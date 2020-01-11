@@ -1,5 +1,5 @@
 {
-  "name": "discord-music",
+  "name": "discord-player",
   "version": "1.0.0",
   "description": "Complete framework to facilitate music commands using discord.js v12",
   "main": "index.js",
