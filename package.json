@@ -1,0 +1,39 @@
+{
+  "name": "discord-music",
+  "version": "1.0.0",
+  "description": "Complete framework to facilitate music commands using discord.js v12",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js",
+    "generate-docs": "node_modules/.bin/jsdoc --configure .jsdoc.json --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-music.git"
+  },
+  "keywords": [
+    "music",
+    "bot",
+    "framework",
+    "discord",
+    "volume",
+    "queue",
+    "youtube"
+  ],
+  "author": "Androz2091",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-music/issues"
+  },
+  "homepage": "https://github.com/Androz2091/discord-music#readme",
+  "dependencies": {
+    "ffmpeg-static": "^3.0.0",
+    "merge-options": "^2.0.0",
+    "simple-youtube-api": "^5.2.1",
+    "ytdl-core": "^1.0.6"
+  },
+  "devDependencies": {
+    "jsdoc": "^3.6.3",
+    "minami": "^1.2.3"
+  }
+}

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Home - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <li class="nav-link nav-home-link"><a href="index.html">Home</a></li><li class="nav-heading">Classes</li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Player.html">Player</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Player.html#addToQueue">addToQueue</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Player.html#clearQueue">clearQueue</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Player.html#getQueue">getQueue</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Player.html#isPlaying">isPlaying</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Player.html#pause">pause</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Player.html#play">play</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Player.html#resume">resume</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Player.html#setVolume">setVolume</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Player.html#skip">skip</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Player.html#stop">stop</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Queue.html">Queue</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Song.html">Song</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Util.html">Util</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Util.html#.getFirstYoutubeResult">getFirstYoutubeResult</a></span></li><li class="nav-heading">Events</li><li class="nav-heading"><span class="nav-item-type type-event">E</span><span class="nav-item-name"><a href="Queue.html#event:end">end</a></span></li><li class="nav-heading"><span class="nav-item-type type-event">E</span><span class="nav-item-name"><a href="Queue.html#event:songChanged">songChanged</a></span></li><li class="nav-heading"><a href="global.html">Globals</a></li>
+</nav>
+
+<div id="main">
+    
+
+    
+
+
+
+    
+
+
+
+
+
+
+
+
+
+    
+
+
+    <section class="readme">
+        <article><h1>Discord Music</h1>
+<p><a href="https://npmjs.com/discord-music"><img src="https://img.shields.io/npm/dt/discord-music?style=for-the-badge" alt="downloadsBadge"></a>
+<a href="https://npmjs.com/discord-music"><img src="https://img.shields.io/npm/v/discord-music?style=for-the-badge" alt="versionBadge"></a>
+<a href="https://patreon.com/Androz2091"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2FAndroz2091%2Fpledges&amp;style=for-the-badge" alt="patreonBadge"></a></p>
+<p><strong>Note</strong>: this module uses recent discordjs features and requires discord.js version 12.</p>
+<p>Discord Music is a powerful <a href="https://nodejs.org">Node.js</a> module that allows you to easily implement music commands. Everything is customizable, and everything is done to simplify your work without limiting you!</p>
+<ul>
+<li><a href="#discord-music">Discord Music</a>
+<ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#player">Player</a>
+<ul>
+<li><a href="#play">Play</a></li>
+<li><a href="#pause">Pause</a></li>
+<li><a href="#resume">Resume</a></li>
+<li><a href="#stop">Stop</a></li>
+<li><a href="#setvolume">SetVolume</a></li>
+<li><a href="#addtoqueue">AddToQueue</a></li>
+<li><a href="#clearqueue">ClearQueue</a></li>
+<li><a href="#getqueue">GetQueue</a></li>
+</ul>
+</li>
+<li><a href="#info-messages">Info Messages</a></li>
+<li><a href="#handle-errors">Handle errors</a></li>
+</ul>
+</li>
+</ul>
+<h2>Installation</h2>
+<pre class="prettyprint source lang-js"><code>npm install --save discord-music
+</code></pre>
+<h2>Player</h2>
+<pre class="prettyprint source lang-js"><code>const Discord = require(&quot;discord.js&quot;),
+client = new Discord.Client(),
+settings = {
+    prefix: &quot;!&quot;,
+    token: &quot;Your Discord Token&quot;
+};
+
+const { Player } = require('discord-music');
+const player = new Player(client, &quot;YOUTUBE API KEY&quot;, {
+    leaveOnEnd: true,
+    leaveOnStop: true
+});
+// To easily access the player
+client.player = player;
+
+client.on(&quot;ready&quot;, () => {
+    console.log(&quot;I'm ready !&quot;);
+});
+
+client.login(settings.token);
+</code></pre>
+<h3>Play</h3>
+<p>To play a song, use the <code>client.manager.play()</code> function.</p>
+<p><strong>Usage:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.player.play(voiceChannel, songName);
+</code></pre>
+<p><strong>Example</strong>:</p>
+<pre class="prettyprint source lang-js"><code>client.on('message', async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+    
+    // !play Despacito
+    // will play &quot;Despacito&quot; in the member voice channel
+
+    if(command === 'play'){
+        let song = await client.player.play(message.member.voice.channel, args[0])
+        message.channel.send(`Currently playing ${song.name}!`);
+    }
+
+</code></pre>
+<h3>Pause</h3>
+<p>To pause the current song, use the <code>client.manager.pause()</code> function.</p>
+<p><strong>Usage:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.player.pause(guildID);
+</code></pre>
+<p><strong>Example</strong>:</p>
+<pre class="prettyprint source lang-js"><code>client.on('message', async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'pause'){
+        let song = await client.player.pause(message.guild.id);
+        message.channel.send(`${song.name} paused!`);
+    }
+
+});
+</code></pre>
+<h3>Resume</h3>
+<p>To resume the current song, use the <code>client.manager.resume()</code> function.</p>
+<p><strong>Usage:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.player.resume(guildID);
+</code></pre>
+<p><strong>Example</strong>:</p>
+<pre class="prettyprint source lang-js"><code>client.on('message', async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'resume'){
+        let song = await client.player.resume(message.guild.id);
+        message.channel.send(`${song.name} resumed!`);
+    }
+
+});
+</code></pre>
+<h3>Stop</h3>
+<p>To stop the music, use the <code>client.manager.stop()</code> function.</p>
+<p><strong>Usage:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.player.stop(guildID);
+</code></pre>
+<p><strong>Example</strong>:</p>
+<pre class="prettyprint source lang-js"><code>client.on('message', (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'stop'){
+        client.player.stop(message.guild.id);
+        message.channel.send('Music stopped!');
+    }
+
+});
+</code></pre>
+<h3>SetVolume</h3>
+<p>To update the volume, use the <code>client.manager.setVolume()</code> function.</p>
+<p><strong>Usage:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.player.setVolume(guildID, percent);
+</code></pre>
+<p><strong>Example</strong>:</p>
+<pre class="prettyprint source lang-js"><code>client.on('message', (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'setvolume'){
+        client.player.setVolume(message.guild.id, parseInt(args[0]));
+        message.channel.send(`Volume set to ${args[0]} !`);
+    }
+
+});
+</code></pre>
+<h3>AddToQueue</h3>
+<p>To add a song to the queue, use the <code>client.player.addToQueue()</code> function.</p>
+<p><strong>Usage:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.player.addToQueue(guildID, songName);
+</code></pre>
+<p><strong>Example:</strong></p>
+<p>In this example, you will see how to add a song to the queue if one is already playing.</p>
+<pre class="prettyprint source lang-js"><code>client.on('message', async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'play'){
+        let aSongIsAlreadyPlaying = client.player.isPlaying(message.guild.id);
+        // If there's already a song playing 
+        if(aSongIsAlreadyPlaying){
+            // Add the song to the queue
+            let song = await client.player.addToQueue(message.guild.id, args[0]);
+            message.channel.send(`${song.name} added to queue!`);
+        } else {
+            // Else, play the song
+            let song = await client.player.play(message.member.voice.channel, args[0]);
+            message.channel.send(`Currently playing ${song.name}!`);
+        }
+    }
+
+});
+</code></pre>
+<h3>ClearQueue</h3>
+<p>To clear the queue, use the <code>client.player.clearQueue()</code> function.</p>
+<p><strong>Usage:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.player.clearQueue(guildID);
+</code></pre>
+<p><strong>Example:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.on('message', (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'clear-queue'){
+        client.player.clearQueue(message.guild.id);
+        message.channel.send('Queue cleared!');
+    }
+
+});
+</code></pre>
+<h3>GetQueue</h3>
+<p>To get the server queue, use the <code>client.player.getQueue()</code> function.</p>
+<p><strong>Usage:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.player.getQueue(guildID);
+</code></pre>
+<p><strong>Example:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.on('message', (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'queue'){
+        let queue = await client.player.getQueue(message.guild.id);
+        message.channel.send('Server queue:\n'+(queue.songs.map((song, i) => {
+            return `${i === 0 ? 'Current' : `#${i+1}`} - ${song.name} | ${song.author}`
+        }).join('\n')));
+    }
+
+    /**
+     * Output:
+     * 
+     * Server queue:
+     * Current - Despacito | Luis Fonsi
+     * #2 - Memories | Maroon 5
+     * #3 - Dance Monkey | Tones And I
+     * #4 - Circles | Post Malone
+     */
+
+});
+</code></pre>
+<h2>Info Messages</h2>
+<p>You can send a message when the queue ends or when the song changes:</p>
+<pre class="prettyprint source lang-js"><code>client.on('message', (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'play'){
+        let song = await client.player.play(message.member.voice.channel, args[0]);
+        song.queue.on('end', () => {
+            message.channel.send('The queue is empty, please add new songs!');
+        });
+        song.queue.on('songChanged', (oldSong, newSong) => {
+            message.channel.send(`Now playing ${newSong}...`);
+        });
+    }
+
+</code></pre>
+<h2>Handle errors</h2>
+<p>There are 2 main errors that you can handle like this:</p>
+<pre class="prettyprint source lang-js"><code>client.on('message', (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    // Error 1:
+    // Song not found
+    if(command === 'play'){
+        client.player.play(message.member.voice.channel, args[0]).then((song) => {
+            message.channel.send(`Currently playing ${song.name}!`);
+        }).catch(() => {
+            message.channel.send(`No song found for ${args[0]}`);
+        });
+    }
+
+    // Error 2:
+    // Not playing
+    if(command === 'queue'){
+        let playing = client.player.isPlaying(message.guild.id);
+        if(!playing) return message.channel.send(':x: No songs currently playing!');
+        // you are sure it works:
+        client.player.getQueue(message.guild.id);
+    }
+
+});
+</code></pre></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
