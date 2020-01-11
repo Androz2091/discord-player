@@ -6,7 +6,7 @@
 
 **Note**: this module uses recent discordjs features and requires discord.js version 12.
 
-Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. Everything is customizable, and everything is done to simplify your work without limiting you!
+Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
 
 - [Installation](#installation)
 - [Player](#player)
@@ -57,9 +57,9 @@ client.on("ready", () => {
 client.login(settings.token);
 ```
 
-You can pass a third parameter when instantiating the class Player: the **options** object:
-**options.leaveOnEnd**: whether the bot should leave the voice channel when there is no more song in the queue.
-**options.leaveOnStop**: whether the bot should leave the voice channel when the `stop()` function is used.
+You can pass a third parameter when instantiating the class Player: the **options** object:  
+**options.leaveOnEnd**: whether the bot should leave the voice channel when there is no more song in the queue.  
+**options.leaveOnStop**: whether the bot should leave the voice channel when the `stop()` function is used.  
 
 ### Play
 
