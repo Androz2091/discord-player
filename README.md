@@ -45,10 +45,8 @@ settings = {
 };
 
 const { Player } = require('discord-player');
-const player = new Player(client, "YOUTUBE API KEY", {
-    leaveOnEnd: true,
-    leaveOnStop: true
-});
+// Create a new Player (Youtube API key is your Youtube Data v3 key)
+const player = new Player(client, "YOUTUBE API KEY");
 // To easily access the player
 client.player = player;
 
@@ -58,6 +56,10 @@ client.on("ready", () => {
 
 client.login(settings.token);
 ```
+
+You can pass a third parameter when instantiating the class Player: the **options** object:
+**options.leaveOnEnd**: whether the bot should leave the voice channel when there is no more song in the queue.
+**options.leaveOnStop**: whether the bot should leave the voice channel when the `stop()` function is used.
 
 ### Play
 

@@ -48,14 +48,12 @@
 
 
     <section class="readme">
-        <article><h1>Discord Music</h1>
-<p><a href="https://npmjs.com/discord-music"><img src="https://img.shields.io/npm/dt/discord-music?style=for-the-badge" alt="downloadsBadge"></a>
-<a href="https://npmjs.com/discord-music"><img src="https://img.shields.io/npm/v/discord-music?style=for-the-badge" alt="versionBadge"></a>
+        <article><h1>Discord Player</h1>
+<p><a href="https://npmjs.com/discord-player"><img src="https://img.shields.io/npm/dt/discord-player?style=for-the-badge" alt="downloadsBadge"></a>
+<a href="https://npmjs.com/discord-player"><img src="https://img.shields.io/npm/v/discord-player?style=for-the-badge" alt="versionBadge"></a>
 <a href="https://patreon.com/Androz2091"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2FAndroz2091%2Fpledges&amp;style=for-the-badge" alt="patreonBadge"></a></p>
 <p><strong>Note</strong>: this module uses recent discordjs features and requires discord.js version 12.</p>
-<p>Discord Music is a powerful <a href="https://nodejs.org">Node.js</a> module that allows you to easily implement music commands. Everything is customizable, and everything is done to simplify your work without limiting you!</p>
-<ul>
-<li><a href="#discord-music">Discord Music</a>
+<p>Discord Player is a powerful <a href="https://nodejs.org">Node.js</a> module that allows you to easily implement music commands. Everything is customizable, and everything is done to simplify your work without limiting you!</p>
 <ul>
 <li><a href="#installation">Installation</a></li>
 <li><a href="#player">Player</a>
@@ -73,11 +71,13 @@
 <li><a href="#info-messages">Info Messages</a></li>
 <li><a href="#handle-errors">Handle errors</a></li>
 </ul>
-</li>
-</ul>
 <h2>Installation</h2>
-<pre class="prettyprint source lang-js"><code>npm install --save discord-music
+<pre class="prettyprint source lang-sh"><code>npm install --save discord-player
 </code></pre>
+<p>Install <strong>opusscript</strong> or <strong>node-opus</strong>:</p>
+<pre class="prettyprint source lang-sh"><code>npm install --save opusscript
+</code></pre>
+<p>Install <a href="https://www.ffmpeg.org/download.html">FFMPEG</a> and you're done!</p>
 <h2>Player</h2>
 <pre class="prettyprint source lang-js"><code>const Discord = require(&quot;discord.js&quot;),
 client = new Discord.Client(),
@@ -86,11 +86,9 @@ settings = {
     token: &quot;Your Discord Token&quot;
 };
 
-const { Player } = require('discord-music');
-const player = new Player(client, &quot;YOUTUBE API KEY&quot;, {
-    leaveOnEnd: true,
-    leaveOnStop: true
-});
+const { Player } = require('discord-player');
+// Create a new Player (Youtube API key is your Youtube Data v3 key)
+const player = new Player(client, &quot;YOUTUBE API KEY&quot;);
 // To easily access the player
 client.player = player;
 
@@ -100,6 +98,9 @@ client.on(&quot;ready&quot;, () => {
 
 client.login(settings.token);
 </code></pre>
+<p>You can pass a third parameter when instantiating the class Player: the <strong>options</strong> object:
+<strong>options.leaveOnEnd</strong>: whether the bot should leave the voice channel when there is no more song in the queue.
+<strong>options.leaveOnStop</strong>: whether the bot should leave the voice channel when the <code>stop()</code> function is used.</p>
 <h3>Play</h3>
 <p>To play a song, use the <code>client.manager.play()</code> function.</p>
 <p><strong>Usage:</strong></p>
