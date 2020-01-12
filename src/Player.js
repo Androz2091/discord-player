@@ -12,10 +12,12 @@ const Song = require('./Song');
  * 
  * @property {Boolean} leaveOnEnd Whether the bot should leave the current voice channel when the queue ends.
  * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
+ * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
  */ 
 const PlayerOptions = {
     leaveOnEnd: true,
-    leaveOnStop: true
+    leaveOnStop: true,
+    leaveOnEmpty: true
 };
 
 class Player {
@@ -53,6 +55,23 @@ class Player {
          * @type {PlayerOptions}
          */
         this.options = mergeOptions(PlayerOptions, options);
+
+        // Listener to check if the channel is empty
+        client.on('voiceStateUpdate', (oldMember, newMember) => {
+            if(!this.options.leaveOnEmpty) return;
+            // If the member leaves a voice channel
+            if(oldMember.voice.channel && !newMember.voice.channel) return;
+            // Search for a queue for this channel
+            let queue = this.queues.find((g) => g.connection.channel.id === oldMember.voice.channel.id);
+            if(queue){
+                // Disconnect from the voice channel
+                queue.connection.channel.leave();
+                // Delete the queue
+                this.queues = this.queues.filter((g) => g.guildID !== queue.guildID);
+                // Emit end event
+                this.emit('channelEmpty');
+            }
+        });
     }
 
     /**
