@@ -61,6 +61,11 @@ class Queue extends EventEmitter {
  */
 
 /**
+ * Emitted when the voice channel is empty.
+ * @event Queue#channelEmpty
+ */
+
+/**
  * Emitted when the song changes.
  * @event Queue#songChanged
  * @param {Song} oldSong The old song (playing before)
