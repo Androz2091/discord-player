@@ -17,17 +17,21 @@ class Util {
         return new Promise(async (resolve, reject) => {
             search = search.replace(/<(.+)>/g, "$1");
             // Try with URL
-            let video = await SYA.getVideo(search).catch(() => {});
-            if(video){
-                video = await video.fetch()
+            SYA.getVideo(search).then(async (video) => {
+                video = await video.fetch();
                 resolve(video);
-            }
-            // Try with song name
-            let results = await SYA.searchVideos(search, 1);
-            if(results.length < 1) reject('Not found');
-            let fetched = await results.shift().fetch();
-            results.push(fetched)
-            resolve(results.pop());
+            }).catch(async (err) => {
+                if(err.message === "Bad Request"){
+                    reject('Invalid Youtube Data v3 API key.');
+                } else {
+                    // Try with song name
+                    let results = await SYA.searchVideos(search, 1);
+                    if(results.length < 1) return reject('Not found');
+                    let fetched = await results.shift().fetch();
+                    results.push(fetched);
+                    resolve(results.pop());
+                }
+            });
         });
     }
 

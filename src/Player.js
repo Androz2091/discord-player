@@ -74,7 +74,7 @@ class Player {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id);
         return new Promise(async (resolve, reject) => {
             // Searches the song
-            let video = await Util.getFirstYoutubeResult(songName, this.SYA).catch(() => {});
+            let video = await Util.getFirstYoutubeResult(songName, this.SYA);
             if(!video) reject('Song not found');
             // Joins the voice channel
             let connection = await voiceChannel.join();
