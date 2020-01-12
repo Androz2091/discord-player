@@ -61,6 +61,8 @@ client.player.addToQueue(guildID, songName);
 client.player.clearQueue(guildID);
 // Get the queue
 client.player.getQueue(guildID);
+// Skip the current song
+client.player.skip(guildID);
 // Pause
 client.player.pause(guildID);
 // Resume
@@ -114,7 +116,7 @@ client.on('message', async (message) => {
 
 ### Pause
 
-To pause the current song, use the `client.manager.pause()` function.  
+To pause the current song, use the `client.player.pause()` function.  
 
 **Usage:**
 
@@ -140,7 +142,7 @@ client.on('message', async (message) => {
 
 ### Resume
 
-To resume the current song, use the `client.manager.resume()` function.  
+To resume the current song, use the `client.player.resume()` function.  
 
 **Usage:**
 
@@ -166,7 +168,7 @@ client.on('message', async (message) => {
 
 ### Stop
 
-To stop the music, use the `client.manager.stop()` function.  
+To stop the music, use the `client.player.stop()` function.  
 
 **Usage:**
 
@@ -192,7 +194,7 @@ client.on('message', (message) => {
 
 ### SetVolume
 
-To update the volume, use the `client.manager.setVolume()` function.  
+To update the volume, use the `client.player.setVolume()` function.  
 
 **Usage:**
 
@@ -313,6 +315,32 @@ client.on('message', (message) => {
      * #3 - Dance Monkey | Tones And I
      * #4 - Circles | Post Malone
      */
+
+});
+```
+
+### Skip
+
+To skip the current song, use the `client.player.skip()` function.  
+
+**Usage:**
+
+```js
+client.player.skip(guildID);
+```
+
+**Example**:
+
+```js
+client.on('message', async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'skip'){
+        let song = await client.player.skip(message.guild.id);
+        message.channel.send(`${song} skipped!`);
+    }
 
 });
 ```
