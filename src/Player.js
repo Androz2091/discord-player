@@ -57,12 +57,12 @@ class Player {
         this.options = mergeOptions(PlayerOptions, options);
 
         // Listener to check if the channel is empty
-        client.on('voiceStateUpdate', (oldMember, newMember) => {
+        client.on('voiceStateUpdate', (oldState, newState) => {
             if(!this.options.leaveOnEmpty) return;
             // If the member leaves a voice channel
-            if(oldMember.voice.channel && !newMember.voice.channel) return;
+            if(oldState.channel && !newState.channel) return;
             // Search for a queue for this channel
-            let queue = this.queues.find((g) => g.connection.channel.id === oldMember.voice.channel.id);
+            let queue = this.queues.find((g) => g.connection.channel.id === oldState.channel.id);
             if(queue){
                 // Disconnect from the voice channel
                 queue.connection.channel.leave();
