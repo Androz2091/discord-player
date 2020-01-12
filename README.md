@@ -46,7 +46,7 @@ client.login(settings.token);
 
 You can pass a third parameter when instantiating the class Player: the **options** object:  
 **options.leaveOnEnd**: whether the bot should leave the voice channel when there is no more song in the queue.  
-**options.leaveOnStop**: whether the bot should leave the voice channel when the `stop()` function is used. 
+**options.leaveOnStop**: whether the bot should leave the voice channel when the `stop()` function is used.  
 **options.leaveOnEmpty**: whether the bot should leave the voice channel if there is no more member in it.
 
 ### Features Overview
