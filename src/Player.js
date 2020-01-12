@@ -95,11 +95,13 @@ class Player {
             // Searches the song
             let video = await Util.getFirstYoutubeResult(songName, this.SYA);
             if(!video) reject('Song not found');
-            // Joins the voice channel
-            let connection = await voiceChannel.join();
+            if(!voiceChannel.guild.me.voice.channel || (voiceChannel.guild.me.voice.channel.id !== voiceChannel.id)){
+                // Joins the voice channel
+                await voiceChannel.join();
+            }
             // Creates a new guild with data
             let queue = new Queue(voiceChannel.guild.id);
-            queue.connection = connection;
+            queue.connection = voiceChannel.guild.me.voice.connection;
             let song = new Song(video, queue);
             queue.songs.push(song);
             // Add the queue to the list
