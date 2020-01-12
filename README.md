@@ -63,7 +63,7 @@ You can pass a third parameter when instantiating the class Player: the **option
 
 ### Play
 
-To play a song, use the `client.manager.play()` function.  
+To play a song, use the `client.player.play()` function.  
 
 **Usage:**
 
