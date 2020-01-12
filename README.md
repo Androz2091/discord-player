@@ -8,19 +8,6 @@
 
 Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
 
-- [Installation](#installation)
-- [Player](#player)
-  - [Play](#play)
-  - [Pause](#pause)
-  - [Resume](#resume)
-  - [Stop](#stop)
-  - [SetVolume](#setvolume)
-  - [AddToQueue](#addtoqueue)
-  - [ClearQueue](#clearqueue)
-  - [GetQueue](#getqueue)
-- [Info Messages](#info-messages)
-- [Handle errors](#handle-errors)
-
 ## Installation
 
 ```sh
@@ -60,6 +47,43 @@ client.login(settings.token);
 You can pass a third parameter when instantiating the class Player: the **options** object:  
 **options.leaveOnEnd**: whether the bot should leave the voice channel when there is no more song in the queue.  
 **options.leaveOnStop**: whether the bot should leave the voice channel when the `stop()` function is used.  
+
+### Features Overview
+
+You need to **init the guild queue using the play() function**, then you are able to manage the queue using the following functions:
+
+```js
+// Play a song in the voice channel and init the guild queue
+client.player.play(voiceChannel, songName);
+// Add a song to the queue
+client.player.addToQueue(guildID, songName);
+// Clear the queue
+client.player.clearQueue(guildID);
+// Get the queue
+client.player.getQueue(guildID);
+// Pause
+client.player.pause(guildID);
+// Resume
+client.player.resume(guildID);
+// Stop
+client.player.stop(guildID);
+// Check if music is playing in a guild
+client.player.isPlaying(guildID);
+```
+
+### Event messages
+
+```js
+client.player.getQueue(guildID)
+.on('end', () => {
+    message.channel.send('There is no more music in the queue!');
+})
+.on('songChanged', (oldSong, newSong) => {
+    message.channel.send(`Now playing ${newSong.name}...`);
+});
+```
+
+## Examples
 
 ### Play
 
