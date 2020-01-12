@@ -44,7 +44,7 @@ settings = {
     token: "Your Discord Token"
 };
 
-const { Player } = require('discord-player');
+const { Player } = require("discord-player");
 // Create a new Player (Youtube API key is your Youtube Data v3 key)
 const player = new Player(client, "YOUTUBE API KEY");
 // To easily access the player
