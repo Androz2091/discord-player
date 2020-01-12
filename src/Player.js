@@ -223,18 +223,19 @@ class Player {
     /**
      * Skips a song.
      * @param {string} guildID
-     * @returns {Promise<Queue>}
+     * @returns {Promise<Song>}
      */
     skip(guildID){
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
             if(!queue) reject('Not playing');
+            let currentSong = queue.songs[0];
             // Ends the dispatcher
             queue.dispatcher.end();
             queue.skipped = true;
-            // Resolves guild queue
-            resolve(queue);
+            // Resolves the current song
+            resolve(currentSong);
         });
     }
 
