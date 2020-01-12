@@ -60,16 +60,16 @@ class Player {
         client.on('voiceStateUpdate', (oldState, newState) => {
             if(!this.options.leaveOnEmpty) return;
             // If the member leaves a voice channel
-            if(oldState.channel && !newState.channel) return;
+            if(!oldState.channelID || newState.channelID) return;
             // Search for a queue for this channel
-            let queue = this.queues.find((g) => g.connection.channel.id === oldState.channel.id);
+            let queue = this.queues.find((g) => g.connection.channel.id === oldState.channelID);
             if(queue){
                 // Disconnect from the voice channel
                 queue.connection.channel.leave();
                 // Delete the queue
                 this.queues = this.queues.filter((g) => g.guildID !== queue.guildID);
                 // Emit end event
-                this.emit('channelEmpty');
+                queue.emit('channelEmpty');
             }
         });
     }
