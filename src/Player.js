@@ -222,6 +222,24 @@ class Player {
     }
 
     /**
+     * Sets the queue for a guild.
+     * @param {string} guildID
+     * @param {Array<Song>} songs The songs list
+     * @returns {Promise<Queue>}
+     */
+    setQueue(guildID, songs){
+        return new Promise(async(resolve, reject) => {
+            // Gets guild queue
+            let queue = this.queues.find((g) => g.guildID === guildID);
+            if(!queue) reject('Not playing');
+            // Updates queue
+            queue.songs = songs;
+            // Resolves the queue
+            resolve(queue);
+        });
+    }
+
+    /**
      * Clears the guild queue, but not the current song.
      * @param {string} guildID
      * @returns {Promise<Queue>}
