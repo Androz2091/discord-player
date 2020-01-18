@@ -13,6 +13,11 @@ class Song {
          */
         this.name = video.title;
         /**
+         * Song duration.
+         * @type {Number}
+         */
+        this.duration = ((video.duration.hours*3600)+(video.duration.minutes*60)+(video.duration.seconds)) * 100;
+        /**
          * Raw informations about the song.
          * @type {Object}
          */
