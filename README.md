@@ -56,6 +56,7 @@ You need to **init the guild queue using the play() function**, then you are abl
 ```js
 // Play a song in the voice channel and init the guild queue
 client.player.play(voiceChannel, songName);
+
 // Add a song to the queue
 client.player.addToQueue(guildID, songName);
 // Clear the queue
@@ -64,14 +65,21 @@ client.player.clearQueue(guildID);
 client.player.getQueue(guildID);
 // Skip the current song
 client.player.skip(guildID);
+
+
 // Pause
 client.player.pause(guildID);
 // Resume
 client.player.resume(guildID);
 // Stop
 client.player.stop(guildID);
+
 // Check if music is playing in a guild
 client.player.isPlaying(guildID);
+// Get the currently playing song
+client.player.nowPlaying(guildID);
+
+
 // Current song will be repeated indefinitely
 client.player.setRepeatMode(true);
 // Current song will no longer be repeated indefinitely
@@ -347,7 +355,33 @@ client.on('message', async (message) => {
 
     if(command === 'skip'){
         let song = await client.player.skip(message.guild.id);
-        message.channel.send(`${song} skipped!`);
+        message.channel.send(`${song.name} skipped!`);
+    }
+
+});
+```
+
+### Now Playing
+
+To get the currently playing song, use the `client.player.nowPlaying()` function.  
+
+**Usage:**
+
+```js
+client.player.nowPlaying(guildID);
+```
+
+**Example**:
+
+```js
+client.on('message', async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'now-playing'){
+        let song = await client.player.nowPlaying(message.guild.id);
+        message.channel.send(`Currently playing ${song.name}...`);
     }
 
 });
@@ -375,8 +409,7 @@ client.on('message', async (message) => {
         // Enable repeat mode
         client.player.setRepeatMode(true);
         // Get the current song
-        let queue = await client.player.getQueue(guildID);
-        let song = queue.songs[0];
+        let song = await client.player.nowPlaying(message.guild.id);
         message.channel.send(`${song.name} will be repeated indefinitely!`);
     }
 
@@ -384,8 +417,7 @@ client.on('message', async (message) => {
         // Disable repeat mode
         client.player.setRepeatMode(false);
         // Get the current song
-        let queue = await client.player.getQueue(guildID);
-        let song = queue.songs[0];
+        let song = await client.player.nowPlaying(message.guild.id);
         message.channel.send(`${song.name}  will no longer be repeated indefinitely!`);
     }
 

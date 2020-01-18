@@ -259,6 +259,22 @@ class Player {
     }
 
     /**
+     * Gets the currently playing song.
+     * @param {string} guildID
+     * @returns {Promise<Song>}
+     */
+    nowPlaying(guildID){
+        return new Promise(async(resolve, reject) => {
+            // Gets guild queue
+            let queue = this.queues.find((g) => g.guildID === guildID);
+            if(!queue) reject('Not playing');
+            let currentSong = queue.songs[0];
+            // Resolves the current song
+            resolve(currentSong);
+        });
+    }
+
+    /**
      * Enable or disable the repeat mode
      * @param {Boolean} enabled Whether the repeat mode should be enabled
      * @returns {Promise<Void>}
