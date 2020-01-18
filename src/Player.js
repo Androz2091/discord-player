@@ -187,16 +187,12 @@ class Player {
     /**
      * Gets the guild queue.
      * @param {string} guildID
-     * @returns {Promise<Queue>}
+     * @returns {?Queue}
      */
     getQueue(guildID) {
-        return new Promise(async(resolve, reject) => {
-            // Gets guild queue
-            let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
-            // Resolves the guild queue
-            resolve(queue);
-        });
+        // Gets guild queue
+        let queue = this.queues.find((g) => g.guildID === guildID);
+        return queue;
     }
 
     /**
