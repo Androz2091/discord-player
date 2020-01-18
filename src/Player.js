@@ -259,6 +259,23 @@ class Player {
     }
 
     /**
+     * Enable or disable the repeat mode
+     * @param {Boolean} enabled Whether the repeat mode should be enabled
+     * @returns {Promise<Void>}
+     */
+    setRepeatMode(enabled) {
+        return new Promise(async(resolve, reject) => {
+            // Gets guild queue
+            let queue = this.queues.find((g) => g.guildID === guildID);
+            if(!queue) reject('Not playing');
+            // Enable/Disable repeat mode
+            queue.repeatMode = enabled;
+            // Resolve
+            resolve();
+        });
+    }
+
+    /**
      * Start playing songs in a guild.
      * @ignore
      * @param {string} guildID
@@ -282,7 +299,7 @@ class Player {
             return queue.emit('end');
         }
         // Emit songChanged event
-        if(!firstPlay) queue.emit('songChanged', queue.songs.shift(), queue.songs[0], queue.skipped);
+        if(!firstPlay) queue.emit('songChanged', (!queue.repeatMode ? queue.songs.shift() : queue.songs[0]), queue.songs[0], queue.skipped, queue.repeatMode);
         queue.skipped = false;
         let song = queue.songs[0];
         // Download the song

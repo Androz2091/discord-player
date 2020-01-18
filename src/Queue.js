@@ -51,6 +51,11 @@ class Queue extends EventEmitter {
          * @type {Boolean}
          */
         this.playing = true;
+        /**
+         * Whether the repeat mode is enabled.
+         * @type {Boolean}
+         */
+        this.repeatMode = false;
     }
 
 };

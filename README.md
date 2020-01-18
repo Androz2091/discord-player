@@ -72,6 +72,10 @@ client.player.resume(guildID);
 client.player.stop(guildID);
 // Check if music is playing in a guild
 client.player.isPlaying(guildID);
+// Current song will be repeated indefinitely
+client.player.setRepeatMode(true);
+// Current song will no longer be repeated indefinitely
+client.player.setRepeatMode(false);
 ```
 
 ### Event messages
@@ -349,6 +353,45 @@ client.on('message', async (message) => {
 });
 ```
 
+### Repeat
+
+To repeat the current song, use the `client.player.setRepeatMode()` function.  
+
+**Usage:**
+
+```js
+client.player.setRepeatMode(boolean);
+```
+
+**Example**:
+
+```js
+client.on('message', async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'enable-repeat'){
+        // Enable repeat mode
+        client.player.setRepeatMode(true);
+        // Get the current song
+        let queue = await client.player.getQueue(guildID);
+        let song = queue.songs[0];
+        message.channel.send(`${song.name} will be repeated indefinitely!`);
+    }
+
+    if(command === 'disable-repeat'){
+        // Disable repeat mode
+        client.player.setRepeatMode(false);
+        // Get the current song
+        let queue = await client.player.getQueue(guildID);
+        let song = queue.songs[0];
+        message.channel.send(`${song.name}  will no longer be repeated indefinitely!`);
+    }
+
+});
+```
+
 ## Info Messages
 
 You can send a message when the queue ends or when the song changes:
@@ -363,8 +406,12 @@ client.on('message', (message) => {
         song.queue.on('end', () => {
             message.channel.send('The queue is empty, please add new songs!');
         });
-        song.queue.on('songChanged', (oldSong, newSong) => {
-            message.channel.send(`Now playing ${newSong}...`);
+        song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode) => {
+            if(repeatMode){
+                message.channel.send(`Playing ${newSong} again...`);
+            } else {
+                message.channel.send(`Now playing ${newSong}...`);
+            }
         });
     }
 
