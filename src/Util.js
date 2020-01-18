@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 
 /**
  * Utilities.
+ * @ignore
  */
 class Util {
 
