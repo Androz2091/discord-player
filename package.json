@@ -9,10 +9,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Androz2091/discord-music.git"
+    "url": "git+https://github.com/Androz2091/discord-player.git"
   },
   "keywords": [
     "music",
+    "player",
     "bot",
     "framework",
     "discord",
@@ -23,9 +24,9 @@
   "author": "Androz2091",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Androz2091/discord-music/issues"
+    "url": "https://github.com/Androz2091/discord-player/issues"
   },
-  "homepage": "https://github.com/Androz2091/discord-music#readme",
+  "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
     "ffmpeg-static": "^3.0.0",
     "merge-options": "^2.0.0",
