@@ -290,10 +290,11 @@ class Player {
 
     /**
      * Enable or disable the repeat mode
+     * @param {string} guildID
      * @param {Boolean} enabled Whether the repeat mode should be enabled
      * @returns {Promise<Void>}
      */
-    setRepeatMode(enabled) {
+    setRepeatMode(guildID, enabled) {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
