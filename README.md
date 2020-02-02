@@ -81,9 +81,9 @@ client.player.nowPlaying(guildID);
 
 
 // Current song will be repeated indefinitely
-client.player.setRepeatMode(true);
+client.player.setRepeatMode(guildID, true);
 // Current song will no longer be repeated indefinitely
-client.player.setRepeatMode(false);
+client.player.setRepeatMode(guildID, false);
 ```
 
 ### Event messages
@@ -394,7 +394,7 @@ To repeat the current song, use the `client.player.setRepeatMode()` function.
 **Usage:**
 
 ```js
-client.player.setRepeatMode(boolean);
+client.player.setRepeatMode(guildID, boolean);
 ```
 
 **Example**:
@@ -407,7 +407,7 @@ client.on('message', async (message) => {
 
     if(command === 'enable-repeat'){
         // Enable repeat mode
-        client.player.setRepeatMode(true);
+        client.player.setRepeatMode(message.guild.id, true);
         // Get the current song
         let song = await client.player.nowPlaying(message.guild.id);
         message.channel.send(`${song.name} will be repeated indefinitely!`);
@@ -415,7 +415,7 @@ client.on('message', async (message) => {
 
     if(command === 'disable-repeat'){
         // Disable repeat mode
-        client.player.setRepeatMode(false);
+        client.player.setRepeatMode(message.guild.id, false);
         // Get the current song
         let song = await client.player.nowPlaying(message.guild.id);
         message.channel.send(`${song.name}  will no longer be repeated indefinitely!`);
