@@ -2,6 +2,8 @@ const ytdl = require('ytdl-core');
 const SYA = require('simple-youtube-api');
 const mergeOptions = require('merge-options');
 
+const { VoiceChannel, version } = require("discord.js");
+if(version.split('.')[0] !== '12') throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
 const Queue = require('./Queue');
 const Util = require('./Util');
 const Song = require('./Song');
@@ -92,9 +94,11 @@ class Player {
     play(voiceChannel, songName) {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id);
         return new Promise(async (resolve, reject) => {
+            if(typeof voiceChannel !== VoiceChannel) return reject("voiceChannel must be type of VoiceChannel. value="+voiceChannel);
+            if(typeof songName !== "string") return reject("songName must be type of string. value="+songName);
             // Searches the song
             let video = await Util.getFirstYoutubeResult(songName, this.SYA);
-            if(!video) reject('Song not found');
+            if(!video) return reject('Song not found');
             // Joins the voice channel
             let connection = await voiceChannel.join();
             // Creates a new guild with data
@@ -120,7 +124,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
+            if(!queue) return reject('Not playing');
             // Pauses the dispatcher
             queue.dispatcher.pause();
             queue.playing = false;
@@ -138,7 +142,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
+            if(!queue) return reject('Not playing');
             // Pauses the dispatcher
             queue.dispatcher.resume();
             queue.playing = true;
@@ -156,7 +160,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
+            if(!queue) return reject('Not playing');
             // Stops the dispatcher
             queue.stopped = true;
             queue.songs = [];
@@ -176,7 +180,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
+            if(!queue) return reject('Not playing');
             // Updates volume
             queue.dispatcher.setVolumeLogarithmic(percent / 200);
             // Resolves guild queue
@@ -205,10 +209,10 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
+            if(!queue) return reject('Not playing');
             // Searches the song
             let video = await Util.getFirstYoutubeResult(songName, this.SYA).catch(() => {});
-            if(!video) reject('Song not found');
+            if(!video) return reject('Song not found');
             let song = new Song(video, queue);
             // Updates queue
             queue.songs.push(song);
@@ -227,7 +231,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
+            if(!queue) return reject('Not playing');
             // Updates queue
             queue.songs = songs;
             // Resolves the queue
@@ -244,7 +248,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
+            if(!queue) return reject('Not playing');
             // Clears queue
             let currentlyPlaying = queue.songs.shift();
             queue.songs = [ currentlyPlaying ];
@@ -262,7 +266,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
+            if(!queue) return reject('Not playing');
             let currentSong = queue.songs[0];
             // Ends the dispatcher
             queue.dispatcher.end();
@@ -281,7 +285,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
+            if(!queue) return reject('Not playing');
             let currentSong = queue.songs[0];
             // Resolves the current song
             resolve(currentSong);
@@ -298,7 +302,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) reject('Not playing');
+            if(!queue) return reject('Not playing');
             // Enable/Disable repeat mode
             queue.repeatMode = enabled;
             // Resolve

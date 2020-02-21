@@ -34,6 +34,7 @@
     "ytdl-core": "^1.0.6"
   },
   "devDependencies": {
+    "discord.js": "discordjs/discord.js",
     "jsdoc": "^3.6.3",
     "minami": "^1.2.3"
   }
