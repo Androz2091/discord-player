@@ -25,12 +25,20 @@ class Util {
                 if(err.message === "Bad Request"){
                     reject('Invalid Youtube Data v3 API key.');
                 } else {
-                    // Try with song name
-                    let results = await SYA.searchVideos(search, 1);
-                    if(results.length < 1) return reject('Not found');
-                    let fetched = await results.shift().fetch();
-                    results.push(fetched);
-                    resolve(results.pop());
+                    try {
+                        // Try with song name
+                        let results = await SYA.searchVideos(search, 1);
+                        if(results.length < 1) return reject('Not found');
+                        let fetched = await results.shift().fetch();
+                        results.push(fetched);
+                        resolve(results.pop());
+                    } catch(err){
+                        if(err.message === "Bad Request"){
+                            reject('Invalid Youtube Data v3 API key.');
+                        } else {
+                            reject(err);
+                        }
+                    }
                 }
             });
         });
