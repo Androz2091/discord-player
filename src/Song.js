@@ -18,6 +18,11 @@ class Song {
          */
         this.duration = ((video.duration.hours*3600)+(video.duration.minutes*60)+(video.duration.seconds)) * 100;
         /**
+         * Raw video object from Simple Youtube API
+         * @type {Video}
+         */
+        this.rawVideo = video;
+        /**
          * Raw informations about the song.
          * @type {Object}
          */
