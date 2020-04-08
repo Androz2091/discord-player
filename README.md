@@ -480,3 +480,11 @@ client.on('message', (message) => {
 
 });
 ```
+
+## Examples of bots made with discord-player
+
+These bots are made by the community, they can help you build your own!
+
+* [Discord-Music](https://github.com/hydraindia/discord-music) by [hydraindia](https://github.com/hydraindia)
+* [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
+
