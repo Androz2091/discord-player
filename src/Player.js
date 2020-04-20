@@ -322,7 +322,7 @@ class Player {
         // Gets guild queue
         let queue = this.queues.find((g) => g.guildID === guildID);
         // If there isn't any music in the queue
-        if(queue.songs.length < 2 && !firstPlay){
+        if(queue.songs.length < 2 && !firstPlay && !queue.repeatMode){
             // Leaves the voice channel
             if(this.options.leaveOnEnd && !queue.stopped) queue.connection.channel.leave();
             // Remoces the guild from the guilds list
