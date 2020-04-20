@@ -36,6 +36,6 @@
   "devDependencies": {
     "discord.js": "discordjs/discord.js",
     "jsdoc": "^3.6.3",
-    "minami": "^1.2.3"
+    "minami": "Androz2091/minami"
   }
 }
