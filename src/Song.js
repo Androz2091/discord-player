@@ -43,7 +43,7 @@ class Song {
          */
         this.thumbnail = video.raw.snippet.thumbnails.default.url;
         /**
-         * The queue in which the song is
+         * The queue in which the song is.
          * @type {Queue}
          */
         this.queue = queue;

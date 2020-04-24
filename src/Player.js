@@ -91,9 +91,10 @@ class Player {
      * Plays a song in a voice channel.
      * @param {voiceChannel} voiceChannel The voice channel in which the song will be played.
      * @param {string} songName The name of the song to play.
+     * @param {User} requestedBy The user who requested the song.
      * @returns {Promise<Song>}
      */
-    play(voiceChannel, songName) {
+    play(voiceChannel, songName, requestedBy) {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id);
         return new Promise(async (resolve, reject) => {
             if(!voiceChannel || typeof voiceChannel !== "object") return reject("voiceChannel must be type of VoiceChannel. value="+voiceChannel);
@@ -106,7 +107,7 @@ class Player {
             // Creates a new guild with data
             let queue = new Queue(voiceChannel.guild.id);
             queue.connection = connection;
-            let song = new Song(video, queue);
+            let song = new Song(video, queue, requestedBy);
             queue.songs.push(song);
             // Add the queue to the list
             this.queues.push(queue);
@@ -205,9 +206,10 @@ class Player {
      * Adds a song to the guild queue.
      * @param {string} guildID
      * @param {string} songName The name of the song to add to the queue.
+     * @param {User} requestedBy The user who requested the song.
      * @returns {Promise<Song>}
      */
-    addToQueue(guildID, songName){
+    addToQueue(guildID, songName, requestedBy){
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
@@ -215,7 +217,7 @@ class Player {
             // Searches the song
             let video = await Util.getFirstYoutubeResult(songName, this.SYA).catch(() => {});
             if(!video) return reject('Song not found');
-            let song = new Song(video, queue);
+            let song = new Song(video, queue, requestedBy);
             // Updates queue
             queue.songs.push(song);
             // Resolves the song
@@ -330,6 +332,7 @@ class Player {
             resolve();
         });
     }
+
     /**
      * Start playing songs in a guild.
      * @ignore
