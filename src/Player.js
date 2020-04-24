@@ -334,6 +334,35 @@ class Player {
     }
 
     /**
+     * Removes a song from the queue
+     * @param {string} guildID 
+     * @param {number|Song} song The index of the song to remove or the song to remove object.
+     * @returns {Promise<Song|null>}
+     */
+    remove(guildID, song){
+        return new Promise(async(resolve, reject) => {
+            // Gets guild queue
+            let queue = this.queues.find((g) => g.guildID === guildID);
+            if(!queue) return reject('Not playing');
+            // Remove the song from the queue
+            let songFound = null;
+            if(typeof song === "number"){
+                songFound = queue.songs[song];
+                if(songFound){
+                    queue.songs = queue.songs.filter((s) => s !== songFound);
+                }
+            } else {
+                songFound = queue.songs.find((s) => s === song);
+                if(songFound){
+                    queue.songs = queue.songs.filter((s) => s !== songFound);
+                }
+            }
+            // Resolve
+            resolve(songFound);
+        });
+    }
+
+    /**
      * Start playing songs in a guild.
      * @ignore
      * @param {string} guildID
