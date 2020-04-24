@@ -313,6 +313,24 @@ class Player {
     }
 
     /**
+     * Shuffles the guild queue.
+     * @param {string} guildID 
+     * @returns {Promise<Void>}
+     */
+    shuffle(guildID){
+        return new Promise(async(resolve, reject) => {
+            // Gets guild queue
+            let queue = this.queues.find((g) => g.guildID === guildID);
+            if(!queue) return reject('Not playing');
+            // Shuffle the queue (except the first song)
+            let currentSong = queue.songs.shift();
+            queue.songs = queue.songs.sort(() => Math.random() - 0.5);
+            queue.songs.unshift(currentSong);
+            // Resolve
+            resolve();
+        });
+    }
+    /**
      * Start playing songs in a guild.
      * @ignore
      * @param {string} guildID

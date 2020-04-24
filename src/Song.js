@@ -6,7 +6,7 @@ class Song {
      * @param {Video} video The Youtube video
      * @param {Queue} queue The queue in which the song is
      */
-    constructor(video, queue) {
+    constructor(video, queue, requestedBy) {
         /**
          * Song name.
          * @type {string}
@@ -47,6 +47,11 @@ class Song {
          * @type {Queue}
          */
         this.queue = queue;
+        /**
+         * The user who requested that song.
+         * @type {User}
+         */
+        this.requestedBy = requestedBy;
     }
 };
 
