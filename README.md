@@ -14,7 +14,7 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 npm install --save discord-player
 ```
 
-Install **opusscript** or **node-opus**:
+Install **opusscript** or **@discordjs/opus**:
 ```sh
 npm install --save opusscript
 ```
