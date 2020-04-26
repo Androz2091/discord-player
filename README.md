@@ -432,7 +432,7 @@ To remove a song from the queue, use the `client.player.remove()` function.
 **Usage:**
 
 ```js
-client.player.remove(guildID, song)
+client.player.remove(guildID, song);
 ```
 
 **Example:**
