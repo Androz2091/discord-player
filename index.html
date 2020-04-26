@@ -98,6 +98,8 @@ client.player.clearQueue(guildID);
 client.player.getQueue(guildID);
 // Skip the current song
 client.player.skip(guildID);
+// Remove a song from the queue using the index number
+client.player.remove(guildID, song);
 
 
 // Pause
@@ -134,7 +136,7 @@ client.player.setRepeatMode(guildID, false);
 <h3>Play</h3>
 <p>To play a song, use the <code>client.player.play()</code> function.</p>
 <p><strong>Usage:</strong></p>
-<pre class="prettyprint source lang-js"><code>client.player.play(voiceChannel, songName);
+<pre class="prettyprint source lang-js"><code>client.player.play(voiceChannel, songName, requestedBy);
 </code></pre>
 <p><strong>Example</strong>:</p>
 <pre class="prettyprint source lang-js"><code>client.on('message', async (message) => {
@@ -146,8 +148,8 @@ client.player.setRepeatMode(guildID, false);
     // will play &quot;Despacito&quot; in the member voice channel
 
     if(command === 'play'){
-        let song = await client.player.play(message.member.voice.channel, args[0])
-        message.channel.send(`Currently playing ${song.name}!`);
+        let song = await client.player.play(message.member.voice.channel, args[0], message.member.user.tag);
+        message.channel.send(`Currently playing ${song.name}! - Requested by ${song.requestedBy}`);
     }
 
 </code></pre>
@@ -362,6 +364,25 @@ client.player.setRepeatMode(guildID, false);
         message.channel.send(`${song.name}  will no longer be repeated indefinitely!`);
     }
 
+});
+</code></pre>
+<h3>Remove</h3>
+<p>To remove a song from the queue, use the <code>client.player.remove()</code> function.</p>
+<p><strong>Usage:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.player.remove(guildID, song);
+</code></pre>
+<p><strong>Example:</strong></p>
+<pre class="prettyprint source lang-js"><code>client.on('message', async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'remove'){
+        // Removes a song from the queue
+        client.player.remove(message.guild.id, args[0]).then(() => {
+            message.channel.send('Removed song!');
+        });
+    }
 });
 </code></pre>
 <h2>Info Messages</h2>
