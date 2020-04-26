@@ -66,7 +66,7 @@ client.player.getQueue(guildID);
 // Skip the current song
 client.player.skip(guildID);
 // Remove a song from the queue using the index number
-client.player.remove(guildID, song)
+client.player.remove(guildID, song);
 
 
 // Pause
