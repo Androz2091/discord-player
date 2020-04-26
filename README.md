@@ -65,6 +65,8 @@ client.player.clearQueue(guildID);
 client.player.getQueue(guildID);
 // Skip the current song
 client.player.skip(guildID);
+// Remove a song from the queue using the index number
+client.player.remove(guildID, song)
 
 
 // Pause
@@ -110,7 +112,7 @@ To play a song, use the `client.player.play()` function.
 **Usage:**
 
 ```js
-client.player.play(voiceChannel, songName);
+client.player.play(voiceChannel, songName, requestedBy);
 ```
 
 **Example**:
@@ -124,8 +126,8 @@ client.on('message', async (message) => {
     // will play "Despacito" in the member voice channel
 
     if(command === 'play'){
-        let song = await client.player.play(message.member.voice.channel, args[0])
-        message.channel.send(`Currently playing ${song.name}!`);
+        let song = await client.player.play(message.member.voice.channel, args[0], message.member.user.tag);
+        message.channel.send(`Currently playing ${song.name}! - Requested by ${song.requestedBy}`)
     }
 
 ```
@@ -421,6 +423,32 @@ client.on('message', async (message) => {
         message.channel.send(`${song.name}  will no longer be repeated indefinitely!`);
     }
 
+});
+```
+
+### Remove
+To remove a song from the queue, use the `client.player.remove()` function.
+
+**Usage:**
+
+```js
+client.player.remove(guildID, song)
+```
+
+**Example:**
+
+```js
+client.on('message', async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'remove'){
+        // Removes a song from the queue
+        client.player.remove(message.guild.id, args[0]).then(() => {
+            message.channel.send('Removed song!')
+        });
+    }
 });
 ```
 
