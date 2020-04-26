@@ -127,7 +127,7 @@ client.on('message', async (message) => {
 
     if(command === 'play'){
         let song = await client.player.play(message.member.voice.channel, args[0], message.member.user.tag);
-        message.channel.send(`Currently playing ${song.name}! - Requested by ${song.requestedBy}`)
+        message.channel.send(`Currently playing ${song.name}! - Requested by ${song.requestedBy}`);
     }
 
 ```
