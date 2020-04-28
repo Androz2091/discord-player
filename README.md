@@ -15,6 +15,7 @@ npm install --save discord-player
 ```
 
 Install **opusscript** or **@discordjs/opus**:
+
 ```sh
 npm install --save opusscript
 ```
@@ -116,12 +117,13 @@ client.player.play(voiceChannel, songName, requestedBy);
 ```
 
 **Example**:
+
 ```js
 client.on('message', async (message) => {
 
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
-    
+
     // !play Despacito
     // will play "Despacito" in the member voice channel
 
@@ -258,7 +260,7 @@ client.on('message', async (message) => {
 
     if(command === 'play'){
         let aSongIsAlreadyPlaying = client.player.isPlaying(message.guild.id);
-        // If there's already a song playing 
+        // If there's already a song playing
         if(aSongIsAlreadyPlaying){
             // Add the song to the queue
             let song = await client.player.addToQueue(message.guild.id, args[0]);
@@ -326,7 +328,7 @@ client.on('message', (message) => {
 
     /**
      * Output:
-     * 
+     *
      * Server queue:
      * Current - Despacito | Luis Fonsi
      * #2 - Memories | Maroon 5
@@ -427,6 +429,7 @@ client.on('message', async (message) => {
 ```
 
 ### Remove
+
 To remove a song from the queue, use the `client.player.remove()` function.
 
 **Usage:**
@@ -455,6 +458,7 @@ client.on('message', async (message) => {
 ## Info Messages
 
 You can send a message when the queue ends or when the song changes:
+
 ```js
 client.on('message', (message) => {
 
