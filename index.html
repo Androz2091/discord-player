@@ -143,7 +143,7 @@ client.player.setRepeatMode(guildID, false);
 
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
-    
+
     // !play Despacito
     // will play &quot;Despacito&quot; in the member voice channel
 
@@ -239,7 +239,7 @@ client.player.setRepeatMode(guildID, false);
 
     if(command === 'play'){
         let aSongIsAlreadyPlaying = client.player.isPlaying(message.guild.id);
-        // If there's already a song playing 
+        // If there's already a song playing
         if(aSongIsAlreadyPlaying){
             // Add the song to the queue
             let song = await client.player.addToQueue(message.guild.id, args[0]);
@@ -291,7 +291,7 @@ client.player.setRepeatMode(guildID, false);
 
     /**
      * Output:
-     * 
+     *
      * Server queue:
      * Current - Despacito | Luis Fonsi
      * #2 - Memories | Maroon 5
