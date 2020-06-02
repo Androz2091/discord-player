@@ -31,7 +31,7 @@
     "ffmpeg-static": "^4.1.1",
     "merge-options": "^2.0.0",
     "simple-youtube-api": "^5.2.1",
-    "ytdl-core": "^2.0.1"
+    "ytdl-core": "^3.0.0"
   },
   "devDependencies": {
     "discord.js": "discordjs/discord.js",
