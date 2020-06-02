@@ -1,4 +1,6 @@
-const { EventEmitter } = require('events');
+const Discord = require('discord.js')
+const { EventEmitter } = require('events')
+const Track = require('./Track')
 
 /**
  * Represents a guild queue.
@@ -6,59 +8,55 @@ const { EventEmitter } = require('events');
 class Queue extends EventEmitter {
 
     /**
-     * Represents a guild queue.
-     * @param {string} guildID 
+     * @param {Discord.Snowflake} guildID ID of the guild this queue is for.
      */
     constructor(guildID){
         super();
         /**
-         * The guild ID.
-         * @type {Snowflake}
+         * ID of the guild this queue is for.
+         * @type {Discord.Snowflake}
          */
         this.guildID = guildID;
         /**
-         * The stream dispatcher.
-         * @type {StreamDispatcher}
+         * The voice connection of this queue.
+         * @type {Discord.VoiceConnection}
          */
-        this.dispatcher = null;
+        this.voiceConnection = null;
         /**
-         * The voice connection.
-         * @type {VoiceConnection}
+         * The tracks of this queue. The first one is currenlty playing and the others are going to be played.
+         * @type {Track[]}
          */
-        this.connection = null;
-        /**
-         * Songs. The first one is currently playing and the rest is going to be played.
-         * @type {Song[]}
-         */
-        this.songs = [];
+        this.tracks = [];
         /**
          * Whether the stream is currently stopped.
-         * @type {Boolean}
+         * @type {boolean}
          */
         this.stopped = false;
         /**
-         * Whether the last song was skipped.
-         * @type {Boolean}
+         * Whether the last track was skipped.
+         * @type {boolean}
          */
-        this.skipped = false;
+        this.lastSkipped = false;
         /**
-         * The stream volume.
-         * @type {Number}
+         * The stream volume of this queue. (0-100)
+         * @type {number}
          */
         this.volume = 100;
         /**
          * Whether the stream is currently playing.
-         * @type {Boolean}
+         * @type {boolean}
          */
         this.playing = true;
         /**
          * Whether the repeat mode is enabled.
-         * @type {Boolean}
+         * @type {boolean}
          */
         this.repeatMode = false;
     }
 
 };
+
+module.exports = Queue;
 
 /**
  * Emitted when the queue is empty.
@@ -71,11 +69,9 @@ class Queue extends EventEmitter {
  */
 
 /**
- * Emitted when the song changes.
- * @event Queue#songChanged
- * @param {Song} oldSong The old song (playing before)
- * @param {Song} newSong The new song (currently playing)
+ * Emitted when the track changes.
+ * @event Queue#trackChanged
+ * @param {Track} oldTrack The old track (playing before)
+ * @param {Track} newTrack The new track (currently playing)
  * @param {Boolean} skipped Whether the change is due to the skip() function
  */
-
-module.exports = Queue;
