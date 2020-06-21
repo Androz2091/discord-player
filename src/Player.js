@@ -243,6 +243,28 @@ class Player {
      * @param {string} trackName The name of the track to add to the queue
      * @param {Discord.User?} requestedBy The user who requested the track
      * @returns {Promise<Track>} The added track
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'play'){
+     *          let trackPlaying = client.player.isPlaying(message.guild.id);
+     *          // If there's already a track being played
+     *          if(trackPlaying){
+     *              // Add the track to the queue
+     *              let track = await client.player.addToQueue(message.guild.id, args[0]);
+     *              message.channel.send(`${track.name} added to queue!`);
+     *          } else {
+     *              // Else, play the track
+     *              let track = await client.player.play(message.member.voice.channel, args[0]);
+     *              message.channel.send(`Currently playing ${track.name}!`);
+     *          }
+     *      }
+     *
+     * });
      */
     addToQueue (guildID, trackName, requestedBy) {
         return new Promise((resolve, reject) => {
