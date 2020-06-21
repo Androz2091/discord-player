@@ -69,45 +69,6 @@ class Player {
         client.on('voiceStateUpdate', (oldState, newState) => this._handleVoiceStateUpdate(oldState, newState))
     }
 
-    _playYTDLStream (queue, updateFilter) {
-        return new Promise((resolve) => {
-            const currentStreamTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime / 1000 : undefined
-            const encoderArgsFilters = []
-            Object.keys(queue.filters).forEach((filterName) => {
-                if (queue.filters[filterName]) {
-                    encoderArgsFilters.push(filters[filterName])
-                }
-            })
-            let encoderArgs
-            if (encoderArgsFilters.length < 1) {
-                encoderArgs = []
-            } else {
-                encoderArgs = ['-af', encoderArgsFilters.join(',')]
-            }
-            const newStream = ytdl(queue.playing.url, {
-                filter: 'audioonly',
-                opusEncoded: true,
-                encoderArgs,
-                seek: currentStreamTime
-            })
-            setTimeout(() => {
-                queue.voiceConnection.play(newStream, {
-                    type: 'opus'
-                })
-                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.volume / 200)
-                // When the track starts
-                queue.voiceConnection.dispatcher.on('start', () => {
-                    resolve()
-                })
-                // When the track ends
-                queue.voiceConnection.dispatcher.on('finish', () => {
-                    // Play the next track
-                    return this._playTrack(queue.guildID, false)
-                })
-            }, 1000)
-        })
-    }
-
     /**
      * Update the filters for the guild
      * @param {Discord.Snowflake} guildID
@@ -460,6 +421,53 @@ class Player {
             // Emit end event
             queue.emit('channelEmpty')
         }
+    }
+
+    /**
+     * Play a stream in a channel
+     * @ignore
+     * @private
+     * @param {Queue} queue The queue to play
+     * @param {*} updateFilter Whether this method is called to update some ffmpeg filters
+     * @returns {Promise<void>}
+     */
+    _playYTDLStream (queue, updateFilter) {
+        return new Promise((resolve) => {
+            const currentStreamTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime / 1000 : undefined
+            const encoderArgsFilters = []
+            Object.keys(queue.filters).forEach((filterName) => {
+                if (queue.filters[filterName]) {
+                    encoderArgsFilters.push(filters[filterName])
+                }
+            })
+            let encoderArgs
+            if (encoderArgsFilters.length < 1) {
+                encoderArgs = []
+            } else {
+                encoderArgs = ['-af', encoderArgsFilters.join(',')]
+            }
+            const newStream = ytdl(queue.playing.url, {
+                filter: 'audioonly',
+                opusEncoded: true,
+                encoderArgs,
+                seek: currentStreamTime
+            })
+            setTimeout(() => {
+                queue.voiceConnection.play(newStream, {
+                    type: 'opus'
+                })
+                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.volume / 200)
+                // When the track starts
+                queue.voiceConnection.dispatcher.on('start', () => {
+                    resolve()
+                })
+                // When the track ends
+                queue.voiceConnection.dispatcher.on('finish', () => {
+                    // Play the next track
+                    return this._playTrack(queue.guildID, false)
+                })
+            }, 1000)
+        })
     }
 
     /**
