@@ -64,14 +64,14 @@ class Track {
     get durationMS () {
         const args = this.duration.split(':')
         if (args.length === 3) {
-            return  parseInt(args[0]) * 60 * 60 * 1000
-                    + parseInt(args[1]) * 60 * 1000
-                    + parseInt(args[2]) * 1000
-        } else if(args.length === 2) {
-            return  parseInt(args[0]) * 60 * 1000
-                    + parseInt(args[1]) * 1000
+            return parseInt(args[0]) * 60 * 60 * 1000 +
+            parseInt(args[1]) * 60 * 1000 +
+            parseInt(args[2]) * 1000
+        } else if (args.length === 2) {
+            return parseInt(args[0]) * 60 * 1000 +
+            parseInt(args[1]) * 1000
         } else {
-            return  parseInt(args[0]) * 1000
+            return parseInt(args[0]) * 1000
         }
     }
 }
