@@ -90,6 +90,32 @@ class Player {
      * Searchs tracks on YouTube
      * @param {string} query The query
      * @returns {Promise<Track[]>}
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'play'){
+     *          // Search for tracks
+     *          let tracks = await client.player.searchTracks(args[0]);
+     *          // Sends an embed with the 10 first songs
+     *          if(tracks.length > 10) tracks = tracks.substr(0, 10);
+     *          const embed = new Discord.MessageEmbed()
+     *          .setDescription(tracks.map((t, i) => `**${i+1} -** ${t.name}`).join("\n"))
+     *          .setFooter("Send the number of the track you want to play!");
+     *          message.channel.send(embed);
+     *          // Wait for user answer
+     *          await message.channel.awaitMessages((m) => m.content > 0 && m.content < 10, { max: 1, time: 20000, errors: ["time"] }).then(async (answers) => {
+     *              let index = parseInt(answers.first().content, 10);
+     *              track = track[index-1];
+     *              // Then play the song
+     *              client.player.play(message.member.voice.channel, track);
+     *          });
+     *      }
+     *
+     * });
      */
     searchTracks (query) {
         return new Promise(async (resolve, reject) => {
@@ -121,6 +147,22 @@ class Player {
      * @param {Track|string} track The name of the track to play
      * @param {Discord.User?} user The user who requested the track
      * @returns {Promise<Track>} The played track
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      // !play Despacito
+     *      // will play "Despacito" in the member voice channel
+     *
+     *      if(command === 'play'){
+     *          let track = await client.player.play(message.member.voice.channel, args[0], message.member.user.tag);
+     *          message.channel.send(`Currently playing ${track.name}! - Requested by ${track.requestedBy}`);
+     *      }
+     *
+     * });
      */
     play (voiceChannel, track, user) {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id)
@@ -282,6 +324,28 @@ class Player {
      * Get a guild queue
      * @param {Discord.Snowflake} guildID
      * @returns {?Queue}
+     *
+     * @example
+     * client.on('message', (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'queue'){
+     *          let queue = await client.player.getQueue(message.guild.id);
+     *          message.channel.send('Server queue:\n'+(queue.tracks.map((track, i) => {
+     *              return `${i === 0 ? 'Current' : `#${i+1}`} - ${track.name} | ${track.author}`;
+     *          }).join('\n')));
+     *      }
+     *
+     *      // Output:
+     *
+     *      // Server queue:
+     *      // Current - Despacito | Luis Fonsi
+     *      // #2 - Memories | Maroon 5
+     *      // #3 - Dance Monkey | Tones And I
+     *      // #4 - Circles | Post Malone
+     * });
      */
     getQueue (guildID) {
         // Gets guild queue
@@ -292,7 +356,7 @@ class Player {
     /**
      * Add a track to the guild queue
      * @param {Discord.Snowflake} guildID The ID of the guild where the track should be added
-     * @param {string} trackName The name of the track to add to the queue
+     * @param {Track|string} trackName The name of the track to add to the queue
      * @param {Discord.User?} requestedBy The user who requested the track
      * @returns {Promise<Track>} The added track
      *
@@ -318,22 +382,21 @@ class Player {
      *
      * });
      */
-    addToQueue (guildID, trackName, requestedBy) {
-        return new Promise((resolve, reject) => {
+    addToQueue (guildID, track, requestedBy) {
+        return new Promise(async (resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
             if (!queue) return reject(new Error('Not playing'))
             // Search the track
-            this.search(trackName).then((track) => {
-                if (!track[0]) return reject(new Error('Track not found'))
-                track[0].requestedBy = requestedBy
-                // Update queue
-                queue.tracks.push(track[0])
-                // Resolve the track
-                resolve(track[0])
-            }).catch(() => {
-                return reject(new Error('Track not found'))
-            })
+            if (typeof track !== 'object') {
+                const results = await this.searchTracks(track)
+                track = results[0]
+            }
+            track.requestedBy = requestedBy
+            // Update queue
+            queue.tracks.push(track)
+            // Resolve the track
+            resolve(track)
         })
     }
 
