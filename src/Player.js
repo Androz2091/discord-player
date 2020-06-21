@@ -322,6 +322,19 @@ class Player {
      * Get the currently playing track
      * @param {Discord.Snowflake} guildID
      * @returns {Promise<Track>} The track which is currently played
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'now-playing'){
+     *          let track = await client.player.nowPlaying(message.guild.id);
+     *          message.channel.send(`Currently playing ${track.name}...`);
+     *      }
+     *
+     * });
      */
     nowPlaying (guildID) {
         return new Promise((resolve, reject) => {
