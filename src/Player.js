@@ -36,7 +36,7 @@ const filters = {
     surrounding: 'surround',
     pulsator: 'apulsator=hz=1',
     subboost: 'asubboost'
-};
+}
 
 /**
  * @typedef PlayerOptions
