@@ -156,6 +156,19 @@ class Player {
      * Pause the current track
      * @param {Discord.Snowflake} guildID The ID of the guild where the current track should be paused
      * @returns {Promise<Track>} The paused track
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'pause'){
+     *          let track = await client.player.pause(message.guild.id);
+     *          message.channel.send(`${track.name} paused!`);
+     *      }
+     *
+     * });
      */
     pause (guildID) {
         return new Promise((resolve, reject) => {
