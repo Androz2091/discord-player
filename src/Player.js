@@ -93,8 +93,10 @@ class Player {
      */
     searchTracks (query) {
         return new Promise(async (resolve, reject) => {
-            if (query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)) {
-                query = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)[1]
+            // eslint-disable-next-line no-useless-escape
+            const matchURL = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
+            if (matchURL) {
+                query = matchURL[1]
             }
             ytsr(query, (err, results) => {
                 if (err) return []
