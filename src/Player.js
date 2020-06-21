@@ -286,24 +286,6 @@ class Player {
     }
 
     /**
-     * Set the queue for a guild.
-     * @param {Discord.Snowflake} guildID The ID of the guild where the queue should be set
-     * @param {Track[]} tracks The tracks list
-     * @returns {Promise<Queue>} The new queue
-     */
-    setQueue (guildID, tracks) {
-        return new Promise((resolve, reject) => {
-            // Get guild queue
-            const queue = this.queues.find((g) => g.guildID === guildID)
-            if (!queue) return reject(new Error('Not playing'))
-            // Update queue
-            queue.tracks = tracks
-            // Resolve the queue
-            resolve(queue)
-        })
-    }
-
-    /**
      * Clear the guild queue, except the current track
      * @param {Discord.Snowflake} guildID The ID of the guild where the queue should be cleared
      * @returns {Promise<Queue>} The updated queue
