@@ -251,6 +251,19 @@ class Player {
      * @param {Discord.Snowflake} guildID The ID of the guild where the music should be modified
      * @param {number} percent The new volume (0-100)
      * @returns {Promise<void>}
+     *
+     * @example
+     * client.on('message', (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'setvolume'){
+     *          client.player.setVolume(message.guild.id, parseInt(args[0]));
+     *          message.channel.send(`Volume set to ${args[0]} !`);
+     *      }
+     *
+     * });
      */
     setVolume (guildID, percent) {
         return new Promise((resolve, reject) => {
