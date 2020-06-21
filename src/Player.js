@@ -356,6 +356,19 @@ class Player {
      * Shuffle the guild queue (except the first track)
      * @param {Discord.Snowflake} guildID The ID of the guild where the queue should be shuffled
      * @returns {Promise<Queue>} The updated queue
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *     const command = args.shift().toLowerCase();
+     *
+     *     if(command === 'shuffle'){
+     *         // Shuffle the server queue
+     *         client.player.shuffle(message.guild.id).then(() => {
+     *              message.channel.send('Queue shuffled!');
+     *         });
+     *      }
+     * });
      */
     shuffle (guildID) {
         return new Promise((resolve, reject) => {
