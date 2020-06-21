@@ -218,6 +218,19 @@ class Player {
      * Stops playing music.
      * @param {Discord.Snowflake} guildID The ID of the guild where the music should be stopped
      * @returns {Promise<void>}
+     *
+     * @example
+     * client.on('message', (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'stop'){
+     *          client.player.stop(message.guild.id);
+     *          message.channel.send('Music stopped!');
+     *      }
+     *
+     * });
      */
     stop (guildID) {
         return new Promise((resolve, reject) => {
