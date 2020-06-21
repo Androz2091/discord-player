@@ -5,6 +5,22 @@ const ytsr = require('ytsr')
 const Queue = require('./Queue')
 const Track = require('./Track')
 
+/**
+ * @typedef Filters
+ * @property {boolean} [bassboost=false] Whether the bassboost filter is enabled.
+ * @property {boolean} [8D=false] Whether the 8D filter is enabled.
+ * @property {boolean} [vaporwave=false] Whether the vaporwave filter is enabled.
+ * @property {boolean} [nightcore=false] Whether the nightcore filter is enabled.
+ * @property {boolean} [phaser=false] Whether the phaser filter is enabled.
+ * @property {boolean} [tremolo=false] Whether the tremolo filter is enabled.
+ * @property {boolean} [reverse=false] Whether the reverse filter is enabled.
+ * @property {boolean} [treble=false] Whether the treble filter is enabled.
+ * @property {boolean} [normalizer=false] Whether the normalizer filter is enabled.
+ * @property {boolean} [surrounding=false] Whether the surrounding filter is enabled.
+ * @property {boolean} [pulsator=false] Whether the pulsator filter is enabled.
+ * @property {boolean} [subboost=false] Whether the subboost filter is enabled.
+ */
+
 const filters = {
     bassboost: 'bass=g=20,dynaudnorm=f=200',
     '8D': 'apulsator=hz=0.128',
@@ -70,11 +86,34 @@ class Player {
     }
 
     /**
-     * Update the filters for the guild
+     * Set the filters enabled for the guild. [Full list of the filters](https://discord-player.js.org/global.html#Filters)
      * @param {Discord.Snowflake} guildID
-     * @param {Object} newFilters
+     * @param {Filters} newFilters
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'bassboost'){
+     *          const bassboostEnabled = client.player.getQueue(message.guild.id);
+     *          if(!bassboostEnabled){
+     *              client.player.updateFilters(message.guild.id, {
+     *                  bassboost: true
+     *              });
+     *              message.channel.send("Bassboost effect has been enabled!");
+     *          } else {
+     *              client.player.updateFilters(message.guild.id, {
+     *                  bassboost: false
+     *              });
+     *              message.channel.send("Bassboost effect has been disabled!");
+     *          }
+     *      }
+     *
+     * });
      */
-    updateFilters (guildID, newFilters) {
+    setFilters (guildID, newFilters) {
         return new Promise((resolve, reject) => {
             // Gets guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
