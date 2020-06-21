@@ -342,6 +342,7 @@ class Player {
      *
      * @example
      * client.on('message', async (message) => {
+     *
      *     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
      *     const command = args.shift().toLowerCase();
      *
@@ -379,6 +380,7 @@ class Player {
      *
      * @example
      * client.on('message', async (message) => {
+     *
      *     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
      *     const command = args.shift().toLowerCase();
      *
@@ -388,6 +390,7 @@ class Player {
      *              message.channel.send('Queue shuffled!');
      *         });
      *      }
+     *
      * });
      */
     shuffle (guildID) {
@@ -412,6 +415,7 @@ class Player {
      *
      * @example
      * client.on('message', async (message) => {
+     *
      *     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
      *     const command = args.shift().toLowerCase();
      *
@@ -421,6 +425,7 @@ class Player {
      *              message.channel.send('Removed track!');
      *         });
      *      }
+     *
      * });
      */
     remove (guildID, track) {
