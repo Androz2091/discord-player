@@ -1,71 +1,79 @@
 const Discord = require('discord.js')
 const Queue = require('./Queue')
-const SimpleYouTubeAPI = require('simple-youtube-api')
 
 /**
  * Represents a track.
  */
 class Track {
-
     /**
-     * @param {SimpleYouTubeAPI.Video} video The video for this track
+     * @param {Object} videoData The video data for this track
      * @param {Discord.User?} user The user who requested the track
      * @param {Queue?} queue The queue in which is the track is
      */
-    constructor(video, user, queue) {
+    constructor (videoData, user, queue) {
         /**
          * The track name
          * @type {string}
          */
-        this.name = video.title;
-        /**
-         * The full video object
-         * @type {SimpleYouTubeAPI.Video}
-         */
-        this.data = video;
+        this.name = videoData.title
         /**
          * The Youtube URL of the track
          * @type {string}
          */
-        this.url = `https://www.youtube.com/watch?v=${video.id}`;
+        this.url = videoData.link
+        /**
+         * The video duration (formatted).
+         * @type {string}
+         */
+        this.duration = videoData.duration
+        /**
+         * The video description
+         * @type {string}
+         */
+        this.description = videoData.description
+        /**
+         * The video thumbnail
+         * @type {string}
+         */
+        this.thumbnail = videoData.thumbnail
+        /**
+         * The video views
+         */
+        this.views = videoData.views
+        /**
+         * The video channel
+         * @type {string}
+         */
+        this.author = videoData.author.name
         /**
          * The user who requested the track
          * @type {Discord.User?}
          */
-        this.requestedBy = user;
+        this.requestedBy = user
         /**
          * The queue in which the track is
          * @type {Queue}
          */
-        this.queue = queue;
-    }
-
-    /**
-     * The name of the channel which is the author of the video on Youtube
-     * @type {string}
-     */
-    get author() {
-        return this.data.raw.snippet.channelTitle;
-    }
-
-    /**
-     * The Youtube video thumbnail
-     * @type {string}
-     */
-    get thumbnail() {
-        return this.data.raw.snippet.thumbnails.default.url;
+        this.queue = queue
     }
 
     /**
      * The track duration
      * @type {number}
      */
-    get duration() {
-        return typeof this.data.duration === "object"
-            ? ((this.data.duration.hours*3600)+(this.data.duration.minutes*60)+(this.data.duration.seconds)) * 1000
-            : parseInt(this.data.duration)
+    get durationMS () {
+        const args = this.duration.split(':')
+        if (args.length === 3) {
+            return  parseInt(args[0]) * 60 * 60 * 1000
+                    + parseInt(args[1]) * 60 * 1000
+                    + parseInt(args[2]) * 1000
+        } else if(args.length === 2) {
+            return  parseInt(args[0]) * 60 * 1000
+                    + parseInt(args[1]) * 1000
+        } else {
+            return  parseInt(args[0]) * 1000
+        }
     }
+}
 
-};
-
-module.exports = Track;
+module.exports = Track
