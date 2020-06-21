@@ -6,7 +6,7 @@
 
 **Note**: this module uses recent discordjs features and requires discord.js version 12.
 
-Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
+Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**! It doesn't require any api key, as it uses **scraping**.
 
 ## Installation
 
@@ -14,10 +14,10 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 npm install --save discord-player
 ```
 
-Install **opusscript** or **@discordjs/opus**:
+Install **@discordjs/opus**:
 
 ```sh
-npm install --save opusscript
+npm install --save @discordjs/opus
 ```
 
 Install [FFMPEG](https://www.ffmpeg.org/download.html) and you're done!
@@ -33,8 +33,8 @@ settings = {
 };
 
 const { Player } = require("discord-player");
-// Create a new Player (Youtube API key is your Youtube Data v3 key)
-const player = new Player(client, "YOUTUBE API KEY");
+// Create a new Player (you don't need any API Key)
+const player = new Player(client);
 // To easily access the player
 client.player = player;
 
@@ -69,6 +69,11 @@ client.player.skip(guildID);
 // Remove a track from the queue using the index number
 client.player.remove(guildID, track);
 
+// Filters!
+client.player.updateFilters(guildID, {
+    bassboost: true,
+    vaporwave: true
+})
 
 // Pause
 client.player.pause(guildID);
@@ -92,6 +97,10 @@ client.player.setRepeatMode(guildID, false);
 ### Event messages
 
 ```js
+// Play the music
+await client.player.play(message.member.voice.channel, "Despacito")
+
+// Then add some messages that will be sent when the events will be triggered
 client.player.getQueue(guildID)
 .on('end', () => {
     message.channel.send('There is no more music in the queue!');
@@ -452,6 +461,56 @@ client.on('message', async (message) => {
             message.channel.send('Removed track!');
         });
     }
+});
+```
+
+### Filters
+
+You can apply some cool filters to your music!
+
+**Usage:**
+
+```js
+client.player.updateFilters(guildID, {
+    bassboost: true,
+    '8D': true,
+    vaporwave: true,
+    nightcore: true,
+    phaser: true,
+    tremolo: true,
+    reverse: true,
+    treble: true,
+    normalizer: true,
+    surrounding: true
+    pulsator: true,
+    subboost: true
+});
+```
+
+**Example:**
+
+```js
+client.on('message', async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'bassboost'){
+        const bassboostEnabled = client.player.getQueue(message.guild.id);
+        if(!bassboostEnabled){
+            client.player.updateFilters(message.guild.id, {
+                bassboost: true
+            });
+            message.channel.send("Bassboost effect has been enabled!");
+        } else {
+            client.player.updateFilters(message.guild.id, {
+                bassboost: false
+            });
+            message.channel.send("Bassboost effect has been disabled!");
+        }
+    }
+
+    // You can do the same for each filter!
 });
 ```
 
