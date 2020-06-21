@@ -303,6 +303,19 @@ class Player {
      * Skip a track
      * @param {Discord.Snowflake} guildID The ID of the guild where the track should be skipped
      * @returns {Promise<Track>}
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'skip'){
+     *          let track = await client.player.skip(message.guild.id);
+     *          message.channel.send(`${track.name} skipped!`);
+     *      }
+     *
+     * });
      */
     skip (guildID) {
         return new Promise((resolve, reject) => {
