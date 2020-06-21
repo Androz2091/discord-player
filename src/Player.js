@@ -187,6 +187,19 @@ class Player {
      * Resume the current track
      * @param {Discord.Snowflake} guildID The ID of the guild where the current track should be resumed
      * @returns {Promise<Track>} The resumed track
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'resume'){
+     *          let track = await client.player.resume(message.guild.id);
+     *          message.channel.send(`${track.name} resumed!`);
+     *      }
+     *
+     * });
      */
     resume (guildID) {
         return new Promise((resolve, reject) => {
