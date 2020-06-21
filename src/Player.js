@@ -376,6 +376,19 @@ class Player {
      * @param {Discord.Snowflake} guildID The ID of the guild where the track should be removed
      * @param {number|Track} track The index of the track to remove or the track to remove object
      * @returns {Promise<Track|null>}
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *     const command = args.shift().toLowerCase();
+     *
+     *     if(command === 'remove'){
+     *         // Removes a track from the queue
+     *         client.player.remove(message.guild.id, args[0]).then(() => {
+     *              message.channel.send('Removed track!');
+     *         });
+     *      }
+     * });
      */
     remove (guildID, track) {
         return new Promise((resolve, reject) => {
