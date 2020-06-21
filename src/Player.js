@@ -708,7 +708,7 @@ class Player {
                 queue.voiceConnection.play(newStream, {
                     type: 'opus'
                 })
-                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.volume / 200);
+                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.volume / 200)
                 // When the track starts
                 queue.voiceConnection.dispatcher.on('start', () => {
                     resolve()
