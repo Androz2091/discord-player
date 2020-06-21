@@ -54,7 +54,7 @@ const defaultPlayerOptions = {
     leaveOnEnd: true,
     leaveOnStop: true,
     leaveOnEmpty: true
-};
+}
 
 class Player {
     /**
