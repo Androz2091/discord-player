@@ -282,9 +282,22 @@ class Player {
     }
 
     /**
-     * Clear the guild queue, but not the current track
+     * Clear the guild queue, except the current track
      * @param {Discord.Snowflake} guildID The ID of the guild where the queue should be cleared
      * @returns {Promise<Queue>} The updated queue
+     *
+     * @example
+     * client.on('message', (message) => {
+     *
+     *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *      const command = args.shift().toLowerCase();
+     *
+     *      if(command === 'clear-queue'){
+     *          client.player.clearQueue(message.guild.id);
+     *          message.channel.send('Queue cleared!');
+     *      }
+     *
+     * });
      */
     clearQueue (guildID) {
         return new Promise((resolve, reject) => {
