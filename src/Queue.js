@@ -69,6 +69,24 @@ module.exports = Queue
 /**
  * Emitted when the queue is empty.
  * @event Queue#end
+ *
+ * @example
+ * client.on('message', (message) => {
+ *
+ *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+ *      const command = args.shift().toLowerCase();
+ *
+ *      if(command === 'play'){
+ *
+ *          let track = await client.player.play(message.member.voice.channel, args[0]);
+ *
+ *          track.queue.on('end', () => {
+ *              message.channel.send('The queue is empty, please add new tracks!');
+ *          });
+ *
+ *      }
+ *
+ * });
  */
 
 /**
@@ -82,4 +100,26 @@ module.exports = Queue
  * @param {Track} oldTrack The old track (playing before)
  * @param {Track} newTrack The new track (currently playing)
  * @param {Boolean} skipped Whether the change is due to the skip() function
+ *
+ * @example
+ * client.on('message', (message) => {
+ *
+ *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+ *      const command = args.shift().toLowerCase();
+ *
+ *      if(command === 'play'){
+ *
+ *          let track = await client.player.play(message.member.voice.channel, args[0]);
+ *
+ *          track.queue.on('trackChanged', (oldTrack, newTrack, skipped, repeatMode) => {
+ *              if(repeatMode){
+ *                  message.channel.send(`Playing ${newTrack} again...`);
+ *              } else {
+ *                  message.channel.send(`Now playing ${newTrack}...`);
+ *              }
+ *          });
+ *
+ *      }
+ *
+ * });
  */
