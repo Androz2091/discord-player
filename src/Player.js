@@ -114,7 +114,7 @@ class Player {
             let song;
             
             // First check if its a Soundcloud URL
-            if (this.soundcloudClientID && Util.isSoundcloudURL(songName)) {
+            if (this.soundcloudClientID !== undefined && Util.isSoundcloudURL(songName)) {
                 const info = await Util.getSoundcloudTrackInfo(songName, this.soundcloudClientID);
                 song = new SoundcloudSong(info, queue, requestedBy);
                 
@@ -237,7 +237,7 @@ class Player {
             let queue = this.queues.find((g) => g.guildID === guildID);
             if(!queue) return reject('Not playing');
             let song;
-            if (this.soundcloudClientID && Util.isSoundcloudURL(songName)) {
+            if (this.soundcloudClientID !== undefined && Util.isSoundcloudURL(songName)) {
                 const info = await Util.getSoundcloudTrackInfo(songName, this.soundcloudClientID);
                 song = new SoundcloudSong(info, queue, requestedBy);
             } else {
@@ -420,7 +420,7 @@ class Player {
         // Download the song
         let dispatcher 
         if (song.constructor.name === 'SoundcloudSong') {
-            dispatcher = queue.connection.play(await scdl.downloadFromURL(song.url))
+            dispatcher = queue.connection.play(await scdl.downloadFromURL(song.url, this.soundcloudClientID))
         } else {
             dispatcher = queue.connection.play(ytdl(song.url, { filter: "audioonly" }));
         }

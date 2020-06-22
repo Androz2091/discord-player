@@ -1,6 +1,6 @@
 const Song = require('./Song')
 
-class SoundcloudSong extends Song {
+class SoundcloudSong {
 
     constructor(trackInfo, queue, requestedBy) {
         this.name = trackInfo.title
@@ -12,3 +12,5 @@ class SoundcloudSong extends Song {
         this.requestedBy = requestedBy
     }
 }
+
+module.exports = SoundcloudSong
