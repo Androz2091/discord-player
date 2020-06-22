@@ -13,6 +13,7 @@ const Track = require('./Track')
  * @property {boolean} [nightcore=false] Whether the nightcore filter is enabled.
  * @property {boolean} [phaser=false] Whether the phaser filter is enabled.
  * @property {boolean} [tremolo=false] Whether the tremolo filter is enabled.
+ * @property {boolean} [vibrato=false] Whether the vibrato filter is enabled.
  * @property {boolean} [reverse=false] Whether the reverse filter is enabled.
  * @property {boolean} [treble=false] Whether the treble filter is enabled.
  * @property {boolean} [normalizer=false] Whether the normalizer filter is enabled.
@@ -24,12 +25,13 @@ const Track = require('./Track')
 const filters = {
     bassboost: 'bass=g=20,dynaudnorm=f=200',
     '8D': 'apulsator=hz=0.128',
-    vaporwave: 'asetrate=441000*.8,aresample=44100,atempo=1.1',
-    nightcore: 'asetrate=441001*.25',
+    vaporwave: 'asetrate=44100*0.8,aresample=44100,atempo=1.1',
+    nightcore: 'asetrate=44100*1.25',
     phaser: 'aphaser=in_gain=0.4',
-    tremolo: 'tremolo=f=6.5',
+    tremolo: 'tremolo',
+    vibrato: 'vibrato=f=6.5',
     reverse: 'areverse',
-    treble: 'treble=g={GAIN}',
+    treble: 'treble=g=5',
     normalizer: 'dynaudnorm=f=150',
     surrounding: 'surround',
     pulsator: 'apulsator=hz=1',
