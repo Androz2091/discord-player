@@ -1,4 +1,6 @@
 const fetch = require('node-fetch');
+const URL = require('url').URL
+const scdl = require('soundcloud-downloader')
 
 /**
  * Utilities.
@@ -42,6 +44,32 @@ class Util {
                 }
             });
         });
+    }
+
+    /**
+     * Checks if the given input string is a Soundcloud URL
+     * @param {string} input The url of the soundcloud track
+     */
+    static isSoundcloudURL(input){
+        try {
+            const url = new URL(input); // Throws a TypeError if the input is invalid
+            if (url.hostname !== 'soundcloud.com') return false;
+            if (url.pathname === '/') return false;
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    /**
+     * 
+     * @param {string} url The url of the soundcloud track
+     * @param {string} clientID A Soundcloud client ID
+     * @returns {Promise<SoundcloudSong>} An object with a similar interface to the YouTube video object
+     * so it can be used interchangeably.
+     */
+    static async getSoundcloudTrackInfo(url, clientID){
+        return await scdl.getInfo(url, clientID);
     }
 
 };

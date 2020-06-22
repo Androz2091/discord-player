@@ -1,4 +1,5 @@
 const ytdl = require('ytdl-core');
+const scdl = require('soundcloud-downloader')
 const SYA = require('simple-youtube-api');
 const mergeOptions = require('merge-options');
 
@@ -7,6 +8,7 @@ if(version.split('.')[0] !== '12') throw new Error("Only the master branch of di
 const Queue = require('./Queue');
 const Util = require('./Util');
 const Song = require('./Song');
+const SoundcloudSong = require('./SouncloudSong');
 
 /**
  * Player options.
@@ -27,9 +29,10 @@ class Player {
     /**
      * @param {Client} client Your Discord Client instance.
      * @param {string} youtubeToken Your Youtube Data v3 API key.
+     * @param {string} soundcloudClientID Your Soundcloud client ID (see: https://github.com/zackradisic/node-soundcloud-downloader#client-id)
      * @param {PlayerOptions} options The PlayerOptions object.
      */
-    constructor(client, youtubeToken, options = {}){
+    constructor(client, youtubeToken, soundcloudClientID, options = {}){
         if(!client) throw new SyntaxError('Invalid Discord client');
         if(!youtubeToken) throw new SyntaxError('Invalid Token: Token must be a String');
         /**
@@ -42,6 +45,13 @@ class Player {
          * @type {string}
          */
         this.youtubeToken = youtubeToken;
+
+        /**
+         * Your Soundcloud Client ID
+         * @type {string}
+         */
+        this.soundcloudClientID = soundcloudClientID;
+        
         /**
          * The Simple Youtube API Client.
          * @type {Youtube}
@@ -99,15 +109,27 @@ class Player {
         return new Promise(async (resolve, reject) => {
             if(!voiceChannel || typeof voiceChannel !== "object") return reject("voiceChannel must be type of VoiceChannel. value="+voiceChannel);
             if(typeof songName !== "string") return reject("songName must be type of string. value="+songName);
-            // Searches the song
-            let video = await Util.getFirstYoutubeResult(songName, this.SYA);
-            if(!video) return reject('Song not found');
+            
+            const queue = new Queue(voiceChannel.guild.id);
+            let song;
+            
+            // First check if its a Soundcloud URL
+            if (this.soundcloudClientID && Util.isSoundcloudURL(songName)) {
+                const info = await Util.getSoundcloudTrackInfo(songName, this.soundcloudClientID);
+                song = new SoundcloudSong(info, queue, requestedBy);
+                
+            } else {
+                // Try YouTube now
+                // Searches the song
+                let video = await Util.getFirstYoutubeResult(songName, this.SYA);
+                if(!video) return reject('Song not found');
+                song = new Song(video, queue, requestedBy);
+            }
+
             // Joins the voice channel
             let connection = await voiceChannel.join();
             // Creates a new guild with data
-            let queue = new Queue(voiceChannel.guild.id);
             queue.connection = connection;
-            let song = new Song(video, queue, requestedBy);
             queue.songs.push(song);
             // Add the queue to the list
             this.queues.push(queue);
@@ -390,7 +412,12 @@ class Player {
         queue.skipped = false;
         let song = queue.songs[0];
         // Download the song
-        let dispatcher = queue.connection.play(ytdl(song.url, { filter: "audioonly" }));
+        let dispatcher 
+        if (song.constructor.name === 'SoundcloudSong') {
+            dispatcher = queue.connection.play(await scdl.downloadFromURL(song.url))
+        } else {
+            dispatcher = queue.connection.play(ytdl(song.url, { filter: "audioonly" }));
+        }
         queue.dispatcher = dispatcher;
         // Set volume
         dispatcher.setVolumeLogarithmic(queue.volume / 200);
