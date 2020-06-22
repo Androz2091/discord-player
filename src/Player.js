@@ -236,10 +236,16 @@ class Player {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
             if(!queue) return reject('Not playing');
-            // Searches the song
-            let video = await Util.getFirstYoutubeResult(songName, this.SYA).catch(() => {});
-            if(!video) return reject('Song not found');
-            let song = new Song(video, queue, requestedBy);
+            let song;
+            if (this.soundcloudClientID && Util.isSoundcloudURL(songName)) {
+                const info = await Util.getSoundcloudTrackInfo(songName, this.soundcloudClientID);
+                song = new SoundcloudSong(info, queue, requestedBy);
+            } else {
+                // Searches the song
+                let video = await Util.getFirstYoutubeResult(songName, this.SYA).catch(() => {});
+                if(!video) return reject('Song not found');
+                song = new Song(video, queue, requestedBy);
+            }
             // Updates queue
             queue.songs.push(song);
             // Resolves the song
