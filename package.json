@@ -29,11 +29,11 @@
   "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
-    "discord-ytdl-core": "^4.0.0",
+    "discord-ytdl-core": "^4.0.2",
     "merge-options": "^2.0.0",
     "node-fetch": "^2.6.0",
     "simple-youtube-api": "^5.2.1",
-    "soundcloud-downloader": "0.0.9",
+    "soundcloud-downloader": "^0.0.9",
     "ytsr": "^0.1.15"
   },
   "devDependencies": {
