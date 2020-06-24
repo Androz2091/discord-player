@@ -651,6 +651,31 @@ class Player {
     }
 
     /**
+      * Creates progress bar of the current song
+      * @param {Discord.Snowflake} guildID
+      * @returns {String}
+      */
+    createProgressBar (guildID) {
+        // Gets guild queue
+        const queue = this.queues.find((g) => g.guildID === guildID)
+        if (!queue) return
+        // Stream time of the dispatcher
+        const currentStreamTime = queue.voiceConnection.dispatcher.streamTime
+        // Total stream time
+        const totalTime = queue.playing.durationMS
+        // Stream progress
+        const index = Math.round((currentStreamTime / totalTime) * 15)
+        // conditions
+        if ((index >= 1) && (index <= 15)) {
+            const bar = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬'.split('')
+            bar.splice(index, 0, '🔘')
+            return bar.join('')
+        } else {
+            return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+        }
+    }
+
+    /**
      * Handle the voice state update event
      * @ignore
      * @private
@@ -672,27 +697,6 @@ class Player {
             this.queues = this.queues.filter((g) => g.guildID !== queue.guildID)
             // Emit end event
             queue.emit('channelEmpty')
-        }
-    }
-    
-    /**
-      * Creates progress bar of the current song
-      * @param {Queue} queue Queue of the current server
-      * @returns {String}
-      */
-    createProgressBar(queue) {
-        // stream time of the dispatcher
-        const currentStreamTime = queue.voiceConnection.dispatcher.streamTime
-        // total stream length
-        const totalLength = queue.tracks[0].durationMS
-        // stream progress
-        let index = Math.round((currentStreamTime / totalLength) * 15)
-        // conditions
-        if ((index >= 1) && (index <= 15)) {
-            let bar = `▬▬▬▬▬▬▬▬▬▬▬▬▬▬`.split("")
-            return bar.splice(index, 0, "🔘").join("")
-        } else {
-            return `🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬`
         }
     }
 
