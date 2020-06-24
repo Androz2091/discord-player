@@ -406,8 +406,8 @@ class Player {
             const queue = this.queues.find((g) => g.guildID === guildID)
             if (!queue) return reject(new Error('Not playing'))
             // Updates volume
-            queue.voiceConnection.dispatcher.setVolumeLogarithmic(percent / 200)
             queue.volume = percent
+            queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
             // Resolves guild queue
             resolve()
         })
@@ -800,7 +800,7 @@ class Player {
                 queue.voiceConnection.play(newStream, {
                     type: 'opus'
                 })
-                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.volume / 200)
+                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
                 // When the track starts
                 queue.voiceConnection.dispatcher.on('start', () => {
                     resolve()
@@ -845,7 +845,7 @@ class Player {
                 queue.voiceConnection.play(newStream, {
                     type: 'ogg/opus'
                 })
-                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.volume / 200)
+                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
                 // When the track starts
                 queue.voiceConnection.dispatcher.on('start', () => {
                     resolve()

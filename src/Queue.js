@@ -62,6 +62,10 @@ class Queue extends EventEmitter {
          */
         this.filters = {}
     }
+
+    get calculatedVolume () {
+        return this.filters.bassboost ? this.volume + 40 : this.volume
+    }
 }
 
 module.exports = Queue
