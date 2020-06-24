@@ -527,7 +527,7 @@ class Player {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
             if (!queue) return reject(new Error('Not playing'))
-            const currentTrack = queue.tracks[0]
+            const currentTrack = queue.playing
             // Resolve the current track
             resolve(currentTrack)
         })
