@@ -674,6 +674,27 @@ class Player {
             queue.emit('channelEmpty')
         }
     }
+    
+    /**
+      * Creates progress bar of the current song
+      * @param {Queue} queue Queue of the current server
+      * @returns {String}
+      */
+    createProgressBar(queue) {
+        // stream time of the dispatcher
+        const currentStreamTime = queue.voiceConnection.dispatcher.streamTime
+        // total stream length
+        const totalLength = queue.tracks[0].durationMS
+        // stream progress
+        let index = Math.round((currentStreamTime / totalLength) * 15)
+        // conditions
+        if ((index >= 1) && (index <= 15)) {
+            let bar = `▬▬▬▬▬▬▬▬▬▬▬▬▬▬`.split("")
+            return bar.splice(index, 0, "🔘").join("")
+        } else {
+            return `🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬`
+        }
+    }
 
     /**
      * Play a stream in a channel
