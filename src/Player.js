@@ -262,7 +262,7 @@ class Player {
             queue.voiceConnection.dispatcher.pause()
             queue.paused = true
             // Resolves the guild queue
-            resolve(queue.tracks[0])
+            resolve(queue.playing)
         })
     }
 
@@ -293,7 +293,7 @@ class Player {
             queue.voiceConnection.dispatcher.resume()
             queue.paused = false
             // Resolve the guild queue
-            resolve(queue.tracks[0])
+            resolve(queue.playing)
         })
     }
 
