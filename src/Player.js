@@ -772,7 +772,7 @@ class Player {
      * @ignore
      * @private
      * @param {Queue} queue The queue to play
-     * @param {*} updateFilter Whether this method is called to update some ffmpeg filters
+     * @param {Boolean} updateFilter Whether this method is called to update some ffmpeg filters
      * @returns {Promise<void>}
      */
     _playYTDLStream (queue, updateFilter) {
