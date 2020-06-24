@@ -1,6 +1,7 @@
 const ytdl = require('discord-ytdl-core')
 const Discord = require('discord.js')
 const ytsr = require('ytsr')
+const scdl = require('soundcloud-downloader')
 
 const Queue = require('./Queue')
 const Track = require('./Track')
@@ -43,6 +44,7 @@ const filters = {
  * @property {boolean} [leaveOnEnd=true] Whether the bot should leave the current voice channel when the queue ends.
  * @property {boolean} [leaveOnStop=true] Whether the bot should leave the current voice channel when the stop() function is used.
  * @property {boolean} [leaveOnEmpty=true] Whether the bot should leave the voice channel if there is no more member in it.
+ * @property {string} [soundcloudClientID=""] The client ID for Soundcloud, optional
  */
 
 /**
@@ -53,7 +55,8 @@ const filters = {
 const defaultPlayerOptions = {
     leaveOnEnd: true,
     leaveOnStop: true,
-    leaveOnEmpty: true
+    leaveOnEmpty: true,
+    soundcloudClientID: ''
 }
 
 class Player {
@@ -164,6 +167,21 @@ class Player {
             const matchURL = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
             if (matchURL) {
                 query = matchURL[1]
+            } else if (this.options.soundcloudClientID) {
+                const scRegex = /^https?:\/\/(soundcloud\.com)\/(.*)$/
+                if (query.match(scRegex) && query.match(scRegex)[2]) {
+                    const info = await scdl.getInfo(query, this.options.soundcloudClientID)
+                    const details = {
+                        title: info.title,
+                        link: info.uri,
+                        duration: info.duration,
+                        description: info.description,
+                        thumbnail: info.artwork_url,
+                        views: info.playback_count,
+                        author: { name: info.user.username }
+                    }
+                    return resolve([new Track(details, null, null)])
+                }
             }
             ytsr(query, (err, results) => {
                 if (err) return []
@@ -763,6 +781,51 @@ class Player {
     }
 
     /**
+     * Play a Soundcloud stream in a channel
+     * @ignore
+     * @private
+     * @param {Queue} queue The queue to play
+     * @param {*} updateFilter Whether this method is called to update some ffmpeg filters
+     * @returns {Promise<void>}
+     */
+    _playSouncloudStream (queue, updateFilter) {
+        return new Promise(async (resolve) => {
+            const currentStreamTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime / 1000 : undefined
+            const encoderArgsFilters = []
+            Object.keys(queue.filters).forEach((filterName) => {
+                if (queue.filters[filterName]) {
+                    encoderArgsFilters.push(filters[filterName])
+                }
+            })
+            let encoderArgs
+            if (encoderArgsFilters.length < 1) {
+                encoderArgs = []
+            } else {
+                encoderArgs = ['-af', encoderArgsFilters.join(',')]
+            }
+
+            const info = await scdl.getInfo(queue.playing.url, this.options.soundcloudClientID)
+            const opus = scdl.filterMedia(info.media.transcodings, { format: scdl.FORMATS.OPUS })
+            const newStream = await scdl.downloadFromURL(opus[0].url, this.options.soundcloudClientID)
+            setTimeout(() => {
+                queue.voiceConnection.play(newStream, {
+                    type: 'ogg/opus'
+                })
+                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.volume / 200)
+                // When the track starts
+                queue.voiceConnection.dispatcher.on('start', () => {
+                    resolve()
+                })
+                // When the track ends
+                queue.voiceConnection.dispatcher.on('finish', () => {
+                    // Play the next track
+                    return this._playTrack(queue.guildID, false)
+                })
+            }, 1000)
+        })
+    }
+
+    /**
      * Start playing a track in a guild
      * @ignore
      * @private
@@ -790,6 +853,16 @@ class Player {
         const nowPlaying = queue.playing = queue.repeatMode ? wasPlaying : queue.tracks.shift()
         // Reset lastSkipped state
         queue.lastSkipped = false
+
+        if (queue.playing.url.includes('soundcloud.com')) {
+            this._playSouncloudStream(queue, false).then(() => {
+                // Emit trackChanged event
+                if (!firstPlay) {
+                    queue.emit('trackChanged', nowPlaying, wasPlaying, queue.lastSkipped, queue.repeatMode)
+                }
+            })
+            return
+        }
         this._playYTDLStream(queue, false).then(() => {
             // Emit trackChanged event
             if (!firstPlay) {
