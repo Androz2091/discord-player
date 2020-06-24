@@ -513,7 +513,7 @@ class Player {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
             if (!queue) return reject(new Error('Not playing'))
-            const currentTrack = queue.tracks[0]
+            const currentTrack = queue.playing
             // End the dispatcher
             queue.voiceConnection.dispatcher.end()
             queue.lastSkipped = true
@@ -836,7 +836,7 @@ class Player {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === guildID)
         // If there isn't any music in the queue
-        if (queue.tracks.length < 2 && !firstPlay && !queue.repeatMode) {
+        if (queue.tracks.length < 1 && !firstPlay && !queue.repeatMode) {
             // Leave the voice channel
             if (this.options.leaveOnEnd && !queue.stopped) queue.voiceConnection.channel.leave()
             // Remove the guild from the guilds list
