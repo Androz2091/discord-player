@@ -651,10 +651,25 @@ class Player {
     }
 
     /**
-      * Creates progress bar of the current song
-      * @param {Discord.Snowflake} guildID
-      * @returns {String}
-      */
+     * Creates progress bar of the current song
+     * @param {Discord.Snowflake} guildID
+     * @returns {String}
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *
+     *     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *     const command = args.shift().toLowerCase();
+     *
+     *     if(command === 'now-playing'){
+     *         // Shuffle the server queue
+     *         client.player.nowPlaying(message.guild.id).then((song) => {
+     *              message.channel.send('Currently playing ' + song.name + '\n\n'+ client.player.createProgressBar(message.guild.id));
+     *         });
+     *      }
+     *
+     * });
+     */
     createProgressBar (guildID) {
         // Gets guild queue
         const queue = this.queues.find((g) => g.guildID === guildID)
