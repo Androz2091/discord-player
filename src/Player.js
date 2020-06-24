@@ -221,7 +221,7 @@ class Player {
      * @param {Discord.VoiceChannel} voiceChannel The voice channel in which the track will be played
      * @param {Track|string} track The name of the track to play
      * @param {Discord.User?} user The user who requested the track
-     * @returns {any} The played track
+     * @returns {any} The played content
      *
      * @example
      * client.on('message', async (message) => {
@@ -450,8 +450,8 @@ class Player {
      * Add a track to the guild queue
      * @param {Discord.Snowflake} guildID The ID of the guild where the track should be added
      * @param {Track|string} trackName The name of the track to add to the queue
-     * @param {Discord.User?} requestedBy The user who requested the track
-     * @returns {Promise<Track>} The added track
+     * @param {Discord.User?} user The user who requested the track
+     * @returns {any} The content added to the queue
      *
      * @example
      * client.on('message', async (message) => {
@@ -463,33 +463,54 @@ class Player {
      *          let trackPlaying = client.player.isPlaying(message.guild.id);
      *          // If there's already a track being played
      *          if(trackPlaying){
-     *              // Add the track to the queue
-     *              let track = await client.player.addToQueue(message.guild.id, args[0]);
-     *              message.channel.send(`${track.name} added to queue!`);
+     *              const result = await client.player.addToQueue(message.guild.id, args.join(" "));
+     *              if(result.type === 'playlist'){
+     *                  message.channel.send(`${result.tracks.length} songs added to the queue ${emotes.music}`);
+     *              } else {
+     *                  message.channel.send(`${result.name} added to the queue ${emotes.music}`);
+     *              }
      *          } else {
      *              // Else, play the track
-     *              let track = await client.player.play(message.member.voice.channel, args[0]);
-     *              message.channel.send(`Currently playing ${track.name}!`);
+     *              const result = await client.player.addToQueue(message.member.voice.channel, args[0]);
+     *              if(result.type === 'playlist'){
+     *                  message.channel.send(`${result.tracks.length} songs added to the queue ${emotes.music}\nCurrently playing **${result.tracks[0].name}**!`);
+     *              } else {
+     *                  message.channel.send(`Currently playing ${result.name} ${emotes.music}`);
+     *              }
      *          }
      *      }
      *
      * });
      */
-    addToQueue (guildID, track, requestedBy) {
+    addToQueue (guildID, track, user) {
         return new Promise(async (resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
             if (!queue) return reject(new Error('Not playing'))
             // Search the track
-            if (typeof track !== 'object') {
+            let result = null
+            if (typeof track === 'object') {
+                track.requestedBy = user
+                result = track
+                // Add the track to the queue
+                queue.tracks.push(track)
+            } else if (typeof track === 'string') {
                 const results = await this.searchTracks(track)
-                track = results[0]
+                if (results.length > 1) {
+                    result = {
+                        type: 'playlist',
+                        tracks: results
+                    }
+                } else {
+                    result = results[0]
+                }
+                results.forEach((i) => {
+                    i.requestedBy = user
+                    queue.tracks.push(i)
+                })
             }
-            track.requestedBy = requestedBy
-            // Update queue
-            queue.tracks.push(track)
-            // Resolve the track
-            resolve(track)
+            // Resolve the result
+            resolve(result)
         })
     }
 
@@ -819,7 +840,7 @@ class Player {
      * @ignore
      * @private
      * @param {Queue} queue The queue to play
-     * @param {*} updateFilter Whether this method is called to update some ffmpeg filters
+     * @param {Boolean} updateFilter Whether this method is called to update some ffmpeg filters
      * @returns {Promise<void>}
      */
     _playSouncloudStream (queue, updateFilter) {
