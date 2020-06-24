@@ -1,6 +1,7 @@
 const ytdl = require('discord-ytdl-core')
 const Discord = require('discord.js')
 const ytsr = require('ytsr')
+const ytpl = require('ytpl')
 const scdl = require('soundcloud-downloader')
 
 const Queue = require('./Queue')
@@ -163,6 +164,21 @@ class Player {
      */
     searchTracks (query) {
         return new Promise(async (resolve, reject) => {
+            if (ytpl.validateURL(query)) {
+                const playlistID = await ytpl.getPlaylistID(query).catch(() => {})
+                if (playlistID) {
+                    const playlist = await ytpl(playlistID).catch(() => {})
+                    if (playlist) {
+                        return resolve(playlist.items.map((i) => new Track({
+                            title: i.title,
+                            duration: i.duration,
+                            thumbnail: i.thumbnail,
+                            author: i.author,
+                            link: i.url
+                        }, null, null)))
+                    }
+                }
+            }
             // eslint-disable-next-line no-useless-escape
             const matchURL = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
             if (matchURL) {
@@ -184,9 +200,9 @@ class Player {
                 }
             }
             ytsr(query, (err, results) => {
-                if (err) return []
+                if (err) return resolve([])
                 const resultsVideo = results.items.filter((i) => i.type === 'video')
-                resolve(resultsVideo.map((r) => new Track(r, null, null)))
+                resolve([new Track(resultsVideo[0], null, null)])
             })
         })
     }
@@ -205,7 +221,7 @@ class Player {
      * @param {Discord.VoiceChannel} voiceChannel The voice channel in which the track will be played
      * @param {Track|string} track The name of the track to play
      * @param {Discord.User?} user The user who requested the track
-     * @returns {Promise<Track>} The played track
+     * @returns {any} The played track
      *
      * @example
      * client.on('message', async (message) => {
@@ -217,8 +233,12 @@ class Player {
      *      // will play "Despacito" in the member voice channel
      *
      *      if(command === 'play'){
-     *          let track = await client.player.play(message.member.voice.channel, args[0], message.member.user.tag);
-     *          message.channel.send(`Currently playing ${track.name}! - Requested by ${track.requestedBy}`);
+     *          const result = await client.player.play(message.member.voice.channel, args.join(" "));
+     *          if(result.type === 'playlist'){
+     *              message.channel.send(`${result.tracks.length} songs added to the queue ${emotes.music}\nCurrently playing **${result.tracks[0].name}**!`);
+     *          } else {
+     *              message.channel.send(`Currently playing ${result.name} ${emotes.music}`);
+     *          }
      *      }
      *
      * });
@@ -230,10 +250,6 @@ class Player {
                 return reject(new Error(`voiceChannel must be type of VoiceChannel. value=${voiceChannel}`))
             }
             const connection = voiceChannel.client.voice.connections.find((c) => c.channel.id === voiceChannel.id) || await voiceChannel.join()
-            if (typeof track !== 'object') {
-                const results = await this.searchTracks(track)
-                track = results[0]
-            }
             // Create a new guild with data
             const queue = new Queue(voiceChannel.guild.id)
             queue.voiceConnection = connection
@@ -241,15 +257,33 @@ class Player {
             Object.keys(filters).forEach((f) => {
                 queue.filters[f] = false
             })
-            // Add the track to the queue
-            track.requestedBy = user
-            queue.tracks.push(track)
+            let result = null
+            if (typeof track === 'object') {
+                track.requestedBy = user
+                result = track
+                // Add the track to the queue
+                queue.tracks.push(track)
+            } else if (typeof track === 'string') {
+                const results = await this.searchTracks(track)
+                if (results.length > 1) {
+                    result = {
+                        type: 'playlist',
+                        tracks: results
+                    }
+                } else {
+                    result = results[0]
+                }
+                results.forEach((i) => {
+                    i.requestedBy = user
+                    queue.tracks.push(i)
+                })
+            }
             // Add the queue to the list
             this.queues.push(queue)
             // Play the track
             this._playTrack(queue.guildID, true)
             // Resolve the track
-            resolve(track)
+            resolve(result)
         })
     }
 
