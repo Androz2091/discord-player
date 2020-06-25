@@ -921,7 +921,7 @@ class Player {
         this._playYTDLStream(queue, false).then(() => {
             // Emit trackChanged event
             if (!firstPlay) {
-                queue.emit('trackChanged', nowPlaying, wasPlaying, queue.lastSkipped, queue.repeatMode)
+                queue.emit('trackChanged', wasPlaying, nowPlaying, queue.lastSkipped, queue.repeatMode)
             }
         })
     }
