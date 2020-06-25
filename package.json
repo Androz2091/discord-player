@@ -33,7 +33,6 @@
     "merge-options": "^2.0.0",
     "node-fetch": "^2.6.0",
     "simple-youtube-api": "^5.2.1",
-    "soundcloud-downloader": "^0.0.9",
     "ytpl": "^0.1.21",
     "ytsr": "^0.1.15"
   },
