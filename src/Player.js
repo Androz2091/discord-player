@@ -818,6 +818,8 @@ class Player {
                 seek: currentStreamTime
             })
             setTimeout(() => {
+                if (queue.stream) queue.stream.destroy()
+                queue.stream = newStream
                 queue.voiceConnection.play(newStream, {
                     type: 'opus'
                 })
@@ -863,6 +865,8 @@ class Player {
             const opus = scdl.filterMedia(info.media.transcodings, { format: scdl.FORMATS.OPUS })
             const newStream = await scdl.downloadFromURL(opus[0].url, this.options.soundcloudClientID)
             setTimeout(() => {
+                if (queue.stream) queue.stream.destroy()
+                queue.stream = newStream
                 queue.voiceConnection.play(newStream, {
                     type: 'ogg/opus'
                 })
@@ -908,7 +912,7 @@ class Player {
         const nowPlaying = queue.playing = queue.repeatMode ? wasPlaying : queue.tracks.shift()
         // Reset lastSkipped state
         queue.lastSkipped = false
-
+        if (queue.stream) queue.stream.destroy()
         if (queue.playing.url.includes('soundcloud.com')) {
             this._playSouncloudStream(queue, false).then(() => {
                 // Emit trackChanged event
