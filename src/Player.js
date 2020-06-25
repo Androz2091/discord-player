@@ -811,6 +811,8 @@ class Player {
                 seek: currentStreamTime
             })
             setTimeout(() => {
+                if (queue.stream) queue.stream.destroy()
+                queue.stream = newStream
                 queue.voiceConnection.play(newStream, {
                     type: 'opus'
                 })
@@ -856,7 +858,6 @@ class Player {
         const nowPlaying = queue.playing = queue.repeatMode ? wasPlaying : queue.tracks.shift()
         // Reset lastSkipped state
         queue.lastSkipped = false
-
         this._playYTDLStream(queue, false).then(() => {
             // Emit trackChanged event
             if (!firstPlay) {
