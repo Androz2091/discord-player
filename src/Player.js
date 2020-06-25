@@ -182,6 +182,7 @@ class Player {
                 query = matchURL[1]
             }
             ytsr(query, (err, results) => {
+                if (results.items.length < 1) return resolve([])
                 if (err) return resolve([])
                 const resultsVideo = results.items.filter((i) => i.type === 'video')
                 resolve([new Track(resultsVideo[0], null, null)])
@@ -246,14 +247,19 @@ class Player {
                 // Add the track to the queue
                 queue.tracks.push(track)
             } else if (typeof track === 'string') {
-                const results = await this.searchTracks(track)
+                const results = await this.searchTracks(track).catch(() => {
+                    return reject(new Error('Not found'))
+                })
+                if (!results) return
                 if (results.length > 1) {
                     result = {
                         type: 'playlist',
                         tracks: results
                     }
-                } else {
+                } else if (results[0]) {
                     result = results[0]
+                } else {
+                    return reject(new Error('Not found'))
                 }
                 results.forEach((i) => {
                     i.requestedBy = user
@@ -477,14 +483,19 @@ class Player {
                 // Add the track to the queue
                 queue.tracks.push(track)
             } else if (typeof track === 'string') {
-                const results = await this.searchTracks(track)
+                const results = await this.searchTracks(track).catch(() => {
+                    return reject(new Error('Not found'))
+                })
+                if (!results) return
                 if (results.length > 1) {
                     result = {
                         type: 'playlist',
                         tracks: results
                     }
-                } else {
+                } else if (results[0]) {
                     result = results[0]
+                } else {
+                    return reject(new Error('Not found'))
                 }
                 results.forEach((i) => {
                     i.requestedBy = user
