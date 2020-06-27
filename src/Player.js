@@ -814,6 +814,7 @@ class Player {
                 if (queue.stream) queue.stream.destroy()
                 queue.stream = newStream
                 queue.voiceConnection.play(newStream, {
+                    bitrate: queue.voiceConnection.channel.bitrate,
                     type: 'opus'
                 })
                 if (currentStreamTime) {
