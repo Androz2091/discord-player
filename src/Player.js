@@ -823,7 +823,7 @@ class Player {
                     bitrate: 'auto'
                 })
                 if (currentStreamTime) {
-                    queue.voiceConnection.dispatcher.streamTime += currentStreamTime
+                    queue.playing.streamTime += currentStreamTime
                 }
                 queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
                 // When the track starts
@@ -832,6 +832,8 @@ class Player {
                 })
                 // When the track ends
                 queue.voiceConnection.dispatcher.on('finish', () => {
+                    // reset streamTime
+                    if (queue.repeatMode) queue.playing.streamTime = 0
                     // Play the next track
                     return this._playTrack(queue.guildID, false)
                 })
