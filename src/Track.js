@@ -38,6 +38,7 @@ class Track {
         this.thumbnail = videoData.thumbnail
         /**
          * The video views
+         * @type {?number}
          */
         this.views = videoData.views
         /**
