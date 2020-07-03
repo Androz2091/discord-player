@@ -176,15 +176,15 @@ class Player {
                     }
                 }
             }
-            const spotifyRegex = query.match(/^(https:\/\/open.spotify.com\/user\/spotify\/playlist\/|spotify:user:spotify:playlist:)([a-zA-Z0-9]+)(.*)$/)
-            // eslint-disable-next-line no-useless-escape
-            const matchURL = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
-            if (spotifyRegex) {
+            const matchSpotifyURL = query.match(/^(https:\/\/open.spotify.com\/user\/spotify\/playlist\/|spotify:user:spotify:playlist:)([a-zA-Z0-9]+)(.*)$/)
+            if (matchSpotifyURL) {
                 const spotifyData = await spotify.getPreview(query).catch(e => resolve([]))
                 query = `${spotifyData.artist} - ${spotifyData.track}`
             }
-            if (matchURL) {
-                query = matchURL[1]
+            // eslint-disable-next-line no-useless-escape
+            const matchYoutubeURL = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
+            if (matchYoutubeURL) {
+                query = matchYoutubeURL[1]
             }
             ytsr(query, (err, results) => {
                 if (results.items.length < 1) return resolve([])
