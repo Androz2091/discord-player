@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Queue - Documentation</title>
+    <title>Track - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,7 +29,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Queue</h1>
+    <h1 class="page-title">Track</h1>
     
 
     
@@ -42,10 +42,10 @@
 <header>
     
         <h2>
-        Queue
+        Track
         </h2>
         
-            <div class="class-description"><p>Represents a guild queue.</p></div>
+            <div class="class-description"><p>Represents a track.</p></div>
         
     
 </header>
@@ -61,7 +61,7 @@
     
 
     
-    <h4 class="name" id="Queue"><span class="type-signature"></span>new Queue<span class="signature">(guildID)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Track"><span class="type-signature"></span>new Track<span class="signature">(videoData, user<span class="signature-attributes">nullable</span>, queue<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -128,6 +128,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -140,24 +142,104 @@
 
         <tr>
             
-                <td class="name"><code>guildID</code></td>
+                <td class="name"><code>videoData</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><code>Discord.Snowflake</code></span>
+<span class="param-type"><code>Object</code></span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last">
-                <p>ID of the guild this queue is for.</p>
+                <p>The video data for this track</p>
+                
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>user</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>Discord.User</code></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <p>The user who requested the track</p>
+                
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>queue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code><a href="Queue.html">Queue</a></code></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <p>The queue in which is the track is</p>
                 
             </td>
         </tr>
@@ -205,13 +287,13 @@
         
             
 <div class="section-members">
-<h4 class="name" id="additionalStreamTime"><span class="type-signature"></span>additionalStreamTime<span class="type-signature"> :Number</span></h4>
+<h4 class="name" id="author"><span class="type-signature"></span>author<span class="type-signature"> :string</span></h4>
 
 
 
 
 <div class="description">
-    <p>Additional stream time</p>
+    <p>The video channel</p>
 </div>
 
 
@@ -259,7 +341,7 @@
     <ul>
         <li>
             
-<span class="param-type"><code>Number</code></span>
+<span class="param-type"><code>string</code></span>
 
 
         </li>
@@ -274,13 +356,13 @@
         
             
 <div class="section-members">
-<h4 class="name" id="filters"><span class="type-signature"></span>filters<span class="type-signature"> :<a href="global.html#Filters">Filters</a></span></h4>
+<h4 class="name" id="description"><span class="type-signature"></span>description<span class="type-signature"> :string</span></h4>
 
 
 
 
 <div class="description">
-    <p>Filters status</p>
+    <p>The video description</p>
 </div>
 
 
@@ -328,7 +410,7 @@
     <ul>
         <li>
             
-<span class="param-type"><code><a href="global.html#Filters">Filters</a></code></span>
+<span class="param-type"><code>string</code></span>
 
 
         </li>
@@ -343,13 +425,13 @@
         
             
 <div class="section-members">
-<h4 class="name" id="guildID"><span class="type-signature"></span>guildID<span class="type-signature"> :Discord.Snowflake</span></h4>
+<h4 class="name" id="duration"><span class="type-signature"></span>duration<span class="type-signature"> :string</span></h4>
 
 
 
 
 <div class="description">
-    <p>ID of the guild this queue is for.</p>
+    <p>The video duration (formatted).</p>
 </div>
 
 
@@ -397,7 +479,7 @@
     <ul>
         <li>
             
-<span class="param-type"><code>Discord.Snowflake</code></span>
+<span class="param-type"><code>string</code></span>
 
 
         </li>
@@ -412,13 +494,13 @@
         
             
 <div class="section-members">
-<h4 class="name" id="lastSkipped"><span class="type-signature"></span>lastSkipped<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="durationMS"><span class="type-signature"></span>durationMS<span class="type-signature"> :number</span></h4>
 
 
 
 
 <div class="description">
-    <p>Whether the last track was skipped.</p>
+    <p>The track duration</p>
 </div>
 
 
@@ -466,7 +548,7 @@
     <ul>
         <li>
             
-<span class="param-type"><code>boolean</code></span>
+<span class="param-type"><code>number</code></span>
 
 
         </li>
@@ -481,13 +563,13 @@
         
             
 <div class="section-members">
-<h4 class="name" id="paused"><span class="type-signature"></span>paused<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="name"><span class="type-signature"></span>name<span class="type-signature"> :string</span></h4>
 
 
 
 
 <div class="description">
-    <p>Whether the stream is currently paused.</p>
+    <p>The track name</p>
 </div>
 
 
@@ -535,7 +617,7 @@
     <ul>
         <li>
             
-<span class="param-type"><code>boolean</code></span>
+<span class="param-type"><code>string</code></span>
 
 
         </li>
@@ -550,13 +632,13 @@
         
             
 <div class="section-members">
-<h4 class="name" id="playing"><span class="type-signature"></span>playing<span class="type-signature"> :<a href="Track.html">Track</a></span></h4>
+<h4 class="name" id="queue"><span class="type-signature"></span>queue<span class="type-signature"> :<a href="Queue.html">Queue</a></span></h4>
 
 
 
 
 <div class="description">
-    <p>The song currently played.</p>
+    <p>The queue in which the track is</p>
 </div>
 
 
@@ -604,7 +686,7 @@
     <ul>
         <li>
             
-<span class="param-type"><code><a href="Track.html">Track</a></code></span>
+<span class="param-type"><code><a href="Queue.html">Queue</a></code></span>
 
 
         </li>
@@ -619,13 +701,13 @@
         
             
 <div class="section-members">
-<h4 class="name" id="repeatMode"><span class="type-signature"></span>repeatMode<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="requestedBy"><span class="type-signature">(nullable) </span>requestedBy<span class="type-signature"> :Discord.User</span></h4>
 
 
 
 
 <div class="description">
-    <p>Whether the repeat mode is enabled.</p>
+    <p>The user who requested the track</p>
 </div>
 
 
@@ -673,7 +755,7 @@
     <ul>
         <li>
             
-<span class="param-type"><code>boolean</code></span>
+<span class="param-type"><code>Discord.User</code></span>
 
 
         </li>
@@ -688,13 +770,13 @@
         
             
 <div class="section-members">
-<h4 class="name" id="stopped"><span class="type-signature"></span>stopped<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="thumbnail"><span class="type-signature"></span>thumbnail<span class="type-signature"> :string</span></h4>
 
 
 
 
 <div class="description">
-    <p>Whether the stream is currently stopped.</p>
+    <p>The video thumbnail</p>
 </div>
 
 
@@ -742,7 +824,7 @@
     <ul>
         <li>
             
-<span class="param-type"><code>boolean</code></span>
+<span class="param-type"><code>string</code></span>
 
 
         </li>
@@ -757,13 +839,13 @@
         
             
 <div class="section-members">
-<h4 class="name" id="tracks"><span class="type-signature"></span>tracks<span class="type-signature"> :Array.&lt;<a href="Track.html">Track</a>></span></h4>
+<h4 class="name" id="url"><span class="type-signature"></span>url<span class="type-signature"> :string</span></h4>
 
 
 
 
 <div class="description">
-    <p>The tracks of this queue. The first one is currenlty playing and the others are going to be played.</p>
+    <p>The Youtube URL of the track</p>
 </div>
 
 
@@ -811,7 +893,7 @@
     <ul>
         <li>
             
-<span class="param-type"><code>Array.&lt;<a href="Track.html">Track</a>></code></span>
+<span class="param-type"><code>string</code></span>
 
 
         </li>
@@ -826,82 +908,13 @@
         
             
 <div class="section-members">
-<h4 class="name" id="voiceConnection"><span class="type-signature"></span>voiceConnection<span class="type-signature"> :Discord.VoiceConnection</span></h4>
+<h4 class="name" id="views"><span class="type-signature">(nullable) </span>views<span class="type-signature"> :number</span></h4>
 
 
 
 
 <div class="description">
-    <p>The voice connection of this queue.</p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><code>Discord.VoiceConnection</code></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="section-members">
-<h4 class="name" id="volume"><span class="type-signature"></span>volume<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    <p>The stream volume of this queue. (0-100)</p>
+    <p>The video views</p>
 </div>
 
 
@@ -968,414 +981,6 @@
 
     
 
-    
-        <h3 class="subsection-title">Events</h3>
-
-        
-            
-<div class="section-method">
-
-    
-
-    
-    <h4 class="name" id="event:channelEmpty">channelEmpty</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when the voice channel is empty.</p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    
-    <h4 class="name" id="event:end">end</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when the queue is empty.</p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-examples">
-<h5>Example</h5>
-
-    <pre class="prettyprint"><code>client.on('message', (message) => {
-
-     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-     const command = args.shift().toLowerCase();
-
-     if(command === 'play'){
-
-         let track = await client.player.play(message.member.voice.channel, args[0]);
-
-         track.queue.on('end', () => {
-             message.channel.send('The queue is empty, please add new tracks!');
-         });
-
-     }
-
-});</code></pre>
-
-</div>
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    
-    <h4 class="name" id="event:trackChanged">trackChanged</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when the track changes.</p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>oldTrack</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code><a href="Track.html">Track</a></code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The old track (playing before)</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>newTrack</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code><a href="Track.html">Track</a></code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The new track (currently playing)</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>skipped</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Boolean</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>Whether the change is due to the skip() function</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-examples">
-<h5>Example</h5>
-
-    <pre class="prettyprint"><code>client.on('message', (message) => {
-
-     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-     const command = args.shift().toLowerCase();
-
-     if(command === 'play'){
-
-         let track = await client.player.play(message.member.voice.channel, args[0]);
-
-         track.queue.on('trackChanged', (oldTrack, newTrack, skipped, repeatMode) => {
-             if(repeatMode){
-                 message.channel.send(`Playing ${newTrack} again...`);
-             } else {
-                 message.channel.send(`Now playing ${newTrack}...`);
-             }
-         });
-
-     }
-
-});</code></pre>
-
-</div>
-
-</div>
-        
     
 </article>
 
