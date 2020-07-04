@@ -58,7 +58,7 @@ class Queue extends EventEmitter {
         this.repeatMode = false
         /**
          * Filters status
-         * @type {Object}
+         * @type {Filters}
          */
         this.filters = {}
         /**
