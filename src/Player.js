@@ -83,6 +83,11 @@ class Player {
         for (const prop in options) {
             this.options[prop] = options[prop]
         }
+        /**
+         * Default filters for the queues created with this player.
+         * @type {Filters}
+         */
+        this.filters = filters
 
         // Listener to check if the channel is empty
         client.on('voiceStateUpdate', (oldState, newState) => this._handleVoiceStateUpdate(oldState, newState))
@@ -242,7 +247,7 @@ class Player {
             const queue = new Queue(voiceChannel.guild.id)
             queue.voiceConnection = connection
             queue.filters = {}
-            Object.keys(filters).forEach((f) => {
+            Object.keys(this.filters).forEach((f) => {
                 queue.filters[f] = false
             })
             let result = null
