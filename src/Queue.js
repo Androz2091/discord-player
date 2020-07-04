@@ -64,7 +64,7 @@ class Queue extends EventEmitter {
     }
 
     get calculatedVolume () {
-        return this.filters.bassboost ? this.volume + 40 : this.volume
+        return this.filters.bassboost ? this.volume + 50 : this.volume
     }
 }
 

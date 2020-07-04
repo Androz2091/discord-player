@@ -2,7 +2,7 @@ const ytdl = require('discord-ytdl-core')
 const Discord = require('discord.js')
 const ytsr = require('ytsr')
 const ytpl = require('ytpl')
-
+const spotify = require('spotify-url-info')
 const Queue = require('./Queue')
 const Track = require('./Track')
 
@@ -176,10 +176,15 @@ class Player {
                     }
                 }
             }
+            const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
+            if (matchSpotifyURL) {
+                const spotifyData = await spotify.getPreview(query).catch(e => resolve([]))
+                query = `${spotifyData.artist} - ${spotifyData.track}`
+            }
             // eslint-disable-next-line no-useless-escape
-            const matchURL = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
-            if (matchURL) {
-                query = matchURL[1]
+            const matchYoutubeURL = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
+            if (matchYoutubeURL) {
+                query = matchYoutubeURL[1]
             }
             ytsr(query, (err, results) => {
                 if (results.items.length < 1) return resolve([])
@@ -814,10 +819,11 @@ class Player {
                 if (queue.stream) queue.stream.destroy()
                 queue.stream = newStream
                 queue.voiceConnection.play(newStream, {
-                    type: 'opus'
+                    type: 'opus',
+                    bitrate: 'auto'
                 })
                 if (currentStreamTime) {
-                    queue.voiceConnection.dispatcher.streamTime += currentStreamTime
+                    queue.playing.streamTime += currentStreamTime
                 }
                 queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
                 // When the track starts
@@ -826,6 +832,8 @@ class Player {
                 })
                 // When the track ends
                 queue.voiceConnection.dispatcher.on('finish', () => {
+                    // reset streamTime
+                    if (queue.repeatMode) queue.playing.streamTime = 0
                     // Play the next track
                     return this._playTrack(queue.guildID, false)
                 })

@@ -56,6 +56,11 @@ class Track {
          * @type {Queue}
          */
         this.queue = queue
+
+        /**
+         * Stream time of the track (available on applying filters)
+         */
+        this.streamTime = 0
     }
 
     /**
