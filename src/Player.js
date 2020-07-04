@@ -750,7 +750,7 @@ class Player {
         const queue = this.queues.find((g) => g.guildID === guildID)
         if (!queue) return
         // Stream time of the dispatcher
-        const currentStreamTime = queue.calculatedStreamTime
+        const currentStreamTime = queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime
         // Total stream time
         const totalTime = queue.playing.durationMS
         // Stream progress
@@ -800,7 +800,7 @@ class Player {
      */
     _playYTDLStream (queue, updateFilter) {
         return new Promise((resolve) => {
-            const currentStreamTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime / 1000 : undefined
+            const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
             const encoderArgsFilters = []
             Object.keys(queue.filters).forEach((filterName) => {
                 if (queue.filters[filterName]) {
@@ -817,7 +817,7 @@ class Player {
                 filter: 'audioonly',
                 opusEncoded: true,
                 encoderArgs,
-                seek: currentStreamTime + queue.additionalStreamTime
+                seek: seekTime / 1000
             })
             setTimeout(() => {
                 if (queue.stream) queue.stream.destroy()
@@ -826,8 +826,8 @@ class Player {
                     type: 'opus',
                     bitrate: 'auto'
                 })
-                if (currentStreamTime) {
-                    queue.additionalStreamTime += currentStreamTime
+                if (seekTime) {
+                    queue.additionalStreamTime = seekTime
                 }
                 queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
                 // When the track starts
