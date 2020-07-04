@@ -26,7 +26,7 @@ Install [FFMPEG](https://www.ffmpeg.org/download.html) and you're done!
 
 🤘 Easy to use!  
 🎸 You can apply some cool filters (bassboost, reverse, 8D, etc...)  
-🎼 Manage your server queues with simple functions (add songs, skip the current song, pause the music, resume it, etc...)!
+🎼 Manage your server queues with simple functions (add songs, skip the current song, pause the music, resume it, etc...)!  
 🌐 Multi-servers support
 
 ## Getting Started
