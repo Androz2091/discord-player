@@ -746,7 +746,7 @@ class Player {
         const queue = this.queues.find((g) => g.guildID === guildID)
         if (!queue) return
         // Stream time of the dispatcher
-        const currentStreamTime = queue.voiceConnection.dispatcher.streamTime
+        const currentStreamTime = queue.calculatedStreamTime
         // Total stream time
         const totalTime = queue.playing.durationMS
         // Stream progress
@@ -813,7 +813,7 @@ class Player {
                 filter: 'audioonly',
                 opusEncoded: true,
                 encoderArgs,
-                seek: currentStreamTime
+                seek: currentStreamTime + queue.additionalStreamTime
             })
             setTimeout(() => {
                 if (queue.stream) queue.stream.destroy()
@@ -823,7 +823,7 @@ class Player {
                     bitrate: 'auto'
                 })
                 if (currentStreamTime) {
-                    queue.playing.streamTime += currentStreamTime
+                    queue.additionalStreamTime += currentStreamTime
                 }
                 queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
                 // When the track starts
@@ -832,8 +832,8 @@ class Player {
                 })
                 // When the track ends
                 queue.voiceConnection.dispatcher.on('finish', () => {
-                    // reset streamTime
-                    if (queue.repeatMode) queue.playing.streamTime = 0
+                    // Reset streamTime
+                    queue.additionalStreamTime = 0
                     // Play the next track
                     return this._playTrack(queue.guildID, false)
                 })

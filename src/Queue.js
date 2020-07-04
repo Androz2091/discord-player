@@ -61,6 +61,11 @@ class Queue extends EventEmitter {
          * @type {Object}
          */
         this.filters = {}
+        /**
+         * Additional stream time
+         * @type {Number}
+         */
+        this.additionalStreamTime = 0
     }
 
     get calculatedVolume () {
