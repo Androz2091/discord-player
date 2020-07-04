@@ -15,10 +15,9 @@ jobs:
       - name: Build
         uses: andstor/jsdoc-action@v1
         with:
-          source_dir: ./src
           output_dir: ./docs
           config_file: .jsdoc.json
-          template_name: Androz2091/minami
+          template: Androz2091/minami
           front_page: README.md
 
       - name: Deploy
@@ -26,3 +25,4 @@ jobs:
         with:
           personal_token: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           publish_dir: ./docs
+          cname: discord-player.js.org
