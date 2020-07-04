@@ -99,8 +99,8 @@ You need to **init the guild queue using the play() function**, then you are abl
 * [pause(guildID)](https://discord-player.js.org/Player.html#pause) - pause the current track
 * [resume(guildID)](https://discord-player.js.org/Player.html#resume) - resume the current track
 * [stop(guildID)](https://discord-player.js.org/Player.html#stop) - stop the current track
-* [setFilters(data)](https://discord-player.js.org/Player.html#setFilters) - update filters (bassboost for example)
-* [setRepeatMode(boolean)](https://discord-player.js.org/Player.html#setRepeatMode) - enable or disable repeat mode for the server
+* [setFilters(guildID, newFilters)](https://discord-player.js.org/Player.html#setFilters) - update filters (bassboost for example)
+* [setRepeatMode(guildID, boolean)](https://discord-player.js.org/Player.html#setRepeatMode) - enable or disable repeat mode for the server
 
 ### Event messages
 
