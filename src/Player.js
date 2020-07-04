@@ -123,7 +123,7 @@ class Player {
      */
     setFilters (guildID, newFilters) {
         return new Promise((resolve, reject) => {
-            // Gets guild queue
+            // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
             if (!queue) return reject(new Error('Not playing'))
             Object.keys(newFilters).forEach((filterName) => {
@@ -134,7 +134,7 @@ class Player {
     }
 
     /**
-     * Searchs tracks on YouTube
+     * Resolve an array of tracks objects from a query string
      * @param {string} query The query
      * @returns {Promise<Track[]>}
      *
@@ -297,7 +297,7 @@ class Player {
      *      const command = args.shift().toLowerCase();
      *
      *      if(command === 'pause'){
-     *          let track = await client.player.pause(message.guild.id);
+     *          const track = await client.player.pause(message.guild.id);
      *          message.channel.send(`${track.name} paused!`);
      *      }
      *
@@ -305,13 +305,13 @@ class Player {
      */
     pause (guildID) {
         return new Promise((resolve, reject) => {
-            // Gets guild queue
+            // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
             if (!queue) return reject(new Error('Not playing'))
-            // Pauses the dispatcher
+            // Pause the dispatcher
             queue.voiceConnection.dispatcher.pause()
             queue.paused = true
-            // Resolves the guild queue
+            // Resolve the guild queue
             resolve(queue.playing)
         })
     }
@@ -328,7 +328,7 @@ class Player {
      *      const command = args.shift().toLowerCase();
      *
      *      if(command === 'resume'){
-     *          let track = await client.player.resume(message.guild.id);
+     *          const track = await client.player.resume(message.guild.id);
      *          message.channel.send(`${track.name} resumed!`);
      *      }
      *
@@ -348,7 +348,7 @@ class Player {
     }
 
     /**
-     * Stops playing music.
+     * Stop the music in the guild
      * @param {Discord.Snowflake} guildID The ID of the guild where the music should be stopped
      * @returns {Promise<void>}
      *
@@ -391,7 +391,7 @@ class Player {
      *      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
      *      const command = args.shift().toLowerCase();
      *
-     *      if(command === 'setvolume'){
+     *      if(command === 'set-volume'){
      *          client.player.setVolume(message.guild.id, parseInt(args[0]));
      *          message.channel.send(`Volume set to ${args[0]} !`);
      *      }
@@ -403,10 +403,10 @@ class Player {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
             if (!queue) return reject(new Error('Not playing'))
-            // Updates volume
+            // Update volume
             queue.volume = percent
             queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
-            // Resolves guild queue
+            // Resolve guild queue
             resolve()
         })
     }
@@ -423,7 +423,7 @@ class Player {
      *      const command = args.shift().toLowerCase();
      *
      *      if(command === 'queue'){
-     *          let queue = await client.player.getQueue(message.guild.id);
+     *          const queue = await client.player.getQueue(message.guild.id);
      *          message.channel.send('Server queue:\n'+(queue.tracks.map((track, i) => {
      *              return `${i === 0 ? 'Current' : `#${i+1}`} - ${track.name} | ${track.author}`;
      *          }).join('\n')));
@@ -560,7 +560,7 @@ class Player {
      *      const command = args.shift().toLowerCase();
      *
      *      if(command === 'skip'){
-     *          let track = await client.player.skip(message.guild.id);
+     *          const track = await client.player.skip(message.guild.id);
      *          message.channel.send(`${track.name} skipped!`);
      *      }
      *
@@ -695,7 +695,7 @@ class Player {
      *     const command = args.shift().toLowerCase();
      *
      *     if(command === 'remove'){
-     *         // Removes a track from the queue
+     *         // Remove a track from the queue
      *         client.player.remove(message.guild.id, args[0]).then(() => {
      *              message.channel.send('Removed track!');
      *         });
@@ -738,7 +738,6 @@ class Player {
      *     const command = args.shift().toLowerCase();
      *
      *     if(command === 'now-playing'){
-     *         // Shuffle the server queue
      *         client.player.nowPlaying(message.guild.id).then((song) => {
      *              message.channel.send('Currently playing ' + song.name + '\n\n'+ client.player.createProgressBar(message.guild.id));
      *         });
