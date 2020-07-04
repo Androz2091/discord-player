@@ -176,7 +176,7 @@ class Player {
                     }
                 }
             }
-            const matchSpotifyURL = query.match(/^(https:\/\/open.spotify.com\/user\/spotify\/playlist\/|spotify:user:spotify:playlist:)([a-zA-Z0-9]+)(.*)$/)
+            const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
             if (matchSpotifyURL) {
                 const spotifyData = await spotify.getPreview(query).catch(e => resolve([]))
                 query = `${spotifyData.artist} - ${spotifyData.track}`
