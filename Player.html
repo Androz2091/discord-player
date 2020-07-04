@@ -1126,7 +1126,6 @@
     const command = args.shift().toLowerCase();
 
     if(command === 'now-playing'){
-        // Shuffle the server queue
         client.player.nowPlaying(message.guild.id).then((song) => {
              message.channel.send('Currently playing ' + song.name + '\n\n'+ client.player.createProgressBar(message.guild.id));
         });
@@ -1302,7 +1301,7 @@
      const command = args.shift().toLowerCase();
 
      if(command === 'queue'){
-         let queue = await client.player.getQueue(message.guild.id);
+         const queue = await client.player.getQueue(message.guild.id);
          message.channel.send('Server queue:\n'+(queue.tracks.map((track, i) => {
              return `${i === 0 ? 'Current' : `#${i+1}`} - ${track.name} | ${track.author}`;
          }).join('\n')));
@@ -1828,7 +1827,7 @@
      const command = args.shift().toLowerCase();
 
      if(command === 'pause'){
-         let track = await client.player.pause(message.guild.id);
+         const track = await client.player.pause(message.guild.id);
          message.channel.send(`${track.name} paused!`);
      }
 
@@ -2299,7 +2298,7 @@
     const command = args.shift().toLowerCase();
 
     if(command === 'remove'){
-        // Removes a track from the queue
+        // Remove a track from the queue
         client.player.remove(message.guild.id, args[0]).then(() => {
              message.channel.send('Removed track!');
         });
@@ -2479,7 +2478,7 @@
      const command = args.shift().toLowerCase();
 
      if(command === 'resume'){
-         let track = await client.player.resume(message.guild.id);
+         const track = await client.player.resume(message.guild.id);
          message.channel.send(`${track.name} resumed!`);
      }
 
@@ -2503,7 +2502,7 @@
 
 
 <div class="description">
-    <p>Searchs tracks on YouTube</p>
+    <p>Resolve an array of tracks objects from a query string</p>
 </div>
 
 
@@ -3262,7 +3261,7 @@
      const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
      const command = args.shift().toLowerCase();
 
-     if(command === 'setvolume'){
+     if(command === 'set-volume'){
          client.player.setVolume(message.guild.id, parseInt(args[0]));
          message.channel.send(`Volume set to ${args[0]} !`);
      }
@@ -3617,7 +3616,7 @@
      const command = args.shift().toLowerCase();
 
      if(command === 'skip'){
-         let track = await client.player.skip(message.guild.id);
+         const track = await client.player.skip(message.guild.id);
          message.channel.send(`${track.name} skipped!`);
      }
 
@@ -3641,7 +3640,7 @@
 
 
 <div class="description">
-    <p>Stops playing music.</p>
+    <p>Stop the music in the guild</p>
 </div>
 
 
