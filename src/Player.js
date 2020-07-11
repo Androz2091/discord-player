@@ -136,6 +136,7 @@ class Player {
     /**
      * Resolve an array of tracks objects from a query string
      * @param {string} query The query
+     * @param {boolean} allResults Whether all the results should be returned, or only the first one
      * @returns {Promise<Track[]>}
      *
      * @example
@@ -164,7 +165,7 @@ class Player {
      *
      * });
      */
-    searchTracks (query) {
+    searchTracks (query, allResults = false) {
         return new Promise(async (resolve, reject) => {
             if (ytpl.validateURL(query)) {
                 const playlistID = await ytpl.getPlaylistID(query).catch(() => {})
@@ -195,7 +196,7 @@ class Player {
                 if (results.items.length < 1) return resolve([])
                 if (err) return resolve([])
                 const resultsVideo = results.items.filter((i) => i.type === 'video')
-                resolve([new Track(resultsVideo[0], null, null)])
+                resolve(allResults ? resultsVideo.map((r) => new Track(r, null, null)) : [new Track(resultsVideo[0], null, null)])
             })
         })
     }
