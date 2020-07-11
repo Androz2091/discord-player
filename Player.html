@@ -2494,7 +2494,7 @@
     
 
     
-    <h4 class="name" id="searchTracks"><span class="type-signature"></span>searchTracks<span class="signature">(query)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Track.html">Track</a>>>}</span></h4>
+    <h4 class="name" id="searchTracks"><span class="type-signature"></span>searchTracks<span class="signature">(query, allResults)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Track.html">Track</a>>>}</span></h4>
     
 
     
@@ -2567,6 +2567,8 @@
         
 
         
+        <th>Default</th>
+        
 
         <th class="last">Description</th>
     </tr>
@@ -2592,9 +2594,45 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">
                 <p>The query</p>
+                
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>allResults</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>boolean</code></span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">
+                <p>Whether all the results should be returned, or only the first one</p>
                 
             </td>
         </tr>
