@@ -52,6 +52,11 @@ class Track {
          */
         this.requestedBy = user
         /**
+         * Whether the track was added from a playlist
+         * @type {boolean}
+         */
+        this.fromPlaylist = videoData.fromPlaylist ?? false
+        /**
          * The queue in which the track is
          * @type {Queue}
          */

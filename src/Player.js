@@ -177,7 +177,8 @@ class Player {
                             duration: i.duration,
                             thumbnail: i.thumbnail,
                             author: i.author,
-                            link: i.url
+                            link: i.url,
+                            fromPlaylist: true
                         }, null, null)))
                     }
                 }
