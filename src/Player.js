@@ -230,9 +230,9 @@ class Player {
      *      if(command === 'play'){
      *          const result = await client.player.play(message.member.voice.channel, args.join(" "));
      *          if(result.type === 'playlist'){
-     *              message.channel.send(`${result.tracks.length} songs added to the queue ${emotes.music}\nCurrently playing **${result.tracks[0].name}**!`);
+     *              message.channel.send(`${result.tracks.length} songs added to the queue!\nCurrently playing **${result.tracks[0].name}**...`);
      *          } else {
-     *              message.channel.send(`Currently playing ${result.name} ${emotes.music}`);
+     *              message.channel.send(`Currently playing ${result.name}...`);
      *          }
      *      }
      *
@@ -465,17 +465,17 @@ class Player {
      *          if(trackPlaying){
      *              const result = await client.player.addToQueue(message.guild.id, args.join(" "));
      *              if(result.type === 'playlist'){
-     *                  message.channel.send(`${result.tracks.length} songs added to the queue ${emotes.music}`);
+     *                  message.channel.send(`${result.tracks.length} songs added to the queue!`);
      *              } else {
-     *                  message.channel.send(`${result.name} added to the queue ${emotes.music}`);
+     *                  message.channel.send(`${result.name} added to the queue!`);
      *              }
      *          } else {
      *              // Else, play the track
      *              const result = await client.player.addToQueue(message.member.voice.channel, args[0]);
      *              if(result.type === 'playlist'){
-     *                  message.channel.send(`${result.tracks.length} songs added to the queue ${emotes.music}\nCurrently playing **${result.tracks[0].name}**!`);
+     *                  message.channel.send(`${result.tracks.length} songs added to the queue\nCurrently playing **${result.tracks[0].name}**!`);
      *              } else {
-     *                  message.channel.send(`Currently playing ${result.name} ${emotes.music}`);
+     *                  message.channel.send(`Currently playing ${result.name}`);
      *              }
      *          }
      *      }
