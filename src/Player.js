@@ -819,7 +819,8 @@ class Player {
                 filter: 'audioonly',
                 opusEncoded: true,
                 encoderArgs,
-                seek: seekTime / 1000
+                seek: seekTime / 1000,
+                highWaterMark: 1 << 25
             })
             setTimeout(() => {
                 if (queue.stream) queue.stream.destroy()
