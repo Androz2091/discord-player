@@ -21,6 +21,7 @@ const Track = require('./Track')
  * @property {boolean} [surrounding=false] Whether the surrounding filter is enabled.
  * @property {boolean} [pulsator=false] Whether the pulsator filter is enabled.
  * @property {boolean} [subboost=false] Whether the subboost filter is enabled.
+ * @property {boolean} [karaoke=false] Whether the karaoke filter is enabled.
  */
 
 const filters = {
@@ -36,7 +37,8 @@ const filters = {
     normalizer: 'dynaudnorm=f=150',
     surrounding: 'surround',
     pulsator: 'apulsator=hz=1',
-    subboost: 'asubboost'
+    subboost: 'asubboost',
+    karaoke: 'stereotools=mlev=0.03'
 }
 
 /**
