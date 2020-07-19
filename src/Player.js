@@ -22,23 +22,31 @@ const Track = require('./Track')
  * @property {boolean} [pulsator=false] Whether the pulsator filter is enabled.
  * @property {boolean} [subboost=false] Whether the subboost filter is enabled.
  * @property {boolean} [karaoke=false] Whether the karaoke filter is enabled.
+ * @property {boolean} [flanger=false] Whether the flanger filter is enabled.
+ * @property {boolean} [gate=false] Whether the gate filter is enabled.
+ * @property {boolean} [haas=false] Whether the haas filter is enabled.
+ * @property {boolean} [mcompand=false] Whether the mcompand filter is enabled.
  */
 
 const filters = {
     bassboost: 'bass=g=20,dynaudnorm=f=200',
-    '8D': 'apulsator=hz=0.128',
-    vaporwave: 'asetrate=44100*0.8,aresample=44100,atempo=1.1',
-    nightcore: 'asetrate=44100*1.25',
+    '8D': 'apulsator=hz=0.08',
+    vaporwave: 'aresample=48000,asetrate=48000*0.8',
+    nightcore: 'aresample=48000,asetrate=48000*1.25',
     phaser: 'aphaser=in_gain=0.4',
     tremolo: 'tremolo',
     vibrato: 'vibrato=f=6.5',
     reverse: 'areverse',
     treble: 'treble=g=5',
-    normalizer: 'dynaudnorm=f=150',
+    normalizer: 'dynaudnorm=f=200',
     surrounding: 'surround',
     pulsator: 'apulsator=hz=1',
     subboost: 'asubboost',
-    karaoke: 'stereotools=mlev=0.03'
+    karaoke: 'stereotools=mlev=0.03',
+    flanger: 'flanger',
+    gate: 'agate',
+    haas: 'haas',
+    mcompand: 'mcompand'
 }
 
 /**
