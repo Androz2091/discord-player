@@ -115,14 +115,14 @@ class Player {
      *      const command = args.shift().toLowerCase();
      *
      *      if(command === 'bassboost'){
-     *          const bassboostEnabled = client.player.getQueue(message.guild.id);
+     *          const bassboostEnabled = client.player.getQueue(message.guild.id).filters.bassboost;
      *          if(!bassboostEnabled){
-     *              client.player.updateFilters(message.guild.id, {
+     *              client.player.setFilters(message.guild.id, {
      *                  bassboost: true
      *              });
      *              message.channel.send("Bassboost effect has been enabled!");
      *          } else {
-     *              client.player.updateFilters(message.guild.id, {
+     *              client.player.setFilters(message.guild.id, {
      *                  bassboost: false
      *              });
      *              message.channel.send("Bassboost effect has been disabled!");
