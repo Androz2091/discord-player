@@ -17,7 +17,7 @@ jobs:
         with:
           output_dir: ./docs
           config_file: .jsdoc.json
-          template: Androz2091/minami
+          template: Androz2091/jsdoc-skyceil
           front_page: README.md
 
       - name: Deploy
