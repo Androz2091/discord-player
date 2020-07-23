@@ -553,8 +553,7 @@ class Player {
             const queue = this.queues.find((g) => g.guildID === guildID)
             if (!queue) return reject(new Error('Not playing'))
             // Clear queue
-            const currentlyPlaying = queue.tracks.shift()
-            queue.tracks = [currentlyPlaying]
+            queue.tracks = []
             // Resolve guild queue
             resolve(queue)
         })
