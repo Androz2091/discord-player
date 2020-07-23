@@ -109,7 +109,7 @@ You need to **init the guild queue using the play() function**, then you are abl
 await client.player.play(message.member.voice.channel, "Despacito")
 
 // Then add some messages that will be sent when the events will be triggered
-client.player.getQueue(guildID)
+client.player.getQueue(message.guild.id)
 .on('end', () => {
     message.channel.send('There is no more music in the queue!');
 })
