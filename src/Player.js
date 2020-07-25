@@ -203,11 +203,12 @@ class Player {
             if (matchYoutubeURL) {
                 query = matchYoutubeURL[1]
             }
-            ytsr(query, (err, results) => {
+            ytsr(query).then((results) => {
                 if (results.items.length < 1) return resolve([])
-                if (err) return resolve([])
                 const resultsVideo = results.items.filter((i) => i.type === 'video')
                 resolve(allResults ? resultsVideo.map((r) => new Track(r, null, null)) : [new Track(resultsVideo[0], null, null)])
+            }).catch(() => {
+                return resolve([])
             })
         })
     }
