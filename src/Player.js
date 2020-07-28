@@ -762,7 +762,9 @@ class Player {
         const queue = this.queues.find((g) => g.guildID === guildID)
         if (!queue) return
         // Stream time of the dispatcher
-        const currentStreamTime = queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime
+        const currentStreamTime = queue.voiceConnection.dispatcher
+            ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime
+            : 0
         // Total stream time
         const totalTime = queue.playing.durationMS
         // Stream progress
