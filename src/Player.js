@@ -386,6 +386,7 @@ class Player {
             // Stop the dispatcher
             queue.stopped = true
             queue.tracks = []
+            if (queue.stream) queue.stream.destroy()
             queue.voiceConnection.dispatcher.end()
             // Resolve
             resolve()
