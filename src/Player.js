@@ -180,7 +180,7 @@ class Player {
             if (ytpl.validateURL(query)) {
                 const playlistID = await ytpl.getPlaylistID(query).catch(() => { })
                 if (playlistID) {
-                    const playlist = await ytpl(playlistID).catch(() => { })
+                    const playlist = await ytpl(playlistID, {limit: Infinity}).catch(() => { })
                     if (playlist) {
                         const songs = [];
                         for (var i = 0; i < playlist.items.length; i++) {
