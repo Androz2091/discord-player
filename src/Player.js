@@ -182,7 +182,6 @@ class Player {
                 if (playlistID) {
                     const playlist = await ytpl(playlistID).catch(() => { })
                     if (playlist) {
-                        console.log(playlist.items[0])
                         const songs = [];
                         for (var i = 0; i < playlist.items.length; i++) {
                             let query = `${playlist.items[i].author.name} - ${playlist.items[i].title}`
@@ -191,7 +190,6 @@ class Player {
                             const resultsVideo = results.items.filter((i) => i.type === 'video');
                             songs.push(resultsVideo[0]);
                         }
-                        console.log(songs[0])
                         return resolve(songs.map((i) => new Track({
                             title: i.title,
                             duration: i.duration,
