@@ -5,6 +5,7 @@ const ytpl = require('ytpl')
 const spotify = require('spotify-url-info')
 const Queue = require('./Queue')
 const Track = require('./Track')
+const moment = require('moment')
 
 /**
  * @typedef Filters
@@ -180,12 +181,11 @@ class Player {
             if (ytpl.validateURL(query)) {
                 const playlistID = await ytpl.getPlaylistID(query).catch(() => { })
                 if (playlistID) {
-                    const playlist = await ytpl(playlistID, {limit: Infinity}).catch(() => { })
+                    const playlist = await ytpl(playlistID, { limit: Infinity }).catch(() => { })
                     if (playlist) {
                         const songs = [];
-                        for (var i = 0; i < playlist.items.length; i++) {
-                            let query = `${playlist.items[i].author.name} - ${playlist.items[i].title}`
-                            let results = await ytsr(query).catch(e => resolve([]))
+                        for (let i = 0; i < playlist.items.length; i++) {
+                            const results = await ytsr(`${playlist.items[i].author.name} - ${playlist.items[i].title}`).catch(e => resolve([]))
                             if (results.items.length < 1) return resolve([])
                             const resultsVideo = results.items.filter((i) => i.type === 'video');
                             songs.push(resultsVideo[0]);
@@ -212,9 +212,8 @@ class Player {
             if (matchSpotifyAlbumURL) {
                 const spotifyData = await spotify.getData(query).catch(e => resolve([]))
                 const songs = [];
-                for (var i = 0; i < spotifyData.tracks.items.length; i++) {
-                    let query = `${spotifyData.tracks.items[i].artists[0].name} - ${spotifyData.tracks.items[i].name}`
-                    let results = await ytsr(query).catch(e => resolve([]))
+                for (let i = 0; i < spotifyData.tracks.items.length; i++) {
+                    const results = await ytsr(`${spotifyData.tracks.items[i].artists[0].name} - ${spotifyData.tracks.items[i].name}`).catch(e => resolve([]))
                     if (results.items.length < 1) return resolve([])
                     const resultsVideo = results.items.filter((i) => i.type === 'video');
                     songs.push(resultsVideo[0]);
@@ -234,9 +233,8 @@ class Player {
             if (matchSpotifyPlaylistURL) {
                 const spotifyData = await spotify.getData(query).catch(e => resolve([]))
                 const songs = [];
-                for (var i = 0; i < spotifyData.tracks.items.length; i++) {
-                    let query = `${spotifyData.tracks.items[i].track.artists[0].name} - ${spotifyData.tracks.items[i].track.name}`
-                    let results = await ytsr(query).catch(e => resolve([]))
+                for (let i = 0; i < spotifyData.tracks.items.length; i++) {
+                    const results = await ytsr(`${spotifyData.tracks.items[i].track.artists[0].name} - ${spotifyData.tracks.items[i].track.name}`).catch(e => resolve([]))
                     if (results.items.length < 1) return resolve([])
                     const resultsVideo = results.items.filter((i) => i.type === 'video');
                     songs.push(resultsVideo[0]);
@@ -810,10 +808,17 @@ class Player {
      *
      * });
      */
-    createProgressBar(guildID) {
+    createProgressBar(guildID, options) {
         // Gets guild queue
         const queue = this.queues.find((g) => g.guildID === guildID)
         if (!queue) return
+        var timecodes = false;
+        if (options) {
+            if (typeof(options) !== "object") return new Error('Options must be an Object')
+            if (options.durations) {
+                timecodes = true
+            }
+        }
         // Stream time of the dispatcher
         const currentStreamTime = queue.voiceConnection.dispatcher
             ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime
@@ -826,9 +831,19 @@ class Player {
         if ((index >= 1) && (index <= 15)) {
             const bar = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬'.split('')
             bar.splice(index, 0, '🔘')
-            return bar.join('')
+            if (timecodes) {
+                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                return `${currentTimecode} ┃ ${bar.join('')} ┃ ${queue.playing.duration}`
+            } else {
+                return `${bar.join('')}`
+            }
         } else {
-            return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+            if (timecodes) {
+                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                return `${currentTimecode} ┃ 🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ┃ ${queue.playing.duration}`
+            } else {
+                return `🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬`
+            }
         }
     }
 
