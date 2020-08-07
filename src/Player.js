@@ -193,10 +193,30 @@ class Player {
                     }
                 }
             }
-            const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
-            if (matchSpotifyURL) {
+            const matchSpotifyTrackURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
+            if (matchSpotifyTrackURL) {
                 const spotifyData = await spotify.getPreview(query).catch(e => resolve([]))
                 query = `${spotifyData.artist} - ${spotifyData.track}`
+            }
+            const matchSpotifyPlaylistURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})/);
+            if (matchSpotifyPlaylistURL) {
+                const spotifyData = await spotify.getData(query).catch(e => resolve([]))
+                const songs = [];
+                for (var i = 0; i < spotifyData.tracks.items.length; i++) {
+                    let query = `${spotifyData.tracks.items[i].track.artists[0].name} - ${spotifyData.tracks.items[i].track.name}`
+                    let results = await ytsr(query).catch(e => resolve([]))
+                    if (results.items.length < 1) return resolve([])
+                    const resultsVideo = results.items.filter((i) => i.type === 'video');
+                    songs.push(resultsVideo[0]);
+                }
+                return resolve(songs.map((i) => new Track({
+                    title: i.title,
+                    duration: i.duration,
+                    thumbnail: i.thumbnail,
+                    author: i.author,
+                    link: i.link,
+                    fromPlaylist: true
+                }, null, null)))
             }
             // eslint-disable-next-line no-useless-escape
             const matchYoutubeURL = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
