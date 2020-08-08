@@ -180,7 +180,7 @@ class Player {
             if (ytpl.validateURL(query)) {
                 const playlistID = await ytpl.getPlaylistID(query).catch(() => {})
                 if (playlistID) {
-                    const playlist = await ytpl(playlistID).catch(() => {})
+                    const playlist = await ytpl(playlistID, {limit: Infinity}).catch(() => {})
                     if (playlist) {
                         return resolve(playlist.items.map((i) => new Track({
                             title: i.title,
@@ -193,10 +193,19 @@ class Player {
                     }
                 }
             }
-            const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
-            if (matchSpotifyURL) {
+            const matchSpotifyTrackURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
+            if (matchSpotifyTrackURL) {
                 const spotifyData = await spotify.getPreview(query).catch(e => resolve([]))
                 query = `${spotifyData.artist} - ${spotifyData.track}`
+            }
+                return resolve(songs.map((i) => new Track({
+                    title: i.title,
+                    duration: i.duration,
+                    thumbnail: i.thumbnail,
+                    author: i.author,
+                    link: i.link,
+                    fromPlaylist: true
+                }, null, null)))
             }
             // eslint-disable-next-line no-useless-escape
             const matchYoutubeURL = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
