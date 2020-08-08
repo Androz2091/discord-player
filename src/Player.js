@@ -5,6 +5,7 @@ const ytpl = require('ytpl')
 const spotify = require('spotify-url-info')
 const Queue = require('./Queue')
 const Track = require('./Track')
+const moment = require('moment')
 
 /**
  * @typedef Filters
@@ -72,7 +73,7 @@ class Player {
      * @param {Discord.Client} client Discord.js client
      * @param {PlayerOptions} options Player options
      */
-    constructor (client, options = {}) {
+    constructor(client, options = {}) {
         if (!client) throw new SyntaxError('Invalid Discord client')
 
         /**
@@ -131,7 +132,7 @@ class Player {
      *
      * });
      */
-    setFilters (guildID, newFilters) {
+    setFilters(guildID, newFilters) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -175,28 +176,77 @@ class Player {
      *
      * });
      */
-    searchTracks (query, allResults = false) {
+    searchTracks(query, allResults = false) {
         return new Promise(async (resolve, reject) => {
             if (ytpl.validateURL(query)) {
-                const playlistID = await ytpl.getPlaylistID(query).catch(() => {})
+                const playlistID = await ytpl.getPlaylistID(query).catch(() => { })
                 if (playlistID) {
-                    const playlist = await ytpl(playlistID).catch(() => {})
+                    const playlist = await ytpl(playlistID, { limit: Infinity }).catch(() => { })
                     if (playlist) {
-                        return resolve(playlist.items.map((i) => new Track({
+                        const songs = [];
+                        for (let i = 0; i < playlist.items.length; i++) {
+                            const results = await ytsr(`${playlist.items[i].author.name} - ${playlist.items[i].title}`).catch(e => resolve([]))
+                            if (results.items.length < 1) return resolve([])
+                            const resultsVideo = results.items.filter((i) => i.type === 'video');
+                            songs.push(resultsVideo[0]);
+                        }
+                        return resolve(songs.map((i) => new Track({
                             title: i.title,
                             duration: i.duration,
+                            description: i.description,
                             thumbnail: i.thumbnail,
                             author: i.author,
-                            link: i.url,
+                            views: i.views,
+                            link: i.link,
                             fromPlaylist: true
                         }, null, null)))
                     }
                 }
             }
-            const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
-            if (matchSpotifyURL) {
+            const matchSpotifyTrackURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
+            if (matchSpotifyTrackURL) {
                 const spotifyData = await spotify.getPreview(query).catch(e => resolve([]))
                 query = `${spotifyData.artist} - ${spotifyData.track}`
+            }
+            const matchSpotifyAlbumURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:album\/|\?uri=spotify:album:)((\w|-){22})/);
+            if (matchSpotifyAlbumURL) {
+                const spotifyData = await spotify.getData(query).catch(e => resolve([]))
+                const songs = [];
+                for (let i = 0; i < spotifyData.tracks.items.length; i++) {
+                    const results = await ytsr(`${spotifyData.tracks.items[i].artists[0].name} - ${spotifyData.tracks.items[i].name}`).catch(e => resolve([]))
+                    if (results.items.length < 1) return resolve([])
+                    const resultsVideo = results.items.filter((i) => i.type === 'video');
+                    songs.push(resultsVideo[0]);
+                }
+                return resolve(songs.map((i) => new Track({
+                    title: i.title,
+                    duration: i.duration,
+                    description: i.description,
+                    thumbnail: i.thumbnail,
+                    author: i.author,
+                    views: i.views,
+                    link: i.url,
+                    fromPlaylist: true
+                }, null, null)))
+            }
+            const matchSpotifyPlaylistURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})/);
+            if (matchSpotifyPlaylistURL) {
+                const spotifyData = await spotify.getData(query).catch(e => resolve([]))
+                const songs = [];
+                for (let i = 0; i < spotifyData.tracks.items.length; i++) {
+                    const results = await ytsr(`${spotifyData.tracks.items[i].track.artists[0].name} - ${spotifyData.tracks.items[i].track.name}`).catch(e => resolve([]))
+                    if (results.items.length < 1) return resolve([])
+                    const resultsVideo = results.items.filter((i) => i.type === 'video');
+                    songs.push(resultsVideo[0]);
+                }
+                return resolve(songs.map((i) => new Track({
+                    title: i.title,
+                    duration: i.duration,
+                    thumbnail: i.thumbnail,
+                    author: i.author,
+                    link: i.link,
+                    fromPlaylist: true
+                }, null, null)))
             }
             // eslint-disable-next-line no-useless-escape
             const matchYoutubeURL = query.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
@@ -218,7 +268,7 @@ class Player {
      * @param {Discord.Snowflake} guildID The guild ID to check
      * @returns {boolean} Whether the guild is currently playing tracks
      */
-    isPlaying (guildID) {
+    isPlaying(guildID) {
         return this.queues.some((g) => g.guildID === guildID)
     }
 
@@ -249,7 +299,7 @@ class Player {
      *
      * });
      */
-    play (voiceChannel, track, user) {
+    play(voiceChannel, track, user) {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id)
         return new Promise(async (resolve, reject) => {
             if (!voiceChannel || typeof voiceChannel !== 'object') {
@@ -316,7 +366,7 @@ class Player {
      *
      * });
      */
-    pause (guildID) {
+    pause(guildID) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -347,7 +397,7 @@ class Player {
      *
      * });
      */
-    resume (guildID) {
+    resume(guildID) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -378,7 +428,7 @@ class Player {
      *
      * });
      */
-    stop (guildID) {
+    stop(guildID) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -412,7 +462,7 @@ class Player {
      *
      * });
      */
-    setVolume (guildID, percent) {
+    setVolume(guildID, percent) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -452,7 +502,7 @@ class Player {
      *      // #4 - Circles | Post Malone
      * });
      */
-    getQueue (guildID) {
+    getQueue(guildID) {
         // Gets guild queue
         const queue = this.queues.find((g) => g.guildID === guildID)
         return queue
@@ -494,7 +544,7 @@ class Player {
      *
      * });
      */
-    addToQueue (guildID, track, user) {
+    addToQueue(guildID, track, user) {
         return new Promise(async (resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -549,7 +599,7 @@ class Player {
      *
      * });
      */
-    clearQueue (guildID) {
+    clearQueue(guildID) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -579,7 +629,7 @@ class Player {
      *
      * });
      */
-    skip (guildID) {
+    skip(guildID) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -611,7 +661,7 @@ class Player {
      *
      * });
      */
-    nowPlaying (guildID) {
+    nowPlaying(guildID) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -649,7 +699,7 @@ class Player {
      *
      * });
      */
-    setRepeatMode (guildID, enabled) {
+    setRepeatMode(guildID, enabled) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -681,7 +731,7 @@ class Player {
      *
      * });
      */
-    shuffle (guildID) {
+    shuffle(guildID) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -716,7 +766,7 @@ class Player {
      *
      * });
      */
-    remove (guildID, track) {
+    remove(guildID, track) {
         return new Promise((resolve, reject) => {
             // Gets guild queue
             const queue = this.queues.find((g) => g.guildID === guildID)
@@ -758,10 +808,17 @@ class Player {
      *
      * });
      */
-    createProgressBar (guildID) {
+    createProgressBar(guildID, options) {
         // Gets guild queue
         const queue = this.queues.find((g) => g.guildID === guildID)
         if (!queue) return
+        var timecodes = false;
+        if (options) {
+            if (typeof(options) !== "object") return new Error('Options must be an Object')
+            if (options.durations) {
+                timecodes = true
+            }
+        }
         // Stream time of the dispatcher
         const currentStreamTime = queue.voiceConnection.dispatcher
             ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime
@@ -774,9 +831,19 @@ class Player {
         if ((index >= 1) && (index <= 15)) {
             const bar = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬'.split('')
             bar.splice(index, 0, '🔘')
-            return bar.join('')
+            if (timecodes) {
+                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                return `${currentTimecode} ┃ ${bar.join('')} ┃ ${queue.playing.duration}`
+            } else {
+                return `${bar.join('')}`
+            }
         } else {
-            return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+            if (timecodes) {
+                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                return `${currentTimecode} ┃ 🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ┃ ${queue.playing.duration}`
+            } else {
+                return `🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬`
+            }
         }
     }
 
@@ -787,7 +854,7 @@ class Player {
      * @param {Discord.VoiceState} oldState
      * @param {Discord.VoiceState} newState
      */
-    _handleVoiceStateUpdate (oldState, newState) {
+    _handleVoiceStateUpdate(oldState, newState) {
         if (!this.options.leaveOnEmpty) return
         // If the member leaves a voice channel
         if (!oldState.channelID || newState.channelID) return
@@ -813,7 +880,7 @@ class Player {
      * @param {Boolean} updateFilter Whether this method is called to update some ffmpeg filters
      * @returns {Promise<void>}
      */
-    _playYTDLStream (queue, updateFilter) {
+    _playYTDLStream(queue, updateFilter) {
         return new Promise((resolve) => {
             const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
             const encoderArgsFilters = []
@@ -868,7 +935,7 @@ class Player {
      * @param {Discord.Snowflake} guildID
      * @param {Boolean} firstPlay Whether the function was called from the play() one
      */
-    async _playTrack (guildID, firstPlay) {
+    async _playTrack(guildID, firstPlay) {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === guildID)
         // If there isn't any music in the queue
