@@ -543,10 +543,10 @@ class Player extends EventEmitter {
             this.queues.delete(queue.guildID)
             // Emit stop event
             if (queue.stopped) {
-                return queue.emit('stop')
+                return queue.emit('musicStopped')
             }
             // Emit end event
-            return queue.emit('end')
+            return queue.emit('queueEnded')
         }
         // if the track needs to be the next one
         if (!queue.repeatMode && !firstPlay) queue.tracks.shift()
@@ -554,10 +554,7 @@ class Player extends EventEmitter {
         // Reset lastSkipped state
         queue.lastSkipped = false
         this._playYTDLStream(track, queue, false).then(() => {
-            // Emit trackChanged event
-            if (!firstPlay) {
-                queue.emit('trackStart', queue.firstMessage, track, queue)
-            }
+            this.emit('trackStart', queue.firstMessage, track, queue)
         })
     }
 };
