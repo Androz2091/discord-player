@@ -1,6 +1,7 @@
 const Discord = require('discord.js')
 const { EventEmitter } = require('events')
 const Track = require('./Track')
+const Player = require('./Player')
 
 /**
  * Represents a guild queue.
@@ -8,8 +9,10 @@ const Track = require('./Track')
 class Queue extends EventEmitter {
     /**
      * @param {Discord.Snowflake} guildID ID of the guild this queue is for.
+     * @param {Discord.Message} message Message that initialized the queue
+     * @param {import('./Player').Filters[]} filters Filters the queue should be initialized with.
      */
-    constructor (guildID) {
+    constructor (guildID, message, filters) {
         super()
         /**
          * ID of the guild this queue is for.
@@ -21,11 +24,6 @@ class Queue extends EventEmitter {
          * @type {Discord.VoiceConnection}
          */
         this.voiceConnection = null
-        /**
-         * The song currently played.
-         * @type {Track}
-         */
-        this.playing = null
         /**
          * The tracks of this queue. The first one is currenlty playing and the others are going to be played.
          * @type {Track[]}
@@ -61,11 +59,23 @@ class Queue extends EventEmitter {
          * @type {Filters}
          */
         this.filters = {}
+        Object.keys(filters).forEach((f) => {
+            this.filters[f] = false
+        })
         /**
          * Additional stream time
          * @type {Number}
          */
         this.additionalStreamTime = 0
+        /**
+         * Message that initialized the queue
+         * @type {Discord.Message}
+         */
+        this.firstMessage = message
+    }
+
+    get playing () {
+        return this.tracks[0]
     }
 
     get calculatedVolume () {
