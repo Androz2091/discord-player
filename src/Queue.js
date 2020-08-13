@@ -2,6 +2,7 @@ const Discord = require('discord.js')
 const { EventEmitter } = require('events')
 const Track = require('./Track')
 const Player = require('./Player')
+const { Stream } = require('stream')
 
 /**
  * Represents a guild queue.
@@ -24,6 +25,11 @@ class Queue extends EventEmitter {
          * @type {Discord.VoiceConnection}
          */
         this.voiceConnection = null
+        /**
+         * The ytdl stream.
+         * @type {any}
+         */
+        this.stream = null
         /**
          * The tracks of this queue. The first one is currenlty playing and the others are going to be played.
          * @type {Track[]}

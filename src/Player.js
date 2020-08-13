@@ -124,72 +124,64 @@ class Player extends EventEmitter {
         }
     }
 
-    async _searchTracks (message, query) {
-        const tracks = []
+    /**
+     *
+     * @param {Discord.Message} message
+     * @param {string} query
+     */
+    _searchTracks (message, query) {
+        return new Promise(async (resolve) => {
+            const tracks = []
 
-        const queryType = this.resolveQueryType(query)
+            const queryType = this.resolveQueryType(query)
 
-        if (queryType === 'spotify-song') {
-            const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
-            if (matchSpotifyURL) {
-                const spotifyData = await spotify.getPreview(query).catch(() => {})
-                if (spotifyData) {
-                    const YTQuery = `${spotifyData.artist} - ${spotifyData.track}`
-                    const results = await ytsr(query)
+            if (queryType === 'spotify-song') {
+                const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
+                if (matchSpotifyURL) {
+                    const spotifyData = await spotify.getPreview(query).catch(() => {})
+                    if (spotifyData) {
+                        const YTQuery = `${spotifyData.artist} - ${spotifyData.track}`
+                        const results = await ytsr(YTQuery)
 
+                        if (results.items.length !== 0) {
+                            const resultsVideo = results.items.filter((i) => i.type === 'video')
+                            tracks.push(...resultsVideo.map((r) => new Track(r, message.author, null)))
+                        }
+                    }
+                }
+            } else if (queryType === 'youtube-video-keywords') {
+                await ytsr(query).then((results) => {
                     if (results.items.length !== 0) {
                         const resultsVideo = results.items.filter((i) => i.type === 'video')
                         tracks.push(...resultsVideo.map((r) => new Track(r, message.author, null)))
                     }
-                }
+                }).catch(() => {})
             }
-        } else if (queryType === 'youtube-playlist') {
-            const playlistID = await ytpl.getPlaylistID(query).catch(() => {})
-            if (playlistID) {
-                const playlist = await ytpl(playlistID).catch(() => {})
-                if (playlist) {
-                    tracks.push(...playlist.items.map((i) => new Track({
-                        title: i.title,
-                        duration: i.duration,
-                        thumbnail: i.thumbnail,
-                        author: i.author,
-                        link: i.url,
-                        fromPlaylist: true
-                    }, message.author, null)))
-                }
-            }
-        } else if (queryType === 'youtube-video-keywords') {
-            await ytsr(query).then((results) => {
-                if (results.items.length !== 0) {
-                    const resultsVideo = results.items.filter((i) => i.type === 'video')
-                    tracks.push(...resultsVideo.map((r) => new Track(r, null, null)))
-                }
-            }).catch(() => {})
-        }
 
-        if (tracks.length === 0) throw new Error('No tracks found for the specified query.')
+            if (tracks.length === 0) throw new Error('No tracks found for the specified query.')
 
-        let track = tracks[0]
-
-        try {
             this.emit('searchResults', message, query, tracks)
-            const answers = await message.channel.awaitMessages(m => m.author.id === message.author.id, {
-                max: 1,
+
+            const collector = message.channel.createMessageCollector((m) => m.author.id === message.author.id, {
                 time: 60000,
                 errors: ['time']
             })
-            const index = parseInt(answers.first().content, 10)
-            if (isNaN(index) || index > tracks.length || index < 1) {
-                this.emit('searchCancel', message)
-                return
-            }
-            track = tracks[index - 1]
-        } catch {
-            this.emit('searchCancel', message)
-            return
-        }
-
-        return track
+            collector.on('collect', ({ content }) => {
+                if (!isNaN(content) && parseInt(content) >= 1 && parseInt(content) <= tracks.length) {
+                    const index = parseInt(content, 10)
+                    const track = tracks[index - 1]
+                    collector.stop()
+                    resolve(track)
+                } else {
+                    this.emit('searchInvalidResponse', message, query, tracks, content)
+                }
+            })
+            collector.on('end', (collected, reason) => {
+                if (reason === 'time') {
+                    this.emit('searchCancel', message, query, tracks)
+                }
+            })
+        })
     }
 
     setFilters (message, newFilters) {
@@ -211,25 +203,25 @@ class Player extends EventEmitter {
     _addTracksToQueue (message, tracks) {
         const queue = this.getQueue(message)
         if (!queue) throw new Error('Cannot add tracks to queue because no song is currently played on the server.')
-        queue.tracks = queue.tracks.concat(tracks)
+        queue.tracks = queue.tracks.push(...tracks)
         return queue
     }
 
     _createQueue (message, track) {
         return new Promise((resolve, reject) => {
             const channel = message.member.voice ? message.member.voice.channel : null
-            if (!channel) reject('NotConnected')
+            if (!channel) reject(new Error('NotConnected'))
             const queue = new Queue(message.guild.id, message, this.filters)
             this.queues.set(message.guild.id, queue)
             channel.join().then((connection) => {
                 queue.voiceConnection = connection
                 queue.tracks.push(track)
                 this.emit('queueCreate', message, queue)
-                this._playTrack(message.guild.id, true)
+                this._playTrack(queue, true)
             }).catch((err) => {
                 console.error(err)
                 this.queues.delete(message.guild.id)
-                reject('UnableToJoin')
+                reject(new Error('UnableToJoin'))
             })
         })
     }
@@ -256,7 +248,7 @@ class Player extends EventEmitter {
         const isPlaying = this.isPlaying(message)
         if (!isPlaying) {
             if (this.util.isYTPlaylistLink(query)) {
-                this._handlePlaylist(message, query)
+                return this._handlePlaylist(message, query)
             }
             let trackToPlay
             if (query instanceof Track) {
@@ -322,10 +314,10 @@ class Player extends EventEmitter {
         })
     }
 
-    setVolume (guildID, percent) {
+    setVolume (message, percent) {
         return new Promise((resolve, reject) => {
             // Get guild queue
-            const queue = this.queues.find((g) => g.guildID === guildID)
+            const queue = this.queues.get(message.guild.id)
             if (!queue) return reject(new Error('Not playing'))
             // Update volume
             queue.volume = percent
@@ -337,14 +329,14 @@ class Player extends EventEmitter {
 
     getQueue (message) {
         // Gets guild queue
-        const queue = this.queues.find((g) => g.guildID === message.guild.id)
+        const queue = this.queues.get(message.guild.id)
         return queue
     }
 
-    clearQueue (guildID) {
+    clearQueue (message) {
         return new Promise((resolve, reject) => {
             // Get guild queue
-            const queue = this.queues.find((g) => g.guildID === guildID)
+            const queue = this.queues.get(message.guild.id)
             if (!queue) return reject(new Error('Not playing'))
             // Clear queue
             queue.tracks = []
@@ -353,10 +345,10 @@ class Player extends EventEmitter {
         })
     }
 
-    skip (guildID) {
+    skip (message) {
         return new Promise((resolve, reject) => {
             // Get guild queue
-            const queue = this.queues.find((g) => g.guildID === guildID)
+            const queue = this.queues.get(message.guild.id)
             if (!queue) return reject(new Error('Not playing'))
             const currentTrack = queue.playing
             // End the dispatcher
@@ -367,10 +359,10 @@ class Player extends EventEmitter {
         })
     }
 
-    nowPlaying (guildID) {
+    nowPlaying (message) {
         return new Promise((resolve, reject) => {
             // Get guild queue
-            const queue = this.queues.find((g) => g.guildID === guildID)
+            const queue = this.queues.get(message.guild.id)
             if (!queue) return reject(new Error('Not playing'))
             const currentTrack = queue.tracks[0]
             // Resolve the current track
@@ -378,10 +370,10 @@ class Player extends EventEmitter {
         })
     }
 
-    setRepeatMode (guildID, enabled) {
+    setRepeatMode (message, enabled) {
         return new Promise((resolve, reject) => {
             // Get guild queue
-            const queue = this.queues.find((g) => g.guildID === guildID)
+            const queue = this.queues.get(message.guild.id)
             if (!queue) return reject(new Error('Not playing'))
             // Enable/Disable repeat mode
             queue.repeatMode = enabled
@@ -390,10 +382,10 @@ class Player extends EventEmitter {
         })
     }
 
-    shuffle (guildID) {
+    shuffle (message) {
         return new Promise((resolve, reject) => {
             // Get guild queue
-            const queue = this.queues.find((g) => g.guildID === guildID)
+            const queue = this.queues.get(message.guild.id)
             if (!queue) return reject(new Error('Not playing'))
             // Shuffle the queue (except the first track)
             const currentTrack = queue.tracks.shift()
@@ -404,10 +396,10 @@ class Player extends EventEmitter {
         })
     }
 
-    remove (guildID, track) {
+    remove (message, track) {
         return new Promise((resolve, reject) => {
             // Gets guild queue
-            const queue = this.queues.find((g) => g.guildID === guildID)
+            const queue = this.queues.get(message.guild.id)
             if (!queue) return reject(new Error('Not playing'))
             // Remove the track from the queue
             let trackFound = null
@@ -427,9 +419,9 @@ class Player extends EventEmitter {
         })
     }
 
-    createProgressBar (guildID) {
+    createProgressBar (message) {
         // Gets guild queue
-        const queue = this.queues.find((g) => g.guildID === guildID)
+        const queue = this.queues.get(message.guild.id)
         if (!queue) return
         // Stream time of the dispatcher
         const currentStreamTime = queue.voiceConnection.dispatcher
@@ -449,25 +441,40 @@ class Player extends EventEmitter {
         }
     }
 
+    /**
+     * Handle voiceStateUpdate event.
+     * @param {Discord.VoiceState} oldState
+     * @param {Discord.VoiceState} newState
+     */
     _handleVoiceStateUpdate (oldState, newState) {
-        const isEmpty = (channel) => (channel.members.filter((member) => !member.user.bot)).size === 0
+        // Search for a queue for this channel
+        const queue = this.queues.find((g) => g.guildID === oldState.guild.id)
+        if (!queue) return
+
+        // if the bot has been kicked from the channel, destroy ytdl stream and remove the queue
+        if (newState.member.id === this.client.user.id && !newState.channelID) {
+            queue.stream.destroy()
+            this.queues.delete(newState.guild.id)
+            this.emit('botDisconnected')
+        }
+
+        // process leaveOnEmpty checks
         if (!this.options.leaveOnEmpty) return
         // If the member leaves a voice channel
         if (!oldState.channelID || newState.channelID) return
-        // Search for a queue for this channel
-        const queue = this.queues.find((g) => g.voiceConnection.channel.id === oldState.channelID)
-        if (queue) {
-            // If the channel is not empty
-            if (!isEmpty(queue.voiceConnection.channel)) return
-            setTimeout(() => {
-                // Disconnect from the voice channel
-                queue.voiceConnection.channel.leave()
-                // Delete the queue
-                this.queues.delete(queue.guildID)
-                // Emit end event
-                queue.emit('channelEmpty', queue.firstMessage, queue)
-            }, this.options.leaveOnEmptyCooldown ?? 0)
-        }
+
+        // If the channel is not empty
+        if (!this.util.isVoiceEmpty(queue.voiceConnection.channel)) return
+        setTimeout(() => {
+            if (!this.util.isVoiceEmpty(queue.voiceConnection.channel)) return
+            if (!this.queues.has(queue.guildID)) return
+            // Disconnect from the voice channel
+            queue.voiceConnection.channel.leave()
+            // Delete the queue
+            this.queues.delete(queue.guildID)
+            // Emit end event
+            queue.emit('channelEmpty', queue.firstMessage, queue)
+        }, this.options.leaveOnEmptyCooldown ?? 0)
     }
 
     _playYTDLStream (track, queue, updateFilter) {
@@ -512,22 +519,28 @@ class Player extends EventEmitter {
                     // Reset streamTime
                     queue.additionalStreamTime = 0
                     // Play the next track
-                    return this._playTrack(queue.guildID, false)
+                    return this._playTrack(queue, false)
                 })
             }, 1000)
         })
     }
 
-    async _playTrack (guildID, firstPlay) {
-        // Get guild queue
-        const queue = this.queues.find((g) => g.guildID === guildID)
+    /**
+     *
+     * @param {Queue} queue The queue to play.
+     * @param {*} firstPlay
+     */
+    async _playTrack (queue, firstPlay) {
+        if (this.options.leaveOnEmpty && this.util.isVoiceEmpty(queue.voiceConnection.channel)) {
+
+        }
         if (queue.stopped) return
         // If there isn't any music in the queue
         if (queue.tracks.length === 0) {
             // Leave the voice channel
             if (this.options.leaveOnEnd && !queue.stopped) queue.voiceConnection.channel.leave()
             // Remove the guild from the guilds list
-            this.queues.delete(guildID)
+            this.queues.delete(queue.guildID)
             // Emit stop event
             if (queue.stopped) {
                 return queue.emit('stop')

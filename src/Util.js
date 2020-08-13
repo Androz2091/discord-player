@@ -9,6 +9,10 @@ module.exports = class Util {
         throw new Error(`The ${this.constructor.name} class may not be instantiated.`)
     }
 
+    static isVoiceEmpty (channel) {
+        return channel.members.filter((member) => !member.user.bot).size === 0
+    }
+
     static isSpotifyLink (query) {
         return spotifySongRegex.test(query)
     }

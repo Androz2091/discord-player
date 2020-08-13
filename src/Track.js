@@ -12,15 +12,15 @@ class Track {
      */
     constructor (videoData, user, queue) {
         /**
-         * The track name
+         * The track title
          * @type {string}
          */
-        this.name = videoData.title
+        this.title = videoData.title
         /**
          * The Youtube URL of the track
          * @type {string}
          */
-        this.url = videoData.link
+        this.url = videoData.link ?? videoData.url
         /**
          * The video duration (formatted).
          * @type {string}
