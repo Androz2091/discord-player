@@ -3,6 +3,7 @@ const Discord = require('discord.js')
 const ytsr = require('ytsr')
 const ytpl = require('ytpl')
 const spotify = require('spotify-url-info')
+const moment = require('moment')
 const Queue = require('./Queue')
 const Track = require('./Track')
 const Util = require('./Util')
@@ -434,25 +435,36 @@ class Player extends EventEmitter {
         })
     }
 
-    createProgressBar (message) {
+    createProgressBar (message, options) {
         // Gets guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) return
+        const timecodes = options && typeof options === 'object' ? options.timecodes : false
         // Stream time of the dispatcher
         const currentStreamTime = queue.voiceConnection.dispatcher
             ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime
             : 0
         // Total stream time
-        const totalTime = queue.tracks[0].durationMS
+        const totalTime = queue.playing.durationMS
         // Stream progress
         const index = Math.round((currentStreamTime / totalTime) * 15)
         // conditions
         if ((index >= 1) && (index <= 15)) {
             const bar = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬'.split('')
             bar.splice(index, 0, '🔘')
-            return bar.join('')
+            if (timecodes) {
+                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                return `${currentTimecode} ┃ ${bar.join('')} ┃ ${queue.playing.duration}`
+            } else {
+                return `${bar.join('')}`
+            }
         } else {
-            return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+            if (timecodes) {
+                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                return `${currentTimecode} ┃ 🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ┃ ${queue.playing.duration}`
+            } else {
+                return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+            }
         }
     }
 
