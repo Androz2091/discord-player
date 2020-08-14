@@ -1,4 +1,5 @@
 const ytpl = require('ytpl')
+const scraper = require('soundcloud-scraper')
 const Discord = require('discord.js')
 
 const youtubeVideoRegex = (/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
@@ -11,6 +12,10 @@ module.exports = class Util {
 
     static isVoiceEmpty (channel) {
         return channel.members.filter((member) => !member.user.bot).size === 0
+    }
+
+    static isSoundcloudLink (query) {
+        return scraper.validateURL(query)
     }
 
     static isSpotifyLink (query) {
