@@ -152,7 +152,7 @@ class Player extends EventEmitter {
             } else if (queryType === 'soundcloud-song') {
                 const soundcloudData = await soundcloud.getSongInfo(query).catch(() => {})
                 if (soundcloudData) {
-                    updatedQuery = `${soundcloudData.author} - ${soundcloudData.title}`
+                    updatedQuery = `${soundcloudData.author.name} - ${soundcloudData.title}`
                     queryType = 'youtube-video-keywords'
                 }
             }
