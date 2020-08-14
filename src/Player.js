@@ -192,7 +192,7 @@ class Player extends EventEmitter {
             Object.keys(newFilters).forEach((filterName) => {
                 queue.filters[filterName] = newFilters[filterName]
             })
-            this._playYTDLStream(queue, true, false)
+            this._playYTDLStream(queue, true)
         })
     }
 
@@ -492,7 +492,7 @@ class Player extends EventEmitter {
         }, this.options.leaveOnEmptyCooldown ?? 0)
     }
 
-    _playYTDLStream (track, queue, updateFilter) {
+    _playYTDLStream (queue, updateFilter) {
         return new Promise((resolve) => {
             const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
             const encoderArgsFilters = []
@@ -507,7 +507,7 @@ class Player extends EventEmitter {
             } else {
                 encoderArgs = ['-af', encoderArgsFilters.join(',')]
             }
-            const newStream = ytdl(track.url, {
+            const newStream = ytdl(queue.playing.url, {
                 filter: 'audioonly',
                 opusEncoded: true,
                 encoderArgs,
@@ -568,7 +568,7 @@ class Player extends EventEmitter {
         const track = queue.playing
         // Reset lastSkipped state
         queue.lastSkipped = false
-        this._playYTDLStream(track, queue, false).then(() => {
+        this._playYTDLStream(queue, false).then(() => {
             if (!firstPlay) this.emit('trackStart', queue.firstMessage, track, queue)
         })
     }
