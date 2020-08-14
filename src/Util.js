@@ -1,5 +1,5 @@
 const ytpl = require('ytpl')
-const scraper = require('soundcloud-scraper')
+const soundcloud = require('soundcloud-scraper')
 const Discord = require('discord.js')
 
 const youtubeVideoRegex = (/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
@@ -15,7 +15,7 @@ module.exports = class Util {
     }
 
     static isSoundcloudLink (query) {
-        return scraper.validateURL(query)
+        return soundcloud.validateURL(query)
     }
 
     static isSpotifyLink (query) {

@@ -3,6 +3,7 @@ const Discord = require('discord.js')
 const ytsr = require('ytsr')
 const ytpl = require('ytpl')
 const spotify = require('spotify-url-info')
+const soundcloud = require('soundcloud-scraper')
 const moment = require('moment')
 const Queue = require('./Queue')
 const Track = require('./Track')
@@ -120,6 +121,8 @@ class Player extends EventEmitter {
             return 'youtube-playlist'
         } else if (this.util.isYTVideoLink(query)) {
             return 'youtube-video'
+        } else if (this.util.isSoundcloudLink(query)) {
+            return 'soundcloud-song'
         } else {
             return 'youtube-video-keywords'
         }
@@ -133,25 +136,29 @@ class Player extends EventEmitter {
     _searchTracks (message, query) {
         return new Promise(async (resolve) => {
             const tracks = []
+            let updatedQuery = null
 
-            const queryType = this.resolveQueryType(query)
+            let queryType = this.resolveQueryType(query)
 
             if (queryType === 'spotify-song') {
                 const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
                 if (matchSpotifyURL) {
                     const spotifyData = await spotify.getPreview(query).catch(() => {})
                     if (spotifyData) {
-                        const YTQuery = `${spotifyData.artist} - ${spotifyData.track}`
-                        const results = await ytsr(YTQuery)
-
-                        if (results.items.length !== 0) {
-                            const resultsVideo = results.items.filter((i) => i.type === 'video')
-                            tracks.push(...resultsVideo.map((r) => new Track(r, message.author, null)))
-                        }
+                        updatedQuery = `${spotifyData.artist} - ${spotifyData.track}`
+                        queryType = 'youtube-video-keywords'
                     }
                 }
-            } else if (queryType === 'youtube-video-keywords') {
-                await ytsr(query).then((results) => {
+            } else if (queryType === 'soundcloud-song') {
+                const soundcloudData = await soundcloud.getSongInfo(query).catch(() => {})
+                if (soundcloudData) {
+                    updatedQuery = `${soundcloudData.author} - ${soundcloudData.title}`
+                    queryType = 'youtube-video-keywords'
+                }
+            }
+
+            if (queryType === 'youtube-video-keywords') {
+                await ytsr(updatedQuery || query).then((results) => {
                     if (results.items.length !== 0) {
                         const resultsVideo = results.items.filter((i) => i.type === 'video')
                         tracks.push(...resultsVideo.map((r) => new Track(r, message.author, null)))
