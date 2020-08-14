@@ -200,10 +200,18 @@ class Player extends EventEmitter {
         return this.queues.some((g) => g.guildID === message.guild.id)
     }
 
+    _addTrackToQueue (message, track) {
+        const queue = this.getQueue(message)
+        if (!queue) throw new Error('NotPlaying')
+        if (!track || !(track instanceof Track)) throw new Error('No track to add to the queue specified')
+        queue.tracks.push(track)
+        return queue
+    }
+
     _addTracksToQueue (message, tracks) {
         const queue = this.getQueue(message)
         if (!queue) throw new Error('Cannot add tracks to queue because no song is currently played on the server.')
-        queue.tracks = queue.tracks.push(...tracks)
+        queue.tracks.push(...tracks)
         return queue
     }
 
@@ -217,6 +225,7 @@ class Player extends EventEmitter {
                 queue.voiceConnection = connection
                 queue.tracks.push(track)
                 this.emit('queueCreate', message, queue)
+                resolve(queue)
                 this._playTrack(queue, true)
             }).catch((err) => {
                 console.error(err)
@@ -235,7 +244,7 @@ class Player extends EventEmitter {
         playlist.requestedBy = message.author
         if (this.isPlaying(message)) {
             const queue = this._addTracksToQueue(message, playlist.tracks)
-            this.emit('addList', message, queue, playlist)
+            this.emit('playlistAdd', message, queue, playlist)
         } else {
             const track = new Track(playlist.tracks.shift(), message.author)
             const queue = await this._createQueue(message, track).catch((e) => this.emit('error', message, e))
@@ -244,29 +253,35 @@ class Player extends EventEmitter {
         }
     }
 
+    async _resolveSong (message, query) {
+
+    }
+
+    async _handleSong (message, query) {
+
+    }
+
     async play (message, query) {
         const isPlaying = this.isPlaying(message)
-        if (!isPlaying) {
-            if (this.util.isYTPlaylistLink(query)) {
-                return this._handlePlaylist(message, query)
-            }
-            let trackToPlay
-            if (query instanceof Track) {
-                trackToPlay = query
-            } else if (this.util.isYTVideoLink(query)) {
-                const videoData = await ytdl.getBasicInfo(query)
-                trackToPlay = new Track(videoData, message.author)
+        if (this.util.isYTPlaylistLink(query)) {
+            return this._handlePlaylist(message, query)
+        }
+        let trackToPlay
+        if (query instanceof Track) {
+            trackToPlay = query
+        } else if (this.util.isYTVideoLink(query)) {
+            const videoData = await ytdl.getBasicInfo(query)
+            trackToPlay = new Track(videoData, message.author)
+        } else {
+            trackToPlay = await this._searchTracks(message, query)
+        }
+        if (trackToPlay) {
+            if (this.isPlaying(message)) {
+                const queue = this._addTrackToQueue(message, trackToPlay)
+                this.emit('trackAdd', message, queue, queue.tracks[queue.tracks.length - 1])
             } else {
-                trackToPlay = await this._searchTracks(message, query)
-            }
-            if (trackToPlay) {
-                if (this.isPlaying(message)) {
-                    const queue = this._addToQueue(message, trackToPlay)
-                    this.emit('addSong', message, queue, queue.tracks[queue.tracks.length - 1])
-                } else {
-                    const queue = await this._createQueue(message, trackToPlay)
-                    this.emit('playSong', message, queue, queue.tracks[0])
-                }
+                const queue = await this._createQueue(message, trackToPlay)
+                this.emit('trackStart', message, queue.tracks[0])
             }
         }
     }
@@ -455,7 +470,7 @@ class Player extends EventEmitter {
         if (newState.member.id === this.client.user.id && !newState.channelID) {
             queue.stream.destroy()
             this.queues.delete(newState.guild.id)
-            this.emit('botDisconnected')
+            this.emit('botDisconnect')
         }
 
         // process leaveOnEmpty checks
@@ -535,18 +550,18 @@ class Player extends EventEmitter {
 
         }
         if (queue.stopped) return
-        // If there isn't any music in the queue
-        if (queue.tracks.length === 0) {
+        // If there isn't next music in the queue
+        if (queue.tracks.length === 1 && !queue.repeatMode && !firstPlay) {
             // Leave the voice channel
             if (this.options.leaveOnEnd && !queue.stopped) queue.voiceConnection.channel.leave()
             // Remove the guild from the guilds list
             this.queues.delete(queue.guildID)
             // Emit stop event
             if (queue.stopped) {
-                return queue.emit('musicStopped')
+                return queue.emit('musicStopp')
             }
             // Emit end event
-            return queue.emit('queueEnded')
+            return queue.emit('queueEnd')
         }
         // if the track needs to be the next one
         if (!queue.repeatMode && !firstPlay) queue.tracks.shift()
@@ -554,7 +569,7 @@ class Player extends EventEmitter {
         // Reset lastSkipped state
         queue.lastSkipped = false
         this._playYTDLStream(track, queue, false).then(() => {
-            this.emit('trackStart', queue.firstMessage, track, queue)
+            if (!firstPlay) this.emit('trackStart', queue.firstMessage, track, queue)
         })
     }
 };
