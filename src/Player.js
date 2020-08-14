@@ -33,8 +33,8 @@ const { EventEmitter } = require('events')
  */
 
 const filters = {
-    bassboost: 'bass=g=20,dynaudnorm=f=200',
-    '8D': 'apulsator=hz=0.08',
+    bassboost: 'bass=g=20',
+    '8D': 'apulsator=hz=0.09',
     vaporwave: 'aresample=48000,asetrate=48000*0.8',
     nightcore: 'aresample=48000,asetrate=48000*1.25',
     phaser: 'aphaser=in_gain=0.4',
@@ -201,6 +201,23 @@ class Player extends EventEmitter {
                 queue.filters[filterName] = newFilters[filterName]
             })
             this._playYTDLStream(queue, true)
+        })
+    }
+    
+    setBassBoost (message, gain = 20) {
+        return new Promise((resolve, reject) => {
+            if (!message) return reject(new Error("message was not provided"))
+            // Get guild queue
+            const queue = this.queues.find((g) => g.guildID === message.guild.id)
+            if (!queue) return reject(new Error('Not playing'))
+            
+            // update gain
+            this.filters['bassboost'] = `bass=g=${isNaN(gain) ? 20 : gain}`
+            
+            // apply filter
+            this.setFilters(message, {
+                bassboost: true
+            })
         })
     }
 
