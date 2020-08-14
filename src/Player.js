@@ -114,6 +114,10 @@ class Player extends EventEmitter {
         client.on('voiceStateUpdate', (oldState, newState) => this._handleVoiceStateUpdate(oldState, newState))
     }
 
+    /**
+     * @ignore
+     * @param {String} query
+     */
     resolveQueryType (query) {
         if (this.util.isSpotifyLink(query)) {
             return 'spotify-song'
@@ -129,9 +133,11 @@ class Player extends EventEmitter {
     }
 
     /**
-     *
+     * Search tracks
+     * @ignore
      * @param {Discord.Message} message
      * @param {string} query
+     * @returns {Promise<Track>}
      */
     _searchTracks (message, query) {
         return new Promise(async (resolve) => {
@@ -192,6 +198,15 @@ class Player extends EventEmitter {
         })
     }
 
+    /**
+     * Change the filters.
+     * @param {Discord.Message} message
+     * @param {Partial<Filters>} newFilters The filters to update and their new status.
+     * @example
+     * client.player.setFilters(message, {
+     *  bassboost: true
+     * });
+     */
     setFilters (message, newFilters) {
         return new Promise((resolve, reject) => {
             // Get guild queue
@@ -204,10 +219,21 @@ class Player extends EventEmitter {
         })
     }
 
+    /**
+     * Check whether there is a music played in the server
+     * @param {Discord.Message} message
+     */
     isPlaying (message) {
         return this.queues.some((g) => g.guildID === message.guild.id)
     }
 
+    /**
+     * Add a track to the queue
+     * @ignore
+     * @param {Discord.Message} message
+     * @param {Track} track
+     * @returns {Queue}
+     */
     _addTrackToQueue (message, track) {
         const queue = this.getQueue(message)
         if (!queue) throw new Error('NotPlaying')
@@ -216,6 +242,13 @@ class Player extends EventEmitter {
         return queue
     }
 
+    /**
+     * Add multiple tracks to the queue
+     * @ignore
+     * @param {Discord.Message} message
+     * @param {Track[]} tracks
+     * @returns {Queue}
+     */
     _addTracksToQueue (message, tracks) {
         const queue = this.getQueue(message)
         if (!queue) throw new Error('Cannot add tracks to queue because no song is currently played on the server.')
@@ -223,6 +256,13 @@ class Player extends EventEmitter {
         return queue
     }
 
+    /**
+     * Create a new queue and play the first track
+     * @ignore
+     * @param {Discord.Message} message
+     * @param {Track} track
+     * @returns {Promise<Queue>}
+     */
     _createQueue (message, track) {
         return new Promise((resolve, reject) => {
             const channel = message.member.voice ? message.member.voice.channel : null
@@ -243,6 +283,12 @@ class Player extends EventEmitter {
         })
     }
 
+    /**
+     * Handle playlist by fetching the tracks and adding them to the queue
+     * @ignore
+     * @param {Discord.Message} message
+     * @param {String} query
+     */
     async _handlePlaylist (message, query) {
         const playlist = await ytpl(query).catch(() => {})
         if (!playlist) return this.emit('noResults', message, query)
@@ -261,14 +307,15 @@ class Player extends EventEmitter {
         }
     }
 
-    async _resolveSong (message, query) {
-
-    }
-
-    async _handleSong (message, query) {
-
-    }
-
+    /**
+     * Play a track in the server. Supported query types are `keywords`, YouTube video links`, `YouTube playlists links`, Spotify track link` or `SoundCloud song link`.
+     * @param {Discord.Message} message
+     * @param {String} query
+     * @returns {Promise<void>}
+     *
+     * @example
+     * client.player.play(message, "Despacito");
+     */
     async play (message, query) {
         const isPlaying = this.isPlaying(message)
         if (this.util.isYTPlaylistLink(query)) {
@@ -294,6 +341,12 @@ class Player extends EventEmitter {
         }
     }
 
+    /**
+     * Pause the music in the server.
+     * @param {Discord.Message} message
+     * @example
+     * client.player.pause(message);
+     */
     pause (message) {
         return new Promise((resolve, reject) => {
             // Get guild queue
@@ -307,141 +360,186 @@ class Player extends EventEmitter {
         })
     }
 
+    /**
+     * Resume the music in the server.
+     * @param {Discord.Message} message
+     * @returns {Queue}
+     * @example
+     * client.player.resume(message);
+     */
     resume (message) {
-        return new Promise((resolve, reject) => {
-            // Get guild queue
-            const queue = this.queues.find((g) => g.guildID === message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
-            // Pause the dispatcher
-            queue.voiceConnection.dispatcher.resume()
-            queue.paused = false
-            // Resolve the guild queue
-            resolve(queue.playing)
-        })
+        // Get guild queue
+        const queue = this.queues.find((g) => g.guildID === message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying')
+        // Pause the dispatcher
+        queue.voiceConnection.dispatcher.resume()
+        queue.paused = false
+        // Resolve the guild queue
+        return queue
     }
 
+    /**
+     * Stop the music in the server.
+     * @param {Discord.Message} message
+     * @example
+     * client.player.stop(message);
+     */
     stop (message) {
-        return new Promise((resolve, reject) => {
-            // Get guild queue
-            const queue = this.queues.find((g) => g.guildID === message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
-            // Stop the dispatcher
-            queue.stopped = true
-            queue.tracks = []
-            if (queue.stream) queue.stream.destroy()
-            queue.voiceConnection.dispatcher.end()
-            if (this.options.leaveOnStop) queue.voiceConnection.channel.leave()
-            this.queues.delete(message.guild.id)
-            // Resolve
-            resolve()
-        })
+        // Get guild queue
+        const queue = this.queues.find((g) => g.guildID === message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying')
+        // Stop the dispatcher
+        queue.stopped = true
+        queue.tracks = []
+        if (queue.stream) queue.stream.destroy()
+        queue.voiceConnection.dispatcher.end()
+        if (this.options.leaveOnStop) queue.voiceConnection.channel.leave()
+        this.queues.delete(message.guild.id)
     }
 
+    /**
+     * Change the server volume.
+     * @param {Discord.Message} message
+     * @param {number} percent
+     * @returns {Queue}
+     * @example
+     * client.player.setVolume(message, 90);
+     */
     setVolume (message, percent) {
-        return new Promise((resolve, reject) => {
-            // Get guild queue
-            const queue = this.queues.get(message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
-            // Update volume
-            queue.volume = percent
-            queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
-            // Resolve guild queue
-            resolve()
-        })
+        // Get guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying')
+        // Update volume
+        queue.volume = percent
+        queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
+        // Return the queue
+        return queue
     }
 
+    /**
+     * Get the server queue.
+     * @param {Discord.Message} message
+     * @returns {Queue}
+     */
     getQueue (message) {
         // Gets guild queue
         const queue = this.queues.get(message.guild.id)
         return queue
     }
 
+    /**
+     * Clears the server queue.
+     * @param {Discord.Message} message
+     * @returns {Queue}
+     */
     clearQueue (message) {
-        return new Promise((resolve, reject) => {
-            // Get guild queue
-            const queue = this.queues.get(message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
-            // Clear queue
-            queue.tracks = []
-            // Resolve guild queue
-            resolve(queue)
-        })
+        // Get guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying')
+        // Clear queue
+        queue.tracks = []
+        // Return the queue
+        return queue
     }
 
+    /**
+     * Skips to the next song.
+     * @param {Discord.Message} message
+     * @returns {Queue}
+     */
     skip (message) {
-        return new Promise((resolve, reject) => {
-            // Get guild queue
-            const queue = this.queues.get(message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
-            const currentTrack = queue.playing
-            // End the dispatcher
-            queue.voiceConnection.dispatcher.end()
-            queue.lastSkipped = true
-            // Resolve the current track
-            resolve(currentTrack)
-        })
+        // Get guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying')
+        const currentTrack = queue.playing
+        // End the dispatcher
+        queue.voiceConnection.dispatcher.end()
+        queue.lastSkipped = true
+        // Return the queue
+        return queue
     }
 
+    /**
+     * Get the played song in the server.
+     * @param {Discord.Message} message
+     * @returns {Track}
+     */
     nowPlaying (message) {
-        return new Promise((resolve, reject) => {
-            // Get guild queue
-            const queue = this.queues.get(message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
-            const currentTrack = queue.tracks[0]
-            // Resolve the current track
-            resolve(currentTrack)
-        })
+        // Get guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying')
+        const currentTrack = queue.tracks[0]
+        // Return the current track
+        return currentTrack
     }
 
+    /**
+     * Enable or disable repeat mode in the server.
+     * @param {Discord.Message} message
+     * @param {boolean} enabled
+     * @returns {boolean} whether the repeat mode is now enabled.
+     */
     setRepeatMode (message, enabled) {
-        return new Promise((resolve, reject) => {
-            // Get guild queue
-            const queue = this.queues.get(message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
-            // Enable/Disable repeat mode
-            queue.repeatMode = enabled
-            // Resolve
-            resolve()
-        })
+        // Get guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying')
+        // Enable/Disable repeat mode
+        queue.repeatMode = enabled
+        // Return the repeat mode
+        return queue.repeatMode
     }
 
+    /**
+     * Shuffle the queue of the server.
+     * @param {Discord.Message} message
+     * @returns {}
+     */
     shuffle (message) {
-        return new Promise((resolve, reject) => {
-            // Get guild queue
-            const queue = this.queues.get(message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
-            // Shuffle the queue (except the first track)
-            const currentTrack = queue.tracks.shift()
-            queue.tracks = queue.tracks.sort(() => Math.random() - 0.5)
-            queue.tracks.unshift(currentTrack)
-            // Resolve
-            resolve(queue)
-        })
+        // Get guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying')
+        // Shuffle the queue (except the first track)
+        const currentTrack = queue.tracks.shift()
+        queue.tracks = queue.tracks.sort(() => Math.random() - 0.5)
+        queue.tracks.unshift(currentTrack)
+        // Return the queue
+        return queue
     }
 
+    /**
+     * Remove a track from the queue of the server
+     * @param {Discord.Message} message
+     * @param {Track|number} track
+     * @returns {Track} the removed track
+     */
     remove (message, track) {
-        return new Promise((resolve, reject) => {
-            // Gets guild queue
-            const queue = this.queues.get(message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
-            // Remove the track from the queue
-            let trackFound = null
-            if (typeof track === 'number') {
-                trackFound = queue.tracks[track]
-                if (trackFound) {
-                    queue.tracks = queue.tracks.filter((t) => t !== trackFound)
-                }
-            } else {
-                trackFound = queue.tracks.find((s) => s === track)
-                if (trackFound) {
-                    queue.tracks = queue.tracks.filter((s) => s !== trackFound)
-                }
+        // Get guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying')
+        // Remove the track from the queue
+        let trackFound = null
+        if (typeof track === 'number') {
+            trackFound = queue.tracks[track]
+            if (trackFound) {
+                queue.tracks = queue.tracks.filter((t) => t !== trackFound)
             }
-            // Resolve
-            resolve(trackFound)
-        })
+        } else {
+            trackFound = queue.tracks.find((s) => s === track)
+            if (trackFound) {
+                queue.tracks = queue.tracks.filter((s) => s !== trackFound)
+            }
+        }
+        // Resolve
+        return trackFound
     }
 
+    /**
+     * Create a progress bar for the queue of the server.
+     * @param {Discord.Message} message
+     * @param {Object} options
+     * @param {boolean} options.timecodes
+     * @returns {string}
+     */
     createProgressBar (message, options) {
         // Gets guild queue
         const queue = this.queues.get(message.guild.id)
@@ -489,7 +587,7 @@ class Player extends EventEmitter {
         if (newState.member.id === this.client.user.id && !newState.channelID) {
             queue.stream.destroy()
             this.queues.delete(newState.guild.id)
-            this.emit('botDisconnect')
+            this.emit('botDisconnect', queue.firstMessage)
         }
 
         // process leaveOnEmpty checks
@@ -580,7 +678,7 @@ class Player extends EventEmitter {
                 return queue.emit('musicStopp')
             }
             // Emit end event
-            return queue.emit('queueEnd')
+            return queue.emit('queueEnd', queue.firstMessage, queue)
         }
         // if the track needs to be the next one
         if (!queue.repeatMode && !firstPlay) queue.tracks.shift()
@@ -594,3 +692,95 @@ class Player extends EventEmitter {
 };
 
 module.exports = Player
+
+/**
+ * Emitted when a track starts
+ * @event Player#trackStart
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ * @param {Track} track
+ */
+
+/**
+ * Emitted when a playlist is started
+ * @event Player#queueCreate
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ * @param {Object} playlist
+ * @param {Track} track
+ */
+
+/**
+ * Emitted when the bot is awaiting search results
+ * @event Player#searchResults
+ * @param {Discord.Message} message
+ * @param {string} query
+ * @param {Track[]} tracks
+ */
+
+/**
+ * Emitted when the user has sent an invalid response for search results
+ * @event Player#searchInvalidResponse
+ * @param {Discord.Message} message
+ * @param {string} query
+ * @param {Track[]} tracks
+ * @param {string} invalidResponse
+ */
+
+/**
+ * Emitted when the bot has stopped awaiting search results (timeout)
+ * @event Player#searchCancel
+ * @param {Discord.Message} message
+ * @param {string} query
+ * @param {Track[]} tracks
+ */
+
+/**
+ * Emitted when the bot can't find related results to the query
+ * @event Player#noResults
+ * @param {Discord.Message} message
+ * @param {string} query
+ */
+
+/**
+ * Emitted when the bot is disconnected from the channel
+ * @event Player#botDisconnect
+ * @param {Discord.Message} message
+ */
+
+/**
+ * Emitted when the channel of the bot is empty
+ * @event Player#channelEmpty
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ */
+
+/**
+ * Emitted when the queue of the server is ended
+ * @event Player#queueEnd
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ */
+
+/**
+ * Emitted when a track is added to the queue
+ * @event Player#trackAdd
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ * @param {Track} track
+ */
+
+/**
+ * Emitted when a playlist is added to the queue
+ * @event Player#playlistAdd
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ * @param {Object} playlist
+ */
+
+/**
+ * Emitted when an error is triggered
+ * @event Player#error
+ * @param {Discord.Message} message
+ * @param {string} error It can be `NotConnected`, `UnableToJoin` or `NotPlaying`.
+ */
