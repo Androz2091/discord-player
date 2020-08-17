@@ -741,7 +741,8 @@ class Player {
 
     /**
      * Creates progress bar of the current song
-     * @param {Discord.Snowflake} guildID
+     * @param {Discord.Message} message A discord message
+     * [INSÉRER OPTIONS ICI]
      * @returns {String}
      *
      * @example
@@ -752,31 +753,106 @@ class Player {
      *
      *     if(command === 'now-playing'){
      *         client.player.nowPlaying(message.guild.id).then((song) => {
-     *              message.channel.send('Currently playing ' + song.name + '\n\n'+ client.player.createProgressBar(message.guild.id));
+     *              message.channel.send('Currently playing ' + song.name + '\n\n'+ client.player.createProgressBar(message));
      *         });
      *      }
      *
      * });
      */
-    createProgressBar (guildID) {
+    createProgressBar(message, options) {
         // Gets guild queue
-        const queue = this.queues.find((g) => g.guildID === guildID)
+        const queue = this.queues.get(message.guild.id)
         if (!queue) return
+
+        // Gets options
+        const timecodes = options && typeof options === 'object' && options.timecodes && typeof options.timecodes === 'boolean' ? options.timecodes : false
+        const len = options && typeof options === 'object' && options.length && typeof options.length === 'number' ? options.length : 15
+        const charCircle = options && typeof options === 'object' && options.charCircle && typeof options.charCircle === 'string' ? options.charCircle : '🔘'
+        const charLine = options && typeof options === 'object' && options.charLine && typeof options.charLine === 'string' ? options.charLine : '▬'
+
         // Stream time of the dispatcher
-        const currentStreamTime = queue.voiceConnection.dispatcher
-            ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime
-            : 0
+        const currentStreamTime = queue.voiceConnection.dispatcher ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : 0
+
         // Total stream time
         const totalTime = queue.playing.durationMS
+
         // Stream progress
-        const index = Math.round((currentStreamTime / totalTime) * 15)
+        const index = Math.round((currentStreamTime / totalTime) * len)
+
         // conditions
-        if ((index >= 1) && (index <= 15)) {
-            const bar = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬'.split('')
-            bar.splice(index, 0, '🔘')
-            return bar.join('')
+        if ((index >= 1) && (index <= len)) {
+            const bar = charLine.repeat(len).split('')
+            bar.splice(index, 0, charCircle)
+            if (timecodes) {
+                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                return `${currentTimecode} ┃ ${bar.join('')} ┃ ${queue.playing.duration}`
+            } else {
+                return `${bar.join('')}`
+            }
         } else {
-            return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+            if (timecodes) {
+                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                return `${currentTimecode} ┃ ${charCircle}${charLine.repeat(len)} ┃ ${queue.playing.duration}`
+            } else {
+                return `${charCircle}${charLine.repeat(len)}`
+            }
+        }
+    }
+    
+    /**
+     * Creates progress bar of the current song
+     * @param {Discord.Message} message A discord message
+     * [INSÉRER OPTIONS ICI]
+     * @returns {String}
+     *
+     * @example
+     * client.on('message', async (message) => {
+     *
+     *     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+     *     const command = args.shift().toLowerCase();
+     *
+     *     if(command === 'now-playing'){
+     *         let volume = bot.player.getQueue(message.guild.id).volume;
+     *         message.channel.send('Current volume ' + volume + '\n\n'+ client.player.createVolumeBar(message));
+     *      }
+     *
+     * });
+     */
+    
+    createVolumeBar(message, options) {
+        // Gets guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return
+
+        // Gets options
+        const len = options && typeof options === 'object' && options.length ? options.length : 5
+        const charCircle = options && typeof options === 'object' && options.charCircle && typeof options.charCircle === 'string' ? options.charCircle : '○'
+        const charLine = options && typeof options === 'object' && options.charLine && typeof options.charLine === 'string' ? options.charLine : '─'
+        const volMax = options && typeof options === 'object' && options.volMax && typeof options.volMax === 'number' ? options.volMax : 200
+        const displayVolume = options && typeof options === 'object' && options.displayVolume && typeof options.displayVolume === 'boolean' ? options.displayVolume : false
+        const emotes = options && typeof options === 'object' && options.emotes && typeof options.emotes === 'object' ? options.emotes : ['🔇', '🔈', '🔉', '🔊', '⚠️']
+        const displayEmote = options && typeof options === 'object' && options.displayEmote && typeof options.displayEmote === 'boolean' ? options.displayEmote : false
+
+        // Gets indexs for circle and emote
+        const index = Math.round((queue.volume / volMax) * len)
+        const emoteIndex = Math.round((queue.volume / volMax) * emotes.length) - 1 <= 0 ? 0 : Math.round((queue.volume / volMax) * emotes.length) - 1
+
+        // Prevents having an undefined if the volume is too high
+        let emote = emotes[emoteIndex]
+        if(emoteIndex < 1) emote = emotes[0]
+        else if(emoteIndex > emotes.length - 1) emote = emotes[emotes.length - 1]
+
+        // Conditions
+        if ((index >= 1) && (index <= len)) {
+            const bar = charLine.repeat(len).split('')
+            bar.splice(index, 0, charCircle)
+            return `${displayVolume ? `${queue.volume} | ` : ''}${bar.join('')}${displayEmote ? ` ${emote}` : ''}`
+        }
+        else if(index < 1) {
+            return `${displayVolume ? `${queue.volume} | ` : ''}${charCircle}${charLine.repeat(len)}${displayEmote ? ` ${emote}` : ''}`
+        }
+        else {
+            return `${displayVolume ? `${queue.volume} | ` : ''}${charLine.repeat(len)}${charCircle}${displayEmote ? ` ${emote}` : ''}`
         }
     }
 
