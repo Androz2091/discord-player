@@ -177,7 +177,7 @@ class Player {
      */
     searchTracks (query, allResults = false) {
         return new Promise(async (resolve, reject) => {
-            if (ytpl.validateURL(query)) {
+            if (ytpl.validateID(query)) {
                 const playlistID = await ytpl.getPlaylistID(query).catch(() => {})
                 if (playlistID) {
                     const playlist = await ytpl(playlistID).catch(() => {})
