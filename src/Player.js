@@ -675,7 +675,7 @@ class Player extends EventEmitter {
             this.queues.delete(queue.guildID)
             // Emit stop event
             if (queue.stopped) {
-                return queue.emit('musicStopp')
+                return queue.emit('musicStop')
             }
             // Emit end event
             return queue.emit('queueEnd', queue.firstMessage, queue)
