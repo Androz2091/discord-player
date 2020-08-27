@@ -46,6 +46,8 @@ const { Player } = require("discord-player");
 const player = new Player(client);
 // To easily access the player
 client.player = player;
+// add the trackStart event so when a song will be played this message will be sent
+client.player.on('trackStart', (message, track) => message.channel.send(`Now playing ${track.title}...`))
 
 client.on("ready", () => {
     console.log("I'm ready !");
@@ -60,8 +62,8 @@ client.on("message", async (message) => {
     // will play "Despacito" in the member voice channel
 
     if(command === "play"){
-        let track = await client.player.play(message.member.voice.channel, args[0], message.member.user.tag);
-        message.channel.send(`Currently playing ${track.name}! - Requested by ${track.requestedBy}`);
+        client.player.play(message, args[0], message.member.user);
+        // as we registered the event above, no need to send a success message here
     }
 
 });
@@ -77,53 +79,84 @@ You will find many examples in the documentation to understand how the package w
 
 You need to **init the guild queue using the play() function**, then you are able to manage the queue and the music using the following functions. Click on a function name to get an example code and explanations.
 
-#### Queue initialization
+#### Play a track
 
-* [play(voiceChannel, track, requestedBy)](https://discord-player.js.org/Player.html#play) - play a track in a server
+* [play(message, track, requestedBy)](https://discord-player.js.org/Player.html#play) - play a track in a server
 
-#### Queue management
+#### Check if a track is being played
 
-* [isPlaying(guildID)](https://discord-player.js.org/Player.html#isPlaying) - check if there is a queue for a specific server
+* [isPlaying(message)](https://discord-player.js.org/Player.html#isPlaying) - check if there is a queue for a specific server
 
-#### Manage tracks in your queue
+#### Manage the queue
 
-* [getQueue(guildID)](https://discord-player.js.org/Player.html#getQueue) - get the server queue
-* [addToQueue(guildID, track, requestedBy)](https://discord-player.js.org/Player.html#addToQueue) - add a track to the server queue
-* [clearQueue(guildID)](https://discord-player.js.org/Player.html#clearQueue) - clear the server queue
-* [remove(guildID, track)](https://discord-player.js.org/Player.html#remove) - remove a track from the server queue
-* [nowPlaying(guildID)](https://discord-player.js.org/Player.html#nowPlaying) - get the current track
+* [getQueue(message)](https://discord-player.js.org/Player.html#getQueue) - get the server queue
+* [clearQueue(message)](https://discord-player.js.org/Player.html#clearQueue) - clear the server queue
+* [remove(message, track)](https://discord-player.js.org/Player.html#remove) - remove a track from the server queue
+* [nowPlaying(message)](https://discord-player.js.org/Player.html#nowPlaying) - get the current track
 
 #### Manage music stream
 
-* [skip(guildID)](https://discord-player.js.org/Player.html#skip) - skip the current track
-* [pause(guildID)](https://discord-player.js.org/Player.html#pause) - pause the current track
-* [resume(guildID)](https://discord-player.js.org/Player.html#resume) - resume the current track
-* [stop(guildID)](https://discord-player.js.org/Player.html#stop) - stop the current track
-* [setFilters(guildID, newFilters)](https://discord-player.js.org/Player.html#setFilters) - update filters (bassboost for example)
-* [setRepeatMode(guildID, boolean)](https://discord-player.js.org/Player.html#setRepeatMode) - enable or disable repeat mode for the server
+* [skip(message)](https://discord-player.js.org/Player.html#skip) - skip the current track
+* [pause(message)](https://discord-player.js.org/Player.html#pause) - pause the current track
+* [resume(message)](https://discord-player.js.org/Player.html#resume) - resume the current track
+* [stop(message)](https://discord-player.js.org/Player.html#stop) - stop the current track
+* [setFilters(message, newFilters)](https://discord-player.js.org/Player.html#setFilters) - update filters (bassboost for example)
+* [setRepeatMode(message, boolean)](https://discord-player.js.org/Player.html#setRepeatMode) - enable or disable repeat mode for the server
 
 ### Event messages
 
 ```js
-// Play the music
-await client.player.play(message.member.voice.channel, "Despacito")
-
 // Then add some messages that will be sent when the events will be triggered
-client.player.getQueue(message.guild.id)
-.on('end', () => {
-    message.channel.send('There is no more music in the queue!');
+client.player
+
+// Send a message when a track starts
+.on('trackStart', (message, track) => message.channel.send(`Now playing ${track.title}...`))
+
+// Send a message when something is added to the queue
+.on('trackAdd', (message, track) => message.channel.send(`${track.title} has been added to the queue!`))
+.on('playlistAdd', (message, playlist) => message.channel.send(`${playlist.title} has been added to the queue (${playlist.items.length} songs)!`))
+
+// Send messages to format search results
+.on('searchResults', (message, query, tracks) => {
+
+    const embed = new Discord.MessageEmbed()
+    .setAuthor(`Here are your search results for ${query}!`)
+    .setDescription(tracks.map((t, i) => `${i}. ${t.title}`))
+    .setFooter('Send the number of the song you want to play!')
+    message.channel.send(embed);
+
 })
-.on('trackChanged', (oldTrack, newTrack) => {
-    message.channel.send(`Now playing ${newTrack.name}...`);
+.on('searchInvalidResponse', (message, query, tracks, content, collector) => message.channel.send(`You must send a valid number between 1 and ${tracks.length}!`))
+.on('searchCancel', (message, query, tracks) => message.channel.send('You did not provide a valid response... Please send the command again!'))
+.on('noResults', (message, query) => message.channel.send(`No results found on YouTube for ${query}!`))
+
+// Send a message when the music is stopped
+.on('queueEnd', (message, queue) => message.channel.send('Music stopped as there is no more music in the queue!'))
+.on('channelEmpty', (message, queue) => message.channel.send('Music stopped as there is no more member in the voice channel!'))
+.on('botDisconnect', (message, queue) => message.channel.send('Music stopped as I have been disconnected from the channel!'))
+
+// Error handling
+.on('error', (message, error) => {
+    switch(error){
+        case 'NotPlaying':
+            message.channel.send('There is no music being played on this server!')
+            break;
+        case 'NotConnected':
+            message.channel.send('You are not connected in any voice channel!')
+            break;
+        case 'UnableToJoin':
+            message.channel.send('I am not able to join your voice channel, please check my permissions!')
+            break;
+        default:
+            message.channel.send(`Something went wrong... Error: ${error}`)
+    }
 })
-.on('channelEmpty', () => {
-    message.channel.send('Stop playing, there is no more member in the voice channel...');
-});
 ```
 
 ## Examples of bots made with discord-player
 
 These bots are made by the community, they can help you build your own!
 
+* [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [me](https://github.com/Androz2091)
 * [Discord-Music](https://github.com/hydraindia/discord-music) by [hydraindia](https://github.com/hydraindia)
 * [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
