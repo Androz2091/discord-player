@@ -187,7 +187,7 @@ class Player extends EventEmitter {
                     collector.stop()
                     resolve(track)
                 } else {
-                    this.emit('searchInvalidResponse', message, query, tracks, content)
+                    this.emit('searchInvalidResponse', message, query, tracks, content, collector)
                 }
             })
             collector.on('end', (collected, reason) => {
@@ -303,7 +303,6 @@ class Player extends EventEmitter {
             const track = new Track(playlist.tracks.shift(), message.author)
             const queue = await this._createQueue(message, track).catch((e) => this.emit('error', message, e))
             this._addTracksToQueue(message, playlist.tracks)
-            this.emit('playlistStart', message, queue, playlist, queue.tracks[0])
         }
     }
 
@@ -370,7 +369,7 @@ class Player extends EventEmitter {
     resume (message) {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying')
+        if (!queue) return this.emit('error', message, 'NotPlaying')
         // Pause the dispatcher
         queue.voiceConnection.dispatcher.resume()
         queue.paused = false
@@ -387,7 +386,7 @@ class Player extends EventEmitter {
     stop (message) {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying')
+        if (!queue) return this.emit('error', message, 'NotPlaying')
         // Stop the dispatcher
         queue.stopped = true
         queue.tracks = []
@@ -408,7 +407,7 @@ class Player extends EventEmitter {
     setVolume (message, percent) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying')
+        if (!queue) return this.emit('error', message, 'NotPlaying')
         // Update volume
         queue.volume = percent
         queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
@@ -435,7 +434,7 @@ class Player extends EventEmitter {
     clearQueue (message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying')
+        if (!queue) return this.emit('error', message, 'NotPlaying')
         // Clear queue
         queue.tracks = []
         // Return the queue
@@ -450,7 +449,7 @@ class Player extends EventEmitter {
     skip (message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying')
+        if (!queue) return this.emit('error', message, 'NotPlaying')
         const currentTrack = queue.playing
         // End the dispatcher
         queue.voiceConnection.dispatcher.end()
@@ -467,7 +466,7 @@ class Player extends EventEmitter {
     nowPlaying (message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying')
+        if (!queue) return this.emit('error', message, 'NotPlaying')
         const currentTrack = queue.tracks[0]
         // Return the current track
         return currentTrack
@@ -482,7 +481,7 @@ class Player extends EventEmitter {
     setRepeatMode (message, enabled) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying')
+        if (!queue) return this.emit('error', message, 'NotPlaying')
         // Enable/Disable repeat mode
         queue.repeatMode = enabled
         // Return the repeat mode
@@ -497,7 +496,7 @@ class Player extends EventEmitter {
     shuffle (message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying')
+        if (!queue) return this.emit('error', message, 'NotPlaying')
         // Shuffle the queue (except the first track)
         const currentTrack = queue.tracks.shift()
         queue.tracks = queue.tracks.sort(() => Math.random() - 0.5)
@@ -515,7 +514,7 @@ class Player extends EventEmitter {
     remove (message, track) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying')
+        if (!queue) return this.emit('error', message, 'NotPlaying')
         // Remove the track from the queue
         let trackFound = null
         if (typeof track === 'number') {
@@ -725,6 +724,7 @@ module.exports = Player
  * @param {string} query
  * @param {Track[]} tracks
  * @param {string} invalidResponse
+ * @param {Discord.MessageCollector} collector
  */
 
 /**
