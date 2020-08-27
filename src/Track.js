@@ -1,5 +1,6 @@
 const Discord = require('discord.js')
 const Queue = require('./Queue')
+const Player = require('./Player')
 
 /**
  * Represents a track.
@@ -7,10 +8,15 @@ const Queue = require('./Queue')
 class Track {
     /**
      * @param {Object} videoData The video data for this track
-     * @param {Discord.User?} user The user who requested the track
-     * @param {Queue?} queue The queue in which is the track is
+     * @param {Discord.User | null} user The user who requested the track
+     * @param {Player} player
      */
-    constructor (videoData, user, queue) {
+    constructor (videoData, user, player) {
+        /**
+         * The player instantiating the track
+         * @type {Player}
+         */
+        this.player = player
         /**
          * The track title
          * @type {string}
@@ -56,11 +62,14 @@ class Track {
          * @type {boolean}
          */
         this.fromPlaylist = videoData.fromPlaylist || false
-        /**
-         * The queue in which the track is
-         * @type {Queue}
-         */
-        this.queue = queue
+    }
+
+    /**
+     * The queue in which the track is
+     * @type {Queue}
+     */
+    get queue () {
+        return this.player.queues.find((queue) => queue.tracks.includes(this))
     }
 
     /**
