@@ -2,6 +2,7 @@ const ytdl = require('discord-ytdl-core')
 const Discord = require('discord.js')
 const ytsr = require('ytsr')
 const ytpl = require('ytpl')
+ytpl.do_warn_deprecate = false
 const spotify = require('spotify-url-info')
 const Queue = require('./Queue')
 const Track = require('./Track')
