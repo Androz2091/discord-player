@@ -2,6 +2,7 @@ const ytdl = require('discord-ytdl-core')
 const Discord = require('discord.js')
 const ytsr = require('ytsr')
 const ytpl = require('ytpl')
+const scdl = require('soundcloud-downloader')
 const spotify = require('spotify-url-info')
 const Queue = require('./Queue')
 const Track = require('./Track')
@@ -192,6 +193,29 @@ class Player {
                         }, null, null)))
                     }
                 }
+            }
+
+            if (scdl.isValidUrl(query)) {
+                let results = []
+                let fromPlaylist = false
+                if (query.includes('/sets/')) {
+                    const info = await scdl.getSetInfo(query)
+                    results = results.concat(info.tracks)
+                    fromPlaylist = true
+                } else {
+                    const info = await scdl.getInfo(query)
+                    results.push(info)
+                }
+
+                return resolve(results.map(info => new Track({
+                    title: info.title,
+                    duration: info.duration,
+                    thumbnail: info.artwork_url,
+                    author: { name: info.user.username },
+                    link: info.permalink_url,
+                    description: info.description,
+                    fromPlaylist
+                })))
             }
             const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
             if (matchSpotifyURL) {
@@ -861,6 +885,46 @@ class Player {
         })
     }
 
+    _playSCDLStream (queue, updateFilter) {
+        return new Promise(async (resolve, reject) => {
+            const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
+            const encoderArgsFilters = []
+            Object.keys(queue.filters).forEach((filterName) => {
+                if (queue.filters[filterName]) {
+                    encoderArgsFilters.push(filters[filterName])
+                }
+            })
+            let encoderArgs
+            if (encoderArgsFilters.length < 1) {
+                encoderArgs = []
+            } else {
+                encoderArgs = ['-af', encoderArgsFilters.join(',')]
+            }
+            const newStream = await scdl.download(queue.playing.url)
+
+            setTimeout(() => {
+                if (queue.stream) queue.stream.destroy()
+                queue.stream = newStream
+                queue.voiceConnection.play(newStream)
+                if (seekTime) {
+                    queue.additionalStreamTime = seekTime
+                }
+                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
+                // When the track starts
+                queue.voiceConnection.dispatcher.on('start', () => {
+                    resolve()
+                })
+                // When the track ends
+                queue.voiceConnection.dispatcher.on('finish', () => {
+                // Reset streamTime
+                    queue.additionalStreamTime = 0
+                    // Play the next track
+                    return this._playTrack(queue.guildID, false)
+                })
+            }, 1000)
+        })
+    }
+
     /**
      * Start playing a track in a guild
      * @ignore
@@ -889,12 +953,22 @@ class Player {
         const nowPlaying = queue.playing = queue.repeatMode ? wasPlaying : queue.tracks.shift()
         // Reset lastSkipped state
         queue.lastSkipped = false
-        this._playYTDLStream(queue, false).then(() => {
-            // Emit trackChanged event
-            if (!firstPlay) {
-                queue.emit('trackChanged', wasPlaying, nowPlaying, queue.lastSkipped, queue.repeatMode)
-            }
-        })
+        console.log(queue.playing.url)
+        if (scdl.isValidUrl(queue.playing.url)) {
+            this._playSCDLStream(queue, false).then(() => {
+                // Emit trackChanged event
+                if (!firstPlay) {
+                    queue.emit('trackChanged', wasPlaying, nowPlaying, queue.lastSkipped, queue.repeatMode)
+                }
+            })
+        } else {
+            this._playYTDLStream(queue, false).then(() => {
+                // Emit trackChanged event
+                if (!firstPlay) {
+                    queue.emit('trackChanged', wasPlaying, nowPlaying, queue.lastSkipped, queue.repeatMode)
+                }
+            })
+        }
     }
 };
 
