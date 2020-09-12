@@ -1,5 +1,6 @@
 const ytpl = require('ytpl')
 const soundcloud = require('soundcloud-scraper')
+const scdl = require('soundcloud-downloader')
 const Discord = require('discord.js')
 
 const youtubeVideoRegex = (/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
@@ -28,5 +29,9 @@ module.exports = class Util {
 
     static isYTVideoLink (query) {
         return youtubeVideoRegex.test(query)
+    }
+
+    static isSoundcloudPlaylistLink (query) {
+        return scdl.isValidUrl(query) && query.includes('/sets/')
     }
 }

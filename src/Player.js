@@ -4,6 +4,7 @@ const ytsr = require('ytsr')
 const ytpl = require('ytpl')
 const spotify = require('spotify-url-info')
 const soundcloud = require('soundcloud-scraper')
+const scdl = require('soundcloud-downloader')
 const moment = require('moment')
 const Queue = require('./Queue')
 const Track = require('./Track')
@@ -146,6 +147,7 @@ class Player extends EventEmitter {
 
             let queryType = this.resolveQueryType(query)
 
+            console.log(queryType)
             if (queryType === 'spotify-song') {
                 const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
                 if (matchSpotifyURL) {
@@ -290,11 +292,27 @@ class Player extends EventEmitter {
      * @param {String} query
      */
     async _handlePlaylist (message, query) {
-        const playlist = await ytpl(query).catch(() => {})
+        let playlist
+        if (this.util.isYTPlaylistLink(query)) {
+            playlist = await ytpl(query).catch(() => {})
+            playlist.tracks = playlist.items.map((item) => new Track(item, message.author))
+            playlist.thumbnail = playlist.tracks[0].thumbnail
+        } else if (this.util.isSoundcloudPlaylistLink(query)) {
+            playlist = await scdl.getSetInfo(query)
+            playlist.thumbnail = playlist.tracks.find(track => !!track.artwork_url)
+            playlist.tracks = playlist.tracks.map(track => new Track({
+                title: track.title,
+                url: track.permalink_url,
+                duration: track.duration,
+                description: track.description,
+                thumbnail: track.artwork_url,
+                views: track.playback_count,
+                author: { name: track.user.username },
+                fromPlaylist: true
+            }, message.author))
+        }
         if (!playlist) return this.emit('noResults', message, query)
-        playlist.tracks = playlist.items.map((item) => new Track(item, message.author))
         playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
-        playlist.thumbnail = playlist.tracks[0].thumbnail
         playlist.requestedBy = message.author
         if (this.isPlaying(message)) {
             const queue = this._addTracksToQueue(message, playlist.tracks)
@@ -319,13 +337,28 @@ class Player extends EventEmitter {
         const isPlaying = this.isPlaying(message)
         if (this.util.isYTPlaylistLink(query)) {
             return this._handlePlaylist(message, query)
+        } else if (this.util.isSoundcloudPlaylistLink(query)) {
+            return this._handlePlaylist(message, query)
         }
+        console.log('fuck')
         let trackToPlay
         if (query instanceof Track) {
             trackToPlay = query
         } else if (this.util.isYTVideoLink(query)) {
             const videoData = await ytdl.getBasicInfo(query)
             trackToPlay = new Track(videoData, message.author)
+        } else if (this.util.isSoundcloudLink(query)) {
+            const track = await scdl.getInfo(query)
+            trackToPlay = new Track({
+                title: track.title,
+                url: track.permalink_url,
+                duration: track.duration,
+                description: track.description,
+                thumbnail: track.artwork_url,
+                views: track.playback_count,
+                author: { name: track.user.username },
+                fromPlaylist: true
+            })
         } else {
             trackToPlay = await this._searchTracks(message, query)
         }
@@ -608,6 +641,45 @@ class Player extends EventEmitter {
         }, this.options.leaveOnEmptyCooldown ?? 0)
     }
 
+    _playSoundcloudStream (queue, updateFilter) {
+        return new Promise(async (resolve) => {
+            const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
+            const encoderArgsFilters = []
+            Object.keys(queue.filters).forEach((filterName) => {
+                if (queue.filters[filterName]) {
+                    encoderArgsFilters.push(filters[filterName])
+                }
+            })
+            let encoderArgs
+            if (encoderArgsFilters.length < 1) {
+                encoderArgs = []
+            } else {
+                encoderArgs = ['-af', encoderArgsFilters.join(',')]
+            }
+            const newStream = await scdl.download(queue.playing.url)
+            setTimeout(() => {
+                if (queue.stream) queue.stream.destroy()
+                queue.stream = newStream
+                queue.voiceConnection.play(newStream)
+                if (seekTime) {
+                    queue.additionalStreamTime = seekTime
+                }
+                queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
+                // When the track starts
+                queue.voiceConnection.dispatcher.on('start', () => {
+                    resolve()
+                })
+                // When the track ends
+                queue.voiceConnection.dispatcher.on('finish', () => {
+                    // Reset streamTime
+                    queue.additionalStreamTime = 0
+                    // Play the next track
+                    return this._playTrack(queue, false)
+                })
+            }, 1000)
+        })
+    }
+
     _playYTDLStream (queue, updateFilter) {
         return new Promise((resolve) => {
             const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
@@ -684,9 +756,16 @@ class Player extends EventEmitter {
         const track = queue.playing
         // Reset lastSkipped state
         queue.lastSkipped = false
-        this._playYTDLStream(queue, false).then(() => {
-            if (!firstPlay) this.emit('trackStart', queue.firstMessage, track, queue)
-        })
+        console.log(this.util.isSoundcloudLink(queue.playing.url))
+        if (this.util.isSoundcloudLink(queue.playing.url)) {
+            this._playSoundcloudStream(queue, false).then(() => {
+                if (!firstPlay) this.emit('trackStart', queue.firstMessage, track, queue)
+            })
+        } else {
+            this._playYTDLStream(queue, false).then(() => {
+                if (!firstPlay) this.emit('trackStart', queue.firstMessage, track, queue)
+            })
+        }
     }
 };
 
