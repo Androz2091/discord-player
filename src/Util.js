@@ -23,7 +23,7 @@ module.exports = class Util {
     }
 
     static isYTPlaylistLink (query) {
-        return ytpl.validateURL(query)
+        return ytpl.validateID(query)
     }
 
     static isYTVideoLink (query) {
