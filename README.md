@@ -136,7 +136,7 @@ client.player
 .on('botDisconnect', (message, queue) => message.channel.send('Music stopped as I have been disconnected from the channel!'))
 
 // Error handling
-.on('error', (message, error) => {
+.on('error', (error, message) => {
     switch(error){
         case 'NotPlaying':
             message.channel.send('There is no music being played on this server!')
