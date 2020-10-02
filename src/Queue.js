@@ -54,7 +54,7 @@ class Queue extends EventEmitter {
          * Whether the stream is currently paused.
          * @type {boolean}
          */
-        this.paused = this.voiceConnection && this.voiceConnection.dispatcher && this.voiceConnection.dispatcher.paused ? true : false;
+        this.paused = this.voiceConnection && this.voiceConnection.dispatcher && this.voiceConnection.dispatcher.paused;
         /**
          * Whether the repeat mode is enabled.
          * @type {boolean}
