@@ -47,7 +47,7 @@ declare module 'discord-player' {
         leaveOnEnd: boolean;
         leaveOnStop: boolean;
         leaveOnEmpty: boolean;
-        leaveOnEmptyCooldown: number;
+        leaveOnEmptyCooldown?: number;
     }
     type Filters = 'bassboost' | '8D' | 'vaporwave' | 'nightcore'| 'phaser' | 'tremolo' | 'vibrato' | 'reverse' | 'treble' | 'normalizer' | 'surrounding' | 'pulsator' | 'subboost' | 'karaoke' | 'flanger' | 'gate' | 'haas' | 'mcompand';
     type FiltersStatuses = {
