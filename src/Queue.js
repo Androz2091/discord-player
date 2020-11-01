@@ -11,7 +11,7 @@ class Queue extends EventEmitter {
     /**
      * @param {Discord.Snowflake} guildID ID of the guild this queue is for.
      * @param {Discord.Message} message Message that initialized the queue
-     * @param {import('./Player').Filters[]} filters Filters the queue should be initialized with.
+     * @param {Filters} filters Filters the queue should be initialized with.
      */
     constructor (guildID, message, filters) {
         super()
