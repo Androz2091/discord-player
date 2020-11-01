@@ -1,6 +1,6 @@
 const ytdl = require('discord-ytdl-core')
 const Discord = require('discord.js')
-const ytsr = require('ytsr')
+const ytsr = require('youtube-sr')
 const ytpl = require('ytpl')
 const spotify = require('spotify-url-info')
 const soundcloud = require('soundcloud-scraper')
@@ -141,7 +141,7 @@ class Player extends EventEmitter {
      */
     _searchTracks (message, query) {
         return new Promise(async (resolve) => {
-            const tracks = []
+            let tracks = []
             let updatedQuery = null
 
             let queryType = this.resolveQueryType(query)
@@ -164,10 +164,9 @@ class Player extends EventEmitter {
             }
 
             if (queryType === 'youtube-video-keywords') {
-                await ytsr(updatedQuery || query).then((results) => {
-                    if (results.items.length !== 0) {
-                        const resultsVideo = results.items.filter((i) => i.type === 'video')
-                        tracks.push(...resultsVideo.map((r) => new Track(r, message.author, null)))
+                await ytsr.search(updatedQuery || query, { type: 'video' }).then((results) => {
+                    if (results.length !== 0) {
+                        tracks = results.map((r) => new Track(r, message.author, null))
                     }
                 }).catch(() => {})
             }
@@ -292,7 +291,17 @@ class Player extends EventEmitter {
     async _handlePlaylist (message, query) {
         const playlist = await ytpl(query).catch(() => {})
         if (!playlist) return this.emit('noResults', message, query)
-        playlist.tracks = playlist.items.map((item) => new Track(item, message.author))
+        playlist.tracks = playlist.items.map((item) => new Track({
+            title: item.title,
+            description: item.description,
+            views: item.views,
+            duration: item.duration,
+            url: item.url,
+            thumbnail: item.thumbnail,
+            channel: {
+                name: item.author.name
+            }
+        }, message.author))
         playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
         playlist.thumbnail = playlist.tracks[0].thumbnail
         playlist.requestedBy = message.author
@@ -300,8 +309,9 @@ class Player extends EventEmitter {
             const queue = this._addTracksToQueue(message, playlist.tracks)
             this.emit('playlistAdd', message, queue, playlist)
         } else {
-            const track = new Track(playlist.tracks.shift(), message.author)
+            const track = playlist.tracks.shift()
             const queue = await this._createQueue(message, track).catch((e) => this.emit('error', message, e))
+            this.emit('trackStart', message, queue.tracks[0])
             this._addTracksToQueue(message, playlist.tracks)
         }
     }
