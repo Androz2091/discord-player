@@ -615,7 +615,7 @@ class Player extends EventEmitter {
             this.queues.delete(queue.guildID)
             // Emit end event
             queue.emit('channelEmpty', queue.firstMessage, queue)
-        }, this.options.leaveOnEmptyCooldown ?? 0)
+        }, this.options.leaveOnEmptyCooldown || 0)
     }
 
     _playYTDLStream (queue, updateFilter) {
