@@ -31,7 +31,7 @@ class Track {
          * The video duration (formatted).
          * @type {string}
          */
-        this.duration = videoData.duration || videoData.durationFormatted
+        this.duration = videoData.durationFormatted
         /**
          * The video description
          * @type {string}
