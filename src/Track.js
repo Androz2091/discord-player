@@ -26,12 +26,12 @@ class Track {
          * The Youtube URL of the track
          * @type {string}
          */
-        this.url = videoData.link ?? videoData.url
+        this.url = videoData.url
         /**
          * The video duration (formatted).
          * @type {string}
          */
-        this.duration = videoData.duration
+        this.duration = videoData.duration || videoData.durationFormatted
         /**
          * The video description
          * @type {string}
@@ -41,17 +41,17 @@ class Track {
          * The video thumbnail
          * @type {string}
          */
-        this.thumbnail = videoData.thumbnail
+        this.thumbnail = typeof videoData.thumbnail === 'object' ? videoData.thumbnail.url : videoData.thumbnail
         /**
          * The video views
          * @type {?number}
          */
-        this.views = videoData.views
+        this.views = parseInt(videoData.views)
         /**
          * The video channel
          * @type {string}
          */
-        this.author = videoData.author.name
+        this.author = videoData.channel.name
         /**
          * The user who requested the track
          * @type {Discord.User?}
