@@ -214,7 +214,9 @@ class Player extends EventEmitter {
             Object.keys(newFilters).forEach((filterName) => {
                 queue.filters[filterName] = newFilters[filterName]
             })
-            this._playYTDLStream(queue, true)
+            this._playYTDLStream(queue, true).then(() => {
+                resolve()
+            })
         })
     }
 
@@ -357,22 +359,17 @@ class Player extends EventEmitter {
      * client.player.pause(message);
      */
     pause (message) {
-        return new Promise((resolve, reject) => {
-            // Get guild queue
-            const queue = this.queues.find((g) => g.guildID === message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
-            // Pause the dispatcher
-            queue.voiceConnection.dispatcher.pause()
-            queue.paused = true
-            // Resolve the guild queue
-            resolve(queue.playing)
-        })
+        // Get guild queue
+        const queue = this.queues.find((g) => g.guildID === message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying', message)
+        // Pause the dispatcher
+        queue.voiceConnection.dispatcher.pause()
+        queue.paused = true
     }
 
     /**
      * Resume the music in the server.
      * @param {Discord.Message} message
-     * @returns {Queue}
      * @example
      * client.player.resume(message);
      */
@@ -383,8 +380,6 @@ class Player extends EventEmitter {
         // Pause the dispatcher
         queue.voiceConnection.dispatcher.resume()
         queue.paused = false
-        // Resolve the guild queue
-        return queue
     }
 
     /**
@@ -410,7 +405,6 @@ class Player extends EventEmitter {
      * Change the server volume.
      * @param {Discord.Message} message
      * @param {number} percent
-     * @returns {Queue}
      * @example
      * client.player.setVolume(message, 90);
      */
@@ -421,8 +415,6 @@ class Player extends EventEmitter {
         // Update volume
         queue.volume = percent
         queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
-        // Return the queue
-        return queue
     }
 
     /**
@@ -439,7 +431,6 @@ class Player extends EventEmitter {
     /**
      * Clears the server queue.
      * @param {Discord.Message} message
-     * @returns {Queue}
      */
     clearQueue (message) {
         // Get guild queue
@@ -447,8 +438,6 @@ class Player extends EventEmitter {
         if (!queue) return this.emit('error', 'NotPlaying', message)
         // Clear queue
         queue.tracks = []
-        // Return the queue
-        return queue
     }
 
     /**
@@ -501,7 +490,7 @@ class Player extends EventEmitter {
     /**
      * Shuffle the queue of the server.
      * @param {Discord.Message} message
-     * @returns {}
+     * @returns {Queue}
      */
     shuffle (message) {
         // Get guild queue
@@ -715,8 +704,6 @@ module.exports = Player
  * @event Player#queueCreate
  * @param {Discord.Message} message
  * @param {Queue} queue
- * @param {Object} playlist
- * @param {Track} track
  */
 
 /**

@@ -1,8 +1,9 @@
 {
   "name": "discord-player",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.4",
   "description": "Complete framework to facilitate music commands using discord.js v12",
   "main": "index.js",
+  "types": "typings/index.d.ts",
   "scripts": {
     "test": "node index.js",
     "generate-docs": "node_modules/.bin/jsdoc --configure .jsdoc.json --verbose"
