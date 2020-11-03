@@ -171,7 +171,7 @@ class Player extends EventEmitter {
                 }).catch(() => {})
             }
 
-            if (tracks.length === 0) this.emit('noResults', message, query)
+            if (tracks.length === 0) return this.emit('noResults', message, query)
 
             this.emit('searchResults', message, query, tracks)
 
