@@ -1,6 +1,6 @@
-const Discord = require("discord.js");
-const Queue = require("./Queue");
-const Player = require("./Player");
+const Discord = require('discord.js');
+const Queue = require('./Queue');
+const Player = require('./Player');
 
 /**
  * Represents a track.
