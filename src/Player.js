@@ -337,7 +337,17 @@ class Player extends EventEmitter {
             trackToPlay = query
         } else if (this.util.isYTVideoLink(query)) {
             const videoData = await ytdl.getBasicInfo(query)
-            trackToPlay = new Track(videoData, message.author)
+            trackToPlay = new Track({
+                title: videoData.videoDetails.title,
+                url: videoData.videoDetails.video_url,
+                views: videoData.videoDetails.viewCount,
+                thumbnail: videoData.videoDetails.thumbnail.thumbnails[0],
+                lengthSeconds: videoData.videoDetails.lengthSeconds,
+                description: videoData.videoDetails.shortDescription,
+                author: {
+                    name: videoData.videoDetails.author.name
+                }
+            }, message.author, this)
         } else {
             trackToPlay = await this._searchTracks(message, query)
         }

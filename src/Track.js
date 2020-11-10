@@ -32,7 +32,7 @@ class Track {
          * @type {string}
          */
         this.duration = videoData.durationFormatted ||
-        `${Math.floor(parseInt(videoData.videoDetails.lengthSeconds) / 60)}:${parseInt(videoData.videoDetails.lengthSeconds) % 60}`
+        `${Math.floor(parseInt(videoData.lengthSeconds) / 60)}:${parseInt(videoData.lengthSeconds) % 60}`
         /**
          * The video description
          * @type {string}
