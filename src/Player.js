@@ -319,9 +319,9 @@ class Player extends EventEmitter {
     }
 
     /**
-     * Play a track in the server. Supported query types are `keywords`, YouTube video links`, `YouTube playlists links`, Spotify track link` or `SoundCloud song link`.
-     * @param {Discord.Message} message
-     * @param {String} query
+     * Play a track in the server. Supported query types are `keywords`, `YouTube video links`, `YouTube playlists links`, `Spotify track link` or `SoundCloud song link`.
+     * @param {Discord.Message} message Discord `message`
+     * @param {(String|Track)} query Search query or a valid `Track` object.
      * @returns {Promise<void>}
      *
      * @example
