@@ -73,7 +73,7 @@ declare module 'discord-player' {
         noResults: [Message, string];
         playlistAdd: [Message, Queue, Playlist];
         trackAdd: [Message, Queue, Track];
-        trackStart: [Message, Track];
+        trackStart: [Message, Track, Queue];
         botDisconnect: [Message];
         channelEmpty: [Message, Queue];
         musicStop: [];
