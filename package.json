@@ -37,6 +37,7 @@
     "soundcloud-scraper": "^4.0.0",
     "spotify-url-info": "^2.2.0",
     "youtube-sr": "^2.0.1",
+    "ytdl-core": "^4.0.6",
     "ytpl": "^1.0.1"
   },
   "devDependencies": {

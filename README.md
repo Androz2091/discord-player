@@ -11,10 +11,8 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 ## Installation
 
 ```sh
-npm install --save discord-player ytdl-core
+npm install --save discord-player
 ```
-
-YTDL-Core is also required. Don't forget to install it too, like in the example above.
 
 Install **@discordjs/opus**:
 
