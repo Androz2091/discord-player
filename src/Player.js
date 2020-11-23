@@ -1,7 +1,6 @@
 const ytdl = require('discord-ytdl-core')
 const Discord = require('discord.js')
 const ytsr = require('youtube-sr')
-const ytpl = require('ytpl')
 const spotify = require('spotify-url-info')
 const soundcloud = require('soundcloud-scraper')
 const moment = require('moment')
@@ -291,19 +290,9 @@ class Player extends EventEmitter {
      * @param {String} query
      */
     async _handlePlaylist (message, query) {
-        const playlist = await ytpl(query).catch(() => {})
+        const playlist = await ytsr.getPlaylist(query)
         if (!playlist) return this.emit('noResults', message, query)
-        playlist.tracks = playlist.items.map((item) => new Track({
-            title: item.title,
-            description: item.description,
-            views: item.views,
-            durationFormatted: item.duration,
-            url: item.url,
-            thumbnail: item.thumbnail,
-            channel: {
-                name: item.author.name
-            }
-        }, message.author))
+        playlist.tracks = playlist.videos.map((item) => new Track(item, message.author))
         playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
         playlist.thumbnail = playlist.tracks[0].thumbnail
         playlist.requestedBy = message.author
