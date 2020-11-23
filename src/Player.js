@@ -671,9 +671,6 @@ class Player extends EventEmitter {
      * @param {*} firstPlay
      */
     async _playTrack (queue, firstPlay) {
-        if (this.options.leaveOnEmpty && this.util.isVoiceEmpty(queue.voiceConnection.channel)) {
-
-        }
         if (queue.stopped) return
         // If there isn't next music in the queue
         if (queue.tracks.length === 1 && !queue.repeatMode && !firstPlay) {
