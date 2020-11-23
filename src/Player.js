@@ -151,7 +151,7 @@ class Player extends EventEmitter {
                 if (matchSpotifyURL) {
                     const spotifyData = await spotify.getPreview(query).catch(() => {})
                     if (spotifyData) {
-                        updatedQuery = `${spotifyData.artist} - ${spotifyData.track}`
+                        updatedQuery = `${spotifyData.artist} - ${spotifyData.title}`
                         queryType = 'youtube-video-keywords'
                     }
                 }

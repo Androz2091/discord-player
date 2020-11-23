@@ -1,4 +1,5 @@
 const ytpl = require('ytpl')
+const { Util: { PlaylistURLRegex: playlistURLRegex } } = require('youtube-sr')
 const soundcloud = require('soundcloud-scraper')
 const Discord = require('discord.js')
 
@@ -23,7 +24,7 @@ module.exports = class Util {
     }
 
     static isYTPlaylistLink (query) {
-        return ytpl.validateID(query)
+        return playlistURLRegex.test(query)
     }
 
     static isYTVideoLink (query) {
