@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
-    "discord-ytdl-core": "^4.1.3",
+    "discord-ytdl-core": "^5.0.0",
     "merge-options": "^2.0.0",
     "moment": "^2.27.0",
     "node-fetch": "^2.6.0",
