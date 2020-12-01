@@ -113,8 +113,8 @@ client.player
 .on('trackStart', (message, track) => message.channel.send(`Now playing ${track.title}...`))
 
 // Send a message when something is added to the queue
-.on('trackAdd', (message, track) => message.channel.send(`${track.title} has been added to the queue!`))
-.on('playlistAdd', (message, playlist) => message.channel.send(`${playlist.title} has been added to the queue (${playlist.items.length} songs)!`))
+.on('trackAdd', (message, queue, track) => message.channel.send(`${track.title} has been added to the queue!`))
+.on('playlistAdd', (message, queue, playlist) => message.channel.send(`${playlist.title} has been added to the queue (${playlist.items.length} songs)!`))
 
 // Send messages to format search results
 .on('searchResults', (message, query, tracks) => {
@@ -133,7 +133,7 @@ client.player
 // Send a message when the music is stopped
 .on('queueEnd', (message, queue) => message.channel.send('Music stopped as there is no more music in the queue!'))
 .on('channelEmpty', (message, queue) => message.channel.send('Music stopped as there is no more member in the voice channel!'))
-.on('botDisconnect', (message, queue) => message.channel.send('Music stopped as I have been disconnected from the channel!'))
+.on('botDisconnect', (message) => message.channel.send('Music stopped as I have been disconnected from the channel!'))
 
 // Error handling
 .on('error', (error, message) => {
