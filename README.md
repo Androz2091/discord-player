@@ -114,7 +114,7 @@ client.player
 
 // Send a message when something is added to the queue
 .on('trackAdd', (message, queue, track) => message.channel.send(`${track.title} has been added to the queue!`))
-.on('playlistAdd', (message, queue, playlist) => message.channel.send(`${playlist.title} has been added to the queue (${playlist.items.length} songs)!`))
+.on('playlistAdd', (message, queue, playlist) => message.channel.send(`${playlist.title} has been added to the queue (${playlist.tracks.length} songs)!`))
 
 // Send messages to format search results
 .on('searchResults', (message, query, tracks) => {
