@@ -33,7 +33,7 @@ const { EventEmitter } = require('events')
  */
 
 const filters = {
-    bassboost: 'bass=g=20,dynaudnorm=f=200',
+    bassboost: 'bass=g=20',
     '8D': 'apulsator=hz=0.08',
     vaporwave: 'aresample=48000,asetrate=48000*0.8',
     nightcore: 'aresample=48000,asetrate=48000*1.25',
@@ -42,7 +42,7 @@ const filters = {
     vibrato: 'vibrato=f=6.5',
     reverse: 'areverse',
     treble: 'treble=g=5',
-    normalizer: 'dynaudnorm=f=200',
+    normalizer: 'dynaudnorm=g=101',
     surrounding: 'surround',
     pulsator: 'apulsator=hz=1',
     subboost: 'asubboost',
