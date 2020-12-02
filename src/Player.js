@@ -8,6 +8,7 @@ const Queue = require('./Queue')
 const Track = require('./Track')
 const Util = require('./Util')
 const { EventEmitter } = require('events')
+const Client = new soundcloud.Client()
 
 /**
  * @typedef Filters
@@ -155,7 +156,7 @@ class Player extends EventEmitter {
                     }
                 }
             } else if (queryType === 'soundcloud-song') {
-                const soundcloudData = await soundcloud.getSongInfo(query).catch(() => {})
+                const soundcloudData = await Client.getSongInfo(query).catch(() => {})
                 if (soundcloudData) {
                     updatedQuery = `${soundcloudData.author.name} - ${soundcloudData.title}`
                     queryType = 'youtube-video-keywords'
