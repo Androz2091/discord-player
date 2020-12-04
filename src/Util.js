@@ -1,8 +1,7 @@
+const ytpl = require('ytpl')
 const ytsr = require('youtube-sr')
 const soundcloud = require('soundcloud-scraper')
-const Discord = require('discord.js')
 
-const youtubeVideoRegex = (/(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/)
 const spotifySongRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
 
 module.exports = class Util {
@@ -23,10 +22,10 @@ module.exports = class Util {
     }
 
     static isYTPlaylistLink (query) {
-        return ytsr.default.validate(query, "PLAYLIST")
+        return ytpl.validateID(query)
     }
 
     static isYTVideoLink (query) {
-        return youtubeVideoRegex.test(query)
+        return ytsr.default.validate(query, "VIDEO")
     }
 }
