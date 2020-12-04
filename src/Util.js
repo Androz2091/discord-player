@@ -1,4 +1,4 @@
-const ytsr = require('youtube-sr')
+const ytpl = require('ytpl')
 const soundcloud = require('soundcloud-scraper')
 const Discord = require('discord.js')
 
@@ -23,7 +23,7 @@ module.exports = class Util {
     }
 
     static isYTPlaylistLink (query) {
-        return ytsr.default.validate(query, "PLAYLIST")
+        return ytpl.validateID(query)
     }
 
     static isYTVideoLink (query) {
