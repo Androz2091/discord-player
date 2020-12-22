@@ -213,7 +213,7 @@ class Player extends EventEmitter {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === message.guild.id)
-            if (!queue) return reject(new Error('Not playing'))
+            if (!queue) this.emit('error', 'NotPlaying', message)
             Object.keys(newFilters).forEach((filterName) => {
                 queue.filters[filterName] = newFilters[filterName]
             })
@@ -240,7 +240,7 @@ class Player extends EventEmitter {
      */
     _addTrackToQueue (message, track) {
         const queue = this.getQueue(message)
-        if (!queue) throw new Error('NotPlaying')
+        if (!queue) this.emit('error', 'NotPlaying', message)
         if (!track || !(track instanceof Track)) throw new Error('No track to add to the queue specified')
         queue.tracks.push(track)
         return queue
@@ -270,7 +270,7 @@ class Player extends EventEmitter {
     _createQueue (message, track) {
         return new Promise((resolve, reject) => {
             const channel = message.member.voice ? message.member.voice.channel : null
-            if (!channel) reject(new Error('NotConnected'))
+            if (!channel) this.emit('error', 'NotConnected', message)
             const queue = new Queue(message.guild.id, message, this.filters)
             this.queues.set(message.guild.id, queue)
             channel.join().then((connection) => {
@@ -282,7 +282,7 @@ class Player extends EventEmitter {
             }).catch((err) => {
                 console.error(err)
                 this.queues.delete(message.guild.id)
-                reject(new Error('UnableToJoin'))
+                this.emit('error', 'UnableToJoin', message)
             })
         })
     }
