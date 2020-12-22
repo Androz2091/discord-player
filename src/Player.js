@@ -327,13 +327,14 @@ class Player extends EventEmitter {
             trackToPlay = query
         } else if (this.util.isYTVideoLink(query)) {
             const videoData = await ytdl.getBasicInfo(query)
+            const lastThumbnail = videoData.videoDetails.thumbnails.length - 1 /* get the highest quality thumbnail */
             trackToPlay = new Track({
                 title: videoData.videoDetails.title,
                 url: videoData.videoDetails.video_url,
                 views: videoData.videoDetails.viewCount,
-                thumbnail: videoData.videoDetails.thumbnail.thumbnails[0],
+                thumbnail: videoData.videoDetails.thumbnails[lastThumbnail],
                 lengthSeconds: videoData.videoDetails.lengthSeconds,
-                description: videoData.videoDetails.shortDescription,
+                description: videoData.videoDetails.description,
                 author: {
                     name: videoData.videoDetails.author.name
                 }
