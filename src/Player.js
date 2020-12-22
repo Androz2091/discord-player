@@ -137,9 +137,10 @@ class Player extends EventEmitter {
      * @ignore
      * @param {Discord.Message} message
      * @param {string} query
+     * @param {boolean} firstResult
      * @returns {Promise<Track>}
      */
-    _searchTracks (message, query) {
+    _searchTracks (message, query, firstResult) {
         return new Promise(async (resolve) => {
             let tracks = []
             let updatedQuery = null
@@ -172,6 +173,8 @@ class Player extends EventEmitter {
             }
 
             if (tracks.length === 0) return this.emit('noResults', message, query)
+
+            if (firstResult) resolve(tracks[0])
 
             this.emit('searchResults', message, query, tracks)
 
@@ -312,12 +315,13 @@ class Player extends EventEmitter {
      * Play a track in the server. Supported query types are `keywords`, `YouTube video links`, `YouTube playlists links`, `Spotify track link` or `SoundCloud song link`.
      * @param {Discord.Message} message Discord `message`
      * @param {String|Track} query Search query or a valid `Track` object.
+     * @param {boolean} firstResult Whether the bot should play the first song found on youtube with the given query
      * @returns {Promise<void>}
      *
      * @example
      * client.player.play(message, "Despacito");
      */
-    async play (message, query) {
+    async play (message, query, firstResult) {
         const isPlaying = this.isPlaying(message)
         if (this.util.isYTPlaylistLink(query)) {
             return this._handlePlaylist(message, query)
@@ -340,7 +344,7 @@ class Player extends EventEmitter {
                 }
             }, message.author, this)
         } else {
-            trackToPlay = await this._searchTracks(message, query)
+            trackToPlay = await this._searchTracks(message, query, firstResult)
         }
         if (trackToPlay) {
             if (this.isPlaying(message)) {
