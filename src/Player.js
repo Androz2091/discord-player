@@ -775,6 +775,6 @@ module.exports = Player
 /**
  * Emitted when an error is triggered
  * @event Player#error
- * @param {Discord.Message} message
  * @param {string} error It can be `NotConnected`, `UnableToJoin` or `NotPlaying`.
+ * @param {Discord.Message} message
  */
