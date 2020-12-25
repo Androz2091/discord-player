@@ -174,7 +174,7 @@ class Player extends EventEmitter {
 
             if (tracks.length === 0) return this.emit('noResults', message, query)
 
-            if (firstResult) resolve(tracks[0])
+            if (firstResult) return resolve(tracks[0])
 
             this.emit('searchResults', message, query, tracks)
 
