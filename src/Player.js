@@ -731,6 +731,7 @@ class Player extends EventEmitter {
         if (!queue.repeatMode && !firstPlay) {
             const oldTrack = queue.tracks.shift()
             if (queue.loopMode) queue.tracks.push(oldTrack) // add the track at the end of the queue
+            queue.previousTracks.push(oldTrack)
         }
         const track = queue.playing
         // Reset lastSkipped state
