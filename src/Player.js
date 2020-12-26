@@ -112,6 +112,12 @@ class Player extends EventEmitter {
 
         // Listener to check if the channel is empty
         client.on('voiceStateUpdate', (oldState, newState) => this._handleVoiceStateUpdate(oldState, newState))
+
+        /**
+         * @private
+         * @type {Discord.Collection<string, Discord.Collector>}
+         */
+        this._resultsCollectors = new Discord.Collection()
     }
 
     /**
@@ -176,12 +182,18 @@ class Player extends EventEmitter {
 
             if (firstResult) return resolve(tracks[0])
 
-            this.emit('searchResults', message, query, tracks)
+            const collectorString = `${message.author.id}${message.channel.id}`
+            const currentCollector = this._resultsCollectors.get(collectorString)
+            if (currentCollector) currentCollector.stop()
 
             const collector = message.channel.createMessageCollector((m) => m.author.id === message.author.id, {
                 time: 60000,
                 errors: ['time']
             })
+            this._resultsCollectors.set(collectorString, collector)
+
+            this.emit('searchResults', message, query, tracks, collector)
+
             collector.on('collect', ({ content }) => {
                 if (!isNaN(content) && parseInt(content) >= 1 && parseInt(content) <= tracks.length) {
                     const index = parseInt(content, 10)
@@ -714,6 +726,7 @@ module.exports = Player
  * @param {Discord.Message} message
  * @param {string} query
  * @param {Track[]} tracks
+ * @param {Discord.Collector} collector
  */
 
 /**
