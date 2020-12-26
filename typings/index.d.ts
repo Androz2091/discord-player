@@ -1,7 +1,7 @@
 declare module 'discord-player' {
     import { EventEmitter } from 'events';
     import { Client, Collection, Message, MessageCollector, Snowflake, User, VoiceChannel, VoiceConnection } from 'discord.js';
-    import { result as YtplPlaylist } from 'ytpl';
+    import { Playlist as YTSRPlaylist } from 'youtube-sr';
     import { Stream } from 'stream';
 
     export const version: string;
@@ -67,7 +67,7 @@ declare module 'discord-player' {
         thumbnail: string;
         requestedBy: User;
     }
-    type Playlist = YtplPlaylist & CustomPlaylist;
+    type Playlist = YTSRPlaylist & CustomPlaylist;
     interface PlayerEvents {
         searchResults: [Message, string, Track[]];
         searchInvalidResponse: [Message, string, Track[], string, MessageCollector];
