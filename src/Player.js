@@ -56,6 +56,7 @@ const filters = {
 /**
  * @typedef PlayerOptions
  * @property {boolean} [leaveOnEnd=true] Whether the bot should leave the current voice channel when the queue ends.
+ * @property {number} [leaveOnEndCooldown=0] Used when leaveOnEnd is enabled, to let the time to users to add new tracks.
  * @property {boolean} [leaveOnStop=true] Whether the bot should leave the current voice channel when the stop() function is used.
  * @property {boolean} [leaveOnEmpty=true] Whether the bot should leave the voice channel if there is no more member in it.
  * @property {number} [leaveOnEmptyCooldown=0] Used when leaveOnEmpty is enabled, to let the time to users to come back in the voice channel.
@@ -717,9 +718,12 @@ class Player extends EventEmitter {
         // If there isn't next music in the queue
         if (queue.tracks.length === 1 && !queue.repeatMode && !firstPlay) {
             // Leave the voice channel
-            if (this.options.leaveOnEnd && !queue.stopped) queue.voiceConnection.channel.leave()
-            // Remove the guild from the guilds list
-            this.queues.delete(queue.guildID)
+            if (this.options.leaveOnEnd && !queue.stopped) {
+                setTimeout(() => {
+                    queue.voiceConnection.channel.leave()
+                    // Remove the guild from the guilds list
+                    this.queues.delete(queue.guildID)
+                }, this.options.leaveOnEndCooldown || 0)
             // Emit stop event
             if (queue.stopped) {
                 return this.emit('musicStop')
