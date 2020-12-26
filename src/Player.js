@@ -678,7 +678,7 @@ class Player extends EventEmitter {
                 return queue.emit('musicStop')
             }
             // Emit end event
-            return queue.emit('queueEnd', queue.firstMessage, queue)
+            return this.emit('queueEnd', queue.firstMessage, queue)
         }
         // if the track needs to be the next one
         if (!queue.repeatMode && !firstPlay) queue.tracks.shift()
