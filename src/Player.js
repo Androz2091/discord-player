@@ -442,7 +442,7 @@ class Player extends EventEmitter {
         const queue = this.queues.get(message.guild.id)
         if (!queue) return this.emit('error', 'NotPlaying', message)
         // Clear queue
-        queue.tracks = []
+        queue.tracks = queue.playing ? [queue.playing] : []
     }
 
     /**
