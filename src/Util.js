@@ -23,7 +23,7 @@ module.exports = class Util {
     }
 
     static isYTPlaylistLink (query) {
-        return ytsr.default.validate(query, "PLAYLIST")
+        return ytsr.default.validate(query, 'PLAYLIST')
     }
 
     static isYTVideoLink (query) {
