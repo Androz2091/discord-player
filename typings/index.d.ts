@@ -33,6 +33,7 @@ declare module 'discord-player' {
         public getQueue(message: Message): Queue;
         public clearQueue(message: Message): void;
         public skip(message: Message): void;
+        public back(message: Message): void;
         public nowPlaying(message: Message): Track;
         public setRepeatMode(message: Message): boolean;
         public setLoopMode(message: Message, enabled: boolean): boolean
@@ -90,6 +91,7 @@ declare module 'discord-player' {
         public voiceConnection?: VoiceConnection;
         public stream: Stream;
         public tracks: Track[];
+        public previousTracks: Track[];
         public stopped: boolean;
         public lastSkipped: boolean;
         public volume: number;

@@ -479,6 +479,23 @@ class Player extends EventEmitter {
     }
 
     /**
+     * Play back the previous song.
+     * @param {Discord.Message} message
+     * @returns {Queue}
+     */
+    back (message) {
+        // Get guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying', message)
+        queue.tracks.splice(1, 0, queue.previousTracks.shift())
+        // End the dispatcher
+        queue.voiceConnection.dispatcher.end()
+        queue.lastSkipped = true
+        // Return the queue
+        return queue
+    }
+
+    /**
      * Get the played song in the server.
      * @param {Discord.Message} message
      * @returns {Track}
