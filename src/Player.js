@@ -331,6 +331,7 @@ class Player extends EventEmitter {
             trackToPlay = query
         } else if (this.util.isYTVideoLink(query)) {
             const videoData = await ytdl.getBasicInfo(query)
+            if (videoData.videoDetails.isLiveContent) return this.emit('error', 'LiveVideo', message)
             const lastThumbnail = videoData.videoDetails.thumbnails.length - 1 /* get the highest quality thumbnail */
             trackToPlay = new Track({
                 title: videoData.videoDetails.title,
