@@ -529,6 +529,7 @@ class Player extends EventEmitter {
     /**
      * Set loop mode, to play the queue again and again
      * @param {Discord.Message} message
+     * @param {boolean} enabled
      */
     async setLoopMode (message, enabled) {
         // Get guild queue
