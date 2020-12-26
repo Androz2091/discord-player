@@ -35,6 +35,7 @@ declare module 'discord-player' {
         public skip(message: Message): void;
         public nowPlaying(message: Message): Track;
         public setRepeatMode(message: Message): boolean;
+        public setLoopMode(message: Message, enabled: boolean): boolean
         public shuffle(message: Message): Queue;
         public remove(message: Message, trackOrPosition: Track|number): Track;
         public createProgressBar(message: Message, progressBarOptions: ProgressBarOptions): string;
@@ -94,6 +95,7 @@ declare module 'discord-player' {
         public volume: number;
         public paused: boolean;
         public repeatMode: boolean;
+        public loopMode: boolean;
         public filters: FiltersStatuses;
         public firstMessage: Message;
         private additionalStreamTime: number;

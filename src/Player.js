@@ -509,6 +509,20 @@ class Player extends EventEmitter {
     }
 
     /**
+     * Set loop mode, to play the queue again and again
+     * @param {Discord.Message} message
+     */
+    async setLoopMode (message, enabled) {
+        // Get guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying', message)
+        // Enable/Disable loop mode
+        queue.loopMode = enabled
+        // Return the repeat mode
+        return queue.loopMode
+    }
+
+    /**
      * Shuffle the queue of the server.
      * @param {Discord.Message} message
      * @returns {Queue}
@@ -697,7 +711,10 @@ class Player extends EventEmitter {
             return this.emit('queueEnd', queue.firstMessage, queue)
         }
         // if the track needs to be the next one
-        if (!queue.repeatMode && !firstPlay) queue.tracks.shift()
+        if (!queue.repeatMode && !firstPlay) {
+            const oldTrack = queue.tracks.shift()
+            if (queue.loopMode) queue.tracks.push(oldTrack) // add the track at the end of the queue
+        }
         const track = queue.playing
         // Reset lastSkipped state
         queue.lastSkipped = false

@@ -61,6 +61,11 @@ class Queue extends EventEmitter {
          */
         this.repeatMode = false
         /**
+         * Whether the loop mode is enabled.
+         * @type {boolean}
+         */
+        this.loopMode = false
+        /**
          * Filters status
          * @type {Filters}
          */
