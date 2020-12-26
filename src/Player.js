@@ -59,6 +59,7 @@ const filters = {
  * @property {boolean} [leaveOnStop=true] Whether the bot should leave the current voice channel when the stop() function is used.
  * @property {boolean} [leaveOnEmpty=true] Whether the bot should leave the voice channel if there is no more member in it.
  * @property {number} [leaveOnEmptyCooldown=0] Used when leaveOnEmpty is enabled, to let the time to users to come back in the voice channel.
+ * @property {boolean} [autoSelfDeaf=true] Whether the bot should automatically turn off its headphones when joining a voice channel.
  */
 
 /**
@@ -69,7 +70,9 @@ const filters = {
 const defaultPlayerOptions = {
     leaveOnEnd: true,
     leaveOnStop: true,
-    leaveOnEmpty: true
+    leaveOnEmpty: true,
+    leaveOnEmptyCooldown: 0,
+    autoSelfDeaf: true
 }
 
 class Player extends EventEmitter {
@@ -287,6 +290,7 @@ class Player extends EventEmitter {
             this.queues.set(message.guild.id, queue)
             channel.join().then((connection) => {
                 queue.voiceConnection = connection
+                if (this.options.autoSelfDeaf) connection.voice.setSelfDeaf(true)
                 queue.tracks.push(track)
                 this.emit('queueCreate', message, queue)
                 resolve(queue)
