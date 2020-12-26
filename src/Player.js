@@ -608,7 +608,7 @@ class Player extends EventEmitter {
             // Delete the queue
             this.queues.delete(queue.guildID)
             // Emit end event
-            queue.emit('channelEmpty', queue.firstMessage, queue)
+            this.emit('channelEmpty', queue.firstMessage, queue)
         }, this.options.leaveOnEmptyCooldown || 0)
     }
 
@@ -675,7 +675,7 @@ class Player extends EventEmitter {
             this.queues.delete(queue.guildID)
             // Emit stop event
             if (queue.stopped) {
-                return queue.emit('musicStop')
+                return this.emit('musicStop')
             }
             // Emit end event
             return this.emit('queueEnd', queue.firstMessage, queue)
