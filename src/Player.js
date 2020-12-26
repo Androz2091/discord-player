@@ -724,6 +724,7 @@ class Player extends EventEmitter {
                     // Remove the guild from the guilds list
                     this.queues.delete(queue.guildID)
                 }, this.options.leaveOnEndCooldown || 0)
+            }
             // Emit stop event
             if (queue.stopped) {
                 return this.emit('musicStop')
