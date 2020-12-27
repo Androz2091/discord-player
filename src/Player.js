@@ -336,7 +336,7 @@ class Player extends EventEmitter {
      * @returns {Promise<void>}
      *
      * @example
-     * client.player.play(message, "Despacito");
+     * client.player.play(message, "Despacito", true);
      */
     async play (message, query, firstResult) {
         if (this.util.isYTPlaylistLink(query)) {

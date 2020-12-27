@@ -81,7 +81,7 @@ You need to **init the guild queue using the play() function**, then you are abl
 
 #### Play a track
 
-* [play(message, track, requestedBy)](https://discord-player.js.org/Player.html#play) - play a track in a server
+* [play(message, track)](https://discord-player.js.org/Player.html#play) - play a track in a server 
 
 #### Check if a track is being played
 
@@ -97,11 +97,13 @@ You need to **init the guild queue using the play() function**, then you are abl
 #### Manage music stream
 
 * [skip(message)](https://discord-player.js.org/Player.html#skip) - skip the current track
+* [back(message)](https://discord-player.js.org/Player.html#back) - play the previous track
 * [pause(message)](https://discord-player.js.org/Player.html#pause) - pause the current track
 * [resume(message)](https://discord-player.js.org/Player.html#resume) - resume the current track
 * [stop(message)](https://discord-player.js.org/Player.html#stop) - stop the current track
 * [setFilters(message, newFilters)](https://discord-player.js.org/Player.html#setFilters) - update filters (bassboost for example)
-* [setRepeatMode(message, boolean)](https://discord-player.js.org/Player.html#setRepeatMode) - enable or disable repeat mode for the server
+* [setRepeatMode(message, boolean)](https://discord-player.js.org/Player.html#setRepeatMode) - enable or disable repeat mode for the server (play the song again and again)
+* [setLoopMode(message, boolean)](https://discord-player.js.org/Player.html#setLoopMode) - enable or disable loop mode for the server (play the queue again and again)
 
 ### Event messages
 
@@ -114,7 +116,7 @@ client.player
 
 // Send a message when something is added to the queue
 .on('trackAdd', (message, queue, track) => message.channel.send(`${track.title} has been added to the queue!`))
-.on('playlistAdd', (message, queue, playlist) => message.channel.send(`${playlist.title} has been added to the queue (${playlist.items.length} songs)!`))
+.on('playlistAdd', (message, queue, playlist) => message.channel.send(`${playlist.title} has been added to the queue (${playlist.tracks.length} songs)!`))
 
 // Send messages to format search results
 .on('searchResults', (message, query, tracks) => {
@@ -126,7 +128,16 @@ client.player
     message.channel.send(embed);
 
 })
-.on('searchInvalidResponse', (message, query, tracks, content, collector) => message.channel.send(`You must send a valid number between 1 and ${tracks.length}!`))
+.on('searchInvalidResponse', (message, query, tracks, content, collector) => {
+
+    if (content === 'cancel') {
+        collector.stop()
+        return message.channel.send('Search cancelled!')
+    }
+
+    message.channel.send(`You must send a valid number between 1 and ${tracks.length}!`)
+
+})
 .on('searchCancel', (message, query, tracks) => message.channel.send('You did not provide a valid response... Please send the command again!'))
 .on('noResults', (message, query) => message.channel.send(`No results found on YouTube for ${query}!`))
 
@@ -146,6 +157,9 @@ client.player
             break;
         case 'UnableToJoin':
             message.channel.send('I am not able to join your voice channel, please check my permissions!')
+            break;
+        case 'LiveVideo':
+            message.channel.send('YouTube lives are not supported!')
             break;
         default:
             message.channel.send(`Something went wrong... Error: ${error}`)
