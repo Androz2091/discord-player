@@ -172,5 +172,5 @@ client.player
 These bots are made by the community, they can help you build your own!
 
 * [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [me](https://github.com/Androz2091)
-* [Discord-Music](https://github.com/hydraindia/discord-music) by [hydraindia](https://github.com/hydraindia)
+* [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox)
 * [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
