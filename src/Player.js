@@ -30,6 +30,7 @@ const Client = new soundcloud.Client()
  * @property {boolean} [gate=false] Whether the gate filter is enabled.
  * @property {boolean} [haas=false] Whether the haas filter is enabled.
  * @property {boolean} [mcompand=false] Whether the mcompand filter is enabled.
+ * @property {boolean} [mono=false] Whether the mono output is enabled.
  */
 
 const filters = {
@@ -50,7 +51,8 @@ const filters = {
     flanger: 'flanger',
     gate: 'agate',
     haas: 'haas',
-    mcompand: 'mcompand'
+    mcompand: 'mcompand',
+    mono: 'pan=mono|c0=.5*c0+.5*c1'
 }
 
 /**
