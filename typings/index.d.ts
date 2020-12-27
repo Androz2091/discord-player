@@ -35,7 +35,7 @@ declare module 'discord-player' {
         public skip(message: Message): void;
         public back(message: Message): void;
         public nowPlaying(message: Message): Track;
-        public setRepeatMode(message: Message): boolean;
+        public setRepeatMode(message: Message, enabled: boolean): boolean;
         public setLoopMode(message: Message, enabled: boolean): boolean
         public shuffle(message: Message): Queue;
         public remove(message: Message, trackOrPosition: Track|number): Track;
