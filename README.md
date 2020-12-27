@@ -81,7 +81,7 @@ You need to **init the guild queue using the play() function**, then you are abl
 
 #### Play a track
 
-* [play(message, track)](https://discord-player.js.org/Player.html#play) - play a track in a server 
+* [play(message, query)](https://discord-player.js.org/Player.html#play) - play a track in a server 
 
 #### Check if a track is being played
 
