@@ -123,7 +123,7 @@ client.player
 
     const embed = new Discord.MessageEmbed()
     .setAuthor(`Here are your search results for ${query}!`)
-    .setDescription(tracks.map((t, i) => `${i}. ${t.title}`))
+    .setDescription(tracks.map((t, i) => `${i + 1}. ${t.title}`))
     .setFooter('Send the number of the song you want to play!')
     message.channel.send(embed);
 
