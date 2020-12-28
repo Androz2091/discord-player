@@ -288,7 +288,7 @@ class Player extends EventEmitter {
     _createQueue (message, track) {
         return new Promise((resolve, reject) => {
             const channel = message.member.voice ? message.member.voice.channel : null
-            if (!channel) this.emit('error', 'NotConnected', message)
+            if (!channel) return this.emit('error', 'NotConnected', message)
             const queue = new Queue(message.guild.id, message, this.filters)
             this.queues.set(message.guild.id, queue)
             channel.join().then((connection) => {
