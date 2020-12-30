@@ -25,7 +25,7 @@ declare module 'discord-player' {
 
         public isPlaying(message: Message): boolean;
         public setFilters(message: Message, newFilters: Partial<Filters>): Promise<void>;
-        public play(message: Message, query: string | Track, firstResult: boolean): Promise<void>;
+        public play(message: Message, query: string | Track, firstResult?: boolean): Promise<void>;
         public pause(message: Message): void;
         public resume(message: Message): void;
         public stop(message: Message): void;
