@@ -359,6 +359,35 @@ class Player extends EventEmitter {
             this._addTracksToQueue(message, playlist.tracks)
         }
     }
+    async _handleSpotifyAlbum (message, query) {
+        const album = await spotify.getData(query)
+        if (!album) return this.emit('noResults', message, query)
+        let tracks = []
+        let s;
+        for (var i = 0; i < album.tracks.items.length; i++) {
+            let query = `${album.tracks.items[i].artists[0].name} - ${album.tracks.items[i].name}`
+            let results = await ytsr.search(query, { type: 'video' })
+            if (results.length < 1) {
+               s++ // could be used later for skipped tracks due to result not being found
+               continue;
+            }
+            tracks.push(results[0])
+        }
+        
+        album.tracks = tracks.map((item) => new Track(item, message.author))
+        album.duration = album.tracks.reduce((prev, next) => prev + next.duration, 0)
+        album.thumbnail = album.images[0].url
+        album.requestedBy = message.author
+        if (this.isPlaying(message)) {
+            const queue = this._addTracksToQueue(message, album.tracks)
+            this.emit('playlistAdd', message, queue, album)
+        } else {
+            const track = album.tracks.shift()
+            const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            this.emit('trackStart', message, queue.tracks[0])
+            this._addTracksToQueue(message, album.tracks)
+        }
+    }
     /**
      * Play a track in the server. Supported query types are `keywords`, `YouTube video links`, `YouTube playlists links`, `Spotify track link` or `SoundCloud song link`.
      * @param {Discord.Message} message Discord `message`
@@ -377,8 +406,7 @@ class Player extends EventEmitter {
             return this._handleSpotifyPlaylist(message, query)
         }
         if (this.util.isSpotifyAlbumLink(query)) {
-            return this._handleSpotifyPlaylist(message, query)
-            // It's basically the same thing so we can use the same handler
+            return this._handleSpotifyAlbum(message, query)
         }
         let trackToPlay
         if (query instanceof Track) {
