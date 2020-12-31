@@ -376,6 +376,10 @@ class Player extends EventEmitter {
         if (this.util.isSpotifyPLLink(query)) {
             return this._handleSpotifyPlaylist(message, query)
         }
+        if (this.util.isSpotifyAlbumLink(query)) {
+            return this._handleSpotifyPlaylist(message, query)
+            // It's basically the same thing so we can use the same handler
+        }
         let trackToPlay
         if (query instanceof Track) {
             trackToPlay = query
