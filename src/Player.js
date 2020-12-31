@@ -139,6 +139,8 @@ class Player extends EventEmitter {
             return 'youtube-video'
         } else if (this.util.isSoundcloudLink(query)) {
             return 'soundcloud-song'
+        } else if (this.util.isSpotifyPLLink(query)) {
+            return 'spotify-playlist'
         } else {
             return 'youtube-video-keywords'
         }
@@ -329,7 +331,34 @@ class Player extends EventEmitter {
             this._addTracksToQueue(message, playlist.tracks)
         }
     }
-
+    async _handleSpotifyPlaylist (message, query) {
+        const playlist = await spotify.getData(query)
+        if (!playlist) return this.emit('noResults', message, query)
+        let tracks = []
+        let s;
+        for (var i = 0; i < playlist.tracks.items.length; i++) {
+            let query = `${playlist.tracks.items[i].track.artists[0].name} - ${playlist.tracks.items[i].track.name}`
+            let results = await ytsr.search(query, { type: 'video' })
+            if (results.length < 1) {
+               s++ // could be used later for skipped tracks due to result not being found
+               continue;
+            }
+            tracks.push(results[0])
+        }
+        playlist.tracks = tracks.map((item) => new Track(item, message.author))
+        playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
+        playlist.thumbnail = playlist.images[0].url
+        playlist.requestedBy = message.author
+        if (this.isPlaying(message)) {
+            const queue = this._addTracksToQueue(message, playlist.tracks)
+            this.emit('playlistAdd', message, queue, playlist)
+        } else {
+            const track = playlist.tracks.shift()
+            const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            this.emit('trackStart', message, queue.tracks[0])
+            this._addTracksToQueue(message, playlist.tracks)
+        }
+    }
     /**
      * Play a track in the server. Supported query types are `keywords`, `YouTube video links`, `YouTube playlists links`, `Spotify track link` or `SoundCloud song link`.
      * @param {Discord.Message} message Discord `message`
@@ -343,6 +372,9 @@ class Player extends EventEmitter {
     async play (message, query, firstResult) {
         if (this.util.isYTPlaylistLink(query)) {
             return this._handlePlaylist(message, query)
+        }
+        if (this.util.isSpotifyPLLink(query)) {
+            return this._handleSpotifyPlaylist(message, query)
         }
         let trackToPlay
         if (query instanceof Track) {
