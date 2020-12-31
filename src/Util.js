@@ -4,6 +4,7 @@ const Discord = require('discord.js')
 
 const youtubeVideoRegex = (/(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/)
 const spotifySongRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
+const spotifyPlaylistRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})/)
 
 module.exports = class Util {
     constructor () {
@@ -20,6 +21,10 @@ module.exports = class Util {
 
     static isSpotifyLink (query) {
         return spotifySongRegex.test(query)
+    }
+
+    static isSpotifyPLLink (query) {
+        return spotifyPlaylistRegex.test(query)
     }
 
     static isYTPlaylistLink (query) {
