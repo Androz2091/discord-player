@@ -70,6 +70,7 @@ declare module 'discord-player' {
         requestedBy: User;
     }
     type Playlist = YTSRPlaylist & CustomPlaylist;
+    type PlayerError = 'NotConnected' | 'UnableToJoin' | 'NotPlaying' | 'LiveVideo';
     interface PlayerEvents {
         searchResults: [Message, string, Track[]];
         searchInvalidResponse: [Message, string, Track[], string, MessageCollector];
@@ -83,7 +84,7 @@ declare module 'discord-player' {
         musicStop: [];
         queueCreate: [Message, Queue];
         queueEnd: [Message, Queue];
-        error: [string, Message];
+        error: [PlayerError, Message];
     }
     class Queue {
         constructor(guildID: string, message: Message, filters: PlayerFilters);
