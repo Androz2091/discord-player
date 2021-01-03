@@ -37,7 +37,7 @@
     "soundcloud-scraper": "^4.0.0",
     "spotify-url-info": "^2.2.0",
     "youtube-sr": "^2.0.5",
-    "ytdl-core": "^4.2.1"
+    "ytdl-core": "^4.4.0"
   },
   "devDependencies": {
     "@discordjs/opus": "^0.3.2",
