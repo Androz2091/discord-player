@@ -340,7 +340,7 @@ class Player extends EventEmitter {
      * @example
      * client.player.play(message, "Despacito", true);
      */
-    async play (message, query, firstResult) {
+    async play (message, query, firstResult = false) {
         if (this.util.isYTPlaylistLink(query)) {
             return this._handlePlaylist(message, query)
         }
