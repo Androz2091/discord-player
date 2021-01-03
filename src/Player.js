@@ -840,6 +840,6 @@ module.exports = Player
 /**
  * Emitted when an error is triggered
  * @event Player#error
- * @param {string} error It can be `NotConnected`, `UnableToJoin` or `NotPlaying`.
+ * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying` or `LiveVideo`.
  * @param {Discord.Message} message
  */
