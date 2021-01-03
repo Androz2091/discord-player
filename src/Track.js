@@ -11,7 +11,7 @@ class Track {
      * @param {Discord.User | null} user The user who requested the track
      * @param {Player} player
      */
-    constructor (videoData, user, player) {
+    constructor (videoData, user, player, fromPlaylist = false) {
         /**
          * The player instantiating the track
          * @type {Player}
@@ -66,7 +66,7 @@ class Track {
          * Whether the track was added from a playlist
          * @type {boolean}
          */
-        this.fromPlaylist = videoData.fromPlaylist || false
+        this.fromPlaylist = fromPlaylist
     }
 
     /**
