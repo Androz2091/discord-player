@@ -2064,6 +2064,8 @@
             
 
             
+            <th>Default</th>
+            
 
             <th class="last">Description</th>
         </tr>
@@ -2088,6 +2090,10 @@
 
                 
 
+                
+                    <td class="default">
+                    
+                    </td>
                 
 
                 <td class="description last"><p>Discord <code>message</code></p></td>
@@ -2115,6 +2121,10 @@
                 
 
                 
+                    <td class="default">
+                    
+                    </td>
+                
 
                 <td class="description last"><p>Search query or a valid <code>Track</code> object.</p></td>
             </tr>
@@ -2137,6 +2147,12 @@
 
                 
 
+                
+                    <td class="default">
+                    
+                        false
+                    
+                    </td>
                 
 
                 <td class="description last"><p>Whether the bot should play the first song found on youtube with the given query</p></td>
@@ -2222,7 +2238,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint example linenums"><code>client.player.play(message, "Despacito");</code></pre>
+    <pre class="prettyprint example linenums"><code>client.player.play(message, "Despacito", true);</code></pre>
 
 
 
@@ -2718,7 +2734,7 @@
     
 
     
-    <h4 class="name" id="setLoopMode"><span class="type-signature">(async) </span>setLoopMode<span class="signature">(message)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setLoopMode"><span class="type-signature">(async) </span>setLoopMode<span class="signature">(message, enabled)</span><span class="type-signature"></span></h4>
     
 
     
@@ -2770,6 +2786,29 @@
                 
                     
 <span class="param-type">Discord.Message</span>
+
+
+                
+                </td>
+
+                
+
+                
+
+                <td class="description last"></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td class="name"><code>enabled</code></td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">boolean</span>
 
 
                 

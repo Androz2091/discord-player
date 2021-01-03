@@ -36,7 +36,7 @@
     
 
 
-    <h3>discord-player 3.2.0</h3>
+    <h3>discord-player 3.2.1</h3>
 
 
 
@@ -115,7 +115,7 @@ client.login(settings.token);
 <p>You need to <strong>init the guild queue using the play() function</strong>, then you are able to manage the queue and the music using the following functions. Click on a function name to get an example code and explanations.</p>
 <h4>Play a track</h4>
 <ul>
-<li><a href="https://discord-player.js.org/Player.html#play">play(message, track, requestedBy)</a> - play a track in a server</li>
+<li><a href="https://discord-player.js.org/Player.html#play">play(message, query)</a> - play a track in a server</li>
 </ul>
 <h4>Check if a track is being played</h4>
 <ul>
@@ -131,11 +131,13 @@ client.login(settings.token);
 <h4>Manage music stream</h4>
 <ul>
 <li><a href="https://discord-player.js.org/Player.html#skip">skip(message)</a> - skip the current track</li>
+<li><a href="https://discord-player.js.org/Player.html#back">back(message)</a> - play the previous track</li>
 <li><a href="https://discord-player.js.org/Player.html#pause">pause(message)</a> - pause the current track</li>
 <li><a href="https://discord-player.js.org/Player.html#resume">resume(message)</a> - resume the current track</li>
 <li><a href="https://discord-player.js.org/Player.html#stop">stop(message)</a> - stop the current track</li>
 <li><a href="https://discord-player.js.org/Player.html#setFilters">setFilters(message, newFilters)</a> - update filters (bassboost for example)</li>
-<li><a href="https://discord-player.js.org/Player.html#setRepeatMode">setRepeatMode(message, boolean)</a> - enable or disable repeat mode for the server</li>
+<li><a href="https://discord-player.js.org/Player.html#setRepeatMode">setRepeatMode(message, boolean)</a> - enable or disable repeat mode for the server (play the song again and again)</li>
+<li><a href="https://discord-player.js.org/Player.html#setLoopMode">setLoopMode(message, boolean)</a> - enable or disable loop mode for the server (play the queue again and again)</li>
 </ul>
 <h3>Event messages</h3>
 <pre class="prettyprint source lang-js"><code>// Then add some messages that will be sent when the events will be triggered
@@ -146,7 +148,7 @@ client.player
 
 // Send a message when something is added to the queue
 .on('trackAdd', (message, queue, track) => message.channel.send(`${track.title} has been added to the queue!`))
-.on('playlistAdd', (message, queue, playlist) => message.channel.send(`${playlist.title} has been added to the queue (${playlist.items.length} songs)!`))
+.on('playlistAdd', (message, queue, playlist) => message.channel.send(`${playlist.title} has been added to the queue (${playlist.tracks.length} songs)!`))
 
 // Send messages to format search results
 .on('searchResults', (message, query, tracks) => {
@@ -158,7 +160,16 @@ client.player
     message.channel.send(embed);
 
 })
-.on('searchInvalidResponse', (message, query, tracks, content, collector) => message.channel.send(`You must send a valid number between 1 and ${tracks.length}!`))
+.on('searchInvalidResponse', (message, query, tracks, content, collector) => {
+
+    if (content === 'cancel') {
+        collector.stop()
+        return message.channel.send('Search cancelled!')
+    }
+
+    message.channel.send(`You must send a valid number between 1 and ${tracks.length}!`)
+
+})
 .on('searchCancel', (message, query, tracks) => message.channel.send('You did not provide a valid response... Please send the command again!'))
 .on('noResults', (message, query) => message.channel.send(`No results found on YouTube for ${query}!`))
 
@@ -179,6 +190,9 @@ client.player
         case 'UnableToJoin':
             message.channel.send('I am not able to join your voice channel, please check my permissions!')
             break;
+        case 'LiveVideo':
+            message.channel.send('YouTube lives are not supported!')
+            break;
         default:
             message.channel.send(`Something went wrong... Error: ${error}`)
     }
@@ -188,7 +202,7 @@ client.player
 <p>These bots are made by the community, they can help you build your own!</p>
 <ul>
 <li><a href="https://github.com/Androz2091/AtlantaBot">AtlantaBot</a> by <a href="https://github.com/Androz2091">me</a></li>
-<li><a href="https://github.com/hydraindia/discord-music">Discord-Music</a> by <a href="https://github.com/hydraindia">hydraindia</a></li>
+<li><a href="https://github.com/inhydrox/discord-music">Discord-Music</a> by <a href="https://github.com/inhydrox">inhydrox</a></li>
 <li><a href="https://github.com/ZerioDev/Music-bot">Music-bot</a> by <a href="https://github.com/ZerioDev">ZerioDev</a></li>
 </ul></article>
     </section>
