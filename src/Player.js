@@ -63,6 +63,7 @@ const filters = {
  * @property {boolean} [leaveOnEmpty=true] Whether the bot should leave the voice channel if there is no more member in it.
  * @property {number} [leaveOnEmptyCooldown=0] Used when leaveOnEmpty is enabled, to let the time to users to come back in the voice channel.
  * @property {boolean} [autoSelfDeaf=true] Whether the bot should automatically turn off its headphones when joining a voice channel.
+ * @property {string} [quality='high'] Music quality (high or low)
  */
 
 /**
@@ -75,7 +76,8 @@ const defaultPlayerOptions = {
     leaveOnStop: true,
     leaveOnEmpty: true,
     leaveOnEmptyCooldown: 0,
-    autoSelfDeaf: true
+    autoSelfDeaf: true,
+    quality: 'high'
 }
 
 class Player extends EventEmitter {
@@ -679,6 +681,7 @@ class Player extends EventEmitter {
                 encoderArgs = ['-af', encoderArgsFilters.join(',')]
             }
             const newStream = ytdl(queue.playing.url, {
+                quality: this.options.quality === 'low' ? 'lowestaudio' : 'highestaudio',
                 filter: 'audioonly',
                 opusEncoded: true,
                 encoderArgs,

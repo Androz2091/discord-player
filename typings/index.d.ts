@@ -45,6 +45,7 @@ declare module 'discord-player' {
         public once<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
         public emit<K extends keyof PlayerEvents>(event: K, ...args: PlayerEvents[K]): boolean;
     }
+    type MusicQuality = 'high' | 'low';
     interface PlayerOptions {
         leaveOnEnd: boolean;
         leaveOnEndCooldown?: number;
@@ -52,6 +53,7 @@ declare module 'discord-player' {
         leaveOnEmpty: boolean;
         leaveOnEmptyCooldown?: number;
         autoSelfDeaf: boolean;
+        quality: MusicQuality;
     }
     type Filters = 'bassboost' | '8D' | 'vaporwave' | 'nightcore'| 'phaser' | 'tremolo' | 'vibrato' | 'reverse' | 'treble' | 'normalizer' | 'surrounding' | 'pulsator' | 'subboost' | 'karaoke' | 'flanger' | 'gate' | 'haas' | 'mcompand';
     type FiltersStatuses = {
