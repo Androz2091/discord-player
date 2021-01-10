@@ -18,6 +18,10 @@ class Facebook {
     }
 
     /**
+     * @typedef {import('stream').Readable} Readable
+     */
+
+    /**
      * Downloads facebook video
      * @param {string} url Video url to download
      * @returns {Promise<Readable>}
