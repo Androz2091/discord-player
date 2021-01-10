@@ -31,6 +31,7 @@
   "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
     "@types/node": "^14.14.7",
+    "chalk": "^4.1.0",
     "discord-ytdl-core": "^5.0.0",
     "merge-options": "^3.0.4",
     "moment": "^2.27.0",
@@ -38,7 +39,7 @@
     "soundcloud-scraper": "^4.0.0",
     "spotify-url-info": "^2.2.0",
     "youtube-sr": "^2.0.5",
-    "ytdl-core": "^4.4.0"
+    "ytdl-core": "^4.4.2"
   },
   "devDependencies": {
     "@discordjs/opus": "^0.3.2",

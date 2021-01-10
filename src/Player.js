@@ -94,6 +94,8 @@ class Player extends EventEmitter {
          * @type {Util}
          */
         this.util = Util
+        this.util.checkFFMPEG();
+
         /**
          * Discord.js client instance
          * @type {Discord.Client}
@@ -731,6 +733,8 @@ class Player extends EventEmitter {
 
     _playYTDLStream (queue, updateFilter) {
         return new Promise((resolve) => {
+            const ffmeg = this.util.checkFFMPEG();
+            if (!ffmeg) return;
             const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
             const encoderArgsFilters = []
             Object.keys(queue.filters).forEach((filterName) => {
