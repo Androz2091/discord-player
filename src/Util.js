@@ -2,6 +2,8 @@ const ytsr = require('youtube-sr')
 const soundcloud = require('soundcloud-scraper')
 
 const spotifySongRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
+const spotifyPlaylistRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})/)
+const spotifyAlbumRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:album\/|\?uri=spotify:album:)((\w|-){22})/)
 
 module.exports = class Util {
     constructor () {
@@ -18,6 +20,14 @@ module.exports = class Util {
 
     static isSpotifyLink (query) {
         return spotifySongRegex.test(query)
+    }
+
+    static isSpotifyPLLink (query) {
+        return spotifyPlaylistRegex.test(query)
+    }
+    
+    static isSpotifyAlbumLink(query) {
+        return spotifyAlbumRegex.test(query)
     }
 
     static isYTPlaylistLink (query) {
