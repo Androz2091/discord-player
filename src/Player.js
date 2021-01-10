@@ -63,6 +63,7 @@ const filters = {
  * @property {boolean} [leaveOnEmpty=true] Whether the bot should leave the voice channel if there is no more member in it.
  * @property {number} [leaveOnEmptyCooldown=0] Used when leaveOnEmpty is enabled, to let the time to users to come back in the voice channel.
  * @property {boolean} [autoSelfDeaf=true] Whether the bot should automatically turn off its headphones when joining a voice channel.
+ * @property {string} [quality='high'] Music quality (high or low)
  */
 
 /**
@@ -75,7 +76,8 @@ const defaultPlayerOptions = {
     leaveOnStop: true,
     leaveOnEmpty: true,
     leaveOnEmptyCooldown: 0,
-    autoSelfDeaf: true
+    autoSelfDeaf: true,
+    quality: 'high'
 }
 
 class Player extends EventEmitter {
@@ -92,6 +94,8 @@ class Player extends EventEmitter {
          * @type {Util}
          */
         this.util = Util
+        this.util.checkFFMPEG();
+
         /**
          * Discord.js client instance
          * @type {Discord.Client}
@@ -139,6 +143,8 @@ class Player extends EventEmitter {
             return 'youtube-video'
         } else if (this.util.isSoundcloudLink(query)) {
             return 'soundcloud-song'
+        } else if (this.util.isSpotifyPLLink(query)) {
+            return 'spotify-playlist'
         } else {
             return 'youtube-video-keywords'
         }
@@ -329,7 +335,63 @@ class Player extends EventEmitter {
             this._addTracksToQueue(message, playlist.tracks)
         }
     }
-
+    async _handleSpotifyPlaylist (message, query) {
+        const playlist = await spotify.getData(query)
+        if (!playlist) return this.emit('noResults', message, query)
+        let tracks = []
+        let s;
+        for (var i = 0; i < playlist.tracks.items.length; i++) {
+            let query = `${playlist.tracks.items[i].track.artists[0].name} - ${playlist.tracks.items[i].track.name}`
+            let results = await ytsr.search(query, { type: 'video' })
+            if (results.length < 1) {
+               s++ // could be used later for skipped tracks due to result not being found
+               continue;
+            }
+            tracks.push(results[0])
+        }
+        playlist.tracks = tracks.map((item) => new Track(item, message.author))
+        playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
+        playlist.thumbnail = playlist.images[0].url
+        playlist.requestedBy = message.author
+        if (this.isPlaying(message)) {
+            const queue = this._addTracksToQueue(message, playlist.tracks)
+            this.emit('playlistAdd', message, queue, playlist)
+        } else {
+            const track = playlist.tracks.shift()
+            const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            this.emit('trackStart', message, queue.tracks[0])
+            this._addTracksToQueue(message, playlist.tracks)
+        }
+    }
+    async _handleSpotifyAlbum (message, query) {
+        const album = await spotify.getData(query)
+        if (!album) return this.emit('noResults', message, query)
+        let tracks = []
+        let s;
+        for (var i = 0; i < album.tracks.items.length; i++) {
+            let query = `${album.tracks.items[i].artists[0].name} - ${album.tracks.items[i].name}`
+            let results = await ytsr.search(query, { type: 'video' })
+            if (results.length < 1) {
+               s++ // could be used later for skipped tracks due to result not being found
+               continue;
+            }
+            tracks.push(results[0])
+        }
+        
+        album.tracks = tracks.map((item) => new Track(item, message.author))
+        album.duration = album.tracks.reduce((prev, next) => prev + next.duration, 0)
+        album.thumbnail = album.images[0].url
+        album.requestedBy = message.author
+        if (this.isPlaying(message)) {
+            const queue = this._addTracksToQueue(message, album.tracks)
+            this.emit('playlistAdd', message, queue, album)
+        } else {
+            const track = album.tracks.shift()
+            const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            this.emit('trackStart', message, queue.tracks[0])
+            this._addTracksToQueue(message, album.tracks)
+        }
+    }
     /**
      * Play a track in the server. Supported query types are `keywords`, `YouTube video links`, `YouTube playlists links`, `Spotify track link` or `SoundCloud song link`.
      * @param {Discord.Message} message Discord `message`
@@ -343,6 +405,12 @@ class Player extends EventEmitter {
     async play (message, query, firstResult = false) {
         if (this.util.isYTPlaylistLink(query)) {
             return this._handlePlaylist(message, query)
+        }
+        if (this.util.isSpotifyPLLink(query)) {
+            return this._handleSpotifyPlaylist(message, query)
+        }
+        if (this.util.isSpotifyAlbumLink(query)) {
+            return this._handleSpotifyAlbum(message, query)
         }
         let trackToPlay
         if (query instanceof Track) {
@@ -665,6 +733,8 @@ class Player extends EventEmitter {
 
     _playYTDLStream (queue, updateFilter) {
         return new Promise((resolve) => {
+            const ffmeg = this.util.checkFFMPEG();
+            if (!ffmeg) return;
             const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
             const encoderArgsFilters = []
             Object.keys(queue.filters).forEach((filterName) => {
@@ -679,6 +749,7 @@ class Player extends EventEmitter {
                 encoderArgs = ['-af', encoderArgsFilters.join(',')]
             }
             const newStream = ytdl(queue.playing.url, {
+                quality: this.options.quality === 'low' ? 'lowestaudio' : 'highestaudio',
                 filter: 'audioonly',
                 opusEncoded: true,
                 encoderArgs,
@@ -840,6 +911,6 @@ module.exports = Player
 /**
  * Emitted when an error is triggered
  * @event Player#error
- * @param {string} error It can be `NotConnected`, `UnableToJoin` or `NotPlaying`.
+ * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying` or `LiveVideo`.
  * @param {Discord.Message} message
  */

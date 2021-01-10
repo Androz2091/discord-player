@@ -45,6 +45,7 @@ declare module 'discord-player' {
         public once<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
         public emit<K extends keyof PlayerEvents>(event: K, ...args: PlayerEvents[K]): boolean;
     }
+    type MusicQuality = 'high' | 'low';
     interface PlayerOptions {
         leaveOnEnd: boolean;
         leaveOnEndCooldown?: number;
@@ -52,6 +53,7 @@ declare module 'discord-player' {
         leaveOnEmpty: boolean;
         leaveOnEmptyCooldown?: number;
         autoSelfDeaf: boolean;
+        quality: MusicQuality;
     }
     type Filters = 'bassboost' | '8D' | 'vaporwave' | 'nightcore'| 'phaser' | 'tremolo' | 'vibrato' | 'reverse' | 'treble' | 'normalizer' | 'surrounding' | 'pulsator' | 'subboost' | 'karaoke' | 'flanger' | 'gate' | 'haas' | 'mcompand';
     type FiltersStatuses = {
@@ -70,6 +72,7 @@ declare module 'discord-player' {
         requestedBy: User;
     }
     type Playlist = YTSRPlaylist & CustomPlaylist;
+    type PlayerError = 'NotConnected' | 'UnableToJoin' | 'NotPlaying' | 'LiveVideo';
     interface PlayerEvents {
         searchResults: [Message, string, Track[]];
         searchInvalidResponse: [Message, string, Track[], string, MessageCollector];
@@ -83,7 +86,7 @@ declare module 'discord-player' {
         musicStop: [];
         queueCreate: [Message, Queue];
         queueEnd: [Message, Queue];
-        error: [string, Message];
+        error: [PlayerError, Message];
     }
     class Queue {
         constructor(guildID: string, message: Message, filters: PlayerFilters);
