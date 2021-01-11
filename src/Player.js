@@ -36,9 +36,9 @@ const Client = new soundcloud.Client()
  * @property {boolean} [compressor=false] Whether compressor filter is enabled.
  * @property {boolean} [expander=false] Whether expander filter is enabled.
  * @property {boolean} [softlimiter=false] Whether softlimiter filter is enabled.
- * @property {boolean} [chorus=false] Whether chorus filter is enabled.
- * @property {boolean} [chorus2d=false] Whether chorus2d filter is enabled.
- * @property {boolean} [chorus3d=false] Whether chorus3d filter is enabled.
+ * @property {boolean} [chorus=false] Whether chorus (single delay) filter is enabled.
+ * @property {boolean} [chorus2d=false] Whether chorus2d (two delays) filter is enabled.
+ * @property {boolean} [chorus3d=false] Whether chorus3d (three delays) filter is enabled.
  * @property {boolean} [fadein=false] Whether fadein filter is enabled.
  */
 
