@@ -203,10 +203,9 @@ class Player extends EventEmitter {
                     }
                 }
             } else if (queryType === 'soundcloud-song') {
-                const soundcloudData = await Client.getSongInfo(query).catch(() => {})
+                const soundcloudData = await this._handleSoundCloudTrack(message, query)
                 if (soundcloudData) {
-                    updatedQuery = `${soundcloudData.author.name} - ${soundcloudData.title}`
-                    queryType = 'youtube-video-keywords'
+                    tracks.push(soundcloudData)
                 }
             }
 
@@ -420,6 +419,41 @@ class Player extends EventEmitter {
             const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
             this.emit('trackStart', message, queue.tracks[0])
             this._addTracksToQueue(message, album.tracks)
+        }
+    }
+
+    async _handleSoundCloudTrack (message, query) {
+        const data = await Client.getSongInfo(query).catch(() => {})
+        if (!data) {
+            this.emit('noResults', message, query)
+            return
+        }
+
+        const track = new Track({
+            title: data.title,
+            url: data.url,
+            lengthSeconds: data.duration / 1000,
+            description: data.description,
+            thumbnail: data.thumbnail,
+            views: data.playCount,
+            author: data.author
+        }, message.author)
+
+        Object.defineProperty(track, 'soundcloud', {
+            get: () => data
+        })
+
+        return track
+    }
+
+    async search (query, type = 'youtube') {
+        if (!query || typeof query !== 'string') return []
+
+        switch (type.toLowerCase()) {
+        case 'soundcloud':
+            return await Client.search(query, 'track').catch(() => {}) || []
+        default:
+            return ytsr.default.search(query, { type: 'video' }).catch(() => {}) || []
         }
     }
 
@@ -763,7 +797,7 @@ class Player extends EventEmitter {
     }
 
     _playYTDLStream (queue, updateFilter) {
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
             const ffmeg = this.util.checkFFMPEG()
             if (!ffmeg) return
             const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
@@ -779,14 +813,25 @@ class Player extends EventEmitter {
             } else {
                 encoderArgs = ['-af', encoderArgsFilters.join(',')]
             }
-            const newStream = ytdl(queue.playing.url, {
-                quality: this.options.quality === 'low' ? 'lowestaudio' : 'highestaudio',
-                filter: 'audioonly',
-                opusEncoded: true,
-                encoderArgs,
-                seek: seekTime / 1000,
-                highWaterMark: 1 << 25
-            })
+
+            let newStream
+            if (!queue.playing.soundcloud) {
+                newStream = ytdl(queue.playing.url, {
+                    quality: this.options.quality === 'low' ? 'lowestaudio' : 'highestaudio',
+                    filter: 'audioonly',
+                    opusEncoded: true,
+                    encoderArgs,
+                    seek: seekTime / 1000,
+                    highWaterMark: 1 << 25
+                })
+            } else {
+                newStream = ytdl.arbitraryStream(await queue.playing.soundcloud.downloadProgressive(), {
+                    opusEncoded: true,
+                    encoderArgs,
+                    seek: seekTime / 1000
+                })
+            }
+
             setTimeout(() => {
                 if (queue.stream) queue.stream.destroy()
                 queue.stream = newStream
