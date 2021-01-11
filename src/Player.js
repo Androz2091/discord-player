@@ -149,6 +149,16 @@ class Player extends EventEmitter {
     }
 
     /**
+     * Returns all the available audio filters
+     * @type {Filters}
+     * @example const filters = require('discord-player').Player.AudioFilters
+     * console.log(`There are ${Object.keys(filters).length} filters!`)
+     */
+    static get AudioFilters () {
+        return filters
+    }
+
+    /**
      * @ignore
      * @param {String} query
      */
