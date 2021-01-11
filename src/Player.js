@@ -795,10 +795,10 @@ class Player extends EventEmitter {
             if (this.options.leaveOnEnd && !queue.stopped) {
                 setTimeout(() => {
                     queue.voiceConnection.channel.leave()
-                    // Remove the guild from the guilds list
-                    this.queues.delete(queue.guildID)
                 }, this.options.leaveOnEndCooldown || 0)
             }
+            // Remove the guild from the guilds list
+            this.queues.delete(queue.guildID)
             // Emit stop event
             if (queue.stopped) {
                 return this.emit('musicStop')
