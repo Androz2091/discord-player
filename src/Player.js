@@ -31,6 +31,15 @@ const Client = new soundcloud.Client()
  * @property {boolean} [haas=false] Whether the haas filter is enabled.
  * @property {boolean} [mcompand=false] Whether the mcompand filter is enabled.
  * @property {boolean} [mono=false] Whether the mono output is enabled.
+ * @property {boolean} [mstlr=false] Whether M/S signal to L/R signal converter is enabled.
+ * @property {boolean} [mstrr=false] Whether M/S signal to R/R signal converter is enabled.
+ * @property {boolean} [compressor=false] Whether compressor filter is enabled.
+ * @property {boolean} [expander=false] Whether expander filter is enabled.
+ * @property {boolean} [softlimiter=false] Whether softlimiter filter is enabled.
+ * @property {boolean} [chorus=false] Whether chorus filter is enabled.
+ * @property {boolean} [chorus2d=false] Whether chorus2d filter is enabled.
+ * @property {boolean} [chorus3d=false] Whether chorus3d filter is enabled.
+ * @property {boolean} [fadein=false] Whether fadein filter is enabled.
  */
 
 const filters = {
@@ -52,7 +61,16 @@ const filters = {
     gate: 'agate',
     haas: 'haas',
     mcompand: 'mcompand',
-    mono: 'pan=mono|c0=.5*c0+.5*c1'
+    mono: 'pan=mono|c0=.5*c0+.5*c1',
+    mstlr: 'stereotools=mode=ms>lr',
+    mstrr: 'stereotools=mode=ms>rr',
+    compressor: 'compand=points=-80/-105|-62/-80|-15.4/-15.4|0/-12|20/-7.6',
+    expander: 'compand=attacks=0:points=-80/-169|-54/-80|-49.5/-64.6|-41.1/-41.1|-25.8/-15|-10.8/-4.5|0/0|20/8.3',
+    softlimiter: 'compand=attacks=0:points=-80/-80|-12.4/-12.4|-6/-8|0/-6.8|20/-2.8',
+    chorus: 'chorus=0.7:0.9:55:0.4:0.25:2',
+    chorus2d: 'chorus=0.6:0.9:50|60:0.4|0.32:0.25|0.4:2|1.3',
+    chorus3d: 'chorus=0.5:0.9:50|60|40:0.4|0.32|0.3:0.25|0.4|0.3:2|2.3|1.3',
+    fadein: 'afade=t=in:ss=0:d=10'
 }
 
 /**
@@ -94,7 +112,7 @@ class Player extends EventEmitter {
          * @type {Util}
          */
         this.util = Util
-        this.util.checkFFMPEG();
+        this.util.checkFFMPEG()
 
         /**
          * Discord.js client instance
@@ -335,17 +353,18 @@ class Player extends EventEmitter {
             this._addTracksToQueue(message, playlist.tracks)
         }
     }
+
     async _handleSpotifyPlaylist (message, query) {
         const playlist = await spotify.getData(query)
         if (!playlist) return this.emit('noResults', message, query)
-        let tracks = []
-        let s;
-        for (var i = 0; i < playlist.tracks.items.length; i++) {
-            let query = `${playlist.tracks.items[i].track.artists[0].name} - ${playlist.tracks.items[i].track.name}`
-            let results = await ytsr.search(query, { type: 'video' })
+        const tracks = []
+        let s = 0
+        for (let i = 0; i < playlist.tracks.items.length; i++) {
+            const query = `${playlist.tracks.items[i].track.artists[0].name} - ${playlist.tracks.items[i].track.name}`
+            const results = await ytsr.search(query, { type: 'video', limit: 1 })
             if (results.length < 1) {
-               s++ // could be used later for skipped tracks due to result not being found
-               continue;
+                s++ // could be used later for skipped tracks due to result not being found
+                continue
             }
             tracks.push(results[0])
         }
@@ -363,21 +382,22 @@ class Player extends EventEmitter {
             this._addTracksToQueue(message, playlist.tracks)
         }
     }
+
     async _handleSpotifyAlbum (message, query) {
         const album = await spotify.getData(query)
         if (!album) return this.emit('noResults', message, query)
-        let tracks = []
-        let s;
-        for (var i = 0; i < album.tracks.items.length; i++) {
-            let query = `${album.tracks.items[i].artists[0].name} - ${album.tracks.items[i].name}`
-            let results = await ytsr.search(query, { type: 'video' })
+        const tracks = []
+        let s = 0
+        for (let i = 0; i < album.tracks.items.length; i++) {
+            const query = `${album.tracks.items[i].artists[0].name} - ${album.tracks.items[i].name}`
+            const results = await ytsr.search(query, { type: 'video' })
             if (results.length < 1) {
-               s++ // could be used later for skipped tracks due to result not being found
-               continue;
+                s++ // could be used later for skipped tracks due to result not being found
+                continue
             }
             tracks.push(results[0])
         }
-        
+
         album.tracks = tracks.map((item) => new Track(item, message.author))
         album.duration = album.tracks.reduce((prev, next) => prev + next.duration, 0)
         album.thumbnail = album.images[0].url
@@ -392,6 +412,7 @@ class Player extends EventEmitter {
             this._addTracksToQueue(message, album.tracks)
         }
     }
+
     /**
      * Play a track in the server. Supported query types are `keywords`, `YouTube video links`, `YouTube playlists links`, `Spotify track link` or `SoundCloud song link`.
      * @param {Discord.Message} message Discord `message`
@@ -733,8 +754,8 @@ class Player extends EventEmitter {
 
     _playYTDLStream (queue, updateFilter) {
         return new Promise((resolve) => {
-            const ffmeg = this.util.checkFFMPEG();
-            if (!ffmeg) return;
+            const ffmeg = this.util.checkFFMPEG()
+            if (!ffmeg) return
             const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
             const encoderArgsFilters = []
             Object.keys(queue.filters).forEach((filterName) => {
