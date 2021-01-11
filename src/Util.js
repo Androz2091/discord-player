@@ -15,15 +15,15 @@ module.exports = class Util {
         try {
             const prism = require('prism-media')
             prism.FFmpeg.getInfo()
-            return true;
-        } catch (e) {
-            this.alertFFMPEG();
-            return false;
+            return true
+        } catch {
+            this.alertFFMPEG()
+            return false
         }
     }
 
     static alertFFMPEG () {
-        console.log(chalk.red('ERROR:'), 'FFMPEG is not installed. Install with "npm install ffmpeg-static" or download it here: https://ffmpeg.org/download.html.');
+        console.log(chalk.red('ERROR:'), 'FFMPEG is not installed. Install with "npm install ffmpeg-static" or download it here: https://ffmpeg.org/download.html.')
     }
 
     static isVoiceEmpty (channel) {
@@ -41,8 +41,8 @@ module.exports = class Util {
     static isSpotifyPLLink (query) {
         return spotifyPlaylistRegex.test(query)
     }
-    
-    static isSpotifyAlbumLink(query) {
+
+    static isSpotifyAlbumLink (query) {
         return spotifyAlbumRegex.test(query)
     }
 
