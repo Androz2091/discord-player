@@ -247,7 +247,9 @@ declare module 'discord-player' {
     }
 
     class Facebook {
-
+        static validateURL(url: string): boolean;
+        static download(url: string): Promise<Readable>;
+        static getInfo(url: string): Promise<FacebookExtractedData>;
     }
 
     class Vimeo {
