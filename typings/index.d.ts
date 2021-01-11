@@ -23,6 +23,7 @@ declare module 'discord-player' {
         public queues: Collection<Snowflake, Queue>;
         public filters: PlayerFilters;
 
+        public static get AudioFilters(): PlayerFilters;
         public isPlaying(message: Message): boolean;
         public setFilters(message: Message, newFilters: Partial<Filters>): Promise<void>;
         public play(message: Message, query: string | Track, firstResult?: boolean): Promise<void>;
@@ -55,7 +56,36 @@ declare module 'discord-player' {
         autoSelfDeaf: boolean;
         quality: MusicQuality;
     }
-    type Filters = 'bassboost' | '8D' | 'vaporwave' | 'nightcore'| 'phaser' | 'tremolo' | 'vibrato' | 'reverse' | 'treble' | 'normalizer' | 'surrounding' | 'pulsator' | 'subboost' | 'karaoke' | 'flanger' | 'gate' | 'haas' | 'mcompand';
+    type Filters = 
+        | 'bassboost' 
+        | '8D' 
+        | 'vaporwave' 
+        | 'nightcore'
+        | 'phaser' 
+        | 'tremolo' 
+        | 'vibrato' 
+        | 'reverse' 
+        | 'treble' 
+        | 'normalizer' 
+        | 'surrounding' 
+        | 'pulsator' 
+        | 'subboost' 
+        | 'karaoke' 
+        | 'flanger' 
+        | 'gate' 
+        | 'haas' 
+        | 'mcompand' 
+        | 'mono' 
+        | 'mstlr' 
+        | 'mstrr' 
+        | 'compressor' 
+        | 'expander' 
+        | 'softlimiter' 
+        | 'chorus' 
+        | 'chorus2d' 
+        | 'chorus3d' 
+        | 'fadein';
+
     type FiltersStatuses = {
         [key in Filters]: boolean;
     }
