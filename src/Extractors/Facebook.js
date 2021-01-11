@@ -104,7 +104,7 @@ class Facebook {
             }
 
             return obj
-        } catch (e) {
+        } catch {
             return null
         }
     }

@@ -2,7 +2,7 @@ declare module 'discord-player' {
     import { EventEmitter } from 'events';
     import { Client, Collection, Message, MessageCollector, Snowflake, User, VoiceChannel, VoiceConnection } from 'discord.js';
     import { Playlist as YTSRPlaylist } from 'youtube-sr';
-    import { Stream } from 'stream';
+    import { Stream, Readable } from 'stream';
 
     export const version: string;
 
@@ -158,4 +158,108 @@ declare module 'discord-player' {
         public durationMS: number;
         public queue: Queue;
     }
+
+    export interface RawExtractedData {
+        title: string;
+        format: string;
+        size: number;
+        sizeFormat: "MB";
+        stream: Readable;
+    }
+
+    export interface VimeoExtractedData {
+        id: number;
+        duration: number;
+        title: string;
+        url: string;
+        thumbnail: string;
+        width: number;
+        height: number;
+        stream: {
+            cdn: string;
+            fps: number;
+            width: number;
+            height: number;
+            id: string;
+            mime: string;
+            origin: string;
+            profile: number;
+            quality: string;
+            url: string;
+        };
+        author: {
+            accountType: string;
+            id: number;
+            name: string;
+            url: string;
+            avatar: string;
+        }
+    }
+
+    interface FacebookExtractedData {
+        name: string;
+        title: string;
+        description: string;
+        rawVideo: string;
+        thumbnail: string;
+        uploadedAt: Date;
+        duration: string;
+        interactionCount: number;
+        streamURL: string;
+        publishedAt: Date;
+        width: number;
+        height: number;
+        nsfw: boolean;
+        genre: string;
+        keywords: string[];
+        comments: number;
+        size: string;
+        quality: string;
+        author: {
+            type: string;
+            name: string;
+            url: string;
+        };
+        publisher: {
+            type: string;
+            name: string;
+            url: string;
+            avatar: string;
+        };
+        url: string;
+        reactions: {
+            total: number;
+            like: number;
+            love: number;
+            care: number;
+            wow: number;
+            haha: number;
+            sad: number;
+            angry: number;
+        };
+        shares: string;
+        views: string;
+    }
+
+    class Discord {
+        static getInfo(url: string): Promise<RawExtractedData>;
+        static download(url: string): Promise<Readable>;
+    }
+
+    class Facebook {
+
+    }
+
+    class Vimeo {
+        static getInfo(id: number): Promise<VimeoExtractedData>;
+        static download(id: number): Promise<Readable>;
+    }
+
+    interface Extractors {
+        DiscordExtractor: Discord;
+        FacebookExtractor: Facebook;
+        VimeoExtractor: Vimeo;
+    }
+
+    export const Extractors: Extractors;
 }
