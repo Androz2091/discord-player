@@ -5,6 +5,8 @@ const chalk = require('chalk')
 const spotifySongRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)
 const spotifyPlaylistRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})/)
 const spotifyAlbumRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:album\/|\?uri=spotify:album:)((\w|-){22})/)
+const vimeoRegex = (/(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)/)
+const facebookRegex = (/(https?:\/\/)(www\.|m\.)?(facebook|fb).com\/.*\/videos\/.*/)
 
 module.exports = class Util {
     constructor () {
@@ -52,5 +54,21 @@ module.exports = class Util {
 
     static isYTVideoLink (query) {
         return ytsr.validate(query, 'VIDEO')
+    }
+
+    static isSoundcloudPlaylist (query) {
+        return Util.isSoundcloudLink(query) && query.includes('/sets/')
+    }
+
+    static isVimeoLink (query) {
+        return vimeoRegex.test(query)
+    }
+
+    static getVimeoID (query) {
+        return Util.isVimeoLink(query) ? query.split('/').filter(x => !!x).pop() : null
+    }
+
+    static isFacebookLink (query) {
+        return facebookRegex.test(query)
     }
 }

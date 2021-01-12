@@ -33,7 +33,7 @@ class Vimeo {
      * @param {number} id Video id
      */
     static async getInfo (id) {
-        if (!id || typeof id !== 'number') throw new Error('Invalid url')
+        if (!id) throw new Error('Invalid id')
         const url = `https://player.vimeo.com/video/${id}`
 
         try {

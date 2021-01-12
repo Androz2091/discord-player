@@ -346,12 +346,16 @@ class Player extends EventEmitter {
      * @param {String} query
      */
     async _handlePlaylist (message, query) {
+        this.emit('playlistParseStart', {}, message)
         const playlist = await ytsr.getPlaylist(query)
         if (!playlist) return this.emit('noResults', message, query)
         playlist.tracks = playlist.videos.map((item) => new Track(item, message.author, this, true))
         playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
         playlist.thumbnail = playlist.tracks[0].thumbnail
         playlist.requestedBy = message.author
+
+        this.emit('playlistParseEnd', playlist, message)
+
         if (this.isPlaying(message)) {
             const queue = this._addTracksToQueue(message, playlist.tracks)
             this.emit('playlistAdd', message, queue, playlist)
@@ -364,6 +368,7 @@ class Player extends EventEmitter {
     }
 
     async _handleSpotifyPlaylist (message, query) {
+        this.emit('playlistParseStart', {}, message)
         const playlist = await spotify.getData(query)
         if (!playlist) return this.emit('noResults', message, query)
         const tracks = []
@@ -381,6 +386,8 @@ class Player extends EventEmitter {
         playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
         playlist.thumbnail = playlist.images[0].url
         playlist.requestedBy = message.author
+
+        this.emit('playlistParseEnd', playlist, message)
         if (this.isPlaying(message)) {
             const queue = this._addTracksToQueue(message, playlist.tracks)
             this.emit('playlistAdd', message, queue, playlist)
@@ -422,6 +429,64 @@ class Player extends EventEmitter {
         }
     }
 
+    async _handleSoundCloudPlaylist (message, query) {
+        const data = await Client.getPlaylist(query, { removeUnknown: true }).catch(() => {})
+        if (!data) return this.emit('noResults', message, query)
+
+        const res = {
+            id: data.id,
+            title: data.title,
+            tracks: [],
+            author: data.author,
+            duration: 0,
+            thumbnail: data.thumbnail,
+            requestedBy: message.author
+        }
+
+        this.emit('playlistParseStart', res, message)
+
+        for (let i = 0; i < data.tracks.length; i++) {
+            const track = data.tracks[i]
+
+            const song = await Client.getSongInfo(track.permalink_url).catch(() => {})
+            if (!song) continue
+
+            const r = new Track({
+                title: song.title,
+                url: song.url,
+                lengthSeconds: song.duration / 1000,
+                description: song.description,
+                thumbnail: song.thumbnail,
+                views: song.playCount,
+                author: song.author
+            }, message.author, this, true)
+
+            Object.defineProperty(r, 'soundcloud', {
+                get: () => song
+            })
+
+            res.tracks.push(r)
+        }
+
+        if (!res.tracks.length) {
+            this.emit('playlistParseEnd', res, message)
+            return this.emit('error', new Error('Could not parse playlist'), message)
+        }
+
+        res.duration = res.tracks.reduce((a, c) => a + c.lengthSeconds, 0)
+
+        this.emit('playlistParseEnd', res, message)
+        if (this.isPlaying(message)) {
+            const queue = this._addTracksToQueue(message, res.tracks)
+            this.emit('playlistAdd', message, queue, res)
+        } else {
+            const track = res.tracks.shift()
+            const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            this.emit('trackStart', message, queue.tracks[0])
+            this._addTracksToQueue(message, res.tracks)
+        }
+    }
+
     async _handleSoundCloudTrack (message, query) {
         const data = await Client.getSongInfo(query).catch(() => {})
         if (!data) {
@@ -437,7 +502,7 @@ class Player extends EventEmitter {
             thumbnail: data.thumbnail,
             views: data.playCount,
             author: data.author
-        }, message.author)
+        }, message.author, this)
 
         Object.defineProperty(track, 'soundcloud', {
             get: () => data
@@ -446,6 +511,12 @@ class Player extends EventEmitter {
         return track
     }
 
+    /**
+     * Custom search function
+     * @param {string} query Search query
+     * @param {("youtube"|"soundcloud")} type Search type
+     * @returns {Promise<any[]>}
+     */
     async search (query, type = 'youtube') {
         if (!query || typeof query !== 'string') return []
 
@@ -477,6 +548,10 @@ class Player extends EventEmitter {
         if (this.util.isSpotifyAlbumLink(query)) {
             return this._handleSpotifyAlbum(message, query)
         }
+        if (this.util.isSoundcloudPlaylist(query)) {
+            return this._handleSoundCloudPlaylist(message, query)
+        }
+
         let trackToPlay
         if (query instanceof Track) {
             trackToPlay = query
@@ -989,4 +1064,18 @@ module.exports = Player
  * @event Player#error
  * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying` or `LiveVideo`.
  * @param {Discord.Message} message
+ */
+
+/**
+ * Emitted when discord-player attempts to parse playlist contents (mostly soundcloud playlists)
+ * @event Player#playlistParseStart
+ * @param {Object} playlist Raw playlist (unparsed)
+ * @param {Discord.Message} message The message
+ */
+
+/**
+ * Emitted when discord-player finishes parsing playlist contents (mostly soundcloud playlists)
+ * @event Player#playlistParseEnd
+ * @param {Object} playlist The playlist data (parsed)
+ * @param {Discord.Message} message The message
  */
