@@ -71,4 +71,13 @@ module.exports = class Util {
     static isFacebookLink (query) {
         return facebookRegex.test(query)
     }
+
+    static buildTimecode (data) {
+        const items = Object.keys(data)
+        const required = ['days', 'hours', 'minutes', 'seconds']
+
+        const parsed = items.filter(x => required.includes(x)).map(m => data[m] > 0 ? data[m] : '')
+        const final = parsed.filter(x => !!x).join(':')
+        return final.length <= 3 ? `0:${final.length === 1 ? `0${final}` : final || 0}` : final
+    }
 }

@@ -3,7 +3,7 @@ const Discord = require('discord.js')
 const ytsr = require('youtube-sr')
 const spotify = require('spotify-url-info')
 const soundcloud = require('soundcloud-scraper')
-const moment = require('moment')
+const ms = require('parse-ms')
 const Queue = require('./Queue')
 const Track = require('./Track')
 const Util = require('./Util')
@@ -826,14 +826,16 @@ class Player extends EventEmitter {
             const bar = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬'.split('')
             bar.splice(index, 0, '🔘')
             if (timecodes) {
-                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                const parsed = ms(currentStreamTime)
+                const currentTimecode = Util.buildTimecode(parsed)
                 return `${currentTimecode} ┃ ${bar.join('')} ┃ ${queue.playing.duration}`
             } else {
                 return `${bar.join('')}`
             }
         } else {
             if (timecodes) {
-                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                const parsed = ms(currentStreamTime)
+                const currentTimecode = Util.buildTimecode(parsed)
                 return `${currentTimecode} ┃ 🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ┃ ${queue.playing.duration}`
             } else {
                 return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
