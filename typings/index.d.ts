@@ -12,6 +12,10 @@ declare module 'discord-player' {
         static isSpotifyLink(query: string): boolean;
         static isYTPlaylistLink(query: string): boolean;
         static isYTVideoLink(query: string): boolean;
+        static isSoundcloudPlaylist(query: string): boolean;
+        static isVimeoLink(query: string): boolean;
+        static getVimeoID(query: string): string;
+        static isFacebookLink(query: string): boolean;
     }
 
     export class Player extends EventEmitter {
@@ -117,6 +121,8 @@ declare module 'discord-player' {
         queueCreate: [Message, Queue];
         queueEnd: [Message, Queue];
         error: [PlayerError, Message];
+        playlistParseStart: [any, Message];
+        playlistParseEnd: [any, Message];
     }
     class Queue {
         constructor(guildID: string, message: Message, filters: PlayerFilters);
