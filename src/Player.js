@@ -679,7 +679,7 @@ class Player extends EventEmitter {
                 encoderArgs = ['-af', encoderArgsFilters.join(',')]
             }
             const newStream = ytdl(queue.playing.url, {
-                filter: 'audioonly',
+                quality: 'highestaudio',
                 opusEncoded: true,
                 encoderArgs,
                 seek: seekTime / 1000,
