@@ -762,7 +762,13 @@ class Player extends EventEmitter {
         if (!queue) return this.emit('error', 'NotPlaying', message)
         // Shuffle the queue (except the first track)
         const currentTrack = queue.tracks.shift()
-        queue.tracks = queue.tracks.sort(() => Math.random() - 0.5)
+
+        // Durstenfeld shuffle algorithm
+        for (let i = queue.tracks.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [queue.tracks[i], queue.tracks[j]] = [queue.tracks[j], queue.tracks[i]]
+        }
+
         queue.tracks.unshift(currentTrack)
         // Return the queue
         return queue
