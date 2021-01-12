@@ -16,6 +16,7 @@ declare module 'discord-player' {
         static isVimeoLink(query: string): boolean;
         static getVimeoID(query: string): string;
         static isFacebookLink(query: string): boolean;
+        static buildTimecode(data: any): string;
     }
 
     export class Player extends EventEmitter {
@@ -106,7 +107,7 @@ declare module 'discord-player' {
         requestedBy: User;
     }
     type Playlist = YTSRPlaylist & CustomPlaylist;
-    type PlayerError = 'NotConnected' | 'UnableToJoin' | 'NotPlaying' | 'LiveVideo';
+    type PlayerError = 'NotConnected' | 'UnableToJoin' | 'NotPlaying' | 'LiveVideo' | 'ParseError';
     interface PlayerEvents {
         searchResults: [Message, string, Track[]];
         searchInvalidResponse: [Message, string, Track[], string, MessageCollector];

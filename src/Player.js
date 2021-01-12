@@ -470,7 +470,7 @@ class Player extends EventEmitter {
 
         if (!res.tracks.length) {
             this.emit('playlistParseEnd', res, message)
-            return this.emit('error', new Error('Could not parse playlist'), message)
+            return this.emit('error', 'ParseError', message)
         }
 
         res.duration = res.tracks.reduce((a, c) => a + c.lengthSeconds, 0)
@@ -1070,7 +1070,7 @@ module.exports = Player
 /**
  * Emitted when an error is triggered
  * @event Player#error
- * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying` or `LiveVideo`.
+ * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying`, `ParseError` or `LiveVideo`.
  * @param {Discord.Message} message
  */
 
