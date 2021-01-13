@@ -313,7 +313,7 @@ class Player extends EventEmitter {
      * @param {String} query
      */
     async _handlePlaylist (message, query) {
-        const playlist = await ytsr.getPlaylist(query)
+        const playlist = await ytsr.default.getPlaylist(query)
         if (!playlist) return this.emit('noResults', message, query)
         playlist.tracks = playlist.videos.map((item) => new Track(item, message.author, this, true))
         playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
