@@ -739,7 +739,7 @@ class Player extends EventEmitter {
             const encoderArgsFilters = []
             Object.keys(queue.filters).forEach((filterName) => {
                 if (queue.filters[filterName]) {
-                    encoderArgsFilters.push(filters[filterName])
+                    encoderArgsFilters.push(this.filters[filterName])
                 }
             })
             let encoderArgs
