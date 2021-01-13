@@ -1,4 +1,4 @@
-const ytsr = require('youtube-sr')
+const ytsr = require('youtube-sr').default
 const soundcloud = require('soundcloud-scraper')
 const chalk = require('chalk')
 

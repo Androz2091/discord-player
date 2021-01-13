@@ -1,6 +1,6 @@
 const ytdl = require('discord-ytdl-core')
 const Discord = require('discord.js')
-const ytsr = require('youtube-sr')
+const ytsr = require('youtube-sr').default
 const spotify = require('spotify-url-info')
 const soundcloud = require('soundcloud-scraper')
 const ms = require('parse-ms')
@@ -524,7 +524,7 @@ class Player extends EventEmitter {
         case 'soundcloud':
             return await Client.search(query, 'track').catch(() => {}) || []
         default:
-            return ytsr.default.search(query, { type: 'video' }).catch(() => {}) || []
+            return ytsr.search(query, { type: 'video' }).catch(() => {}) || []
         }
     }
 
