@@ -560,6 +560,11 @@ class Player extends EventEmitter {
      * client.player.play(message, "Despacito", true);
      */
     async play (message, query, firstResult = false) {
+        if (!query || typeof query !== 'string') throw new Error('Play function requires search query but received none!')
+
+        // clean query
+        query = query.replace(/<(.+)>/g, '$1')
+
         if (this.util.isYTPlaylistLink(query)) {
             return this._handlePlaylist(message, query)
         }
