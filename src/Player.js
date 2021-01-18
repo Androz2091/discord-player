@@ -203,9 +203,23 @@ class Player extends EventEmitter {
                     }
                 }
             } else if (queryType === 'soundcloud-song') {
-                const soundcloudData = await this._handleSoundCloudTrack(message, query)
-                if (soundcloudData) {
-                    tracks.push(soundcloudData)
+                const data = await Client.getSongInfo(query).catch(() => { })
+                if (data) {
+                    const track = new Track({
+                        title: data.title,
+                        url: data.url,
+                        lengthSeconds: data.duration / 1000,
+                        description: data.description,
+                        thumbnail: data.thumbnail,
+                        views: data.playCount,
+                        author: data.author
+                    }, message.author, this)
+
+                    Object.defineProperty(track, 'soundcloud', {
+                        get: () => data
+                    })
+
+                    tracks.push(track)
                 }
             }
 
@@ -506,30 +520,6 @@ class Player extends EventEmitter {
             this.emit('trackStart', message, queue.tracks[0])
             this._addTracksToQueue(message, res.tracks)
         }
-    }
-
-    async _handleSoundCloudTrack (message, query) {
-        const data = await Client.getSongInfo(query).catch(() => {})
-        if (!data) {
-            this.emit('noResults', message, query)
-            return
-        }
-
-        const track = new Track({
-            title: data.title,
-            url: data.url,
-            lengthSeconds: data.duration / 1000,
-            description: data.description,
-            thumbnail: data.thumbnail,
-            views: data.playCount,
-            author: data.author
-        }, message.author, this)
-
-        Object.defineProperty(track, 'soundcloud', {
-            get: () => data
-        })
-
-        return track
     }
 
     /**
