@@ -275,6 +275,27 @@ class Player extends EventEmitter {
     }
 
     /**
+     * Sets currently playing music duration
+     * @param {Discord.Message} message Discord message
+     * @param {number} time Time in ms
+     * @returns {Promise<void>}
+     */
+    setPosition (message, time) {
+        return new Promise((resolve) => {
+            const queue = this.queues.find((g) => g.guildID === message.guild.id)
+            if (!queue) return this.emit('error', 'NotPlaying', message)
+
+            if (typeof time !== 'number' && !isNaN(time)) time = parseInt(time)
+            if (queue.playing.durationMS === time) return this.skip(message)
+            if (queue.voiceConnection.dispatcher.streamTime === time || (queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime) === time) return resolve()
+            if (time < 0) this._playYTDLStream(queue, false).then(() => resolve())
+
+            this._playYTDLStream(queue, false, time)
+                .then(() => resolve())
+        })
+    }
+
+    /**
      * Check whether there is a music played in the server
      * @param {Discord.Message} message
      */
@@ -879,11 +900,11 @@ class Player extends EventEmitter {
         }, this.options.leaveOnEmptyCooldown || 0)
     }
 
-    _playYTDLStream (queue, updateFilter) {
+    _playYTDLStream (queue, updateFilter, seek) {
         return new Promise(async (resolve) => {
             const ffmeg = this.util.checkFFMPEG()
             if (!ffmeg) return
-            const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
+            const seekTime = typeof seek === 'number' ? seek : updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
             const encoderArgsFilters = []
             Object.keys(queue.filters).forEach((filterName) => {
                 if (queue.filters[filterName]) {
