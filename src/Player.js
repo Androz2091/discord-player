@@ -465,7 +465,7 @@ class Player extends EventEmitter {
     }
 
     async _handleSoundCloudPlaylist (message, query) {
-        const data = await Client.getPlaylist(query, { removeUnknown: true }).catch(() => {})
+        const data = await Client.getPlaylist(query).catch(() => {})
         if (!data) return this.emit('noResults', message, query)
 
         const res = {
@@ -481,10 +481,7 @@ class Player extends EventEmitter {
         this.emit('playlistParseStart', res, message)
 
         for (let i = 0; i < data.tracks.length; i++) {
-            const track = data.tracks[i]
-
-            const song = await Client.getSongInfo(track.permalink_url).catch(() => {})
-            if (!song) continue
+            const song = data.tracks[i]
 
             const r = new Track({
                 title: song.title,
@@ -492,8 +489,8 @@ class Player extends EventEmitter {
                 lengthSeconds: song.duration / 1000,
                 description: song.description,
                 thumbnail: song.thumbnail,
-                views: song.playCount,
-                author: song.author
+                views: song.playCount || 0,
+                author: song.author || data.author
             }, message.author, this, true)
 
             Object.defineProperty(r, 'soundcloud', {
