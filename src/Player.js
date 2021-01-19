@@ -9,6 +9,7 @@ const Track = require('./Track')
 const Util = require('./Util')
 const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
+const { VimeoExtractor, DiscordExtractor, FacebookExtractor } = require('./Extractors/Extractor')
 
 /**
  * @typedef Filters
@@ -173,6 +174,8 @@ class Player extends EventEmitter {
             return 'soundcloud-song'
         } else if (this.util.isSpotifyPLLink(query)) {
             return 'spotify-playlist'
+        } else if (this.util.isVimeoLink(query)) {
+            return 'vimeo'
         } else {
             return 'youtube-video-keywords'
         }
@@ -221,6 +224,30 @@ class Player extends EventEmitter {
 
                     tracks.push(track)
                 }
+            } else if (queryType === 'vimeo') {
+                const data = await VimeoExtractor.getInfo(this.util.getVimeoID(query)).catch(e => {})
+                if (!data) return this.emit('noResults', message, query)
+
+                const track = new Track({
+                    title: data.title,
+                    url: data.url,
+                    thumbnail: data.thumbnail,
+                    lengthSeconds: data.duration,
+                    description: '',
+                    views: 0,
+                    author: data.author
+                }, message.author, this)
+
+                Object.defineProperties(track, {
+                    arbitrary: {
+                        get: () => true
+                    },
+                    stream: {
+                        get: () => data.stream.url
+                    }
+                })
+
+                tracks.push(track)
             }
 
             if (queryType === 'youtube-video-keywords') {
@@ -911,7 +938,7 @@ class Player extends EventEmitter {
             }
 
             let newStream
-            if (!queue.playing.soundcloud) {
+            if (!queue.playing.soundcloud && !queue.playing.arbitrary) {
                 newStream = ytdl(queue.playing.url, {
                     quality: this.options.quality === 'low' ? 'lowestaudio' : 'highestaudio',
                     filter: 'audioonly',
@@ -919,6 +946,12 @@ class Player extends EventEmitter {
                     encoderArgs,
                     seek: seekTime / 1000,
                     highWaterMark: 1 << 25
+                })
+            } else if (queue.playing.arbitrary) {
+                newStream = ytdl.arbitraryStream(queue.playing.stream, {
+                    opusEncoded: true,
+                    encoderArgs,
+                    seek: seekTime / 1000
                 })
             } else {
                 newStream = ytdl.arbitraryStream(await queue.playing.soundcloud.downloadProgressive(), {

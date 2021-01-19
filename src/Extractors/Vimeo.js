@@ -1,5 +1,4 @@
 const fetch = require('node-fetch').default
-const { JSDOM } = require('jsdom')
 
 class Vimeo {
     constructor () {
@@ -46,7 +45,7 @@ class Vimeo {
                 duration: json.video.duration,
                 title: json.video.title,
                 url: json.video.url,
-                thumbnail: json.video.thumbs['1280'],
+                thumbnail: json.video.thumbs['1280'] || json.video.thumbs.base,
                 width: json.video.width,
                 height: json.video.height,
                 stream: json.request.files.progressive[0],
