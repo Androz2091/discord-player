@@ -974,14 +974,8 @@ class Player extends EventEmitter {
                     seek: seekTime / 1000,
                     highWaterMark: 1 << 25
                 })
-            } else if (queue.playing.arbitrary) {
-                newStream = ytdl.arbitraryStream(queue.playing.stream, {
-                    opusEncoded: true,
-                    encoderArgs,
-                    seek: seekTime / 1000
-                })
             } else {
-                newStream = ytdl.arbitraryStream(await queue.playing.soundcloud.downloadProgressive(), {
+                newStream = ytdl.arbitraryStream(queue.playing.soundcloud ? await queue.playing.soundcloud.downloadProgressive() : queue.playing.stream, {
                     opusEncoded: true,
                     encoderArgs,
                     seek: seekTime / 1000
