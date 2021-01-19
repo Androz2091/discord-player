@@ -279,7 +279,7 @@ class Player extends EventEmitter {
 
             if (queryType === 'youtube-video-keywords') {
                 await ytsr.search(updatedQuery || query, { type: 'video' }).then((results) => {
-                    if (results.length !== 0) {
+                    if (results && results.length !== 0) {
                         tracks = results.map((r) => new Track(r, message.author, this))
                     }
                 }).catch(() => {})
