@@ -83,6 +83,8 @@ const filters = {
  * @property {number} [leaveOnEmptyCooldown=0] Used when leaveOnEmpty is enabled, to let the time to users to come back in the voice channel.
  * @property {boolean} [autoSelfDeaf=true] Whether the bot should automatically turn off its headphones when joining a voice channel.
  * @property {string} [quality='high'] Music quality (high or low)
+ * @property {boolean} [enableLive=false] If it should enable live contents
+ * @property {object} [ytdlRequestOptions={}] YTDL request options to use cookies, proxy etc..
  */
 
 /**
@@ -96,7 +98,9 @@ const defaultPlayerOptions = {
     leaveOnEmpty: true,
     leaveOnEmptyCooldown: 0,
     autoSelfDeaf: true,
-    quality: 'high'
+    quality: 'high',
+    enableLive: false,
+    ytdlRequestOptions: {}
 }
 
 class Player extends EventEmitter {
@@ -253,7 +257,7 @@ class Player extends EventEmitter {
             } else if (queryType === 'facebook') {
                 const data = await FacebookExtractor.getInfo(query).catch(e => {})
                 if (!data) return this.emit('noResults', message, query)
-                if (data.live) return this.emit('error', 'LiveVideo', message)
+                if (data.live && !this.options.enableLive) return this.emit('error', 'LiveVideo', message)
 
                 const track = new Track({
                     title: data.title,
@@ -624,7 +628,7 @@ class Player extends EventEmitter {
             trackToPlay = query
         } else if (this.util.isYTVideoLink(query)) {
             const videoData = await ytdl.getBasicInfo(query)
-            if (videoData.videoDetails.isLiveContent) return this.emit('error', 'LiveVideo', message)
+            if (videoData.videoDetails.isLiveContent && !this.options.enableLive) return this.emit('error', 'LiveVideo', message)
             const lastThumbnail = videoData.videoDetails.thumbnails.length - 1 /* get the highest quality thumbnail */
             trackToPlay = new Track({
                 title: videoData.videoDetails.title,
@@ -972,7 +976,8 @@ class Player extends EventEmitter {
                     opusEncoded: true,
                     encoderArgs,
                     seek: seekTime / 1000,
-                    highWaterMark: 1 << 25
+                    highWaterMark: 1 << 25,
+                    requestOptions: this.options.ytdlRequestOptions || {}
                 })
             } else {
                 newStream = ytdl.arbitraryStream(queue.playing.soundcloud ? await queue.playing.soundcloud.downloadProgressive() : queue.playing.stream, {
