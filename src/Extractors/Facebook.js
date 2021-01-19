@@ -70,6 +70,7 @@ class Facebook {
                 publishedAt: new Date(json.datePublished),
                 width: json.width,
                 height: json.height,
+                live: !!json.publication[0].isLiveBroadcast,
                 nsfw: !json.isFamilyFriendly,
                 genre: json.genre,
                 keywords: json.keywords ? json.keywords.split(', ') : [],

@@ -176,6 +176,8 @@ class Player extends EventEmitter {
             return 'spotify-playlist'
         } else if (this.util.isVimeoLink(query)) {
             return 'vimeo'
+        } else if (FacebookExtractor.validateURL(query)) {
+            return 'facebook'
         } else {
             return 'youtube-video-keywords'
         }
@@ -244,6 +246,31 @@ class Player extends EventEmitter {
                     },
                     stream: {
                         get: () => data.stream.url
+                    }
+                })
+
+                tracks.push(track)
+            } else if (queryType === 'facebook') {
+                const data = await FacebookExtractor.getInfo(query).catch(e => {})
+                if (!data) return this.emit('noResults', message, query)
+                if (data.live) return this.emit('error', 'LiveVideo', message)
+
+                const track = new Track({
+                    title: data.title,
+                    url: data.url,
+                    thumbnail: data.thumbnail,
+                    lengthSeconds: data.duration,
+                    description: data.description,
+                    views: data.views || data.interactionCount,
+                    author: data.author
+                }, message.author, this)
+
+                Object.defineProperties(track, {
+                    arbitrary: {
+                        get: () => true
+                    },
+                    stream: {
+                        get: () => data.streamURL
                     }
                 })
 
