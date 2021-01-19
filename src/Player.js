@@ -488,7 +488,7 @@ class Player extends EventEmitter {
                 url: song.url,
                 lengthSeconds: song.duration / 1000,
                 description: song.description,
-                thumbnail: song.thumbnail || '',
+                thumbnail: song.thumbnail || 'https://soundcloud.com/pwa-icon-192.png',
                 views: song.playCount || 0,
                 author: song.author || data.author
             }, message.author, this, true)
