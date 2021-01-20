@@ -442,6 +442,23 @@ class Player extends EventEmitter {
     }
 
     /**
+     * Moves to new voice channel
+     * @param {Discord.Message} message Message
+     * @param {Discord.VoiceChannel} channel Voice channel
+     */
+    moveTo (message, channel) {
+        if (!channel || channel.type !== 'voice') return
+        const queue = this.queues.find((g) => g.guildID === message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (queue.voiceConnection.channel.id === channel.id) return
+
+        queue.voiceConnection.dispatcher.pause()
+        message.guild.voice.setChannel(channel)
+            .then(() => queue.voiceConnection.dispatcher.resume())
+            .catch(() => this.emit('error', 'UnableToJoin', message))
+    }
+
+    /**
      * Add a track to the queue
      * @ignore
      * @param {Discord.Message} message
