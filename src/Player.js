@@ -424,6 +424,16 @@ class Player extends EventEmitter {
     }
 
     /**
+     * Sets currently playing music duration
+     * @param {Discord.Message} message Discord message
+     * @param {number} time Time in ms
+     * @returns {Promise<void>}
+     */
+    seek (message, time) {
+        return this.setPosition(message, time)
+    }
+
+    /**
      * Check whether there is a music played in the server
      * @param {Discord.Message} message
      */
