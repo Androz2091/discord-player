@@ -38,6 +38,7 @@
     "merge-options": "^3.0.4",
     "node-fetch": "^2.6.0",
     "parse-ms": "^2.1.0",
+    "reverbnation-scraper": "^2.0.0",
     "soundcloud-scraper": "^4.0.3",
     "spotify-url-info": "^2.2.0",
     "youtube-sr": "^3.0.0",

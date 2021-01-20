@@ -9,7 +9,7 @@ const Track = require('./Track')
 const Util = require('./Util')
 const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
-const { VimeoExtractor, DiscordExtractor, FacebookExtractor } = require('./Extractors/Extractor')
+const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor } = require('./Extractors/Extractor')
 
 /**
  * @typedef Filters
@@ -182,6 +182,8 @@ class Player extends EventEmitter {
             return 'vimeo'
         } else if (FacebookExtractor.validateURL(query)) {
             return 'facebook'
+        } else if (this.util.isReverbnationLink(query)) {
+            return 'reverbnation'
         } else {
             return 'youtube-video-keywords'
         }
@@ -267,6 +269,30 @@ class Player extends EventEmitter {
                     description: data.description,
                     views: data.views || data.interactionCount,
                     author: data.author
+                }, message.author, this)
+
+                Object.defineProperties(track, {
+                    arbitrary: {
+                        get: () => true
+                    },
+                    stream: {
+                        get: () => data.streamURL
+                    }
+                })
+
+                tracks.push(track)
+            } else if (queryType === 'reverbnation') {
+                const data = await ReverbnationExtractor.getInfo(query).catch(() => {})
+                if (!data) return this.emit('noResults', message, query)
+
+                const track = new Track({
+                    title: data.title,
+                    url: data.url,
+                    thumbnail: data.thumbnail,
+                    lengthSeconds: data.duration / 1000,
+                    description: '',
+                    views: 0,
+                    author: data.artist
                 }, message.author, this)
 
                 Object.defineProperties(track, {

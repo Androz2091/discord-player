@@ -72,6 +72,10 @@ module.exports = class Util {
         return facebookRegex.test(query)
     }
 
+    static isReverbnationLink (query) {
+        return /https:\/\/(www.)?reverbnation.com\/(.+)\/song\/(.+)/.test(query)
+    }
+
     static buildTimecode (data) {
         const items = Object.keys(data)
         const required = ['days', 'hours', 'minutes', 'seconds']
