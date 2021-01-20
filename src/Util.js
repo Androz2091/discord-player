@@ -76,6 +76,10 @@ module.exports = class Util {
         return /https:\/\/(www.)?reverbnation.com\/(.+)\/song\/(.+)/.test(query)
     }
 
+    static isDiscordAttachment (query) {
+        return /https:\/\/cdn.discordapp.com\/attachments\/(\d{17,19})\/(\d{17,19})\/(.+)/.test(query)
+    }
+
     static buildTimecode (data) {
         const items = Object.keys(data)
         const required = ['days', 'hours', 'minutes', 'seconds']

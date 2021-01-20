@@ -167,7 +167,9 @@ class Player extends EventEmitter {
      * @ignore
      * @param {String} query
      */
-    resolveQueryType (query) {
+    resolveQueryType (query, forceType) {
+        if (forceType && typeof forceType === 'string') return forceType
+
         if (this.util.isSpotifyLink(query)) {
             return 'spotify-song'
         } else if (this.util.isYTPlaylistLink(query)) {
@@ -184,6 +186,8 @@ class Player extends EventEmitter {
             return 'facebook'
         } else if (this.util.isReverbnationLink(query)) {
             return 'reverbnation'
+        } else if (this.util.isDiscordAttachment(query)) {
+            return 'attachment'
         } else {
             return 'youtube-video-keywords'
         }
@@ -301,6 +305,32 @@ class Player extends EventEmitter {
                     },
                     stream: {
                         get: () => data.streamURL
+                    }
+                })
+
+                tracks.push(track)
+            } else if (queryType === 'attachment') {
+                const data = await DiscordExtractor.getInfo(query).catch(() => {})
+                if (!data || !data.format.startsWith('audio/')) return this.emit('noResults', message, query)
+
+                const track = new Track({
+                    title: data.title,
+                    url: query,
+                    thumbnail: '',
+                    lengthSeconds: 0,
+                    description: '',
+                    views: 0,
+                    author: {
+                        name: 'Media_Attachment'
+                    }
+                }, message.author, this)
+
+                Object.defineProperties(track, {
+                    arbitrary: {
+                        get: () => true
+                    },
+                    stream: {
+                        get: () => query
                     }
                 })
 
