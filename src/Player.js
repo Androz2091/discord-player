@@ -311,7 +311,7 @@ class Player extends EventEmitter {
                 tracks.push(track)
             } else if (queryType === 'attachment') {
                 const data = await DiscordExtractor.getInfo(query).catch(() => {})
-                if (!data || !data.format.startsWith('audio/')) return this.emit('noResults', message, query)
+                if (!data || !(data.format.startsWith('audio/') || data.format.startsWith('video/'))) return this.emit('noResults', message, query)
 
                 const track = new Track({
                     title: data.title,
