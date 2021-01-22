@@ -97,6 +97,12 @@ class Queue extends EventEmitter {
     get calculatedVolume () {
         return this.filters.bassboost ? this.volume + 50 : this.volume
     }
+
+    get currentStreamTime () {
+        return this.voiceConnection.dispatcher
+            ? this.voiceConnection.dispatcher.streamTime + this.additionalStreamTime
+            : 0
+    }
 }
 
 module.exports = Queue

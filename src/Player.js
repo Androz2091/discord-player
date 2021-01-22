@@ -668,9 +668,7 @@ class Player extends EventEmitter {
         if (!queue) return
         const timecodes = options && typeof options === 'object' ? options.timecodes : false
         // Stream time of the dispatcher
-        const currentStreamTime = queue.voiceConnection.dispatcher
-            ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime
-            : 0
+        const currentStreamTime = queue.currentStreamTime
         // Total stream time
         const totalTime = queue.playing.durationMS
         // Stream progress
