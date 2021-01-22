@@ -1,6 +1,5 @@
 const fetch = require('node-fetch').default
 const { JSDOM } = require('jsdom')
-const JSON5 = require('json5')
 
 class Facebook {
     constructor () {
@@ -54,9 +53,6 @@ class Facebook {
             const rawdata = document.querySelector('script[type="application/ld+json"]').innerHTML
             const json = JSON.parse(rawdata)
 
-            const reactions = html.split('top_reactions:{edges:')[1].split('},associated_video')[0]
-            const reactionData = JSON5.parse(reactions)
-
             const obj = {
                 name: json.name,
                 title: document.querySelector('meta[property="og:title"]').attributes.item(1).value,
@@ -89,17 +85,6 @@ class Facebook {
                     avatar: json.publisher.logo.url
                 },
                 url: html.split('",page_uri:"')[1].split('",')[0],
-                reactions: {
-                    total: parseInt(html.split(',reaction_count:')[1].split('},')[0].split(':')[1]) || 0,
-                    like: reactionData.find(x => x.node.reaction_type === 'LIKE').reaction_count || 0,
-                    love: reactionData.find(x => x.node.reaction_type === 'LOVE').reaction_count || 0,
-                    care: reactionData.find(x => x.node.reaction_type === 'SUPPORT').reaction_count || 0,
-                    wow: reactionData.find(x => x.node.reaction_type === 'WOW').reaction_count || 0,
-                    haha: reactionData.find(x => x.node.reaction_type === 'HAHA').reaction_count || 0,
-                    sad: reactionData.find(x => x.node.reaction_type === 'SORRY').reaction_count || 0,
-                    angry: reactionData.find(x => x.node.reaction_type === 'ANGER').reaction_count || 0
-
-                },
                 shares: html.split(',share_count:{')[1].split('},')[0].split(':')[1],
                 views: html.split(',video_view_count:')[1].split(',')[0]
             }

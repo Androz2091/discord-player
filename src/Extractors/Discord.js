@@ -26,6 +26,7 @@ class Discord {
     static getInfo (url) {
         return new Promise((resolve) => {
             https.get(url, res => {
+                console.log(res)
                 const data = {
                     title: res.req.path.split('/').pop(),
                     format: res.headers['content-type'],
