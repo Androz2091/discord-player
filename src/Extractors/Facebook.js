@@ -90,8 +90,7 @@ class Facebook {
             }
 
             return obj
-        } catch (e) {
-            console.error(e)
+        } catch {
             return null
         }
     }
