@@ -9,8 +9,7 @@ const Track = require('./Track')
 const Util = require('./Util')
 const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
-const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor } = require('./Extractors/Extractor')
-const { XVDL } = require('xvdl')
+const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor, XVideosExtractor } = require('./Extractors/Extractor')
 
 /**
  * @typedef Filters
@@ -339,7 +338,7 @@ class Player extends EventEmitter {
 
                 tracks.push(track)
             } else if (queryType === 'xvlink') {
-                const data = await XVDL.getInfo(query).catch(() => {})
+                const data = await XVideosExtractor.getInfo(query).catch(() => {})
                 if (!data || !(data.streams.lq || data.streams.hq)) return this.emit('noResults', message, query)
 
                 const track = new Track({
@@ -703,7 +702,7 @@ class Player extends EventEmitter {
             return await Client.search(query, 'track').catch(() => {}) || []
         case 'xvideos':
             // eslint-disable-next-line
-            let videos = await XVDL.search(query).catch(() => {})
+            let videos = await XVideosExtractor.search(query).catch(() => {})
             if (!videos) return []
             return videos.videos
         default:
