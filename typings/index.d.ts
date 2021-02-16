@@ -1,4 +1,4 @@
-declare module 'discord-player' {
+declare module 'discord-player-akumis' {
     import { EventEmitter } from 'events';
     import { Client, Collection, Message, MessageCollector, Snowflake, User, VoiceChannel, VoiceConnection } from 'discord.js';
     import { Playlist as YTSRPlaylist } from 'youtube-sr';
