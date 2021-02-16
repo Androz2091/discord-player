@@ -11,7 +11,7 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 ## Installation
 
 ```sh
-npm install --save discord-player
+npm install --save discord-player-akumis
 ```
 
 Install **@discordjs/opus**:
