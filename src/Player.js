@@ -722,10 +722,10 @@ class Player extends EventEmitter {
         if (queue.tracks.length === 1 && !queue.repeatMode && !firstPlay) {
             // Leave the voice channel
             if (this.options.leaveOnEnd && !queue.stopped) {
+                // Remove the guild from the guilds list
+                this.queues.delete(queue.guildID)
                 setTimeout(() => {
                     queue.voiceConnection.channel.leave()
-                    // Remove the guild from the guilds list
-                    this.queues.delete(queue.guildID)
                 }, this.options.leaveOnEndCooldown || 0)
             }
             // Emit stop event
