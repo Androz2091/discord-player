@@ -9,6 +9,7 @@ const Track = require('./Track')
 const Util = require('./Util')
 const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
+var timeout
 
 /**
  * @typedef Filters
@@ -341,6 +342,7 @@ class Player extends EventEmitter {
      * client.player.play(message, "Despacito", true);
      */
     async play (message, query, firstResult = false) {
+        clearTimeout(timeout)
         if (this.util.isYTPlaylistLink(query)) {
             return this._handlePlaylist(message, query)
         }
@@ -723,8 +725,8 @@ class Player extends EventEmitter {
             // Leave the voice channel
             if (this.options.leaveOnEnd && !queue.stopped) {
                  // Remove the guild from the guilds list
-                    this.queues.delete(queue.guildID)
-                setTimeout(() => {
+                 this.queues.delete(queue.guildID)
+                timeout = setTimeout(() => {
                     queue.voiceConnection.channel.leave()
                 }, this.options.leaveOnEndCooldown || 0)
             }
