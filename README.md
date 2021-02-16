@@ -1,4 +1,4 @@
-# Discord Player
+# Discord Player Modified By Akumiś
 
 [![downloadsBadge](https://img.shields.io/npm/dt/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
 [![versionBadge](https://img.shields.io/npm/v/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
