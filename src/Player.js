@@ -10,7 +10,6 @@ const Util = require('./Util')
 const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
 const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor, XVideosExtractor } = require('./Extractors/Extractor')
-var timeout
 
 /**
  * @typedef Filters
@@ -152,6 +151,12 @@ class Player extends EventEmitter {
          * @type {Discord.Collection<string, Discord.Collector>}
          */
         this._resultsCollectors = new Discord.Collection()
+
+        /**
+         * @private
+         * @type {Discord.Collection<string, Timeout>}
+         */
+        this._cooldownsTimeout = new Discord.Collection()
     }
 
     /**
@@ -722,7 +727,11 @@ class Player extends EventEmitter {
      * client.player.play(message, "Despacito", true);
      */
     async play (message, query, firstResult = false) {
-        clearTimeout(timeout)
+        if (this._cooldownsTimeout.has(`end_${message.guild.id}`)) {
+            clearTimeout(this._cooldownsTimeout.get(`end_${message.guild.id}`))
+            this._cooldownsTimeout.delete(`end_${message.guild.id}`)
+        }
+
         if (!query || typeof query !== 'string') throw new Error('Play function requires search query but received none!')
 
         // clean query
@@ -1049,21 +1058,29 @@ class Player extends EventEmitter {
 
         // process leaveOnEmpty checks
         if (!this.options.leaveOnEmpty) return
-        // If the member leaves a voice channel
-        if (!oldState.channelID || newState.channelID) return
-
-        // If the channel is not empty
-        if (!this.util.isVoiceEmpty(queue.voiceConnection.channel)) return
-        setTimeout(() => {
+        // If the member joins a voice channel
+        if (!oldState.channelID || newState.channelID) {
+            const emptyTimeout = this._cooldownsTimeout.get(`empty_${oldState.guild.id}`)
+            const channelEmpty = this.util.isVoiceEmpty(queue.voiceConnection.channel)
+            if (!channelEmpty && emptyTimeout) {
+                clearTimeout(emptyTimeout)
+                this._cooldownsTimeout.delete(`empty_${oldState.guild.id}`)
+            }
+        } else {
+            // If the channel is not empty
             if (!this.util.isVoiceEmpty(queue.voiceConnection.channel)) return
-            if (!this.queues.has(queue.guildID)) return
-            // Disconnect from the voice channel
-            queue.voiceConnection.channel.leave()
-            // Delete the queue
-            this.queues.delete(queue.guildID)
-            // Emit end event
-            this.emit('channelEmpty', queue.firstMessage, queue)
-        }, this.options.leaveOnEmptyCooldown || 0)
+            const timeout = setTimeout(() => {
+                if (!this.util.isVoiceEmpty(queue.voiceConnection.channel)) return
+                if (!this.queues.has(queue.guildID)) return
+                // Disconnect from the voice channel
+                queue.voiceConnection.channel.leave()
+                // Delete the queue
+                this.queues.delete(queue.guildID)
+                // Emit end event
+                this.emit('channelEmpty', queue.firstMessage, queue)
+            }, this.options.leaveOnEmptyCooldown || 0)
+            this._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout)
+        }
     }
 
     _playYTDLStream (queue, updateFilter, seek) {
@@ -1140,11 +1157,12 @@ class Player extends EventEmitter {
         if (queue.tracks.length === 1 && !queue.repeatMode && !firstPlay) {
             // Leave the voice channel
             if (this.options.leaveOnEnd && !queue.stopped) {
-                 // Remove the guild from the guilds list
-                 this.queues.delete(queue.guildID)
-                timeout = setTimeout(() => {
+                // Remove the guild from the guilds list
+                this.queues.delete(queue.guildID)
+                const timeout = setTimeout(() => {
                     queue.voiceConnection.channel.leave()
                 }, this.options.leaveOnEndCooldown || 0)
+                this._cooldownsTimeout.set(`end_${queue.guildID}`, timeout)
             }
             // Remove the guild from the guilds list
             this.queues.delete(queue.guildID)
