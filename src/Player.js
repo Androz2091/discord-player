@@ -572,7 +572,7 @@ class Player extends EventEmitter {
         } else {
             const track = playlist.tracks.shift()
             const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
-            this.emit('trackStart', message, queue.tracks[0])
+            this.emit('trackStart', message, queue.tracks[0], queue)
             this._addTracksToQueue(message, playlist.tracks)
         }
     }
@@ -604,7 +604,7 @@ class Player extends EventEmitter {
         } else {
             const track = playlist.tracks.shift()
             const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
-            this.emit('trackStart', message, queue.tracks[0])
+            this.emit('trackStart', message, queue.tracks[0], queue)
             this._addTracksToQueue(message, playlist.tracks)
         }
     }
@@ -634,7 +634,7 @@ class Player extends EventEmitter {
         } else {
             const track = album.tracks.shift()
             const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
-            this.emit('trackStart', message, queue.tracks[0])
+            this.emit('trackStart', message, queue.tracks[0], queue)
             this._addTracksToQueue(message, album.tracks)
         }
     }
@@ -689,7 +689,7 @@ class Player extends EventEmitter {
         } else {
             const track = res.tracks.shift()
             const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
-            this.emit('trackStart', message, queue.tracks[0])
+            this.emit('trackStart', message, queue.tracks[0], queue)
             this._addTracksToQueue(message, res.tracks)
         }
     }
@@ -777,7 +777,7 @@ class Player extends EventEmitter {
                 this.emit('trackAdd', message, queue, queue.tracks[queue.tracks.length - 1])
             } else {
                 const queue = await this._createQueue(message, trackToPlay)
-                this.emit('trackStart', message, queue.tracks[0])
+                this.emit('trackStart', message, queue.tracks[0], queue)
             }
         }
     }
@@ -1198,8 +1198,8 @@ module.exports = Player
  * Emitted when a track starts
  * @event Player#trackStart
  * @param {Discord.Message} message
- * @param {Queue} queue
  * @param {Track} track
+ * @param {Queue} queue
  */
 
 /**
