@@ -10,6 +10,7 @@ const Util = require('./Util')
 const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
 const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor, XVideosExtractor } = require('./Extractors/Extractor')
+var timeout
 
 /**
  * @typedef Filters
@@ -721,6 +722,7 @@ class Player extends EventEmitter {
      * client.player.play(message, "Despacito", true);
      */
     async play (message, query, firstResult = false) {
+        clearTimeout(timeout)
         if (!query || typeof query !== 'string') throw new Error('Play function requires search query but received none!')
 
         // clean query
@@ -1138,7 +1140,9 @@ class Player extends EventEmitter {
         if (queue.tracks.length === 1 && !queue.repeatMode && !firstPlay) {
             // Leave the voice channel
             if (this.options.leaveOnEnd && !queue.stopped) {
-                setTimeout(() => {
+                 // Remove the guild from the guilds list
+                 this.queues.delete(queue.guildID)
+                timeout = setTimeout(() => {
                     queue.voiceConnection.channel.leave()
                 }, this.options.leaveOnEndCooldown || 0)
             }
