@@ -2,7 +2,8 @@ declare module 'discord-player' {
     import { EventEmitter } from 'events';
     import { Client, Collection, Message, MessageCollector, Snowflake, User, VoiceChannel, VoiceConnection } from 'discord.js';
     import { Playlist as YTSRPlaylist } from 'youtube-sr';
-    import { Stream } from 'stream';
+    import { Stream, Readable } from 'stream';
+    import * as XVDL from 'xvdl';
 
     export const version: string;
 
@@ -12,6 +13,11 @@ declare module 'discord-player' {
         static isSpotifyLink(query: string): boolean;
         static isYTPlaylistLink(query: string): boolean;
         static isYTVideoLink(query: string): boolean;
+        static isSoundcloudPlaylist(query: string): boolean;
+        static isVimeoLink(query: string): boolean;
+        static getVimeoID(query: string): string;
+        static isFacebookLink(query: string): boolean;
+        static buildTimecode(data: any): string;
     }
 
     export class Player extends EventEmitter {
@@ -23,6 +29,7 @@ declare module 'discord-player' {
         public queues: Collection<Snowflake, Queue>;
         public filters: PlayerFilters;
 
+        public static get AudioFilters(): PlayerFilters;
         public isPlaying(message: Message): boolean;
         public setFilters(message: Message, newFilters: Partial<Filters>): Promise<void>;
         public play(message: Message, query: string | Track, firstResult?: boolean): Promise<void>;
@@ -55,7 +62,36 @@ declare module 'discord-player' {
         autoSelfDeaf: boolean;
         quality: MusicQuality;
     }
-    type Filters = 'bassboost' | '8D' | 'vaporwave' | 'nightcore'| 'phaser' | 'tremolo' | 'vibrato' | 'reverse' | 'treble' | 'normalizer' | 'surrounding' | 'pulsator' | 'subboost' | 'karaoke' | 'flanger' | 'gate' | 'haas' | 'mcompand';
+    type Filters = 
+        | 'bassboost' 
+        | '8D' 
+        | 'vaporwave' 
+        | 'nightcore'
+        | 'phaser' 
+        | 'tremolo' 
+        | 'vibrato' 
+        | 'reverse' 
+        | 'treble' 
+        | 'normalizer' 
+        | 'surrounding' 
+        | 'pulsator' 
+        | 'subboost' 
+        | 'karaoke' 
+        | 'flanger' 
+        | 'gate' 
+        | 'haas' 
+        | 'mcompand' 
+        | 'mono' 
+        | 'mstlr' 
+        | 'mstrr' 
+        | 'compressor' 
+        | 'expander' 
+        | 'softlimiter' 
+        | 'chorus' 
+        | 'chorus2d' 
+        | 'chorus3d' 
+        | 'fadein';
+
     type FiltersStatuses = {
         [key in Filters]: boolean;
     }
@@ -72,7 +108,7 @@ declare module 'discord-player' {
         requestedBy: User;
     }
     type Playlist = YTSRPlaylist & CustomPlaylist;
-    type PlayerError = 'NotConnected' | 'UnableToJoin' | 'NotPlaying' | 'LiveVideo';
+    type PlayerError = 'NotConnected' | 'UnableToJoin' | 'NotPlaying' | 'LiveVideo' | 'ParseError';
     interface PlayerEvents {
         searchResults: [Message, string, Track[]];
         searchInvalidResponse: [Message, string, Track[], string, MessageCollector];
@@ -87,6 +123,8 @@ declare module 'discord-player' {
         queueCreate: [Message, Queue];
         queueEnd: [Message, Queue];
         error: [PlayerError, Message];
+        playlistParseStart: [any, Message];
+        playlistParseEnd: [any, Message];
     }
     class Queue {
         constructor(guildID: string, message: Message, filters: PlayerFilters);
@@ -128,4 +166,111 @@ declare module 'discord-player' {
         public durationMS: number;
         public queue: Queue;
     }
+
+    export interface RawExtractedData {
+        title: string;
+        format: string;
+        size: number;
+        sizeFormat: "MB";
+        stream: Readable;
+    }
+
+    export interface VimeoExtractedData {
+        id: number;
+        duration: number;
+        title: string;
+        url: string;
+        thumbnail: string;
+        width: number;
+        height: number;
+        stream: {
+            cdn: string;
+            fps: number;
+            width: number;
+            height: number;
+            id: string;
+            mime: string;
+            origin: string;
+            profile: number;
+            quality: string;
+            url: string;
+        };
+        author: {
+            accountType: string;
+            id: number;
+            name: string;
+            url: string;
+            avatar: string;
+        }
+    }
+
+    interface FacebookExtractedData {
+        name: string;
+        title: string;
+        description: string;
+        rawVideo: string;
+        thumbnail: string;
+        uploadedAt: Date;
+        duration: string;
+        interactionCount: number;
+        streamURL: string;
+        publishedAt: Date;
+        width: number;
+        height: number;
+        nsfw: boolean;
+        genre: string;
+        keywords: string[];
+        comments: number;
+        size: string;
+        quality: string;
+        author: {
+            type: string;
+            name: string;
+            url: string;
+        };
+        publisher: {
+            type: string;
+            name: string;
+            url: string;
+            avatar: string;
+        };
+        url: string;
+        reactions: {
+            total: number;
+            like: number;
+            love: number;
+            care: number;
+            wow: number;
+            haha: number;
+            sad: number;
+            angry: number;
+        };
+        shares: string;
+        views: string;
+    }
+
+    class Discord {
+        static getInfo(url: string): Promise<RawExtractedData>;
+        static download(url: string): Promise<Readable>;
+    }
+
+    class Facebook {
+        static validateURL(url: string): boolean;
+        static download(url: string): Promise<Readable>;
+        static getInfo(url: string): Promise<FacebookExtractedData>;
+    }
+
+    class Vimeo {
+        static getInfo(id: number): Promise<VimeoExtractedData>;
+        static download(id: number): Promise<Readable>;
+    }
+
+    interface Extractors {
+        DiscordExtractor: Discord;
+        FacebookExtractor: Facebook;
+        VimeoExtractor: Vimeo;
+        XVideosExtractor: XVDL.XVDL;
+    }
+
+    export const Extractors: Extractors;
 }

@@ -1,14 +1,15 @@
 const ytdl = require('discord-ytdl-core')
 const Discord = require('discord.js')
-const ytsr = require('youtube-sr')
+const ytsr = require('youtube-sr').default
 const spotify = require('spotify-url-info')
 const soundcloud = require('soundcloud-scraper')
-const moment = require('moment')
+const ms = require('parse-ms')
 const Queue = require('./Queue')
 const Track = require('./Track')
 const Util = require('./Util')
 const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
+const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor, XVideosExtractor } = require('./Extractors/Extractor')
 
 /**
  * @typedef Filters
@@ -31,6 +32,15 @@ const Client = new soundcloud.Client()
  * @property {boolean} [haas=false] Whether the haas filter is enabled.
  * @property {boolean} [mcompand=false] Whether the mcompand filter is enabled.
  * @property {boolean} [mono=false] Whether the mono output is enabled.
+ * @property {boolean} [mstlr=false] Whether M/S signal to L/R signal converter is enabled.
+ * @property {boolean} [mstrr=false] Whether M/S signal to R/R signal converter is enabled.
+ * @property {boolean} [compressor=false] Whether compressor filter is enabled.
+ * @property {boolean} [expander=false] Whether expander filter is enabled.
+ * @property {boolean} [softlimiter=false] Whether softlimiter filter is enabled.
+ * @property {boolean} [chorus=false] Whether chorus (single delay) filter is enabled.
+ * @property {boolean} [chorus2d=false] Whether chorus2d (two delays) filter is enabled.
+ * @property {boolean} [chorus3d=false] Whether chorus3d (three delays) filter is enabled.
+ * @property {boolean} [fadein=false] Whether fadein filter is enabled.
  */
 
 const filters = {
@@ -52,7 +62,16 @@ const filters = {
     gate: 'agate',
     haas: 'haas',
     mcompand: 'mcompand',
-    mono: 'pan=mono|c0=.5*c0+.5*c1'
+    mono: 'pan=mono|c0=.5*c0+.5*c1',
+    mstlr: 'stereotools=mode=ms>lr',
+    mstrr: 'stereotools=mode=ms>rr',
+    compressor: 'compand=points=-80/-105|-62/-80|-15.4/-15.4|0/-12|20/-7.6',
+    expander: 'compand=attacks=0:points=-80/-169|-54/-80|-49.5/-64.6|-41.1/-41.1|-25.8/-15|-10.8/-4.5|0/0|20/8.3',
+    softlimiter: 'compand=attacks=0:points=-80/-80|-12.4/-12.4|-6/-8|0/-6.8|20/-2.8',
+    chorus: 'chorus=0.7:0.9:55:0.4:0.25:2',
+    chorus2d: 'chorus=0.6:0.9:50|60:0.4|0.32:0.25|0.4:2|1.3',
+    chorus3d: 'chorus=0.5:0.9:50|60|40:0.4|0.32|0.3:0.25|0.4|0.3:2|2.3|1.3',
+    fadein: 'afade=t=in:ss=0:d=10'
 }
 
 /**
@@ -64,6 +83,8 @@ const filters = {
  * @property {number} [leaveOnEmptyCooldown=0] Used when leaveOnEmpty is enabled, to let the time to users to come back in the voice channel.
  * @property {boolean} [autoSelfDeaf=true] Whether the bot should automatically turn off its headphones when joining a voice channel.
  * @property {string} [quality='high'] Music quality (high or low)
+ * @property {boolean} [enableLive=false] If it should enable live contents
+ * @property {object} [ytdlRequestOptions={}] YTDL request options to use cookies, proxy etc..
  */
 
 /**
@@ -77,7 +98,9 @@ const defaultPlayerOptions = {
     leaveOnEmpty: true,
     leaveOnEmptyCooldown: 0,
     autoSelfDeaf: true,
-    quality: 'high'
+    quality: 'high',
+    enableLive: false,
+    ytdlRequestOptions: {}
 }
 
 class Player extends EventEmitter {
@@ -94,7 +117,7 @@ class Player extends EventEmitter {
          * @type {Util}
          */
         this.util = Util
-        this.util.checkFFMPEG();
+        this.util.checkFFMPEG()
 
         /**
          * Discord.js client instance
@@ -131,10 +154,22 @@ class Player extends EventEmitter {
     }
 
     /**
+     * Returns all the available audio filters
+     * @type {Filters}
+     * @example const filters = require('discord-player').Player.AudioFilters
+     * console.log(`There are ${Object.keys(filters).length} filters!`)
+     */
+    static get AudioFilters () {
+        return filters
+    }
+
+    /**
      * @ignore
      * @param {String} query
      */
-    resolveQueryType (query) {
+    resolveQueryType (query, forceType) {
+        if (forceType && typeof forceType === 'string') return forceType
+
         if (this.util.isSpotifyLink(query)) {
             return 'spotify-song'
         } else if (this.util.isYTPlaylistLink(query)) {
@@ -145,6 +180,16 @@ class Player extends EventEmitter {
             return 'soundcloud-song'
         } else if (this.util.isSpotifyPLLink(query)) {
             return 'spotify-playlist'
+        } else if (this.util.isVimeoLink(query)) {
+            return 'vimeo'
+        } else if (FacebookExtractor.validateURL(query)) {
+            return 'facebook'
+        } else if (this.util.isReverbnationLink(query)) {
+            return 'reverbnation'
+        } else if (this.util.isDiscordAttachment(query)) {
+            return 'attachment'
+        } else if (this.util.isXVLink(query)) {
+            return 'xvlink'
         } else {
             return 'youtube-video-keywords'
         }
@@ -175,16 +220,154 @@ class Player extends EventEmitter {
                     }
                 }
             } else if (queryType === 'soundcloud-song') {
-                const soundcloudData = await Client.getSongInfo(query).catch(() => {})
-                if (soundcloudData) {
-                    updatedQuery = `${soundcloudData.author.name} - ${soundcloudData.title}`
-                    queryType = 'youtube-video-keywords'
+                const data = await Client.getSongInfo(query).catch(() => { })
+                if (data) {
+                    const track = new Track({
+                        title: data.title,
+                        url: data.url,
+                        lengthSeconds: data.duration / 1000,
+                        description: data.description,
+                        thumbnail: data.thumbnail,
+                        views: data.playCount,
+                        author: data.author
+                    }, message.author, this)
+
+                    Object.defineProperty(track, 'soundcloud', {
+                        get: () => data
+                    })
+
+                    tracks.push(track)
                 }
+            } else if (queryType === 'vimeo') {
+                const data = await VimeoExtractor.getInfo(this.util.getVimeoID(query)).catch(e => {})
+                if (!data) return this.emit('noResults', message, query)
+
+                const track = new Track({
+                    title: data.title,
+                    url: data.url,
+                    thumbnail: data.thumbnail,
+                    lengthSeconds: data.duration,
+                    description: '',
+                    views: 0,
+                    author: data.author
+                }, message.author, this)
+
+                Object.defineProperties(track, {
+                    arbitrary: {
+                        get: () => true
+                    },
+                    stream: {
+                        get: () => data.stream.url
+                    }
+                })
+
+                tracks.push(track)
+            } else if (queryType === 'facebook') {
+                const data = await FacebookExtractor.getInfo(query).catch(e => {})
+                if (!data) return this.emit('noResults', message, query)
+                if (data.live && !this.options.enableLive) return this.emit('error', 'LiveVideo', message)
+
+                const track = new Track({
+                    title: data.title,
+                    url: data.url,
+                    thumbnail: data.thumbnail,
+                    lengthSeconds: data.duration,
+                    description: data.description,
+                    views: data.views || data.interactionCount,
+                    author: data.author
+                }, message.author, this)
+
+                Object.defineProperties(track, {
+                    arbitrary: {
+                        get: () => true
+                    },
+                    stream: {
+                        get: () => data.streamURL
+                    }
+                })
+
+                tracks.push(track)
+            } else if (queryType === 'reverbnation') {
+                const data = await ReverbnationExtractor.getInfo(query).catch(() => {})
+                if (!data) return this.emit('noResults', message, query)
+
+                const track = new Track({
+                    title: data.title,
+                    url: data.url,
+                    thumbnail: data.thumbnail,
+                    lengthSeconds: data.duration / 1000,
+                    description: '',
+                    views: 0,
+                    author: data.artist
+                }, message.author, this)
+
+                Object.defineProperties(track, {
+                    arbitrary: {
+                        get: () => true
+                    },
+                    stream: {
+                        get: () => data.streamURL
+                    }
+                })
+
+                tracks.push(track)
+            } else if (queryType === 'attachment') {
+                const data = await DiscordExtractor.getInfo(query).catch(() => {})
+                if (!data || !(data.format.startsWith('audio/') || data.format.startsWith('video/'))) return this.emit('noResults', message, query)
+
+                const track = new Track({
+                    title: data.title,
+                    url: query,
+                    thumbnail: '',
+                    lengthSeconds: 0,
+                    description: '',
+                    views: 0,
+                    author: {
+                        name: 'Media_Attachment'
+                    }
+                }, message.author, this)
+
+                Object.defineProperties(track, {
+                    arbitrary: {
+                        get: () => true
+                    },
+                    stream: {
+                        get: () => query
+                    }
+                })
+
+                tracks.push(track)
+            } else if (queryType === 'xvlink') {
+                const data = await XVideosExtractor.getInfo(query).catch(() => {})
+                if (!data || !(data.streams.lq || data.streams.hq)) return this.emit('noResults', message, query)
+
+                const track = new Track({
+                    title: data.title,
+                    url: data.url,
+                    thumbnail: data.thumbnail,
+                    lengthSeconds: data.length,
+                    description: '',
+                    views: data.views,
+                    author: {
+                        name: data.channel.name
+                    }
+                }, message.author, this)
+
+                Object.defineProperties(track, {
+                    arbitrary: {
+                        get: () => true
+                    },
+                    stream: {
+                        get: () => data.streams.lq || data.streams.hq
+                    }
+                })
+
+                tracks.push(track)
             }
 
             if (queryType === 'youtube-video-keywords') {
                 await ytsr.search(updatedQuery || query, { type: 'video' }).then((results) => {
-                    if (results.length !== 0) {
+                    if (results && results.length !== 0) {
                         tracks = results.map((r) => new Track(r, message.author, this))
                     }
                 }).catch(() => {})
@@ -248,11 +431,59 @@ class Player extends EventEmitter {
     }
 
     /**
+     * Sets currently playing music duration
+     * @param {Discord.Message} message Discord message
+     * @param {number} time Time in ms
+     * @returns {Promise<void>}
+     */
+    setPosition (message, time) {
+        return new Promise((resolve) => {
+            const queue = this.queues.find((g) => g.guildID === message.guild.id)
+            if (!queue) return this.emit('error', 'NotPlaying', message)
+
+            if (typeof time !== 'number' && !isNaN(time)) time = parseInt(time)
+            if (queue.playing.durationMS === time) return this.skip(message)
+            if (queue.voiceConnection.dispatcher.streamTime === time || (queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime) === time) return resolve()
+            if (time < 0) this._playYTDLStream(queue, false).then(() => resolve())
+
+            this._playYTDLStream(queue, false, time)
+                .then(() => resolve())
+        })
+    }
+
+    /**
+     * Sets currently playing music duration
+     * @param {Discord.Message} message Discord message
+     * @param {number} time Time in ms
+     * @returns {Promise<void>}
+     */
+    seek (message, time) {
+        return this.setPosition(message, time)
+    }
+
+    /**
      * Check whether there is a music played in the server
      * @param {Discord.Message} message
      */
     isPlaying (message) {
         return this.queues.some((g) => g.guildID === message.guild.id)
+    }
+
+    /**
+     * Moves to new voice channel
+     * @param {Discord.Message} message Message
+     * @param {Discord.VoiceChannel} channel Voice channel
+     */
+    moveTo (message, channel) {
+        if (!channel || channel.type !== 'voice') return
+        const queue = this.queues.find((g) => g.guildID === message.guild.id)
+        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (queue.voiceConnection.channel.id === channel.id) return
+
+        queue.voiceConnection.dispatcher.pause()
+        message.guild.voice.setChannel(channel)
+            .then(() => queue.voiceConnection.dispatcher.resume())
+            .catch(() => this.emit('error', 'UnableToJoin', message))
     }
 
     /**
@@ -319,12 +550,16 @@ class Player extends EventEmitter {
      * @param {String} query
      */
     async _handlePlaylist (message, query) {
+        this.emit('playlistParseStart', {}, message)
         const playlist = await ytsr.getPlaylist(query)
         if (!playlist) return this.emit('noResults', message, query)
         playlist.tracks = playlist.videos.map((item) => new Track(item, message.author, this, true))
         playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
         playlist.thumbnail = playlist.tracks[0].thumbnail
         playlist.requestedBy = message.author
+
+        this.emit('playlistParseEnd', playlist, message)
+
         if (this.isPlaying(message)) {
             const queue = this._addTracksToQueue(message, playlist.tracks)
             this.emit('playlistAdd', message, queue, playlist)
@@ -335,17 +570,19 @@ class Player extends EventEmitter {
             this._addTracksToQueue(message, playlist.tracks)
         }
     }
+
     async _handleSpotifyPlaylist (message, query) {
+        this.emit('playlistParseStart', {}, message)
         const playlist = await spotify.getData(query)
         if (!playlist) return this.emit('noResults', message, query)
-        let tracks = []
-        let s;
-        for (var i = 0; i < playlist.tracks.items.length; i++) {
-            let query = `${playlist.tracks.items[i].track.artists[0].name} - ${playlist.tracks.items[i].track.name}`
-            let results = await ytsr.search(query, { type: 'video' })
+        const tracks = []
+        let s = 0
+        for (let i = 0; i < playlist.tracks.items.length; i++) {
+            const query = `${playlist.tracks.items[i].track.artists[0].name} - ${playlist.tracks.items[i].track.name}`
+            const results = await ytsr.search(query, { type: 'video', limit: 1 })
             if (results.length < 1) {
-               s++ // could be used later for skipped tracks due to result not being found
-               continue;
+                s++ // could be used later for skipped tracks due to result not being found
+                continue
             }
             tracks.push(results[0])
         }
@@ -353,6 +590,8 @@ class Player extends EventEmitter {
         playlist.duration = playlist.tracks.reduce((prev, next) => prev + next.duration, 0)
         playlist.thumbnail = playlist.images[0].url
         playlist.requestedBy = message.author
+
+        this.emit('playlistParseEnd', playlist, message)
         if (this.isPlaying(message)) {
             const queue = this._addTracksToQueue(message, playlist.tracks)
             this.emit('playlistAdd', message, queue, playlist)
@@ -363,21 +602,22 @@ class Player extends EventEmitter {
             this._addTracksToQueue(message, playlist.tracks)
         }
     }
+
     async _handleSpotifyAlbum (message, query) {
         const album = await spotify.getData(query)
         if (!album) return this.emit('noResults', message, query)
-        let tracks = []
-        let s;
-        for (var i = 0; i < album.tracks.items.length; i++) {
-            let query = `${album.tracks.items[i].artists[0].name} - ${album.tracks.items[i].name}`
-            let results = await ytsr.search(query, { type: 'video' })
+        const tracks = []
+        let s = 0
+        for (let i = 0; i < album.tracks.items.length; i++) {
+            const query = `${album.tracks.items[i].artists[0].name} - ${album.tracks.items[i].name}`
+            const results = await ytsr.search(query, { type: 'video' })
             if (results.length < 1) {
-               s++ // could be used later for skipped tracks due to result not being found
-               continue;
+                s++ // could be used later for skipped tracks due to result not being found
+                continue
             }
             tracks.push(results[0])
         }
-        
+
         album.tracks = tracks.map((item) => new Track(item, message.author))
         album.duration = album.tracks.reduce((prev, next) => prev + next.duration, 0)
         album.thumbnail = album.images[0].url
@@ -392,6 +632,84 @@ class Player extends EventEmitter {
             this._addTracksToQueue(message, album.tracks)
         }
     }
+
+    async _handleSoundCloudPlaylist (message, query) {
+        const data = await Client.getPlaylist(query).catch(() => {})
+        if (!data) return this.emit('noResults', message, query)
+
+        const res = {
+            id: data.id,
+            title: data.title,
+            tracks: [],
+            author: data.author,
+            duration: 0,
+            thumbnail: data.thumbnail,
+            requestedBy: message.author
+        }
+
+        this.emit('playlistParseStart', res, message)
+
+        for (let i = 0; i < data.tracks.length; i++) {
+            const song = data.tracks[i]
+
+            const r = new Track({
+                title: song.title,
+                url: song.url,
+                lengthSeconds: song.duration / 1000,
+                description: song.description,
+                thumbnail: song.thumbnail || 'https://soundcloud.com/pwa-icon-192.png',
+                views: song.playCount || 0,
+                author: song.author || data.author
+            }, message.author, this, true)
+
+            Object.defineProperty(r, 'soundcloud', {
+                get: () => song
+            })
+
+            res.tracks.push(r)
+        }
+
+        if (!res.tracks.length) {
+            this.emit('playlistParseEnd', res, message)
+            return this.emit('error', 'ParseError', message)
+        }
+
+        res.duration = res.tracks.reduce((a, c) => a + c.lengthSeconds, 0)
+
+        this.emit('playlistParseEnd', res, message)
+        if (this.isPlaying(message)) {
+            const queue = this._addTracksToQueue(message, res.tracks)
+            this.emit('playlistAdd', message, queue, res)
+        } else {
+            const track = res.tracks.shift()
+            const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            this.emit('trackStart', message, queue.tracks[0])
+            this._addTracksToQueue(message, res.tracks)
+        }
+    }
+
+    /**
+     * Custom search function
+     * @param {string} query Search query
+     * @param {("youtube"|"soundcloud"|"xvideos")} type Search type
+     * @returns {Promise<any[]>}
+     */
+    async search (query, type = 'youtube') {
+        if (!query || typeof query !== 'string') return []
+
+        switch (type.toLowerCase()) {
+        case 'soundcloud':
+            return await Client.search(query, 'track').catch(() => {}) || []
+        case 'xvideos':
+            // eslint-disable-next-line
+            let videos = await XVideosExtractor.search(query).catch(() => {})
+            if (!videos) return []
+            return videos.videos
+        default:
+            return ytsr.search(query, { type: 'video' }).catch(() => {}) || []
+        }
+    }
+
     /**
      * Play a track in the server. Supported query types are `keywords`, `YouTube video links`, `YouTube playlists links`, `Spotify track link` or `SoundCloud song link`.
      * @param {Discord.Message} message Discord `message`
@@ -403,6 +721,11 @@ class Player extends EventEmitter {
      * client.player.play(message, "Despacito", true);
      */
     async play (message, query, firstResult = false) {
+        if (!query || typeof query !== 'string') throw new Error('Play function requires search query but received none!')
+
+        // clean query
+        query = query.replace(/<(.+)>/g, '$1')
+
         if (this.util.isYTPlaylistLink(query)) {
             return this._handlePlaylist(message, query)
         }
@@ -412,12 +735,16 @@ class Player extends EventEmitter {
         if (this.util.isSpotifyAlbumLink(query)) {
             return this._handleSpotifyAlbum(message, query)
         }
+        if (this.util.isSoundcloudPlaylist(query)) {
+            return this._handleSoundCloudPlaylist(message, query)
+        }
+
         let trackToPlay
         if (query instanceof Track) {
             trackToPlay = query
         } else if (this.util.isYTVideoLink(query)) {
             const videoData = await ytdl.getBasicInfo(query)
-            if (videoData.videoDetails.isLiveContent) return this.emit('error', 'LiveVideo', message)
+            if (videoData.videoDetails.isLiveContent && !this.options.enableLive) return this.emit('error', 'LiveVideo', message)
             const lastThumbnail = videoData.videoDetails.thumbnails.length - 1 /* get the highest quality thumbnail */
             trackToPlay = new Track({
                 title: videoData.videoDetails.title,
@@ -622,7 +949,13 @@ class Player extends EventEmitter {
         if (!queue) return this.emit('error', 'NotPlaying', message)
         // Shuffle the queue (except the first track)
         const currentTrack = queue.tracks.shift()
-        queue.tracks = queue.tracks.sort(() => Math.random() - 0.5)
+
+        // Durstenfeld shuffle algorithm
+        for (let i = queue.tracks.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [queue.tracks[i], queue.tracks[j]] = [queue.tracks[j], queue.tracks[i]]
+        }
+
         queue.tracks.unshift(currentTrack)
         // Return the queue
         return queue
@@ -678,14 +1011,16 @@ class Player extends EventEmitter {
             const bar = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬'.split('')
             bar.splice(index, 0, '🔘')
             if (timecodes) {
-                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                const parsed = ms(currentStreamTime)
+                const currentTimecode = Util.buildTimecode(parsed)
                 return `${currentTimecode} ┃ ${bar.join('')} ┃ ${queue.playing.duration}`
             } else {
                 return `${bar.join('')}`
             }
         } else {
             if (timecodes) {
-                const currentTimecode = (currentStreamTime >= 3600000 ? moment(currentStreamTime).format('H:mm:ss') : moment(currentStreamTime).format('m:ss'))
+                const parsed = ms(currentStreamTime)
+                const currentTimecode = Util.buildTimecode(parsed)
                 return `${currentTimecode} ┃ 🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ┃ ${queue.playing.duration}`
             } else {
                 return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
@@ -729,11 +1064,11 @@ class Player extends EventEmitter {
         }, this.options.leaveOnEmptyCooldown || 0)
     }
 
-    _playYTDLStream (queue, updateFilter) {
-        return new Promise((resolve) => {
-            const ffmeg = this.util.checkFFMPEG();
-            if (!ffmeg) return;
-            const seekTime = updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
+    _playYTDLStream (queue, updateFilter, seek) {
+        return new Promise(async (resolve) => {
+            const ffmeg = this.util.checkFFMPEG()
+            if (!ffmeg) return
+            const seekTime = typeof seek === 'number' ? seek : updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined
             const encoderArgsFilters = []
             Object.keys(queue.filters).forEach((filterName) => {
                 if (queue.filters[filterName]) {
@@ -746,14 +1081,26 @@ class Player extends EventEmitter {
             } else {
                 encoderArgs = ['-af', encoderArgsFilters.join(',')]
             }
-            const newStream = ytdl(queue.playing.url, {
-                quality: this.options.quality === 'low' ? 'lowestaudio' : 'highestaudio',
-                filter: 'audioonly',
-                opusEncoded: true,
-                encoderArgs,
-                seek: seekTime / 1000,
-                highWaterMark: 1 << 25
-            })
+
+            let newStream
+            if (!queue.playing.soundcloud && !queue.playing.arbitrary) {
+                newStream = ytdl(queue.playing.url, {
+                    quality: this.options.quality === 'low' ? 'lowestaudio' : 'highestaudio',
+                    filter: 'audioonly',
+                    opusEncoded: true,
+                    encoderArgs,
+                    seek: seekTime / 1000,
+                    highWaterMark: 1 << 25,
+                    requestOptions: this.options.ytdlRequestOptions || {}
+                })
+            } else {
+                newStream = ytdl.arbitraryStream(queue.playing.soundcloud ? await queue.playing.soundcloud.downloadProgressive() : queue.playing.stream, {
+                    opusEncoded: true,
+                    encoderArgs,
+                    seek: seekTime / 1000
+                })
+            }
+
             setTimeout(() => {
                 if (queue.stream) queue.stream.destroy()
                 queue.stream = newStream
@@ -793,10 +1140,10 @@ class Player extends EventEmitter {
             if (this.options.leaveOnEnd && !queue.stopped) {
                 setTimeout(() => {
                     queue.voiceConnection.channel.leave()
-                    // Remove the guild from the guilds list
-                    this.queues.delete(queue.guildID)
                 }, this.options.leaveOnEndCooldown || 0)
             }
+            // Remove the guild from the guilds list
+            this.queues.delete(queue.guildID)
             // Emit stop event
             if (queue.stopped) {
                 return this.emit('musicStop')
@@ -909,6 +1256,20 @@ module.exports = Player
 /**
  * Emitted when an error is triggered
  * @event Player#error
- * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying` or `LiveVideo`.
+ * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying`, `ParseError` or `LiveVideo`.
  * @param {Discord.Message} message
+ */
+
+/**
+ * Emitted when discord-player attempts to parse playlist contents (mostly soundcloud playlists)
+ * @event Player#playlistParseStart
+ * @param {Object} playlist Raw playlist (unparsed)
+ * @param {Discord.Message} message The message
+ */
+
+/**
+ * Emitted when discord-player finishes parsing playlist contents (mostly soundcloud playlists)
+ * @event Player#playlistParseEnd
+ * @param {Object} playlist The playlist data (parsed)
+ * @param {Discord.Message} message The message
  */
