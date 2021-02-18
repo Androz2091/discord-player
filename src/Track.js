@@ -42,7 +42,7 @@ class Track {
          * The video thumbnail
          * @type {string}
          */
-        this.thumbnail = typeof videoData.thumbnail === 'object'
+        this.thumbnail = videoData.thumbnail && typeof videoData.thumbnail === 'object'
             ? videoData.thumbnail.url
             : videoData.thumbnail
         /**
