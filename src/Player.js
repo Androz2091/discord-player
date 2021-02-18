@@ -1120,6 +1120,8 @@ class Player extends EventEmitter {
                 })
             }
 
+            newStream.on('error', (error) => this.emit('error', error, queue.firstMessage))
+
             setTimeout(() => {
                 if (queue.stream) queue.stream.destroy()
                 queue.stream = newStream
