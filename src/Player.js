@@ -1056,6 +1056,8 @@ class Player extends EventEmitter {
             this.emit('botDisconnect', queue.firstMessage)
         }
 
+        // check if the bot is in a channel
+        if (!queue.voiceConnection || !queue.voiceConnection.channel) return
         // process leaveOnEmpty checks
         if (!this.options.leaveOnEmpty) return
         // If the member joins a voice channel
