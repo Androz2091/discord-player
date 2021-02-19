@@ -1002,10 +1002,8 @@ class Player extends EventEmitter {
     /**
      * Create a progress bar for the queue of the server.
      * @param {Discord.Message} message
-     * @param {Object} [options]
-     * @param {boolean} [options.timecodes] Whether or not to show timecodes in the progress bar
-     * @param {number} [options.currentTime]
-     * @param {number} [options.totalTime]
+     * @param {Object} options
+     * @param {boolean} options.timecodes
      * @returns {string}
      */
     createProgressBar (message, options) {
@@ -1014,9 +1012,9 @@ class Player extends EventEmitter {
         if (!queue) return
         const timecodes = options && typeof options === 'object' ? options.timecodes : false
         // Stream time of the dispatcher
-        const currentStreamTime = options && typeof options.currentTime === 'number' ? options.currentTime : queue.currentStreamTime
+        const currentStreamTime = queue.currentStreamTime
         // Total stream time
-        const totalTime = options && typeof options.totalTime === 'number' ? options.totalTime : queue.playing.durationMS
+        const totalTime = queue.playing.durationMS
         // Stream progress
         const index = Math.round((currentStreamTime / totalTime) * 15)
         // conditions
