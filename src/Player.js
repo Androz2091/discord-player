@@ -1013,9 +1013,11 @@ class Player extends EventEmitter {
         if (!queue) return
         const timecodes = options && typeof options === 'object' ? options.timecodes : false
         // Stream time of the dispatcher
-        const currentStreamTime = options && options.queue ? queue.previousTracks.map((t) => t.durationMS).reduce((p, c) => p + c) + queue.currentStreamTime : queue.currentStreamTime
+        const previousTracksTime = queue.previousTracks.length > 0 ? queue.previousTracks.map((t) => t.durationMS) : 0
+        const currentStreamTime = options && options.queue ? previousTracksTime + queue.currentStreamTime : queue.currentStreamTime
         // Total stream time
-        const totalTime = options && options.queue ? queue.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : queue.playing.durationMS
+        const totalTracksTime = queue.tracks.length > 0 ? queue.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0
+        const totalTime = options && options.queue ? totalTracksTime : queue.playing.durationMS
         // Stream progress
         const index = Math.round((currentStreamTime / totalTime) * 15)
         // conditions
@@ -1023,17 +1025,17 @@ class Player extends EventEmitter {
             const bar = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬'.split('')
             bar.splice(index, 0, '🔘')
             if (timecodes) {
-                const parsed = ms(currentStreamTime)
-                const currentTimecode = Util.buildTimecode(parsed)
-                return `${currentTimecode} ┃ ${bar.join('')} ┃ ${queue.playing.duration}`
+                const currentTimecode = Util.buildTimecode(ms(currentStreamTime))
+                const endTimecode = Util.buildTimecode(ms(totalTime))
+                return `${currentTimecode} ┃ ${bar.join('')} ┃ ${endTimecode}`
             } else {
                 return `${bar.join('')}`
             }
         } else {
             if (timecodes) {
-                const parsed = ms(currentStreamTime)
-                const currentTimecode = Util.buildTimecode(parsed)
-                return `${currentTimecode} ┃ 🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ┃ ${queue.playing.duration}`
+                const currentTimecode = Util.buildTimecode(ms(currentStreamTime))
+                const endTimecode = Util.buildTimecode(ms(totalTime))
+                return `${currentTimecode} ┃ 🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ┃ ${endTimecode}`
             } else {
                 return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
             }
