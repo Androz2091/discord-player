@@ -487,7 +487,7 @@ class Player extends EventEmitter {
         if (queue.voiceConnection.channel.id === channel.id) return
 
         queue.voiceConnection.dispatcher.pause()
-        message.guild.voice.setChannel(channel)
+        channel.join()
             .then(() => queue.voiceConnection.dispatcher.resume())
             .catch(() => this.emit('error', 'UnableToJoin', message))
     }
