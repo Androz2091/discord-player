@@ -3,7 +3,6 @@ declare module 'discord-player' {
     import { Client, Collection, Message, MessageCollector, Snowflake, User, VoiceChannel, VoiceConnection } from 'discord.js';
     import { Playlist as YTSRPlaylist } from 'youtube-sr';
     import { Stream, Readable } from 'stream';
-    import * as XVDL from 'xvdl';
 
     export const version: string;
 
@@ -269,7 +268,6 @@ declare module 'discord-player' {
         DiscordExtractor: Discord;
         FacebookExtractor: Facebook;
         VimeoExtractor: Vimeo;
-        XVideosExtractor: XVDL.XVDL;
     }
 
     export const Extractors: Extractors;

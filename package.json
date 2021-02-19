@@ -40,7 +40,6 @@
     "reverbnation-scraper": "^2.0.0",
     "soundcloud-scraper": "^4.0.3",
     "spotify-url-info": "^2.2.0",
-    "xvdl": "^1.0.2",
     "youtube-sr": "^3.0.0",
     "ytdl-core": "^4.4.3"
   },
