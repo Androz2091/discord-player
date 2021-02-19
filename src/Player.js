@@ -1002,8 +1002,9 @@ class Player extends EventEmitter {
     /**
      * Create a progress bar for the queue of the server.
      * @param {Discord.Message} message
-     * @param {Object} options
-     * @param {boolean} options.timecodes
+     * @param {Object} [options]
+     * @param {boolean} [options.timecodes] Whether or not to show timecodes in the progress bar
+     * @param {boolean} [options.queue] Whether to show the progress bar for the whole queue (if false, only the current song)
      * @returns {string}
      */
     createProgressBar (message, options) {
@@ -1012,9 +1013,9 @@ class Player extends EventEmitter {
         if (!queue) return
         const timecodes = options && typeof options === 'object' ? options.timecodes : false
         // Stream time of the dispatcher
-        const currentStreamTime = queue.currentStreamTime
+        const currentStreamTime = options && options.queue ? queue.previousTracks.map((t) => t.durationMS).reduce((p, c) => p + c) + queue.currentStreamTime : queue.currentStreamTime
         // Total stream time
-        const totalTime = queue.playing.durationMS
+        const totalTime = options && options.queue ? queue.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : queue.playing.durationMS
         // Stream progress
         const index = Math.round((currentStreamTime / totalTime) * 15)
         // conditions
