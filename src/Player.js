@@ -1094,7 +1094,13 @@ class Player extends EventEmitter {
                 })
             }
 
-            newStream.on('error', (error) => this.emit('error', error, queue.firstMessage))
+            newStream.on('error', (error) => {
+                if (error.message === 'Video unavailable') {
+                    this.emit('error', 'VideoUnavailable', queue.firstMessage)
+                } else {
+                    this.emit('error', error, queue.firstMessage)
+                }
+            })
 
             setTimeout(() => {
                 if (queue.stream) queue.stream.destroy()
@@ -1254,7 +1260,7 @@ module.exports = Player
 /**
  * Emitted when an error is triggered
  * @event Player#error
- * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying`, `ParseError` or `LiveVideo`.
+ * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying`, `ParseError`, `LiveVideo` or `VideoUnavailable`.
  * @param {Discord.Message} message
  */
 

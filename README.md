@@ -161,6 +161,9 @@ client.player
         case 'LiveVideo':
             message.channel.send('YouTube lives are not supported!')
             break;
+        case 'VideoUnavailable':
+            message.channel.send('This YouTube video is not available!');
+            break;
         default:
             message.channel.send(`Something went wrong... Error: ${error}`)
     }
