@@ -1094,14 +1094,6 @@ class Player extends EventEmitter {
                 })
             }
 
-            newStream.on('error', (error) => {
-                if (error.message === 'Video unavailable') {
-                    this.emit('error', 'VideoUnavailable', queue.firstMessage)
-                } else {
-                    this.emit('error', error, queue.firstMessage)
-                }
-            })
-
             setTimeout(() => {
                 if (queue.stream) queue.stream.destroy()
                 queue.stream = newStream
@@ -1123,6 +1115,14 @@ class Player extends EventEmitter {
                     queue.additionalStreamTime = 0
                     // Play the next track
                     return this._playTrack(queue, false)
+                })
+                newStream.on('error', (error) => {
+                    if (error.message.includes('Video unavailable')) {
+                        this.emit('error', 'VideoUnavailable', queue.firstMessage)
+                        this._playTrack(queue, false)
+                    } else {
+                        this.emit('error', error, queue.firstMessage)
+                    }
                 })
             }, 1000)
         })
