@@ -46,6 +46,8 @@ declare module 'discord-player' {
         public shuffle(message: Message): Queue;
         public remove(message: Message, trackOrPosition: Track | number): Track;
         public createProgressBar(message: Message, progressBarOptions: ProgressBarOptions): string;
+        public seek(message: Message, time: number): Promise<void>;
+        public moveTo(message: Message, channel: VoiceChannel): void;
 
         public on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
         public once<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
@@ -53,13 +55,15 @@ declare module 'discord-player' {
     }
     type MusicQuality = 'high' | 'low';
     interface PlayerOptions {
-        leaveOnEnd: boolean;
+        leaveOnEnd?: boolean;
         leaveOnEndCooldown?: number;
-        leaveOnStop: boolean;
-        leaveOnEmpty: boolean;
+        leaveOnStop?: boolean;
+        leaveOnEmpty?: boolean;
         leaveOnEmptyCooldown?: number;
-        autoSelfDeaf: boolean;
-        quality: MusicQuality;
+        autoSelfDeaf?: boolean;
+        quality?: MusicQuality;
+        enableLive?: boolean;
+        ytdlRequestOptions?: any;
     }
     type Filters =
         | 'bassboost'
@@ -146,6 +150,7 @@ declare module 'discord-player' {
         // these are getters
         public playing: Track;
         public calculatedVolume: number;
+        public currentStreamTime: number;
     }
     class Track {
         constructor(videoData: object, user: User, player: Player);
