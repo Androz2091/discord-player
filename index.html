@@ -36,7 +36,7 @@
     
 
 
-    <h3>discord-player 3.3.1</h3>
+    <h3>discord-player 3.3.2</h3>
 
 
 
@@ -125,6 +125,7 @@ client.login(settings.token);
 <li><a href="https://discord-player.js.org/Player.html#getQueue">getQueue(message)</a> - get the server queue</li>
 <li><a href="https://discord-player.js.org/Player.html#clearQueue">clearQueue(message)</a> - clear the server queue</li>
 <li><a href="https://discord-player.js.org/Player.html#remove">remove(message, track)</a> - remove a track from the server queue</li>
+<li><a href="https://discord-player.js.org/Player.html#shuffle">shuffle(message)</a> - shuffle the server queue</li>
 <li><a href="https://discord-player.js.org/Player.html#nowPlaying">nowPlaying(message)</a> - get the current track</li>
 </ul>
 <h4>Manage music stream</h4>
@@ -137,6 +138,12 @@ client.login(settings.token);
 <li><a href="https://discord-player.js.org/Player.html#setFilters">setFilters(message, newFilters)</a> - update filters (bassboost for example)</li>
 <li><a href="https://discord-player.js.org/Player.html#setRepeatMode">setRepeatMode(message, boolean)</a> - enable or disable repeat mode for the server (play the song again and again)</li>
 <li><a href="https://discord-player.js.org/Player.html#setLoopMode">setLoopMode(message, boolean)</a> - enable or disable loop mode for the server (play the queue again and again)</li>
+<li><a href="https://discord-player.js.org/Player.html#seek">seek(message, time)</a> - seek to a specific position</li>
+<li><a href="https://discord-player.js.org/Player.html#moveTo">moveTo(message, channel)</a> - move the bot to another channel</li>
+</ul>
+<h3>Utils</h3>
+<ul>
+<li><a href="https://discord-player.js.org/Player.html#createProgressBar">createProgressBar(message, options)</a> - generate a progress bar for the current song/queue</li>
 </ul>
 <h3>Event messages</h3>
 <pre class="prettyprint source lang-js"><code>// Then add some messages that will be sent when the events will be triggered
