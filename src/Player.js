@@ -982,11 +982,11 @@ class Player extends EventEmitter {
         if (!queue) return
         const timecodes = options && typeof options === 'object' ? options.timecodes : false
         // Stream time of the dispatcher
-        const previousTracksTime = queue.previousTracks.length > 0 ? queue.previousTracks.map((t) => t.durationMS) : 0
+        const previousTracksTime = queue.previousTracks.length > 0 ? queue.previousTracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0
         const currentStreamTime = options && options.queue ? previousTracksTime + queue.currentStreamTime : queue.currentStreamTime
         // Total stream time
         const totalTracksTime = queue.tracks.length > 0 ? queue.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0
-        const totalTime = options && options.queue ? totalTracksTime : queue.playing.durationMS
+        const totalTime = options && options.queue ? previousTracksTime + totalTracksTime : queue.playing.durationMS
         // Stream progress
         const index = Math.round((currentStreamTime / totalTime) * 15)
         // conditions
