@@ -7,7 +7,6 @@ const spotifyPlaylistRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?
 const spotifyAlbumRegex = (/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:album\/|\?uri=spotify:album:)((\w|-){22})/)
 const vimeoRegex = (/(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)/)
 const facebookRegex = (/(https?:\/\/)(www\.|m\.)?(facebook|fb).com\/.*\/videos\/.*/)
-const xvRegex = (/(http|https):\/\/(.+)?xvideos.com\/(.+)\/(.+)/)
 
 module.exports = class Util {
     constructor () {
@@ -20,7 +19,7 @@ module.exports = class Util {
             prism.FFmpeg.getInfo()
             return true
         } catch {
-            this.alertFFMPEG()
+            Util.alertFFMPEG()
             return false
         }
     }
@@ -79,10 +78,6 @@ module.exports = class Util {
 
     static isDiscordAttachment (query) {
         return /https:\/\/cdn.discordapp.com\/attachments\/(\d{17,19})\/(\d{17,19})\/(.+)/.test(query)
-    }
-
-    static isXVLink (query) {
-        return xvRegex.test(query)
     }
 
     static buildTimecode (data) {

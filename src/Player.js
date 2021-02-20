@@ -9,7 +9,7 @@ const Track = require('./Track')
 const Util = require('./Util')
 const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
-const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor, XVideosExtractor } = require('./Extractors/Extractor')
+const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor } = require('./Extractors/Extractor')
 
 /**
  * @typedef Filters
@@ -194,8 +194,6 @@ class Player extends EventEmitter {
             return 'reverbnation'
         } else if (this.util.isDiscordAttachment(query)) {
             return 'attachment'
-        } else if (this.util.isXVLink(query)) {
-            return 'xvlink'
         } else {
             return 'youtube-video-keywords'
         }
@@ -339,32 +337,6 @@ class Player extends EventEmitter {
                     },
                     stream: {
                         get: () => query
-                    }
-                })
-
-                tracks.push(track)
-            } else if (queryType === 'xvlink') {
-                const data = await XVideosExtractor.getInfo(query).catch(() => {})
-                if (!data || !(data.streams.lq || data.streams.hq)) return this.emit('noResults', message, query)
-
-                const track = new Track({
-                    title: data.title,
-                    url: data.url,
-                    thumbnail: data.thumbnail,
-                    lengthSeconds: data.length,
-                    description: '',
-                    views: data.views,
-                    author: {
-                        name: data.channel.name
-                    }
-                }, message.author, this)
-
-                Object.defineProperties(track, {
-                    arbitrary: {
-                        get: () => true
-                    },
-                    stream: {
-                        get: () => data.streams.lq || data.streams.hq
                     }
                 })
 
@@ -697,7 +669,7 @@ class Player extends EventEmitter {
     /**
      * Custom search function
      * @param {string} query Search query
-     * @param {("youtube"|"soundcloud"|"xvideos")} type Search type
+     * @param {("youtube"|"soundcloud")} type Search type
      * @returns {Promise<any[]>}
      */
     async search (query, type = 'youtube') {
@@ -706,11 +678,6 @@ class Player extends EventEmitter {
         switch (type.toLowerCase()) {
         case 'soundcloud':
             return await Client.search(query, 'track').catch(() => {}) || []
-        case 'xvideos':
-            // eslint-disable-next-line
-            let videos = await XVideosExtractor.search(query).catch(() => {})
-            if (!videos) return []
-            return videos.videos
         default:
             return ytsr.search(query, { type: 'video' }).catch(() => {}) || []
         }
