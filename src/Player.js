@@ -205,9 +205,10 @@ class Player extends EventEmitter {
      * @param {Discord.Message} message
      * @param {string} query
      * @param {boolean} firstResult
+     * @param {boolean} isAttachment
      * @returns {Promise<Track>}
      */
-    _searchTracks (message, query, firstResult) {
+    _searchTracks (message, query, firstResult, isAttachment) {
         return new Promise(async (resolve) => {
             let tracks = []
             let updatedQuery = null
@@ -315,7 +316,7 @@ class Player extends EventEmitter {
                 })
 
                 tracks.push(track)
-            } else if (queryType === 'attachment') {
+            } else if (!!isAttachment || queryType === 'attachment') {
                 const data = await DiscordExtractor.getInfo(query).catch(() => {})
                 if (!data || !(data.format.startsWith('audio/') || data.format.startsWith('video/'))) return this.emit('noResults', message, query)
 
@@ -327,7 +328,7 @@ class Player extends EventEmitter {
                     description: '',
                     views: 0,
                     author: {
-                        name: 'Media_Attachment'
+                        name: 'Media Attachment'
                     }
                 }, message.author, this)
 
@@ -679,7 +680,7 @@ class Player extends EventEmitter {
         case 'soundcloud':
             return await Client.search(query, 'track').catch(() => {}) || []
         default:
-            return ytsr.search(query, { type: 'video' }).catch(() => {}) || []
+            return await ytsr.search(query, { type: 'video' }).catch(() => {}) || []
         }
     }
 
@@ -688,12 +689,13 @@ class Player extends EventEmitter {
      * @param {Discord.Message} message Discord `message`
      * @param {String|Track} query Search query or a valid `Track` object.
      * @param {boolean} firstResult Whether the bot should play the first song found on youtube with the given query
+     * @param {boolean} [isAttachment=false] If it should play it as attachment
      * @returns {Promise<void>}
      *
      * @example
      * client.player.play(message, "Despacito", true);
      */
-    async play (message, query, firstResult = false) {
+    async play (message, query, firstResult = false, isAttachment = false) {
         if (this._cooldownsTimeout.has(`end_${message.guild.id}`)) {
             clearTimeout(this._cooldownsTimeout.get(`end_${message.guild.id}`))
             this._cooldownsTimeout.delete(`end_${message.guild.id}`)
@@ -704,7 +706,7 @@ class Player extends EventEmitter {
         // clean query
         query = query.replace(/<(.+)>/g, '$1')
 
-        if (this.util.isYTPlaylistLink(query)) {
+        if (!this.util.isDiscordAttachment(query) && !isAttachment && this.util.isYTPlaylistLink(query)) {
             return this._handlePlaylist(message, query)
         }
         if (this.util.isSpotifyPLLink(query)) {
@@ -736,7 +738,7 @@ class Player extends EventEmitter {
                 }
             }, message.author, this)
         } else {
-            trackToPlay = await this._searchTracks(message, query, firstResult)
+            trackToPlay = await this._searchTracks(message, query, firstResult, !!isAttachment || this.util.isDiscordAttachment(query))
         }
         if (trackToPlay) {
             if (this.isPlaying(message)) {
