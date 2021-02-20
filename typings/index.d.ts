@@ -103,6 +103,7 @@ declare module 'discord-player' {
     }
     interface ProgressBarOptions {
         timecodes: boolean;
+        queue: boolean;
     }
     interface CustomPlaylist {
         tracks: Track[];
