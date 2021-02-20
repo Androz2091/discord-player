@@ -91,6 +91,7 @@ You need to **init the guild queue using the play() function**, then you are abl
 * [getQueue(message)](https://discord-player.js.org/Player.html#getQueue) - get the server queue
 * [clearQueue(message)](https://discord-player.js.org/Player.html#clearQueue) - clear the server queue
 * [remove(message, track)](https://discord-player.js.org/Player.html#remove) - remove a track from the server queue
+* [shuffle(message)](https://discord-player.js.org/Player.html#shuffle) - shuffle the server queue
 * [nowPlaying(message)](https://discord-player.js.org/Player.html#nowPlaying) - get the current track
 
 #### Manage music stream
@@ -103,6 +104,12 @@ You need to **init the guild queue using the play() function**, then you are abl
 * [setFilters(message, newFilters)](https://discord-player.js.org/Player.html#setFilters) - update filters (bassboost for example)
 * [setRepeatMode(message, boolean)](https://discord-player.js.org/Player.html#setRepeatMode) - enable or disable repeat mode for the server (play the song again and again)
 * [setLoopMode(message, boolean)](https://discord-player.js.org/Player.html#setLoopMode) - enable or disable loop mode for the server (play the queue again and again)
+* [seek(message, time)](https://discord-player.js.org/Player.html#seek) - seek to a specific position
+* [moveTo(message, channel)](https://discord-player.js.org/Player.html#moveTo) - move the bot to another channel
+
+### Utils
+
+* [createProgressBar(message, options)](https://discord-player.js.org/Player.html#createProgressBar) - generate a progress bar for the current song/queue
 
 ### Event messages
 
