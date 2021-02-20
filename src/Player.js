@@ -776,7 +776,7 @@ class Player extends EventEmitter {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
         if (!queue) return this.emit('error', 'NotPlaying', message)
-        // Pause the dispatcher
+        // Resume the dispatcher
         queue.voiceConnection.dispatcher.resume()
         queue.paused = false
     }
