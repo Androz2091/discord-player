@@ -1,4 +1,5 @@
 const https = require('https')
+const { Readable } = require('stream')
 
 class Discord {
     constructor () {
@@ -6,7 +7,7 @@ class Discord {
     }
 
     /**
-     * @typedef {import('stream').Readable} Readable
+     * @typedef {Readable} Readable
      */
 
     /**

@@ -1,4 +1,5 @@
 const fetch = require('node-fetch').default
+const { Readable } = require('stream')
 
 class Vimeo {
     constructor () {
@@ -6,7 +7,7 @@ class Vimeo {
     }
 
     /**
-     * @typedef {import('stream').Readable} Readable
+     * @typedef {Readable} Readable
      */
 
     /**

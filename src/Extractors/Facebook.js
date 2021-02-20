@@ -1,6 +1,6 @@
 const fetch = require('node-fetch').default
 const { JSDOM } = require('jsdom')
-
+const { Readable } = require('stream')
 class Facebook {
     constructor () {
         throw new Error(`The ${this.constructor.name} class may not be instantiated!`)
@@ -17,7 +17,7 @@ class Facebook {
     }
 
     /**
-     * @typedef {import('stream').Readable} Readable
+     * @typedef {Readable} Readable
      */
 
     /**
