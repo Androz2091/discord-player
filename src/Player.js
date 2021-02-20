@@ -1130,7 +1130,7 @@ class Player extends EventEmitter {
     async _playTrack (queue, firstPlay) {
         if (queue.stopped) return
         // If there isn't next music in the queue
-        if (queue.tracks.length === 1 && !queue.repeatMode && !firstPlay) {
+        if (queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
             // Leave the voice channel
             if (this.options.leaveOnEnd && !queue.stopped) {
                 // Remove the guild from the guilds list
