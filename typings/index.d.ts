@@ -44,7 +44,7 @@ declare module 'discord-player' {
         public setRepeatMode(message: Message, enabled: boolean): boolean;
         public setLoopMode(message: Message, enabled: boolean): boolean
         public shuffle(message: Message): Queue;
-        public remove(message: Message, trackOrPosition: Track|number): Track;
+        public remove(message: Message, trackOrPosition: Track | number): Track;
         public createProgressBar(message: Message, progressBarOptions: ProgressBarOptions): string;
 
         public on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
@@ -61,34 +61,34 @@ declare module 'discord-player' {
         autoSelfDeaf: boolean;
         quality: MusicQuality;
     }
-    type Filters = 
-        | 'bassboost' 
-        | '8D' 
-        | 'vaporwave' 
+    type Filters =
+        | 'bassboost'
+        | '8D'
+        | 'vaporwave'
         | 'nightcore'
-        | 'phaser' 
-        | 'tremolo' 
-        | 'vibrato' 
-        | 'reverse' 
-        | 'treble' 
-        | 'normalizer' 
-        | 'surrounding' 
-        | 'pulsator' 
-        | 'subboost' 
-        | 'karaoke' 
-        | 'flanger' 
-        | 'gate' 
-        | 'haas' 
-        | 'mcompand' 
-        | 'mono' 
-        | 'mstlr' 
-        | 'mstrr' 
-        | 'compressor' 
-        | 'expander' 
-        | 'softlimiter' 
-        | 'chorus' 
-        | 'chorus2d' 
-        | 'chorus3d' 
+        | 'phaser'
+        | 'tremolo'
+        | 'vibrato'
+        | 'reverse'
+        | 'treble'
+        | 'normalizer'
+        | 'surrounding'
+        | 'pulsator'
+        | 'subboost'
+        | 'karaoke'
+        | 'flanger'
+        | 'gate'
+        | 'haas'
+        | 'mcompand'
+        | 'mono'
+        | 'mstlr'
+        | 'mstrr'
+        | 'compressor'
+        | 'expander'
+        | 'softlimiter'
+        | 'chorus'
+        | 'chorus2d'
+        | 'chorus3d'
         | 'fadein';
 
     type FiltersStatuses = {
@@ -234,16 +234,6 @@ declare module 'discord-player' {
             avatar: string;
         };
         url: string;
-        reactions: {
-            total: number;
-            like: number;
-            love: number;
-            care: number;
-            wow: number;
-            haha: number;
-            sad: number;
-            angry: number;
-        };
         shares: string;
         views: string;
     }
