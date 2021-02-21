@@ -30,7 +30,7 @@ declare module 'discord-player' {
 
         public static get AudioFilters(): PlayerFilters;
         public isPlaying(message: Message): boolean;
-        public setFilters(message: Message, newFilters: Partial<Filters>): Promise<void>;
+        public setFilters(message: Message, newFilters: Partial<FiltersOption>): Promise<void>;
         public play(message: Message, query: string | Track, firstResult?: boolean, isAttachment?: boolean): Promise<void>;
         public pause(message: Message): void;
         public resume(message: Message): void;
@@ -96,6 +96,9 @@ declare module 'discord-player' {
         | 'fadein';
 
     type FiltersStatuses = {
+        [key in Filters]: boolean;
+    }
+    type FiltersOption = {
         [key in Filters]: boolean;
     }
     type PlayerFilters = {
