@@ -31,7 +31,7 @@ declare module 'discord-player' {
         public static get AudioFilters(): PlayerFilters;
         public isPlaying(message: Message): boolean;
         public setFilters(message: Message, newFilters: Partial<Filters>): Promise<void>;
-        public play(message: Message, query: string | Track, firstResult?: boolean): Promise<void>;
+        public play(message: Message, query: string | Track, firstResult?: boolean, isAttachment?: boolean): Promise<void>;
         public pause(message: Message): void;
         public resume(message: Message): void;
         public stop(message: Message): void;
@@ -45,7 +45,7 @@ declare module 'discord-player' {
         public setLoopMode(message: Message, enabled: boolean): boolean
         public shuffle(message: Message): Queue;
         public remove(message: Message, trackOrPosition: Track | number): Track;
-        public createProgressBar(message: Message, progressBarOptions: ProgressBarOptions): string;
+        public createProgressBar(message: Message, progressBarOptions?: ProgressBarOptions): string;
         public seek(message: Message, time: number): Promise<void>;
         public moveTo(message: Message, channel: VoiceChannel): void;
 
