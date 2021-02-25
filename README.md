@@ -3,7 +3,7 @@
 [![downloadsBadge](https://img.shields.io/npm/dt/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
 [![versionBadge](https://img.shields.io/npm/v/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
 
-**Note**: this module uses recent discordjs features and requires discord.js version 12.
+**Note**: this module uses recent discordjs features and requires discord.js version 12 and Node.js 14.
 
 Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**! It doesn't require any api key, as it uses **scraping**.
 
