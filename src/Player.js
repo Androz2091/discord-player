@@ -452,17 +452,27 @@ class Player extends EventEmitter {
      * Moves to new voice channel
      * @param {Discord.Message} message Message
      * @param {Discord.VoiceChannel} channel Voice channel
+     * @returns {boolean} Whether it succeed or not
      */
     moveTo (message, channel) {
         if (!channel || channel.type !== 'voice') return
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit('error', 'MusicStarting', message)
+            return false
+        }
         if (queue.voiceConnection.channel.id === channel.id) return
 
         queue.voiceConnection.dispatcher.pause()
         channel.join()
             .then(() => queue.voiceConnection.dispatcher.resume())
             .catch(() => this.emit('error', 'UnableToJoin', message))
+
+        return true
     }
 
     /**
@@ -755,43 +765,69 @@ class Player extends EventEmitter {
     /**
      * Pause the music in the server.
      * @param {Discord.Message} message
+     * @returns {boolean} Whether it succeed or not
      * @example
      * client.player.pause(message);
      */
     pause (message) {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit('error', 'MusicStarting', message)
+            return false
+        }
         // Pause the dispatcher
         queue.voiceConnection.dispatcher.pause()
         queue.paused = true
+        return true
     }
 
     /**
      * Resume the music in the server.
      * @param {Discord.Message} message
+     * @returns {boolean} Whether it succeed or not
      * @example
      * client.player.resume(message);
      */
     resume (message) {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit('error', 'MusicStarting', message)
+            return false
+        }
         // Resume the dispatcher
         queue.voiceConnection.dispatcher.resume()
         queue.paused = false
+        return true
     }
 
     /**
      * Stop the music in the server.
      * @param {Discord.Message} message
+     * @returns {boolean} Whether it succeed or not
      * @example
      * client.player.stop(message);
      */
     stop (message) {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit('error', 'MusicStarting', message)
+            return false
+        }
         // Stop the dispatcher
         queue.stopped = true
         queue.tracks = []
@@ -799,22 +835,32 @@ class Player extends EventEmitter {
         queue.voiceConnection.dispatcher.end()
         if (this.options.leaveOnStop) queue.voiceConnection.channel.leave()
         this.queues.delete(message.guild.id)
+        return true
     }
 
     /**
      * Change the server volume.
      * @param {Discord.Message} message
      * @param {number} percent
+     * @returns {boolean} Whether it succeed or not
      * @example
      * client.player.setVolume(message, 90);
      */
     setVolume (message, percent) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit('error', 'MusicStarting', message)
+            return false
+        }
         // Update volume
         queue.volume = percent
         queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200)
+        return true
     }
 
     /**
@@ -843,35 +889,48 @@ class Player extends EventEmitter {
     /**
      * Skips to the next song.
      * @param {Discord.Message} message
-     * @returns {Queue}
+     * @returns {boolean} Whether it succeed or not
      */
     skip (message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
-        const currentTrack = queue.playing
+        if (!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit('error', 'MusicStarting', message)
+            return false
+        }
         // End the dispatcher
         queue.voiceConnection.dispatcher.end()
         queue.lastSkipped = true
         // Return the queue
-        return queue
+        return true
     }
 
     /**
      * Play back the previous song.
      * @param {Discord.Message} message
-     * @returns {Queue}
+     * @returns {boolean} Whether it succeed or not
      */
     back (message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit('error', 'MusicStarting', message)
+            return false
+        }
         queue.tracks.splice(1, 0, queue.previousTracks.shift())
         // End the dispatcher
         queue.voiceConnection.dispatcher.end()
         queue.lastSkipped = true
         // Return the queue
-        return queue
+        return true
     }
 
     /**
