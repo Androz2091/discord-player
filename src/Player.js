@@ -545,6 +545,7 @@ class Player extends EventEmitter {
         } else {
             const track = playlist.tracks.shift()
             const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            this.emit('playlistAdd', message, queue, playlist)
             this.emit('trackStart', message, queue.tracks[0], queue)
             this._addTracksToQueue(message, playlist.tracks)
         }
