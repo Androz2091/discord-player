@@ -1118,7 +1118,7 @@ class Player extends EventEmitter {
                 })
                 newStream.on('error', (error) => {
                     if (error.message.includes('Video unavailable')) {
-                        this.emit('error', 'VideoUnavailable', queue.firstMessage)
+                        this.emit('error', 'VideoUnavailable', queue.firstMessage, queue.playing)
                         this._playTrack(queue, false)
                     } else {
                         this.emit('error', error, queue.firstMessage)
