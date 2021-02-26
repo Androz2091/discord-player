@@ -1045,7 +1045,7 @@ class Player extends EventEmitter {
         const previousTracksTime = queue.previousTracks.length > 0 ? queue.previousTracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0
         const currentStreamTime = options && options.queue ? previousTracksTime + queue.currentStreamTime : queue.currentStreamTime
         // Total stream time
-        const totalTracksTime = queue.tracks.length > 0 ? queue.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0
+        const totalTracksTime = queue.totalTime
         const totalTime = options && options.queue ? previousTracksTime + totalTracksTime : queue.playing.durationMS
         // Stream progress
         const index = Math.round((currentStreamTime / totalTime) * 15)

@@ -98,6 +98,10 @@ class Queue extends EventEmitter {
         return this.filters.bassboost ? this.volume + 50 : this.volume
     }
 
+    get totalTime () {
+        return this.tracks.length > 0 ? this.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0
+    }
+
     get currentStreamTime () {
         return this.voiceConnection.dispatcher
             ? this.voiceConnection.dispatcher.streamTime + this.additionalStreamTime
