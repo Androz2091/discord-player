@@ -115,7 +115,7 @@ declare module 'discord-player' {
         requestedBy: User;
     }
     type Playlist = YTSRPlaylist & CustomPlaylist;
-    type PlayerError = 'NotConnected' | 'UnableToJoin' | 'NotPlaying' | 'LiveVideo' | 'ParseError' | 'VideoUnavailable' | "MusicStarting";
+    type PlayerError = 'NotConnected' | 'UnableToJoin' | 'NotPlaying' | 'LiveVideo' | 'ParseError' | 'VideoUnavailable' | 'MusicStarting';
     interface PlayerEvents {
         searchResults: [Message, string, Track[]];
         searchInvalidResponse: [Message, string, Track[], string, MessageCollector];
