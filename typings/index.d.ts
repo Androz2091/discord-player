@@ -115,7 +115,7 @@ declare module 'discord-player' {
         requestedBy: User;
     }
     type Playlist = YTSRPlaylist & CustomPlaylist;
-    type PlayerError = 'NotConnected' | 'UnableToJoin' | 'NotPlaying' | 'LiveVideo' | 'ParseError' | 'VideoUnavailable';
+    type PlayerError = 'NotConnected' | 'UnableToJoin' | 'NotPlaying' | 'LiveVideo' | 'ParseError' | 'VideoUnavailable' | "MusicStarting";
     interface PlayerEvents {
         searchResults: [Message, string, Track[]];
         searchInvalidResponse: [Message, string, Track[], string, MessageCollector];
@@ -155,6 +155,7 @@ declare module 'discord-player' {
         public playing: Track;
         public calculatedVolume: number;
         public currentStreamTime: number;
+        public totalTime: number;
     }
     class Track {
         constructor(videoData: object, user: User, player: Player);
