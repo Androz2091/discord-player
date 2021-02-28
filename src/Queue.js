@@ -100,7 +100,7 @@ class Queue extends EventEmitter {
 
     /**
      * The calculated volume of the queue
-     * @type {Number}
+     * @type {number}
      */
     get calculatedVolume () {
         return this.filters.bassboost ? this.volume + 50 : this.volume
@@ -108,7 +108,7 @@ class Queue extends EventEmitter {
 
     /**
      * Returns the total time of the queue in milliseconds
-     * @type {Number}
+     * @type {number}
      */
     get totalTime () {
         return this.tracks.length > 0 ? this.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0
@@ -116,7 +116,7 @@ class Queue extends EventEmitter {
 
     /**
      * The current stream time
-     * @type {Number}
+     * @type {number}
      */
     get currentStreamTime () {
         return this.voiceConnection.dispatcher
