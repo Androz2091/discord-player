@@ -90,18 +90,34 @@ class Queue extends EventEmitter {
         this.firstMessage = message
     }
 
+    /**
+     * The current playing track
+     * @type {Track}
+     */
     get playing () {
         return this.tracks[0]
     }
 
+    /**
+     * The calculated volume of the queue
+     * @type {number}
+     */
     get calculatedVolume () {
         return this.filters.bassboost ? this.volume + 50 : this.volume
     }
 
+    /**
+     * Returns the total time of the queue in milliseconds
+     * @type {number}
+     */
     get totalTime () {
         return this.tracks.length > 0 ? this.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0
     }
 
+    /**
+     * The current stream time
+     * @type {number}
+     */
     get currentStreamTime () {
         return this.voiceConnection.dispatcher
             ? this.voiceConnection.dispatcher.streamTime + this.additionalStreamTime
