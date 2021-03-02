@@ -270,7 +270,7 @@ class Player extends EventEmitter {
             } else if (queryType === 'facebook') {
                 const data = await FacebookExtractor.getInfo(query).catch(e => {})
                 if (!data) return this.emit('noResults', message, query)
-                if (data.live && !this.options.enableLive) return this.emit('error', 'LiveVideo', message)
+                if (data.live && !this.options.enableLive) return this.emit('playerError', 'LiveVideo', message)
 
                 const track = new Track({
                     title: data.title,
@@ -399,7 +399,7 @@ class Player extends EventEmitter {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === message.guild.id)
-            if (!queue) this.emit('error', 'NotPlaying', message)
+            if (!queue) this.emit('playerError', 'NotPlaying', message)
             Object.keys(newFilters).forEach((filterName) => {
                 queue.filters[filterName] = newFilters[filterName]
             })
@@ -418,7 +418,7 @@ class Player extends EventEmitter {
     setPosition (message, time) {
         return new Promise((resolve) => {
             const queue = this.queues.find((g) => g.guildID === message.guild.id)
-            if (!queue) return this.emit('error', 'NotPlaying', message)
+            if (!queue) return this.emit('playerError', 'NotPlaying', message)
 
             if (typeof time !== 'number' && !isNaN(time)) time = parseInt(time)
             if (queue.playing.durationMS === time) return this.skip(message)
@@ -458,11 +458,11 @@ class Player extends EventEmitter {
         if (!channel || channel.type !== 'voice') return
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
         if (!queue) {
-            this.emit('error', 'NotPlaying', message)
+            this.emit('playerError', 'NotPlaying', message)
             return false
         }
         if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
-            this.emit('error', 'MusicStarting', message)
+            this.emit('playerError', 'MusicStarting', message)
             return false
         }
         if (queue.voiceConnection.channel.id === channel.id) return
@@ -470,7 +470,7 @@ class Player extends EventEmitter {
         queue.voiceConnection.dispatcher.pause()
         channel.join()
             .then(() => queue.voiceConnection.dispatcher.resume())
-            .catch(() => this.emit('error', 'UnableToJoin', message))
+            .catch(() => this.emit('playerError', 'UnableToJoin', message))
 
         return true
     }
@@ -484,7 +484,7 @@ class Player extends EventEmitter {
      */
     _addTrackToQueue (message, track) {
         const queue = this.getQueue(message)
-        if (!queue) this.emit('error', 'NotPlaying', message)
+        if (!queue) this.emit('playerError', 'NotPlaying', message)
         if (!track || !(track instanceof Track)) throw new Error('No track to add to the queue specified')
         queue.tracks.push(track)
         return queue
@@ -514,7 +514,7 @@ class Player extends EventEmitter {
     _createQueue (message, track) {
         return new Promise((resolve, reject) => {
             const channel = message.member.voice ? message.member.voice.channel : null
-            if (!channel) return this.emit('error', 'NotConnected', message)
+            if (!channel) return this.emit('playerError', 'NotConnected', message)
             const queue = new Queue(message.guild.id, message, this.filters)
             this.queues.set(message.guild.id, queue)
             channel.join().then((connection) => {
@@ -527,7 +527,7 @@ class Player extends EventEmitter {
             }).catch((err) => {
                 console.error(err)
                 this.queues.delete(message.guild.id)
-                this.emit('error', 'UnableToJoin', message)
+                this.emit('playerError', 'UnableToJoin', message)
             })
         })
     }
@@ -554,7 +554,7 @@ class Player extends EventEmitter {
             this.emit('playlistAdd', message, queue, playlist)
         } else {
             const track = playlist.tracks.shift()
-            const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            const queue = await this._createQueue(message, track).catch((e) => this.emit('playerError', e, message))
             this.emit('playlistAdd', message, queue, playlist)
             this.emit('trackStart', message, queue.tracks[0], queue)
             this._addTracksToQueue(message, playlist.tracks)
@@ -587,7 +587,7 @@ class Player extends EventEmitter {
             this.emit('playlistAdd', message, queue, playlist)
         } else {
             const track = playlist.tracks.shift()
-            const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            const queue = await this._createQueue(message, track).catch((e) => this.emit('playerError', e, message))
             this.emit('trackStart', message, queue.tracks[0], queue)
             this._addTracksToQueue(message, playlist.tracks)
         }
@@ -617,7 +617,7 @@ class Player extends EventEmitter {
             this.emit('playlistAdd', message, queue, album)
         } else {
             const track = album.tracks.shift()
-            const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            const queue = await this._createQueue(message, track).catch((e) => this.emit('playerError', e, message))
             this.emit('trackStart', message, queue.tracks[0], queue)
             this._addTracksToQueue(message, album.tracks)
         }
@@ -661,7 +661,7 @@ class Player extends EventEmitter {
 
         if (!res.tracks.length) {
             this.emit('playlistParseEnd', res, message)
-            return this.emit('error', 'ParseError', message)
+            return this.emit('playerError', 'ParseError', message)
         }
 
         res.duration = res.tracks.reduce((a, c) => a + c.lengthSeconds, 0)
@@ -672,7 +672,7 @@ class Player extends EventEmitter {
             this.emit('playlistAdd', message, queue, res)
         } else {
             const track = res.tracks.shift()
-            const queue = await this._createQueue(message, track).catch((e) => this.emit('error', e, message))
+            const queue = await this._createQueue(message, track).catch((e) => this.emit('playerError', e, message))
             this.emit('trackStart', message, queue.tracks[0], queue)
             this._addTracksToQueue(message, res.tracks)
         }
@@ -735,7 +735,7 @@ class Player extends EventEmitter {
             trackToPlay = query
         } else if (this.util.isYTVideoLink(query)) {
             const videoData = await ytdl.getBasicInfo(query)
-            if (videoData.videoDetails.isLiveContent && !this.options.enableLive) return this.emit('error', 'LiveVideo', message)
+            if (videoData.videoDetails.isLiveContent && !this.options.enableLive) return this.emit('playerError', 'LiveVideo', message)
             const lastThumbnail = videoData.videoDetails.thumbnails.length - 1 /* get the highest quality thumbnail */
             trackToPlay = new Track({
                 title: videoData.videoDetails.title,
@@ -773,11 +773,11 @@ class Player extends EventEmitter {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
         if (!queue) {
-            this.emit('error', 'NotPlaying', message)
+            this.emit('playerError', 'NotPlaying', message)
             return false
         }
         if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
-            this.emit('error', 'MusicStarting', message)
+            this.emit('playerError', 'MusicStarting', message)
             return false
         }
         // Pause the dispatcher
@@ -797,11 +797,11 @@ class Player extends EventEmitter {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
         if (!queue) {
-            this.emit('error', 'NotPlaying', message)
+            this.emit('playerError', 'NotPlaying', message)
             return false
         }
         if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
-            this.emit('error', 'MusicStarting', message)
+            this.emit('playerError', 'MusicStarting', message)
             return false
         }
         // Resume the dispatcher
@@ -821,11 +821,11 @@ class Player extends EventEmitter {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
         if (!queue) {
-            this.emit('error', 'NotPlaying', message)
+            this.emit('playerError', 'NotPlaying', message)
             return false
         }
         if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
-            this.emit('error', 'MusicStarting', message)
+            this.emit('playerError', 'MusicStarting', message)
             return false
         }
         // Stop the dispatcher
@@ -850,11 +850,11 @@ class Player extends EventEmitter {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) {
-            this.emit('error', 'NotPlaying', message)
+            this.emit('playerError', 'NotPlaying', message)
             return false
         }
         if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
-            this.emit('error', 'MusicStarting', message)
+            this.emit('playerError', 'MusicStarting', message)
             return false
         }
         // Update volume
@@ -881,7 +881,7 @@ class Player extends EventEmitter {
     clearQueue (message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) return this.emit('playerError', 'NotPlaying', message)
         // Clear queue
         queue.tracks = queue.playing ? [queue.playing] : []
     }
@@ -895,11 +895,11 @@ class Player extends EventEmitter {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) {
-            this.emit('error', 'NotPlaying', message)
+            this.emit('playerError', 'NotPlaying', message)
             return false
         }
         if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
-            this.emit('error', 'MusicStarting', message)
+            this.emit('playerError', 'MusicStarting', message)
             return false
         }
         // End the dispatcher
@@ -918,11 +918,11 @@ class Player extends EventEmitter {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) {
-            this.emit('error', 'NotPlaying', message)
+            this.emit('playerError', 'NotPlaying', message)
             return false
         }
         if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
-            this.emit('error', 'MusicStarting', message)
+            this.emit('playerError', 'MusicStarting', message)
             return false
         }
         queue.tracks.splice(1, 0, queue.previousTracks.shift())
@@ -941,7 +941,7 @@ class Player extends EventEmitter {
     nowPlaying (message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) return this.emit('playerError', 'NotPlaying', message)
         const currentTrack = queue.tracks[0]
         // Return the current track
         return currentTrack
@@ -956,7 +956,7 @@ class Player extends EventEmitter {
     setRepeatMode (message, enabled) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) return this.emit('playerError', 'NotPlaying', message)
         // Enable/Disable repeat mode
         queue.repeatMode = enabled
         // Return the repeat mode
@@ -971,7 +971,7 @@ class Player extends EventEmitter {
     async setLoopMode (message, enabled) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) return this.emit('playerError', 'NotPlaying', message)
         // Enable/Disable loop mode
         queue.loopMode = enabled
         // Return the repeat mode
@@ -986,7 +986,7 @@ class Player extends EventEmitter {
     shuffle (message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) return this.emit('playerError', 'NotPlaying', message)
         // Shuffle the queue (except the first track)
         const currentTrack = queue.tracks.shift()
 
@@ -1010,7 +1010,7 @@ class Player extends EventEmitter {
     remove (message, track) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
-        if (!queue) return this.emit('error', 'NotPlaying', message)
+        if (!queue) return this.emit('playerError', 'NotPlaying', message)
         // Remove the track from the queue
         let trackFound = null
         if (typeof track === 'number') {
@@ -1178,10 +1178,10 @@ class Player extends EventEmitter {
                 })
                 newStream.on('error', (error) => {
                     if (error.message.includes('Video unavailable')) {
-                        this.emit('error', 'VideoUnavailable', queue.firstMessage, queue.playing)
+                        this.emit('playerError', 'VideoUnavailable', queue.firstMessage, queue.playing)
                         this._playTrack(queue, false)
                     } else {
-                        this.emit('error', error, queue.firstMessage)
+                        this.emit('playerError', error, queue.firstMessage)
                     }
                 })
             }, 1000)
