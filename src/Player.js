@@ -11,7 +11,7 @@ const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
 const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor } = require('./Extractors/Extractor')
 const geniusLyrics = require('genius-lyrics')
-const Client = new geniusLyrics.Client()
+const gClient = new geniusLyrics.Client()
 
 /**
  * @typedef Filters
@@ -453,7 +453,7 @@ class Player extends EventEmitter {
             const queue = this.queues.find((g) => g.guildID === message.guild.id)
             if (!queue && !customQuery) return this.emit('error', 'NotPlaying', message)
 
-            const searches = await Client.songs.search((customQuery) ? customQuery : queue.tracks[0].title ).catch((error) => { return reject(error)}
+            const searches = await gClient.songs.search((customQuery) ? customQuery : queue.tracks[0].title ).catch((error) => { return reject(error)}
             const firstSong = searches[0]
             const lyrics = await firstSong.lyrics()
             resolve(lyrics)
