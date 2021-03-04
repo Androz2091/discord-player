@@ -445,17 +445,18 @@ class Player extends EventEmitter {
     /**
      * Fetches the lyrics of the current song
      * @param {Discord.Message} message Discord message
+     * @param {string} query, or the current song if left undefined
      * @returns {Promise<void>}
      */
-    lyrics (message) {
-        return new Promise(async function(resolve) {
+    lyrics (message, customQuery) {
+        return new Promise(async function(resolve, reject) {
             const queue = this.queues.find((g) => g.guildID === message.guild.id)
             if (!queue) return this.emit('error', 'NotPlaying', message)
 
-            const searches = await Client.songs.search(queue.tracks[0].title).catch((e) => { return resolve(undefined) })
-            const firstSong = searches[0];
-            const lyrics = await firstSong.lyrics();
-            resolve(lyrics);
+            const searches = await Client.songs.search( (customQuery) ? customQuery : queue.tracks[0].title ).catch((error) => { return reject(error) }
+            const firstSong = searches[0]
+            const lyrics = await firstSong.lyrics()
+            resolve(lyrics)
         })
     }
 
