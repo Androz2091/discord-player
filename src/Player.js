@@ -453,7 +453,8 @@ class Player extends EventEmitter {
             const queue = this.queues.find((g) => g.guildID === message.guild.id)
             if (!queue && !customQuery) return this.emit('error', 'NotPlaying', message)
 
-            const searches = await gClient.songs.search((customQuery) ? customQuery : queue.tracks[0].title ).catch((error) => { return reject(error)}
+            const query = (customQuery) ? customQuery : queue.tracks[0].title
+            const searches = await gClient.songs.search(query).catch((error) => { return reject(error) })
             const firstSong = searches[0]
             const lyrics = await firstSong.lyrics()
             resolve(lyrics)
