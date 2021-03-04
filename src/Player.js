@@ -451,9 +451,9 @@ class Player extends EventEmitter {
     lyrics (message, customQuery) {
         return new Promise(async function(resolve, reject) {
             const queue = this.queues.find((g) => g.guildID === message.guild.id)
-            if (!queue) return this.emit('error', 'NotPlaying', message)
+            if (!queue && !customQuery) return this.emit('error', 'NotPlaying', message)
 
-            const searches = await Client.songs.search( (customQuery) ? customQuery : queue.tracks[0].title ).catch((error) => { return reject(error) }
+            const searches = await Client.songs.search((customQuery) ? customQuery : queue.tracks[0].title ).catch((error) => { return reject(error)}
             const firstSong = searches[0]
             const lyrics = await firstSong.lyrics()
             resolve(lyrics)
