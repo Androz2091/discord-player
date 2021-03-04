@@ -10,7 +10,7 @@ const Util = require('./Util')
 const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
 const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor } = require('./Extractors/Extractor')
-const geniusLyrics = require("genius-lyrics")
+const geniusLyrics = require('genius-lyrics')
 const Client = new geniusLyrics.Client()
 
 /**
