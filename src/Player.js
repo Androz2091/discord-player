@@ -11,7 +11,7 @@ const { EventEmitter } = require('events')
 const Client = new soundcloud.Client()
 const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor } = require('./Extractors/Extractor')
 const geniusLyrics = require('genius-lyrics')
-const gClient = (process.env.GENIUSAPI) ? new geniusLyrics.Client(process.env.GENIUSAPI) : new geniusLyrics.Client()
+const gClient = new geniusLyrics.Client(process.env.GENIUSAPI)
 
 /**
  * @typedef Filters
