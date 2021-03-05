@@ -457,7 +457,6 @@ class Player extends EventEmitter {
 
         const query = (customQuery) ? customQuery : queue.tracks[0].title
         const searches = await gClient.songs.search(query).catch((error) => { return (error) })
-        console.log(searches)
         if (!searches) return (undefined)
         const firstSong = searches[0]
         const lyrics = await firstSong.lyrics()
