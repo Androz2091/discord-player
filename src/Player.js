@@ -908,6 +908,35 @@ class Player extends EventEmitter {
         // Return the queue
         return true
     }
+    
+    /**
+   * Jump to the song number in the queue.
+   * @param {Discord.Message} message The message from guild channel
+   * @param {number} num The song number to play
+   * @returns {boolean} Whether it succeed or not
+   */
+    
+    jump(message, num) {
+        const queue = this.queues.find((g) => g.guildID === message.guild.id)
+        if(!queue) {
+            this.emit('error', 'NotPlaying', message)
+            return false
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit('error', 'MusicStarting', message)
+            return false
+        }
+        
+        queue.tracks = queue.tracks.splice(num - 1)
+        queue.lastSkipped = true;
+        
+        if(queue.voiceConnection.dispatcher) {
+            queue.voiceConnection.dispatcher.end()
+        }
+        
+        return true
+        
+    }
 
     /**
      * Play back the previous song.
