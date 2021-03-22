@@ -43,7 +43,7 @@
     "ytdl-core": "^4.5.0"
   },
   "devDependencies": {
-    "@discordjs/opus": "^0.4.0",
+    "@discordjs/opus": "^0.5.0",
     "@types/node": "14.14.31",
     "discord.js": "^12.2.0",
     "eslint": "^7.20.0",
