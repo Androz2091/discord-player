@@ -133,10 +133,7 @@ class Player extends EventEmitter {
          * Player options
          * @type {PlayerOptions}
          */
-        this.options = defaultPlayerOptions
-        for (const prop in options) {
-            this.options[prop] = options[prop]
-        }
+        this.options = Object.assign({}, defaultPlayerOptions, options || {});
         /**
          * Default filters for the queues created with this player.
          * @type {Filters}
