@@ -7,9 +7,16 @@ const ms = require('parse-ms')
 const Queue = require('./Queue')
 const Track = require('./Track')
 const Util = require('./Util')
-const { EventEmitter } = require('events')
+const {
+    EventEmitter
+} = require('events')
 const Client = new soundcloud.Client()
-const { VimeoExtractor, DiscordExtractor, FacebookExtractor, ReverbnationExtractor } = require('./Extractors/Extractor')
+const {
+    VimeoExtractor,
+    DiscordExtractor,
+    FacebookExtractor,
+    ReverbnationExtractor
+} = require('./Extractors/Extractor')
 
 /**
  * @typedef Filters
@@ -108,7 +115,7 @@ class Player extends EventEmitter {
      * @param {Discord.Client} client Discord.js client
      * @param {PlayerOptions} options Player options
      */
-    constructor (client, options = {}) {
+    constructor(client, options = {}) {
         if (!client) throw new SyntaxError('Invalid Discord client')
         super()
 
@@ -165,7 +172,7 @@ class Player extends EventEmitter {
      * @example const filters = require('discord-player').Player.AudioFilters
      * console.log(`There are ${Object.keys(filters).length} filters!`)
      */
-    static get AudioFilters () {
+    static get AudioFilters() {
         return filters
     }
 
@@ -173,7 +180,7 @@ class Player extends EventEmitter {
      * @ignore
      * @param {String} query
      */
-    resolveQueryType (query, forceType) {
+    resolveQueryType(query, forceType) {
         if (forceType && typeof forceType === 'string') return forceType
 
         if (this.util.isSpotifyLink(query)) {
@@ -208,7 +215,7 @@ class Player extends EventEmitter {
      * @param {boolean} isAttachment
      * @returns {Promise<Track>}
      */
-    _searchTracks (message, query, firstResult, isAttachment) {
+    _searchTracks(message, query, firstResult, isAttachment) {
         return new Promise(async (resolve) => {
             let tracks = []
             let updatedQuery = null
@@ -225,7 +232,7 @@ class Player extends EventEmitter {
                     }
                 }
             } else if (queryType === 'soundcloud-song') {
-                const data = await Client.getSongInfo(query).catch(() => { })
+                const data = await Client.getSongInfo(query).catch(() => {})
                 if (data) {
                     const track = new Track({
                         title: data.title,
@@ -345,7 +352,9 @@ class Player extends EventEmitter {
             }
 
             if (queryType === 'youtube-video-keywords') {
-                await ytsr.search(updatedQuery || query, { type: 'video' }).then((results) => {
+                await ytsr.search(updatedQuery || query, {
+                    type: 'video'
+                }).then((results) => {
                     if (results && results.length !== 0) {
                         tracks = results.map((r) => new Track(r, message.author, this))
                     }
@@ -368,7 +377,9 @@ class Player extends EventEmitter {
 
             this.emit('searchResults', message, query, tracks, collector)
 
-            collector.on('collect', ({ content }) => {
+            collector.on('collect', ({
+                content
+            }) => {
                 if (!isNaN(content) && parseInt(content) >= 1 && parseInt(content) <= tracks.length) {
                     const index = parseInt(content, 10)
                     const track = tracks[index - 1]
@@ -395,7 +406,7 @@ class Player extends EventEmitter {
      *  bassboost: true
      * });
      */
-    setFilters (message, newFilters) {
+    setFilters(message, newFilters) {
         return new Promise((resolve, reject) => {
             // Get guild queue
             const queue = this.queues.find((g) => g.guildID === message.guild.id)
@@ -415,7 +426,7 @@ class Player extends EventEmitter {
      * @param {number} time Time in ms
      * @returns {Promise<void>}
      */
-    setPosition (message, time) {
+    setPosition(message, time) {
         return new Promise((resolve) => {
             const queue = this.queues.find((g) => g.guildID === message.guild.id)
             if (!queue) return this.emit('error', 'NotPlaying', message)
@@ -436,7 +447,7 @@ class Player extends EventEmitter {
      * @param {number} time Time in ms
      * @returns {Promise<void>}
      */
-    seek (message, time) {
+    seek(message, time) {
         return this.setPosition(message, time)
     }
 
@@ -444,7 +455,7 @@ class Player extends EventEmitter {
      * Check whether there is a music played in the server
      * @param {Discord.Message} message
      */
-    isPlaying (message) {
+    isPlaying(message) {
         return this.queues.some((g) => g.guildID === message.guild.id)
     }
 
@@ -454,7 +465,7 @@ class Player extends EventEmitter {
      * @param {Discord.VoiceChannel} channel Voice channel
      * @returns {boolean} Whether it succeed or not
      */
-    moveTo (message, channel) {
+    moveTo(message, channel) {
         if (!channel || channel.type !== 'voice') return
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
         if (!queue) {
@@ -482,7 +493,7 @@ class Player extends EventEmitter {
      * @param {Track} track
      * @returns {Queue}
      */
-    _addTrackToQueue (message, track) {
+    _addTrackToQueue(message, track) {
         const queue = this.getQueue(message)
         if (!queue) this.emit('error', 'NotPlaying', message)
         if (!track || !(track instanceof Track)) throw new Error('No track to add to the queue specified')
@@ -497,7 +508,7 @@ class Player extends EventEmitter {
      * @param {Track[]} tracks
      * @returns {Queue}
      */
-    _addTracksToQueue (message, tracks) {
+    _addTracksToQueue(message, tracks) {
         const queue = this.getQueue(message)
         if (!queue) throw new Error('Cannot add tracks to queue because no song is currently played on the server.')
         queue.tracks.push(...tracks)
@@ -511,7 +522,7 @@ class Player extends EventEmitter {
      * @param {Track} track
      * @returns {Promise<Queue>}
      */
-    _createQueue (message, track) {
+    _createQueue(message, track) {
         return new Promise((resolve, reject) => {
             const channel = message.member.voice ? message.member.voice.channel : null
             if (!channel) return this.emit('error', 'NotConnected', message)
@@ -538,7 +549,7 @@ class Player extends EventEmitter {
      * @param {Discord.Message} message
      * @param {String} query
      */
-    async _handlePlaylist (message, query) {
+    async _handlePlaylist(message, query) {
         this.emit('playlistParseStart', {}, message)
         const playlist = await ytsr.getPlaylist(query)
         if (!playlist) return this.emit('noResults', message, query)
@@ -561,7 +572,7 @@ class Player extends EventEmitter {
         }
     }
 
-    async _handleSpotifyPlaylist (message, query) {
+    async _handleSpotifyPlaylist(message, query) {
         this.emit('playlistParseStart', {}, message)
         const playlist = await spotify.getData(query)
         if (!playlist) return this.emit('noResults', message, query)
@@ -569,7 +580,10 @@ class Player extends EventEmitter {
         let s = 0
         for (let i = 0; i < playlist.tracks.items.length; i++) {
             const query = `${playlist.tracks.items[i].track.artists[0].name} - ${playlist.tracks.items[i].track.name}`
-            const results = await ytsr.search(query, { type: 'video', limit: 1 })
+            const results = await ytsr.search(query, {
+                type: 'video',
+                limit: 1
+            })
             if (results.length < 1) {
                 s++ // could be used later for skipped tracks due to result not being found
                 continue
@@ -593,14 +607,16 @@ class Player extends EventEmitter {
         }
     }
 
-    async _handleSpotifyAlbum (message, query) {
+    async _handleSpotifyAlbum(message, query) {
         const album = await spotify.getData(query)
         if (!album) return this.emit('noResults', message, query)
         const tracks = []
         let s = 0
         for (let i = 0; i < album.tracks.items.length; i++) {
             const query = `${album.tracks.items[i].artists[0].name} - ${album.tracks.items[i].name}`
-            const results = await ytsr.search(query, { type: 'video' })
+            const results = await ytsr.search(query, {
+                type: 'video'
+            })
             if (results.length < 1) {
                 s++ // could be used later for skipped tracks due to result not being found
                 continue
@@ -623,7 +639,7 @@ class Player extends EventEmitter {
         }
     }
 
-    async _handleSoundCloudPlaylist (message, query) {
+    async _handleSoundCloudPlaylist(message, query) {
         const data = await Client.getPlaylist(query).catch(() => {})
         if (!data) return this.emit('noResults', message, query)
 
@@ -684,14 +700,16 @@ class Player extends EventEmitter {
      * @param {("youtube"|"soundcloud")} type Search type
      * @returns {Promise<any[]>}
      */
-    async search (query, type = 'youtube') {
+    async search(query, type = 'youtube') {
         if (!query || typeof query !== 'string') return []
 
         switch (type.toLowerCase()) {
-        case 'soundcloud':
-            return await Client.search(query, 'track').catch(() => {}) || []
-        default:
-            return await ytsr.search(query, { type: 'video' }).catch(() => {}) || []
+            case 'soundcloud':
+                return await Client.search(query, 'track').catch(() => {}) || []
+            default:
+                return await ytsr.search(query, {
+                    type: 'video'
+                }).catch(() => {}) || []
         }
     }
 
@@ -706,7 +724,7 @@ class Player extends EventEmitter {
      * @example
      * client.player.play(message, "Despacito", true);
      */
-    async play (message, query, firstResult = false, isAttachment = false) {
+    async play(message, query, firstResult = false, isAttachment = false) {
         if (this._cooldownsTimeout.has(`end_${message.guild.id}`)) {
             clearTimeout(this._cooldownsTimeout.get(`end_${message.guild.id}`))
             this._cooldownsTimeout.delete(`end_${message.guild.id}`)
@@ -769,7 +787,7 @@ class Player extends EventEmitter {
      * @example
      * client.player.pause(message);
      */
-    pause (message) {
+    pause(message) {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
         if (!queue) {
@@ -793,7 +811,7 @@ class Player extends EventEmitter {
      * @example
      * client.player.resume(message);
      */
-    resume (message) {
+    resume(message) {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
         if (!queue) {
@@ -817,7 +835,7 @@ class Player extends EventEmitter {
      * @example
      * client.player.stop(message);
      */
-    stop (message) {
+    stop(message) {
         // Get guild queue
         const queue = this.queues.find((g) => g.guildID === message.guild.id)
         if (!queue) {
@@ -846,7 +864,7 @@ class Player extends EventEmitter {
      * @example
      * client.player.setVolume(message, 90);
      */
-    setVolume (message, percent) {
+    setVolume(message, percent) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) {
@@ -868,7 +886,7 @@ class Player extends EventEmitter {
      * @param {Discord.Message} message
      * @returns {Queue}
      */
-    getQueue (message) {
+    getQueue(message) {
         // Gets guild queue
         const queue = this.queues.get(message.guild.id)
         return queue
@@ -878,7 +896,7 @@ class Player extends EventEmitter {
      * Clears the server queue.
      * @param {Discord.Message} message
      */
-    clearQueue (message) {
+    clearQueue(message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) return this.emit('error', 'NotPlaying', message)
@@ -891,7 +909,7 @@ class Player extends EventEmitter {
      * @param {Discord.Message} message
      * @returns {boolean} Whether it succeed or not
      */
-    skip (message) {
+    skip(message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) {
@@ -914,7 +932,7 @@ class Player extends EventEmitter {
      * @param {Discord.Message} message
      * @returns {boolean} Whether it succeed or not
      */
-    back (message) {
+    back(message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) {
@@ -938,7 +956,7 @@ class Player extends EventEmitter {
      * @param {Discord.Message} message
      * @returns {Track}
      */
-    nowPlaying (message) {
+    nowPlaying(message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) return this.emit('error', 'NotPlaying', message)
@@ -953,7 +971,7 @@ class Player extends EventEmitter {
      * @param {boolean} enabled
      * @returns {boolean} whether the repeat mode is now enabled.
      */
-    setRepeatMode (message, enabled) {
+    setRepeatMode(message, enabled) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) return this.emit('error', 'NotPlaying', message)
@@ -968,7 +986,7 @@ class Player extends EventEmitter {
      * @param {Discord.Message} message
      * @param {boolean} enabled
      */
-    async setLoopMode (message, enabled) {
+    async setLoopMode(message, enabled) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) return this.emit('error', 'NotPlaying', message)
@@ -983,7 +1001,7 @@ class Player extends EventEmitter {
      * @param {Discord.Message} message
      * @returns {Queue}
      */
-    shuffle (message) {
+    shuffle(message) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) return this.emit('error', 'NotPlaying', message)
@@ -1007,7 +1025,7 @@ class Player extends EventEmitter {
      * @param {Track|number} track
      * @returns {Track} the removed track
      */
-    remove (message, track) {
+    remove(message, track) {
         // Get guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) return this.emit('error', 'NotPlaying', message)
@@ -1036,7 +1054,7 @@ class Player extends EventEmitter {
      * @param {boolean} [options.queue] Whether to show the progress bar for the whole queue (if false, only the current song)
      * @returns {string}
      */
-    createProgressBar (message, options) {
+    createProgressBar(message, options) {
         // Gets guild queue
         const queue = this.queues.get(message.guild.id)
         if (!queue) return
@@ -1048,10 +1066,10 @@ class Player extends EventEmitter {
         const totalTracksTime = queue.totalTime
         const totalTime = options && options.queue ? previousTracksTime + totalTracksTime : queue.playing.durationMS
         // Stream progress
-        const index = Math.round((currentStreamTime / totalTime) * 15)
+        const index = Math.round((currentStreamTime / totalTime) * 30)
         // conditions
-        if ((index >= 1) && (index <= 15)) {
-            const bar = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬'.split('')
+        if ((index >= 1) && (index <= 30)) {
+            const bar = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'.split('')
             bar.splice(index, 0, '🔘')
             if (timecodes) {
                 const currentTimecode = Util.buildTimecode(ms(currentStreamTime))
@@ -1064,9 +1082,46 @@ class Player extends EventEmitter {
             if (timecodes) {
                 const currentTimecode = Util.buildTimecode(ms(currentStreamTime))
                 const endTimecode = Util.buildTimecode(ms(totalTime))
-                return `${currentTimecode} ┃ 🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ┃ ${endTimecode}`
+                return `${currentTimecode} ┃ 🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ┃ ${endTimecode}`
             } else {
-                return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+                return '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+            }
+        }
+    }
+
+    /**
+     * Get time code for the queue of the server.
+     * @param {Discord.Message} message
+     * @param {Object} [options]
+     * @param {boolean} [options.queue] Whether to show the time code for the whole queue (if false, only the current song)
+     * @returns {string}
+     */
+    getTimeCode(message, options) {
+        // Gets guild queue
+        const queue = this.queues.get(message.guild.id)
+        if (!queue) return
+        // Stream time of the dispatcher
+        const previousTracksTime = queue.previousTracks.length > 0 ? queue.previousTracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0
+        const currentStreamTime = options && options.queue ? previousTracksTime + queue.currentStreamTime : queue.currentStreamTime
+        // Total stream time
+        const totalTracksTime = queue.totalTime
+        const totalTime = options && options.queue ? previousTracksTime + totalTracksTime : queue.playing.durationMS
+        // Stream progress
+        const index = Math.round((currentStreamTime / totalTime) * 30)
+        // conditions
+        if ((index >= 1) && (index <= 30)) {
+            const currentTimecode = Util.buildTimecode(ms(currentStreamTime))
+            const endTimecode = Util.buildTimecode(ms(totalTime))
+            return {
+                current: currentTimecode,
+                end: endTimecode
+            }
+        } else {
+            const currentTimecode = Util.buildTimecode(ms(currentStreamTime))
+            const endTimecode = Util.buildTimecode(ms(totalTime))
+            return {
+                current: currentTimecode,
+                end: endTimecode
             }
         }
     }
@@ -1076,7 +1131,7 @@ class Player extends EventEmitter {
      * @param {Discord.VoiceState} oldState
      * @param {Discord.VoiceState} newState
      */
-    _handleVoiceStateUpdate (oldState, newState) {
+    _handleVoiceStateUpdate(oldState, newState) {
         // Search for a queue for this channel
         const queue = this.queues.find((g) => g.guildID === oldState.guild.id)
         if (!queue) return
@@ -1117,7 +1172,7 @@ class Player extends EventEmitter {
         }
     }
 
-    _playYTDLStream (queue, updateFilter, seek) {
+    _playYTDLStream(queue, updateFilter, seek) {
         return new Promise(async (resolve) => {
             const ffmeg = this.util.checkFFMPEG()
             if (!ffmeg) return
@@ -1193,7 +1248,7 @@ class Player extends EventEmitter {
      * @param {Queue} queue The queue to play.
      * @param {*} firstPlay
      */
-    async _playTrack (queue, firstPlay) {
+    async _playTrack(queue, firstPlay) {
         if (queue.stopped) return
         // If there isn't next music in the queue
         if (queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
