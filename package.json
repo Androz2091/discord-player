@@ -2,7 +2,7 @@
   "name": "discord-player",
   "version": "4.0.0-dev",
   "description": "Complete framework to facilitate music commands using discord.js",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "cd test && node index.js"
   },
