@@ -6,6 +6,7 @@
   "scripts": {
     "test": "cd test && node index.js"
   },
+  "funding": "https://github.com/Androz2091/discord-player?sponsor=1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Androz2091/discord-player.git"
