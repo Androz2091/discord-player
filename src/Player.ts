@@ -1,7 +1,7 @@
-import { EventEmitter } from "events";
-import { Client } from "discord.js";
-import { PlayerOptions } from "./types/Player";
-import Util from "./Util";
+import { EventEmitter } from 'events';
+import { Client } from 'discord.js';
+import { PlayerOptions } from './types/Player';
+import Util from './Util';
 
 export default class Player extends EventEmitter {
     public client!: Client;
@@ -13,7 +13,7 @@ export default class Player extends EventEmitter {
         /**
          * The discord client that instantiated this player
          */
-        Object.defineProperty(this, "client", {
+        Object.defineProperty(this, 'client', {
             value: client,
             enumerable: false
         });
@@ -26,5 +26,4 @@ export default class Player extends EventEmitter {
         // check FFmpeg
         void Util.alertFFmpeg();
     }
-
 }

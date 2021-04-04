@@ -1,8 +1,7 @@
-import { PlayerOptions } from "./types/Player";
-import { FFmpeg } from "prism-media";
+import { PlayerOptions } from './types/Player';
+import { FFmpeg } from 'prism-media';
 
 export default class Util {
-
     constructor() {
         throw new Error(`The ${this.constructor.name} class is static and cannot be instantiated!`);
     }
@@ -32,7 +31,9 @@ export default class Util {
     static alertFFmpeg() {
         const hasFFmpeg = Util.checkFFmpeg();
 
-        if (!hasFFmpeg) console.warn("[Discord Player] FFmpeg/Avconv not found! Install via \"npm install ffmpeg-static\" or download from https://ffmpeg.org/download.html");
+        if (!hasFFmpeg)
+            console.warn(
+                '[Discord Player] FFmpeg/Avconv not found! Install via "npm install ffmpeg-static" or download from https://ffmpeg.org/download.html'
+            );
     }
-
 }

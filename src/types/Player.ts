@@ -1,4 +1,4 @@
-import { downloadOptions } from "ytdl-core";
+import { downloadOptions } from 'ytdl-core';
 
 export interface PlayerOptions {
     leaveOnEnd?: boolean;
