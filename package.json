@@ -13,6 +13,9 @@
     "lint": "tslint -p tsconfig.json"
   },
   "funding": "https://github.com/Androz2091/discord-player?sponsor=1",
+  "contributors": [
+    "Snowflake107"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Androz2091/discord-player.git"
