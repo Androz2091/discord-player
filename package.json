@@ -29,7 +29,8 @@
   "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
     "discord-ytdl-core": "^5.0.2",
-    "youtube-sr": "^4.0.3"
+    "youtube-sr": "^4.0.3",
+    "ytdl-core": "^4.5.0"
   },
   "devDependencies": {
     "@discordjs/opus": "^0.5.0",
