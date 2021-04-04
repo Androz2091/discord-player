@@ -1,0 +1,38 @@
+{
+  "name": "discord-player",
+  "version": "4.0.0-dev",
+  "description": "Complete framework to facilitate music commands using discord.js",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "cd test && node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "keywords": [
+    "music",
+    "player",
+    "bot",
+    "framework",
+    "discord",
+    "volume",
+    "queue",
+    "youtube"
+  ],
+  "author": "Androz2091",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "homepage": "https://github.com/Androz2091/discord-player#readme",
+  "dependencies": {
+    "discord-ytdl-core": "^5.0.2",
+    "youtube-sr": "^4.0.3"
+  },
+  "devDependencies": {
+    "@discordjs/opus": "^0.5.0",
+    "@types/node": "^14.14.37",
+    "discord.js": "discordjs/discord.js"
+  }
+}

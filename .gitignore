@@ -1,0 +1,5 @@
+# Modules
+node_modules/
+
+# Test dir
+test/
