@@ -1,5 +1,6 @@
 import Player from '../Player';
 import { User } from 'discord.js';
+import { TrackData } from "../types/Track";
 
 export default class Track {
     public player!: Player;
@@ -12,8 +13,9 @@ export default class Track {
     public views!: number;
     public requestedBy!: User;
     public fromPlaylist!: boolean;
+    public raw!: TrackData;
 
-    constructor(player: Player, data: any) {
+    constructor(player: Player, data: TrackData) {
         /**
          * The player that instantiated this Track
          */
@@ -22,15 +24,18 @@ export default class Track {
         void this._patch(data);
     }
 
-    private _patch(data: any) {
+    private _patch(data: TrackData) {
         this.title = data.title ?? '';
         this.description = data.description ?? '';
         this.author = data.author ?? '';
         this.url = data.url ?? '';
-        this.thumbnail = typeof data.thumbnail === 'object' ? data.thumbnail.url : data.thumbnail;
+        this.thumbnail = data.thumbnail ?? '';
         this.duration = data.duration ?? '';
         this.views = data.views ?? 0;
         this.requestedBy = data.requestedBy;
         this.fromPlaylist = Boolean(data.fromPlaylist);
+
+        // raw
+        Object.defineProperty(this, "raw", { get: () => data, enumerable: false });
     }
 }
