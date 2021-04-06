@@ -1,8 +1,8 @@
-import Player from '../Player';
+import { Player } from '../Player';
 import { User } from 'discord.js';
 import { TrackData } from '../types/types';
 
-export default class Track {
+export class Track {
     public player!: Player;
     public title!: string;
     public description!: string;
@@ -67,3 +67,5 @@ export default class Track {
         return `${this.title} by ${this.author}`;
     }
 }
+
+export default Track;

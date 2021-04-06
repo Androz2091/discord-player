@@ -55,3 +55,4 @@ const FilterList = {
 };
 
 export default FilterList;
+export { FilterList as AudioFilters };

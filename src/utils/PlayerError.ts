@@ -6,3 +6,5 @@ export default class PlayerError extends Error {
         Error.captureStackTrace(this);
     }
 }
+
+export { PlayerError };

@@ -1,11 +1,10 @@
-import YouTube from 'youtube-sr';
 import { EventEmitter } from 'events';
 import { Client, Collection, Snowflake, Collector, Message } from 'discord.js';
-import { PlayerOptions } from './types/types';
+import { PlayerOptions, QueueFilters } from './types/types';
 import Util from './utils/Util';
 import AudioFilters from './utils/AudioFilters';
-import Queue from './Structures/Queue';
-import Track from './Structures/Track';
+import { Queue } from './Structures/Queue';
+import { Track } from './Structures/Track';
 import { PlayerErrorEventCodes, PlayerEvents } from './utils/Constants';
 import PlayerError from './utils/PlayerError';
 import ytdl from 'discord-ytdl-core';
@@ -17,7 +16,7 @@ import { Client as SoundCloudClient } from 'soundcloud-scraper';
 
 const SoundCloud = new SoundCloudClient();
 
-export default class Player extends EventEmitter {
+export class Player extends EventEmitter {
     public client!: Client;
     public options: PlayerOptions;
     public filters: typeof AudioFilters;
@@ -53,6 +52,9 @@ export default class Player extends EventEmitter {
          * Player queues
          */
         this.queues = new Collection();
+
+        this._resultsCollectors = new Collection();
+        this._cooldownsTimeout = new Collection();
     }
 
     static get AudioFilters() {
@@ -146,7 +148,7 @@ export default class Player extends EventEmitter {
         });
     }
 
-    async play(message: Message, query: string | Track, firstResult?: boolean) {
+    async play(message: Message, query: string | Track, firstResult?: boolean): Promise<void> {
         if (!message) throw new PlayerError('Play function needs message');
         if (!query) throw new PlayerError('Play function needs search query as a string or Player.Track object');
 
@@ -162,9 +164,9 @@ export default class Player extends EventEmitter {
         else {
             if (ytdl.validateURL(query)) {
                 const info = await ytdl.getBasicInfo(query).catch(() => {});
-                if (!info) return this.emit(PlayerEvents.NO_RESULTS, message, query);
+                if (!info) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
                 if (info.videoDetails.isLiveContent && !this.options.enableLive)
-                    return this.emit(
+                    return void this.emit(
                         PlayerEvents.ERROR,
                         PlayerErrorEventCodes.LIVE_VIDEO,
                         message,
@@ -208,6 +210,28 @@ export default class Player extends EventEmitter {
         return this.queues.find((g) => g.guildID === message.guild.id);
     }
 
+    setFilters(message: Message, newFilters: QueueFilters): Promise<void> {
+        return new Promise((resolve) => {
+            const queue = this.queues.find((g) => g.guildID === message.guild.id);
+            if (!queue)
+                this.emit(
+                    PlayerEvents.ERROR,
+                    PlayerErrorEventCodes.NOT_PLAYING,
+                    message,
+                    new PlayerError('Not playing')
+                );
+
+            Object.keys(newFilters).forEach((filterName) => {
+                // @ts-ignore
+                queue.filters[filterName] = newFilters[filterName];
+            });
+
+            this._playStream(queue, true).then(() => {
+                resolve();
+            });
+        });
+    }
+
     private _addTrackToQueue(message: Message, track: Track) {
         const queue = this.getQueue(message);
         if (!queue)
@@ -246,7 +270,7 @@ export default class Player extends EventEmitter {
                     queue.tracks.push(track);
                     this.emit(PlayerEvents.QUEUE_CREATE, message, queue);
                     resolve(queue);
-                    // this._playTrack(queue, true)
+                    this._playTrack(queue, true);
                 })
                 .catch((err) => {
                     this.queues.delete(message.guild.id);
@@ -260,7 +284,7 @@ export default class Player extends EventEmitter {
         });
     }
 
-    private async _playTrack(queue: Queue, firstPlay: boolean) {
+    private async _playTrack(queue: Queue, firstPlay: boolean): Promise<void> {
         if (queue.stopped) return;
 
         if (queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
@@ -275,10 +299,10 @@ export default class Player extends EventEmitter {
             this.queues.delete(queue.guildID);
 
             if (queue.stopped) {
-                return this.emit(PlayerEvents.MUSIC_STOP, queue.firstMessage);
+                return void this.emit(PlayerEvents.MUSIC_STOP, queue.firstMessage);
             }
 
-            return this.emit(PlayerEvents.QUEUE_END, queue.firstMessage, queue);
+            return void this.emit(PlayerEvents.QUEUE_END, queue.firstMessage, queue);
         }
 
         if (!queue.repeatMode && !firstPlay) {
@@ -316,7 +340,7 @@ export default class Player extends EventEmitter {
                 }
             });
 
-            let encoderArgs: string[];
+            let encoderArgs: string[] = [];
             if (encoderArgsFilters.length < 1) {
                 encoderArgs = [];
             } else {
@@ -386,3 +410,5 @@ export default class Player extends EventEmitter {
         });
     }
 }
+
+export default Player;

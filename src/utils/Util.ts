@@ -1,7 +1,7 @@
 import { PlayerOptions, QueryType } from '../types/types';
 import { FFmpeg } from 'prism-media';
 import YouTube from 'youtube-sr';
-import Track from '../Structures/Track';
+import { Track } from '../Structures/Track';
 // @ts-ignore
 import { validateURL as SoundcloudValidateURL } from 'soundcloud-scraper';
 
@@ -12,7 +12,7 @@ const vimeoRegex = /(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/
 const facebookRegex = /(https?:\/\/)(www\.|m\.)?(facebook|fb).com\/.*\/videos\/.*/;
 const reverbnationRegex = /https:\/\/(www.)?reverbnation.com\/(.+)\/song\/(.+)/;
 
-export default class Util {
+export class Util {
     constructor() {
         throw new Error(`The ${this.constructor.name} class is static and cannot be instantiated!`);
     }
@@ -127,3 +127,5 @@ export default class Util {
         });
     }
 }
+
+export default Util;

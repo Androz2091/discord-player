@@ -1,11 +1,11 @@
 import { Message, Snowflake, VoiceConnection } from 'discord.js';
 import AudioFilters from '../utils/AudioFilters';
-import Player from '../Player';
+import { Player } from '../Player';
 import { EventEmitter } from 'events';
-import Track from './Track';
+import { Track } from './Track';
 import { QueueFilters } from '../types/types';
 
-export default class Queue extends EventEmitter {
+export class Queue extends EventEmitter {
     public player!: Player;
     public guildID: Snowflake;
     public voiceConnection?: VoiceConnection;
@@ -127,3 +127,5 @@ export default class Queue extends EventEmitter {
         return this.voiceConnection?.dispatcher?.streamTime + this.additionalStreamTime || 0;
     }
 }
+
+export default Queue;
