@@ -7,8 +7,8 @@ import AudioFilters from './utils/AudioFilters';
 import Queue from './Structures/Queue';
 import Track from './Structures/Track';
 import { PlayerErrorEventCodes, PlayerEvents } from './utils/Constants';
-import PlayerError from "./utils/PlayerError";
-import ytdl from "discord-ytdl-core";
+import PlayerError from './utils/PlayerError';
+import ytdl from 'discord-ytdl-core';
 
 // @ts-ignore
 import spotify from 'spotify-url-info';
@@ -59,11 +59,7 @@ export default class Player extends EventEmitter {
         return AudioFilters;
     }
 
-    private _searchTracks(
-        message: Message,
-        query: string,
-        firstResult?: boolean
-    ): Promise<Track> {
+    private _searchTracks(message: Message, query: string, firstResult?: boolean): Promise<Track> {
         return new Promise(async (resolve) => {
             let tracks: Track[] = [];
             const queryType = Util.getQueryType(query);
@@ -151,15 +147,15 @@ export default class Player extends EventEmitter {
     }
 
     async play(message: Message, query: string | Track, firstResult?: boolean) {
-        if (!message) throw new PlayerError("Play function needs message");
-        if (!query) throw new PlayerError("Play function needs search query as a string or Player.Track object");
+        if (!message) throw new PlayerError('Play function needs message');
+        if (!query) throw new PlayerError('Play function needs search query as a string or Player.Track object');
 
         if (this._cooldownsTimeout.has(`end_${message.guild.id}`)) {
             clearTimeout(this._cooldownsTimeout.get(`end_${message.guild.id}`));
             this._cooldownsTimeout.delete(`end_${message.guild.id}`);
         }
 
-        if (typeof query === "string") query = query.replace(/<(.+)>/g, '$1');
+        if (typeof query === 'string') query = query.replace(/<(.+)>/g, '$1');
         let track;
 
         if (query instanceof Track) track = query;
@@ -167,7 +163,13 @@ export default class Player extends EventEmitter {
             if (ytdl.validateURL(query)) {
                 const info = await ytdl.getBasicInfo(query).catch(() => {});
                 if (!info) return this.emit(PlayerEvents.NO_RESULTS, message, query);
-                if (info.videoDetails.isLiveContent && !this.options.enableLive) return this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.LIVE_VIDEO, message, new PlayerError("Live video is not enabled!"));
+                if (info.videoDetails.isLiveContent && !this.options.enableLive)
+                    return this.emit(
+                        PlayerEvents.ERROR,
+                        PlayerErrorEventCodes.LIVE_VIDEO,
+                        message,
+                        new PlayerError('Live video is not enabled!')
+                    );
                 const lastThumbnail = info.videoDetails.thumbnails[info.videoDetails.thumbnails.length - 1];
 
                 track = new Track(this, {
@@ -180,7 +182,7 @@ export default class Player extends EventEmitter {
                     views: parseInt(info.videoDetails.viewCount),
                     requestedBy: message.author,
                     fromPlaylist: false,
-                    source: "youtube"
+                    source: 'youtube'
                 });
             } else {
                 track = await this._searchTracks(message, query, firstResult);
@@ -199,16 +201,22 @@ export default class Player extends EventEmitter {
     }
 
     isPlaying(message: Message) {
-        return this.queues.some(g => g.guildID === message.guild.id);
+        return this.queues.some((g) => g.guildID === message.guild.id);
     }
 
     getQueue(message: Message) {
-        return this.queues.find(g => g.guildID === message.guild.id);
+        return this.queues.find((g) => g.guildID === message.guild.id);
     }
 
     private _addTrackToQueue(message: Message, track: Track) {
         const queue = this.getQueue(message);
-        if (!queue) this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message, new PlayerError("Player is not available in this server"));
+        if (!queue)
+            this.emit(
+                PlayerEvents.ERROR,
+                PlayerErrorEventCodes.NOT_PLAYING,
+                message,
+                new PlayerError('Player is not available in this server')
+            );
         if (!track || !(track instanceof Track)) throw new PlayerError('No track specified to add to the queue');
         queue.tracks.push(track);
         return queue;
@@ -216,25 +224,39 @@ export default class Player extends EventEmitter {
 
     private _createQueue(message: Message, track: Track): Promise<Queue> {
         return new Promise((resolve) => {
-            const channel = message.member.voice ? message.member.voice.channel : null
-            if (!channel) return this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_CONNECTED, message, new PlayerError("Voice connection is not available in this server!"));
+            const channel = message.member.voice ? message.member.voice.channel : null;
+            if (!channel)
+                return this.emit(
+                    PlayerEvents.ERROR,
+                    PlayerErrorEventCodes.NOT_CONNECTED,
+                    message,
+                    new PlayerError('Voice connection is not available in this server!')
+                );
 
             const queue = new Queue(this, message, this.filters);
             this.queues.set(message.guild.id, queue);
 
-            channel.join().then((connection) => {
-                this.emit(PlayerEvents.CONNECTION_CREATE, message, connection);
+            channel
+                .join()
+                .then((connection) => {
+                    this.emit(PlayerEvents.CONNECTION_CREATE, message, connection);
 
-                queue.voiceConnection = connection;
-                if (this.options.autoSelfDeaf) connection.voice.setSelfDeaf(true);
-                queue.tracks.push(track);
-                this.emit(PlayerEvents.QUEUE_CREATE, message, queue);
-                resolve(queue);
-                // this._playTrack(queue, true)
-            }).catch((err) => {
-                this.queues.delete(message.guild.id);
-                this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.UNABLE_TO_JOIN, message, new PlayerError(err.message ?? err));
-            });
+                    queue.voiceConnection = connection;
+                    if (this.options.autoSelfDeaf) connection.voice.setSelfDeaf(true);
+                    queue.tracks.push(track);
+                    this.emit(PlayerEvents.QUEUE_CREATE, message, queue);
+                    resolve(queue);
+                    // this._playTrack(queue, true)
+                })
+                .catch((err) => {
+                    this.queues.delete(message.guild.id);
+                    this.emit(
+                        PlayerEvents.ERROR,
+                        PlayerErrorEventCodes.UNABLE_TO_JOIN,
+                        message,
+                        new PlayerError(err.message ?? err)
+                    );
+                });
         });
     }
 
@@ -243,14 +265,14 @@ export default class Player extends EventEmitter {
 
         if (queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
             if (this.options.leaveOnEnd && !queue.stopped) {
-                this.queues.delete(queue.guildID)
+                this.queues.delete(queue.guildID);
                 const timeout = setTimeout(() => {
                     queue.voiceConnection.channel.leave();
                 }, this.options.leaveOnEndCooldown || 0);
                 this._cooldownsTimeout.set(`end_${queue.guildID}`, timeout);
             }
 
-            this.queues.delete(queue.guildID)
+            this.queues.delete(queue.guildID);
 
             if (queue.stopped) {
                 return this.emit(PlayerEvents.MUSIC_STOP, queue.firstMessage);
@@ -278,7 +300,12 @@ export default class Player extends EventEmitter {
             const ffmeg = Util.checkFFmpeg();
             if (!ffmeg) return;
 
-            const seekTime = typeof seek === "number" ? seek : updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined;
+            const seekTime =
+                typeof seek === 'number'
+                    ? seek
+                    : updateFilter
+                    ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime
+                    : undefined;
             const encoderArgsFilters: string[] = [];
 
             Object.keys(queue.filters).forEach((filterName) => {
@@ -291,27 +318,33 @@ export default class Player extends EventEmitter {
 
             let encoderArgs: string[];
             if (encoderArgsFilters.length < 1) {
-                encoderArgs = []
+                encoderArgs = [];
             } else {
-                encoderArgs = ['-af', encoderArgsFilters.join(',')]
+                encoderArgs = ['-af', encoderArgsFilters.join(',')];
             }
 
             let newStream: any;
-            if (queue.playing.raw.source === "youtube") {
+            if (queue.playing.raw.source === 'youtube') {
                 newStream = ytdl(queue.playing.url, {
                     filter: 'audioonly',
                     opusEncoded: true,
                     encoderArgs,
                     seek: seekTime / 1000,
+                    // tslint:disable-next-line:no-bitwise
                     highWaterMark: 1 << 25,
                     ...this.options.ytdlDownloadOptions
                 });
             } else {
-                newStream = ytdl.arbitraryStream(queue.playing.raw.source === "soundcloud" ? await queue.playing.raw.engine.downloadProgressive() : queue.playing.raw.engine, {
-                    opusEncoded: true,
-                    encoderArgs,
-                    seek: seekTime / 1000
-                });
+                newStream = ytdl.arbitraryStream(
+                    queue.playing.raw.source === 'soundcloud'
+                        ? await queue.playing.raw.engine.downloadProgressive()
+                        : queue.playing.raw.engine,
+                    {
+                        opusEncoded: true,
+                        encoderArgs,
+                        seek: seekTime / 1000
+                    }
+                );
             }
 
             setTimeout(() => {
@@ -337,7 +370,13 @@ export default class Player extends EventEmitter {
 
                 newStream.on('error', (error: Error) => {
                     if (error.message.toLowerCase().includes('video unavailable')) {
-                        this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.VIDEO_UNAVAILABLE, queue.firstMessage, queue.playing, error);
+                        this.emit(
+                            PlayerEvents.ERROR,
+                            PlayerErrorEventCodes.VIDEO_UNAVAILABLE,
+                            queue.firstMessage,
+                            queue.playing,
+                            error
+                        );
                         this._playTrack(queue, false);
                     } else {
                         this.emit(PlayerEvents.ERROR, error, queue.firstMessage, error);
@@ -346,5 +385,4 @@ export default class Player extends EventEmitter {
             }, 1000);
         });
     }
-
 }
