@@ -333,6 +333,8 @@ export class Player extends EventEmitter {
             const encoderArgsFilters: string[] = [];
 
             Object.keys(queue.filters).forEach((filterName) => {
+                if (this.options.enableLive && ["nightcore", "vaporwave", "reverse"].includes(filterName)) return;
+                
                 // @ts-ignore
                 if (queue.filters[filterName]) {
                     // @ts-ignore
