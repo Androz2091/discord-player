@@ -54,13 +54,13 @@ const FilterList = {
     },
     define(filterName: string, value: string) {
         /* @ts-ignore */
-        if (typeof this[filterName] !== "string") return;
+        if (typeof this[filterName] !== 'string') return;
 
         /* @ts-ignore */
         this[filterName] = value;
     },
-    defineBulk(filterArray: { name: string, value: string }[]) {
-        filterArray.forEach(arr => this.define(arr.name, arr.value));
+    defineBulk(filterArray: { name: string; value: string }[]) {
+        filterArray.forEach((arr) => this.define(arr.name, arr.value));
     }
 };
 
