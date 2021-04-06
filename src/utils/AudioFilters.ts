@@ -42,9 +42,15 @@ const FilterList = {
     get length() {
         return Object.keys(this).length;
     },
+
     toString() {
         return `${Object.values(this).join(',')}`;
     },
+
+    /**
+     * Creates single string of audio filters
+     * @param filter Array of AudioFilters name
+     */
     create(filter?: FiltersName[]) {
         if (!filter || !Array.isArray(filter)) return this.toString();
         return filter
@@ -52,13 +58,27 @@ const FilterList = {
             .map((m) => this[m])
             .join(',');
     },
+
+    /**
+     * Defines custom filter
+     * @param filterName The filter name
+     * @param value FFmpeg args to use with -af
+     * @example Player.AudioFilters.define("3D", "apulsator=hz=0.125")
+     * 
+     * player.setFilters(message, { "3D": true })
+     */
     define(filterName: string, value: string) {
         /* @ts-ignore */
-        if (typeof this[filterName] !== 'string') return;
+        if (typeof this[filterName] && typeof this[filterName] === "function") return;
 
         /* @ts-ignore */
         this[filterName] = value;
     },
+
+    /**
+     * Defines filters in bulk
+     * @param filterArray Array of filters containing object with `name` and `value` prop
+     */
     defineBulk(filterArray: { name: string; value: string }[]) {
         filterArray.forEach((arr) => this.define(arr.name, arr.value));
     }
