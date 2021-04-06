@@ -1,9 +1,9 @@
-import { Message, Snowflake, VoiceConnection } from "discord.js";
-import AudioFilters from "../utils/AudioFilters";
-import Player from "../Player";
-import { EventEmitter } from "events";
-import Track from "./Track";
-import { QueueFilters } from "../types/types";
+import { Message, Snowflake, VoiceConnection } from 'discord.js';
+import AudioFilters from '../utils/AudioFilters';
+import Player from '../Player';
+import { EventEmitter } from 'events';
+import Track from './Track';
+import { QueueFilters } from '../types/types';
 
 export default class Queue extends EventEmitter {
     public player!: Player;
@@ -28,7 +28,7 @@ export default class Queue extends EventEmitter {
         /**
          * The player that instantiated this Queue
          */
-        Object.defineProperty(this, "player", { value: player, enumerable: false });
+        Object.defineProperty(this, 'player', { value: player, enumerable: false });
 
         /**
          * ID of the guild assigned to this queue
@@ -93,7 +93,7 @@ export default class Queue extends EventEmitter {
         // @ts-ignore
         this.filters = {};
 
-        Object.keys(AudioFilters).forEach(fn => {
+        Object.keys(AudioFilters).forEach((fn) => {
             // @ts-ignore
             this.filters[fn] = false;
         });

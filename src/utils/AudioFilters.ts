@@ -1,4 +1,4 @@
-import { FiltersName } from "../types/types";
+import { FiltersName } from '../types/types';
 
 const FilterList = {
     bassboost: 'bass=g=20',
@@ -47,7 +47,10 @@ const FilterList = {
     },
     create(filter?: FiltersName[]) {
         if (!filter || !Array.isArray(filter)) return this.toString();
-        return filter.filter(predicate => typeof predicate === "string").map(m => this[m]).join(",");
+        return filter
+            .filter((predicate) => typeof predicate === 'string')
+            .map((m) => this[m])
+            .join(',');
     }
 };
 
