@@ -6,3 +6,6 @@ test/
 
 # Compiled
 lib/
+
+# error logs
+yarn-error.log

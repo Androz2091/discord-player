@@ -1,4 +1,6 @@
-export default {
+import { FiltersName } from "../types/types";
+
+const FilterList = {
     bassboost: 'bass=g=20',
     '8D': 'apulsator=hz=0.09',
     vaporwave: 'aresample=48000,asetrate=48000*0.8',
@@ -41,6 +43,12 @@ export default {
         return Object.keys(this).length;
     },
     toString() {
-        return `"${Object.values(this).join(',')}"`;
+        return `${Object.values(this).join(',')}`;
+    },
+    create(filter?: FiltersName[]) {
+        if (!filter || !Array.isArray(filter)) return this.toString();
+        return filter.filter(predicate => typeof predicate === "string").map(m => this[m]).join(",");
     }
 };
+
+export default FilterList;
