@@ -64,12 +64,12 @@ const FilterList = {
      * @param filterName The filter name
      * @param value FFmpeg args to use with -af
      * @example Player.AudioFilters.define("3D", "apulsator=hz=0.125")
-     * 
+     *
      * player.setFilters(message, { "3D": true })
      */
     define(filterName: string, value: string) {
         /* @ts-ignore */
-        if (typeof this[filterName] && typeof this[filterName] === "function") return;
+        if (typeof this[filterName] && typeof this[filterName] === 'function') return;
 
         /* @ts-ignore */
         this[filterName] = value;
