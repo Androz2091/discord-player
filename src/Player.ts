@@ -60,8 +60,7 @@ export default class Player extends EventEmitter {
     private _searchTracks(
         message: Message,
         query: string,
-        firstResult?: boolean,
-        isAttachment?: boolean
+        firstResult?: boolean
     ): Promise<Track> {
         return new Promise(async (resolve) => {
             let tracks: Track[] = [];
