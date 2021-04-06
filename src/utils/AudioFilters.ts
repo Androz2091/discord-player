@@ -51,6 +51,16 @@ const FilterList = {
             .filter((predicate) => typeof predicate === 'string')
             .map((m) => this[m])
             .join(',');
+    },
+    define(filterName: string, value: string) {
+        /* @ts-ignore */
+        if (typeof this[filterName] !== "string") return;
+
+        /* @ts-ignore */
+        this[filterName] = value;
+    },
+    defineBulk(filterArray: { name: string, value: string }[]) {
+        filterArray.forEach(arr => this.define(arr.name, arr.value));
     }
 };
 
