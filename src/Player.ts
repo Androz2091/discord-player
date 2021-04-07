@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Client, Collection, Snowflake, Collector, Message } from 'discord.js';
+import { Client, Collection, Snowflake, Collector, Message, VoiceChannel } from 'discord.js';
 import { PlayerOptions, QueueFilters } from './types/types';
 import Util from './utils/Util';
 import AudioFilters from './utils/AudioFilters';
@@ -13,6 +13,7 @@ import ytdl from 'discord-ytdl-core';
 import spotify from 'spotify-url-info';
 // @ts-ignore
 import { Client as SoundCloudClient } from 'soundcloud-scraper';
+import YouTube from 'youtube-sr';
 
 const SoundCloud = new SoundCloudClient();
 
@@ -99,18 +100,172 @@ export class Player extends EventEmitter {
                             if (spotifyData) {
                                 tracks = await Util.ytSearch(`${spotifyData.artist} - ${spotifyData.title}`, {
                                     user: message.author,
-                                    player: this
+                                    player: this,
+                                    limit: 1
                                 });
                             }
                         }
                     }
                     break;
+
+                // todo: make spotify playlist/album load faster
+                case 'spotify_album':
+                case 'spotify_playlist': {
+                    this.emit(PlayerEvents.PLAYLIST_PARSE_START, null, message);
+                    const playlist = await spotify.getData(query);
+                    if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
+
+                    // tslint:disable:no-shadowed-variable
+                    const tracks = [];
+
+                    for (const item of playlist.tracks.items) {
+                        const sq =
+                            queryType === 'spotify_album'
+                                ? `${item.artists[0].name} - ${item.name}`
+                                : `${item.track.artists[0].name} - ${item.name}`;
+                        const data = await Util.ytSearch(sq, {
+                            limit: 1,
+                            player: this,
+                            user: message.author,
+                            pl: true
+                        });
+
+                        if (data[0]) tracks.push(data[0]);
+                    }
+
+                    if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
+
+                    const pl = {
+                        ...playlist,
+                        tracks,
+                        duration: tracks.reduce((a, c) => a + c.durationMS, 0),
+                        thumbnail: playlist.images[0]?.url ?? tracks[0].thumbnail
+                    };
+
+                    this.emit(PlayerEvents.PLAYLIST_PARSE_END, pl, message);
+
+                    if (this.isPlaying(message)) {
+                        const queue = this._addTracksToQueue(message, tracks);
+                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
+                    } else {
+                        const track = tracks.shift();
+                        const queue = (await this._createQueue(message, track).catch(
+                            (e) => void this.emit(PlayerEvents.ERROR, e, message)
+                        )) as Queue;
+                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
+                        this._addTracksToQueue(message, tracks);
+                    }
+
+                    return;
+                }
+                case 'youtube_playlist': {
+                    this.emit(PlayerEvents.PLAYLIST_PARSE_START, null, message);
+                    const playlist = await YouTube.getPlaylist(query);
+                    if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
+
+                    // @ts-ignore
+                    playlist.videos = playlist.videos.map(
+                        (data) =>
+                            new Track(this, {
+                                title: data.title,
+                                url: data.url,
+                                duration: Util.durationString(Util.parseMS(data.duration)),
+                                description: data.description,
+                                thumbnail: data.thumbnail?.displayThumbnailURL(),
+                                views: data.views,
+                                author: data.channel.name,
+                                requestedBy: message.author,
+                                fromPlaylist: true,
+                                source: 'youtube'
+                            })
+                    );
+
+                    // @ts-ignore
+                    playlist.duration = playlist.videos.reduce((a, c) => a + c.durationMS, 0);
+
+                    // @ts-ignore
+                    playlist.thumbnail = playlist.thumbnail?.url ?? playlist.videos[0].thumbnail;
+
+                    // @ts-ignore
+                    playlist.requestedBy = message.author;
+
+                    this.emit(PlayerEvents.PLAYLIST_PARSE_END, playlist, message);
+
+                    // @ts-ignore
+                    const tracks = playlist.videos as Track[];
+
+                    if (this.isPlaying(message)) {
+                        const queue = this._addTracksToQueue(message, tracks);
+                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
+                    } else {
+                        const track = tracks.shift();
+                        const queue = (await this._createQueue(message, track).catch(
+                            (e) => void this.emit(PlayerEvents.ERROR, e, message)
+                        )) as Queue;
+                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
+                        this._addTracksToQueue(message, tracks);
+                    }
+                }
+                case 'soundcloud_playlist': {
+                    this.emit(PlayerEvents.PLAYLIST_PARSE_START, null, message);
+
+                    const data = await SoundCloud.getPlaylist(query).catch(() => {});
+                    if (!data) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
+
+                    const res = {
+                        id: data.id,
+                        title: data.title,
+                        tracks: [] as Track[],
+                        author: data.author,
+                        duration: 0,
+                        thumbnail: data.thumbnail,
+                        requestedBy: message.author
+                    };
+
+                    for (const song of data.tracks) {
+                        const r = new Track(this, {
+                            title: song.title,
+                            url: song.url,
+                            duration: Util.durationString(Util.parseMS(song.duration / 1000)),
+                            description: song.description,
+                            thumbnail: song.thumbnail ?? 'https://soundcloud.com/pwa-icon-192.png',
+                            views: song.playCount ?? 0,
+                            author: song.author ?? data.author,
+                            requestedBy: message.author,
+                            fromPlaylist: true,
+                            source: 'soundcloud',
+                            engine: song
+                        });
+
+                        res.tracks.push(r);
+                    }
+
+                    if (!res.tracks.length)
+                        return this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.PARSE_ERROR, message);
+                    res.duration = res.tracks.reduce((a, c) => a + c.durationMS, 0);
+
+                    this.emit(PlayerEvents.PLAYLIST_PARSE_END, res, message);
+
+                    if (this.isPlaying(message)) {
+                        const queue = this._addTracksToQueue(message, res.tracks);
+                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
+                    } else {
+                        const track = res.tracks.shift();
+                        const queue = (await this._createQueue(message, track).catch(
+                            (e) => void this.emit(PlayerEvents.ERROR, e, message)
+                        )) as Queue;
+                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
+                        this._addTracksToQueue(message, res.tracks);
+                    }
+
+                    return;
+                }
                 default:
                     tracks = await Util.ytSearch(query, { user: message.author, player: this });
             }
 
-            if (tracks.length < 1) return this.emit(PlayerEvents.NO_RESULTS, message, query);
-            if (firstResult) return resolve(tracks[0]);
+            if (tracks.length < 1) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
+            if (firstResult || tracks.length === 1) return resolve(tracks[0]);
 
             const collectorString = `${message.author.id}-${message.channel.id}`;
             const currentCollector = this._resultsCollectors.get(collectorString);
@@ -140,7 +295,7 @@ export class Player extends EventEmitter {
                 }
             });
 
-            collector.on('end', (collected, reason) => {
+            collector.on('end', (_, reason) => {
                 if (reason === 'time') {
                     this.emit(PlayerEvents.SEARCH_CANCEL, message, query, tracks);
                 }
@@ -232,6 +387,67 @@ export class Player extends EventEmitter {
         });
     }
 
+    setPosition(message: Message, time: number): Promise<void> {
+        return new Promise((resolve) => {
+            const queue = this.queues.find((g) => g.guildID === message.guild.id);
+            if (!queue) return this.emit('error', 'NotPlaying', message);
+
+            if (typeof time !== 'number' && !isNaN(time)) time = parseInt(time);
+            if (queue.playing.durationMS >= time) return this.skip(message);
+            if (
+                queue.voiceConnection.dispatcher.streamTime === time ||
+                queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime === time
+            )
+                return resolve();
+            if (time < 0) this._playStream(queue, false).then(() => resolve());
+
+            this._playStream(queue, false, time).then(() => resolve());
+        });
+    }
+
+    seek(message: Message, time: number) {
+        return this.setPosition(message, time);
+    }
+
+    skip(message: Message): boolean {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return false;
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.MUSIC_STARTING, message);
+            return false;
+        }
+
+        queue.voiceConnection.dispatcher.end();
+        queue.lastSkipped = true;
+
+        return true;
+    }
+
+    moveTo(message: Message, channel?: VoiceChannel) {
+        if (!channel || channel.type !== 'voice') return;
+        const queue = this.queues.find((g) => g.guildID === message.guild.id);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return false;
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.MUSIC_STARTING, message);
+            return false;
+        }
+        if (queue.voiceConnection.channel.id === channel.id) return;
+
+        queue.voiceConnection.dispatcher.pause();
+        channel
+            .join()
+            .then(() => queue.voiceConnection.dispatcher.resume())
+            .catch(() => this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.UNABLE_TO_JOIN, message));
+
+        return true;
+    }
+
     private _addTrackToQueue(message: Message, track: Track) {
         const queue = this.getQueue(message);
         if (!queue)
@@ -246,11 +462,21 @@ export class Player extends EventEmitter {
         return queue;
     }
 
+    private _addTracksToQueue(message: Message, tracks: Track[]) {
+        const queue = this.getQueue(message);
+        if (!queue)
+            throw new PlayerError(
+                'Cannot add tracks to queue because no song is currently being played on the server.'
+            );
+        queue.tracks.push(...tracks);
+        return queue;
+    }
+
     private _createQueue(message: Message, track: Track): Promise<Queue> {
         return new Promise((resolve) => {
             const channel = message.member.voice ? message.member.voice.channel : null;
             if (!channel)
-                return this.emit(
+                return void this.emit(
                     PlayerEvents.ERROR,
                     PlayerErrorEventCodes.NOT_CONNECTED,
                     message,
@@ -333,8 +559,6 @@ export class Player extends EventEmitter {
             const encoderArgsFilters: string[] = [];
 
             Object.keys(queue.filters).forEach((filterName) => {
-                if (this.options.enableLive && ["nightcore", "vaporwave", "reverse"].includes(filterName)) return;
-                
                 // @ts-ignore
                 if (queue.filters[filterName]) {
                     // @ts-ignore

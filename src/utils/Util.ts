@@ -54,8 +54,8 @@ export class Util {
         if (spotifySongRegex.test(query)) return 'spotify_song';
         if (spotifyAlbumRegex.test(query)) return 'spotify_album';
         if (spotifyPlaylistRegex.test(query)) return 'spotify_playlist';
-        if (YouTube.validate(query, 'VIDEO')) return 'youtube_video';
         if (YouTube.validate(query, 'PLAYLIST')) return 'youtube_playlist';
+        if (YouTube.validate(query, 'VIDEO')) return 'youtube_video';
         if (vimeoRegex.test(query)) return 'vimeo';
         if (facebookRegex.test(query)) return 'facebook';
         if (reverbnationRegex.test(query)) return 'reverbnation';
@@ -102,7 +102,8 @@ export class Util {
         return new Promise(async (resolve) => {
             await YouTube.search(query, {
                 type: 'video',
-                safeSearch: Boolean(options?.player.options.useSafeSearch)
+                safeSearch: Boolean(options?.player.options.useSafeSearch),
+                limit: options.limit ?? 10
             })
                 .then((results) => {
                     resolve(
@@ -117,7 +118,7 @@ export class Util {
                                     duration: r.durationFormatted,
                                     views: r.views,
                                     requestedBy: options?.user,
-                                    fromPlaylist: false,
+                                    fromPlaylist: Boolean(options?.pl),
                                     source: 'youtube'
                                 })
                         )
