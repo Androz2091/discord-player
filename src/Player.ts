@@ -602,7 +602,11 @@ export class Player extends EventEmitter {
                 queue.stream = newStream;
                 queue.voiceConnection.play(newStream, {
                     type: 'opus',
-                    bitrate: 'auto'
+                    bitrate: 'auto',
+
+                    // disable inline volume for replit.com, leave it as it is for other platforms
+                    // thx Amish Shah for this info :D
+                    volume: Util.isRepl() ? false : undefined
                 });
 
                 if (seekTime) {
