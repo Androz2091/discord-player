@@ -97,10 +97,10 @@ client.on(&quot;message&quot;, async (message) => {
     const command = args.shift().toLowerCase();
 
     // !play Despacito
-    // will play &quot;Despacito&quot; in the member voice channel
+    // will play &quot;Despacito Remix&quot; in the member voice channel
 
     if(command === &quot;play&quot;){
-        client.player.play(message, args[0]);
+        client.player.play(message, args.join(' '));
         // as we registered the event above, no need to send a success message here
     }
 
