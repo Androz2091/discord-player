@@ -41,7 +41,7 @@
     "discord-ytdl-core": "^5.0.2",
     "soundcloud-scraper": "^4.0.3",
     "spotify-url-info": "^2.2.0",
-    "youtube-sr": "^4.0.3",
+    "youtube-sr": "^4.0.4",
     "ytdl-core": "^4.5.0"
   },
   "devDependencies": {
