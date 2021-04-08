@@ -8,13 +8,16 @@ import { Track } from './Structures/Track';
 import { PlayerErrorEventCodes, PlayerEvents } from './utils/Constants';
 import PlayerError from './utils/PlayerError';
 import ytdl from 'discord-ytdl-core';
-import { ExtractorModel } from "./Structures/ExtractorModel";
+import { ExtractorModel } from './Structures/ExtractorModel';
 
 // @ts-ignore
 import spotify from 'spotify-url-info';
 // @ts-ignore
 import { Client as SoundCloudClient } from 'soundcloud-scraper';
 import YouTube from 'youtube-sr';
+
+// @ts-ignore
+import * as DP_EXTRACTORS from '@discord-player/extractor';
 
 const SoundCloud = new SoundCloudClient();
 
@@ -58,6 +61,8 @@ export class Player extends EventEmitter {
 
         this._resultsCollectors = new Collection();
         this._cooldownsTimeout = new Collection();
+
+        ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => this.use(ext, DP_EXTRACTORS[ext]));
     }
 
     static get AudioFilters() {
@@ -70,12 +75,13 @@ export class Player extends EventEmitter {
      * @param extractor The extractor itself
      */
     use(extractorName: string, extractor: any) {
-        if (!extractorName) throw new PlayerError("Missing extractor name!", "PlayerExtractorError");
+        if (!extractorName) throw new PlayerError('Missing extractor name!', 'PlayerExtractorError');
 
-        const methods = ["validate", "getInfo"];
+        const methods = ['validate', 'getInfo'];
 
         for (const method of methods) {
-            if (typeof extractor[method] !== "function") throw new PlayerError("Invalid extractor supplied!", "PlayerExtractorError");
+            if (typeof extractor[method] !== 'function')
+                throw new PlayerError('Invalid extractor supplied!', 'PlayerExtractorError');
         }
 
         this.Extractors.set(extractorName, new ExtractorModel(extractorName, extractor));
@@ -88,7 +94,7 @@ export class Player extends EventEmitter {
      * @param extractorName The extractor name
      */
     unuse(extractorName: string) {
-        if (!extractorName) throw new PlayerError("Missing extractor name!", "PlayerExtractorError");
+        if (!extractorName) throw new PlayerError('Missing extractor name!', 'PlayerExtractorError');
 
         return this.Extractors.delete(extractorName);
     }
@@ -377,7 +383,6 @@ export class Player extends EventEmitter {
                     if (extractor.validate(query)) {
                         const data = await extractor.handle(query);
                         if (data) {
-                            console.log(data)
                             track = new Track(this, {
                                 title: data.title,
                                 description: data.description,

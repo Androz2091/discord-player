@@ -1,4 +1,4 @@
-import { ExtractorModelData } from "../types/types";
+import { ExtractorModelData } from '../types/types';
 
 class ExtractorModel {
     name: string;
@@ -7,7 +7,7 @@ class ExtractorModel {
     constructor(extractorName: string, data: any) {
         this.name = extractorName;
 
-        Object.defineProperty(this, "_raw", { value: data, configurable: false, writable: false, enumerable: false });
+        Object.defineProperty(this, '_raw', { value: data, configurable: false, writable: false, enumerable: false });
     }
 
     async handle(query: string) {
@@ -31,13 +31,12 @@ class ExtractorModel {
     }
 
     get version() {
-        return this._raw.version ?? "0.0.0";
+        return this._raw.version ?? '0.0.0';
     }
 
     get important() {
         return Boolean(this._raw.important);
     }
-
 }
 
 export default ExtractorModel;

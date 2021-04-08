@@ -1,6 +1,6 @@
 import { downloadOptions } from 'ytdl-core';
 import { User } from 'discord.js';
-import { Readable, Duplex } from "stream";
+import { Readable, Duplex } from 'stream';
 
 export interface PlayerOptions {
     leaveOnEnd?: boolean;
