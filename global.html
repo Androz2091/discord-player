@@ -1,1874 +1,765 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Global</title>
-
-    <script src="scripts/prettify/prettify.js"></script>
-    <script src="scripts/prettify/lang-css.js"></script>
-    <script src="scripts/nav.js"></script>
-    <!--[if lt IE 9]>
+   <head>
+      <meta charset="utf-8">
+      <title>Global</title>
+      <script src="scripts/prettify/prettify.js"></script>
+      <script src="scripts/prettify/lang-css.js"></script>
+      <script src="scripts/nav.js"></script>
+      <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/skyceil.css">
-    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
-</head>
-
-<body>
-
-<nav class="navbar">
-    <h4><a href="index.html">Home</a></h4><h5 class="no-bottom must-underline">Classes</h5><ul><li><span class="small-icon C">C</span><b><a href="Player.html">Player</a></b><ul class="has-class-methods"><li><span class="small-icon F">F</span><a href="Player.html#_handleVoiceStateUpdate">_handleVoiceStateUpdate</a></li><li><span class="small-icon F">F</span><a href="Player.html#_playTrack">_playTrack</a></li><li><span class="small-icon F">F</span><a href="Player.html#back">back</a></li><li><span class="small-icon F">F</span><a href="Player.html#clearQueue">clearQueue</a></li><li><span class="small-icon F">F</span><a href="Player.html#createProgressBar">createProgressBar</a></li><li><span class="small-icon F">F</span><a href="Player.html#getQueue">getQueue</a></li><li><span class="small-icon F">F</span><a href="Player.html#isPlaying">isPlaying</a></li><li><span class="small-icon F">F</span><a href="Player.html#moveTo">moveTo</a></li><li><span class="small-icon F">F</span><a href="Player.html#nowPlaying">nowPlaying</a></li><li><span class="small-icon F">F</span><a href="Player.html#pause">pause</a></li><li><span class="small-icon F">F</span><a href="Player.html#play">play</a></li><li><span class="small-icon F">F</span><a href="Player.html#remove">remove</a></li><li><span class="small-icon F">F</span><a href="Player.html#resume">resume</a></li><li><span class="small-icon F">F</span><a href="Player.html#search">search</a></li><li><span class="small-icon F">F</span><a href="Player.html#seek">seek</a></li><li><span class="small-icon F">F</span><a href="Player.html#setFilters">setFilters</a></li><li><span class="small-icon F">F</span><a href="Player.html#setLoopMode">setLoopMode</a></li><li><span class="small-icon F">F</span><a href="Player.html#setPosition">setPosition</a></li><li><span class="small-icon F">F</span><a href="Player.html#setRepeatMode">setRepeatMode</a></li><li><span class="small-icon F">F</span><a href="Player.html#setVolume">setVolume</a></li><li><span class="small-icon F">F</span><a href="Player.html#shuffle">shuffle</a></li><li><span class="small-icon F">F</span><a href="Player.html#skip">skip</a></li><li><span class="small-icon F">F</span><a href="Player.html#stop">stop</a></li><li><span class="small-icon M">M</span><a href="Player.html#.AudioFilters">AudioFilters</a></li><li><span class="small-icon M">M</span><a href="Player.html#_cooldownsTimeout">_cooldownsTimeout</a></li><li><span class="small-icon M">M</span><a href="Player.html#_resultsCollectors">_resultsCollectors</a></li><li><span class="small-icon M">M</span><a href="Player.html#client">client</a></li><li><span class="small-icon M">M</span><a href="Player.html#filters">filters</a></li><li><span class="small-icon M">M</span><a href="Player.html#options">options</a></li><li><span class="small-icon M">M</span><a href="Player.html#queues">queues</a></li><li><span class="small-icon M">M</span><a href="Player.html#util">util</a></li></ul></li><li><span class="small-icon C">C</span><b><a href="Queue.html">Queue</a></b><ul class="has-class-methods"><li><span class="small-icon M">M</span><a href="Queue.html#additionalStreamTime">additionalStreamTime</a></li><li><span class="small-icon M">M</span><a href="Queue.html#filters">filters</a></li><li><span class="small-icon M">M</span><a href="Queue.html#firstMessage">firstMessage</a></li><li><span class="small-icon M">M</span><a href="Queue.html#guildID">guildID</a></li><li><span class="small-icon M">M</span><a href="Queue.html#lastSkipped">lastSkipped</a></li><li><span class="small-icon M">M</span><a href="Queue.html#loopMode">loopMode</a></li><li><span class="small-icon M">M</span><a href="Queue.html#paused">paused</a></li><li><span class="small-icon M">M</span><a href="Queue.html#previousTracks">previousTracks</a></li><li><span class="small-icon M">M</span><a href="Queue.html#repeatMode">repeatMode</a></li><li><span class="small-icon M">M</span><a href="Queue.html#stopped">stopped</a></li><li><span class="small-icon M">M</span><a href="Queue.html#stream">stream</a></li><li><span class="small-icon M">M</span><a href="Queue.html#tracks">tracks</a></li><li><span class="small-icon M">M</span><a href="Queue.html#voiceConnection">voiceConnection</a></li><li><span class="small-icon M">M</span><a href="Queue.html#volume">volume</a></li></ul></li><li><span class="small-icon C">C</span><b><a href="Track.html">Track</a></b><ul class="has-class-methods"><li><span class="small-icon M">M</span><a href="Track.html#author">author</a></li><li><span class="small-icon M">M</span><a href="Track.html#description">description</a></li><li><span class="small-icon M">M</span><a href="Track.html#duration">duration</a></li><li><span class="small-icon M">M</span><a href="Track.html#durationMS">durationMS</a></li><li><span class="small-icon M">M</span><a href="Track.html#fromPlaylist">fromPlaylist</a></li><li><span class="small-icon M">M</span><a href="Track.html#player">player</a></li><li><span class="small-icon M">M</span><a href="Track.html#queue">queue</a></li><li><span class="small-icon M">M</span><a href="Track.html#requestedBy">requestedBy</a></li><li><span class="small-icon M">M</span><a href="Track.html#thumbnail">thumbnail</a></li><li><span class="small-icon M">M</span><a href="Track.html#title">title</a></li><li><span class="small-icon M">M</span><a href="Track.html#url">url</a></li><li><span class="small-icon M">M</span><a href="Track.html#views">views</a></li></ul></li></ul><h5 class="no-bottom must-underline">Events</h5><ul><li><span class="small-icon E">E</span><a href="Player.html#event:botDisconnect">botDisconnect</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:channelEmpty">channelEmpty</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:error">error</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:noResults">noResults</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:playlistAdd">playlistAdd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseEnd">playlistParseEnd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseStart">playlistParseStart</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:queueCreate">queueCreate</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:queueEnd">queueEnd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:searchCancel">searchCancel</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:searchInvalidResponse">searchInvalidResponse</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:searchResults">searchResults</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:trackAdd">trackAdd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:trackStart">trackStart</a></li></ul><h4><a href="global.html">Global</a></h4>
-</nav>
-
-<div id="main">
-    <div class="burger">
-        <div class="burger-line-1"></div>
-        <div class="burger-line-2"></div>
-        <div class="burger-line-3"></div>
-    </div>
-
-    <h1 class="page-title">Global</h1>
-
-    
-
-
-
-
-<section>
-<header>
-    <hr>
-    
-        <h2></h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-
-        
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        
-                
-<h4 class="name" id="Filters">Filters</h4>
-
-
-
-
-
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<div class="table-box">
-    <table class="props">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-            <th>Attributes</th>
-            
-
-            
-            <th>Default</th>
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>bassboost</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the bassboost filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>8D</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the 8D filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>vaporwave</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the vaporwave filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>nightcore</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the nightcore filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>phaser</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the phaser filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>tremolo</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the tremolo filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>vibrato</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the vibrato filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>reverse</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the reverse filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>treble</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the treble filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>normalizer</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the normalizer filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>surrounding</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the surrounding filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>pulsator</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the pulsator filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>subboost</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the subboost filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>karaoke</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the karaoke filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>flanger</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the flanger filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>gate</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the gate filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>haas</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the haas filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>mcompand</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the mcompand filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>mono</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the mono output is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>mstlr</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether M/S signal to L/R signal converter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>mstrr</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether M/S signal to R/R signal converter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>compressor</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether compressor filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>expander</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether expander filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>softlimiter</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether softlimiter filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>chorus</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether chorus (single delay) filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>chorus2d</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether chorus2d (two delays) filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>chorus3d</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether chorus3d (three delays) filter is enabled.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>fadein</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether fadein filter is enabled.</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-            
-                
-<h4 class="name" id="PlayerOptions">PlayerOptions</h4>
-
-
-
-
-
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<div class="table-box">
-    <table class="props">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-            <th>Attributes</th>
-            
-
-            
-            <th>Default</th>
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>leaveOnEnd</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        true
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the bot should leave the current voice channel when the queue ends.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>leaveOnEndCooldown</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">number</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        0
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Used when leaveOnEnd is enabled, to let the time to users to add new tracks.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>leaveOnStop</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        true
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the bot should leave the current voice channel when the stop() function is used.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>leaveOnEmpty</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        true
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the bot should leave the voice channel if there is no more member in it.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>leaveOnEmptyCooldown</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">number</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        0
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Used when leaveOnEmpty is enabled, to let the time to users to come back in the voice channel.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>autoSelfDeaf</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        true
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the bot should automatically turn off its headphones when joining a voice channel.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>quality</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">string</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        'high'
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Music quality (high or low)</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>enableLive</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>If it should enable live contents</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>ytdlRequestOptions</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">object</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        {}
-                    
-                    </td>
-                
-
-                <td class="description last"><p>YTDL request options to use cookies, proxy etc..</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-            
-                
-<h4 class="name" id="Readable">Readable</h4>
-
-
-
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="global.html#Readable">Readable</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-            
-                
-<h4 class="name" id="Readable">Readable</h4>
-
-
-
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="global.html#Readable">Readable</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-            
-                
-<h4 class="name" id="Readable">Readable</h4>
-
-
-
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="global.html#Readable">Readable</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-            
-    
-
-    
-</article>
-
-</section>
-
-
-
-
-
-</div>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> using <a href="https://github.com/zyrouge/jsdoc-skyceil">Skyceil Theme</a>
-</footer>
-
-<script>prettyPrint();</script>
-<script src="scripts/linenumber.js"></script>
-
-</body>
+      <![endif]-->
+      <link type="text/css" rel="stylesheet" href="styles/skyceil.css">
+      <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+   </head>
+   <body>
+      <nav class="navbar">
+         <h4><a href="index.html">Home</a></h4>
+         <h5 class="no-bottom must-underline">Classes</h5>
+         <ul>
+            <li>
+               <span class="small-icon C">C</span><b><a href="Player.html">Player</a></b>
+               <ul class="has-class-methods">
+                  <li><span class="small-icon F">F</span><a href="Player.html#_handleVoiceStateUpdate">_handleVoiceStateUpdate</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#_playTrack">_playTrack</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#back">back</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#clearQueue">clearQueue</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#createProgressBar">createProgressBar</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#getQueue">getQueue</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#isPlaying">isPlaying</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#moveTo">moveTo</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#nowPlaying">nowPlaying</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#pause">pause</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#play">play</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#remove">remove</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#resume">resume</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#search">search</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#seek">seek</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setFilters">setFilters</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setLoopMode">setLoopMode</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setPosition">setPosition</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setRepeatMode">setRepeatMode</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setVolume">setVolume</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#shuffle">shuffle</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#skip">skip</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#stop">stop</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#.AudioFilters">AudioFilters</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#_cooldownsTimeout">_cooldownsTimeout</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#_resultsCollectors">_resultsCollectors</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#client">client</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#filters">filters</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#options">options</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#queues">queues</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#util">util</a></li>
+               </ul>
+            </li>
+            <li>
+               <span class="small-icon C">C</span><b><a href="Queue.html">Queue</a></b>
+               <ul class="has-class-methods">
+                  <li><span class="small-icon M">M</span><a href="Queue.html#additionalStreamTime">additionalStreamTime</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#filters">filters</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#firstMessage">firstMessage</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#guildID">guildID</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#lastSkipped">lastSkipped</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#loopMode">loopMode</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#paused">paused</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#previousTracks">previousTracks</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#repeatMode">repeatMode</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#stopped">stopped</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#stream">stream</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#tracks">tracks</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#voiceConnection">voiceConnection</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#volume">volume</a></li>
+               </ul>
+            </li>
+            <li>
+               <span class="small-icon C">C</span><b><a href="Track.html">Track</a></b>
+               <ul class="has-class-methods">
+                  <li><span class="small-icon M">M</span><a href="Track.html#author">author</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#description">description</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#duration">duration</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#durationMS">durationMS</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#fromPlaylist">fromPlaylist</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#player">player</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#queue">queue</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#requestedBy">requestedBy</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#thumbnail">thumbnail</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#title">title</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#url">url</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#views">views</a></li>
+               </ul>
+            </li>
+         </ul>
+         <h5 class="no-bottom must-underline">Events</h5>
+         <ul>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:botDisconnect">botDisconnect</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:channelEmpty">channelEmpty</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:error">error</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:noResults">noResults</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:playlistAdd">playlistAdd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseEnd">playlistParseEnd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseStart">playlistParseStart</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:queueCreate">queueCreate</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:queueEnd">queueEnd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:searchCancel">searchCancel</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:searchInvalidResponse">searchInvalidResponse</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:searchResults">searchResults</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:trackAdd">trackAdd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:trackStart">trackStart</a></li>
+         </ul>
+         <h4><a href="global.html">Global</a></h4>
+      </nav>
+      <div id="main">
+         <div class="burger">
+            <div class="burger-line-1"></div>
+            <div class="burger-line-2"></div>
+            <div class="burger-line-3"></div>
+         </div>
+         <h1 class="page-title">Global</h1>
+         <section>
+            <header>
+               <hr>
+               <h2></h2>
+            </header>
+            <article>
+               <div class="container-overview">
+                  <dl class="details">
+                  </dl>
+               </div>
+               <h3 class="subsection-title">Type Definitions</h3>
+               <h4 class="name" id="Filters">Filters</h4>
+               <h5 class="subsection-title">Properties:</h5>
+               <div class="table-box">
+                  <table class="props">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th>Attributes</th>
+                           <th>Default</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>bassboost</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the bassboost filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>8D</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the 8D filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>vaporwave</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the vaporwave filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>nightcore</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the nightcore filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>phaser</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the phaser filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>tremolo</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the tremolo filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>vibrato</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the vibrato filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>reverse</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the reverse filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>treble</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the treble filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>normalizer</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the normalizer filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>surrounding</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the surrounding filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>pulsator</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the pulsator filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>subboost</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the subboost filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>karaoke</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the karaoke filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>flanger</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the flanger filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>gate</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the gate filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>haas</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the haas filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>mcompand</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the mcompand filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>mono</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the mono output is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>mstlr</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether M/S signal to L/R signal converter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>mstrr</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether M/S signal to R/R signal converter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>compressor</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether compressor filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>expander</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether expander filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>softlimiter</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether softlimiter filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>chorus</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether chorus (single delay) filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>chorus2d</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether chorus2d (two delays) filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>chorus3d</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether chorus3d (three delays) filter is enabled.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>fadein</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether fadein filter is enabled.</p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="PlayerOptions">PlayerOptions</h4>
+               <h5 class="subsection-title">Properties:</h5>
+               <div class="table-box">
+                  <table class="props">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th>Attributes</th>
+                           <th>Default</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>leaveOnEnd</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              true
+                           </td>
+                           <td class="description last">
+                              <p>Whether the bot should leave the current voice channel when the queue ends.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>leaveOnEndCooldown</code></td>
+                           <td class="type">
+                              <span class="param-type">number</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              0
+                           </td>
+                           <td class="description last">
+                              <p>Used when leaveOnEnd is enabled, to let the time to users to add new tracks.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>leaveOnStop</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              true
+                           </td>
+                           <td class="description last">
+                              <p>Whether the bot should leave the current voice channel when the stop() function is used.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>leaveOnEmpty</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              true
+                           </td>
+                           <td class="description last">
+                              <p>Whether the bot should leave the voice channel if there is no more member in it.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>leaveOnEmptyCooldown</code></td>
+                           <td class="type">
+                              <span class="param-type">number</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              0
+                           </td>
+                           <td class="description last">
+                              <p>Used when leaveOnEmpty is enabled, to let the time to users to come back in the voice channel.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>autoSelfDeaf</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              true
+                           </td>
+                           <td class="description last">
+                              <p>Whether the bot should automatically turn off its headphones when joining a voice channel.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>quality</code></td>
+                           <td class="type">
+                              <span class="param-type">string</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              'high'
+                           </td>
+                           <td class="description last">
+                              <p>Music quality (high or low)</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>enableLive</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>If it should enable live contents</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>ytdlRequestOptions</code></td>
+                           <td class="type">
+                              <span class="param-type">object</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              {}
+                           </td>
+                           <td class="description last">
+                              <p>YTDL request options to use cookies, proxy etc..</p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="Readable">Readable</h4>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type"><a href="global.html#Readable">Readable</a></span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="Readable">Readable</h4>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type"><a href="global.html#Readable">Readable</a></span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="Readable">Readable</h4>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type"><a href="global.html#Readable">Readable</a></span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <hr>
+            </article>
+         </section>
+      </div>
+      <br class="clear">
+      <footer>
+         Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> using <a href="https://github.com/zyrouge/jsdoc-skyceil">Skyceil Theme</a>
+      </footer>
+      <script>prettyPrint();</script>
+      <script src="scripts/linenumber.js"></script>
+   </body>
 </html>
