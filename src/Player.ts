@@ -86,7 +86,7 @@ export class Player extends EventEmitter {
 
         this.Extractors.set(extractorName, new ExtractorModel(extractorName, extractor));
 
-        return Player;
+        return this;
     }
 
     /**
