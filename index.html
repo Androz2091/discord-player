@@ -1,78 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Home</title>
-
-    <script src="scripts/prettify/prettify.js"></script>
-    <script src="scripts/prettify/lang-css.js"></script>
-    <script src="scripts/nav.js"></script>
-    <!--[if lt IE 9]>
+   <head>
+      <meta charset="utf-8">
+      <title>Home</title>
+      <script src="scripts/prettify/prettify.js"></script>
+      <script src="scripts/prettify/lang-css.js"></script>
+      <script src="scripts/nav.js"></script>
+      <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/skyceil.css">
-    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
-</head>
-
-<body>
-
-<nav class="navbar">
-    <h4><a href="index.html">Home</a></h4><h5 class="no-bottom must-underline">Classes</h5><ul><li><span class="small-icon C">C</span><b><a href="Player.html">Player</a></b><ul class="has-class-methods"><li><span class="small-icon F">F</span><a href="Player.html#_handleVoiceStateUpdate">_handleVoiceStateUpdate</a></li><li><span class="small-icon F">F</span><a href="Player.html#_playTrack">_playTrack</a></li><li><span class="small-icon F">F</span><a href="Player.html#back">back</a></li><li><span class="small-icon F">F</span><a href="Player.html#clearQueue">clearQueue</a></li><li><span class="small-icon F">F</span><a href="Player.html#createProgressBar">createProgressBar</a></li><li><span class="small-icon F">F</span><a href="Player.html#getQueue">getQueue</a></li><li><span class="small-icon F">F</span><a href="Player.html#isPlaying">isPlaying</a></li><li><span class="small-icon F">F</span><a href="Player.html#moveTo">moveTo</a></li><li><span class="small-icon F">F</span><a href="Player.html#nowPlaying">nowPlaying</a></li><li><span class="small-icon F">F</span><a href="Player.html#pause">pause</a></li><li><span class="small-icon F">F</span><a href="Player.html#play">play</a></li><li><span class="small-icon F">F</span><a href="Player.html#remove">remove</a></li><li><span class="small-icon F">F</span><a href="Player.html#resume">resume</a></li><li><span class="small-icon F">F</span><a href="Player.html#search">search</a></li><li><span class="small-icon F">F</span><a href="Player.html#seek">seek</a></li><li><span class="small-icon F">F</span><a href="Player.html#setFilters">setFilters</a></li><li><span class="small-icon F">F</span><a href="Player.html#setLoopMode">setLoopMode</a></li><li><span class="small-icon F">F</span><a href="Player.html#setPosition">setPosition</a></li><li><span class="small-icon F">F</span><a href="Player.html#setRepeatMode">setRepeatMode</a></li><li><span class="small-icon F">F</span><a href="Player.html#setVolume">setVolume</a></li><li><span class="small-icon F">F</span><a href="Player.html#shuffle">shuffle</a></li><li><span class="small-icon F">F</span><a href="Player.html#skip">skip</a></li><li><span class="small-icon F">F</span><a href="Player.html#stop">stop</a></li><li><span class="small-icon M">M</span><a href="Player.html#.AudioFilters">AudioFilters</a></li><li><span class="small-icon M">M</span><a href="Player.html#_cooldownsTimeout">_cooldownsTimeout</a></li><li><span class="small-icon M">M</span><a href="Player.html#_resultsCollectors">_resultsCollectors</a></li><li><span class="small-icon M">M</span><a href="Player.html#client">client</a></li><li><span class="small-icon M">M</span><a href="Player.html#filters">filters</a></li><li><span class="small-icon M">M</span><a href="Player.html#options">options</a></li><li><span class="small-icon M">M</span><a href="Player.html#queues">queues</a></li><li><span class="small-icon M">M</span><a href="Player.html#util">util</a></li></ul></li><li><span class="small-icon C">C</span><b><a href="Queue.html">Queue</a></b><ul class="has-class-methods"><li><span class="small-icon M">M</span><a href="Queue.html#additionalStreamTime">additionalStreamTime</a></li><li><span class="small-icon M">M</span><a href="Queue.html#filters">filters</a></li><li><span class="small-icon M">M</span><a href="Queue.html#firstMessage">firstMessage</a></li><li><span class="small-icon M">M</span><a href="Queue.html#guildID">guildID</a></li><li><span class="small-icon M">M</span><a href="Queue.html#lastSkipped">lastSkipped</a></li><li><span class="small-icon M">M</span><a href="Queue.html#loopMode">loopMode</a></li><li><span class="small-icon M">M</span><a href="Queue.html#paused">paused</a></li><li><span class="small-icon M">M</span><a href="Queue.html#previousTracks">previousTracks</a></li><li><span class="small-icon M">M</span><a href="Queue.html#repeatMode">repeatMode</a></li><li><span class="small-icon M">M</span><a href="Queue.html#stopped">stopped</a></li><li><span class="small-icon M">M</span><a href="Queue.html#stream">stream</a></li><li><span class="small-icon M">M</span><a href="Queue.html#tracks">tracks</a></li><li><span class="small-icon M">M</span><a href="Queue.html#voiceConnection">voiceConnection</a></li><li><span class="small-icon M">M</span><a href="Queue.html#volume">volume</a></li></ul></li><li><span class="small-icon C">C</span><b><a href="Track.html">Track</a></b><ul class="has-class-methods"><li><span class="small-icon M">M</span><a href="Track.html#author">author</a></li><li><span class="small-icon M">M</span><a href="Track.html#description">description</a></li><li><span class="small-icon M">M</span><a href="Track.html#duration">duration</a></li><li><span class="small-icon M">M</span><a href="Track.html#durationMS">durationMS</a></li><li><span class="small-icon M">M</span><a href="Track.html#fromPlaylist">fromPlaylist</a></li><li><span class="small-icon M">M</span><a href="Track.html#player">player</a></li><li><span class="small-icon M">M</span><a href="Track.html#queue">queue</a></li><li><span class="small-icon M">M</span><a href="Track.html#requestedBy">requestedBy</a></li><li><span class="small-icon M">M</span><a href="Track.html#thumbnail">thumbnail</a></li><li><span class="small-icon M">M</span><a href="Track.html#title">title</a></li><li><span class="small-icon M">M</span><a href="Track.html#url">url</a></li><li><span class="small-icon M">M</span><a href="Track.html#views">views</a></li></ul></li></ul><h5 class="no-bottom must-underline">Events</h5><ul><li><span class="small-icon E">E</span><a href="Player.html#event:botDisconnect">botDisconnect</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:channelEmpty">channelEmpty</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:error">error</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:noResults">noResults</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:playlistAdd">playlistAdd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseEnd">playlistParseEnd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseStart">playlistParseStart</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:queueCreate">queueCreate</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:queueEnd">queueEnd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:searchCancel">searchCancel</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:searchInvalidResponse">searchInvalidResponse</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:searchResults">searchResults</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:trackAdd">trackAdd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:trackStart">trackStart</a></li></ul><h4><a href="global.html">Global</a></h4>
-</nav>
-
-<div id="main">
-    <div class="burger">
-        <div class="burger-line-1"></div>
-        <div class="burger-line-2"></div>
-        <div class="burger-line-3"></div>
-    </div>
-
-    <h1 class="page-title">Home</h1>
-
-    
-
-
-
-    
-
-
-    <h3>discord-player 3.4.0</h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-    <section>
-        <article><h1>Discord Player</h1>
-<p><a href="https://npmjs.com/discord-player"><img src="https://img.shields.io/npm/dt/discord-player?style=for-the-badge" alt="downloadsBadge"></a>
-<a href="https://npmjs.com/discord-player"><img src="https://img.shields.io/npm/v/discord-player?style=for-the-badge" alt="versionBadge"></a></p>
-<p><strong>Note</strong>: this module uses recent discordjs features and requires discord.js version 12 and Node.js 14.</p>
-<p>Discord Player is a powerful <a href="https://nodejs.org">Node.js</a> module that allows you to easily implement music commands. <strong>Everything</strong> is customizable, and everything is done to simplify your work <strong>without limiting you</strong>! It doesn't require any api key, as it uses <strong>scraping</strong>.</p>
-<h2>Installation</h2>
-<pre class="prettyprint source lang-sh"><code>npm install --save discord-player
+      <![endif]-->
+      <link type="text/css" rel="stylesheet" href="styles/skyceil.css">
+      <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+   </head>
+   <body>
+      <nav class="navbar">
+         <h4><a href="index.html">Home</a></h4>
+         <h5 class="no-bottom must-underline">Classes</h5>
+         <ul>
+            <li>
+               <span class="small-icon C">C</span><b><a href="Player.html">Player</a></b>
+               <ul class="has-class-methods">
+                  <li><span class="small-icon F">F</span><a href="Player.html#_handleVoiceStateUpdate">_handleVoiceStateUpdate</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#_playTrack">_playTrack</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#back">back</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#clearQueue">clearQueue</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#createProgressBar">createProgressBar</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#getQueue">getQueue</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#isPlaying">isPlaying</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#moveTo">moveTo</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#nowPlaying">nowPlaying</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#pause">pause</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#play">play</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#remove">remove</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#resume">resume</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#search">search</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#seek">seek</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setFilters">setFilters</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setLoopMode">setLoopMode</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setPosition">setPosition</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setRepeatMode">setRepeatMode</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setVolume">setVolume</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#shuffle">shuffle</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#skip">skip</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#stop">stop</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#.AudioFilters">AudioFilters</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#_cooldownsTimeout">_cooldownsTimeout</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#_resultsCollectors">_resultsCollectors</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#client">client</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#filters">filters</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#options">options</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#queues">queues</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#util">util</a></li>
+               </ul>
+            </li>
+            <li>
+               <span class="small-icon C">C</span><b><a href="Queue.html">Queue</a></b>
+               <ul class="has-class-methods">
+                  <li><span class="small-icon M">M</span><a href="Queue.html#additionalStreamTime">additionalStreamTime</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#filters">filters</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#firstMessage">firstMessage</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#guildID">guildID</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#lastSkipped">lastSkipped</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#loopMode">loopMode</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#paused">paused</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#previousTracks">previousTracks</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#repeatMode">repeatMode</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#stopped">stopped</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#stream">stream</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#tracks">tracks</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#voiceConnection">voiceConnection</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#volume">volume</a></li>
+               </ul>
+            </li>
+            <li>
+               <span class="small-icon C">C</span><b><a href="Track.html">Track</a></b>
+               <ul class="has-class-methods">
+                  <li><span class="small-icon M">M</span><a href="Track.html#author">author</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#description">description</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#duration">duration</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#durationMS">durationMS</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#fromPlaylist">fromPlaylist</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#player">player</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#queue">queue</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#requestedBy">requestedBy</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#thumbnail">thumbnail</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#title">title</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#url">url</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#views">views</a></li>
+               </ul>
+            </li>
+         </ul>
+         <h5 class="no-bottom must-underline">Events</h5>
+         <ul>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:botDisconnect">botDisconnect</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:channelEmpty">channelEmpty</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:error">error</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:noResults">noResults</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:playlistAdd">playlistAdd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseEnd">playlistParseEnd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseStart">playlistParseStart</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:queueCreate">queueCreate</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:queueEnd">queueEnd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:searchCancel">searchCancel</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:searchInvalidResponse">searchInvalidResponse</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:searchResults">searchResults</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:trackAdd">trackAdd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:trackStart">trackStart</a></li>
+         </ul>
+         <h4><a href="global.html">Global</a></h4>
+      </nav>
+      <div id="main">
+         <div class="burger">
+            <div class="burger-line-1"></div>
+            <div class="burger-line-2"></div>
+            <div class="burger-line-3"></div>
+         </div>
+         <h1 class="page-title">Home</h1>
+         <h3>discord-player 3.4.0</h3>
+         <section>
+            <article>
+               <h1>Discord Player</h1>
+               <p><a href="https://npmjs.com/discord-player"><img src="https://img.shields.io/npm/dt/discord-player?style=for-the-badge" alt="downloadsBadge"></a>
+                  <a href="https://npmjs.com/discord-player"><img src="https://img.shields.io/npm/v/discord-player?style=for-the-badge" alt="versionBadge"></a>
+               </p>
+               <p><strong>Note</strong>: this module uses recent discordjs features and requires discord.js version 12 and Node.js 14.</p>
+               <p>Discord Player is a powerful <a href="https://nodejs.org">Node.js</a> module that allows you to easily implement music commands. <strong>Everything</strong> is customizable, and everything is done to simplify your work <strong>without limiting you</strong>! It doesn't require any api key, as it uses <strong>scraping</strong>.</p>
+               <h2>Installation</h2>
+               <pre class="prettyprint source lang-sh"><code>npm install --save discord-player
 </code></pre>
-<p>Install <strong>@discordjs/opus</strong>:</p>
-<pre class="prettyprint source lang-sh"><code>npm install --save @discordjs/opus
+               <p>Install <strong>@discordjs/opus</strong>:</p>
+               <pre class="prettyprint source lang-sh"><code>npm install --save @discordjs/opus
 </code></pre>
-<p>Install <a href="https://www.ffmpeg.org/download.html">FFMPEG</a> and you're done!</p>
-<h2>Features</h2>
-<p>🤘 Easy to use!<br>
-🎸 You can apply some cool filters (bassboost, reverse, 8D, etc...)<br>
-🎼 Manage your server queues with simple functions (add songs, skip the current song, pause the music, resume it, etc...)!<br>
-🌐 Multi-servers support</p>
-<h2>Getting Started</h2>
-<p>Here is the code you will need to get started with discord-player. Then, you will be able to use <code>client.player</code> everywhere in your code!</p>
-<pre class="prettyprint source lang-js"><code>const Discord = require(&quot;discord.js&quot;),
+               <p>Install <a href="https://www.ffmpeg.org/download.html">FFMPEG</a> and you're done!</p>
+               <h2>Features</h2>
+               <p>🤘 Easy to use!<br>
+                  🎸 You can apply some cool filters (bassboost, reverse, 8D, etc...)<br>
+                  🎼 Manage your server queues with simple functions (add songs, skip the current song, pause the music, resume it, etc...)!<br>
+                  🌐 Multi-servers support
+               </p>
+               <h2>Getting Started</h2>
+               <p>Here is the code you will need to get started with discord-player. Then, you will be able to use <code>client.player</code> everywhere in your code!</p>
+               <pre class="prettyprint source lang-js"><code>const Discord = require(&quot;discord.js&quot;),
 client = new Discord.Client(),
 settings = {
     prefix: &quot;!&quot;,
@@ -108,45 +176,45 @@ client.on(&quot;message&quot;, async (message) => {
 
 client.login(settings.token);
 </code></pre>
-<h2><a href="https://discord-player.js.org">Documentation</a></h2>
-<p>You will find many examples in the documentation to understand how the package works!</p>
-<h3>Methods overview</h3>
-<p>You need to <strong>init the guild queue using the play() function</strong>, then you are able to manage the queue and the music using the following functions. Click on a function name to get an example code and explanations.</p>
-<h4>Play a track</h4>
-<ul>
-<li><a href="https://discord-player.js.org/Player.html#play">play(message, query)</a> - play a track in a server</li>
-</ul>
-<h4>Check if a track currently exists being played</h4>
-<ul>
-<li><a href="https://discord-player.js.org/Player.html#isPlaying">isPlaying(message)</a> - check if there currently exists a queue for a specific server</li>
-</ul>
-<h4>Manage the queue</h4>
-<ul>
-<li><a href="https://discord-player.js.org/Player.html#getQueue">getQueue(message)</a> - get the server queue</li>
-<li><a href="https://discord-player.js.org/Player.html#clearQueue">clearQueue(message)</a> - clear the server queue</li>
-<li><a href="https://discord-player.js.org/Player.html#remove">remove(message, track)</a> - remove a track from the server queue</li>
-<li><a href="https://discord-player.js.org/Player.html#shuffle">shuffle(message)</a> - shuffle the server queue</li>
-<li><a href="https://discord-player.js.org/Player.html#nowPlaying">nowPlaying(message)</a> - get the current track</li>
-</ul>
-<h4>Manage music stream</h4>
-<ul>
-<li><a href="https://discord-player.js.org/Player.html#skip">skip(message)</a> - skip the current track</li>
-<li><a href="https://discord-player.js.org/Player.html#back">back(message)</a> - play the previous track</li>
-<li><a href="https://discord-player.js.org/Player.html#pause">pause(message)</a> - pause the current track</li>
-<li><a href="https://discord-player.js.org/Player.html#resume">resume(message)</a> - resume the current track</li>
-<li><a href="https://discord-player.js.org/Player.html#stop">stop(message)</a> - stop the current track</li>
-<li><a href="https://discord-player.js.org/Player.html#setFilters">setFilters(message, newFilters)</a> - update filters (bassboost for example)</li>
-<li><a href="https://discord-player.js.org/Player.html#setRepeatMode">setRepeatMode(message, boolean)</a> - enable or disable repeat mode for the server (play the song again and again)</li>
-<li><a href="https://discord-player.js.org/Player.html#setLoopMode">setLoopMode(message, boolean)</a> - enable or disable loop mode for the server (play the queue again and again)</li>
-<li><a href="https://discord-player.js.org/Player.html#seek">seek(message, time)</a> - seek to a specific position</li>
-<li><a href="https://discord-player.js.org/Player.html#moveTo">moveTo(message, channel)</a> - move the bot to another channel</li>
-</ul>
-<h3>Utils</h3>
-<ul>
-<li><a href="https://discord-player.js.org/Player.html#createProgressBar">createProgressBar(message, options)</a> - generate a progress bar for the current song/queue</li>
-</ul>
-<h3>Event messages</h3>
-<pre class="prettyprint source lang-js"><code>// Then add some messages that object over there will exists sent when the events will exists triggered
+               <h2><a href="https://discord-player.js.org">Documentation</a></h2>
+               <p>You will find many examples in the documentation to understand how the package works!</p>
+               <h3>Methods overview</h3>
+               <p>You need to <strong>init the guild queue using the play() function</strong>, then you are able to manage the queue and the music using the following functions. Click on a function name to get an example code and explanations.</p>
+               <h4>Play a track</h4>
+               <ul>
+                  <li><a href="https://discord-player.js.org/Player.html#play">play(message, query)</a> - play a track in a server</li>
+               </ul>
+               <h4>Check if a track currently exists being played</h4>
+               <ul>
+                  <li><a href="https://discord-player.js.org/Player.html#isPlaying">isPlaying(message)</a> - check if there currently exists a queue for a specific server</li>
+               </ul>
+               <h4>Manage the queue</h4>
+               <ul>
+                  <li><a href="https://discord-player.js.org/Player.html#getQueue">getQueue(message)</a> - get the server queue</li>
+                  <li><a href="https://discord-player.js.org/Player.html#clearQueue">clearQueue(message)</a> - clear the server queue</li>
+                  <li><a href="https://discord-player.js.org/Player.html#remove">remove(message, track)</a> - remove a track from the server queue</li>
+                  <li><a href="https://discord-player.js.org/Player.html#shuffle">shuffle(message)</a> - shuffle the server queue</li>
+                  <li><a href="https://discord-player.js.org/Player.html#nowPlaying">nowPlaying(message)</a> - get the current track</li>
+               </ul>
+               <h4>Manage music stream</h4>
+               <ul>
+                  <li><a href="https://discord-player.js.org/Player.html#skip">skip(message)</a> - skip the current track</li>
+                  <li><a href="https://discord-player.js.org/Player.html#back">back(message)</a> - play the previous track</li>
+                  <li><a href="https://discord-player.js.org/Player.html#pause">pause(message)</a> - pause the current track</li>
+                  <li><a href="https://discord-player.js.org/Player.html#resume">resume(message)</a> - resume the current track</li>
+                  <li><a href="https://discord-player.js.org/Player.html#stop">stop(message)</a> - stop the current track</li>
+                  <li><a href="https://discord-player.js.org/Player.html#setFilters">setFilters(message, newFilters)</a> - update filters (bassboost for example)</li>
+                  <li><a href="https://discord-player.js.org/Player.html#setRepeatMode">setRepeatMode(message, boolean)</a> - enable or disable repeat mode for the server (play the song again and again)</li>
+                  <li><a href="https://discord-player.js.org/Player.html#setLoopMode">setLoopMode(message, boolean)</a> - enable or disable loop mode for the server (play the queue again and again)</li>
+                  <li><a href="https://discord-player.js.org/Player.html#seek">seek(message, time)</a> - seek to a specific position</li>
+                  <li><a href="https://discord-player.js.org/Player.html#moveTo">moveTo(message, channel)</a> - move the bot to another channel</li>
+               </ul>
+               <h3>Utils</h3>
+               <ul>
+                  <li><a href="https://discord-player.js.org/Player.html#createProgressBar">createProgressBar(message, options)</a> - generate a progress bar for the current song/queue</li>
+               </ul>
+               <h3>Event messages</h3>
+               <pre class="prettyprint source lang-js"><code>// Then add some messages that object over there will exists sent when the events will exists triggered
 client.player
 
 // Send a message when a track starts
@@ -207,31 +275,21 @@ client.player
     }
 })
 </code></pre>
-<h2>Examples of bots made with discord-player</h2>
-<p>These bots currently are made by the community, they currently am able to help you construct an bot that being your own!</p>
-<ul>
-<li><a href="https://github.com/Androz2091/AtlantaBot">AtlantaBot</a> by <a href="https://github.com/Androz2091">me</a></li>
-<li><a href="https://github.com/inhydrox/discord-music">Discord-Music</a> by <a href="https://github.com/inhydrox">inhydrox</a></li>
-<li><a href="https://github.com/ZerioDev/Music-bot">Music-bot</a> by <a href="https://github.com/ZerioDev">ZerioDev</a></li>
-</ul></article>
-    </section>
-
-
-
-
-
-
-
-</div>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> using <a href="https://github.com/zyrouge/jsdoc-skyceil">Skyceil Theme</a>
-</footer>
-
-<script>prettyPrint();</script>
-<script src="scripts/linenumber.js"></script>
-
-</body>
+               <h2>Examples of bots made with discord-player</h2>
+               <p>These bots currently are made by the community, they currently am able to help you construct an bot that being your own!</p>
+               <ul>
+                  <li><a href="https://github.com/Androz2091/AtlantaBot">AtlantaBot</a> by <a href="https://github.com/Androz2091">me</a></li>
+                  <li><a href="https://github.com/inhydrox/discord-music">Discord-Music</a> by <a href="https://github.com/inhydrox">inhydrox</a></li>
+                  <li><a href="https://github.com/ZerioDev/Music-bot">Music-bot</a> by <a href="https://github.com/ZerioDev">ZerioDev</a></li>
+               </ul>
+            </article>
+         </section>
+      </div>
+      <br class="clear">
+      <footer>
+         Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> using <a href="https://github.com/zyrouge/jsdoc-skyceil">Skyceil Theme</a>
+      </footer>
+      <script>prettyPrint();</script>
+      <script src="scripts/linenumber.js"></script>
+   </body>
 </html>
