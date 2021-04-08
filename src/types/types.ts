@@ -1,5 +1,6 @@
 import { downloadOptions } from 'ytdl-core';
 import { User } from 'discord.js';
+import { Readable, Duplex } from "stream";
 
 export interface PlayerOptions {
     leaveOnEnd?: boolean;
@@ -75,3 +76,15 @@ export type QueryType =
     | 'reverbnation'
     | 'attachment'
     | 'youtube_search';
+
+export interface ExtractorModelData {
+    title: string;
+    duration: number;
+    thumbnail: string;
+    engine: string | Readable | Duplex;
+    views: number;
+    author: string;
+    description: string;
+    url: string;
+    version?: string;
+}

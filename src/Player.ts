@@ -8,6 +8,7 @@ import { Track } from './Structures/Track';
 import { PlayerErrorEventCodes, PlayerEvents } from './utils/Constants';
 import PlayerError from './utils/PlayerError';
 import ytdl from 'discord-ytdl-core';
+import { ExtractorModel } from "./Structures/ExtractorModel";
 
 // @ts-ignore
 import spotify from 'spotify-url-info';
@@ -24,6 +25,7 @@ export class Player extends EventEmitter {
     public queues: Collection<Snowflake, Queue>;
     private _resultsCollectors: Collection<string, Collector<Snowflake, Message>>;
     private _cooldownsTimeout: Collection<string, NodeJS.Timeout>;
+    public Extractors = new Collection<string, ExtractorModel>();
 
     constructor(client: Client, options?: PlayerOptions) {
         super();
@@ -62,6 +64,35 @@ export class Player extends EventEmitter {
         return AudioFilters;
     }
 
+    /**
+     * Define custom extractor in this player
+     * @param extractorName The extractor name
+     * @param extractor The extractor itself
+     */
+    use(extractorName: string, extractor: any) {
+        if (!extractorName) throw new PlayerError("Missing extractor name!", "PlayerExtractorError");
+
+        const methods = ["validate", "getInfo"];
+
+        for (const method of methods) {
+            if (typeof extractor[method] !== "function") throw new PlayerError("Invalid extractor supplied!", "PlayerExtractorError");
+        }
+
+        this.Extractors.set(extractorName, new ExtractorModel(extractorName, extractor));
+
+        return Player;
+    }
+
+    /**
+     * Remove existing extractor from this player
+     * @param extractorName The extractor name
+     */
+    unuse(extractorName: string) {
+        if (!extractorName) throw new PlayerError("Missing extractor name!", "PlayerExtractorError");
+
+        return this.Extractors.delete(extractorName);
+    }
+
     private _searchTracks(message: Message, query: string, firstResult?: boolean): Promise<Track> {
         return new Promise(async (resolve) => {
             let tracks: Track[] = [];
@@ -83,7 +114,7 @@ export class Player extends EventEmitter {
                                 requestedBy: message.author,
                                 fromPlaylist: false,
                                 source: 'soundcloud',
-                                engine: data
+                                engine: data.engine
                             });
 
                             tracks.push(track);
@@ -342,7 +373,31 @@ export class Player extends EventEmitter {
                     source: 'youtube'
                 });
             } else {
-                track = await this._searchTracks(message, query, firstResult);
+                for (const [_, extractor] of this.Extractors) {
+                    if (extractor.validate(query)) {
+                        const data = await extractor.handle(query);
+                        if (data) {
+                            console.log(data)
+                            track = new Track(this, {
+                                title: data.title,
+                                description: data.description,
+                                duration: Util.durationString(Util.parseMS(data.duration)),
+                                thumbnail: data.thumbnail,
+                                author: data.author,
+                                views: data.views,
+                                engine: data.engine,
+                                source: 'arbitrary',
+                                fromPlaylist: false,
+                                requestedBy: message.author,
+                                url: data.url
+                            });
+
+                            if (extractor.important) break;
+                        }
+                    }
+                }
+
+                if (!track) track = await this._searchTracks(message, query, firstResult);
             }
         }
 
