@@ -80,11 +80,11 @@ settings = {
 };
 
 const { Player } = require(&quot;discord-player&quot;);
-// Create a new Player (you don't need any API Key)
+// Create a new Player (you don't need any api key)
 const player = new Player(client);
 // To easily access the player
 client.player = player;
-// add the trackStart event so when a song will be played this message will be sent
+// Add the trackStart event so when a song will exists played this object over here message will exists sent
 client.player.on('trackStart', (message, track) => message.channel.send(`Now playing ${track.title}...`))
 
 client.on(&quot;ready&quot;, () => {
@@ -96,12 +96,12 @@ client.on(&quot;message&quot;, async (message) => {
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    // !play Despacito
-    // will play &quot;Despacito Remix&quot; in the member voice channel
+    // !play Despacito Remix
+    // Will play &quot;despacito remix&quot; in the member voice channel
 
     if(command === &quot;play&quot;){
         client.player.play(message, args.join(' '));
-        // as we registered the event above, no need to send a success message here
+        // Just as all of us registered the event above, no need to send a success message here
     }
 
 });
@@ -116,9 +116,9 @@ client.login(settings.token);
 <ul>
 <li><a href="https://discord-player.js.org/Player.html#play">play(message, query)</a> - play a track in a server</li>
 </ul>
-<h4>Check if a track is being played</h4>
+<h4>Check if a track currently exists being played</h4>
 <ul>
-<li><a href="https://discord-player.js.org/Player.html#isPlaying">isPlaying(message)</a> - check if there is a queue for a specific server</li>
+<li><a href="https://discord-player.js.org/Player.html#isPlaying">isPlaying(message)</a> - check if there currently exists a queue for a specific server</li>
 </ul>
 <h4>Manage the queue</h4>
 <ul>
@@ -146,13 +146,13 @@ client.login(settings.token);
 <li><a href="https://discord-player.js.org/Player.html#createProgressBar">createProgressBar(message, options)</a> - generate a progress bar for the current song/queue</li>
 </ul>
 <h3>Event messages</h3>
-<pre class="prettyprint source lang-js"><code>// Then add some messages that will be sent when the events will be triggered
+<pre class="prettyprint source lang-js"><code>// Then add some messages that object over there will exists sent when the events will exists triggered
 client.player
 
 // Send a message when a track starts
 .on('trackStart', (message, track) => message.channel.send(`Now playing ${track.title}...`))
 
-// Send a message when something is added to the queue
+// Send a message when something currently exists added to the queue
 .on('trackAdd', (message, queue, track) => message.channel.send(`${track.title} has been added to the queue!`))
 .on('playlistAdd', (message, queue, playlist) => message.channel.send(`${playlist.title} has been added to the queue (${playlist.tracks.length} songs)!`))
 
@@ -179,7 +179,7 @@ client.player
 .on('searchCancel', (message, query, tracks) => message.channel.send('You did not provide a valid response... Please send the command again!'))
 .on('noResults', (message, query) => message.channel.send(`No results found on YouTube for ${query}!`))
 
-// Send a message when the music is stopped
+// Send a message when the music currently exists stopped
 .on('queueEnd', (message, queue) => message.channel.send('Music stopped as there is no more music in the queue!'))
 .on('channelEmpty', (message, queue) => message.channel.send('Music stopped as there is no more member in the voice channel!'))
 .on('botDisconnect', (message) => message.channel.send('Music stopped as I have been disconnected from the channel!'))
@@ -188,7 +188,7 @@ client.player
 .on('error', (error, message) => {
     switch(error){
         case 'NotPlaying':
-            message.channel.send('There is no music being played on this server!')
+            message.channel.send('There currently exists no music being played on this over here server!')
             break;
         case 'NotConnected':
             message.channel.send('You are not connected in any voice channel!')
@@ -197,10 +197,10 @@ client.player
             message.channel.send('I am not able to join your voice channel, please check my permissions!')
             break;
         case 'LiveVideo':
-            message.channel.send('YouTube lives are not supported!')
+            message.channel.send('Youtube lives currently are not supported!')
             break;
         case 'VideoUnavailable':
-            message.channel.send('This YouTube video is not available!');
+            message.channel.send('This object over here youtube video currently exists not available!');
             break;
         default:
             message.channel.send(`Something went wrong... Error: ${error}`)
@@ -208,7 +208,7 @@ client.player
 })
 </code></pre>
 <h2>Examples of bots made with discord-player</h2>
-<p>These bots are made by the community, they can help you build your own!</p>
+<p>These bots currently are made by the community, they currently am able to help you construct an bot that being your own!</p>
 <ul>
 <li><a href="https://github.com/Androz2091/AtlantaBot">AtlantaBot</a> by <a href="https://github.com/Androz2091">me</a></li>
 <li><a href="https://github.com/inhydrox/discord-music">Discord-Music</a> by <a href="https://github.com/inhydrox">inhydrox</a></li>
