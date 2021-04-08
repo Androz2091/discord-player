@@ -1,7158 +1,1863 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Class: Player</title>
-
-    <script src="scripts/prettify/prettify.js"></script>
-    <script src="scripts/prettify/lang-css.js"></script>
-    <script src="scripts/nav.js"></script>
-    <!--[if lt IE 9]>
+   <head>
+      <meta charset="utf-8">
+      <title>Class: Player</title>
+      <script src="scripts/prettify/prettify.js"></script>
+      <script src="scripts/prettify/lang-css.js"></script>
+      <script src="scripts/nav.js"></script>
+      <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/skyceil.css">
-    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
-</head>
-
-<body>
-
-<nav class="navbar">
-    <h4><a href="index.html">Home</a></h4><h5 class="no-bottom must-underline">Classes</h5><ul><li><span class="small-icon C">C</span><b><a href="Player.html">Player</a></b><ul class="has-class-methods"><li><span class="small-icon F">F</span><a href="Player.html#_handleVoiceStateUpdate">_handleVoiceStateUpdate</a></li><li><span class="small-icon F">F</span><a href="Player.html#_playTrack">_playTrack</a></li><li><span class="small-icon F">F</span><a href="Player.html#back">back</a></li><li><span class="small-icon F">F</span><a href="Player.html#clearQueue">clearQueue</a></li><li><span class="small-icon F">F</span><a href="Player.html#createProgressBar">createProgressBar</a></li><li><span class="small-icon F">F</span><a href="Player.html#getQueue">getQueue</a></li><li><span class="small-icon F">F</span><a href="Player.html#isPlaying">isPlaying</a></li><li><span class="small-icon F">F</span><a href="Player.html#moveTo">moveTo</a></li><li><span class="small-icon F">F</span><a href="Player.html#nowPlaying">nowPlaying</a></li><li><span class="small-icon F">F</span><a href="Player.html#pause">pause</a></li><li><span class="small-icon F">F</span><a href="Player.html#play">play</a></li><li><span class="small-icon F">F</span><a href="Player.html#remove">remove</a></li><li><span class="small-icon F">F</span><a href="Player.html#resume">resume</a></li><li><span class="small-icon F">F</span><a href="Player.html#search">search</a></li><li><span class="small-icon F">F</span><a href="Player.html#seek">seek</a></li><li><span class="small-icon F">F</span><a href="Player.html#setFilters">setFilters</a></li><li><span class="small-icon F">F</span><a href="Player.html#setLoopMode">setLoopMode</a></li><li><span class="small-icon F">F</span><a href="Player.html#setPosition">setPosition</a></li><li><span class="small-icon F">F</span><a href="Player.html#setRepeatMode">setRepeatMode</a></li><li><span class="small-icon F">F</span><a href="Player.html#setVolume">setVolume</a></li><li><span class="small-icon F">F</span><a href="Player.html#shuffle">shuffle</a></li><li><span class="small-icon F">F</span><a href="Player.html#skip">skip</a></li><li><span class="small-icon F">F</span><a href="Player.html#stop">stop</a></li><li><span class="small-icon M">M</span><a href="Player.html#.AudioFilters">AudioFilters</a></li><li><span class="small-icon M">M</span><a href="Player.html#_cooldownsTimeout">_cooldownsTimeout</a></li><li><span class="small-icon M">M</span><a href="Player.html#_resultsCollectors">_resultsCollectors</a></li><li><span class="small-icon M">M</span><a href="Player.html#client">client</a></li><li><span class="small-icon M">M</span><a href="Player.html#filters">filters</a></li><li><span class="small-icon M">M</span><a href="Player.html#options">options</a></li><li><span class="small-icon M">M</span><a href="Player.html#queues">queues</a></li><li><span class="small-icon M">M</span><a href="Player.html#util">util</a></li></ul></li><li><span class="small-icon C">C</span><b><a href="Queue.html">Queue</a></b><ul class="has-class-methods"><li><span class="small-icon M">M</span><a href="Queue.html#additionalStreamTime">additionalStreamTime</a></li><li><span class="small-icon M">M</span><a href="Queue.html#filters">filters</a></li><li><span class="small-icon M">M</span><a href="Queue.html#firstMessage">firstMessage</a></li><li><span class="small-icon M">M</span><a href="Queue.html#guildID">guildID</a></li><li><span class="small-icon M">M</span><a href="Queue.html#lastSkipped">lastSkipped</a></li><li><span class="small-icon M">M</span><a href="Queue.html#loopMode">loopMode</a></li><li><span class="small-icon M">M</span><a href="Queue.html#paused">paused</a></li><li><span class="small-icon M">M</span><a href="Queue.html#previousTracks">previousTracks</a></li><li><span class="small-icon M">M</span><a href="Queue.html#repeatMode">repeatMode</a></li><li><span class="small-icon M">M</span><a href="Queue.html#stopped">stopped</a></li><li><span class="small-icon M">M</span><a href="Queue.html#stream">stream</a></li><li><span class="small-icon M">M</span><a href="Queue.html#tracks">tracks</a></li><li><span class="small-icon M">M</span><a href="Queue.html#voiceConnection">voiceConnection</a></li><li><span class="small-icon M">M</span><a href="Queue.html#volume">volume</a></li></ul></li><li><span class="small-icon C">C</span><b><a href="Track.html">Track</a></b><ul class="has-class-methods"><li><span class="small-icon M">M</span><a href="Track.html#author">author</a></li><li><span class="small-icon M">M</span><a href="Track.html#description">description</a></li><li><span class="small-icon M">M</span><a href="Track.html#duration">duration</a></li><li><span class="small-icon M">M</span><a href="Track.html#durationMS">durationMS</a></li><li><span class="small-icon M">M</span><a href="Track.html#fromPlaylist">fromPlaylist</a></li><li><span class="small-icon M">M</span><a href="Track.html#player">player</a></li><li><span class="small-icon M">M</span><a href="Track.html#queue">queue</a></li><li><span class="small-icon M">M</span><a href="Track.html#requestedBy">requestedBy</a></li><li><span class="small-icon M">M</span><a href="Track.html#thumbnail">thumbnail</a></li><li><span class="small-icon M">M</span><a href="Track.html#title">title</a></li><li><span class="small-icon M">M</span><a href="Track.html#url">url</a></li><li><span class="small-icon M">M</span><a href="Track.html#views">views</a></li></ul></li></ul><h5 class="no-bottom must-underline">Events</h5><ul><li><span class="small-icon E">E</span><a href="Player.html#event:botDisconnect">botDisconnect</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:channelEmpty">channelEmpty</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:error">error</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:noResults">noResults</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:playlistAdd">playlistAdd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseEnd">playlistParseEnd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseStart">playlistParseStart</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:queueCreate">queueCreate</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:queueEnd">queueEnd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:searchCancel">searchCancel</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:searchInvalidResponse">searchInvalidResponse</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:searchResults">searchResults</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:trackAdd">trackAdd</a></li><li><span class="small-icon E">E</span><a href="Player.html#event:trackStart">trackStart</a></li></ul><h4><a href="global.html">Global</a></h4>
-</nav>
-
-<div id="main">
-    <div class="burger">
-        <div class="burger-line-1"></div>
-        <div class="burger-line-2"></div>
-        <div class="burger-line-3"></div>
-    </div>
-
-    <h1 class="page-title">Class: Player</h1>
-
-    
-
-
-
-
-<section>
-<header>
-    <hr>
-    
-        <h2><span class="attribs"><span class="type-signature"></span></span>Player<span class="signature">(client, options)</span><span class="type-signature"></span></h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-
-    
-
-    
-    <h4 class="name" id="Player"><span class="type-signature"></span>new Player<span class="signature">(client, options)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>client</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Client</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>Discord.js client</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>options</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="global.html#PlayerOptions">PlayerOptions</a></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>Player options</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id=".AudioFilters"><span class="type-signature">(static) </span>AudioFilters<span class="type-signature"> :<a href="global.html#Filters">Filters</a></span></h4>
-
-
-
-
-<div class="description">
-    <p>Returns all the available audio filters</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="global.html#Filters">Filters</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint example linenums"><code>const filters = require('discord-player').Player.AudioFilters
+      <![endif]-->
+      <link type="text/css" rel="stylesheet" href="styles/skyceil.css">
+      <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+   </head>
+   <body>
+      <nav class="navbar">
+         <h4><a href="index.html">Home</a></h4>
+         <h5 class="no-bottom must-underline">Classes</h5>
+         <ul>
+            <li>
+               <span class="small-icon C">C</span><b><a href="Player.html">Player</a></b>
+               <ul class="has-class-methods">
+                  <li><span class="small-icon F">F</span><a href="Player.html#_handleVoiceStateUpdate">_handleVoiceStateUpdate</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#_playTrack">_playTrack</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#back">back</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#clearQueue">clearQueue</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#createProgressBar">createProgressBar</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#getQueue">getQueue</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#isPlaying">isPlaying</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#moveTo">moveTo</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#nowPlaying">nowPlaying</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#pause">pause</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#play">play</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#remove">remove</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#resume">resume</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#search">search</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#seek">seek</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setFilters">setFilters</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setLoopMode">setLoopMode</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setPosition">setPosition</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setRepeatMode">setRepeatMode</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#setVolume">setVolume</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#shuffle">shuffle</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#skip">skip</a></li>
+                  <li><span class="small-icon F">F</span><a href="Player.html#stop">stop</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#.AudioFilters">AudioFilters</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#_cooldownsTimeout">_cooldownsTimeout</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#_resultsCollectors">_resultsCollectors</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#client">client</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#filters">filters</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#options">options</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#queues">queues</a></li>
+                  <li><span class="small-icon M">M</span><a href="Player.html#util">util</a></li>
+               </ul>
+            </li>
+            <li>
+               <span class="small-icon C">C</span><b><a href="Queue.html">Queue</a></b>
+               <ul class="has-class-methods">
+                  <li><span class="small-icon M">M</span><a href="Queue.html#additionalStreamTime">additionalStreamTime</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#filters">filters</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#firstMessage">firstMessage</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#guildID">guildID</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#lastSkipped">lastSkipped</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#loopMode">loopMode</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#paused">paused</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#previousTracks">previousTracks</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#repeatMode">repeatMode</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#stopped">stopped</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#stream">stream</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#tracks">tracks</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#voiceConnection">voiceConnection</a></li>
+                  <li><span class="small-icon M">M</span><a href="Queue.html#volume">volume</a></li>
+               </ul>
+            </li>
+            <li>
+               <span class="small-icon C">C</span><b><a href="Track.html">Track</a></b>
+               <ul class="has-class-methods">
+                  <li><span class="small-icon M">M</span><a href="Track.html#author">author</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#description">description</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#duration">duration</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#durationMS">durationMS</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#fromPlaylist">fromPlaylist</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#player">player</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#queue">queue</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#requestedBy">requestedBy</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#thumbnail">thumbnail</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#title">title</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#url">url</a></li>
+                  <li><span class="small-icon M">M</span><a href="Track.html#views">views</a></li>
+               </ul>
+            </li>
+         </ul>
+         <h5 class="no-bottom must-underline">Events</h5>
+         <ul>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:botDisconnect">botDisconnect</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:channelEmpty">channelEmpty</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:error">error</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:noResults">noResults</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:playlistAdd">playlistAdd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseEnd">playlistParseEnd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:playlistParseStart">playlistParseStart</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:queueCreate">queueCreate</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:queueEnd">queueEnd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:searchCancel">searchCancel</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:searchInvalidResponse">searchInvalidResponse</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:searchResults">searchResults</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:trackAdd">trackAdd</a></li>
+            <li><span class="small-icon E">E</span><a href="Player.html#event:trackStart">trackStart</a></li>
+         </ul>
+         <h4><a href="global.html">Global</a></h4>
+      </nav>
+      <div id="main">
+         <div class="burger">
+            <div class="burger-line-1"></div>
+            <div class="burger-line-2"></div>
+            <div class="burger-line-3"></div>
+         </div>
+         <h1 class="page-title">Class: Player</h1>
+         <section>
+            <header>
+               <hr>
+               <h2><span class="attribs"><span class="type-signature"></span></span>Player<span class="signature">(client, options)</span><span class="type-signature"></span></h2>
+            </header>
+            <article>
+               <div class="container-overview">
+                  <h4 class="name" id="Player"><span class="type-signature"></span>new Player<span class="signature">(client, options)</span><span class="type-signature"></span></h4>
+                  <h5>Parameters:</h5>
+                  <div class="table-box">
+                     <table class="params">
+                        <thead>
+                           <tr>
+                              <th>Name</th>
+                              <th>Type</th>
+                              <th class="last">Description</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td class="name"><code>client</code></td>
+                              <td class="type">
+                                 <span class="param-type">Discord.Client</span>
+                              </td>
+                              <td class="description last">
+                                 <p>Discord.js client</p>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td class="name"><code>options</code></td>
+                              <td class="type">
+                                 <span class="param-type"><a href="global.html#PlayerOptions">PlayerOptions</a></span>
+                              </td>
+                              <td class="description last">
+                                 <p>Player options</p>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <dl class="details">
+                  </dl>
+                  <hr>
+               </div>
+               <h3 class="subsection-title">Members</h3>
+               <h4 class="name" id=".AudioFilters"><span class="type-signature">(static) </span>AudioFilters<span class="type-signature"> :<a href="global.html#Filters">Filters</a></span></h4>
+               <div class="description">
+                  <p>Returns all the available audio filters</p>
+               </div>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type"><a href="global.html#Filters">Filters</a></span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <h5>Example</h5>
+               <pre class="prettyprint example linenums"><code>const filters = require('discord-player').Player.AudioFilters
 console.log(`There are ${Object.keys(filters).length} filters!`)</code></pre>
-
-
-
-<hr>
-        
-            
-<h4 class="name" id="_cooldownsTimeout"><span class="type-signature">(private) </span>_cooldownsTimeout<span class="type-signature"> :Discord.Collection.&lt;string, Timeout></span></h4>
-
-
-
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Discord.Collection.&lt;string, Timeout></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-        
-            
-<h4 class="name" id="_resultsCollectors"><span class="type-signature">(private) </span>_resultsCollectors<span class="type-signature"> :Discord.Collection.&lt;string, Discord.Collector></span></h4>
-
-
-
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Discord.Collection.&lt;string, Discord.Collector></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-        
-            
-<h4 class="name" id="client"><span class="type-signature"></span>client<span class="type-signature"> :Discord.Client</span></h4>
-
-
-
-
-<div class="description">
-    <p>Discord.js client instance</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Discord.Client</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-        
-            
-<h4 class="name" id="filters"><span class="type-signature"></span>filters<span class="type-signature"> :<a href="global.html#Filters">Filters</a></span></h4>
-
-
-
-
-<div class="description">
-    <p>Default filters for the queues created with this player.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="global.html#Filters">Filters</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-        
-            
-<h4 class="name" id="options"><span class="type-signature"></span>options<span class="type-signature"> :<a href="global.html#PlayerOptions">PlayerOptions</a></span></h4>
-
-
-
-
-<div class="description">
-    <p>Player options</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="global.html#PlayerOptions">PlayerOptions</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-        
-            
-<h4 class="name" id="queues"><span class="type-signature"></span>queues<span class="type-signature"> :Discord.Collection.&lt;Discord.Snowflake, <a href="Queue.html">Queue</a>></span></h4>
-
-
-
-
-<div class="description">
-    <p>Player queues</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Discord.Collection.&lt;Discord.Snowflake, <a href="Queue.html">Queue</a>></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-        
-            
-<h4 class="name" id="util"><span class="type-signature"></span>util<span class="type-signature"> :Util</span></h4>
-
-
-
-
-<div class="description">
-    <p>Utilities</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Util</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-<hr>
-        
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="_handleVoiceStateUpdate"><span class="type-signature"></span>_handleVoiceStateUpdate<span class="signature">(oldState, newState)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Handle voiceStateUpdate event.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>oldState</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.VoiceState</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>newState</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.VoiceState</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="_playTrack"><span class="type-signature">(async) </span>_playTrack<span class="signature">(queue, firstPlay)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>queue</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Queue.html">Queue</a></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>The queue to play.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>firstPlay</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">*</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="back"><span class="type-signature"></span>back<span class="signature">(message)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Play back the previous song.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Whether it succeed or not</p>
-</div>
-
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">boolean</span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="clearQueue"><span class="type-signature"></span>clearQueue<span class="signature">(message)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Clears the server queue.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="createProgressBar"><span class="type-signature"></span>createProgressBar<span class="signature">(message, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Create a progress bar for the queue of the server.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-            <th>Attributes</th>
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-
-                    
-
-                    
-                    </td>
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>options</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Object</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-
-                    
-                    </td>
-                
-
-                
-
-                <td class="description last">
-                    <h6>Properties</h6>
-                    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-            <th>Attributes</th>
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>timecodes</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-
-                    
-                    </td>
-                
-
-                
-
-                <td class="description last"><p>Whether or not to show timecodes in the progress bar</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>queue</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-
-                    
-                    </td>
-                
-
-                
-
-                <td class="description last"><p>Whether to show the progress bar for the whole queue (if false, only the current song)</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-                </td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">string</span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getQueue"><span class="type-signature"></span>getQueue<span class="signature">(message)</span><span class="type-signature"> &rarr; {<a href="Queue.html">Queue</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Get the server queue.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type"><a href="Queue.html">Queue</a></span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="isPlaying"><span class="type-signature"></span>isPlaying<span class="signature">(message)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Check whether there is a music played in the server</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="moveTo"><span class="type-signature"></span>moveTo<span class="signature">(message, channel)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Moves to new voice channel</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>Message</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>channel</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.VoiceChannel</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>Voice channel</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Whether it succeed or not</p>
-</div>
-
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">boolean</span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="nowPlaying"><span class="type-signature"></span>nowPlaying<span class="signature">(message)</span><span class="type-signature"> &rarr; {<a href="Track.html">Track</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Get the played song in the server.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type"><a href="Track.html">Track</a></span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="pause"><span class="type-signature"></span>pause<span class="signature">(message)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Pause the music in the server.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Whether it succeed or not</p>
-</div>
-
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">boolean</span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint example linenums"><code>client.player.pause(message);</code></pre>
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="play"><span class="type-signature">(async) </span>play<span class="signature">(message, query, firstResult, isAttachment<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Play a track in the server. Supported query types are <code>keywords</code>, <code>YouTube video links</code>, <code>YouTube playlists links</code>, <code>Spotify track link</code> or <code>SoundCloud song link</code>.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-            <th>Attributes</th>
-            
-
-            
-            <th>Default</th>
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Discord <code>message</code></p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>query</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">String</span>
-|
-
-<span class="param-type"><a href="Track.html">Track</a></span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Search query or a valid <code>Track</code> object.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>firstResult</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Whether the bot should play the first song found on youtube with the given query</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>isAttachment</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-                    <td class="attributes">
-                    
-                        &lt;optional><br>
-                    
-
-                    
-
-                    
-                    </td>
-                
-
-                
-                    <td class="default">
-                    
-                        false
-                    
-                    </td>
-                
-
-                <td class="description last"><p>If it should play it as attachment</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">Promise.&lt;void></span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint example linenums"><code>client.player.play(message, "Despacito", true);</code></pre>
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="remove"><span class="type-signature"></span>remove<span class="signature">(message, track)</span><span class="type-signature"> &rarr; {<a href="Track.html">Track</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Remove a track from the queue of the server</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>track</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Track.html">Track</a></span>
-|
-
-<span class="param-type">number</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>the removed track</p>
-</div>
-
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type"><a href="Track.html">Track</a></span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="resume"><span class="type-signature"></span>resume<span class="signature">(message)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Resume the music in the server.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Whether it succeed or not</p>
-</div>
-
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">boolean</span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint example linenums"><code>client.player.resume(message);</code></pre>
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="search"><span class="type-signature">(async) </span>search<span class="signature">(query, type)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;any>>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Custom search function</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-            <th>Default</th>
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>query</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">string</span>
-
-
-                
-                </td>
-
-                
-
-                
-                    <td class="default">
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Search query</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>type</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">"youtube"</span>
-|
-
-<span class="param-type">"soundcloud"</span>
-
-
-                
-                </td>
-
-                
-
-                
-                    <td class="default">
-                    
-                        youtube
-                    
-                    </td>
-                
-
-                <td class="description last"><p>Search type</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">Promise.&lt;Array.&lt;any>></span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="seek"><span class="type-signature"></span>seek<span class="signature">(message, time)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Sets currently playing music duration</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>Discord message</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>time</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">number</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>Time in ms</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">Promise.&lt;void></span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setFilters"><span class="type-signature"></span>setFilters<span class="signature">(message, newFilters)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Change the filters.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>newFilters</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Partial.&lt;<a href="global.html#Filters">Filters</a>></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>The filters to update and their new status.</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint example linenums"><code>client.player.setFilters(message, {
+               <hr>
+               <h4 class="name" id="_cooldownsTimeout"><span class="type-signature">(private) </span>_cooldownsTimeout<span class="type-signature"> :Discord.Collection.&lt;string, Timeout></span></h4>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type">Discord.Collection.&lt;string, Timeout></span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="_resultsCollectors"><span class="type-signature">(private) </span>_resultsCollectors<span class="type-signature"> :Discord.Collection.&lt;string, Discord.Collector></span></h4>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type">Discord.Collection.&lt;string, Discord.Collector></span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="client"><span class="type-signature"></span>client<span class="type-signature"> :Discord.Client</span></h4>
+               <div class="description">
+                  <p>Discord.js client instance</p>
+               </div>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type">Discord.Client</span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="filters"><span class="type-signature"></span>filters<span class="type-signature"> :<a href="global.html#Filters">Filters</a></span></h4>
+               <div class="description">
+                  <p>Default filters for the queues created with this player.</p>
+               </div>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type"><a href="global.html#Filters">Filters</a></span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="options"><span class="type-signature"></span>options<span class="type-signature"> :<a href="global.html#PlayerOptions">PlayerOptions</a></span></h4>
+               <div class="description">
+                  <p>Player options</p>
+               </div>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type"><a href="global.html#PlayerOptions">PlayerOptions</a></span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="queues"><span class="type-signature"></span>queues<span class="type-signature"> :Discord.Collection.&lt;Discord.Snowflake, <a href="Queue.html">Queue</a>></span></h4>
+               <div class="description">
+                  <p>Player queues</p>
+               </div>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type">Discord.Collection.&lt;Discord.Snowflake, <a href="Queue.html">Queue</a>></span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="util"><span class="type-signature"></span>util<span class="type-signature"> :Util</span></h4>
+               <div class="description">
+                  <p>Utilities</p>
+               </div>
+               <h5>Type:</h5>
+               <ul>
+                  <li>
+                     <span class="param-type">Util</span>
+                  </li>
+               </ul>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h3 class="subsection-title">Methods</h3>
+               <h4 class="name" id="_handleVoiceStateUpdate"><span class="type-signature"></span>_handleVoiceStateUpdate<span class="signature">(oldState, newState)</span><span class="type-signature"></span></h4>
+               <div class="description">
+                  <p>Handle voiceStateUpdate event.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>oldState</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.VoiceState</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>newState</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.VoiceState</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="_playTrack"><span class="type-signature">(async) </span>_playTrack<span class="signature">(queue, firstPlay)</span><span class="type-signature"></span></h4>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>queue</code></td>
+                           <td class="type">
+                              <span class="param-type"><a href="Queue.html">Queue</a></span>
+                           </td>
+                           <td class="description last">
+                              <p>The queue to play.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>firstPlay</code></td>
+                           <td class="type">
+                              <span class="param-type">*</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="back"><span class="type-signature"></span>back<span class="signature">(message)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+               <div class="description">
+                  <p>Play back the previous song.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <div class="param-desc">
+                  <p>Whether it succeed or not</p>
+               </div>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">boolean</span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="clearQueue"><span class="type-signature"></span>clearQueue<span class="signature">(message)</span><span class="type-signature"></span></h4>
+               <div class="description">
+                  <p>Clears the server queue.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="createProgressBar"><span class="type-signature"></span>createProgressBar<span class="signature">(message, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
+               <div class="description">
+                  <p>Create a progress bar for the queue of the server.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th>Attributes</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="attributes">
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>options</code></td>
+                           <td class="type">
+                              <span class="param-type">Object</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="description last">
+                              <h6>Properties</h6>
+                              <div class="table-box">
+                                 <table class="params">
+                                    <thead>
+                                       <tr>
+                                          <th>Name</th>
+                                          <th>Type</th>
+                                          <th>Attributes</th>
+                                          <th class="last">Description</th>
+                                       </tr>
+                                    </thead>
+                                    <tbody>
+                                       <tr>
+                                          <td class="name"><code>timecodes</code></td>
+                                          <td class="type">
+                                             <span class="param-type">boolean</span>
+                                          </td>
+                                          <td class="attributes">
+                                             &lt;optional><br>
+                                          </td>
+                                          <td class="description last">
+                                             <p>Whether or not to show timecodes in the progress bar</p>
+                                          </td>
+                                       </tr>
+                                       <tr>
+                                          <td class="name"><code>queue</code></td>
+                                          <td class="type">
+                                             <span class="param-type">boolean</span>
+                                          </td>
+                                          <td class="attributes">
+                                             &lt;optional><br>
+                                          </td>
+                                          <td class="description last">
+                                             <p>Whether to show the progress bar for the whole queue (if false, only the current song)</p>
+                                          </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </div>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">string</span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="getQueue"><span class="type-signature"></span>getQueue<span class="signature">(message)</span><span class="type-signature"> &rarr; {<a href="Queue.html">Queue</a>}</span></h4>
+               <div class="description">
+                  <p>Get the server queue.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type"><a href="Queue.html">Queue</a></span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="isPlaying"><span class="type-signature"></span>isPlaying<span class="signature">(message)</span><span class="type-signature"></span></h4>
+               <div class="description">
+                  <p>Check whether there is a music played in the server</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="moveTo"><span class="type-signature"></span>moveTo<span class="signature">(message, channel)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+               <div class="description">
+                  <p>Moves to new voice channel</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last">
+                              <p>Message</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>channel</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.VoiceChannel</span>
+                           </td>
+                           <td class="description last">
+                              <p>Voice channel</p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <div class="param-desc">
+                  <p>Whether it succeed or not</p>
+               </div>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">boolean</span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="nowPlaying"><span class="type-signature"></span>nowPlaying<span class="signature">(message)</span><span class="type-signature"> &rarr; {<a href="Track.html">Track</a>}</span></h4>
+               <div class="description">
+                  <p>Get the played song in the server.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type"><a href="Track.html">Track</a></span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="pause"><span class="type-signature"></span>pause<span class="signature">(message)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+               <div class="description">
+                  <p>Pause the music in the server.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <div class="param-desc">
+                  <p>Whether it succeed or not</p>
+               </div>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">boolean</span>
+                     </span>
+                  </li>
+               </ul>
+               <h5>Example</h5>
+               <pre class="prettyprint example linenums"><code>client.player.pause(message);</code></pre>
+               <hr>
+               <h4 class="name" id="play"><span class="type-signature">(async) </span>play<span class="signature">(message, query, firstResult, isAttachment<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+               <div class="description">
+                  <p>Play a track in the server. Supported query types are <code>keywords</code>, <code>YouTube video links</code>, <code>YouTube playlists links</code>, <code>Spotify track link</code> or <code>SoundCloud song link</code>.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th>Attributes</th>
+                           <th>Default</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="attributes">
+                           </td>
+                           <td class="default">
+                           </td>
+                           <td class="description last">
+                              <p>Discord <code>message</code></p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>query</code></td>
+                           <td class="type">
+                              <span class="param-type">String</span>
+                              |
+                              <span class="param-type"><a href="Track.html">Track</a></span>
+                           </td>
+                           <td class="attributes">
+                           </td>
+                           <td class="default">
+                           </td>
+                           <td class="description last">
+                              <p>Search query or a valid <code>Track</code> object.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>firstResult</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>Whether the bot should play the first song found on youtube with the given query</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>isAttachment</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="attributes">
+                              &lt;optional><br>
+                           </td>
+                           <td class="default">
+                              false
+                           </td>
+                           <td class="description last">
+                              <p>If it should play it as attachment</p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">Promise.&lt;void></span>
+                     </span>
+                  </li>
+               </ul>
+               <h5>Example</h5>
+               <pre class="prettyprint example linenums"><code>client.player.play(message, "Despacito", true);</code></pre>
+               <hr>
+               <h4 class="name" id="remove"><span class="type-signature"></span>remove<span class="signature">(message, track)</span><span class="type-signature"> &rarr; {<a href="Track.html">Track</a>}</span></h4>
+               <div class="description">
+                  <p>Remove a track from the queue of the server</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>track</code></td>
+                           <td class="type">
+                              <span class="param-type"><a href="Track.html">Track</a></span>
+                              |
+                              <span class="param-type">number</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <div class="param-desc">
+                  <p>the removed track</p>
+               </div>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type"><a href="Track.html">Track</a></span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="resume"><span class="type-signature"></span>resume<span class="signature">(message)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+               <div class="description">
+                  <p>Resume the music in the server.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <div class="param-desc">
+                  <p>Whether it succeed or not</p>
+               </div>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">boolean</span>
+                     </span>
+                  </li>
+               </ul>
+               <h5>Example</h5>
+               <pre class="prettyprint example linenums"><code>client.player.resume(message);</code></pre>
+               <hr>
+               <h4 class="name" id="search"><span class="type-signature">(async) </span>search<span class="signature">(query, type)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;any>>}</span></h4>
+               <div class="description">
+                  <p>Custom search function</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th>Default</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>query</code></td>
+                           <td class="type">
+                              <span class="param-type">string</span>
+                           </td>
+                           <td class="default">
+                           </td>
+                           <td class="description last">
+                              <p>Search query</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>type</code></td>
+                           <td class="type">
+                              <span class="param-type">"youtube"</span>
+                              |
+                              <span class="param-type">"soundcloud"</span>
+                           </td>
+                           <td class="default">
+                              youtube
+                           </td>
+                           <td class="description last">
+                              <p>Search type</p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">Promise.&lt;Array.&lt;any>></span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="seek"><span class="type-signature"></span>seek<span class="signature">(message, time)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+               <div class="description">
+                  <p>Sets currently playing music duration</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last">
+                              <p>Discord message</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>time</code></td>
+                           <td class="type">
+                              <span class="param-type">number</span>
+                           </td>
+                           <td class="description last">
+                              <p>Time in ms</p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">Promise.&lt;void></span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="setFilters"><span class="type-signature"></span>setFilters<span class="signature">(message, newFilters)</span><span class="type-signature"></span></h4>
+               <div class="description">
+                  <p>Change the filters.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>newFilters</code></td>
+                           <td class="type">
+                              <span class="param-type">Partial.&lt;<a href="global.html#Filters">Filters</a>></span>
+                           </td>
+                           <td class="description last">
+                              <p>The filters to update and their new status.</p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Example</h5>
+               <pre class="prettyprint example linenums"><code>client.player.setFilters(message, {
  bassboost: true
 });</code></pre>
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setLoopMode"><span class="type-signature">(async) </span>setLoopMode<span class="signature">(message, enabled)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Set loop mode, to play the queue again and again</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>enabled</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setPosition"><span class="type-signature"></span>setPosition<span class="signature">(message, time)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Sets currently playing music duration</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>Discord message</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>time</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">number</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>Time in ms</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">Promise.&lt;void></span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setRepeatMode"><span class="type-signature"></span>setRepeatMode<span class="signature">(message, enabled)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Enable or disable repeat mode in the server.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>enabled</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">boolean</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>whether the repeat mode is now enabled.</p>
-</div>
-
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">boolean</span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setVolume"><span class="type-signature"></span>setVolume<span class="signature">(message, percent)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Change the server volume.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>percent</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">number</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Whether it succeed or not</p>
-</div>
-
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">boolean</span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint example linenums"><code>client.player.setVolume(message, 90);</code></pre>
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="shuffle"><span class="type-signature"></span>shuffle<span class="signature">(message)</span><span class="type-signature"> &rarr; {<a href="Queue.html">Queue</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Shuffle the queue of the server.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type"><a href="Queue.html">Queue</a></span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="skip"><span class="type-signature"></span>skip<span class="signature">(message)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Skips to the next song.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Whether it succeed or not</p>
-</div>
-
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">boolean</span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="stop"><span class="type-signature"></span>stop<span class="signature">(message)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Stop the music in the server.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Whether it succeed or not</p>
-</div>
-
-
-
-<ul>
-    <li>
-        Type: <span class="simple-code">
-<span class="param-type">boolean</span>
-
-</span>
-    </li>
-</ul>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint example linenums"><code>client.player.stop(message);</code></pre>
-
-
-
-<hr>
-        
-    
-
-    
-
-    
-        <h3 class="subsection-title">Events</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:botDisconnect">botDisconnect</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when the bot is disconnected from the channel</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:channelEmpty">channelEmpty</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when the channel of the bot is empty</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>queue</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Queue.html">Queue</a></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:error">error</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when an error is triggered</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>error</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">string</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>It can be <code>NotConnected</code>, <code>UnableToJoin</code>, <code>NotPlaying</code>, <code>ParseError</code>, <code>LiveVideo</code> or <code>VideoUnavailable</code>.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:noResults">noResults</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when the bot can't find related results to the query</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>query</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">string</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:playlistAdd">playlistAdd</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when a playlist is added to the queue</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>queue</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Queue.html">Queue</a></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>playlist</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Object</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:playlistParseEnd">playlistParseEnd</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when discord-player finishes parsing playlist contents (mostly soundcloud playlists)</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>playlist</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Object</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>The playlist data (parsed)</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>The message</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:playlistParseStart">playlistParseStart</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when discord-player attempts to parse playlist contents (mostly soundcloud playlists)</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>playlist</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Object</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>Raw playlist (unparsed)</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"><p>The message</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:queueCreate">queueCreate</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when a playlist is started</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>queue</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Queue.html">Queue</a></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:queueEnd">queueEnd</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when the queue of the server is ended</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>queue</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Queue.html">Queue</a></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:searchCancel">searchCancel</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when the bot has stopped awaiting search results (timeout)</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>query</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">string</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>tracks</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Array.&lt;<a href="Track.html">Track</a>></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:searchInvalidResponse">searchInvalidResponse</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when the user has sent an invalid response for search results</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>query</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">string</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>tracks</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Array.&lt;<a href="Track.html">Track</a>></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>invalidResponse</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">string</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>collector</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.MessageCollector</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:searchResults">searchResults</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when the bot is awaiting search results</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>query</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">string</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>tracks</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Array.&lt;<a href="Track.html">Track</a>></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>collector</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Collector</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:trackAdd">trackAdd</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when a track is added to the queue</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>queue</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Queue.html">Queue</a></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>track</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Track.html">Track</a></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-            
-
-    
-
-    
-    <h4 class="name" id="event:trackStart">trackStart</h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emitted when a track starts</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<div class="table-box">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td class="name"><code>message</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">Discord.Message</span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>track</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Track.html">Track</a></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td class="name"><code>queue</code></td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Queue.html">Queue</a></span>
-
-
-                
-                </td>
-
-                
-
-                
-
-                <td class="description last"></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-        
-    
-</article>
-
-</section>
-
-
-
-
-
-</div>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> using <a href="https://github.com/zyrouge/jsdoc-skyceil">Skyceil Theme</a>
-</footer>
-
-<script>prettyPrint();</script>
-<script src="scripts/linenumber.js"></script>
-
-</body>
+               <hr>
+               <h4 class="name" id="setLoopMode"><span class="type-signature">(async) </span>setLoopMode<span class="signature">(message, enabled)</span><span class="type-signature"></span></h4>
+               <div class="description">
+                  <p>Set loop mode, to play the queue again and again</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>enabled</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="setPosition"><span class="type-signature"></span>setPosition<span class="signature">(message, time)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+               <div class="description">
+                  <p>Sets currently playing music duration</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last">
+                              <p>Discord message</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>time</code></td>
+                           <td class="type">
+                              <span class="param-type">number</span>
+                           </td>
+                           <td class="description last">
+                              <p>Time in ms</p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">Promise.&lt;void></span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="setRepeatMode"><span class="type-signature"></span>setRepeatMode<span class="signature">(message, enabled)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+               <div class="description">
+                  <p>Enable or disable repeat mode in the server.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>enabled</code></td>
+                           <td class="type">
+                              <span class="param-type">boolean</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <div class="param-desc">
+                  <p>whether the repeat mode is now enabled.</p>
+               </div>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">boolean</span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="setVolume"><span class="type-signature"></span>setVolume<span class="signature">(message, percent)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+               <div class="description">
+                  <p>Change the server volume.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>percent</code></td>
+                           <td class="type">
+                              <span class="param-type">number</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <div class="param-desc">
+                  <p>Whether it succeed or not</p>
+               </div>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">boolean</span>
+                     </span>
+                  </li>
+               </ul>
+               <h5>Example</h5>
+               <pre class="prettyprint example linenums"><code>client.player.setVolume(message, 90);</code></pre>
+               <hr>
+               <h4 class="name" id="shuffle"><span class="type-signature"></span>shuffle<span class="signature">(message)</span><span class="type-signature"> &rarr; {<a href="Queue.html">Queue</a>}</span></h4>
+               <div class="description">
+                  <p>Shuffle the queue of the server.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type"><a href="Queue.html">Queue</a></span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="skip"><span class="type-signature"></span>skip<span class="signature">(message)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+               <div class="description">
+                  <p>Skips to the next song.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <div class="param-desc">
+                  <p>Whether it succeed or not</p>
+               </div>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">boolean</span>
+                     </span>
+                  </li>
+               </ul>
+               <hr>
+               <h4 class="name" id="stop"><span class="type-signature"></span>stop<span class="signature">(message)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+               <div class="description">
+                  <p>Stop the music in the server.</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <h5>Returns:</h5>
+               <div class="param-desc">
+                  <p>Whether it succeed or not</p>
+               </div>
+               <ul>
+                  <li>
+                     Type: <span class="simple-code">
+                     <span class="param-type">boolean</span>
+                     </span>
+                  </li>
+               </ul>
+               <h5>Example</h5>
+               <pre class="prettyprint example linenums"><code>client.player.stop(message);</code></pre>
+               <hr>
+               <h3 class="subsection-title">Events</h3>
+               <h4 class="name" id="event:botDisconnect">botDisconnect</h4>
+               <div class="description">
+                  <p>Emitted when the bot is disconnected from the channel</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:channelEmpty">channelEmpty</h4>
+               <div class="description">
+                  <p>Emitted when the channel of the bot is empty</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>queue</code></td>
+                           <td class="type">
+                              <span class="param-type"><a href="Queue.html">Queue</a></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:error">error</h4>
+               <div class="description">
+                  <p>Emitted when an error is triggered</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>error</code></td>
+                           <td class="type">
+                              <span class="param-type">string</span>
+                           </td>
+                           <td class="description last">
+                              <p>It can be <code>NotConnected</code>, <code>UnableToJoin</code>, <code>NotPlaying</code>, <code>ParseError</code>, <code>LiveVideo</code> or <code>VideoUnavailable</code>.</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:noResults">noResults</h4>
+               <div class="description">
+                  <p>Emitted when the bot can't find related results to the query</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>query</code></td>
+                           <td class="type">
+                              <span class="param-type">string</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:playlistAdd">playlistAdd</h4>
+               <div class="description">
+                  <p>Emitted when a playlist is added to the queue</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>queue</code></td>
+                           <td class="type">
+                              <span class="param-type"><a href="Queue.html">Queue</a></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>playlist</code></td>
+                           <td class="type">
+                              <span class="param-type">Object</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:playlistParseEnd">playlistParseEnd</h4>
+               <div class="description">
+                  <p>Emitted when discord-player finishes parsing playlist contents (mostly soundcloud playlists)</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>playlist</code></td>
+                           <td class="type">
+                              <span class="param-type">Object</span>
+                           </td>
+                           <td class="description last">
+                              <p>The playlist data (parsed)</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last">
+                              <p>The message</p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:playlistParseStart">playlistParseStart</h4>
+               <div class="description">
+                  <p>Emitted when discord-player attempts to parse playlist contents (mostly soundcloud playlists)</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>playlist</code></td>
+                           <td class="type">
+                              <span class="param-type">Object</span>
+                           </td>
+                           <td class="description last">
+                              <p>Raw playlist (unparsed)</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last">
+                              <p>The message</p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:queueCreate">queueCreate</h4>
+               <div class="description">
+                  <p>Emitted when a playlist is started</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>queue</code></td>
+                           <td class="type">
+                              <span class="param-type"><a href="Queue.html">Queue</a></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:queueEnd">queueEnd</h4>
+               <div class="description">
+                  <p>Emitted when the queue of the server is ended</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>queue</code></td>
+                           <td class="type">
+                              <span class="param-type"><a href="Queue.html">Queue</a></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:searchCancel">searchCancel</h4>
+               <div class="description">
+                  <p>Emitted when the bot has stopped awaiting search results (timeout)</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>query</code></td>
+                           <td class="type">
+                              <span class="param-type">string</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>tracks</code></td>
+                           <td class="type">
+                              <span class="param-type">Array.&lt;<a href="Track.html">Track</a>></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:searchInvalidResponse">searchInvalidResponse</h4>
+               <div class="description">
+                  <p>Emitted when the user has sent an invalid response for search results</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>query</code></td>
+                           <td class="type">
+                              <span class="param-type">string</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>tracks</code></td>
+                           <td class="type">
+                              <span class="param-type">Array.&lt;<a href="Track.html">Track</a>></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>invalidResponse</code></td>
+                           <td class="type">
+                              <span class="param-type">string</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>collector</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.MessageCollector</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:searchResults">searchResults</h4>
+               <div class="description">
+                  <p>Emitted when the bot is awaiting search results</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>query</code></td>
+                           <td class="type">
+                              <span class="param-type">string</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>tracks</code></td>
+                           <td class="type">
+                              <span class="param-type">Array.&lt;<a href="Track.html">Track</a>></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>collector</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Collector</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:trackAdd">trackAdd</h4>
+               <div class="description">
+                  <p>Emitted when a track is added to the queue</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>queue</code></td>
+                           <td class="type">
+                              <span class="param-type"><a href="Queue.html">Queue</a></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>track</code></td>
+                           <td class="type">
+                              <span class="param-type"><a href="Track.html">Track</a></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+               <h4 class="name" id="event:trackStart">trackStart</h4>
+               <div class="description">
+                  <p>Emitted when a track starts</p>
+               </div>
+               <h5>Parameters:</h5>
+               <div class="table-box">
+                  <table class="params">
+                     <thead>
+                        <tr>
+                           <th>Name</th>
+                           <th>Type</th>
+                           <th class="last">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td class="name"><code>message</code></td>
+                           <td class="type">
+                              <span class="param-type">Discord.Message</span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>track</code></td>
+                           <td class="type">
+                              <span class="param-type"><a href="Track.html">Track</a></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                        <tr>
+                           <td class="name"><code>queue</code></td>
+                           <td class="type">
+                              <span class="param-type"><a href="Queue.html">Queue</a></span>
+                           </td>
+                           <td class="description last"></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <dl class="details">
+               </dl>
+               <hr>
+            </article>
+         </section>
+      </div>
+      <br class="clear">
+      <footer>
+         Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> using <a href="https://github.com/zyrouge/jsdoc-skyceil">Skyceil Theme</a>
+      </footer>
+      <script>prettyPrint();</script>
+      <script src="scripts/linenumber.js"></script>
+   </body>
 </html>
