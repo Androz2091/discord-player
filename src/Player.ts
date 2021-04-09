@@ -54,9 +54,9 @@ export class Player extends EventEmitter {
          */
         this.filters = AudioFilters;
 
-        this.client.on('voiceStateUpdate', (o, n) => this._handleVoiceStateUpdate(o, n));
+        this.client.on('voiceStateUpdate', (o, n) => void this._handleVoiceStateUpdate(o, n));
 
-        ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => this.use(ext, DP_EXTRACTORS[ext]));
+        ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => void this.use(ext, DP_EXTRACTORS[ext]));
     }
 
     static get AudioFilters() {
