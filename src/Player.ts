@@ -123,11 +123,11 @@ export class Player extends EventEmitter {
                                 description: data.description,
                                 thumbnail: data.thumbnail,
                                 views: data.playCount,
-                                author: data.author,
+                                author: data.author.name,
                                 requestedBy: message.author,
                                 fromPlaylist: false,
                                 source: 'soundcloud',
-                                engine: data.engine
+                                engine: data
                             });
 
                             tracks.push(track);
@@ -249,6 +249,8 @@ export class Player extends EventEmitter {
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
                         this._addTracksToQueue(message, tracks);
                     }
+
+                    return;
                 }
                 case 'soundcloud_playlist': {
                     this.emit(PlayerEvents.PLAYLIST_PARSE_START, null, message);
@@ -824,7 +826,7 @@ export class Player extends EventEmitter {
                 ? options?.length <= 0 || options?.length === Infinity
                     ? 15
                     : options?.length
-                : options?.length;
+                : 15;
 
         const index = Math.round((currentStreamTime / totalTime) * length);
         const indicator = '🔘';
