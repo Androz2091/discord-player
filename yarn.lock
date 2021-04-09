@@ -23,10 +23,10 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
-"@discord-player/extractor@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@discord-player/extractor/-/extractor-1.0.4.tgz#e593fed1749cb859554e79967b88937d9e08f4ec"
-  integrity sha512-zzCK1GQ7szpZD6fmf9LMxrlLt6r+h0gpjo/yMXmmT+xmLpfayZbT36sfEZV8WkMnN7vhr9z6qzDDDC1v7BBbDg==
+"@discord-player/extractor@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@discord-player/extractor/-/extractor-1.0.5.tgz#d38f6d73cec5efe2d7b23c62eb12fac0b54514cf"
+  integrity sha512-lw7ebA7gazoOMzCbwdBPwGlsh6d2/sp/DMDTeBQa9S6HO4wGP1lIjaEt2ipduYRhBP2vlY3iEs5ryFiZwbLraA==
   dependencies:
     jsdom "^16.5.2"
     node-fetch "^2.6.1"

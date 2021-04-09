@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
-    "@discord-player/extractor": "^1.0.4",
+    "@discord-player/extractor": "^1.0.5",
     "discord-ytdl-core": "^5.0.2",
     "soundcloud-scraper": "^4.0.3",
     "spotify-url-info": "^2.2.0",
