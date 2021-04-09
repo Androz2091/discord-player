@@ -732,9 +732,9 @@ export class Player extends EventEmitter {
             if (Boolean(options?.timecodes)) {
                 const currentTimecode = Util.buildTimeCode(Util.parseMS(currentStreamTime));
                 const endTimecode = Util.buildTimeCode(Util.parseMS(totalTime));
-                return `${currentTimecode} ┃ ${indicator}${line.repeat(length)} ┃ ${endTimecode}`;
+                return `${currentTimecode} ┃ ${indicator}${line.repeat(length - 1)} ┃ ${endTimecode}`;
             } else {
-                return `${indicator}${line.repeat(length)}`;
+                return `${indicator}${line.repeat(length - 1)}`;
             }
         }
     }
