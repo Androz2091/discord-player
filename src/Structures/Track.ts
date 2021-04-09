@@ -3,6 +3,9 @@ import { User } from 'discord.js';
 import { TrackData } from '../types/types';
 
 export class Track {
+    /**
+     * The player that instantiated this Track
+     */
     public player!: Player;
     public title!: string;
     public description!: string;
@@ -16,9 +19,6 @@ export class Track {
     public raw!: TrackData;
 
     constructor(player: Player, data: TrackData) {
-        /**
-         * The player that instantiated this Track
-         */
         Object.defineProperty(this, 'player', { value: player, enumerable: false });
 
         void this._patch(data);

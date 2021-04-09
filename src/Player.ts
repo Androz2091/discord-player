@@ -22,20 +22,33 @@ import * as DP_EXTRACTORS from '@discord-player/extractor';
 const SoundCloud = new SoundCloudClient();
 
 export class Player extends EventEmitter {
+    /**
+     * The discord client that instantiated this player
+     */
     public client!: Client;
     public options: PlayerOptions;
     public filters: typeof AudioFilters;
+
+    /**
+     * The collection of queues in this player
+     */
     public queues = new Collection<Snowflake, Queue>();
     private _resultsCollectors = new Collection<string, Collector<Snowflake, Message>>();
     private _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
+
+    /**
+     * The extractor model collection
+     */
     public Extractors = new Collection<string, ExtractorModel>();
 
+    /**
+     * Creates new Player instance
+     * @param client The discord.js client
+     * @param options Player options
+     */
     constructor(client: Client, options?: PlayerOptions) {
         super();
 
-        /**
-         * The discord client that instantiated this player
-         */
         Object.defineProperty(this, 'client', {
             value: client,
             enumerable: false
@@ -334,6 +347,13 @@ export class Player extends EventEmitter {
         });
     }
 
+    /**
+     * Play a song
+     * @param message The discord.js message object
+     * @param query Search query, can be `Player.Track` instance
+     * @param firstResult If it should play the first result
+     * @example await player.play(message, "never gonna give you up", true)
+     */
     async play(message: Message, query: string | Track, firstResult?: boolean): Promise<void> {
         if (!message) throw new PlayerError('Play function needs message');
         if (!query) throw new PlayerError('Play function needs search query as a string or Player.Track object');
@@ -411,14 +431,27 @@ export class Player extends EventEmitter {
         }
     }
 
+    /**
+     * Checks if this player is playing in a server
+     * @param message The message object
+     */
     isPlaying(message: Message) {
         return this.queues.some((g) => g.guildID === message.guild.id);
     }
 
+    /**
+     * Returns guild queue object
+     * @param message The message object
+     */
     getQueue(message: Message) {
         return this.queues.find((g) => g.guildID === message.guild.id);
     }
 
+    /**
+     * Sets audio filters in this player
+     * @param message The message object
+     * @param newFilters Audio filters object
+     */
     setFilters(message: Message, newFilters: QueueFilters): Promise<void> {
         return new Promise((resolve) => {
             const queue = this.queues.find((g) => g.guildID === message.guild.id);
@@ -441,6 +474,12 @@ export class Player extends EventEmitter {
         });
     }
 
+    /**
+     * Sets track position
+     * @param message The message object
+     * @param time Time in ms to set
+     * @alias seek
+     */
     setPosition(message: Message, time: number): Promise<void> {
         return new Promise((resolve) => {
             const queue = this.queues.find((g) => g.guildID === message.guild.id);
@@ -459,10 +498,20 @@ export class Player extends EventEmitter {
         });
     }
 
+    /**
+     * Sets track position
+     * @param message The message object
+     * @param time Time in ms to set
+     * @alias setPosition
+     */
     seek(message: Message, time: number) {
         return this.setPosition(message, time);
     }
 
+    /**
+     * Skips current track
+     * @param message The message object
+     */
     skip(message: Message): boolean {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -480,6 +529,11 @@ export class Player extends EventEmitter {
         return true;
     }
 
+    /**
+     * Moves to a new voice channel
+     * @param message The message object
+     * @param channel New voice channel to move to
+     */
     moveTo(message: Message, channel?: VoiceChannel) {
         if (!channel || channel.type !== 'voice') return;
         const queue = this.queues.find((g) => g.guildID === message.guild.id);
@@ -502,6 +556,10 @@ export class Player extends EventEmitter {
         return true;
     }
 
+    /**
+     * Pause the playback
+     * @param message The message object
+     */
     pause(message: Message) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -518,6 +576,10 @@ export class Player extends EventEmitter {
         return true;
     }
 
+    /**
+     * Resume the playback
+     * @param message The message object
+     */
     resume(message: Message) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -534,6 +596,10 @@ export class Player extends EventEmitter {
         return true;
     }
 
+    /**
+     * Stops the player
+     * @param message The message object
+     */
     stop(message: Message) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -554,6 +620,11 @@ export class Player extends EventEmitter {
         return true;
     }
 
+    /**
+     * Sets music volume
+     * @param message The message object
+     * @param percent The volume percentage/amount to set
+     */
     setVolume(message: Message, percent: number) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -571,6 +642,10 @@ export class Player extends EventEmitter {
         return true;
     }
 
+    /**
+     * Clears the queue
+     * @param message The message object
+     */
     clearQueue(message: Message) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -583,6 +658,10 @@ export class Player extends EventEmitter {
         return true;
     }
 
+    /**
+     * Plays previous track
+     * @param message The message object
+     */
     back(message: Message) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -601,6 +680,11 @@ export class Player extends EventEmitter {
         return true;
     }
 
+    /**
+     * Sets repeat mode
+     * @param message The message object
+     * @param enabled If it should enable the repeat mode
+     */
     setRepeatMode(message: Message, enabled: boolean) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -613,6 +697,11 @@ export class Player extends EventEmitter {
         return queue.repeatMode;
     }
 
+    /**
+     * Sets loop mode
+     * @param message The message object
+     * @param enabled If it should enable the loop mode
+     */
     setLoopMode(message: Message, enabled: boolean) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -625,6 +714,10 @@ export class Player extends EventEmitter {
         return queue.loopMode;
     }
 
+    /**
+     * Returns currently playing track
+     * @param message The message object
+     */
     nowPlaying(message: Message) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -635,6 +728,10 @@ export class Player extends EventEmitter {
         return queue.tracks[0];
     }
 
+    /**
+     * Shuffles the queue
+     * @param message The message object
+     */
     shuffle(message: Message) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -654,6 +751,11 @@ export class Player extends EventEmitter {
         return queue;
     }
 
+    /**
+     * Removes specified track
+     * @param message The message object
+     * @param track The track object/id to remove
+     */
     remove(message: Message, track: Track | number) {
         const queue = this.getQueue(message);
         if (!queue) {
@@ -677,6 +779,11 @@ export class Player extends EventEmitter {
         return trackFound;
     }
 
+    /**
+     * Returns time code of currently playing song
+     * @param message The message object
+     * @param queueTime If it should make the time code of the whole queue
+     */
     getTimeCode(message: Message, queueTime?: boolean) {
         const queue = this.getQueue(message);
         if (!queue) return;
@@ -696,6 +803,11 @@ export class Player extends EventEmitter {
         };
     }
 
+    /**
+     * Creates progressbar
+     * @param message The message object
+     * @param options Progressbar options
+     */
     createProgressBar(message: Message, options?: PlayerProgressbarOptions) {
         const queue = this.getQueue(message);
         if (!queue) return;
@@ -739,7 +851,7 @@ export class Player extends EventEmitter {
         }
     }
 
-    _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
+    private _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
         const queue = this.queues.find((g) => g.guildID === oldState.guild.id);
         if (!queue) return;
 
