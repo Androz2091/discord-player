@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { Client, Collection, Snowflake, Collector, Message, VoiceChannel } from 'discord.js';
-import { PlayerOptions, QueueFilters } from './types/types';
+import { Client, Collection, Snowflake, Collector, Message, VoiceChannel, VoiceState } from 'discord.js';
+import { PlayerOptions, PlayerProgressbarOptions, QueueFilters } from './types/types';
 import Util from './utils/Util';
 import AudioFilters from './utils/AudioFilters';
 import { Queue } from './Structures/Queue';
@@ -25,9 +25,9 @@ export class Player extends EventEmitter {
     public client!: Client;
     public options: PlayerOptions;
     public filters: typeof AudioFilters;
-    public queues: Collection<Snowflake, Queue>;
-    private _resultsCollectors: Collection<string, Collector<Snowflake, Message>>;
-    private _cooldownsTimeout: Collection<string, NodeJS.Timeout>;
+    public queues = new Collection<Snowflake, Queue>();
+    private _resultsCollectors = new Collection<string, Collector<Snowflake, Message>>();
+    private _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
     public Extractors = new Collection<string, ExtractorModel>();
 
     constructor(client: Client, options?: PlayerOptions) {
@@ -54,13 +54,7 @@ export class Player extends EventEmitter {
          */
         this.filters = AudioFilters;
 
-        /**
-         * Player queues
-         */
-        this.queues = new Collection();
-
-        this._resultsCollectors = new Collection();
-        this._cooldownsTimeout = new Collection();
+        this.client.on('voiceStateUpdate', (o, n) => this._handleVoiceStateUpdate(o, n));
 
         ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => this.use(ext, DP_EXTRACTORS[ext]));
     }
@@ -506,6 +500,276 @@ export class Player extends EventEmitter {
             .catch(() => this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.UNABLE_TO_JOIN, message));
 
         return true;
+    }
+
+    pause(message: Message) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return false;
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.MUSIC_STARTING, message);
+            return false;
+        }
+
+        queue.voiceConnection.dispatcher.pause();
+        queue.paused = true;
+        return true;
+    }
+
+    resume(message: Message) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return false;
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.MUSIC_STARTING, message);
+            return false;
+        }
+
+        queue.voiceConnection.dispatcher.resume();
+        queue.paused = false;
+        return true;
+    }
+
+    stop(message: Message) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return false;
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.MUSIC_STARTING, message);
+            return false;
+        }
+
+        queue.stopped = true;
+        queue.tracks = [];
+        if (queue.stream) queue.stream.destroy();
+        queue.voiceConnection.dispatcher.end();
+        if (this.options.leaveOnStop) queue.voiceConnection.channel.leave();
+        this.queues.delete(message.guild.id);
+        return true;
+    }
+
+    setVolume(message: Message, percent: number) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return false;
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.MUSIC_STARTING, message);
+            return false;
+        }
+
+        queue.volume = percent;
+        queue.voiceConnection.dispatcher.setVolumeLogarithmic(queue.calculatedVolume / 200);
+
+        return true;
+    }
+
+    clearQueue(message: Message) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return false;
+        }
+
+        queue.tracks = queue.playing ? [queue.playing] : [];
+
+        return true;
+    }
+
+    back(message: Message) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return false;
+        }
+        if (!queue.voiceConnection || !queue.voiceConnection.dispatcher) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.MUSIC_STARTING, message);
+            return false;
+        }
+
+        queue.tracks.splice(1, 0, queue.previousTracks.shift());
+        queue.voiceConnection.dispatcher.end();
+        queue.lastSkipped = true;
+
+        return true;
+    }
+
+    setRepeatMode(message: Message, enabled: boolean) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return;
+        }
+
+        queue.repeatMode = Boolean(enabled);
+
+        return queue.repeatMode;
+    }
+
+    setLoopMode(message: Message, enabled: boolean) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return;
+        }
+
+        queue.loopMode = Boolean(enabled);
+
+        return queue.loopMode;
+    }
+
+    nowPlaying(message: Message) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return;
+        }
+
+        return queue.tracks[0];
+    }
+
+    shuffle(message: Message) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return;
+        }
+
+        const currentTrack = queue.tracks.shift();
+
+        for (let i = queue.tracks.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [queue.tracks[i], queue.tracks[j]] = [queue.tracks[j], queue.tracks[i]];
+        }
+
+        queue.tracks.unshift(currentTrack);
+
+        return queue;
+    }
+
+    remove(message: Message, track: Track | number) {
+        const queue = this.getQueue(message);
+        if (!queue) {
+            this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+            return;
+        }
+
+        let trackFound: Track = null;
+        if (typeof track === 'number') {
+            trackFound = queue.tracks[track];
+            if (trackFound) {
+                queue.tracks = queue.tracks.filter((t) => t !== trackFound);
+            }
+        } else {
+            trackFound = queue.tracks.find((s) => s === track);
+            if (trackFound) {
+                queue.tracks = queue.tracks.filter((s) => s !== trackFound);
+            }
+        }
+
+        return trackFound;
+    }
+
+    getTimeCode(message: Message, queueTime?: boolean) {
+        const queue = this.getQueue(message);
+        if (!queue) return;
+
+        const previousTracksTime =
+            queue.previousTracks.length > 0 ? queue.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
+        const currentStreamTime = queueTime ? previousTracksTime + queue.currentStreamTime : queue.currentStreamTime;
+        const totalTracksTime = queue.totalTime;
+        const totalTime = queueTime ? previousTracksTime + totalTracksTime : queue.playing.durationMS;
+
+        const currentTimecode = Util.buildTimeCode(Util.parseMS(currentStreamTime));
+        const endTimecode = Util.buildTimeCode(Util.parseMS(totalTime));
+
+        return {
+            current: currentTimecode,
+            end: endTimecode
+        };
+    }
+
+    createProgressBar(message: Message, options?: PlayerProgressbarOptions) {
+        const queue = this.getQueue(message);
+        if (!queue) return;
+
+        const previousTracksTime =
+            queue.previousTracks.length > 0 ? queue.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
+        const currentStreamTime = options?.queue
+            ? previousTracksTime + queue.currentStreamTime
+            : queue.currentStreamTime;
+        const totalTracksTime = queue.totalTime;
+        const totalTime = options?.queue ? previousTracksTime + totalTracksTime : queue.playing.durationMS;
+        const length =
+            typeof options?.length === 'number'
+                ? options?.length <= 0 || options?.length === Infinity
+                    ? 15
+                    : options?.length
+                : options?.length;
+
+        const index = Math.round((currentStreamTime / totalTime) * length);
+        const indicator = '🔘';
+        const line = '▬';
+
+        if (index >= 1 && index <= length) {
+            const bar = line.repeat(length - 1).split('');
+            bar.splice(index, 0, indicator);
+            if (Boolean(options?.timecodes)) {
+                const currentTimecode = Util.buildTimeCode(Util.parseMS(currentStreamTime));
+                const endTimecode = Util.buildTimeCode(Util.parseMS(totalTime));
+                return `${currentTimecode} ┃ ${bar.join('')} ┃ ${endTimecode}`;
+            } else {
+                return `${bar.join('')}`;
+            }
+        } else {
+            if (Boolean(options?.timecodes)) {
+                const currentTimecode = Util.buildTimeCode(Util.parseMS(currentStreamTime));
+                const endTimecode = Util.buildTimeCode(Util.parseMS(totalTime));
+                return `${currentTimecode} ┃ ${indicator}${line.repeat(length)} ┃ ${endTimecode}`;
+            } else {
+                return `${indicator}${line.repeat(length)}`;
+            }
+        }
+    }
+
+    _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
+        const queue = this.queues.find((g) => g.guildID === oldState.guild.id);
+        if (!queue) return;
+
+        if (newState.member.id === this.client.user.id && !newState.channelID) {
+            queue.stream.destroy();
+            this.queues.delete(newState.guild.id);
+            this.emit(PlayerEvents.BOT_DISCONNECT, queue.firstMessage);
+        }
+
+        if (!queue.voiceConnection || !queue.voiceConnection.channel) return;
+        if (!this.options.leaveOnEmpty) return;
+
+        if (!oldState.channelID || newState.channelID) {
+            const emptyTimeout = this._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
+            const channelEmpty = Util.isVoiceEmpty(queue.voiceConnection.channel);
+            if (!channelEmpty && emptyTimeout) {
+                clearTimeout(emptyTimeout);
+                this._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+            }
+        } else {
+            if (!Util.isVoiceEmpty(queue.voiceConnection.channel)) return;
+            const timeout = setTimeout(() => {
+                if (!Util.isVoiceEmpty(queue.voiceConnection.channel)) return;
+                if (!this.queues.has(queue.guildID)) return;
+                queue.voiceConnection.channel.leave();
+                this.queues.delete(queue.guildID);
+                this.emit(PlayerEvents.CHANNEL_EMPTY, queue.firstMessage, queue);
+            }, this.options.leaveOnEmptyCooldown || 0);
+            this._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+        }
     }
 
     private _addTrackToQueue(message: Message, track: Track) {

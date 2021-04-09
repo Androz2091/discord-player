@@ -88,3 +88,9 @@ export interface ExtractorModelData {
     url: string;
     version?: string;
 }
+
+export interface PlayerProgressbarOptions {
+    timecodes?: boolean;
+    queue?: boolean;
+    length?: number;
+}

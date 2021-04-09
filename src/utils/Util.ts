@@ -4,6 +4,7 @@ import YouTube from 'youtube-sr';
 import { Track } from '../Structures/Track';
 // @ts-ignore
 import { validateURL as SoundcloudValidateURL } from 'soundcloud-scraper';
+import { VoiceChannel } from 'discord.js';
 
 const spotifySongRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/;
 const spotifyPlaylistRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})/;
@@ -144,6 +145,22 @@ export class Util {
         for (const prop of REPL_IT_PROPS) if (prop in process.env) return true;
 
         return false;
+    }
+
+    static isVoiceEmpty(channel: VoiceChannel) {
+        return channel.members.filter((member) => !member.user.bot).size === 0;
+    }
+
+    static buildTimeCode(data: any) {
+        const items = Object.keys(data);
+        const required = ['days', 'hours', 'minutes', 'seconds'];
+
+        const parsed = items.filter((x) => required.includes(x)).map((m) => (data[m] > 0 ? data[m] : ''));
+        const final = parsed
+            .filter((x) => !!x)
+            .map((x) => x.toString().padStart(2, '0'))
+            .join(':');
+        return final.length <= 3 ? `0:${final.padStart(2, '0') || 0}` : final;
     }
 }
 
