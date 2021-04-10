@@ -119,7 +119,7 @@ export class Player extends EventEmitter {
                             const track = new Track(this, {
                                 title: data.title,
                                 url: data.url,
-                                duration: Util.durationString(Util.parseMS(data.duration / 1000)),
+                                duration: Util.buildTimeCode(Util.parseMS(data.duration / 1000)),
                                 description: data.description,
                                 thumbnail: data.thumbnail,
                                 views: data.playCount,
@@ -213,7 +213,7 @@ export class Player extends EventEmitter {
                             new Track(this, {
                                 title: data.title,
                                 url: data.url,
-                                duration: Util.durationString(Util.parseMS(data.duration)),
+                                duration: Util.buildTimeCode(Util.parseMS(data.duration)),
                                 description: data.description,
                                 thumbnail: data.thumbnail?.displayThumbnailURL(),
                                 views: data.views,
@@ -272,7 +272,7 @@ export class Player extends EventEmitter {
                         const r = new Track(this, {
                             title: song.title,
                             url: song.url,
-                            duration: Util.durationString(Util.parseMS(song.duration / 1000)),
+                            duration: Util.buildTimeCode(Util.parseMS(song.duration / 1000)),
                             description: song.description,
                             thumbnail: song.thumbnail ?? 'https://soundcloud.com/pwa-icon-192.png',
                             views: song.playCount ?? 0,
@@ -388,7 +388,7 @@ export class Player extends EventEmitter {
                     author: info.videoDetails.author.name,
                     url: info.videoDetails.video_url,
                     thumbnail: lastThumbnail.url,
-                    duration: Util.durationString(Util.parseMS(parseInt(info.videoDetails.lengthSeconds) * 1000)),
+                    duration: Util.buildTimeCode(Util.parseMS(parseInt(info.videoDetails.lengthSeconds) * 1000)),
                     views: parseInt(info.videoDetails.viewCount),
                     requestedBy: message.author,
                     fromPlaylist: false,
@@ -402,7 +402,7 @@ export class Player extends EventEmitter {
                             track = new Track(this, {
                                 title: data.title,
                                 description: data.description,
-                                duration: Util.durationString(Util.parseMS(data.duration)),
+                                duration: Util.buildTimeCode(Util.parseMS(data.duration)),
                                 thumbnail: data.thumbnail,
                                 author: data.author,
                                 views: data.views,

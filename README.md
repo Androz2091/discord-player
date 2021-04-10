@@ -34,6 +34,8 @@ $ npm install --save @discordjs/opus
 - Lightweight 🛬
 - Custom extractors support 🌌
 - Lyrics 📃
+- Multiple sources support ✌
+- Play in multiple servers at the same time 🚗
 
 # Sources supported
 > By default, **discord-player** supports `youtube`, `spotify`, `soundcloud`, `vimeo`, `reverbnation`, `facebook` and `attachment links` only.

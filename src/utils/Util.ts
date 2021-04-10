@@ -114,7 +114,7 @@ export class Util {
                                     author: r.channel.name,
                                     url: r.url,
                                     thumbnail: r.thumbnail.displayThumbnailURL(),
-                                    duration: r.durationFormatted,
+                                    duration: Util.buildTimeCode(Util.parseMS(r.duration)),
                                     views: r.views,
                                     requestedBy: options?.user,
                                     fromPlaylist: Boolean(options?.pl),
