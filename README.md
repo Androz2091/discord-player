@@ -32,7 +32,8 @@ $ npm install --save @discordjs/opus
 - Beginner friendly 😱
 - Audio filters 🎸
 - Lightweight 🛬
-- Custom extractors 🌌
+- Custom extractors support 🌌
+- Lyrics 📃
 
 # License
 MIT License
