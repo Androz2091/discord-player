@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { Client, Collection, Snowflake, Collector, Message, VoiceChannel, VoiceState } from 'discord.js';
-import { PlayerOptions, PlayerProgressbarOptions, QueueFilters } from './types/types';
+import { LyricsData, PlayerOptions, PlayerProgressbarOptions, QueueFilters } from './types/types';
 import Util from './utils/Util';
 import AudioFilters from './utils/AudioFilters';
 import { Queue } from './Structures/Queue';
@@ -851,6 +851,17 @@ export class Player extends EventEmitter {
                 return `${indicator}${line.repeat(length - 1)}`;
             }
         }
+    }
+
+    /**
+     * Gets lyrics of a song
+     * @param query Search query
+     */
+    async lyrics(query: string) {
+        const data = await DP_EXTRACTORS.Lyrics(query);
+        if (Array.isArray(data)) return null;
+
+        return data as LyricsData;
     }
 
     private _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {

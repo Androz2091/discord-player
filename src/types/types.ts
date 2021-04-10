@@ -94,3 +94,18 @@ export interface PlayerProgressbarOptions {
     queue?: boolean;
     length?: number;
 }
+
+export interface LyricsData {
+    title: string;
+    id: number;
+    thumbnail: string;
+    image: string;
+    url: string;
+    artist: {
+        name: string;
+        id: number;
+        url: string;
+        image: string;
+    };
+    lyrics?: string;
+}
