@@ -856,6 +856,8 @@ export class Player extends EventEmitter {
     /**
      * Gets lyrics of a song
      * @param query Search query
+     * @example const lyrics = await player.lyrics("alan walker faded")
+     * message.channel.send(lyrics.lyrics);
      */
     async lyrics(query: string) {
         const data = await DP_EXTRACTORS.Lyrics(query);
