@@ -35,6 +35,19 @@ $ npm install --save @discordjs/opus
 - Custom extractors support 🌌
 - Lyrics 📃
 
+# Sources supported
+> By default, **discord-player** supports `youtube`, `spotify`, `soundcloud`, `vimeo`, `reverbnation`, `facebook` and `attachment links` only.
+
+**Discord Player** provides **extractor API** that enables you to use your custom stream extractor with it. For example, you can use **youtube-dl** with **discord-player** like this:
+
+```js
+const { Downloader } = require("@discord-player/downloader"); // YouTubeDL instance
+
+player.use("EXAMPLE", Downloader); // now discord-player supports 700+ sites :poggies:
+```
+
+or you can build your own :D
+
 # License
 MIT License
 
