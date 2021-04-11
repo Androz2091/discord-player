@@ -24,7 +24,7 @@ export class Queue extends EventEmitter {
     public filters: QueueFilters;
     public additionalStreamTime: number;
     public firstMessage: Message;
-    public ytLast?: Track;
+    public autoPlay = false;
 
     constructor(player: Player, message: Message) {
         super();

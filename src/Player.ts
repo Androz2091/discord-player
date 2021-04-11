@@ -866,6 +866,18 @@ export class Player extends EventEmitter {
         return data as LyricsData;
     }
 
+    /**
+     * Toggle autoplay for youtube streams
+     * @param message The message object
+     * @param enable Enable/Disable autoplay
+     */
+    setAutoplay(message: Message, enable: boolean): void {
+        const queue = this.getQueue(message);
+        if (!queue) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
+
+        queue.autoPlay = Boolean(enable);
+    }
+
     private _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
         const queue = this.queues.find((g) => g.guildID === oldState.guild.id);
         if (!queue) return;
@@ -964,7 +976,7 @@ export class Player extends EventEmitter {
     private async _playTrack(queue: Queue, firstPlay: boolean): Promise<void> {
         if (queue.stopped) return;
 
-        if (queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
+        if (!queue.autoPlay && queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
             if (this.options.leaveOnEnd && !queue.stopped) {
                 this.queues.delete(queue.guildID);
                 const timeout = setTimeout(() => {
@@ -982,7 +994,22 @@ export class Player extends EventEmitter {
             return void this.emit(PlayerEvents.QUEUE_END, queue.firstMessage, queue);
         }
 
-        if (!queue.repeatMode && !firstPlay) {
+        if (queue.autoPlay && !queue.repeatMode && !firstPlay) {
+            const oldTrack = queue.tracks.shift();
+
+            const info = oldTrack.raw.source === 'youtube' ? await ytdl.getInfo(oldTrack.url).catch((e) => {}) : null;
+            if (info) {
+                const res = await Util.ytSearch(info.related_videos[0].title, { player: this, limit: 1 })
+                    .then((v) => v[0])
+                    .catch((e) => {});
+
+                if (res) {
+                    queue.tracks.push(res);
+                    if (queue.loopMode) queue.tracks.push(oldTrack);
+                    queue.previousTracks.push(oldTrack);
+                }
+            }
+        } else if (!queue.autoPlay && !queue.repeatMode && !firstPlay) {
             const oldTrack = queue.tracks.shift();
             if (queue.loopMode) queue.tracks.push(oldTrack);
             queue.previousTracks.push(oldTrack);
@@ -998,8 +1025,8 @@ export class Player extends EventEmitter {
 
     private _playStream(queue: Queue, updateFilter: boolean, seek?: number): Promise<void> {
         return new Promise(async (resolve) => {
-            const ffmeg = Util.checkFFmpeg();
-            if (!ffmeg) return;
+            const ffmpeg = Util.checkFFmpeg();
+            if (!ffmpeg) return;
 
             const seekTime =
                 typeof seek === 'number'
