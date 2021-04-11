@@ -24,8 +24,9 @@ export class Queue extends EventEmitter {
     public filters: QueueFilters;
     public additionalStreamTime: number;
     public firstMessage: Message;
+    public ytLast?: Track;
 
-    constructor(player: Player, message: Message, filters: typeof AudioFilters) {
+    constructor(player: Player, message: Message) {
         super();
 
         Object.defineProperty(this, 'player', { value: player, enumerable: false });

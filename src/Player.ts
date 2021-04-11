@@ -934,7 +934,7 @@ export class Player extends EventEmitter {
                     new PlayerError('Voice connection is not available in this server!')
                 );
 
-            const queue = new Queue(this, message, this.filters);
+            const queue = new Queue(this, message);
             this.queues.set(message.guild.id, queue);
 
             channel
