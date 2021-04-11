@@ -999,7 +999,7 @@ export class Player extends EventEmitter {
 
             const info = oldTrack.raw.source === 'youtube' ? await ytdl.getInfo(oldTrack.url).catch((e) => {}) : null;
             if (info) {
-                const res = await Util.ytSearch(info.related_videos[0].title, { player: this, limit: 1 })
+                const res = await Util.ytSearch(info.related_videos[0].title, { player: this, limit: 1, user: oldTrack.requestedBy })
                     .then((v) => v[0])
                     .catch((e) => {});
 

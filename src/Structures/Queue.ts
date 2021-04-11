@@ -111,7 +111,7 @@ export class Queue extends EventEmitter {
      * Calculated volume of this queue
      */
     get calculatedVolume() {
-        return this.filters.bassboost ? this.volume + 50 : this.volume;
+        return this.filters.normalizer ? this.volume + 70 : this.volume;
     }
 
     /**
