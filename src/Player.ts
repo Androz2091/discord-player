@@ -1059,7 +1059,7 @@ export class Player extends EventEmitter {
             let newStream: any;
             if (queue.playing.raw.source === 'youtube') {
                 newStream = ytdl(queue.playing.url, {
-                    filter: queue.playing.raw.live ? undefined : "audioonly",
+                    filter: queue.playing.raw.live ? undefined : 'audioonly',
                     opusEncoded: true,
                     encoderArgs: queue.playing.raw.live ? [] : encoderArgs,
                     seek: seekTime / 1000,
