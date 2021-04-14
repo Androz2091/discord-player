@@ -30,6 +30,7 @@ export interface TrackData {
     fromPlaylist: boolean;
     source?: TrackSource;
     engine?: any;
+    live?: boolean;
 }
 
 export type QueueFilters = {

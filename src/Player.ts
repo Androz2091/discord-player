@@ -392,7 +392,8 @@ export class Player extends EventEmitter {
                     views: parseInt(info.videoDetails.viewCount),
                     requestedBy: message.author,
                     fromPlaylist: false,
-                    source: 'youtube'
+                    source: 'youtube',
+                    live: Boolean(info.videoDetails.isLiveContent)
                 });
             } else {
                 for (const [_, extractor] of this.Extractors) {
@@ -999,7 +1000,11 @@ export class Player extends EventEmitter {
 
             const info = oldTrack.raw.source === 'youtube' ? await ytdl.getInfo(oldTrack.url).catch((e) => {}) : null;
             if (info) {
-                const res = await Util.ytSearch(info.related_videos[0].title, { player: this, limit: 1, user: oldTrack.requestedBy })
+                const res = await Util.ytSearch(info.related_videos[0].title, {
+                    player: this,
+                    limit: 1,
+                    user: oldTrack.requestedBy
+                })
                     .then((v) => v[0])
                     .catch((e) => {});
 
@@ -1054,9 +1059,8 @@ export class Player extends EventEmitter {
             let newStream: any;
             if (queue.playing.raw.source === 'youtube') {
                 newStream = ytdl(queue.playing.url, {
-                    filter: 'audioonly',
                     opusEncoded: true,
-                    encoderArgs,
+                    encoderArgs: queue.playing.raw.live ? [] : encoderArgs,
                     seek: seekTime / 1000,
                     // tslint:disable-next-line:no-bitwise
                     highWaterMark: 1 << 25,
