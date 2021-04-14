@@ -466,6 +466,14 @@ export class Player extends EventEmitter {
                     new PlayerError('Not playing')
                 );
 
+            if (queue.playing.raw.live)
+                return void this.emit(
+                    PlayerEvents.ERROR,
+                    PlayerErrorEventCodes.LIVE_VIDEO,
+                    message,
+                    new PlayerError('Cannot use setFilters on livestream')
+                );
+
             Object.keys(newFilters).forEach((filterName) => {
                 // @ts-ignore
                 queue.filters[filterName] = newFilters[filterName];
