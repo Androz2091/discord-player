@@ -895,7 +895,7 @@ export class Player extends EventEmitter {
         return {
             uptime: this.client.uptime,
             connections: this.client.voice.connections.size,
-            users: this.client.voice.connections.reduce((a, c) => a + c.channel.members.size, 0),
+            users: this.client.voice.connections.reduce((a, c) => a + c.channel.members.filter(a => a.user.id !== this.client.user.id).size, 0),
             queues: this.queues.size,
             extractors: this.Extractors.size,
             versions: {
