@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { Client, Collection, Snowflake, Collector, Message, VoiceChannel, VoiceState } from 'discord.js';
-import { LyricsData, PlayerOptions, PlayerProgressbarOptions, QueueFilters } from './types/types';
+import { LyricsData, PlayerOptions, PlayerProgressbarOptions, PlayerStats, QueueFilters } from './types/types';
 import Util from './utils/Util';
 import AudioFilters from './utils/AudioFilters';
 import { Queue } from './Structures/Queue';
@@ -9,6 +9,7 @@ import { PlayerErrorEventCodes, PlayerEvents } from './utils/Constants';
 import PlayerError from './utils/PlayerError';
 import ytdl from 'discord-ytdl-core';
 import { ExtractorModel } from './Structures/ExtractorModel';
+import os from 'os';
 
 // @ts-ignore
 import spotify from 'spotify-url-info';
@@ -885,6 +886,33 @@ export class Player extends EventEmitter {
         if (!queue) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
 
         queue.autoPlay = Boolean(enable);
+    }
+
+    getStats(): PlayerStats {
+        return {
+            uptime: this.client.uptime,
+            connections: this.client.voice.connections.size,
+            users: this.client.voice.connections.reduce((a, c) => a + c.channel.members.size, 0),
+            queues: this.queues.size,
+            extractors: this.Extractors.size,
+            versions: {
+                ffmpeg: Util.getFFmpegVersion(),
+                node: process.version,
+                v8: process.versions.v8
+            },
+            system: {
+                arch: process.arch,
+                platform: process.platform,
+                cpu: os.cpus().length,
+                memory: {
+                    total: (process.memoryUsage().heapTotal / 1024 / 1024).toFixed(2),
+                    usage: (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
+                    rss: (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
+                    arrayBuffers: (process.memoryUsage().arrayBuffers / 1024 / 1024).toFixed(2)
+                },
+                uptime: process.uptime()
+            }
+        };
     }
 
     private _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {

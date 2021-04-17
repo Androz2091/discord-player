@@ -110,3 +110,38 @@ export interface LyricsData {
     };
     lyrics?: string;
 }
+
+export interface PlayerStats {
+    uptime: number;
+    connections: number;
+    users: number;
+    queues: number;
+    extractors: number;
+    versions: {
+        ffmpeg: string;
+        node: string;
+        v8: string;
+    };
+    system: {
+        arch: string;
+        platform:
+            | 'aix'
+            | 'android'
+            | 'darwin'
+            | 'freebsd'
+            | 'linux'
+            | 'openbsd'
+            | 'sunos'
+            | 'win32'
+            | 'cygwin'
+            | 'netbsd';
+        cpu: number;
+        memory: {
+            total: string;
+            usage: string;
+            rss: string;
+            arrayBuffers: string;
+        };
+        uptime: number;
+    };
+}

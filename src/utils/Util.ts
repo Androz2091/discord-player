@@ -31,14 +31,19 @@ export class Util {
         } as PlayerOptions;
     }
 
-    static checkFFmpeg(force?: boolean) {
+    static getFFmpegVersion(force?: boolean) {
         try {
-            FFmpeg.getInfo(Boolean(force));
+            const info = FFmpeg.getInfo(Boolean(force));
 
-            return true;
+            return info.version;
         } catch {
-            return false;
+            return null;
         }
+    }
+
+    static checkFFmpeg(force?: boolean) {
+        const version = Util.getFFmpegVersion(force);
+        return version === null ? false : true;
     }
 
     static alertFFmpeg() {
