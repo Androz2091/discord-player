@@ -9,7 +9,7 @@
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-    "postinstall": "npx tsc"
+    "postinstall": "npx tsc --build tsconfig.json"
   },
   "funding": "https://github.com/Androz2091/discord-player?sponsor=1",
   "contributors": [
