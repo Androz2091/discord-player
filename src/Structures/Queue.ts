@@ -127,6 +127,40 @@ export class Queue extends EventEmitter {
     get currentStreamTime() {
         return this.voiceConnection?.dispatcher?.streamTime + this.additionalStreamTime || 0;
     }
+
+    /**
+     * Sets audio filters in this player
+     * @param filters Audio filters to set
+     */
+    setFilters(filters: QueueFilters) {
+        return this.player.setFilters(this.firstMessage, filters);
+    }
+
+    /**
+     * Returns array of all enabled filters
+     */
+    getFiltersEnabled() {
+        const filters: string[] = [];
+
+        for (const filter in this.filters) {
+            if (this.filters[filter as keyof QueueFilters] !== false) filters.push(filter);
+        }
+
+        return filters;
+    }
+
+    /**
+     * Returns all disabled filters
+     */
+    getFiltersDisabled() {
+        const enabled = this.getFiltersEnabled();
+
+        return Object.keys(this.filters).filter((f) => !enabled.includes(f));
+    }
+
+    toString() {
+        return `<Queue ${this.guildID}>`;
+    }
 }
 
 export default Queue;
