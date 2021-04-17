@@ -1,4 +1,4 @@
-import { PlayerOptions, QueryType } from '../types/types';
+import { QueryType } from '../types/types';
 import { FFmpeg } from 'prism-media';
 import YouTube from 'youtube-sr';
 import { Track } from '../Structures/Track';
@@ -17,18 +17,6 @@ const attachmentRegex = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){
 export class Util {
     constructor() {
         throw new Error(`The ${this.constructor.name} class is static and cannot be instantiated!`);
-    }
-
-    static get DefaultPlayerOptions() {
-        return {
-            leaveOnEnd: true,
-            leaveOnStop: true,
-            leaveOnEmpty: true,
-            leaveOnEmptyCooldown: 0,
-            autoSelfDeaf: true,
-            enableLive: false,
-            ytdlDownloadOptions: {}
-        } as PlayerOptions;
     }
 
     static getFFmpegVersion(force?: boolean) {

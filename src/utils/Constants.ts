@@ -1,3 +1,5 @@
+import { PlayerOptions as DP_OPTIONS } from '../types/types';
+
 export const PlayerEvents = {
     BOT_DISCONNECT: 'botDisconnect',
     CHANNEL_EMPTY: 'channelEmpty',
@@ -25,4 +27,14 @@ export const PlayerErrorEventCodes = {
     PARSE_ERROR: 'ParseError',
     VIDEO_UNAVAILABLE: 'VideoUnavailable',
     MUSIC_STARTING: 'MusicStarting'
+};
+
+export const PlayerOptions: DP_OPTIONS = {
+    leaveOnEnd: true,
+    leaveOnStop: true,
+    leaveOnEmpty: true,
+    leaveOnEmptyCooldown: 0,
+    autoSelfDeaf: true,
+    enableLive: false,
+    ytdlDownloadOptions: {}
 };

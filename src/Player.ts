@@ -1,11 +1,17 @@
 import { EventEmitter } from 'events';
 import { Client, Collection, Snowflake, Collector, Message, VoiceChannel, VoiceState } from 'discord.js';
-import { LyricsData, PlayerOptions, PlayerProgressbarOptions, PlayerStats, QueueFilters } from './types/types';
+import {
+    LyricsData,
+    PlayerOptions as PlayerOptionsType,
+    PlayerProgressbarOptions,
+    PlayerStats,
+    QueueFilters
+} from './types/types';
 import Util from './utils/Util';
 import AudioFilters from './utils/AudioFilters';
 import { Queue } from './Structures/Queue';
 import { Track } from './Structures/Track';
-import { PlayerErrorEventCodes, PlayerEvents } from './utils/Constants';
+import { PlayerErrorEventCodes, PlayerEvents, PlayerOptions } from './utils/Constants';
 import PlayerError from './utils/PlayerError';
 import ytdl from 'discord-ytdl-core';
 import { ExtractorModel } from './Structures/ExtractorModel';
@@ -27,7 +33,7 @@ export class Player extends EventEmitter {
      * The discord client that instantiated this player
      */
     public client!: Client;
-    public options: PlayerOptions;
+    public options: PlayerOptionsType;
     public filters: typeof AudioFilters;
 
     /**
@@ -47,7 +53,7 @@ export class Player extends EventEmitter {
      * @param client The discord.js client
      * @param options Player options
      */
-    constructor(client: Client, options?: PlayerOptions) {
+    constructor(client: Client, options?: PlayerOptionsType) {
         super();
 
         Object.defineProperty(this, 'client', {
@@ -58,7 +64,7 @@ export class Player extends EventEmitter {
         /**
          * The player options
          */
-        this.options = Object.assign({}, Util.DefaultPlayerOptions, options ?? {});
+        this.options = Object.assign({}, PlayerOptions, options ?? {});
 
         // check FFmpeg
         void Util.alertFFmpeg();
@@ -895,7 +901,10 @@ export class Player extends EventEmitter {
         return {
             uptime: this.client.uptime,
             connections: this.client.voice.connections.size,
-            users: this.client.voice.connections.reduce((a, c) => a + c.channel.members.filter(a => a.user.id !== this.client.user.id).size, 0),
+            users: this.client.voice.connections.reduce(
+                (a, c) => a + c.channel.members.filter((a) => a.user.id !== this.client.user.id).size,
+                0
+            ),
             queues: this.queues.size,
             extractors: this.Extractors.size,
             versions: {
