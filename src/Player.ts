@@ -888,6 +888,9 @@ export class Player extends EventEmitter {
         queue.autoPlay = Boolean(enable);
     }
 
+    /**
+     * Player stats
+     */
     getStats(): PlayerStats {
         return {
             uptime: this.client.uptime,
