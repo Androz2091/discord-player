@@ -73,7 +73,6 @@ export class Util {
     }
 
     static parseMS(milliseconds: number) {
-        // taken from ms package :: https://github.com/sindresorhus/parse-ms/blob/main/index.js
         const roundTowardsZero = milliseconds > 0 ? Math.floor : Math.ceil;
 
         return {
