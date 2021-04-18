@@ -4,8 +4,6 @@ Complete framework to facilitate music commands using **[discord.js](https://dis
 [![downloadsBadge](https://img.shields.io/npm/dt/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
 [![versionBadge](https://img.shields.io/npm/v/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
 
-> WIP
-
 ## Installation
 
 ### Install **[discord-player](https://npmjs.com/package/discord-player)**
@@ -37,6 +35,83 @@ $ npm install --save @discordjs/opus
 - Multiple sources support ✌
 - Play in multiple servers at the same time 🚗
 
+## [Documentation](https://discord-player.js.org)
+
+## Getting Started
+
+Here is the code you will need to get started with discord-player. Then, you will be able to use `client.player` everywhere in your code!
+
+```js
+const Discord = require("discord.js"),
+client = new Discord.Client,
+settings = {
+    prefix: "!",
+    token: "Your Discord Token"
+};
+
+const { Player } = require("discord-player");
+
+// Create a new Player (you don't need any API Key)
+const player = new Player(client);
+
+// To easily access the player
+client.player = player;
+
+// add the trackStart event so when a song will be played this message will be sent
+client.player.on("trackStart", (message, track) => message.channel.send(`Now playing ${track.title}...`))
+
+client.once("ready", () => {
+    console.log("I'm ready !");
+});
+
+client.on("message", async (message) => {
+
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    // !play Despacito
+    // will play "Despacito" in the voice channel
+    if(command === "play"){
+        client.player.play(message, args[0]);
+        // as we registered the event above, no need to send a success message here
+    }
+
+});
+
+client.login(settings.token);
+```
+
+# Other Examples
+## Using Cookies
+
+```js
+const player = new Player(client, {
+    ytdlDownloadOptions: {
+        requestOptions: {
+            headers: {
+                cookie: "YOUR_YOUTUBE_COOKIE"
+            }
+        }
+    }
+});
+```
+
+## Using Proxy
+
+```js
+const HttpsProxyAgent = require("https-proxy-agent");
+
+// Remove "user:pass@" if you don't need to authenticate to your proxy.
+const proxy = "http://user:pass@111.111.111.111:8080";
+const agent = HttpsProxyAgent(proxy);
+
+const player = new Player(client, {
+    ytdlDownloadOptions: {
+        requestOptions: { agent }
+    }
+});
+```
+
 # Sources supported
 > By default, **discord-player** supports `youtube`, `spotify`, `soundcloud`, `vimeo`, `reverbnation`, `facebook` and `attachment links` only.
 
@@ -49,6 +124,14 @@ player.use("EXAMPLE", Downloader); // now discord-player supports 700+ sites :po
 ```
 
 or you can build your own :D
+
+## Examples of bots made with Discord Player
+
+These bots are made by the community, they can help you build your own!
+
+* [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091)
+* [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox)
+* [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
 
 # License
 MIT License
