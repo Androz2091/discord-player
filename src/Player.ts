@@ -502,7 +502,7 @@ export class Player extends EventEmitter {
     setPosition(message: Message, time: number): Promise<void> {
         return new Promise((resolve) => {
             const queue = this.queues.find((g) => g.guildID === message.guild.id);
-            if (!queue) return this.emit('error', 'NotPlaying', message);
+            if (!queue) return this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
 
             if (typeof time !== 'number' && !isNaN(time)) time = parseInt(time);
             if (queue.playing.durationMS >= time) return this.skip(message);
