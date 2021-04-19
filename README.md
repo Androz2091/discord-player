@@ -118,7 +118,7 @@ const player = new Player(client, {
 **Discord Player** provides **Extractor API** that enables you to use your custom stream extractor with it.
 
 # Using @discord-player/extractor [optional]
-> Adds support for `vimeo`, `reverbnation`, `facebook` and `attachment links` and `lyrics`
+> Adds support for `vimeo`, `reverbnation`, `facebook`, `attachment links` and `lyrics`
 
 **Discord Player** automatically detects and uses `@discord-player/extractor`. You just need to install it via `npm i --save @discord-player/extractor`.
 
