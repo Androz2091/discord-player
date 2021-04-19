@@ -23,9 +23,6 @@ import spotify from 'spotify-url-info';
 import { Client as SoundCloudClient } from 'soundcloud-scraper';
 import YouTube from 'youtube-sr';
 
-// @ts-ignore
-import * as DP_EXTRACTORS from '@discord-player/extractor';
-
 const SoundCloud = new SoundCloudClient();
 
 export class Player extends EventEmitter {
@@ -76,7 +73,11 @@ export class Player extends EventEmitter {
 
         this.client.on('voiceStateUpdate', (o, n) => void this._handleVoiceStateUpdate(o, n));
 
-        ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => void this.use(ext, DP_EXTRACTORS[ext]));
+        // auto detect @discord-player/extractor
+        let nv: any;
+        if ((nv = Util.require('@discord-player/extractor'))) {
+            ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => void this.use(ext, nv[ext]));
+        }
     }
 
     static get AudioFilters() {
@@ -876,7 +877,10 @@ export class Player extends EventEmitter {
      * message.channel.send(lyrics.lyrics);
      */
     async lyrics(query: string) {
-        const data = await DP_EXTRACTORS.Lyrics(query);
+        const extractor = Util.require('@discord-player/extractor');
+        if (!extractor) throw new PlayerError("Cannot call 'Player.lyrics()' without '@discord-player/extractor'");
+
+        const data = await extractor.Lyrics(query);
         if (Array.isArray(data)) return null;
 
         return data as LyricsData;

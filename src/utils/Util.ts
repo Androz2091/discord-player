@@ -152,6 +152,18 @@ export class Util {
             .join(':');
         return final.length <= 3 ? `0:${final.padStart(2, '0') || 0}` : final;
     }
+
+    /**
+     * Manage CJS require
+     * @param id id to require
+     */
+    static require(id: string): any {
+        try {
+            return require(id);
+        } catch {
+            return null;
+        }
+    }
 }
 
 export default Util;
