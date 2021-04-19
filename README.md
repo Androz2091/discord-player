@@ -81,8 +81,34 @@ client.on("message", async (message) => {
 client.login(settings.token);
 ```
 
-# Other Examples
-## Using Cookies
+## Supported websites
+
+By default, discord-player supports **YouTube**, **Spotify** and **SoundCloud** streams only.
+
+### Extractor API
+
+Discord Player provides an **Extractor API** that enables you to use your custom stream extractor with it.
+
+#### [@discord-player/extractor](https://github.com/Snowflake107/discord-player-extractors)
+
+`@discord-player/extractor` is an optional package that adds support for `vimeo`, `reverbnation`, `facebook`, `attachment links` and `lyrics`.  
+You just need to install it via `npm i --save @discord-player/extractor` (discord-player will automatically detects and uses it).
+
+#### [@discord-player/downloader](https://github.com/DevSnowflake/discord-player-downloader)
+
+`@discord-player/downloader` is an optional package that brings support for +700 websites. The documentation is available [here](https://github.com/DevSnowflake/discord-player-downloader).
+
+## Examples of bots made with Discord Player
+
+These bots are made by the community, they can help you build your own!
+
+* [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091)
+* [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox)
+* [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
+
+## FAQ
+
+### How to use cookies?
 
 ```js
 const player = new Player(client, {
@@ -96,7 +122,7 @@ const player = new Player(client, {
 });
 ```
 
-## Using Proxy
+### How to use custom proxies?
 
 ```js
 const HttpsProxyAgent = require("https-proxy-agent");
@@ -111,44 +137,3 @@ const player = new Player(client, {
     }
 });
 ```
-
-# Sources supported
-> By default, **discord-player** supports `youtube`, `spotify` and `soundcloud` streams only.
-
-**Discord Player** provides **Extractor API** that enables you to use your custom stream extractor with it.
-
-# Using @discord-player/extractor [optional]
-> Adds support for `vimeo`, `reverbnation`, `facebook`, `attachment links` and `lyrics`
-
-**Discord Player** automatically detects and uses `@discord-player/extractor`. You just need to install it via `npm i --save @discord-player/extractor`.
-
-## Examples of bots made with Discord Player
-
-These bots are made by the community, they can help you build your own!
-
-* [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091)
-* [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox)
-* [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
-
-# License
-MIT License
-
-Copyright (c) 2020-present Androz
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
