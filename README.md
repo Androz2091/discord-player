@@ -92,7 +92,7 @@ Discord Player provides an **Extractor API** that enables you to use your custom
 #### [@discord-player/extractor](https://github.com/Snowflake107/discord-player-extractors) (optional)
 
 Optional package that adds support for `vimeo`, `reverbnation`, `facebook`, `attachment links` and `lyrics`.
-You just need to install it using `npm i --save @discord-player/extractor` (discord-player will automatically detects and uses it).
+You just need to install it using `npm i --save @discord-player/extractor` (discord-player will automatically detect and use it).
 
 #### [@discord-player/downloader](https://github.com/DevSnowflake/discord-player-downloader) (optional)
 
