@@ -85,16 +85,16 @@ client.login(settings.token);
 
 By default, discord-player supports **YouTube**, **Spotify** and **SoundCloud** streams only.
 
-### Extractor API
+### Optional dependencies
 
-Discord Player provides an **Extractor API** that enables you to use your custom stream extractor with it.
+Discord Player provides an **Extractor API** that enables you to use your custom stream extractor with it. Some packages have been made by the community to add new features using this API.
 
-#### [@discord-player/extractor](https://github.com/Snowflake107/discord-player-extractors)
+#### [@discord-player/extractor](https://github.com/Snowflake107/discord-player-extractors) (optional)
 
-`@discord-player/extractor` is an optional package that adds support for `vimeo`, `reverbnation`, `facebook`, `attachment links` and `lyrics`.  
-You just need to install it via `npm i --save @discord-player/extractor` (discord-player will automatically detects and uses it).
+Optional package that adds support for `vimeo`, `reverbnation`, `facebook`, `attachment links` and `lyrics`.
+You just need to install it using `npm i --save @discord-player/extractor` (discord-player will automatically detects and uses it).
 
-#### [@discord-player/downloader](https://github.com/DevSnowflake/discord-player-downloader)
+#### [@discord-player/downloader](https://github.com/DevSnowflake/discord-player-downloader) (optional)
 
 `@discord-player/downloader` is an optional package that brings support for +700 websites. The documentation is available [here](https://github.com/DevSnowflake/discord-player-downloader).
 
