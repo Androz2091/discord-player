@@ -10,7 +10,6 @@ class ExtractorModel {
      * @param data Extractor object
      */
     constructor(extractorName: string, data: any) {
-
         /**
          * The extractor name
          */
