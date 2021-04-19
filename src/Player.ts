@@ -80,7 +80,7 @@ export class Player extends EventEmitter {
         }
     }
 
-    static get AudioFilters() {
+    static get AudioFilters(): typeof AudioFilters {
         return AudioFilters;
     }
 
@@ -89,7 +89,7 @@ export class Player extends EventEmitter {
      * @param extractorName The extractor name
      * @param extractor The extractor itself
      */
-    use(extractorName: string, extractor: any) {
+    use(extractorName: string, extractor: any): Player {
         if (!extractorName) throw new PlayerError('Missing extractor name!', 'PlayerExtractorError');
 
         const methods = ['validate', 'getInfo'];
@@ -108,7 +108,7 @@ export class Player extends EventEmitter {
      * Remove existing extractor from this player
      * @param extractorName The extractor name
      */
-    unuse(extractorName: string) {
+    unuse(extractorName: string): boolean {
         if (!extractorName) throw new PlayerError('Missing extractor name!', 'PlayerExtractorError');
 
         return this.Extractors.delete(extractorName);
@@ -446,7 +446,7 @@ export class Player extends EventEmitter {
      * Checks if this player is playing in a server
      * @param message The message object
      */
-    isPlaying(message: Message) {
+    isPlaying(message: Message): boolean {
         return this.queues.some((g) => g.guildID === message.guild.id);
     }
 
@@ -454,7 +454,7 @@ export class Player extends EventEmitter {
      * Returns guild queue object
      * @param message The message object
      */
-    getQueue(message: Message) {
+    getQueue(message: Message): Queue {
         return this.queues.find((g) => g.guildID === message.guild.id);
     }
 
@@ -523,7 +523,7 @@ export class Player extends EventEmitter {
      * @param time Time in ms to set
      * @alias setPosition
      */
-    seek(message: Message, time: number) {
+    seek(message: Message, time: number): Promise<void> {
         return this.setPosition(message, time);
     }
 
@@ -553,7 +553,7 @@ export class Player extends EventEmitter {
      * @param message The message object
      * @param channel New voice channel to move to
      */
-    moveTo(message: Message, channel?: VoiceChannel) {
+    moveTo(message: Message, channel?: VoiceChannel): boolean {
         if (!channel || channel.type !== 'voice') return;
         const queue = this.queues.find((g) => g.guildID === message.guild.id);
         if (!queue) {
@@ -579,7 +579,7 @@ export class Player extends EventEmitter {
      * Pause the playback
      * @param message The message object
      */
-    pause(message: Message) {
+    pause(message: Message): boolean {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -599,7 +599,7 @@ export class Player extends EventEmitter {
      * Resume the playback
      * @param message The message object
      */
-    resume(message: Message) {
+    resume(message: Message): boolean {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -619,7 +619,7 @@ export class Player extends EventEmitter {
      * Stops the player
      * @param message The message object
      */
-    stop(message: Message) {
+    stop(message: Message): boolean {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -644,7 +644,7 @@ export class Player extends EventEmitter {
      * @param message The message object
      * @param percent The volume percentage/amount to set
      */
-    setVolume(message: Message, percent: number) {
+    setVolume(message: Message, percent: number): boolean {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -665,7 +665,7 @@ export class Player extends EventEmitter {
      * Clears the queue
      * @param message The message object
      */
-    clearQueue(message: Message) {
+    clearQueue(message: Message): boolean {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -681,7 +681,7 @@ export class Player extends EventEmitter {
      * Plays previous track
      * @param message The message object
      */
-    back(message: Message) {
+    back(message: Message): boolean {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -704,7 +704,7 @@ export class Player extends EventEmitter {
      * @param message The message object
      * @param enabled If it should enable the repeat mode
      */
-    setRepeatMode(message: Message, enabled: boolean) {
+    setRepeatMode(message: Message, enabled: boolean): boolean {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -721,7 +721,7 @@ export class Player extends EventEmitter {
      * @param message The message object
      * @param enabled If it should enable the loop mode
      */
-    setLoopMode(message: Message, enabled: boolean) {
+    setLoopMode(message: Message, enabled: boolean): boolean {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -737,7 +737,7 @@ export class Player extends EventEmitter {
      * Returns currently playing track
      * @param message The message object
      */
-    nowPlaying(message: Message) {
+    nowPlaying(message: Message): Track {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -751,7 +751,7 @@ export class Player extends EventEmitter {
      * Shuffles the queue
      * @param message The message object
      */
-    shuffle(message: Message) {
+    shuffle(message: Message): Queue {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -775,7 +775,7 @@ export class Player extends EventEmitter {
      * @param message The message object
      * @param track The track object/id to remove
      */
-    remove(message: Message, track: Track | number) {
+    remove(message: Message, track: Track | number): Track {
         const queue = this.getQueue(message);
         if (!queue) {
             this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
@@ -803,7 +803,7 @@ export class Player extends EventEmitter {
      * @param message The message object
      * @param queueTime If it should make the time code of the whole queue
      */
-    getTimeCode(message: Message, queueTime?: boolean) {
+    getTimeCode(message: Message, queueTime?: boolean): { current: string; end: string } {
         const queue = this.getQueue(message);
         if (!queue) return;
 
@@ -827,7 +827,7 @@ export class Player extends EventEmitter {
      * @param message The message object
      * @param options Progressbar options
      */
-    createProgressBar(message: Message, options?: PlayerProgressbarOptions) {
+    createProgressBar(message: Message, options?: PlayerProgressbarOptions): string {
         const queue = this.getQueue(message);
         if (!queue) return;
 
@@ -876,14 +876,14 @@ export class Player extends EventEmitter {
      * @example const lyrics = await player.lyrics("alan walker faded")
      * message.channel.send(lyrics.lyrics);
      */
-    async lyrics(query: string) {
+    async lyrics(query: string): Promise<LyricsData> {
         const extractor = Util.require('@discord-player/extractor');
         if (!extractor) throw new PlayerError("Cannot call 'Player.lyrics()' without '@discord-player/extractor'");
 
         const data = await extractor.Lyrics(query);
         if (Array.isArray(data)) return null;
 
-        return data as LyricsData;
+        return data;
     }
 
     /**
@@ -931,7 +931,7 @@ export class Player extends EventEmitter {
         };
     }
 
-    private _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
+    private _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): void {
         const queue = this.queues.find((g) => g.guildID === oldState.guild.id);
         if (!queue) return;
 
@@ -964,7 +964,7 @@ export class Player extends EventEmitter {
         }
     }
 
-    private _addTrackToQueue(message: Message, track: Track) {
+    private _addTrackToQueue(message: Message, track: Track): Queue {
         const queue = this.getQueue(message);
         if (!queue)
             this.emit(
@@ -978,7 +978,7 @@ export class Player extends EventEmitter {
         return queue;
     }
 
-    private _addTracksToQueue(message: Message, tracks: Track[]) {
+    private _addTracksToQueue(message: Message, tracks: Track[]): Queue {
         const queue = this.getQueue(message);
         if (!queue)
             throw new PlayerError(
@@ -1174,3 +1174,109 @@ export class Player extends EventEmitter {
 }
 
 export default Player;
+
+/**
+ * Emitted when a track starts
+ * @event Player#trackStart
+ * @param {Discord.Message} message
+ * @param {Track} track
+ * @param {Queue} queue
+ */
+
+/**
+ * Emitted when a playlist is started
+ * @event Player#queueCreate
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ */
+
+/**
+ * Emitted when the bot is awaiting search results
+ * @event Player#searchResults
+ * @param {Discord.Message} message
+ * @param {string} query
+ * @param {Track[]} tracks
+ * @param {Discord.Collector} collector
+ */
+
+/**
+ * Emitted when the user has sent an invalid response for search results
+ * @event Player#searchInvalidResponse
+ * @param {Discord.Message} message
+ * @param {string} query
+ * @param {Track[]} tracks
+ * @param {string} invalidResponse
+ * @param {Discord.MessageCollector} collector
+ */
+
+/**
+ * Emitted when the bot has stopped awaiting search results (timeout)
+ * @event Player#searchCancel
+ * @param {Discord.Message} message
+ * @param {string} query
+ * @param {Track[]} tracks
+ */
+
+/**
+ * Emitted when the bot can't find related results to the query
+ * @event Player#noResults
+ * @param {Discord.Message} message
+ * @param {string} query
+ */
+
+/**
+ * Emitted when the bot is disconnected from the channel
+ * @event Player#botDisconnect
+ * @param {Discord.Message} message
+ */
+
+/**
+ * Emitted when the channel of the bot is empty
+ * @event Player#channelEmpty
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ */
+
+/**
+ * Emitted when the queue of the server is ended
+ * @event Player#queueEnd
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ */
+
+/**
+ * Emitted when a track is added to the queue
+ * @event Player#trackAdd
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ * @param {Track} track
+ */
+
+/**
+ * Emitted when a playlist is added to the queue
+ * @event Player#playlistAdd
+ * @param {Discord.Message} message
+ * @param {Queue} queue
+ * @param {Object} playlist
+ */
+
+/**
+ * Emitted when an error is triggered
+ * @event Player#error
+ * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying`, `ParseError`, `LiveVideo` or `VideoUnavailable`.
+ * @param {Discord.Message} message
+ */
+
+/**
+ * Emitted when discord-player attempts to parse playlist contents (mostly soundcloud playlists)
+ * @event Player#playlistParseStart
+ * @param {Object} playlist Raw playlist (unparsed)
+ * @param {Discord.Message} message The message
+ */
+
+/**
+ * Emitted when discord-player finishes parsing playlist contents (mostly soundcloud playlists)
+ * @event Player#playlistParseEnd
+ * @param {Object} playlist The playlist data (parsed)
+ * @param {Discord.Message} message The message
+ */

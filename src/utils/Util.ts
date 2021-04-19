@@ -1,4 +1,4 @@
-import { QueryType } from '../types/types';
+import { QueryType, TimeData } from '../types/types';
 import { FFmpeg } from 'prism-media';
 import YouTube from 'youtube-sr';
 import { Track } from '../Structures/Track';
@@ -19,7 +19,7 @@ export class Util {
         throw new Error(`The ${this.constructor.name} class is static and cannot be instantiated!`);
     }
 
-    static getFFmpegVersion(force?: boolean) {
+    static getFFmpegVersion(force?: boolean): string {
         try {
             const info = FFmpeg.getInfo(Boolean(force));
 
@@ -29,12 +29,12 @@ export class Util {
         }
     }
 
-    static checkFFmpeg(force?: boolean) {
+    static checkFFmpeg(force?: boolean): boolean {
         const version = Util.getFFmpegVersion(force);
         return version === null ? false : true;
     }
 
-    static alertFFmpeg() {
+    static alertFFmpeg(): void {
         const hasFFmpeg = Util.checkFFmpeg();
 
         if (!hasFFmpeg)
@@ -59,11 +59,11 @@ export class Util {
         return 'youtube_search';
     }
 
-    static isURL(str: string) {
+    static isURL(str: string): boolean {
         return str.length < 2083 && attachmentRegex.test(str);
     }
 
-    static getVimeoID(query: string) {
+    static getVimeoID(query: string): string {
         return Util.getQueryType(query) === 'vimeo'
             ? query
                   .split('/')
@@ -72,7 +72,7 @@ export class Util {
             : null;
     }
 
-    static parseMS(milliseconds: number) {
+    static parseMS(milliseconds: number): TimeData {
         const roundTowardsZero = milliseconds > 0 ? Math.floor : Math.ceil;
 
         return {
@@ -83,7 +83,7 @@ export class Util {
         };
     }
 
-    static durationString(durObj: object) {
+    static durationString(durObj: object): string {
         return Object.values(durObj)
             .map((m) => (isNaN(m) ? 0 : m))
             .join(':');
@@ -119,7 +119,7 @@ export class Util {
         });
     }
 
-    static isRepl() {
+    static isRepl(): boolean {
         if ('DP_REPL_NOCHECK' in process.env) return false;
 
         const REPL_IT_PROPS = [
@@ -137,11 +137,11 @@ export class Util {
         return false;
     }
 
-    static isVoiceEmpty(channel: VoiceChannel) {
+    static isVoiceEmpty(channel: VoiceChannel): boolean {
         return channel.members.filter((member) => !member.user.bot).size === 0;
     }
 
-    static buildTimeCode(data: any) {
+    static buildTimeCode(data: any): string {
         const items = Object.keys(data);
         const required = ['days', 'hours', 'minutes', 'seconds'];
 

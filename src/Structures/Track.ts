@@ -1,23 +1,69 @@
 import { Player } from '../Player';
 import { User } from 'discord.js';
 import { TrackData } from '../types/types';
+import Queue from './Queue';
 
 export class Track {
     /**
      * The player that instantiated this Track
      */
     public player!: Player;
+
+    /**
+     * Title of this track
+     */
     public title!: string;
+
+    /**
+     * Description of this track
+     */
     public description!: string;
+
+    /**
+     * Author of this track
+     */
     public author!: string;
+
+    /**
+     * Link of this track
+     */
     public url!: string;
+
+    /**
+     * Thumbnail of this track
+     */
     public thumbnail!: string;
+
+    /**
+     * Duration of this track
+     */
     public duration!: string;
+
+    /**
+     * View count of this track
+     */
     public views!: number;
+
+    /**
+     * Person who requested this track
+     */
     public requestedBy!: User;
+
+    /**
+     * If this track belongs to a playlist
+     */
     public fromPlaylist!: boolean;
+
+    /**
+     * Raw data of this track
+     */
     public raw!: TrackData;
 
+    /**
+     * Track constructor
+     * @param player The player that instantiated this Track
+     * @param data Track data
+     */
     constructor(player: Player, data: TrackData) {
         Object.defineProperty(this, 'player', { value: player, enumerable: false });
 
@@ -42,14 +88,14 @@ export class Track {
     /**
      * The queue in which this track is located
      */
-    get queue() {
+    get queue(): Queue {
         return this.player.queues.find((q) => q.tracks.includes(this));
     }
 
     /**
      * The track duration in millisecond
      */
-    get durationMS() {
+    get durationMS(): number {
         const times = (n: number, t: number) => {
             let tn = 1;
             for (let i = 0; i < t; i++) tn *= n;
@@ -63,7 +109,10 @@ export class Track {
             .reduce((a, c) => a + c, 0);
     }
 
-    toString() {
+    /**
+     * String representation of this track
+     */
+    toString(): string {
         return `${this.title} by ${this.author}`;
     }
 }

@@ -26,6 +26,11 @@ export class Queue extends EventEmitter {
     public firstMessage: Message;
     public autoPlay = false;
 
+    /**
+     * Queue constructor
+     * @param player The player that instantiated this Queue
+     * @param message The message object
+     */
     constructor(player: Player, message: Message) {
         super();
 
@@ -91,40 +96,41 @@ export class Queue extends EventEmitter {
          */
         this.firstMessage = message;
 
-        // @ts-ignore
+        /**
+         * The audio filters in this queue
+         */
         this.filters = {};
 
         Object.keys(AudioFilters).forEach((fn) => {
-            // @ts-ignore
-            this.filters[fn] = false;
+            this.filters[fn as keyof QueueFilters] = false;
         });
     }
 
     /**
      * Currently playing track
      */
-    get playing() {
+    get playing(): Track {
         return this.tracks[0];
     }
 
     /**
      * Calculated volume of this queue
      */
-    get calculatedVolume() {
+    get calculatedVolume(): number {
         return this.filters.normalizer ? this.volume + 70 : this.volume;
     }
 
     /**
      * Total duration
      */
-    get totalTime() {
+    get totalTime(): number {
         return this.tracks.length > 0 ? this.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0;
     }
 
     /**
      * Current stream time
      */
-    get currentStreamTime() {
+    get currentStreamTime(): number {
         return this.voiceConnection?.dispatcher?.streamTime + this.additionalStreamTime || 0;
     }
 
@@ -132,14 +138,14 @@ export class Queue extends EventEmitter {
      * Sets audio filters in this player
      * @param filters Audio filters to set
      */
-    setFilters(filters: QueueFilters) {
+    setFilters(filters: QueueFilters): Promise<void> {
         return this.player.setFilters(this.firstMessage, filters);
     }
 
     /**
      * Returns array of all enabled filters
      */
-    getFiltersEnabled() {
+    getFiltersEnabled(): string[] {
         const filters: string[] = [];
 
         for (const filter in this.filters) {
@@ -152,13 +158,16 @@ export class Queue extends EventEmitter {
     /**
      * Returns all disabled filters
      */
-    getFiltersDisabled() {
+    getFiltersDisabled(): string[] {
         const enabled = this.getFiltersEnabled();
 
         return Object.keys(this.filters).filter((f) => !enabled.includes(f));
     }
 
-    toString() {
+    /**
+     * String representation of this Queue
+     */
+    toString(): string {
         return `<Queue ${this.guildID}>`;
     }
 }

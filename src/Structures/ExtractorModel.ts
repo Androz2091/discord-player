@@ -4,13 +4,26 @@ class ExtractorModel {
     name: string;
     private _raw: any;
 
+    /**
+     * Model for raw Discord Player extractors
+     * @param extractorName Name of the extractor
+     * @param data Extractor object
+     */
     constructor(extractorName: string, data: any) {
+
+        /**
+         * The extractor name
+         */
         this.name = extractorName;
 
         Object.defineProperty(this, '_raw', { value: data, configurable: false, writable: false, enumerable: false });
     }
 
-    async handle(query: string) {
+    /**
+     * Method to handle requests from `Player.play()`
+     * @param query Query to handle
+     */
+    async handle(query: string): Promise<ExtractorModelData> {
         const data = await this._raw.getInfo(query);
         if (!data) return null;
 
@@ -23,18 +36,28 @@ class ExtractorModel {
             author: data.author,
             description: data.description,
             url: data.url
-        } as ExtractorModelData;
+        };
     }
 
-    validate(query: string) {
+    /**
+     * Method used by Discord Player to validate query with this extractor
+     * @param query The query to validate
+     */
+    validate(query: string): boolean {
         return Boolean(this._raw.validate(query));
     }
 
-    get version() {
+    /**
+     * The extractor version
+     */
+    get version(): string {
         return this._raw.version ?? '0.0.0';
     }
 
-    get important() {
+    /**
+     * If player should mark this extractor as important
+     */
+    get important(): boolean {
         return Boolean(this._raw.important);
     }
 }
