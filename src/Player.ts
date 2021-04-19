@@ -891,7 +891,7 @@ export class Player extends EventEmitter {
      * @param message The message object
      * @param enable Enable/Disable autoplay
      */
-    setAutoplay(message: Message, enable: boolean): void {
+    setAutoPlay(message: Message, enable: boolean): void {
         const queue = this.getQueue(message);
         if (!queue) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
 
