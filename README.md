@@ -113,17 +113,14 @@ const player = new Player(client, {
 ```
 
 # Sources supported
-> By default, **discord-player** supports `youtube`, `spotify`, `soundcloud`, `vimeo`, `reverbnation`, `facebook` and `attachment links` only.
+> By default, **discord-player** supports `youtube`, `spotify` and `soundcloud` streams only.
 
-**Discord Player** provides **extractor API** that enables you to use your custom stream extractor with it. For example, you can use **youtube-dl** with **discord-player** like this:
+**Discord Player** provides **Extractor API** that enables you to use your custom stream extractor with it.
 
-```js
-const { Downloader } = require("@discord-player/downloader"); // YouTubeDL instance
+# Using @discord-player/extractor [optional]
+> Adds support for `vimeo`, `reverbnation`, `facebook` and `attachment links` and `lyrics`
 
-player.use("EXAMPLE", Downloader); // now discord-player supports 700+ sites :poggies:
-```
-
-or you can build your own :D
+**Discord Player** automatically detects and uses `@discord-player/extractor`. You just need to install it via `npm i --save @discord-player/extractor`.
 
 ## Examples of bots made with Discord Player
 
