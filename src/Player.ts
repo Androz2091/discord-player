@@ -60,7 +60,7 @@ export class Player extends EventEmitter {
     /**
      * Creates new Player instance
      * @param {DiscordClient} client The discord.js client
-     * @param {PlayerOptionsType} options Player options
+     * @param {PlayerOptions} options Player options
      */
     constructor(client: Client, options?: PlayerOptionsType) {
         super();
