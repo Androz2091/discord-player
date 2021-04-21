@@ -1,2 +1,2 @@
 # Discord Player Extractor API
-The extractor API
+The Extractor API
