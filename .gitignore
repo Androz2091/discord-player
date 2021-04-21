@@ -9,3 +9,6 @@ lib/
 
 # error logs
 yarn-error.log
+
+# demo
+demo/

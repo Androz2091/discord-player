@@ -15,10 +15,17 @@ const reverbnationRegex = /https:\/\/(www.)?reverbnation.com\/(.+)\/song\/(.+)/;
 const attachmentRegex = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
 
 export class Util {
+    /**
+     * Static Player Util class
+     */
     constructor() {
         throw new Error(`The ${this.constructor.name} class is static and cannot be instantiated!`);
     }
 
+    /**
+     * Checks FFmpeg Version
+     * @param {boolean} [force] If it should forcefully get the version
+     */
     static getFFmpegVersion(force?: boolean): string {
         try {
             const info = FFmpeg.getInfo(Boolean(force));
@@ -29,11 +36,18 @@ export class Util {
         }
     }
 
+    /**
+     * Checks FFmpeg
+     * @param {boolean} [force] If it should forcefully get the version
+     */
     static checkFFmpeg(force?: boolean): boolean {
         const version = Util.getFFmpegVersion(force);
         return version === null ? false : true;
     }
 
+    /**
+     * Alerts if FFmpeg is not available
+     */
     static alertFFmpeg(): void {
         const hasFFmpeg = Util.checkFFmpeg();
 
@@ -43,6 +57,10 @@ export class Util {
             );
     }
 
+    /**
+     * Resolves query type
+     * @param {string} query The query
+     */
     static getQueryType(query: string): QueryType {
         if (SoundcloudValidateURL(query) && !query.includes('/sets/')) return 'soundcloud_track';
         if (SoundcloudValidateURL(query) && query.includes('/sets/')) return 'soundcloud_playlist';
@@ -59,10 +77,18 @@ export class Util {
         return 'youtube_search';
     }
 
+    /**
+     * Checks if the given string is url
+     * @param {string} str URL to check
+     */
     static isURL(str: string): boolean {
         return str.length < 2083 && attachmentRegex.test(str);
     }
 
+    /**
+     * Returns Vimeo ID
+     * @param {string} query Vimeo link
+     */
     static getVimeoID(query: string): string {
         return Util.getQueryType(query) === 'vimeo'
             ? query
@@ -72,6 +98,10 @@ export class Util {
             : null;
     }
 
+    /**
+     * Parses ms time
+     * @param {number} milliseconds Time to parse
+     */
     static parseMS(milliseconds: number): TimeData {
         const roundTowardsZero = milliseconds > 0 ? Math.floor : Math.ceil;
 
@@ -83,12 +113,22 @@ export class Util {
         };
     }
 
+    /**
+     * Creates simple duration string
+     * @param {object} durObj Duration object
+     */
     static durationString(durObj: object): string {
         return Object.values(durObj)
             .map((m) => (isNaN(m) ? 0 : m))
             .join(':');
     }
 
+    /**
+     * Makes youtube searches
+     * @param {string} query The query
+     * @param {any} options Options
+     * @returns {Promise<Track[]>}
+     */
     static ytSearch(query: string, options?: any): Promise<Track[]> {
         return new Promise(async (resolve) => {
             await YouTube.search(query, {
@@ -119,6 +159,9 @@ export class Util {
         });
     }
 
+    /**
+     * Checks if this system is running in replit.com
+     */
     static isRepl(): boolean {
         if ('DP_REPL_NOCHECK' in process.env) return false;
 
@@ -137,10 +180,18 @@ export class Util {
         return false;
     }
 
+    /**
+     * Checks if the given voice channel is empty
+     * @param {Discord.VoiceChannel} channel The voice channel
+     */
     static isVoiceEmpty(channel: VoiceChannel): boolean {
         return channel.members.filter((member) => !member.user.bot).size === 0;
     }
 
+    /**
+     * Builds time code
+     * @param {object} data The data to build time code from
+     */
     static buildTimeCode(data: any): string {
         const items = Object.keys(data);
         const required = ['days', 'hours', 'minutes', 'seconds'];
@@ -155,7 +206,7 @@ export class Util {
 
     /**
      * Manage CJS require
-     * @param id id to require
+     * @param {string} id id to require
      */
     static require(id: string): any {
         try {

@@ -6,63 +6,74 @@ import Queue from './Queue';
 export class Track {
     /**
      * The player that instantiated this Track
+     * @type {Player}
      */
     public player!: Player;
 
     /**
      * Title of this track
+     * @type {string}
      */
     public title!: string;
 
     /**
      * Description of this track
+     * @type {string}
      */
     public description!: string;
 
     /**
      * Author of this track
+     * @type {string}
      */
     public author!: string;
 
     /**
      * Link of this track
+     * @type {string}
      */
     public url!: string;
 
     /**
      * Thumbnail of this track
+     * @type {string}
      */
     public thumbnail!: string;
 
     /**
      * Duration of this track
+     * @type {string}
      */
     public duration!: string;
 
     /**
      * View count of this track
+     * @type {number}
      */
     public views!: number;
 
     /**
      * Person who requested this track
+     * @type {Discord.User}
      */
     public requestedBy!: User;
 
     /**
      * If this track belongs to a playlist
+     * @type {boolean}
      */
     public fromPlaylist!: boolean;
 
     /**
      * Raw data of this track
+     * @type {TrackData}
      */
     public raw!: TrackData;
 
     /**
      * Track constructor
-     * @param player The player that instantiated this Track
-     * @param data Track data
+     * @param {Player} player The player that instantiated this Track
+     * @param {TrackData} data Track data
      */
     constructor(player: Player, data: TrackData) {
         Object.defineProperty(this, 'player', { value: player, enumerable: false });
@@ -87,6 +98,7 @@ export class Track {
 
     /**
      * The queue in which this track is located
+     * @type {Queue}
      */
     get queue(): Queue {
         return this.player.queues.find((q) => q.tracks.includes(this));
@@ -94,6 +106,7 @@ export class Track {
 
     /**
      * The track duration in millisecond
+     * @type {number}
      */
     get durationMS(): number {
         const times = (n: number, t: number) => {
@@ -111,6 +124,7 @@ export class Track {
 
     /**
      * String representation of this track
+     * @type {string}
      */
     toString(): string {
         return `${this.title} by ${this.author}`;

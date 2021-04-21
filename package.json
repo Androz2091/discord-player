@@ -11,7 +11,9 @@
     "test": "yarn build && cd test && node index.js",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "tslint -p tsconfig.json"
+    "lint": "tslint -p tsconfig.json",
+    "docs": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml --output demo/docs.json",
+    "docs:test": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml"
   },
   "funding": "https://github.com/Androz2091/discord-player?sponsor=1",
   "contributors": [
@@ -45,11 +47,17 @@
     "ytdl-core": "^4.5.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.13.16",
+    "@babel/core": "^7.13.16",
+    "@babel/preset-env": "^7.13.15",
+    "@babel/preset-typescript": "^7.13.0",
     "@discord-player/extractor": "^2.0.0",
     "@discordjs/opus": "^0.5.0",
     "@types/node": "^14.14.41",
     "@types/ws": "^7.4.1",
     "discord.js": "^12.5.3",
+    "discord.js-docgen": "discordjs/docgen#ts-patch",
+    "jsdoc-babel": "^0.5.0",
     "prettier": "^2.2.1",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",

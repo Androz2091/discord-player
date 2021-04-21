@@ -24,12 +24,16 @@ export class Queue extends EventEmitter {
     public filters: QueueFilters;
     public additionalStreamTime: number;
     public firstMessage: Message;
+
+    /**
+     * @type {boolean}
+     */
     public autoPlay = false;
 
     /**
      * Queue constructor
-     * @param player The player that instantiated this Queue
-     * @param message The message object
+     * @param {Player} player The player that instantiated this Queue
+     * @param {Discord.Message} message The message object
      */
     constructor(player: Player, message: Message) {
         super();
@@ -38,66 +42,79 @@ export class Queue extends EventEmitter {
 
         /**
          * ID of the guild assigned to this queue
+         * @type {Discord.Snowflake}
          */
         this.guildID = message.guild.id;
 
         /**
          * The voice connection of this queue
+         * @type {Discord.VoiceConnection}
          */
         this.voiceConnection = null;
 
         /**
          * Tracks of this queue
+         * @type {Track[]}
          */
         this.tracks = [];
 
         /**
          * Previous tracks of this queue
+         * @type {Track[]}
          */
         this.previousTracks = [];
 
         /**
          * If the player of this queue is stopped
+         * @type {boolean}
          */
         this.stopped = false;
 
         /**
          * If last track was skipped
+         * @type {boolean}
          */
         this.lastSkipped = false;
 
         /**
          * Queue volume
+         * @type {number}
          */
         this.volume = 100;
 
         /**
          * If the player of this queue is paused
+         * @type {boolean}
          */
         this.paused = Boolean(this.voiceConnection?.dispatcher?.paused);
 
         /**
          * If repeat mode is enabled in this queue
+         * @type {boolean}
          */
         this.repeatMode = false;
 
         /**
          * If loop mode is enabled in this queue
+         * @type {boolean}
          */
         this.loopMode = false;
 
         /**
          * The additional calculated stream time
+         * @type {number}
          */
         this.additionalStreamTime = 0;
 
         /**
          * The initial message object
+         * @type {Discord.Message}
          */
         this.firstMessage = message;
 
         /**
          * The audio filters in this queue
+         * @type {QueueFilters}
          */
         this.filters = {};
 
@@ -108,6 +125,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Currently playing track
+     * @type {Track}
      */
     get playing(): Track {
         return this.tracks[0];
@@ -115,6 +133,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Calculated volume of this queue
+     * @type {number}
      */
     get calculatedVolume(): number {
         return this.filters.normalizer ? this.volume + 70 : this.volume;
@@ -122,6 +141,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Total duration
+     * @type {number}
      */
     get totalTime(): number {
         return this.tracks.length > 0 ? this.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0;
@@ -129,6 +149,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Current stream time
+     * @type {number}
      */
     get currentStreamTime(): number {
         return this.voiceConnection?.dispatcher?.streamTime + this.additionalStreamTime || 0;
@@ -136,7 +157,8 @@ export class Queue extends EventEmitter {
 
     /**
      * Sets audio filters in this player
-     * @param filters Audio filters to set
+     * @param {QueueFilters} filters Audio filters to set
+     * @type {Promise<void>}
      */
     setFilters(filters: QueueFilters): Promise<void> {
         return this.player.setFilters(this.firstMessage, filters);
@@ -144,6 +166,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Returns array of all enabled filters
+     * @type {string[]}
      */
     getFiltersEnabled(): string[] {
         const filters: string[] = [];
@@ -157,6 +180,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Returns all disabled filters
+     * @type {string[]}
      */
     getFiltersDisabled(): string[] {
         const enabled = this.getFiltersEnabled();
@@ -166,6 +190,7 @@ export class Queue extends EventEmitter {
 
     /**
      * String representation of this Queue
+     * @type {string}
      */
     toString(): string {
         return `<Queue ${this.guildID}>`;
