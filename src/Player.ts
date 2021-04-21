@@ -1207,6 +1207,10 @@ export class Player extends EventEmitter {
             }, 1000);
         });
     }
+
+    toString() {
+        return `<Player ${this.queues.size}>`
+    }
 }
 
 export default Player;
