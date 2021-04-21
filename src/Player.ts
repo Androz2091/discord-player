@@ -1335,7 +1335,11 @@ export default Player;
  */
 
 /**
- * @typedef {('soundcloud'|'youtube'|'arbitrary')} TrackSource
+ * The type of Track source, either:
+ * * `soundcloud` - a stream from SoundCloud
+ * * `youtube` - a stream from YouTube
+ * * `arbitrary` - arbitrary stream
+ * @typedef {String} TrackSource
  */
 
 /**
@@ -1359,7 +1363,20 @@ export default Player;
  */
 
 /**
- * @typedef {('soundcloud_track'|'soundcloud_playlist'|'spotify_song'|'spotify_album'|'spotify_playlist'|'youtube_video'|'youtube_playlist'|'vimeo'|'facebook'|'reverbnation'|'attachment'|'youtube_search')} QueryType The query type
+ * The query type, either:
+ * * `soundcloud_track` - a SoundCloud Track
+ * * `soundcloud_playlist` - a SoundCloud Playlist
+ * * `spotify_song` - a Spotify Song
+ * * `spotify_album` - a Spotify album
+ * * `spotify_playlist` - a Spotify playlist
+ * * `youtube_video` - a YouTube video
+ * * `youtube_playlist` - a YouTube playlist
+ * * `vimeo` - a Vimeo link
+ * * `facebook` - a Facebook link
+ * * `reverbnation` - a Reverbnation link
+ * * `attachment` - an attachment link
+ * * `youtube_search` - a YouTube search keyword
+ * @typedef {String} QueryType The query type
  */
 
 /**
@@ -1411,7 +1428,7 @@ export default Player;
  * @property {String} [versions.v8] The v8 JavaScript engine version
  * @property {Object} system The system data
  * @property {String} [system.arch] The system arch
- * @property {('aix'|'android'|'darwin'|'freebsd'|'linux'|'openbsd'|'sunos'|'win32'|'cygwin'|'netbsd')} [system.platform] The system platform
+ * @property {String} [system.platform] The system platform
  * @property {Number} [system.cpu] The cpu count
  * @property {Object} [system.memory] The memory info
  * @property {String} [system.memory.total] The total memory
