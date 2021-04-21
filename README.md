@@ -108,7 +108,7 @@ These bots are made by the community, they can help you build your own!
 
 ## FAQ
 
-### How to use cookies?
+### How to use cookies
 
 ```js
 const player = new Player(client, {
@@ -122,7 +122,7 @@ const player = new Player(client, {
 });
 ```
 
-### How to use custom proxies?
+### How to use custom proxies
 
 ```js
 const HttpsProxyAgent = require("https-proxy-agent");
