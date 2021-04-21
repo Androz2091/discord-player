@@ -1183,93 +1183,93 @@ export default Player;
 /**
  * Emitted when a track starts
  * @event Player#trackStart
- * @param {Discord.Message} message
- * @param {Track} track
- * @param {Queue} queue
+ * @param {Discord.Message} message The message
+ * @param {Track} track The track
+ * @param {Queue} queue The queue
  */
 
 /**
  * Emitted when a playlist is started
  * @event Player#queueCreate
- * @param {Discord.Message} message
- * @param {Queue} queue
+ * @param {Discord.Message} message The message
+ * @param {Queue} queue The queue
  */
 
 /**
  * Emitted when the bot is awaiting search results
  * @event Player#searchResults
- * @param {Discord.Message} message
- * @param {string} query
- * @param {Track[]} tracks
- * @param {Discord.Collector} collector
+ * @param {Discord.Message} message The message
+ * @param {string} query The query
+ * @param {Track[]} tracks The tracks
+ * @param {Discord.Collector} collector The collector
  */
 
 /**
  * Emitted when the user has sent an invalid response for search results
  * @event Player#searchInvalidResponse
- * @param {Discord.Message} message
- * @param {string} query
- * @param {Track[]} tracks
- * @param {string} invalidResponse
- * @param {Discord.MessageCollector} collector
+ * @param {Discord.Message} message The message
+ * @param {string} query The query
+ * @param {Track[]} tracks The tracks
+ * @param {string} invalidResponse The `invalidResponse` string
+ * @param {Discord.MessageCollector} collector The collector
  */
 
 /**
  * Emitted when the bot has stopped awaiting search results (timeout)
  * @event Player#searchCancel
- * @param {Discord.Message} message
- * @param {string} query
- * @param {Track[]} tracks
+ * @param {Discord.Message} message The message
+ * @param {string} query The query
+ * @param {Track[]} tracks The tracks
  */
 
 /**
  * Emitted when the bot can't find related results to the query
  * @event Player#noResults
- * @param {Discord.Message} message
- * @param {string} query
+ * @param {Discord.Message} message The message
+ * @param {string} query The query
  */
 
 /**
  * Emitted when the bot is disconnected from the channel
  * @event Player#botDisconnect
- * @param {Discord.Message} message
+ * @param {Discord.Message} message The message
  */
 
 /**
  * Emitted when the channel of the bot is empty
  * @event Player#channelEmpty
- * @param {Discord.Message} message
- * @param {Queue} queue
+ * @param {Discord.Message} message The message
+ * @param {Queue} queue The queue
  */
 
 /**
  * Emitted when the queue of the server is ended
  * @event Player#queueEnd
- * @param {Discord.Message} message
- * @param {Queue} queue
+ * @param {Discord.Message} message The message
+ * @param {Queue} queue The queue
  */
 
 /**
  * Emitted when a track is added to the queue
  * @event Player#trackAdd
- * @param {Discord.Message} message
- * @param {Queue} queue
- * @param {Track} track
+ * @param {Discord.Message} message The message
+ * @param {Queue} queue The queue
+ * @param {Track} track The track
  */
 
 /**
  * Emitted when a playlist is added to the queue
  * @event Player#playlistAdd
- * @param {Discord.Message} message
- * @param {Queue} queue
- * @param {Object} playlist
+ * @param {Discord.Message} message The message
+ * @param {Queue} queue The queue
+ * @param {Object} playlist The playlist
  */
 
 /**
  * Emitted when an error is triggered
  * @event Player#error
  * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying`, `ParseError`, `LiveVideo` or `VideoUnavailable`.
- * @param {Discord.Message} message
+ * @param {Discord.Message} message The message
  */
 
 /**
