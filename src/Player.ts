@@ -1335,7 +1335,7 @@ export default Player;
  */
 
 /**
- * @typedef {'soundcloud'|'youtube'|'arbitrary'} TrackSource
+ * @typedef {('soundcloud'|'youtube'|'arbitrary')} TrackSource
  */
 
 /**
@@ -1359,7 +1359,7 @@ export default Player;
  */
 
 /**
- * @typedef {'soundcloud_track'|'soundcloud_playlist'|'spotify_song'|'spotify_album'|'spotify_playlist'|'youtube_video'|'youtube_playlist'|'vimeo'|'facebook'|'reverbnation'|'attachment'|'youtube_search'} QueryType The query type
+ * @typedef {('soundcloud_track'|'soundcloud_playlist'|'spotify_song'|'spotify_album'|'spotify_playlist'|'youtube_video'|'youtube_playlist'|'vimeo'|'facebook'|'reverbnation'|'attachment'|'youtube_search')} QueryType The query type
  */
 
 /**
@@ -1411,7 +1411,7 @@ export default Player;
  * @property {String} [versions.v8] The v8 JavaScript engine version
  * @property {Object} system The system data
  * @property {String} [system.arch] The system arch
- * @property {'aix'|'android'|'darwin'|'freebsd'|'linux'|'openbsd'|'sunos'|'win32'|'cygwin'|'netbsd'} [system.platform] The system platform
+ * @property {('aix'|'android'|'darwin'|'freebsd'|'linux'|'openbsd'|'sunos'|'win32'|'cygwin'|'netbsd')} [system.platform] The system platform
  * @property {Number} [system.cpu] The cpu count
  * @property {Object} [system.memory] The memory info
  * @property {String} [system.memory.total] The total memory
