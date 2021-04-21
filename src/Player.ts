@@ -502,7 +502,6 @@ export class Player extends EventEmitter {
      * Sets track position
      * @param {Discord.Message} message The message object
      * @param {number} time Time in ms to set
-     * @alias Player.seek
      */
     setPosition(message: Message, time: number): Promise<void> {
         return new Promise((resolve) => {
@@ -526,7 +525,6 @@ export class Player extends EventEmitter {
      * Sets track position
      * @param {Discord.Message} message The message object
      * @param {number} time Time in ms to set
-     * @alias Player.setPosition
      */
     seek(message: Message, time: number): Promise<void> {
         return this.setPosition(message, time);
