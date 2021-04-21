@@ -182,7 +182,7 @@ export class Util {
 
     /**
      * Checks if the given voice channel is empty
-     * @param {Discord.VoiceChannel} channel The voice channel
+     * @param {DiscordVoiceChannel} channel The voice channel
      */
     static isVoiceEmpty(channel: VoiceChannel): boolean {
         return channel.members.filter((member) => !member.user.bot).size === 0;

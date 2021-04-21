@@ -26,6 +26,7 @@ export class Queue extends EventEmitter {
     public firstMessage: Message;
 
     /**
+     * If autoplay is enabled in this queue
      * @type {boolean}
      */
     public autoPlay = false;
@@ -33,7 +34,7 @@ export class Queue extends EventEmitter {
     /**
      * Queue constructor
      * @param {Player} player The player that instantiated this Queue
-     * @param {Discord.Message} message The message object
+     * @param {DiscordMessage} message The message object
      */
     constructor(player: Player, message: Message) {
         super();
@@ -42,13 +43,13 @@ export class Queue extends EventEmitter {
 
         /**
          * ID of the guild assigned to this queue
-         * @type {Discord.Snowflake}
+         * @type {DiscordSnowflake}
          */
         this.guildID = message.guild.id;
 
         /**
          * The voice connection of this queue
-         * @type {Discord.VoiceConnection}
+         * @type {DiscordVoiceConnection}
          */
         this.voiceConnection = null;
 
@@ -108,7 +109,7 @@ export class Queue extends EventEmitter {
 
         /**
          * The initial message object
-         * @type {Discord.Message}
+         * @type {DiscordMessage}
          */
         this.firstMessage = message;
 

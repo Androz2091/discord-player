@@ -54,7 +54,7 @@ export class Track {
 
     /**
      * Person who requested this track
-     * @type {Discord.User}
+     * @type {DiscordUser}
      */
     public requestedBy!: User;
 
