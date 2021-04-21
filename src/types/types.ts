@@ -31,7 +31,7 @@ export type FiltersName = keyof QueueFilters;
 /**
  * @typedef {'soundcloud'|'youtube'|'arbitrary'} TrackSource
  */
-export type TrackSource = 'soundcloud'|'youtube'|'arbitrary';
+export type TrackSource = 'soundcloud' | 'youtube' | 'arbitrary';
 
 /**
  * @typedef {object} TrackData
