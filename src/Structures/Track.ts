@@ -4,70 +4,16 @@ import { TrackData } from '../types/types';
 import Queue from './Queue';
 
 export class Track {
-    /**
-     * The player that instantiated this Track
-     * @type {Player}
-     */
     public player!: Player;
-
-    /**
-     * Title of this track
-     * @type {String}
-     */
     public title!: string;
-
-    /**
-     * Description of this track
-     * @type {String}
-     */
     public description!: string;
-
-    /**
-     * Author of this track
-     * @type {String}
-     */
     public author!: string;
-
-    /**
-     * Link of this track
-     * @type {String}
-     */
     public url!: string;
-
-    /**
-     * Thumbnail of this track
-     * @type {String}
-     */
     public thumbnail!: string;
-
-    /**
-     * Duration of this track
-     * @type {String}
-     */
     public duration!: string;
-
-    /**
-     * View count of this track
-     * @type {Number}
-     */
     public views!: number;
-
-    /**
-     * Person who requested this track
-     * @type {DiscordUser}
-     */
     public requestedBy!: User;
-
-    /**
-     * If this track belongs to a playlist
-     * @type {Boolean}
-     */
     public fromPlaylist!: boolean;
-
-    /**
-     * Raw data of this track
-     * @type {TrackData}
-     */
     public raw!: TrackData;
 
     /**
@@ -76,7 +22,73 @@ export class Track {
      * @param {TrackData} data Track data
      */
     constructor(player: Player, data: TrackData) {
+        /**
+         * The player that instantiated this Queue
+         * @name Track#player
+         * @type {Player}
+         * @readonly
+         */
         Object.defineProperty(this, 'player', { value: player, enumerable: false });
+
+        /**
+         * Title of this track
+         * @name Track#title
+         * @type {String}
+         */
+
+        /**
+         * Description of this track
+         * @name Track#description
+         * @type {String}
+         */
+
+        /**
+         * Author of this track
+         * @name Track#author
+         * @type {String}
+         */
+
+        /**
+         * URL of this track
+         * @name Track#url
+         * @type {String}
+         */
+
+        /**
+         * Thumbnail of this track
+         * @name Track#thumbnail
+         * @type {String}
+         */
+
+        /**
+         * Duration of this track
+         * @name Track#duration
+         * @type {String}
+         */
+
+        /**
+         * Views count of this track
+         * @name Track#views
+         * @type {Number}
+         */
+
+        /**
+         * Person who requested this track
+         * @name Track#requestedBy
+         * @type {DiscordUser}
+         */
+
+        /**
+         * If this track belongs to playlist
+         * @name Track#fromPlaylist
+         * @type {Boolean}
+         */
+
+        /**
+         * Raw track data
+         * @name Track#raw
+         * @type {TrackData}
+         */
 
         void this._patch(data);
     }
@@ -124,7 +136,7 @@ export class Track {
 
     /**
      * String representation of this track
-     * @type {String}
+     * @returns {String}
      */
     toString(): string {
         return `${this.title} by ${this.author}`;

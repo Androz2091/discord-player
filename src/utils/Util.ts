@@ -25,6 +25,7 @@ export class Util {
     /**
      * Checks FFmpeg Version
      * @param {Boolean} [force] If it should forcefully get the version
+     * @returns {String}
      */
     static getFFmpegVersion(force?: boolean): string {
         try {
@@ -39,6 +40,7 @@ export class Util {
     /**
      * Checks FFmpeg
      * @param {Boolean} [force] If it should forcefully get the version
+     * @returns {Boolean}
      */
     static checkFFmpeg(force?: boolean): boolean {
         const version = Util.getFFmpegVersion(force);
@@ -60,6 +62,7 @@ export class Util {
     /**
      * Resolves query type
      * @param {String} query The query
+     * @returns {QueryType}
      */
     static getQueryType(query: string): QueryType {
         if (SoundcloudValidateURL(query) && !query.includes('/sets/')) return 'soundcloud_track';
@@ -80,6 +83,7 @@ export class Util {
     /**
      * Checks if the given string is url
      * @param {String} str URL to check
+     * @returns {Boolean}
      */
     static isURL(str: string): boolean {
         return str.length < 2083 && attachmentRegex.test(str);
@@ -88,6 +92,7 @@ export class Util {
     /**
      * Returns Vimeo ID
      * @param {String} query Vimeo link
+     * @returns {String}
      */
     static getVimeoID(query: string): string {
         return Util.getQueryType(query) === 'vimeo'
@@ -101,6 +106,7 @@ export class Util {
     /**
      * Parses ms time
      * @param {Number} milliseconds Time to parse
+     * @returns {TimeData}
      */
     static parseMS(milliseconds: number): TimeData {
         const roundTowardsZero = milliseconds > 0 ? Math.floor : Math.ceil;
@@ -116,6 +122,7 @@ export class Util {
     /**
      * Creates simple duration string
      * @param {object} durObj Duration object
+     * @returns {String}
      */
     static durationString(durObj: object): string {
         return Object.values(durObj)
@@ -161,6 +168,7 @@ export class Util {
 
     /**
      * Checks if this system is running in replit.com
+     * @returns {Boolean}
      */
     static isRepl(): boolean {
         if ('DP_REPL_NOCHECK' in process.env) return false;
@@ -183,6 +191,7 @@ export class Util {
     /**
      * Checks if the given voice channel is empty
      * @param {DiscordVoiceChannel} channel The voice channel
+     * @returns {Boolean}
      */
     static isVoiceEmpty(channel: VoiceChannel): boolean {
         return channel.members.filter((member) => !member.user.bot).size === 0;
@@ -191,6 +200,7 @@ export class Util {
     /**
      * Builds time code
      * @param {object} data The data to build time code from
+     * @returns {String}
      */
     static buildTimeCode(data: any): string {
         const items = Object.keys(data);
@@ -207,6 +217,7 @@ export class Util {
     /**
      * Manage CJS require
      * @param {String} id id to require
+     * @returns {any}
      */
     static require(id: string): any {
         try {

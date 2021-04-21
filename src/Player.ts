@@ -26,16 +26,7 @@ import YouTube from 'youtube-sr';
 const SoundCloud = new SoundCloudClient();
 
 export class Player extends EventEmitter {
-    /**
-     * The discord client that instantiated this player
-     * @type {DiscordClient}
-     */
     public client: Client;
-
-    /**
-     * The player options
-     * @type {PlayerOptions}
-     */
     public options: PlayerOptionsType;
 
     /**
@@ -45,7 +36,7 @@ export class Player extends EventEmitter {
 
     /**
      * The collection of queues in this player
-     * @type {DiscordCollection}
+     * @type {DiscordCollection<Queue>}
      */
     public queues = new Collection<Snowflake, Queue>();
     private _resultsCollectors = new Collection<string, Collector<Snowflake, Message>>();
@@ -53,7 +44,7 @@ export class Player extends EventEmitter {
 
     /**
      * The extractor model collection
-     * @type {DiscordCollection}
+     * @type {DiscordCollection<ExtractorModel>}
      */
     public Extractors = new Collection<string, ExtractorModel>();
 
@@ -65,16 +56,30 @@ export class Player extends EventEmitter {
     constructor(client: Client, options?: PlayerOptionsType) {
         super();
 
+        /**
+         * The discord client that instantiated this player
+         * @name Player#client
+         * @type {DiscordClient}
+         * @readonly
+         */
         Object.defineProperty(this, 'client', {
             value: client,
             enumerable: false
         });
 
+        /**
+         * The player options
+         * @type {PlayerOptions}
+         */
         this.options = Object.assign({}, PlayerOptions, options ?? {});
 
         // check FFmpeg
         void Util.alertFFmpeg();
 
+        /**
+         * Audio filters
+         * @type {Object}
+         */
         this.filters = AudioFilters;
 
         this.client.on('voiceStateUpdate', (o, n) => void this._handleVoiceStateUpdate(o, n));
@@ -86,6 +91,10 @@ export class Player extends EventEmitter {
         }
     }
 
+    /**
+     * The audio filters
+     * @returns {Object}
+     */
     static get AudioFilters(): typeof AudioFilters {
         return AudioFilters;
     }
@@ -94,6 +103,7 @@ export class Player extends EventEmitter {
      * Define custom extractor in this player
      * @param {String} extractorName The extractor name
      * @param {any} extractor The extractor itself
+     * @returns {Player}
      */
     use(extractorName: string, extractor: any): Player {
         if (!extractorName) throw new PlayerError('Missing extractor name!', 'PlayerExtractorError');
@@ -113,6 +123,7 @@ export class Player extends EventEmitter {
     /**
      * Remove existing extractor from this player
      * @param {String} extractorName The extractor name
+     * @returns {Boolean}
      */
     unuse(extractorName: string): boolean {
         if (!extractorName) throw new PlayerError('Missing extractor name!', 'PlayerExtractorError');
@@ -369,6 +380,7 @@ export class Player extends EventEmitter {
      * @param {string|Track} query Search query, can be `Player.Track` instance
      * @param {Boolean} [firstResult] If it should play the first result
      * @example await player.play(message, "never gonna give you up", true)
+     * @returns {Promise<void>}
      */
     async play(message: Message, query: string | Track, firstResult?: boolean): Promise<void> {
         if (!message) throw new PlayerError('Play function needs message');
@@ -451,6 +463,7 @@ export class Player extends EventEmitter {
     /**
      * Checks if this player is playing in a server
      * @param {DiscordMessage} message The message object
+     * @returns {Boolean}
      */
     isPlaying(message: Message): boolean {
         return this.queues.some((g) => g.guildID === message.guild.id);
@@ -459,6 +472,7 @@ export class Player extends EventEmitter {
     /**
      * Returns guild queue object
      * @param {DiscordMessage} message The message object
+     * @returns {Queue}
      */
     getQueue(message: Message): Queue {
         return this.queues.find((g) => g.guildID === message.guild.id);
@@ -468,6 +482,7 @@ export class Player extends EventEmitter {
      * Sets audio filters in this player
      * @param {DiscordMessage} message The message object
      * @param {QueueFilters} newFilters Audio filters object
+     * @returns {Promise<void>}
      */
     setFilters(message: Message, newFilters: QueueFilters): Promise<void> {
         return new Promise((resolve) => {
@@ -503,6 +518,7 @@ export class Player extends EventEmitter {
      * Sets track position
      * @param {DiscordMessage} message The message object
      * @param {Number} time Time in ms to set
+     * @returns {Promise<void>}
      */
     setPosition(message: Message, time: number): Promise<void> {
         return new Promise((resolve) => {
@@ -526,6 +542,7 @@ export class Player extends EventEmitter {
      * Sets track position
      * @param {DiscordMessage} message The message object
      * @param {Number} time Time in ms to set
+     * @returns {Promise<void>}
      */
     seek(message: Message, time: number): Promise<void> {
         return this.setPosition(message, time);
@@ -534,6 +551,7 @@ export class Player extends EventEmitter {
     /**
      * Skips current track
      * @param {DiscordMessage} message The message object
+     * @returns {Boolean}
      */
     skip(message: Message): boolean {
         const queue = this.getQueue(message);
@@ -556,6 +574,7 @@ export class Player extends EventEmitter {
      * Moves to a new voice channel
      * @param {DiscordMessage} message The message object
      * @param {DiscordVoiceChannel} channel New voice channel to move to
+     * @returns {Boolean}
      */
     moveTo(message: Message, channel?: VoiceChannel): boolean {
         if (!channel || channel.type !== 'voice') return;
@@ -582,6 +601,7 @@ export class Player extends EventEmitter {
     /**
      * Pause the playback
      * @param {DiscordMessage} message The message object
+     * @returns {Boolean}
      */
     pause(message: Message): boolean {
         const queue = this.getQueue(message);
@@ -602,6 +622,7 @@ export class Player extends EventEmitter {
     /**
      * Resume the playback
      * @param {DiscordMessage} message The message object
+     * @returns {Boolean}
      */
     resume(message: Message): boolean {
         const queue = this.getQueue(message);
@@ -622,6 +643,7 @@ export class Player extends EventEmitter {
     /**
      * Stops the player
      * @param {DiscordMessage} message The message object
+     * @returns {Boolean}
      */
     stop(message: Message): boolean {
         const queue = this.getQueue(message);
@@ -647,6 +669,7 @@ export class Player extends EventEmitter {
      * Sets music volume
      * @param {DiscordMessage} message The message object
      * @param {Number} percent The volume percentage/amount to set
+     * @returns {Boolean}
      */
     setVolume(message: Message, percent: number): boolean {
         const queue = this.getQueue(message);
@@ -668,6 +691,7 @@ export class Player extends EventEmitter {
     /**
      * Clears the queue
      * @param {DiscordMessage} message The message object
+     * @returns {Boolean}
      */
     clearQueue(message: Message): boolean {
         const queue = this.getQueue(message);
@@ -684,6 +708,7 @@ export class Player extends EventEmitter {
     /**
      * Plays previous track
      * @param {DiscordMessage} message The message object
+     * @returns {Boolean}
      */
     back(message: Message): boolean {
         const queue = this.getQueue(message);
@@ -724,6 +749,7 @@ export class Player extends EventEmitter {
      * Sets loop mode
      * @param {DiscordMessage} message The message object
      * @param {Boolean} enabled If it should enable the loop mode
+     * @returns {Boolean}
      */
     setLoopMode(message: Message, enabled: boolean): boolean {
         const queue = this.getQueue(message);
@@ -740,6 +766,7 @@ export class Player extends EventEmitter {
     /**
      * Returns currently playing track
      * @param {DiscordMessage} message The message object
+     * @returns {Track}
      */
     nowPlaying(message: Message): Track {
         const queue = this.getQueue(message);
@@ -754,6 +781,7 @@ export class Player extends EventEmitter {
     /**
      * Shuffles the queue
      * @param {DiscordMessage} message The message object
+     * @returns {Queue}
      */
     shuffle(message: Message): Queue {
         const queue = this.getQueue(message);
@@ -778,6 +806,7 @@ export class Player extends EventEmitter {
      * Removes specified track
      * @param {DiscordMessage} message The message object
      * @param {Track|number} track The track object/id to remove
+     * @returns {Track}
      */
     remove(message: Message, track: Track | number): Track {
         const queue = this.getQueue(message);
@@ -806,6 +835,7 @@ export class Player extends EventEmitter {
      * Returns time code of currently playing song
      * @param {DiscordMessage} message The message object
      * @param {Boolean} [queueTime] If it should make the time code of the whole queue
+     * @returns {Object}
      */
     getTimeCode(message: Message, queueTime?: boolean): { current: string; end: string } {
         const queue = this.getQueue(message);
@@ -830,6 +860,7 @@ export class Player extends EventEmitter {
      * Creates progressbar
      * @param {DiscordMessage} message The message object
      * @param {PlayerProgressbarOptions} [options] Progressbar options
+     * @returns {String}
      */
     createProgressBar(message: Message, options?: PlayerProgressbarOptions): string {
         const queue = this.getQueue(message);
@@ -879,6 +910,7 @@ export class Player extends EventEmitter {
      * @param {String} query Search query
      * @example const lyrics = await player.lyrics("alan walker faded")
      * message.channel.send(lyrics.lyrics);
+     * @returns {Promise<LyricsData>}
      */
     async lyrics(query: string): Promise<LyricsData> {
         const extractor = Util.require('@discord-player/extractor');
@@ -894,6 +926,7 @@ export class Player extends EventEmitter {
      * Toggle autoplay for youtube streams
      * @param {DiscordMessage} message The message object
      * @param {Boolean} enable Enable/Disable autoplay
+     * @returns {boolean}
      */
     setAutoPlay(message: Message, enable: boolean): boolean {
         const queue = this.getQueue(message);
@@ -906,6 +939,7 @@ export class Player extends EventEmitter {
 
     /**
      * Player stats
+     * @returns {PlayerStats}
      */
     getStats(): PlayerStats {
         return {

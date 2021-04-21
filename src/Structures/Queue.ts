@@ -6,9 +6,6 @@ import { Track } from './Track';
 import { QueueFilters } from '../types/types';
 
 export class Queue extends EventEmitter {
-    /**
-     * The player that instantiated this Queue
-     */
     public player!: Player;
     public guildID: Snowflake;
     public voiceConnection?: VoiceConnection;
@@ -39,6 +36,12 @@ export class Queue extends EventEmitter {
     constructor(player: Player, message: Message) {
         super();
 
+        /**
+         * The player that instantiated this Queue
+         * @name Queue#player
+         * @type {Player}
+         * @readonly
+         */
         Object.defineProperty(this, 'player', { value: player, enumerable: false });
 
         /**
@@ -191,7 +194,7 @@ export class Queue extends EventEmitter {
 
     /**
      * String representation of this Queue
-     * @type {String}
+     * @returns {String}
      */
     toString(): string {
         return `<Queue ${this.guildID}>`;

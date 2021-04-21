@@ -22,6 +22,7 @@ class ExtractorModel {
     /**
      * Method to handle requests from `Player.play()`
      * @param {String} query Query to handle
+     * @returns {Promise<ExtractorModelData>}
      */
     async handle(query: string): Promise<ExtractorModelData> {
         const data = await this._raw.getInfo(query);
@@ -42,6 +43,7 @@ class ExtractorModel {
     /**
      * Method used by Discord Player to validate query with this extractor
      * @param {String} query The query to validate
+     * @returns {Boolean}
      */
     validate(query: string): boolean {
         return Boolean(this._raw.validate(query));
