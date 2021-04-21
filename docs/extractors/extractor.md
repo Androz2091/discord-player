@@ -19,17 +19,17 @@ Your extractor should have 2 methods (required):
         // the duration in ms
         duration: 20000,
         // the thumbnail
-        thumbnail: data.thumbnail,
+        thumbnail: "some thumbnail link",
         // engine, can be Readable streams or link to raw stream that gets played
-        engine: data.streamURL,
+        engine: "someStreamLink",
         // number of views
         views: 0,
         // author of this stream
-        author: data.artist.name,
+        author: "Some Artist",
         // description
         description: "",
         // link of this stream
-        url: data.url
+        url: "Some Link"
     }
     ```
  - `important: boolean`
@@ -39,6 +39,39 @@ Your extractor should have 2 methods (required):
  - `version: string`
 
    This should be the version of your extractor. It is not really important and is set to `0.0.0` by default.
+
+# Loading Extractors
+Discord Player Extractors can be loaded using `Player.use(ExtractorName, Extractor)` method.
+
+## Register Extractor
+
+```js
+const myExtractor = {
+  version: "1.0.0",
+  important: false,
+  validate: (query) => true,
+  getInfo: async (query) => {
+    return {
+        title: "Extracted by custom extractor",
+        duration: 20000,
+        thumbnail: "some thumbnail link",
+        engine: "someStreamLink",
+        views: 0,
+        author: "Some Artist",
+        description: "",
+        url: "Some Link"
+    };
+  }
+};
+
+player.use("GiveItSomeName", myExtractor);
+```
+
+## Remove Extractor
+
+```js
+player.unuse("GiveItSomeName");
+```
 
 # Examples
 ### You can check out **[@discord-player/extractor](https://github.com/Snowflake107/discord-player-extractors)**
