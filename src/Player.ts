@@ -25,13 +25,13 @@ import YouTube from 'youtube-sr';
 
 const SoundCloud = new SoundCloudClient();
 
+/**
+ * The Player class
+ * @extends {EventEmitter}
+ */
 export class Player extends EventEmitter {
     public client: Client;
     public options: PlayerOptionsType;
-
-    /**
-     * The audio filters
-     */
     public filters: typeof AudioFilters;
 
     /**
@@ -91,10 +91,6 @@ export class Player extends EventEmitter {
         }
     }
 
-    /**
-     * The audio filters
-     * @returns {Object}
-     */
     static get AudioFilters(): typeof AudioFilters {
         return AudioFilters;
     }
