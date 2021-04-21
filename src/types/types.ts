@@ -12,6 +12,7 @@ export interface PlayerOptions {
     enableLive?: boolean;
     ytdlDownloadOptions?: downloadOptions;
     useSafeSearch?: boolean;
+    disableAutoRegister?: boolean;
 }
 
 export type FiltersName = keyof QueueFilters;

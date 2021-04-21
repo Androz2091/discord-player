@@ -85,9 +85,11 @@ export class Player extends EventEmitter {
         this.client.on('voiceStateUpdate', (o, n) => void this._handleVoiceStateUpdate(o, n));
 
         // auto detect @discord-player/extractor
-        let nv: any;
-        if ((nv = Util.require('@discord-player/extractor'))) {
-            ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => void this.use(ext, nv[ext]));
+        if (!this.options.disableAutoRegister) {
+            let nv: any;
+            if ((nv = Util.require('@discord-player/extractor'))) {
+                ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => void this.use(ext, nv[ext]));
+            }
         }
     }
 
@@ -903,6 +905,7 @@ export class Player extends EventEmitter {
 
     /**
      * Gets lyrics of a song
+     * <warn>You need to have `@discord-player/extractor` installed in order to use this method!</warn>
      * @param {String} query Search query
      * @example const lyrics = await player.lyrics("alan walker faded")
      * message.channel.send(lyrics.lyrics);
@@ -1209,7 +1212,7 @@ export class Player extends EventEmitter {
     }
 
     toString() {
-        return `<Player ${this.queues.size}>`
+        return `<Player ${this.queues.size}>`;
     }
 }
 
@@ -1332,6 +1335,7 @@ export default Player;
  * @property {Boolean} [enableLive=false] If it should enable live videos support
  * @property {YTDLDownloadOptions} [ytdlDownloadOptions={}] The download options passed to `ytdl-core`
  * @property {Boolean} [useSafeSearch=false] If it should use `safe search` method for youtube searches
+ * @property {Boolean} [disableAutoRegister=false] If it should disable auto-registeration of `@discord-player/extractor`
  */
 
 /**
