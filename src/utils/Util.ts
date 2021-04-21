@@ -24,7 +24,7 @@ export class Util {
 
     /**
      * Checks FFmpeg Version
-     * @param {boolean} [force] If it should forcefully get the version
+     * @param {Boolean} [force] If it should forcefully get the version
      */
     static getFFmpegVersion(force?: boolean): string {
         try {
@@ -38,7 +38,7 @@ export class Util {
 
     /**
      * Checks FFmpeg
-     * @param {boolean} [force] If it should forcefully get the version
+     * @param {Boolean} [force] If it should forcefully get the version
      */
     static checkFFmpeg(force?: boolean): boolean {
         const version = Util.getFFmpegVersion(force);
@@ -59,7 +59,7 @@ export class Util {
 
     /**
      * Resolves query type
-     * @param {string} query The query
+     * @param {String} query The query
      */
     static getQueryType(query: string): QueryType {
         if (SoundcloudValidateURL(query) && !query.includes('/sets/')) return 'soundcloud_track';
@@ -79,7 +79,7 @@ export class Util {
 
     /**
      * Checks if the given string is url
-     * @param {string} str URL to check
+     * @param {String} str URL to check
      */
     static isURL(str: string): boolean {
         return str.length < 2083 && attachmentRegex.test(str);
@@ -87,7 +87,7 @@ export class Util {
 
     /**
      * Returns Vimeo ID
-     * @param {string} query Vimeo link
+     * @param {String} query Vimeo link
      */
     static getVimeoID(query: string): string {
         return Util.getQueryType(query) === 'vimeo'
@@ -100,7 +100,7 @@ export class Util {
 
     /**
      * Parses ms time
-     * @param {number} milliseconds Time to parse
+     * @param {Number} milliseconds Time to parse
      */
     static parseMS(milliseconds: number): TimeData {
         const roundTowardsZero = milliseconds > 0 ? Math.floor : Math.ceil;
@@ -125,7 +125,7 @@ export class Util {
 
     /**
      * Makes youtube searches
-     * @param {string} query The query
+     * @param {String} query The query
      * @param {any} options Options
      * @returns {Promise<Track[]>}
      */
@@ -206,7 +206,7 @@ export class Util {
 
     /**
      * Manage CJS require
-     * @param {string} id id to require
+     * @param {String} id id to require
      */
     static require(id: string): any {
         try {

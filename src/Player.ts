@@ -91,7 +91,7 @@ export class Player extends EventEmitter {
 
     /**
      * Define custom extractor in this player
-     * @param {string} extractorName The extractor name
+     * @param {String} extractorName The extractor name
      * @param {any} extractor The extractor itself
      */
     use(extractorName: string, extractor: any): Player {
@@ -111,7 +111,7 @@ export class Player extends EventEmitter {
 
     /**
      * Remove existing extractor from this player
-     * @param {string} extractorName The extractor name
+     * @param {String} extractorName The extractor name
      */
     unuse(extractorName: string): boolean {
         if (!extractorName) throw new PlayerError('Missing extractor name!', 'PlayerExtractorError');
@@ -366,7 +366,7 @@ export class Player extends EventEmitter {
      * Play a song
      * @param {Discord.Message} message The discord.js message object
      * @param {string|Track} query Search query, can be `Player.Track` instance
-     * @param {boolean} [firstResult] If it should play the first result
+     * @param {Boolean} [firstResult] If it should play the first result
      * @example await player.play(message, "never gonna give you up", true)
      */
     async play(message: Message, query: string | Track, firstResult?: boolean): Promise<void> {
@@ -501,7 +501,7 @@ export class Player extends EventEmitter {
     /**
      * Sets track position
      * @param {Discord.Message} message The message object
-     * @param {number} time Time in ms to set
+     * @param {Number} time Time in ms to set
      */
     setPosition(message: Message, time: number): Promise<void> {
         return new Promise((resolve) => {
@@ -524,7 +524,7 @@ export class Player extends EventEmitter {
     /**
      * Sets track position
      * @param {Discord.Message} message The message object
-     * @param {number} time Time in ms to set
+     * @param {Number} time Time in ms to set
      */
     seek(message: Message, time: number): Promise<void> {
         return this.setPosition(message, time);
@@ -645,7 +645,7 @@ export class Player extends EventEmitter {
     /**
      * Sets music volume
      * @param {Discord.Message} message The message object
-     * @param {number} percent The volume percentage/amount to set
+     * @param {Number} percent The volume percentage/amount to set
      */
     setVolume(message: Message, percent: number): boolean {
         const queue = this.getQueue(message);
@@ -705,7 +705,7 @@ export class Player extends EventEmitter {
     /**
      * Sets repeat mode
      * @param {Discord.Message} message The message object
-     * @param {boolean} enabled If it should enable the repeat mode
+     * @param {Boolean} enabled If it should enable the repeat mode
      */
     setRepeatMode(message: Message, enabled: boolean): boolean {
         const queue = this.getQueue(message);
@@ -722,7 +722,7 @@ export class Player extends EventEmitter {
     /**
      * Sets loop mode
      * @param {Discord.Message} message The message object
-     * @param {boolean} enabled If it should enable the loop mode
+     * @param {Boolean} enabled If it should enable the loop mode
      */
     setLoopMode(message: Message, enabled: boolean): boolean {
         const queue = this.getQueue(message);
@@ -804,7 +804,7 @@ export class Player extends EventEmitter {
     /**
      * Returns time code of currently playing song
      * @param {Discord.Message} message The message object
-     * @param {boolean} [queueTime] If it should make the time code of the whole queue
+     * @param {Boolean} [queueTime] If it should make the time code of the whole queue
      */
     getTimeCode(message: Message, queueTime?: boolean): { current: string; end: string } {
         const queue = this.getQueue(message);
@@ -875,7 +875,7 @@ export class Player extends EventEmitter {
 
     /**
      * Gets lyrics of a song
-     * @param {string} query Search query
+     * @param {String} query Search query
      * @example const lyrics = await player.lyrics("alan walker faded")
      * message.channel.send(lyrics.lyrics);
      */
@@ -892,7 +892,7 @@ export class Player extends EventEmitter {
     /**
      * Toggle autoplay for youtube streams
      * @param {Discord.Message} message The message object
-     * @param {boolean} enable Enable/Disable autoplay
+     * @param {Boolean} enable Enable/Disable autoplay
      */
     setAutoPlay(message: Message, enable: boolean): boolean {
         const queue = this.getQueue(message);
@@ -1199,7 +1199,7 @@ export default Player;
  * Emitted when the bot is awaiting search results
  * @event Player#searchResults
  * @param {Discord.Message} message The message
- * @param {string} query The query
+ * @param {String} query The query
  * @param {Track[]} tracks The tracks
  * @param {Discord.Collector} collector The collector
  */
@@ -1208,9 +1208,9 @@ export default Player;
  * Emitted when the user has sent an invalid response for search results
  * @event Player#searchInvalidResponse
  * @param {Discord.Message} message The message
- * @param {string} query The query
+ * @param {String} query The query
  * @param {Track[]} tracks The tracks
- * @param {string} invalidResponse The `invalidResponse` string
+ * @param {String} invalidResponse The `invalidResponse` string
  * @param {Discord.MessageCollector} collector The collector
  */
 
@@ -1218,7 +1218,7 @@ export default Player;
  * Emitted when the bot has stopped awaiting search results (timeout)
  * @event Player#searchCancel
  * @param {Discord.Message} message The message
- * @param {string} query The query
+ * @param {String} query The query
  * @param {Track[]} tracks The tracks
  */
 
@@ -1226,7 +1226,7 @@ export default Player;
  * Emitted when the bot can't find related results to the query
  * @event Player#noResults
  * @param {Discord.Message} message The message
- * @param {string} query The query
+ * @param {String} query The query
  */
 
 /**
@@ -1268,7 +1268,7 @@ export default Player;
 /**
  * Emitted when an error is triggered
  * @event Player#error
- * @param {string} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying`, `ParseError`, `LiveVideo` or `VideoUnavailable`.
+ * @param {String} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying`, `ParseError`, `LiveVideo` or `VideoUnavailable`.
  * @param {Discord.Message} message The message
  */
 
@@ -1284,4 +1284,112 @@ export default Player;
  * @event Player#playlistParseEnd
  * @param {Object} playlist The playlist data (parsed)
  * @param {Discord.Message} message The message
+ */
+
+/**
+ * @typedef {Object} PlayerOptions
+ * @property {Boolean} [leaveOnEnd=false] If it should leave on queue end
+ * @property {Number} [leaveOnEndCooldown=0] Time in ms to wait before executing `leaveOnEnd`
+ * @property {Boolean} [leaveOnStop=false] If it should leave on stop command
+ * @property {Boolean} [leaveOnEmpty=false] If it should leave on empty voice channel
+ * @property {Number} [leaveOnEmptyCooldown=0] Time in ms to wait before executing `leaveOnEmpty`
+ * @property {Boolean} [autoSelfDeaf=false] If it should set the client to `self deaf` mode on joining
+ * @property {Boolean} [enableLive=false] If it should enable live videos support
+ * @property {YTDLDownloadOptions} [ytdlDownloadOptions={}] The download options passed to `ytdl-core`
+ * @property {Boolean} [useSafeSearch=false] If it should use `safe search` method for youtube searches
+ */
+
+/**
+ * @typedef {'soundcloud'|'youtube'|'arbitrary'} TrackSource
+ */
+
+/**
+ * @typedef {Object} TrackData
+ * @property {String} title The title
+ * @property {String} description The description
+ * @property {String} author The author
+ * @property {String} url The url
+ * @property {String} duration The duration
+ * @property {Number} views The view count
+ * @property {Discord.User} requestedBy The user who requested this track
+ * @property {Boolean} fromPlaylist If this track came from a playlist
+ * @property {TrackSource} [source] The track source
+ * @property {string|Readable} [engine] The stream engine
+ * @property {Boolean} [live=false] If this track is livestream instance
+ */
+
+/**
+ * @typedef {Object} QueueFilters
+ * The FFmpeg Filters
+ */
+
+/**
+ * @typedef {'soundcloud_track'|'soundcloud_playlist'|'spotify_song'|'spotify_album'|'spotify_playlist'|'youtube_video'|'youtube_playlist'|'vimeo'|'facebook'|'reverbnation'|'attachment'|'youtube_search'} QueryType The query type
+ */
+
+/**
+ * @typedef {Object} ExtractorModelData
+ * @property {String} title The title
+ * @property {Number} duration The duration in ms
+ * @property {String} thumbnail The thumbnail url
+ * @property {string|Readable} engine The audio engine
+ * @property {Number} views The views count of this stream
+ * @property {String} author The author
+ * @property {String} description The description
+ * @property {String} url The url
+ * @property {String} [version='0.0.0'] The extractor version
+ * @property {Boolean} [important=false] Mark as important
+ */
+
+/**
+ * @typedef {Object} PlayerProgressbarOptions
+ * @property {Boolean} [timecodes] If it should return progres bar with time codes
+ * @property {Boolean} [queue] if it should return the progress bar of the whole queue
+ * @property {Number} [length] The length of progress bar to build
+ */
+
+/**
+ * @typedef {Object} LyricsData
+ * @property {String} title The title of the lyrics
+ * @property {Number} id The song id
+ * @property {String} thumbnail The thumbnail
+ * @property {String} image The image
+ * @property {String} url The url
+ * @property {Object} artist The artust info
+ * @property {String} [artist.name] The name of the artist
+ * @property {Number} [artist.id] The ID of the artist
+ * @property {String} [artist.url] The profile link of the artist
+ * @property {String} [artist.image] The artist image url
+ * @property {String?} lyrics The lyrics
+ */
+
+/**
+ * @typedef {Object} PlayerStats
+ * @property {Number} uptime The uptime in ms
+ * @property {Number} connections The number of connections
+ * @property {Number} users The number of users
+ * @property {Number} queues The number of queues
+ * @property {Number} extractors The number of custom extractors registered
+ * @property {Object} versions The versions metadata
+ * @property {String} [versions.ffmpeg] The ffmpeg version
+ * @property {String} [versions.node] The node version
+ * @property {String} [versions.v8] The v8 JavaScript engine version
+ * @property {Object} system The system data
+ * @property {String} [system.arch] The system arch
+ * @property {'aix'|'android'|'darwin'|'freebsd'|'linux'|'openbsd'|'sunos'|'win32'|'cygwin'|'netbsd'} [system.platform] The system platform
+ * @property {Number} [system.cpu] The cpu count
+ * @property {Object} [system.memory] The memory info
+ * @property {String} [system.memory.total] The total memory
+ * @property {String} [system.memory.usage] The memory usage
+ * @property {String} [system.memory.rss] The memory usage in RSS
+ * @property {String} [system.memory.arrayBuffers] The memory usage in ArrayBuffers
+ * @property {Number} [system.uptime] The system uptime
+ */
+
+/**
+ * @typedef {Object} TimeData
+ * @property {Number} days The time in days
+ * @property {Number} hours The time in hours
+ * @property {Number} minutes The time in minutes
+ * @property {Number} seconds The time in seconds
  */

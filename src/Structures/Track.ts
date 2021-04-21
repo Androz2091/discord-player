@@ -12,43 +12,43 @@ export class Track {
 
     /**
      * Title of this track
-     * @type {string}
+     * @type {String}
      */
     public title!: string;
 
     /**
      * Description of this track
-     * @type {string}
+     * @type {String}
      */
     public description!: string;
 
     /**
      * Author of this track
-     * @type {string}
+     * @type {String}
      */
     public author!: string;
 
     /**
      * Link of this track
-     * @type {string}
+     * @type {String}
      */
     public url!: string;
 
     /**
      * Thumbnail of this track
-     * @type {string}
+     * @type {String}
      */
     public thumbnail!: string;
 
     /**
      * Duration of this track
-     * @type {string}
+     * @type {String}
      */
     public duration!: string;
 
     /**
      * View count of this track
-     * @type {number}
+     * @type {Number}
      */
     public views!: number;
 
@@ -60,7 +60,7 @@ export class Track {
 
     /**
      * If this track belongs to a playlist
-     * @type {boolean}
+     * @type {Boolean}
      */
     public fromPlaylist!: boolean;
 
@@ -106,7 +106,7 @@ export class Track {
 
     /**
      * The track duration in millisecond
-     * @type {number}
+     * @type {Number}
      */
     get durationMS(): number {
         const times = (n: number, t: number) => {
@@ -124,7 +124,7 @@ export class Track {
 
     /**
      * String representation of this track
-     * @type {string}
+     * @type {String}
      */
     toString(): string {
         return `${this.title} by ${this.author}`;

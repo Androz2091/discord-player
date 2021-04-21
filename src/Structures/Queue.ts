@@ -78,7 +78,7 @@ export class Queue extends EventEmitter {
 
         /**
          * Queue volume
-         * @type {number}
+         * @type {Number}
          */
         this.volume = 100;
 
@@ -102,7 +102,7 @@ export class Queue extends EventEmitter {
 
         /**
          * The additional calculated stream time
-         * @type {number}
+         * @type {Number}
          */
         this.additionalStreamTime = 0;
 
@@ -133,7 +133,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Calculated volume of this queue
-     * @type {number}
+     * @type {Number}
      */
     get calculatedVolume(): number {
         return this.filters.normalizer ? this.volume + 70 : this.volume;
@@ -141,7 +141,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Total duration
-     * @type {number}
+     * @type {Number}
      */
     get totalTime(): number {
         return this.tracks.length > 0 ? this.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0;
@@ -149,7 +149,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Current stream time
-     * @type {number}
+     * @type {Number}
      */
     get currentStreamTime(): number {
         return this.voiceConnection?.dispatcher?.streamTime + this.additionalStreamTime || 0;
@@ -166,7 +166,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Returns array of all enabled filters
-     * @type {string[]}
+     * @type {String[]}
      */
     getFiltersEnabled(): string[] {
         const filters: string[] = [];
@@ -180,7 +180,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Returns all disabled filters
-     * @type {string[]}
+     * @type {String[]}
      */
     getFiltersDisabled(): string[] {
         const enabled = this.getFiltersEnabled();
@@ -190,7 +190,7 @@ export class Queue extends EventEmitter {
 
     /**
      * String representation of this Queue
-     * @type {string}
+     * @type {String}
      */
     toString(): string {
         return `<Queue ${this.guildID}>`;
