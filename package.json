@@ -31,7 +31,17 @@
     "discord",
     "volume",
     "queue",
-    "youtube"
+    "youtube",
+    "discord.js",
+    "musicbot",
+    "discord-music-player",
+    "discord-music",
+    "music-player",
+    "youtube-dl",
+    "ytdl-core",
+    "ytdl",
+    "lavalink",
+    "api"
   ],
   "author": "Androz2091",
   "license": "MIT",

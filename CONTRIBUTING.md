@@ -18,5 +18,5 @@ We are using **[Prettier](https://prettier.io)** to format the code.
 # Pull Requests
 - Use English language
 - Explain what your update does
-
-- Run tests, formatting, etc. before making Pull Requests
+- Run `npm run docs:test` command to make sure documentation is working
+- Format the code properly with `npm run format`
