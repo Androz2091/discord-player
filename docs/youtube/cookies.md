@@ -13,3 +13,6 @@ const player = new Player(client, {
     }
 });
 ```
+
+> Keep in mind that using `cookies` after getting `429` **does not fix the problem**.
+> You should use `cookies` before getting `429` which helps to **_reduce_** `Error: Status Code 429`

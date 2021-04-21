@@ -1232,7 +1232,7 @@ export default Player;
  * @param {DiscordMessage} message The message
  * @param {String} query The query
  * @param {Track[]} tracks The tracks
- * @param {DiscordCollector} collector The collector
+ * @param {DiscordMessageCollector} collector The collector
  */
 
 /**

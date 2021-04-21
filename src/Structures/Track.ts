@@ -23,7 +23,7 @@ export class Track {
      */
     constructor(player: Player, data: TrackData) {
         /**
-         * The player that instantiated this Queue
+         * The player that instantiated this Track
          * @name Track#player
          * @type {Player}
          * @readonly
