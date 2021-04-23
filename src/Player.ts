@@ -979,7 +979,7 @@ export class Player extends EventEmitter {
     jump(message: Message, track: Track | number): boolean {
         const toJUMP = this.remove(message, track);
         const queue = this.getQueue(message);
-        if (!toJUMP || !queue) throw new PlayerError('Track not found');
+        if (!toJUMP || !queue) throw new PlayerError('Specified Track not found');
 
         queue.tracks.splice(1, 0, toJUMP);
 
