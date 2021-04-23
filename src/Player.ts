@@ -970,6 +970,22 @@ export class Player extends EventEmitter {
         };
     }
 
+    /**
+     * Jumps to particular track
+     * @param {DiscordMessage} message The message
+     * @param {Track|number} track The track to jump to
+     * @returns {boolean}
+     */
+    jump(message: Message, track: Track | number): boolean {
+        const toJUMP = this.remove(message, track);
+        const queue = this.getQueue(message);
+        if (!toJUMP || !queue) throw new PlayerError('Track not found');
+
+        queue.tracks.splice(1, 0, toJUMP);
+
+        return this.skip(message);
+    }
+
     private _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): void {
         const queue = this.queues.find((g) => g.guildID === oldState.guild.id);
         if (!queue) return;
