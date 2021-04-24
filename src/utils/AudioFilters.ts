@@ -1,5 +1,38 @@
 import { FiltersName } from '../types/types';
 
+/**
+ * The available audio filters
+ * @typedef {Object} AudioFilters
+ * @property {String} bassboost The bassboost filter
+ * @property {String} 8D The 8D filter
+ * @property {String} vaporwave The vaporwave filter
+ * @property {String} nightcore The nightcore filter
+ * @property {String} phaser The phaser filter
+ * @property {String} tremolo The tremolo filter
+ * @property {String} vibrato The vibrato filter
+ * @property {String} reverse The reverse filter
+ * @property {String} treble The treble filter
+ * @property {String} normalizer The normalizer filter
+ * @property {String} surrounding The surrounding filter
+ * @property {String} pulsator The pulsator filter
+ * @property {String} subboost The subboost filter
+ * @property {String} kakaoke The kakaoke filter
+ * @property {String} flanger The flanger filter
+ * @property {String} gate The gate filter
+ * @property {String} haas The haas filter
+ * @property {String} mcompand The mcompand filter
+ * @property {String} mono The mono filter
+ * @property {String} mstlr The mstlr filter
+ * @property {String} mstrr The mstrr filter
+ * @property {String} compressor The compressor filter
+ * @property {String} expander The expander filter
+ * @property {String} softlimiter The softlimiter filter
+ * @property {String} chorus The chorus filter
+ * @property {String} chorus2d The chorus2d filter
+ * @property {String} chorus3d The chorus3d filter
+ * @property {String} fadein The fadein filter
+ */
+
 const FilterList = {
     bassboost: 'bass=g=20',
     '8D': 'apulsator=hz=0.09',
@@ -30,17 +63,18 @@ const FilterList = {
     chorus3d: 'chorus=0.5:0.9:50|60|40:0.4|0.32|0.3:0.25|0.4|0.3:2|2.3|1.3',
     fadein: 'afade=t=in:ss=0:d=10',
 
-    *[Symbol.iterator](): IterableIterator<{ name: string; value: string }> {
+    *[Symbol.iterator](): IterableIterator<{ name: FiltersName; value: string }> {
         for (const [k, v] of Object.entries(this)) {
-            // @ts-ignore
-            yield { name: k, value: v };
+            if (typeof this[k as FiltersName] === 'string') yield { name: k as FiltersName, value: v as string };
         }
     },
+
     get names() {
-        return Object.keys(this);
+        return Object.keys(this).filter((p) => ['names', 'length'].includes(p) && typeof this[p as FiltersName] !== 'function');
     },
+
     get length() {
-        return Object.keys(this).length;
+        return Object.keys(this).filter((p) => ['names', 'length'].includes(p) && typeof this[p as FiltersName] !== 'function').length;
     },
 
     toString() {
