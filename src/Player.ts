@@ -524,7 +524,7 @@ export class Player extends EventEmitter {
             if (!queue) return this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message);
 
             if (typeof time !== 'number' && !isNaN(time)) time = parseInt(time);
-            if (queue.playing.durationMS >= time) return this.skip(message);
+            if (queue.playing.durationMS <= time) return this.skip(message);
             if (
                 queue.voiceConnection.dispatcher.streamTime === time ||
                 queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime === time
