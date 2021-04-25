@@ -7,4 +7,3 @@ export { Track } from './Structures/Track';
 export { Queue } from './Structures/Queue';
 export * from './types/types';
 export { PlayerError } from './utils/PlayerError';
-export { version } from '../package.json';
