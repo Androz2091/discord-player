@@ -1,7 +1,14 @@
-node_modules
-poc.js
-package-lock.json
-yarn.lock
-docs
-.vscode
-test
+# Modules
+node_modules/
+
+# Test dir
+test/
+
+# Compiled
+lib/
+
+# error logs
+yarn-error.log
+
+# demo
+demo/
