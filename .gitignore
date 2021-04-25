@@ -1,14 +1,15 @@
-# Modules
-node_modules/
+# Node
+node_modules
+package-lock.json
 
-# Test dir
-test/
+# Tests
+test
 
-# Compiled
-lib/
+# Compiled files
+lib
 
-# error logs
-yarn-error.log
+# Yarn logs
+yarn*.log
 
-# demo
-demo/
+# Demo
+demo
