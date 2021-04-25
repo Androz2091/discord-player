@@ -106,9 +106,9 @@ These bots are made by the community, they can help you build your own!
 * [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox)
 * [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
 
-## FAQ
+## Advanced
 
-### How to use cookies
+### Use cookies
 
 ```js
 const player = new Player(client, {
@@ -122,7 +122,7 @@ const player = new Player(client, {
 });
 ```
 
-### How to use custom proxies
+### Use custom proxies
 
 ```js
 const HttpsProxyAgent = require("https-proxy-agent");
