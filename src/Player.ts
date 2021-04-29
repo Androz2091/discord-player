@@ -175,17 +175,15 @@ export class Player extends EventEmitter {
                     }
                     break;
 
-                // todo: make spotify playlist/album load faster
-                case 'spotify_album':
-                case 'spotify_playlist': {
-                    this.emit(PlayerEvents.PLAYLIST_PARSE_START, null, message);
-                    const playlist = await spotify.getData(query);
-                    if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
+                    // todo: make spotify playlist/album load faster
+                    case 'spotify_album':
+                    case 'spotify_playlist': {
+                        this.emit(PlayerEvents.PLAYLIST_PARSE_START, null, message);
+                        const playlist = await spotify.getData(query);
+                        if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
-                    // tslint:disable:no-shadowed-variable
-                    const tracks = [];
-
-                    for (const item of playlist.tracks.items) {
+                    //Much faster loading
+                    const tracks = await Promise.all(playlist.tracks.items.map(async (track) => {
                         const sq =
                             queryType === 'spotify_album'
                                 ? `${item.artists[0].name} - ${item.name}`
@@ -197,8 +195,26 @@ export class Player extends EventEmitter {
                             pl: true
                         });
 
-                        if (data[0]) tracks.push(data[0]);
-                    }
+                        return results[0];
+                    }));
+
+//                     // tslint:disable:no-shadowed-variable
+//                     const tracks = [];
+
+//                     for (const item of playlist.tracks.items) {
+//                         const sq =
+//                             queryType === 'spotify_album'
+//                                 ? `${item.artists[0].name} - ${item.name}`
+//                                 : `${item.track.artists[0].name} - ${item.name}`;
+//                         const data = await Util.ytSearch(sq, {
+//                             limit: 1,
+//                             player: this,
+//                             user: message.author,
+//                             pl: true
+//                         });
+
+//                         if (data[0]) tracks.push(data[0]);
+//                     }
 
                     if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
