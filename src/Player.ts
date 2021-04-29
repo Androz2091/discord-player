@@ -182,7 +182,6 @@ export class Player extends EventEmitter {
                         const playlist = await spotify.getData(query);
                         if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
-                    //Much faster loading
                     const tracks = await Promise.all(playlist.tracks.items.map(async (track) => {
                         const sq =
                             queryType === 'spotify_album'
@@ -197,24 +196,6 @@ export class Player extends EventEmitter {
 
                         return results[0];
                     }));
-
-//                     // tslint:disable:no-shadowed-variable
-//                     const tracks = [];
-
-//                     for (const item of playlist.tracks.items) {
-//                         const sq =
-//                             queryType === 'spotify_album'
-//                                 ? `${item.artists[0].name} - ${item.name}`
-//                                 : `${item.track.artists[0].name} - ${item.name}`;
-//                         const data = await Util.ytSearch(sq, {
-//                             limit: 1,
-//                             player: this,
-//                             user: message.author,
-//                             pl: true
-//                         });
-
-//                         if (data[0]) tracks.push(data[0]);
-//                     }
 
                     if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
