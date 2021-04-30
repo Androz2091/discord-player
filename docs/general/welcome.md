@@ -3,7 +3,6 @@ Complete framework to facilitate music commands using **[discord.js](https://dis
 
 [![downloadsBadge](https://img.shields.io/npm/dt/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
 [![versionBadge](https://img.shields.io/npm/v/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
-[![discordBadge](https://img.shields.io/discord/558328638911545423?style=for-the-badge&color=7289da)](https://androz2091.fr/discord)
 
 ## Installation
 
@@ -71,7 +70,7 @@ client.on("message", async (message) => {
     const command = args.shift().toLowerCase();
 
     // !play Despacito
-    // will play "Despacito" in the voice channel
+    // will play the song "Despacito" in the voice channel
     if(command === "play"){
         client.player.play(message, args[0]);
         // as we registered the event above, no need to send a success message here
@@ -107,9 +106,9 @@ These bots are made by the community, they can help you build your own!
 * [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox)
 * [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
 
-## Advanced
+## FAQ
 
-### Use cookies
+### How to use cookies
 
 ```js
 const player = new Player(client, {
@@ -123,7 +122,7 @@ const player = new Player(client, {
 });
 ```
 
-### Use custom proxies
+### How to use custom proxies
 
 ```js
 const HttpsProxyAgent = require("https-proxy-agent");

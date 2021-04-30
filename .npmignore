@@ -1,3 +1,6 @@
-docs
-node_modules/
-poc.js
+src/
+tslint.json
+tsconfig.json
+.prettierrc
+test/
+demo/

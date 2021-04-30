@@ -1,0 +1,14 @@
+- name: General
+  files:
+    - name: Welcome
+      path: welcome.md
+- name: Extractors
+  files:
+    - name: Extractors API
+      path: extractor.md
+- name: YouTube
+  files:
+    - name: Using Cookies
+      path: cookies.md
+    - name: Using Proxy
+      path: proxy.md
