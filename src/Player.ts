@@ -881,8 +881,8 @@ export class Player extends EventEmitter {
                 : 15;
 
         const index = Math.round((currentStreamTime / totalTime) * length);
-        const indicator = '🔘';
-        const line = '▬';
+        const indicator = typeof options?.indicator === 'string' ? options?.indicator.length > 0 ? options?.indicator : '🔘' : '🔘';
+        const line = typeof options?.line === 'string' ? options?.line.length > 0 ? options?.line : '▬' : '▬';
 
         if (index >= 1 && index <= length) {
             const bar = line.repeat(length - 1).split('');
