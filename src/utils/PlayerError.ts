@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 export default class PlayerError extends Error {
     constructor(msg: string, name?: string) {
         super();

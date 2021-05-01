@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { PlayerOptions as DP_OPTIONS } from '../types/types';
 
 export const PlayerEvents = {

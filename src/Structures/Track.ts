@@ -18,79 +18,9 @@ export class Track {
     public fromPlaylist!: boolean;
     public raw!: TrackData;
 
-    /**
-     * Track constructor
-     * @param {Player} player The player that instantiated this Track
-     * @param {TrackData} data Track data
-     */
     constructor(player: Player, data: TrackData) {
-        /**
-         * The player that instantiated this Track
-         * @name Track#player
-         * @type {Player}
-         * @readonly
-         */
+ 
         Object.defineProperty(this, 'player', { value: player, enumerable: false });
-
-        /**
-         * Title of this track
-         * @name Track#title
-         * @type {String}
-         */
-
-        /**
-         * Description of this track
-         * @name Track#description
-         * @type {String}
-         */
-
-        /**
-         * Author of this track
-         * @name Track#author
-         * @type {String}
-         */
-
-        /**
-         * URL of this track
-         * @name Track#url
-         * @type {String}
-         */
-
-        /**
-         * Thumbnail of this track
-         * @name Track#thumbnail
-         * @type {String}
-         */
-
-        /**
-         * Duration of this track
-         * @name Track#duration
-         * @type {String}
-         */
-
-        /**
-         * Views count of this track
-         * @name Track#views
-         * @type {Number}
-         */
-
-        /**
-         * Person who requested this track
-         * @name Track#requestedBy
-         * @type {DiscordUser}
-         */
-
-        /**
-         * If this track belongs to playlist
-         * @name Track#fromPlaylist
-         * @type {Boolean}
-         */
-
-        /**
-         * Raw track data
-         * @name Track#raw
-         * @type {TrackData}
-         */
 
         void this._patch(data);
     }
@@ -110,19 +40,10 @@ export class Track {
         Object.defineProperty(this, 'raw', { get: () => data, enumerable: false });
     }
 
-    /**
-     * The queue in which this track is located
-     * @type {Queue}
-     * @readonly
-     */
     get queue(): Queue {
         return this.player.queues.find((q) => q.tracks.includes(this));
     }
 
-    /**
-     * The track duration in millisecond
-     * @type {Number}
-     */
     get durationMS(): number {
         const times = (n: number, t: number) => {
             let tn = 1;
@@ -137,10 +58,6 @@ export class Track {
             .reduce((a, c) => a + c, 0);
     }
 
-    /**
-     * String representation of this track
-     * @returns {String}
-     */
     toString(): string {
         return `${this.title} by ${this.author}`;
     }

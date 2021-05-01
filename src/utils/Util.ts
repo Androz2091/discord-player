@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { QueryType, TimeData } from '../types/types';
 import { FFmpeg } from 'prism-media';
 import YouTube from 'youtube-sr';
