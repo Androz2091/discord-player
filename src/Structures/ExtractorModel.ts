@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { ExtractorModelData } from '../types/types';
 
 class ExtractorModel {

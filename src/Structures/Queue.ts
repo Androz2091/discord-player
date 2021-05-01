@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Message, Snowflake, VoiceConnection } from 'discord.js';
 import AudioFilters from '../utils/AudioFilters';
 import { Player } from '../Player';
@@ -130,6 +132,7 @@ export class Queue extends EventEmitter {
     /**
      * Currently playing track
      * @type {Track}
+     * @readonly
      */
     get playing(): Track {
         return this.tracks[0];

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { FiltersName } from '../types/types';
 
 /**

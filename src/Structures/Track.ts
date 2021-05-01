@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Player } from '../Player';
 import { User } from 'discord.js';
 import { TrackData } from '../types/types';
@@ -111,6 +113,7 @@ export class Track {
     /**
      * The queue in which this track is located
      * @type {Queue}
+     * @readonly
      */
     get queue(): Queue {
         return this.player.queues.find((q) => q.tracks.includes(this));
