@@ -5,6 +5,8 @@ Complete framework to facilitate music commands using **[discord.js](https://dis
 [![versionBadge](https://img.shields.io/npm/v/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
 [![discordBadge](https://img.shields.io/discord/558328638911545423?style=for-the-badge&color=7289da)](https://androz2091.fr/discord)
 
+> V5 WIP
+
 ## Installation
 
 ### Install **[discord-player](https://npmjs.com/package/discord-player)**
