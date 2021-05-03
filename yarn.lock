@@ -872,9 +872,9 @@
     to-fast-properties "^2.0.0"
 
 "@discord-player/extractor@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@discord-player/extractor/-/extractor-2.0.0.tgz#3879e51d64b72d4dcee9338bdece5251d006c746"
-  integrity sha512-qNyF0dkLNRYvtVtLLO022RV8DzToCPJqbuAOqSWCSdkXiKSGoqTdKcZI9I/Lb87mchYuuakOXyPRvRwkAruX6w==
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@discord-player/extractor/-/extractor-2.0.2.tgz#deb505bf66ed8749ea6eb674e8d53d2feeac0b41"
+  integrity sha512-Vexx0Fj+x3x5g0ZX7AnFu4SrkFHh4xyg+YGJTAcgF1L7b6CRi10/dH7ejnDTvhMLUG/u+a+TClh4as9PnACNDQ==
   dependencies:
     genius-lyrics "^4.2.7"
     jsdom "^16.5.2"
