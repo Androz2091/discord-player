@@ -82,11 +82,13 @@ export class Player extends EventEmitter {
          */
         this.filters = AudioFilters;
 
-        this.client.on('voiceStateUpdate', (o, n) => void this._handleVoiceStateUpdate(o, n));
+        this.client.on('voiceStateUpdate', this._handleVoiceStateUpdate.bind(this));
 
         // auto detect @discord-player/extractor
         if (!this.options.disableAutoRegister) {
             let nv: any;
+
+            // tslint:disable:no-conditional-assignment
             if ((nv = Util.require('@discord-player/extractor'))) {
                 ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => void this.use(ext, nv[ext]));
             }
