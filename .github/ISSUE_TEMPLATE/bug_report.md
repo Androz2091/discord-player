@@ -25,7 +25,7 @@ Steps to reproduce the behavior:
 
 **Please complete the following information:**
  - Node Version: [x.x.x]
- - Library Version: [x.x.x]
+ - Discord Player Version: [x.x.x]
  - Discord.js Version: [x.x.x]
 
 **Additional context**

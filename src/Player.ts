@@ -82,11 +82,13 @@ export class Player extends EventEmitter {
          */
         this.filters = AudioFilters;
 
-        this.client.on('voiceStateUpdate', (o, n) => void this._handleVoiceStateUpdate(o, n));
+        this.client.on('voiceStateUpdate', this._handleVoiceStateUpdate.bind(this));
 
         // auto detect @discord-player/extractor
         if (!this.options.disableAutoRegister) {
             let nv: any;
+
+            // tslint:disable:no-conditional-assignment
             if ((nv = Util.require('@discord-player/extractor'))) {
                 ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => void this.use(ext, nv[ext]));
             }
@@ -269,6 +271,7 @@ export class Player extends EventEmitter {
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
+                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
                         this._addTracksToQueue(message, tracks);
                     }
@@ -323,6 +326,7 @@ export class Player extends EventEmitter {
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
+                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
                         this._addTracksToQueue(message, res.tracks);
                     }
@@ -820,9 +824,9 @@ export class Player extends EventEmitter {
                 queue.tracks = queue.tracks.filter((t) => t !== trackFound);
             }
         } else {
-            trackFound = queue.tracks.find((s) => s === track);
+            trackFound = queue.tracks.find((s) => s.url === track.url);
             if (trackFound) {
-                queue.tracks = queue.tracks.filter((s) => s !== trackFound);
+                queue.tracks = queue.tracks.filter((s) => s.url !== trackFound.url);
             }
         }
 
@@ -879,8 +883,9 @@ export class Player extends EventEmitter {
                 : 15;
 
         const index = Math.round((currentStreamTime / totalTime) * length);
-        const indicator = '🔘';
-        const line = '▬';
+        const indicator =
+            typeof options?.indicator === 'string' && options?.indicator.length > 0 ? options?.indicator : '🔘';
+        const line = typeof options?.line === 'string' && options?.line.length > 0 ? options?.line : '▬';
 
         if (index >= 1 && index <= length) {
             const bar = line.repeat(length - 1).split('');
