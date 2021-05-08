@@ -822,9 +822,9 @@ export class Player extends EventEmitter {
                 queue.tracks = queue.tracks.filter((t) => t !== trackFound);
             }
         } else {
-            trackFound = queue.tracks.find((s) => s === track);
+            trackFound = queue.tracks.find((s) => s.url === track.url);
             if (trackFound) {
-                queue.tracks = queue.tracks.filter((s) => s !== trackFound);
+                queue.tracks = queue.tracks.filter((s) => s.url !== trackFound.url);
             }
         }
 
