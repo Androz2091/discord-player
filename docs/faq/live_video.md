@@ -1,4 +1,5 @@
 # How to play live videos
+
 You cannot play live videos by default. If you need to play the live video, just add this option:
 
 ```js
