@@ -131,6 +131,14 @@ export class Player extends EventEmitter {
         return this.Extractors.delete(extractorName);
     }
 
+    /**
+     * Internal method to search tracks
+     * @param {DiscordMessage} message The message
+     * @param {string} query The query
+     * @param {boolean} [firstResult=false] If it should return the first result
+     * @returns {Promise<Track>}
+     * @private
+     */
     private _searchTracks(message: Message, query: string, firstResult?: boolean): Promise<Track> {
         return new Promise(async (resolve) => {
             let tracks: Track[] = [];
@@ -379,7 +387,7 @@ export class Player extends EventEmitter {
      * Play a song
      * @param {DiscordMessage} message The discord.js message object
      * @param {string|Track} query Search query, can be `Player.Track` instance
-     * @param {Boolean} [firstResult] If it should play the first result
+     * @param {Boolean} [firstResult=false] If it should play the first result
      * @example await player.play(message, "never gonna give you up", true)
      * @returns {Promise<void>}
      */
@@ -990,6 +998,13 @@ export class Player extends EventEmitter {
         return this.skip(message);
     }
 
+    /**
+     * Internal method to handle VoiceStateUpdate events
+     * @param {DiscordVoiceState} oldState The old voice state
+     * @param {DiscordVoiceState} newState The new voice state
+     * @returns {void}
+     * @private
+     */
     private _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): void {
         const queue = this.queues.find((g) => g.guildID === oldState.guild.id);
         if (!queue) return;
@@ -1023,7 +1038,14 @@ export class Player extends EventEmitter {
         }
     }
 
-    private _addTrackToQueue(message: Message, track: Track): Queue {
+    /**
+     * Internal method used to add tracks to the queue
+     * @param {DiscordMessage} message The discord message
+     * @param {Track} track The track
+     * @returns {Queue}
+     * @private
+     */
+    _addTrackToQueue(message: Message, track: Track): Queue {
         const queue = this.getQueue(message);
         if (!queue)
             this.emit(
@@ -1037,7 +1059,14 @@ export class Player extends EventEmitter {
         return queue;
     }
 
-    private _addTracksToQueue(message: Message, tracks: Track[]): Queue {
+    /**
+     * Same as `_addTrackToQueue` but used for multiple tracks
+     * @param {DiscordMessage} message Discord message
+     * @param {Track[]} tracks The tracks
+     * @returns {Queue}
+     * @private
+     */
+    _addTracksToQueue(message: Message, tracks: Track[]): Queue {
         const queue = this.getQueue(message);
         if (!queue)
             throw new PlayerError(
@@ -1085,6 +1114,13 @@ export class Player extends EventEmitter {
         });
     }
 
+    /**
+     * Internal method used to init stream playing
+     * @param {Queue} queue The queue
+     * @param {boolean} firstPlay If this is a first play
+     * @returns {Promise<void>}
+     * @private
+     */
     private async _playTrack(queue: Queue, firstPlay: boolean): Promise<void> {
         if (queue.stopped) return;
 
@@ -1139,6 +1175,14 @@ export class Player extends EventEmitter {
         });
     }
 
+    /**
+     * Internal method to play audio
+     * @param {Queue} queue The queue
+     * @param {boolean} updateFilter If this method was called for audio filter update
+     * @param {number} [seek] Time in ms to seek to
+     * @returns {Promise<void>}
+     * @private
+     */
     private _playStream(queue: Queue, updateFilter: boolean, seek?: number): Promise<void> {
         return new Promise(async (resolve) => {
             const ffmpeg = Util.checkFFmpeg();
@@ -1323,7 +1367,8 @@ export default Player;
  */
 
 /**
- * Emitted when an error is triggered
+ * Emitted when an error is triggered.
+ * <warn>This event should handled properly by the users otherwise it might crash the process!</warn>
  * @event Player#error
  * @param {String} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying`, `ParseError`, `LiveVideo` or `VideoUnavailable`.
  * @param {DiscordMessage} message The message
