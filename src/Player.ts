@@ -39,7 +39,19 @@ export class Player extends EventEmitter {
      * @type {DiscordCollection<Queue>}
      */
     public queues = new Collection<Snowflake, Queue>();
+
+    /**
+     * Collection of results collectors
+     * @type {DiscordCollection<DiscordCollector<DiscordSnowflake, DiscordMessage>>}
+     * @private
+     */
     private _resultsCollectors = new Collection<string, Collector<Snowflake, Message>>();
+
+    /**
+     * Collection of cooldowns timeout
+     * @type {DiscordCollection<Timeout>}
+     * @private
+     */
     private _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
 
     /**
