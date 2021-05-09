@@ -34,7 +34,7 @@ export const PlayerOptions: DP_OPTIONS = {
     leaveOnStop: true,
     leaveOnEmpty: true,
     leaveOnEmptyCooldown: 0,
-    autoSelfDeaf: true,
+    setSelfDeaf: true,
     enableLive: false,
     ytdlDownloadOptions: {}
 };

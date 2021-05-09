@@ -8,7 +8,7 @@ export interface PlayerOptions {
     leaveOnStop?: boolean;
     leaveOnEmpty?: boolean;
     leaveOnEmptyCooldown?: number;
-    autoSelfDeaf?: boolean;
+    setSelfDeaf?: boolean;
     enableLive?: boolean;
     ytdlDownloadOptions?: downloadOptions;
     useSafeSearch?: boolean;
