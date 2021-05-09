@@ -164,7 +164,7 @@ export class Player extends EventEmitter {
                             const track = new Track(this, {
                                 title: data.title,
                                 url: data.url,
-                                duration: Util.buildTimeCode(Util.parseMS(data.duration / 1000)),
+                                duration: Util.buildTimeCode(Util.parseMS(data.duration)),
                                 description: data.description,
                                 thumbnail: data.thumbnail,
                                 views: data.playCount,
@@ -317,7 +317,7 @@ export class Player extends EventEmitter {
                         const r = new Track(this, {
                             title: song.title,
                             url: song.url,
-                            duration: Util.buildTimeCode(Util.parseMS(song.duration / 1000)),
+                            duration: Util.buildTimeCode(Util.parseMS(song.duration)),
                             description: song.description,
                             thumbnail: song.thumbnail ?? 'https://soundcloud.com/pwa-icon-192.png',
                             views: song.playCount ?? 0,
