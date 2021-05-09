@@ -203,6 +203,7 @@ export class Player extends EventEmitter {
                     const playlist = await spotify.getData(query);
                     if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
+                    // tslint:disable-next-line:no-shadowed-variable
                     const tracks = await Promise.all<Track>(
                         playlist.tracks.items.map(async (item: any) => {
                             const sq =
@@ -280,6 +281,7 @@ export class Player extends EventEmitter {
                     this.emit(PlayerEvents.PLAYLIST_PARSE_END, playlist, message);
 
                     // @ts-ignore
+                    // tslint:disable-next-line:no-shadowed-variable
                     const tracks = playlist.videos as Track[];
 
                     if (this.isPlaying(message)) {
@@ -968,6 +970,7 @@ export class Player extends EventEmitter {
         return {
             uptime: this.client.uptime,
             connections: this.client.voice.connections.size,
+            // tslint:disable:no-shadowed-variable
             users: this.client.voice.connections.reduce(
                 (a, c) => a + c.channel.members.filter((a) => a.user.id !== this.client.user.id).size,
                 0
