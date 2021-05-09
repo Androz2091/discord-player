@@ -65,8 +65,6 @@ export class Util {
      * @returns {QueryType}
      */
     static getQueryType(query: string): QueryType {
-        // @todo: better validation
-        if (query.match(/soundcloud.app.goo.gl/)) return 'soundcloud_track';
         if (SoundcloudValidateURL(query) && !query.includes('/sets/')) return 'soundcloud_track';
         if (SoundcloudValidateURL(query) && query.includes('/sets/')) return 'soundcloud_playlist';
         if (spotifySongRegex.test(query)) return 'spotify_song';
