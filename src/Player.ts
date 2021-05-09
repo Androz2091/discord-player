@@ -1091,6 +1091,13 @@ export class Player extends EventEmitter {
         return queue;
     }
 
+    /**
+     * Internal method used to create queue
+     * @param {DiscordMessage} message The message
+     * @param {Track} track The track
+     * @returns {Promise<Queue>}
+     * @private
+     */
     private _createQueue(message: Message, track: Track): Promise<Queue> {
         return new Promise((resolve) => {
             const channel = message.member.voice ? message.member.voice.channel : null;
