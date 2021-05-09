@@ -1,8 +1,8 @@
 import Player from "../Player";
 
-class Playlist {
+export class Playlist {
     player: Player;
-    
+
     constructor(player: Player, data: any) {
         Object.defineProperty(this, "player", { value: player });
     }
