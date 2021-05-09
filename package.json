@@ -48,7 +48,7 @@
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
-  "homepage": "https://github.com/Androz2091/discord-player#readme",
+  "homepage": "https://discord-player.js.org",
   "dependencies": {
     "discord-ytdl-core": "^5.0.3",
     "soundcloud-scraper": "^4.0.4",
