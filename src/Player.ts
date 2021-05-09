@@ -177,27 +177,29 @@ export class Player extends EventEmitter {
                     }
                     break;
 
-                    case 'spotify_album':
-                    case 'spotify_playlist': {
-                        this.emit(PlayerEvents.PLAYLIST_PARSE_START, null, message);
-                        const playlist = await spotify.getData(query);
-                        if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
+                case 'spotify_album':
+                case 'spotify_playlist': {
+                    this.emit(PlayerEvents.PLAYLIST_PARSE_START, null, message);
+                    const playlist = await spotify.getData(query);
+                    if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
-                    const tracks = await Promise.all<Track>(playlist.tracks.items.map(async (item: any) => {
-                        const sq =
-                            queryType === 'spotify_album'
-                                ? `${item.artists[0].name} - ${item.name}`
-                                : `${item.track.artists[0].name} - ${item.name}`;
+                    const tracks = await Promise.all<Track>(
+                        playlist.tracks.items.map(async (item: any) => {
+                            const sq =
+                                queryType === 'spotify_album'
+                                    ? `${item.artists[0].name} - ${item.name}`
+                                    : `${item.track.artists[0].name} - ${item.name}`;
 
-                        const data = await Util.ytSearch(sq, {
-                            limit: 1,
-                            player: this,
-                            user: message.author,
-                            pl: true
-                        });
+                            const data = await Util.ytSearch(sq, {
+                                limit: 1,
+                                player: this,
+                                user: message.author,
+                                pl: true
+                            });
 
-                        return data[0];
-                    }));
+                            return data[0];
+                        })
+                    );
 
                     if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
