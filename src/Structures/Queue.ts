@@ -161,7 +161,7 @@ export class Queue extends EventEmitter {
         const streamTime = this.voiceConnection?.dispatcher?.streamTime + this.additionalStreamTime || 0;
 
         if (NC && VW) return streamTime * (NC + VW);
-        return NC ? streamTime * NC : VW ? (streamTime * VW) : streamTime;
+        return NC ? streamTime * NC : VW ? streamTime * VW : streamTime;
     }
 
     /**

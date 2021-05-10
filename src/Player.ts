@@ -232,8 +232,8 @@ export class Player extends EventEmitter {
                             if (data.length) return data[0];
                         })
                     );
-                    
-                    tracks = tracks.filter(f => !!f);
+
+                    tracks = tracks.filter((f) => !!f);
                     if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
                     const pl = {
