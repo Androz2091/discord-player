@@ -290,6 +290,10 @@ export class Player extends EventEmitter {
                     // @ts-ignore
                     playlist.requestedBy = message.author;
 
+                    Object.defineProperty(playlist, "tracks", {
+                        get: () => playlist.videos ?? []
+                    });
+
                     this.emit(PlayerEvents.PLAYLIST_PARSE_END, playlist, message);
 
                     // @ts-ignore
