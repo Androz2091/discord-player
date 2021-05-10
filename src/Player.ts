@@ -209,14 +209,13 @@ export class Player extends EventEmitter {
                     // tslint:disable-next-line:no-shadowed-variable
                     const tracks = await Promise.all<Track>(
                         playlist.tracks.items.map(async (item: any) => {
-                            
                             const sq =
                                 queryType === 'spotify_album'
                                     ? `${
                                           this.options.disableArtistSearch
                                               ? item.artists[0].name
                                               : `${item.artists[0].name} - `
-                                    }${item.name ?? item.track.name}`
+                                      }${item.name ?? item.track.name}`
                                     : `${
                                           this.options.disableArtistSearch
                                               ? item.track.artists[0].name
