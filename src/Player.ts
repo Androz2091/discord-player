@@ -254,8 +254,8 @@ export class Player extends EventEmitter {
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
-                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
+                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
                         this._addTracksToQueue(message, tracks);
                     }
 
