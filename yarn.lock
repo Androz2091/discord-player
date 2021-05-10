@@ -3917,10 +3917,10 @@ sort-array@^2.0.0:
     object-get "^2.1.0"
     typical "^2.6.0"
 
-soundcloud-scraper@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/soundcloud-scraper/-/soundcloud-scraper-4.0.3.tgz#cd7ed1d7b6ed1d7729fd7580c011281f652b920f"
-  integrity sha512-A0a6sVJ2wkkWIX8Ft3L63sfHBlFDRAaPFif+SWi07KCNLh8YTcylw45pts76pndxlupKwV2NgOTIYeF/F9tg8w==
+soundcloud-scraper@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/soundcloud-scraper/-/soundcloud-scraper-4.0.4.tgz#dfd6a45dc6e63fac7d6b31f2ba1d23a199ca4fb6"
+  integrity sha512-ei3KuPsVZRiq9j2GN580gQwVGZUWMdkmDAANSPm8qweUa4/UnKAnYiUsc/6volZsQiGsnJAP9+8HECDxNcTg6A==
   dependencies:
     cheerio "^1.0.0-rc.3"
     m3u8stream "^0.8.0"

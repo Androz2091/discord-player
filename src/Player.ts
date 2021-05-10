@@ -39,7 +39,19 @@ export class Player extends EventEmitter {
      * @type {DiscordCollection<Queue>}
      */
     public queues = new Collection<Snowflake, Queue>();
+
+    /**
+     * Collection of results collectors
+     * @type {DiscordCollection<DiscordCollector<DiscordSnowflake, DiscordMessage>>}
+     * @private
+     */
     private _resultsCollectors = new Collection<string, Collector<Snowflake, Message>>();
+
+    /**
+     * Collection of cooldowns timeout
+     * @type {DiscordCollection<Timeout>}
+     * @private
+     */
     private _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
 
     /**
@@ -131,6 +143,14 @@ export class Player extends EventEmitter {
         return this.Extractors.delete(extractorName);
     }
 
+    /**
+     * Internal method to search tracks
+     * @param {DiscordMessage} message The message
+     * @param {string} query The query
+     * @param {boolean} [firstResult=false] If it should return the first result
+     * @returns {Promise<Track>}
+     * @private
+     */
     private _searchTracks(message: Message, query: string, firstResult?: boolean): Promise<Track> {
         return new Promise(async (resolve) => {
             let tracks: Track[] = [];
@@ -144,7 +164,7 @@ export class Player extends EventEmitter {
                             const track = new Track(this, {
                                 title: data.title,
                                 url: data.url,
-                                duration: Util.buildTimeCode(Util.parseMS(data.duration / 1000)),
+                                duration: Util.buildTimeCode(Util.parseMS(data.duration)),
                                 description: data.description,
                                 thumbnail: data.thumbnail,
                                 views: data.playCount,
@@ -167,7 +187,10 @@ export class Player extends EventEmitter {
                         if (matchSpotifyURL) {
                             const spotifyData = await spotify.getPreview(query).catch(() => {});
                             if (spotifyData) {
-                                tracks = await Util.ytSearch(`${spotifyData.artist} - ${spotifyData.title}`, {
+                                const searchString = this.options.disableArtistSearch
+                                    ? spotifyData.title
+                                    : `${spotifyData.artist} - ${spotifyData.title}`;
+                                tracks = await Util.ytSearch(searchString, {
                                     user: message.author,
                                     player: this,
                                     limit: 1
@@ -177,38 +200,48 @@ export class Player extends EventEmitter {
                     }
                     break;
 
-                // todo: make spotify playlist/album load faster
                 case 'spotify_album':
                 case 'spotify_playlist': {
                     this.emit(PlayerEvents.PLAYLIST_PARSE_START, null, message);
                     const playlist = await spotify.getData(query);
                     if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
-                    // tslint:disable:no-shadowed-variable
-                    const tracks = [];
+                    // tslint:disable-next-line:no-shadowed-variable
+                    let tracks = await Promise.all<Track>(
+                        playlist.tracks.items.map(async (item: any) => {
+                            const sq =
+                                queryType === 'spotify_album'
+                                    ? `${
+                                          this.options.disableArtistSearch
+                                              ? item.artists[0].name
+                                              : `${item.artists[0].name} - `
+                                      }${item.name ?? item.track.name}`
+                                    : `${
+                                          this.options.disableArtistSearch
+                                              ? item.track.artists[0].name
+                                              : `${item.track.artists[0].name} - `
+                                      }${item.name ?? item.track.name}`;
 
-                    for (const item of playlist.tracks.items) {
-                        const sq =
-                            queryType === 'spotify_album'
-                                ? `${item.artists[0].name} - ${item.name}`
-                                : `${item.track.artists[0].name} - ${item.name}`;
-                        const data = await Util.ytSearch(sq, {
-                            limit: 1,
-                            player: this,
-                            user: message.author,
-                            pl: true
-                        });
+                            const data = await Util.ytSearch(sq, {
+                                limit: 1,
+                                player: this,
+                                user: message.author,
+                                pl: true
+                            });
 
-                        if (data[0]) tracks.push(data[0]);
-                    }
+                            if (data.length) return data[0];
+                        })
+                    );
 
+                    tracks = tracks.filter((f) => !!f);
                     if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
                     const pl = {
                         ...playlist,
                         tracks,
-                        duration: tracks.reduce((a, c) => a + c.durationMS, 0),
-                        thumbnail: playlist.images[0]?.url ?? tracks[0].thumbnail
+                        duration: tracks?.reduce((a, c) => a + (c?.durationMS ?? 0), 0) ?? 0,
+                        thumbnail: playlist.images[0]?.url ?? tracks[0].thumbnail,
+                        title: playlist.title ?? playlist.name ?? ''
                     };
 
                     this.emit(PlayerEvents.PLAYLIST_PARSE_END, pl, message);
@@ -221,6 +254,7 @@ export class Player extends EventEmitter {
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
+                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
                         this._addTracksToQueue(message, tracks);
                     }
@@ -258,9 +292,14 @@ export class Player extends EventEmitter {
                     // @ts-ignore
                     playlist.requestedBy = message.author;
 
+                    Object.defineProperty(playlist, 'tracks', {
+                        get: () => playlist.videos ?? []
+                    });
+
                     this.emit(PlayerEvents.PLAYLIST_PARSE_END, playlist, message);
 
                     // @ts-ignore
+                    // tslint:disable-next-line:no-shadowed-variable
                     const tracks = playlist.videos as Track[];
 
                     if (this.isPlaying(message)) {
@@ -298,7 +337,7 @@ export class Player extends EventEmitter {
                         const r = new Track(this, {
                             title: song.title,
                             url: song.url,
-                            duration: Util.buildTimeCode(Util.parseMS(song.duration / 1000)),
+                            duration: Util.buildTimeCode(Util.parseMS(song.duration)),
                             description: song.description,
                             thumbnail: song.thumbnail ?? 'https://soundcloud.com/pwa-icon-192.png',
                             views: song.playCount ?? 0,
@@ -380,7 +419,7 @@ export class Player extends EventEmitter {
      * Play a song
      * @param {DiscordMessage} message The discord.js message object
      * @param {string|Track} query Search query, can be `Player.Track` instance
-     * @param {Boolean} [firstResult] If it should play the first result
+     * @param {Boolean} [firstResult=false] If it should play the first result
      * @example await player.play(message, "never gonna give you up", true)
      * @returns {Promise<void>}
      */
@@ -949,6 +988,7 @@ export class Player extends EventEmitter {
         return {
             uptime: this.client.uptime,
             connections: this.client.voice.connections.size,
+            // tslint:disable:no-shadowed-variable
             users: this.client.voice.connections.reduce(
                 (a, c) => a + c.channel.members.filter((a) => a.user.id !== this.client.user.id).size,
                 0
@@ -991,6 +1031,13 @@ export class Player extends EventEmitter {
         return this.skip(message);
     }
 
+    /**
+     * Internal method to handle VoiceStateUpdate events
+     * @param {DiscordVoiceState} oldState The old voice state
+     * @param {DiscordVoiceState} newState The new voice state
+     * @returns {void}
+     * @private
+     */
     private _handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): void {
         const queue = this.queues.find((g) => g.guildID === oldState.guild.id);
         if (!queue) return;
@@ -1006,15 +1053,17 @@ export class Player extends EventEmitter {
 
         if (!oldState.channelID || newState.channelID) {
             const emptyTimeout = this._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-            const channelEmpty = Util.isVoiceEmpty(queue.voiceConnection.channel);
+
+            // @todo: stage channels
+            const channelEmpty = Util.isVoiceEmpty(queue.voiceConnection.channel as VoiceChannel);
             if (!channelEmpty && emptyTimeout) {
                 clearTimeout(emptyTimeout);
                 this._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
             }
         } else {
-            if (!Util.isVoiceEmpty(queue.voiceConnection.channel)) return;
+            if (!Util.isVoiceEmpty(queue.voiceConnection.channel as VoiceChannel)) return;
             const timeout = setTimeout(() => {
-                if (!Util.isVoiceEmpty(queue.voiceConnection.channel)) return;
+                if (!Util.isVoiceEmpty(queue.voiceConnection.channel as VoiceChannel)) return;
                 if (!this.queues.has(queue.guildID)) return;
                 queue.voiceConnection.channel.leave();
                 this.queues.delete(queue.guildID);
@@ -1024,7 +1073,14 @@ export class Player extends EventEmitter {
         }
     }
 
-    private _addTrackToQueue(message: Message, track: Track): Queue {
+    /**
+     * Internal method used to add tracks to the queue
+     * @param {DiscordMessage} message The discord message
+     * @param {Track} track The track
+     * @returns {Queue}
+     * @private
+     */
+    _addTrackToQueue(message: Message, track: Track): Queue {
         const queue = this.getQueue(message);
         if (!queue)
             this.emit(
@@ -1038,7 +1094,14 @@ export class Player extends EventEmitter {
         return queue;
     }
 
-    private _addTracksToQueue(message: Message, tracks: Track[]): Queue {
+    /**
+     * Same as `_addTrackToQueue` but used for multiple tracks
+     * @param {DiscordMessage} message Discord message
+     * @param {Track[]} tracks The tracks
+     * @returns {Queue}
+     * @private
+     */
+    _addTracksToQueue(message: Message, tracks: Track[]): Queue {
         const queue = this.getQueue(message);
         if (!queue)
             throw new PlayerError(
@@ -1048,6 +1111,13 @@ export class Player extends EventEmitter {
         return queue;
     }
 
+    /**
+     * Internal method used to create queue
+     * @param {DiscordMessage} message The message
+     * @param {Track} track The track
+     * @returns {Promise<Queue>}
+     * @private
+     */
     private _createQueue(message: Message, track: Track): Promise<Queue> {
         return new Promise((resolve) => {
             const channel = message.member.voice ? message.member.voice.channel : null;
@@ -1086,6 +1156,13 @@ export class Player extends EventEmitter {
         });
     }
 
+    /**
+     * Internal method used to init stream playing
+     * @param {Queue} queue The queue
+     * @param {boolean} firstPlay If this is a first play
+     * @returns {Promise<void>}
+     * @private
+     */
     private async _playTrack(queue: Queue, firstPlay: boolean): Promise<void> {
         if (queue.stopped) return;
 
@@ -1140,6 +1217,14 @@ export class Player extends EventEmitter {
         });
     }
 
+    /**
+     * Internal method to play audio
+     * @param {Queue} queue The queue
+     * @param {boolean} updateFilter If this method was called for audio filter update
+     * @param {number} [seek] Time in ms to seek to
+     * @returns {Promise<void>}
+     * @private
+     */
     private _playStream(queue: Queue, updateFilter: boolean, seek?: number): Promise<void> {
         return new Promise(async (resolve) => {
             const ffmpeg = Util.checkFFmpeg();
@@ -1324,7 +1409,8 @@ export default Player;
  */
 
 /**
- * Emitted when an error is triggered
+ * Emitted when an error is triggered.
+ * <warn>This event should handled properly by the users otherwise it might crash the process!</warn>
  * @event Player#error
  * @param {String} error It can be `NotConnected`, `UnableToJoin`, `NotPlaying`, `ParseError`, `LiveVideo` or `VideoUnavailable`.
  * @param {DiscordMessage} message The message
@@ -1356,6 +1442,7 @@ export default Player;
  * @property {YTDLDownloadOptions} [ytdlDownloadOptions={}] The download options passed to `ytdl-core`
  * @property {Boolean} [useSafeSearch=false] If it should use `safe search` method for youtube searches
  * @property {Boolean} [disableAutoRegister=false] If it should disable auto-registeration of `@discord-player/extractor`
+ * @property {Boolean} [disableArtistSearch=false] If it should disable artist search for spotify
  */
 
 /**
