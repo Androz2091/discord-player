@@ -241,7 +241,7 @@ export class Player extends EventEmitter {
                         tracks,
                         duration: tracks?.reduce((a, c) => a + (c?.durationMS ?? 0), 0) ?? 0,
                         thumbnail: playlist.images[0]?.url ?? tracks[0].thumbnail,
-                        title: playlist.title ?? playlist.name ?? ""
+                        title: playlist.title ?? playlist.name ?? ''
                     };
 
                     this.emit(PlayerEvents.PLAYLIST_PARSE_END, pl, message);
@@ -292,7 +292,7 @@ export class Player extends EventEmitter {
                     // @ts-ignore
                     playlist.requestedBy = message.author;
 
-                    Object.defineProperty(playlist, "tracks", {
+                    Object.defineProperty(playlist, 'tracks', {
                         get: () => playlist.videos ?? []
                     });
 
