@@ -240,7 +240,8 @@ export class Player extends EventEmitter {
                         ...playlist,
                         tracks,
                         duration: tracks?.reduce((a, c) => a + (c?.durationMS ?? 0), 0) ?? 0,
-                        thumbnail: playlist.images[0]?.url ?? tracks[0].thumbnail
+                        thumbnail: playlist.images[0]?.url ?? tracks[0].thumbnail,
+                        title: playlist.title ?? playlist.name ?? ""
                     };
 
                     this.emit(PlayerEvents.PLAYLIST_PARSE_END, pl, message);
@@ -254,6 +255,7 @@ export class Player extends EventEmitter {
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
+                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                         this._addTracksToQueue(message, tracks);
                     }
 
