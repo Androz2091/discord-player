@@ -229,7 +229,7 @@ export class Player extends EventEmitter {
                                 pl: true
                             });
 
-                            return data[0];
+                            if (data.length) return data[0];
                         })
                     );
 
@@ -238,7 +238,7 @@ export class Player extends EventEmitter {
                     const pl = {
                         ...playlist,
                         tracks,
-                        duration: tracks.reduce((a, c) => a + c.durationMS, 0),
+                        duration: tracks?.reduce((a, c) => a + (c?.durationMS ?? 0), 0) ?? 0,
                         thumbnail: playlist.images[0]?.url ?? tracks[0].thumbnail
                     };
 
