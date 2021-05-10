@@ -156,7 +156,12 @@ export class Queue extends EventEmitter {
      * @type {Number}
      */
     get currentStreamTime(): number {
-        return this.voiceConnection?.dispatcher?.streamTime + this.additionalStreamTime || 0;
+        const NC = this.filters.nightcore ? 1.25 : null;
+        const VW = this.filters.vaporwave ? 0.8 : null;
+        const streamTime = this.voiceConnection?.dispatcher?.streamTime + this.additionalStreamTime || 0;
+
+        if (NC && VW) return streamTime * (NC + VW);
+        return NC ? streamTime * NC : VW ? (streamTime * VW) : streamTime;
     }
 
     /**
