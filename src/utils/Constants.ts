@@ -20,6 +20,7 @@ export enum PlayerEvents {
 };
 
 export enum PlayerErrorEventCodes {
+    DEFAULT = 'PlayerError',
     LIVE_VIDEO = 'LiveVideo',
     NOT_CONNECTED = 'NotConnected',
     UNABLE_TO_JOIN = 'UnableToJoin',
