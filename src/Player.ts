@@ -207,7 +207,7 @@ export class Player extends EventEmitter {
                     if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
                     // tslint:disable-next-line:no-shadowed-variable
-                    const tracks = await Promise.all<Track>(
+                    let tracks = await Promise.all<Track>(
                         playlist.tracks.items.map(async (item: any) => {
                             const sq =
                                 queryType === 'spotify_album'
@@ -232,7 +232,8 @@ export class Player extends EventEmitter {
                             if (data.length) return data[0];
                         })
                     );
-
+                    
+                    tracks = tracks.filter(f => !!f);
                     if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
                     const pl = {
