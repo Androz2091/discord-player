@@ -1046,15 +1046,17 @@ export class Player extends EventEmitter {
 
         if (!oldState.channelID || newState.channelID) {
             const emptyTimeout = this._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-            const channelEmpty = Util.isVoiceEmpty(queue.voiceConnection.channel);
+
+            // @todo: stage channels
+            const channelEmpty = Util.isVoiceEmpty(queue.voiceConnection.channel as VoiceChannel);
             if (!channelEmpty && emptyTimeout) {
                 clearTimeout(emptyTimeout);
                 this._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
             }
         } else {
-            if (!Util.isVoiceEmpty(queue.voiceConnection.channel)) return;
+            if (!Util.isVoiceEmpty(queue.voiceConnection.channel as VoiceChannel)) return;
             const timeout = setTimeout(() => {
-                if (!Util.isVoiceEmpty(queue.voiceConnection.channel)) return;
+                if (!Util.isVoiceEmpty(queue.voiceConnection.channel as VoiceChannel)) return;
                 if (!this.queues.has(queue.guildID)) return;
                 queue.voiceConnection.channel.leave();
                 this.queues.delete(queue.guildID);

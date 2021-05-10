@@ -4,7 +4,7 @@ import YouTube from 'youtube-sr';
 import { Track } from '../Structures/Track';
 // @ts-ignore
 import { validateURL as SoundcloudValidateURL } from 'soundcloud-scraper';
-import { StageChannel, VoiceChannel } from 'discord.js';
+import { VoiceChannel } from 'discord.js';
 
 const spotifySongRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/;
 const spotifyPlaylistRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})/;
@@ -190,10 +190,10 @@ export class Util {
 
     /**
      * Checks if the given voice channel is empty
-     * @param {DiscordVoiceChannel|DiscordStageChannel} channel The voice channel
+     * @param {DiscordVoiceChannel} channel The voice channel
      * @returns {Boolean}
      */
-    static isVoiceEmpty(channel: VoiceChannel | StageChannel): boolean {
+    static isVoiceEmpty(channel: VoiceChannel): boolean {
         return channel.members.filter((member) => !member.user.bot).size === 0;
     }
 
