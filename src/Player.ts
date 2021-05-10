@@ -1281,8 +1281,7 @@ export class Player extends EventEmitter {
                 queue.stream = newStream;
                 queue.voiceConnection.play(newStream, {
                     type: 'opus',
-                    bitrate: 'auto',
-                    volume: Util.isRepl() ? false : undefined
+                    bitrate: 'auto'
                 });
 
                 if (seekTime) {

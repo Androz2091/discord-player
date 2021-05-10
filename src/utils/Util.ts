@@ -167,28 +167,6 @@ export class Util {
     }
 
     /**
-     * Checks if this system is running in replit.com
-     * @returns {Boolean}
-     */
-    static isRepl(): boolean {
-        if ('DP_REPL_NOCHECK' in process.env) return false;
-
-        const REPL_IT_PROPS = [
-            'REPL_SLUG',
-            'REPL_OWNER',
-            'REPL_IMAGE',
-            'REPL_PUBKEYS',
-            'REPL_ID',
-            'REPL_LANGUAGE',
-            'REPLIT_DB_URL'
-        ];
-
-        for (const prop of REPL_IT_PROPS) if (prop in process.env) return true;
-
-        return false;
-    }
-
-    /**
      * Checks if the given voice channel is empty
      * @param {DiscordVoiceChannel} channel The voice channel
      * @returns {Boolean}
