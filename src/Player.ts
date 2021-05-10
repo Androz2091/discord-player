@@ -187,7 +187,10 @@ export class Player extends EventEmitter {
                         if (matchSpotifyURL) {
                             const spotifyData = await spotify.getPreview(query).catch(() => {});
                             if (spotifyData) {
-                                tracks = await Util.ytSearch(`${spotifyData.artist} - ${spotifyData.title}`, {
+                                const searchString = this.options.disableArtistSearch
+                                    ? spotifyData.title
+                                    : `${spotifyData.artist} - ${spotifyData.title}`;
+                                tracks = await Util.ytSearch(searchString, {
                                     user: message.author,
                                     player: this,
                                     limit: 1
@@ -208,8 +211,16 @@ export class Player extends EventEmitter {
                         playlist.tracks.items.map(async (item: any) => {
                             const sq =
                                 queryType === 'spotify_album'
-                                    ? `${item.artists[0].name} - ${item.name}`
-                                    : `${item.track.artists[0].name} - ${item.name}`;
+                                    ? `${
+                                          this.options.disableArtistSearch
+                                              ? item.artists[0].name
+                                              : `${item.artists[0].name} - `
+                                      }${item.name}`
+                                    : `${
+                                          this.options.disableArtistSearch
+                                              ? item.track.artists[0].name
+                                              : `${item.track.artists[0].name} - `
+                                      }${item.name}`;
 
                             const data = await Util.ytSearch(sq, {
                                 limit: 1,
@@ -1422,6 +1433,7 @@ export default Player;
  * @property {YTDLDownloadOptions} [ytdlDownloadOptions={}] The download options passed to `ytdl-core`
  * @property {Boolean} [useSafeSearch=false] If it should use `safe search` method for youtube searches
  * @property {Boolean} [disableAutoRegister=false] If it should disable auto-registeration of `@discord-player/extractor`
+ * @property {Boolean} [disableArtistSearch=false] If it should disable artist search for spotify
  */
 
 /**
