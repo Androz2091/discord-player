@@ -6,6 +6,7 @@ export class Env {
 
     /**
      * Utility env
+     * <warn>This feature is Experimental</warn>
      */
     constructor() {
         throw new Error(`Cannot instantiate the class ${this.constructor.name}`);
@@ -13,7 +14,6 @@ export class Env {
 
     /**
      * The soundcloud client
-     * @example const soundcloud = new (require("discord-player")).Env.SoundcloudClient.Client();
      * soundcloud.search("faded").then(console.log);
      * @type {Object}
      */
@@ -23,7 +23,6 @@ export class Env {
 
     /**
      * The soundcloud store utils
-     * @example const store = require("discord-player").Env.SoundcloudStore.setAPIkey("soundcloud_api_key")
      * @type {Object}
      */
     static get SoundcloudStore() {
