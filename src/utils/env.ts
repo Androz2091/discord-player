@@ -13,8 +13,8 @@ export class Env {
 
     /**
      * The soundcloud client
-     * @example const sc = new (require("discord-player")).Env.SoundcloudClient.Client();
-     * sc.search("faded").then(console.log);
+     * @example const soundcloud = new (require("discord-player")).Env.SoundcloudClient.Client();
+     * soundcloud.search("faded").then(console.log);
      * @type {Object}
      */
     static get SoundcloudClient() {
