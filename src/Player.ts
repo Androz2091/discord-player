@@ -1054,7 +1054,7 @@ export class Player extends EventEmitter {
         if (!oldState.channelID || newState.channelID) {
             const emptyTimeout = this._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
 
-            // @todo: stage channels
+            // @todo: make stage channels stable
             const channelEmpty = Util.isVoiceEmpty(queue.voiceConnection.channel as VoiceChannel);
             if (!channelEmpty && emptyTimeout) {
                 clearTimeout(emptyTimeout);
