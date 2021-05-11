@@ -65,8 +65,8 @@ export class Util {
      * @returns {QueryType}
      */
     static getQueryType(query: string): QueryType {
-        if (SoundcloudValidateURL(query) && !query.includes('/sets/')) return 'soundcloud_track';
-        if (SoundcloudValidateURL(query) && query.includes('/sets/')) return 'soundcloud_playlist';
+        if (SoundcloudValidateURL(query, 'track')) return 'soundcloud_track';
+        if (SoundcloudValidateURL(query, 'playlist') || query.includes('/sets/')) return 'soundcloud_playlist';
         if (spotifySongRegex.test(query)) return 'spotify_song';
         if (spotifyAlbumRegex.test(query)) return 'spotify_album';
         if (spotifyPlaylistRegex.test(query)) return 'spotify_playlist';
