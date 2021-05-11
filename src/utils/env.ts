@@ -2,14 +2,20 @@
 import { Store, Client } from 'soundcloud-scraper';
 import { YouTube } from 'youtube-sr';
 
-/**
- * Utility env
- */
 export class Env {
+
+    /**
+     * Utility env
+     */
+    constructor() {
+        throw new Error(`Cannot instantiate the class ${this.constructor.name}`);
+    }
+
     /**
      * The soundcloud client
      * @example const sc = new (require("discord-player")).Env.SoundcloudClient.Client();
      * sc.search("faded").then(console.log);
+     * @type {Object}
      */
     static get SoundcloudClient() {
         return { Client };
@@ -18,6 +24,7 @@ export class Env {
     /**
      * The soundcloud store utils
      * @example const store = require("discord-player").Env.SoundcloudStore.setAPIkey("soundcloud_api_key")
+     * @type {Object}
      */
     static get SoundcloudStore() {
         const store = Store as Map<string, string>;
@@ -27,6 +34,7 @@ export class Env {
 
     /**
      * The youtube search
+     * @type {YouTube}
      */
     static get youtube() {
         return YouTube;
