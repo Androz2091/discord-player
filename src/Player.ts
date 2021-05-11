@@ -959,7 +959,7 @@ export class Player extends EventEmitter {
         const extractor = Util.require('@discord-player/extractor');
         if (!extractor) throw new PlayerError("Cannot call 'Player.lyrics()' without '@discord-player/extractor'");
 
-        const data = await extractor.Lyrics(query);
+        const data = await extractor.Lyrics.init().search(query);
         if (Array.isArray(data)) return null;
 
         return data;

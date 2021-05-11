@@ -871,13 +871,13 @@
     "@babel/helper-validator-identifier" "^7.12.11"
     to-fast-properties "^2.0.0"
 
-"@discord-player/extractor@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@discord-player/extractor/-/extractor-2.0.0.tgz#3879e51d64b72d4dcee9338bdece5251d006c746"
-  integrity sha512-qNyF0dkLNRYvtVtLLO022RV8DzToCPJqbuAOqSWCSdkXiKSGoqTdKcZI9I/Lb87mchYuuakOXyPRvRwkAruX6w==
+"@discord-player/extractor@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@discord-player/extractor/-/extractor-3.0.0.tgz#2baa733da054b991f83417054cad1575cf57c4ab"
+  integrity sha512-6A2QmrbQXTpv1oequiAYQMnWzvv1fu9Yg0GJwAMoLUXZjvb5Yoak2lnohsDI1Hc14LW//Z5xyLGtmFivTWTXDQ==
   dependencies:
-    genius-lyrics "^4.2.7"
-    jsdom "^16.5.2"
+    genius-lyrics "^4.2.9"
+    jsdom "^16.5.3"
     node-fetch "^2.6.1"
     reverbnation-scraper "^2.0.0"
 
@@ -1656,17 +1656,6 @@ cross-spawn@^6.0.5:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
-css-select@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/css-select/-/css-select-3.1.2.tgz#d52cbdc6fee379fba97fb0d3925abbd18af2d9d8"
-  integrity sha512-qmss1EihSuBNWNNhHjxzxSfJoFBM/lERB/Q4EnsJQQC62R2evJDW481091oAdOr9uh46/0n4nrg0It5cAnj1RA==
-  dependencies:
-    boolbase "^1.0.0"
-    css-what "^4.0.0"
-    domhandler "^4.0.0"
-    domutils "^2.4.3"
-    nth-check "^2.0.0"
-
 css-select@^4.1.2:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/css-select/-/css-select-4.1.2.tgz#8b52b6714ed3a80d8221ec971c543f3b12653286"
@@ -1677,11 +1666,6 @@ css-select@^4.1.2:
     domhandler "^4.2.0"
     domutils "^2.6.0"
     nth-check "^2.0.0"
-
-css-what@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/css-what/-/css-what-4.0.0.tgz#35e73761cab2eeb3d3661126b23d7aa0e8432233"
-  integrity sha512-teijzG7kwYfNVsUh2H/YN62xW3KK9YhXEgSlbxMlcyjPNvdKJqFx5lrwlJgoFP1ZHlB89iGDlo/JyshKeRhv5A==
 
 css-what@^5.0.0:
   version "5.0.0"
@@ -1895,7 +1879,7 @@ domexception@^2.0.1:
   dependencies:
     webidl-conversions "^5.0.0"
 
-domhandler@^4.0.0, domhandler@^4.1.0:
+domhandler@^4.0.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-4.1.0.tgz#c1d8d494d5ec6db22de99e46a149c2a4d23ddd43"
   integrity sha512-/6/kmsGlMY4Tup/nGVutdrK9yQi4YjWVcVeoQmixpzjOUK1U7pQkvAPHBJeUxOgxF0J8f8lwCJSlCfD0V4CMGQ==
@@ -1908,15 +1892,6 @@ domhandler@^4.2.0:
   integrity sha512-zk7sgt970kzPks2Bf+dwT/PLzghLnsivb9CcxkvR8Mzr66Olr0Ofd8neSbglHJHaHa2MadfoSdNlKYAaafmWfA==
   dependencies:
     domelementtype "^2.2.0"
-
-domutils@^2.4.3:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/domutils/-/domutils-2.5.1.tgz#9b8e84b5d9f788499ae77506ea832e9b4f9aa1c0"
-  integrity sha512-hO1XwHMGAthA/1KL7c83oip/6UWo3FlUNIuWiWKltoiQ5oCOiqths8KknvY2jpOohUoUgnwa/+Rm7UpwpSbY/Q==
-  dependencies:
-    dom-serializer "^1.0.1"
-    domelementtype "^2.2.0"
-    domhandler "^4.1.0"
 
 domutils@^2.5.2, domutils@^2.6.0:
   version "2.6.0"
@@ -2345,13 +2320,13 @@ gauge@~2.7.3:
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
 
-genius-lyrics@^4.2.7:
-  version "4.2.7"
-  resolved "https://registry.yarnpkg.com/genius-lyrics/-/genius-lyrics-4.2.7.tgz#e85f65eb2de4ea2c0af1e11b13dda11e0c9744a9"
-  integrity sha512-laoeF2/P+Ed4uewuG6OeqymKTNdfGuymkCohMHIgr3g2DwziW49USXcEGCog1vnEDCpf2LhznNi3WOeLeSmAww==
+genius-lyrics@^4.2.9:
+  version "4.2.9"
+  resolved "https://registry.yarnpkg.com/genius-lyrics/-/genius-lyrics-4.2.9.tgz#87d12946589d3e96df4e100c51805aa5046de2c7"
+  integrity sha512-BQm/gmaXEckLAc/Z9ZsGNWxh4CHudx0G1Key8Rnv0xFcqmrxIvssJIDBgDPJLqB6dpVas3uj6LQng1yMFtxfNA==
   dependencies:
     axios "^0.21.1"
-    node-html-parser "^3.0.4"
+    cheerio "^1.0.0-rc.9"
 
 gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"
@@ -2510,11 +2485,6 @@ has@^1.0.3:
   integrity sha512-f2dvO0VU6Oej7RkWJGrehjbzMAjFp5/VKPp5tTpWIV4JHHZK1/BxbFRtf/siA2SWTe09caDmVtYYzWEIbBS4zw==
   dependencies:
     function-bind "^1.1.1"
-
-he@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
-  integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
 himalaya@^1.1.0:
   version "1.1.0"
@@ -2892,7 +2862,7 @@ jsdoc@^3.6.3:
     taffydb "2.6.2"
     underscore "~1.10.2"
 
-jsdom@^16.5.2:
+jsdom@^16.5.3:
   version "16.5.3"
   resolved "https://registry.yarnpkg.com/jsdom/-/jsdom-16.5.3.tgz#13a755b3950eb938b4482c407238ddf16f0d2136"
   integrity sha512-Qj1H+PEvUsOtdPJ056ewXM4UJPCi4hhLA8wpiz9F2YvsRBhuFsXxtrIFAgGBDynQA9isAMGE91PfUYbdMPXuTA==
@@ -3277,14 +3247,6 @@ node-fetch@2.6.1, node-fetch@^2.6.0, node-fetch@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
-
-node-html-parser@^3.0.4:
-  version "3.1.5"
-  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-3.1.5.tgz#ffb62f2a336b6b634f41f3315487fe446fb9d7b5"
-  integrity sha512-/XKKdWbSUymlXTjtNBcDlmM7Jp8S/BqGMzLx7r2bd2NMjTXz+ofuLcz0Bl3VT0vTvVzF+N511FNLrZt4HVitXA==
-  dependencies:
-    css-select "^3.1.2"
-    he "1.2.0"
 
 node-releases@^1.1.71:
   version "1.1.71"
