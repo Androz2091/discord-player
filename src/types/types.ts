@@ -92,6 +92,7 @@ export interface ExtractorModelData {
     url: string;
     version?: string;
     important?: boolean;
+    source?: TrackSource;
 }
 
 export interface PlayerProgressbarOptions {

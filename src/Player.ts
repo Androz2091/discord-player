@@ -556,7 +556,7 @@ export class Player extends EventEmitter {
                                 author: data.author,
                                 views: data.views,
                                 engine: data.engine,
-                                source: 'arbitrary',
+                                source: data.source ?? 'arbitrary',
                                 fromPlaylist: false,
                                 requestedBy: message.author,
                                 url: data.url
