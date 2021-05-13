@@ -1,6 +1,5 @@
 export { AudioFilters } from './utils/AudioFilters';
 export * as Constants from './utils/Constants';
-export { Env as env } from './utils/env';
 export { ExtractorModel } from './Structures/ExtractorModel';
 export { Player } from './Player';
 export { Util } from './utils/Util';
