@@ -1279,17 +1279,16 @@ export class Player extends EventEmitter {
             }
 
             let newStream: any;
-            let clonedTrack = queue.playing;
 
             // modify spotify
-            if (clonedTrack.raw.source === 'spotify') {
+            if (queue.playing.raw.source === 'spotify' && !(queue.playing as any).backupLink) {
                 const searchQueryString = this.options.disableArtistSearch
-                    ? clonedTrack.title
-                    : `${clonedTrack.title}${' - ' + clonedTrack.author}`;
+                    ? queue.playing.title
+                    : `${queue.playing.title}${' - ' + queue.playing.author}`;
                 const yteqv = await Util.ytSearch(searchQueryString, {
                     player: this,
                     limit: 1,
-                    user: clonedTrack.requestedBy
+                    user: queue.playing.requestedBy
                 }).catch(() => {});
 
                 if (!yteqv || !yteqv.length)
@@ -1301,13 +1300,18 @@ export class Player extends EventEmitter {
                         new PlayerError('Could not find alternative track on youtube!', 'SpotifyTrackError')
                     );
 
-                clonedTrack = yteqv[0];
+                Object.defineProperty(queue.playing, 'backupLink', {
+                    value: yteqv[0].url,
+                    writable: true,
+                    enumerable: false,
+                    configurable: true
+                });
             }
 
-            if (clonedTrack.raw.source === 'youtube') {
-                newStream = ytdl(clonedTrack.url, {
+            if (queue.playing.raw.source === 'youtube' || queue.playing.raw.source === 'spotify') {
+                newStream = ytdl((queue.playing as any).backupLink ?? queue.playing.url, {
                     opusEncoded: true,
-                    encoderArgs: clonedTrack.raw.live ? [] : encoderArgs,
+                    encoderArgs: queue.playing.raw.live ? [] : encoderArgs,
                     seek: seekTime / 1000,
                     // tslint:disable-next-line:no-bitwise
                     highWaterMark: 1 << 25,
@@ -1315,9 +1319,9 @@ export class Player extends EventEmitter {
                 });
             } else {
                 newStream = ytdl.arbitraryStream(
-                    clonedTrack.raw.source === 'soundcloud'
-                        ? await clonedTrack.raw.engine.downloadProgressive()
-                        : clonedTrack.raw.engine,
+                    queue.playing.raw.source === 'soundcloud'
+                        ? await queue.playing.raw.engine.downloadProgressive()
+                        : queue.playing.raw.engine,
                     {
                         opusEncoded: true,
                         encoderArgs,
