@@ -135,6 +135,14 @@ export class Track {
     }
 
     /**
+     * Returns source of this track
+     * @type {TrackSource}
+     */
+    get source() {
+        return this.raw.source ?? 'arbitrary';
+    }
+
+    /**
      * String representation of this track
      * @returns {String}
      */

@@ -185,16 +185,42 @@ export class Player extends EventEmitter {
                             /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/
                         );
                         if (matchSpotifyURL) {
-                            const spotifyData = await spotify.getPreview(query).catch(() => {});
+                            const spotifyData = await spotify.getData(query).catch(() => {});
                             if (spotifyData) {
-                                const searchString = this.options.disableArtistSearch
-                                    ? spotifyData.title
-                                    : `${spotifyData.artist} - ${spotifyData.title}`;
-                                tracks = await Util.ytSearch(searchString, {
-                                    user: message.author,
-                                    player: this,
-                                    limit: 1
+                                const spotifyTrack = new Track(this, {
+                                    title: spotifyData.name,
+                                    description: spotifyData.description ?? '',
+                                    author: spotifyData.artists[0]?.name ?? 'Unknown Artist',
+                                    url: spotifyData.external_urls?.spotify ?? query,
+                                    thumbnail:
+                                        spotifyData.album?.images[0]?.url ?? spotifyData.preview_url?.length
+                                            ? `https://i.scdn.co/image/${spotifyData.preview_url?.split('?cid=')[1]}`
+                                            : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms)),
+                                    views: 0,
+                                    requestedBy: message.author,
+                                    fromPlaylist: false,
+                                    source: 'spotify'
                                 });
+
+                                if (this.options.fetchBeforeQueued) {
+                                    const searchQueryString = this.options.disableArtistSearch
+                                        ? spotifyTrack.title
+                                        : `${spotifyTrack.title}${' - ' + spotifyTrack.author}`;
+                                    const ytv = await YouTube.search(searchQueryString, {
+                                        limit: 1,
+                                        type: 'video'
+                                    }).catch((e) => {});
+
+                                    if (ytv && ytv[0])
+                                        Util.define({
+                                            target: spotifyTrack,
+                                            prop: 'backupLink',
+                                            value: ytv[0].url
+                                        });
+                                }
+
+                                tracks = [spotifyTrack];
                             }
                         }
                     }
@@ -207,33 +233,88 @@ export class Player extends EventEmitter {
                     if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
                     // tslint:disable-next-line:no-shadowed-variable
-                    let tracks = await Promise.all<Track>(
-                        playlist.tracks.items.map(async (item: any) => {
-                            const sq =
-                                queryType === 'spotify_album'
-                                    ? `${
-                                          this.options.disableArtistSearch
-                                              ? item.artists[0].name
-                                              : `${item.artists[0].name} - `
-                                      }${item.name ?? item.track.name}`
-                                    : `${
-                                          this.options.disableArtistSearch
-                                              ? item.track.artists[0].name
-                                              : `${item.track.artists[0].name} - `
-                                      }${item.name ?? item.track.name}`;
+                    let tracks: Track[] = [];
 
-                            const data = await Util.ytSearch(sq, {
-                                limit: 1,
-                                player: this,
-                                user: message.author,
-                                pl: true
-                            });
+                    if (playlist.type !== 'playlist')
+                        tracks = await Promise.all(
+                            playlist.tracks.items.map(async (m: any) => {
+                                const data = new Track(this, {
+                                    title: m.name ?? '',
+                                    description: m.description ?? '',
+                                    author: m.artists[0]?.name ?? 'Unknown Artist',
+                                    url: m.external_urls?.spotify ?? query,
+                                    thumbnail:
+                                        playlist.images[0]?.url ?? m.preview_url?.length
+                                            ? `https://i.scdn.co/image/${m.preview_url?.split('?cid=')[1]}`
+                                            : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
+                                    views: 0,
+                                    requestedBy: message.author,
+                                    fromPlaylist: true,
+                                    source: 'spotify'
+                                });
 
-                            if (data.length) return data[0];
-                        })
-                    );
+                                if (this.options.fetchBeforeQueued) {
+                                    const searchQueryString = this.options.disableArtistSearch
+                                        ? data.title
+                                        : `${data.title}${' - ' + data.author}`;
+                                    const ytv = await YouTube.search(searchQueryString, {
+                                        limit: 1,
+                                        type: 'video'
+                                    }).catch((e) => {});
 
-                    tracks = tracks.filter((f) => !!f);
+                                    if (ytv && ytv[0])
+                                        Util.define({
+                                            target: data,
+                                            prop: 'backupLink',
+                                            value: ytv[0].url
+                                        });
+                                }
+
+                                return data;
+                            })
+                        );
+                    else {
+                        tracks = await Promise.all(
+                            playlist.tracks.items.map(async (m: any) => {
+                                const data = new Track(this, {
+                                    title: m.track.name ?? '',
+                                    description: m.track.description ?? '',
+                                    author: m.track.artists[0]?.name ?? 'Unknown Artist',
+                                    url: m.track.external_urls?.spotify ?? query,
+                                    thumbnail:
+                                        playlist.images[0]?.url ?? m.track.preview_url?.length
+                                            ? `https://i.scdn.co/image/${m.track.preview_url?.split('?cid=')[1]}`
+                                            : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
+                                    views: 0,
+                                    requestedBy: message.author,
+                                    fromPlaylist: true,
+                                    source: 'spotify'
+                                });
+
+                                if (this.options.fetchBeforeQueued) {
+                                    const searchQueryString = this.options.disableArtistSearch
+                                        ? data.title
+                                        : `${data.title}${' - ' + data.author}`;
+                                    const ytv = await YouTube.search(searchQueryString, {
+                                        limit: 1,
+                                        type: 'video'
+                                    }).catch((e) => {});
+
+                                    if (ytv && ytv[0])
+                                        Util.define({
+                                            target: data,
+                                            prop: 'backupLink',
+                                            value: ytv[0].url
+                                        });
+                                }
+
+                                return data;
+                            })
+                        );
+                    }
+
                     if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
                     const pl = {
@@ -250,7 +331,7 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                     } else {
-                        const track = tracks.shift();
+                        const track = tracks[0];
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
@@ -306,7 +387,7 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
                     } else {
-                        const track = tracks.shift();
+                        const track = tracks[0];
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
@@ -361,7 +442,7 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, res.tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
                     } else {
-                        const track = res.tracks.shift();
+                        const track = res.tracks[0];
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
@@ -475,7 +556,7 @@ export class Player extends EventEmitter {
                                 author: data.author,
                                 views: data.views,
                                 engine: data.engine,
-                                source: 'arbitrary',
+                                source: data.source ?? 'arbitrary',
                                 fromPlaylist: false,
                                 requestedBy: message.author,
                                 url: data.url
@@ -959,7 +1040,7 @@ export class Player extends EventEmitter {
         const extractor = Util.require('@discord-player/extractor');
         if (!extractor) throw new PlayerError("Cannot call 'Player.lyrics()' without '@discord-player/extractor'");
 
-        const data = await extractor.Lyrics(query);
+        const data = await extractor.Lyrics.init().search(query);
         if (Array.isArray(data)) return null;
 
         return data;
@@ -1054,7 +1135,7 @@ export class Player extends EventEmitter {
         if (!oldState.channelID || newState.channelID) {
             const emptyTimeout = this._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
 
-            // @todo: stage channels
+            // @todo: make stage channels stable
             const channelEmpty = Util.isVoiceEmpty(queue.voiceConnection.channel as VoiceChannel);
             if (!channelEmpty && emptyTimeout) {
                 clearTimeout(emptyTimeout);
@@ -1254,8 +1335,32 @@ export class Player extends EventEmitter {
             }
 
             let newStream: any;
-            if (queue.playing.raw.source === 'youtube') {
-                newStream = ytdl(queue.playing.url, {
+
+            // modify spotify
+            if (queue.playing.raw.source === 'spotify' && !(queue.playing as any).backupLink) {
+                const searchQueryString = this.options.disableArtistSearch
+                    ? queue.playing.title
+                    : `${queue.playing.title}${' - ' + queue.playing.author}`;
+                const yteqv = await YouTube.search(searchQueryString, { type: 'video', limit: 1 }).catch(() => {});
+
+                if (!yteqv || !yteqv.length)
+                    return void this.emit(
+                        PlayerEvents.ERROR,
+                        PlayerErrorEventCodes.VIDEO_UNAVAILABLE,
+                        queue.firstMessage,
+                        queue.playing,
+                        new PlayerError('Could not find alternative track on youtube!', 'SpotifyTrackError')
+                    );
+
+                Util.define({
+                    target: queue.playing,
+                    prop: 'backupLink',
+                    value: yteqv[0].url
+                });
+            }
+
+            if (queue.playing.raw.source === 'youtube' || queue.playing.raw.source === 'spotify') {
+                newStream = ytdl((queue.playing as any).backupLink ?? queue.playing.url, {
                     opusEncoded: true,
                     encoderArgs: queue.playing.raw.live ? [] : encoderArgs,
                     seek: seekTime / 1000,
@@ -1281,8 +1386,7 @@ export class Player extends EventEmitter {
                 queue.stream = newStream;
                 queue.voiceConnection.play(newStream, {
                     type: 'opus',
-                    bitrate: 'auto',
-                    volume: Util.isRepl() ? false : undefined
+                    bitrate: 'auto'
                 });
 
                 if (seekTime) {
@@ -1443,6 +1547,7 @@ export default Player;
  * @property {Boolean} [useSafeSearch=false] If it should use `safe search` method for youtube searches
  * @property {Boolean} [disableAutoRegister=false] If it should disable auto-registeration of `@discord-player/extractor`
  * @property {Boolean} [disableArtistSearch=false] If it should disable artist search for spotify
+ * @property {Boolean} [fetchBeforeQueued=false] If it should fetch all songs loaded from spotify before playing
  */
 
 /**
@@ -1518,7 +1623,7 @@ export default Player;
  * @property {String} thumbnail The thumbnail
  * @property {String} image The image
  * @property {String} url The url
- * @property {Object} artist The artust info
+ * @property {Object} artist The artist info
  * @property {String} [artist.name] The name of the artist
  * @property {Number} [artist.id] The ID of the artist
  * @property {String} [artist.url] The profile link of the artist

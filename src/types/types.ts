@@ -14,11 +14,12 @@ export interface PlayerOptions {
     useSafeSearch?: boolean;
     disableAutoRegister?: boolean;
     disableArtistSearch?: boolean;
+    fetchBeforeQueued?: boolean;
 }
 
 export type FiltersName = keyof QueueFilters;
 
-export type TrackSource = 'soundcloud' | 'youtube' | 'arbitrary';
+export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'arbitrary';
 
 export interface TrackData {
     title: string;
@@ -91,6 +92,7 @@ export interface ExtractorModelData {
     url: string;
     version?: string;
     important?: boolean;
+    source?: TrackSource;
 }
 
 export interface PlayerProgressbarOptions {

@@ -167,7 +167,7 @@ export class Queue extends EventEmitter {
     /**
      * Sets audio filters in this player
      * @param {QueueFilters} filters Audio filters to set
-     * @type {Promise<void>}
+     * @returns {Promise<void>}
      */
     setFilters(filters: QueueFilters): Promise<void> {
         return this.player.setFilters(this.firstMessage, filters);
@@ -175,7 +175,7 @@ export class Queue extends EventEmitter {
 
     /**
      * Returns array of all enabled filters
-     * @type {String[]}
+     * @returns {String[]}
      */
     getFiltersEnabled(): string[] {
         const filters: string[] = [];
@@ -189,12 +189,20 @@ export class Queue extends EventEmitter {
 
     /**
      * Returns all disabled filters
-     * @type {String[]}
+     * @returns {String[]}
      */
     getFiltersDisabled(): string[] {
         const enabled = this.getFiltersEnabled();
 
         return Object.keys(this.filters).filter((f) => !enabled.includes(f));
+    }
+
+    /**
+     * Destroys this queue
+     * @returns {Boolean}
+     */
+    destroy() {
+        return this.player.stop(this.firstMessage);
     }
 
     /**

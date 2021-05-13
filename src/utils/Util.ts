@@ -65,8 +65,8 @@ export class Util {
      * @returns {QueryType}
      */
     static getQueryType(query: string): QueryType {
-        if (SoundcloudValidateURL(query) && !query.includes('/sets/')) return 'soundcloud_track';
-        if (SoundcloudValidateURL(query) && query.includes('/sets/')) return 'soundcloud_playlist';
+        if (SoundcloudValidateURL(query, 'track')) return 'soundcloud_track';
+        if (SoundcloudValidateURL(query, 'playlist') || query.includes('/sets/')) return 'soundcloud_playlist';
         if (spotifySongRegex.test(query)) return 'spotify_song';
         if (spotifyAlbumRegex.test(query)) return 'spotify_album';
         if (spotifyPlaylistRegex.test(query)) return 'spotify_playlist';
@@ -167,28 +167,6 @@ export class Util {
     }
 
     /**
-     * Checks if this system is running in replit.com
-     * @returns {Boolean}
-     */
-    static isRepl(): boolean {
-        if ('DP_REPL_NOCHECK' in process.env) return false;
-
-        const REPL_IT_PROPS = [
-            'REPL_SLUG',
-            'REPL_OWNER',
-            'REPL_IMAGE',
-            'REPL_PUBKEYS',
-            'REPL_ID',
-            'REPL_LANGUAGE',
-            'REPLIT_DB_URL'
-        ];
-
-        for (const prop of REPL_IT_PROPS) if (prop in process.env) return true;
-
-        return false;
-    }
-
-    /**
      * Checks if the given voice channel is empty
      * @param {DiscordVoiceChannel} channel The voice channel
      * @returns {Boolean}
@@ -225,6 +203,22 @@ export class Util {
         } catch {
             return null;
         }
+    }
+
+    /**
+     * Defines a property in the given object
+     * @param {any} target The target
+     * @param {any} prop The property to define
+     * @param {any} value The value
+     * @returns {void}
+     */
+    static define(ops: { target: any; prop: any; value: any; enumerate?: boolean }) {
+        Object.defineProperty(ops.target, ops.prop, {
+            value: ops.value,
+            writable: true,
+            enumerable: Boolean(ops.enumerate),
+            configurable: true
+        });
     }
 }
 
