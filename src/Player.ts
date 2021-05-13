@@ -1567,7 +1567,7 @@ export default Player;
  * @property {String} thumbnail The thumbnail
  * @property {String} image The image
  * @property {String} url The url
- * @property {Object} artist The artust info
+ * @property {Object} artist The artist info
  * @property {String} [artist.name] The name of the artist
  * @property {Number} [artist.id] The ID of the artist
  * @property {String} [artist.url] The profile link of the artist
