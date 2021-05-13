@@ -331,7 +331,7 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                     } else {
-                        const track = tracks.shift();
+                        const track = tracks[0];
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
@@ -387,7 +387,7 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
                     } else {
-                        const track = tracks.shift();
+                        const track = tracks[0];
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
@@ -442,7 +442,7 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, res.tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
                     } else {
-                        const track = res.tracks.shift();
+                        const track = res.tracks[0];
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
