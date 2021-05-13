@@ -185,11 +185,11 @@ export class Player extends EventEmitter {
                             /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/
                         );
                         if (matchSpotifyURL) {
-                            const spotifyData = await spotify.getPreview(query).catch(() => {});
+                            const spotifyData = await spotify.getData(query).catch(() => {});
                             if (spotifyData) {
                                 const searchString = this.options.disableArtistSearch
-                                    ? spotifyData.title
-                                    : `${spotifyData.artist} - ${spotifyData.title}`;
+                                    ? spotifyData.name
+                                    : `${spotifyData.name}${spotifyData.artists[0] ? ` - ${spotifyData.artists[0]?.name}` : ""}`;
                                 tracks = await Util.ytSearch(searchString, {
                                     user: message.author,
                                     player: this,
