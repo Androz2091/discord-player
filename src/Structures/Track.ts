@@ -133,6 +133,14 @@ export class Track {
             .map((m, i) => parseInt(m) * times(60, i))
             .reduce((a, c) => a + c, 0);
     }
+    
+    /**
+     * Returns source of this track
+     * @type {TrackSource}
+     */
+    get source() {
+        return this.raw.source ?? 'arbitrary';
+    }
 
     /**
      * String representation of this track
