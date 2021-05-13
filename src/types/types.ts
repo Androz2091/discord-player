@@ -18,7 +18,7 @@ export interface PlayerOptions {
 
 export type FiltersName = keyof QueueFilters;
 
-export type TrackSource = 'soundcloud' | 'youtube' | 'arbitrary';
+export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'arbitrary';
 
 export interface TrackData {
     title: string;

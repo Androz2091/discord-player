@@ -187,14 +187,23 @@ export class Player extends EventEmitter {
                         if (matchSpotifyURL) {
                             const spotifyData = await spotify.getData(query).catch(() => {});
                             if (spotifyData) {
-                                const searchString = this.options.disableArtistSearch
-                                    ? spotifyData.name
-                                    : `${spotifyData.name}${spotifyData.artists[0] ? ` - ${spotifyData.artists[0]?.name}` : ""}`;
-                                tracks = await Util.ytSearch(searchString, {
-                                    user: message.author,
-                                    player: this,
-                                    limit: 1
+                                const spotifyTrack = new Track(this, {
+                                    title: spotifyData.name,
+                                    description: spotifyData.description ?? '',
+                                    author: spotifyData.artists[0]?.name ?? 'Unknown Artist',
+                                    url: spotifyData.external_urls?.spotify ?? query,
+                                    thumbnail:
+                                        spotifyData.album?.images[0]?.url ?? spotifyData.preview_url?.length
+                                            ? `https://i.scdn.co/image/${spotifyData.preview_url?.split('?cid=')[1]}`
+                                            : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms)),
+                                    views: 0,
+                                    requestedBy: message.author,
+                                    fromPlaylist: false,
+                                    source: 'spotify'
                                 });
+
+                                tracks = [spotifyTrack];
                             }
                         }
                     }
@@ -207,33 +216,49 @@ export class Player extends EventEmitter {
                     if (!playlist) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
                     // tslint:disable-next-line:no-shadowed-variable
-                    let tracks = await Promise.all<Track>(
-                        playlist.tracks.items.map(async (item: any) => {
-                            const sq =
-                                queryType === 'spotify_album'
-                                    ? `${
-                                          this.options.disableArtistSearch
-                                              ? item.artists[0].name
-                                              : `${item.artists[0].name} - `
-                                      }${item.name ?? item.track.name}`
-                                    : `${
-                                          this.options.disableArtistSearch
-                                              ? item.track.artists[0].name
-                                              : `${item.track.artists[0].name} - `
-                                      }${item.name ?? item.track.name}`;
+                    let tracks: Track[] = [];
 
-                            const data = await Util.ytSearch(sq, {
-                                limit: 1,
-                                player: this,
-                                user: message.author,
-                                pl: true
+                    if (playlist.type !== 'playlist')
+                        tracks = playlist.tracks.items.map((m: any) => {
+                            const data = new Track(this, {
+                                title: m.name ?? '',
+                                description: m.description ?? '',
+                                author: m.artists[0]?.name ?? 'Unknown Artist',
+                                url: m.external_urls?.spotify ?? query,
+                                thumbnail:
+                                    playlist.images[0]?.url ?? m.preview_url?.length
+                                        ? `https://i.scdn.co/image/${m.preview_url?.split('?cid=')[1]}`
+                                        : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
+                                views: 0,
+                                requestedBy: message.author,
+                                fromPlaylist: true,
+                                source: 'spotify'
+                            });
+                            return data;
+                        });
+                    else {
+                        tracks = playlist.tracks.items.map((m: any) => {
+                            const data = new Track(this, {
+                                title: m.track.name ?? '',
+                                description: m.track.description ?? '',
+                                author: m.track.artists[0]?.name ?? 'Unknown Artist',
+                                url: m.track.external_urls?.spotify ?? query,
+                                thumbnail:
+                                    playlist.images[0]?.url ?? m.track.preview_url?.length
+                                        ? `https://i.scdn.co/image/${m.track.preview_url?.split('?cid=')[1]}`
+                                        : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
+                                views: 0,
+                                requestedBy: message.author,
+                                fromPlaylist: true,
+                                source: 'spotify'
                             });
 
-                            if (data.length) return data[0];
-                        })
-                    );
+                            return data;
+                        });
+                    }
 
-                    tracks = tracks.filter((f) => !!f);
                     if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
 
                     const pl = {
@@ -1254,10 +1279,35 @@ export class Player extends EventEmitter {
             }
 
             let newStream: any;
-            if (queue.playing.raw.source === 'youtube') {
-                newStream = ytdl(queue.playing.url, {
+            let clonedTrack = queue.playing;
+
+            // modify spotify
+            if (clonedTrack.raw.source === 'spotify') {
+                const searchQueryString = this.options.disableArtistSearch
+                    ? clonedTrack.title
+                    : `${clonedTrack.title}${' - ' + clonedTrack.author}`;
+                const yteqv = await Util.ytSearch(searchQueryString, {
+                    player: this,
+                    limit: 1,
+                    user: clonedTrack.requestedBy
+                }).catch(() => {});
+
+                if (!yteqv || !yteqv.length)
+                    return void this.emit(
+                        PlayerEvents.ERROR,
+                        PlayerErrorEventCodes.VIDEO_UNAVAILABLE,
+                        queue.firstMessage,
+                        queue.playing,
+                        new PlayerError('Could not find alternative track on youtube!', 'SpotifyTrackError')
+                    );
+
+                clonedTrack = yteqv[0];
+            }
+
+            if (clonedTrack.raw.source === 'youtube') {
+                newStream = ytdl(clonedTrack.url, {
                     opusEncoded: true,
-                    encoderArgs: queue.playing.raw.live ? [] : encoderArgs,
+                    encoderArgs: clonedTrack.raw.live ? [] : encoderArgs,
                     seek: seekTime / 1000,
                     // tslint:disable-next-line:no-bitwise
                     highWaterMark: 1 << 25,
@@ -1265,9 +1315,9 @@ export class Player extends EventEmitter {
                 });
             } else {
                 newStream = ytdl.arbitraryStream(
-                    queue.playing.raw.source === 'soundcloud'
-                        ? await queue.playing.raw.engine.downloadProgressive()
-                        : queue.playing.raw.engine,
+                    clonedTrack.raw.source === 'soundcloud'
+                        ? await clonedTrack.raw.engine.downloadProgressive()
+                        : clonedTrack.raw.engine,
                     {
                         opusEncoded: true,
                         encoderArgs,
