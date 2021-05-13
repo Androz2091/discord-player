@@ -207,13 +207,17 @@ export class Player extends EventEmitter {
                                     const searchQueryString = this.options.disableArtistSearch
                                         ? spotifyTrack.title
                                         : `${spotifyTrack.title}${' - ' + spotifyTrack.author}`;
-                                    const ytv = await YouTube.search(searchQueryString, { limit: 1, type: "video" }).catch(e => { });
+                                    const ytv = await YouTube.search(searchQueryString, {
+                                        limit: 1,
+                                        type: 'video'
+                                    }).catch((e) => {});
 
-                                    if (ytv && ytv[0]) Util.define({
-                                        target: spotifyTrack,
-                                        prop: 'backupLink',
-                                        value: ytv[0].url
-                                    });
+                                    if (ytv && ytv[0])
+                                        Util.define({
+                                            target: spotifyTrack,
+                                            prop: 'backupLink',
+                                            value: ytv[0].url
+                                        });
                                 }
 
                                 tracks = [spotifyTrack];
@@ -232,71 +236,83 @@ export class Player extends EventEmitter {
                     let tracks: Track[] = [];
 
                     if (playlist.type !== 'playlist')
-                        tracks = await Promise.all(playlist.tracks.items.map(async (m: any) => {
-                            const data = new Track(this, {
-                                title: m.name ?? '',
-                                description: m.description ?? '',
-                                author: m.artists[0]?.name ?? 'Unknown Artist',
-                                url: m.external_urls?.spotify ?? query,
-                                thumbnail:
-                                    playlist.images[0]?.url ?? m.preview_url?.length
-                                        ? `https://i.scdn.co/image/${m.preview_url?.split('?cid=')[1]}`
-                                        : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                                duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
-                                views: 0,
-                                requestedBy: message.author,
-                                fromPlaylist: true,
-                                source: 'spotify'
-                            });
-
-                            if (this.options.fetchBeforeQueued) {
-                                const searchQueryString = this.options.disableArtistSearch
-                                    ? data.title
-                                    : `${data.title}${' - ' + data.author}`;
-                                const ytv = await YouTube.search(searchQueryString, { limit: 1, type: "video" }).catch(e => { });
-
-                                if (ytv && ytv[0]) Util.define({
-                                    target: data,
-                                    prop: 'backupLink',
-                                    value: ytv[0].url
+                        tracks = await Promise.all(
+                            playlist.tracks.items.map(async (m: any) => {
+                                const data = new Track(this, {
+                                    title: m.name ?? '',
+                                    description: m.description ?? '',
+                                    author: m.artists[0]?.name ?? 'Unknown Artist',
+                                    url: m.external_urls?.spotify ?? query,
+                                    thumbnail:
+                                        playlist.images[0]?.url ?? m.preview_url?.length
+                                            ? `https://i.scdn.co/image/${m.preview_url?.split('?cid=')[1]}`
+                                            : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
+                                    views: 0,
+                                    requestedBy: message.author,
+                                    fromPlaylist: true,
+                                    source: 'spotify'
                                 });
-                            }
 
-                            return data;
-                        }));
+                                if (this.options.fetchBeforeQueued) {
+                                    const searchQueryString = this.options.disableArtistSearch
+                                        ? data.title
+                                        : `${data.title}${' - ' + data.author}`;
+                                    const ytv = await YouTube.search(searchQueryString, {
+                                        limit: 1,
+                                        type: 'video'
+                                    }).catch((e) => {});
+
+                                    if (ytv && ytv[0])
+                                        Util.define({
+                                            target: data,
+                                            prop: 'backupLink',
+                                            value: ytv[0].url
+                                        });
+                                }
+
+                                return data;
+                            })
+                        );
                     else {
-                        tracks = await Promise.all(playlist.tracks.items.map(async (m: any) => {
-                            const data = new Track(this, {
-                                title: m.track.name ?? '',
-                                description: m.track.description ?? '',
-                                author: m.track.artists[0]?.name ?? 'Unknown Artist',
-                                url: m.track.external_urls?.spotify ?? query,
-                                thumbnail:
-                                    playlist.images[0]?.url ?? m.track.preview_url?.length
-                                        ? `https://i.scdn.co/image/${m.track.preview_url?.split('?cid=')[1]}`
-                                        : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                                duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
-                                views: 0,
-                                requestedBy: message.author,
-                                fromPlaylist: true,
-                                source: 'spotify'
-                            });
-
-                            if (this.options.fetchBeforeQueued) {
-                                const searchQueryString = this.options.disableArtistSearch
-                                    ? data.title
-                                    : `${data.title}${' - ' + data.author}`;
-                                const ytv = await YouTube.search(searchQueryString, { limit: 1, type: "video" }).catch(e => {});
-
-                                if (ytv && ytv[0]) Util.define({
-                                    target: data,
-                                    prop: 'backupLink',
-                                    value: ytv[0].url
+                        tracks = await Promise.all(
+                            playlist.tracks.items.map(async (m: any) => {
+                                const data = new Track(this, {
+                                    title: m.track.name ?? '',
+                                    description: m.track.description ?? '',
+                                    author: m.track.artists[0]?.name ?? 'Unknown Artist',
+                                    url: m.track.external_urls?.spotify ?? query,
+                                    thumbnail:
+                                        playlist.images[0]?.url ?? m.track.preview_url?.length
+                                            ? `https://i.scdn.co/image/${m.track.preview_url?.split('?cid=')[1]}`
+                                            : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
+                                    views: 0,
+                                    requestedBy: message.author,
+                                    fromPlaylist: true,
+                                    source: 'spotify'
                                 });
-                            }
 
-                            return data;
-                        }));
+                                if (this.options.fetchBeforeQueued) {
+                                    const searchQueryString = this.options.disableArtistSearch
+                                        ? data.title
+                                        : `${data.title}${' - ' + data.author}`;
+                                    const ytv = await YouTube.search(searchQueryString, {
+                                        limit: 1,
+                                        type: 'video'
+                                    }).catch((e) => {});
+
+                                    if (ytv && ytv[0])
+                                        Util.define({
+                                            target: data,
+                                            prop: 'backupLink',
+                                            value: ytv[0].url
+                                        });
+                                }
+
+                                return data;
+                            })
+                        );
                     }
 
                     if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
@@ -1325,7 +1341,7 @@ export class Player extends EventEmitter {
                 const searchQueryString = this.options.disableArtistSearch
                     ? queue.playing.title
                     : `${queue.playing.title}${' - ' + queue.playing.author}`;
-                const yteqv = await YouTube.search(searchQueryString, { type: "video", limit: 1 }).catch(() => {});
+                const yteqv = await YouTube.search(searchQueryString, { type: 'video', limit: 1 }).catch(() => {});
 
                 if (!yteqv || !yteqv.length)
                     return void this.emit(
