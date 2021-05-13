@@ -206,10 +206,11 @@ export class Util {
     }
 
     /**
-     *
-     * @param target
-     * @param prop
-     * @param value
+     * Defines a property in the given object
+     * @param {any} target The target
+     * @param {any} prop The property to define
+     * @param {any} value The value
+     * @returns {void}
      */
     static define(ops: { target: any; prop: any; value: any; enumerate?: boolean }) {
         Object.defineProperty(ops.target, ops.prop, {
