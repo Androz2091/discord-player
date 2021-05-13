@@ -14,6 +14,7 @@ export interface PlayerOptions {
     useSafeSearch?: boolean;
     disableAutoRegister?: boolean;
     disableArtistSearch?: boolean;
+    fetchBeforeQueued?: boolean;
 }
 
 export type FiltersName = keyof QueueFilters;

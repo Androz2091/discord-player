@@ -204,6 +204,21 @@ export class Util {
             return null;
         }
     }
+
+    /**
+     * 
+     * @param target 
+     * @param prop 
+     * @param value 
+     */
+    static define(ops: { target: any, prop: any, value: any, enumerate?: boolean }) {
+        Object.defineProperty(ops.target, ops.prop, {
+            value: ops.value,
+            writable: true,
+            enumerable: Boolean(ops.enumerate),
+            configurable: true
+        });
+    }
 }
 
 export default Util;

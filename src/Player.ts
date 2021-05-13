@@ -203,6 +203,19 @@ export class Player extends EventEmitter {
                                     source: 'spotify'
                                 });
 
+                                if (this.options.fetchBeforeQueued) {
+                                    const searchQueryString = this.options.disableArtistSearch
+                                        ? spotifyTrack.title
+                                        : `${spotifyTrack.title}${' - ' + spotifyTrack.author}`;
+                                    const ytv = await YouTube.search(searchQueryString, { limit: 1, type: "video" }).catch(e => { });
+
+                                    if (ytv && ytv[0]) Util.define({
+                                        target: spotifyTrack,
+                                        prop: 'backupLink',
+                                        value: ytv[0].url
+                                    });
+                                }
+
                                 tracks = [spotifyTrack];
                             }
                         }
@@ -219,7 +232,7 @@ export class Player extends EventEmitter {
                     let tracks: Track[] = [];
 
                     if (playlist.type !== 'playlist')
-                        tracks = playlist.tracks.items.map((m: any) => {
+                        tracks = await Promise.all(playlist.tracks.items.map(async (m: any) => {
                             const data = new Track(this, {
                                 title: m.name ?? '',
                                 description: m.description ?? '',
@@ -235,10 +248,24 @@ export class Player extends EventEmitter {
                                 fromPlaylist: true,
                                 source: 'spotify'
                             });
+
+                            if (this.options.fetchBeforeQueued) {
+                                const searchQueryString = this.options.disableArtistSearch
+                                    ? data.title
+                                    : `${data.title}${' - ' + data.author}`;
+                                const ytv = await YouTube.search(searchQueryString, { limit: 1, type: "video" }).catch(e => { });
+
+                                if (ytv && ytv[0]) Util.define({
+                                    target: data,
+                                    prop: 'backupLink',
+                                    value: ytv[0].url
+                                });
+                            }
+
                             return data;
-                        });
+                        }));
                     else {
-                        tracks = playlist.tracks.items.map((m: any) => {
+                        tracks = await Promise.all(playlist.tracks.items.map(async (m: any) => {
                             const data = new Track(this, {
                                 title: m.track.name ?? '',
                                 description: m.track.description ?? '',
@@ -255,8 +282,21 @@ export class Player extends EventEmitter {
                                 source: 'spotify'
                             });
 
+                            if (this.options.fetchBeforeQueued) {
+                                const searchQueryString = this.options.disableArtistSearch
+                                    ? data.title
+                                    : `${data.title}${' - ' + data.author}`;
+                                const ytv = await YouTube.search(searchQueryString, { limit: 1, type: "video" }).catch(e => {});
+
+                                if (ytv && ytv[0]) Util.define({
+                                    target: data,
+                                    prop: 'backupLink',
+                                    value: ytv[0].url
+                                });
+                            }
+
                             return data;
-                        });
+                        }));
                     }
 
                     if (!tracks.length) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
@@ -1285,11 +1325,7 @@ export class Player extends EventEmitter {
                 const searchQueryString = this.options.disableArtistSearch
                     ? queue.playing.title
                     : `${queue.playing.title}${' - ' + queue.playing.author}`;
-                const yteqv = await Util.ytSearch(searchQueryString, {
-                    player: this,
-                    limit: 1,
-                    user: queue.playing.requestedBy
-                }).catch(() => {});
+                const yteqv = await YouTube.search(searchQueryString, { type: "video", limit: 1 }).catch(() => {});
 
                 if (!yteqv || !yteqv.length)
                     return void this.emit(
@@ -1300,11 +1336,10 @@ export class Player extends EventEmitter {
                         new PlayerError('Could not find alternative track on youtube!', 'SpotifyTrackError')
                     );
 
-                Object.defineProperty(queue.playing, 'backupLink', {
-                    value: yteqv[0].url,
-                    writable: true,
-                    enumerable: false,
-                    configurable: true
+                Util.define({
+                    target: queue.playing,
+                    prop: 'backupLink',
+                    value: yteqv[0].url
                 });
             }
 
@@ -1496,6 +1531,7 @@ export default Player;
  * @property {Boolean} [useSafeSearch=false] If it should use `safe search` method for youtube searches
  * @property {Boolean} [disableAutoRegister=false] If it should disable auto-registeration of `@discord-player/extractor`
  * @property {Boolean} [disableArtistSearch=false] If it should disable artist search for spotify
+ * @property {Boolean} [fetchBeforeQueued=false] If it should fetch all songs loaded from spotify before playing
  */
 
 /**
