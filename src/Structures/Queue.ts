@@ -198,6 +198,14 @@ export class Queue extends EventEmitter {
     }
 
     /**
+     * Destroys this queue
+     * @returns {Boolean}
+     */
+    destroy() {
+        return this.player.stop(this.firstMessage);
+    }
+
+    /**
      * String representation of this Queue
      * @returns {String}
      */
