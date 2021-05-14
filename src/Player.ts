@@ -1269,7 +1269,9 @@ export class Player extends EventEmitter {
         if (queue.autoPlay && !queue.repeatMode && !firstPlay) {
             const oldTrack = queue.tracks.shift();
 
-            const info = oldTrack.raw.source === 'youtube' ? await ytdl.getInfo(oldTrack.url).catch((e) => {}) : null;
+            const info = ['youtube', 'spotify'].includes(oldTrack.raw.source)
+                ? await ytdl.getInfo((oldTrack as any).backupLink ?? oldTrack.url).catch((e) => {})
+                : null;
             if (info) {
                 const res = await Util.ytSearch(info.related_videos[0].title, {
                     player: this,
@@ -1294,7 +1296,7 @@ export class Player extends EventEmitter {
         const track = queue.playing;
 
         queue.lastSkipped = false;
-        this._playStream(queue, false).then(() => {
+        if (queue.playing) this._playStream(queue, false).then(() => {
             if (!firstPlay) this.emit(PlayerEvents.TRACK_START, queue.firstMessage, track, queue);
         });
     }
