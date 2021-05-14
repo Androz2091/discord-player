@@ -1145,7 +1145,9 @@ export class Player extends EventEmitter {
                     queue.tracks.push(track);
                     this.emit(PlayerEvents.QUEUE_CREATE, message, queue);
                     resolve(queue);
-                    this._playTrack(queue, true);
+                    this._playTrack(queue, true).catch((e) => {
+                        this.emit(PlayerEvents.ERROR, e, queue.firstMessage, queue.playing);
+                    });
                 })
                 .catch((err) => {
                     this.queues.delete(message.guild.id);
@@ -1164,7 +1166,7 @@ export class Player extends EventEmitter {
     private async _playTrack(queue: Queue, firstPlay: boolean): Promise<void> {
         if (queue.stopped) return;
 
-        if (!(queue.autoPlay && ['youtube', 'spotify'].includes(queue.playing.source)) && queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
+        if (!(queue.autoPlay && ['youtube', 'spotify'].includes(queue.playing?.source)) && queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
             if (this.options.leaveOnEnd && !queue.stopped) {
                 this.queues.delete(queue.guildID);
                 const timeout = setTimeout(() => {
@@ -1185,7 +1187,7 @@ export class Player extends EventEmitter {
         if (queue.autoPlay && !queue.repeatMode && !firstPlay) {
             const oldTrack = queue.tracks.shift();
 
-            const info = ['youtube', 'spotify'].includes(oldTrack.raw.source) ? await ytdl.getInfo((oldTrack as any).backupLink ?? oldTrack.url).catch((e) => {}) : null;
+            const info = ['youtube', 'spotify'].includes(oldTrack?.raw.source) ? await ytdl.getInfo((oldTrack as any).backupLink ?? oldTrack.url).catch((e) => {}) : null;
             if (info) {
                 const res = await Util.ytSearch(info.related_videos[0].title, {
                     player: this,
@@ -1210,9 +1212,13 @@ export class Player extends EventEmitter {
         const track = queue.playing;
 
         queue.lastSkipped = false;
-        this._playStream(queue, false).then(() => {
-            if (!firstPlay) this.emit(PlayerEvents.TRACK_START, queue.firstMessage, track, queue);
-        });
+        this._playStream(queue, false)
+            .then(() => {
+                if (!firstPlay) this.emit(PlayerEvents.TRACK_START, queue.firstMessage, track, queue);
+            })
+            .catch((e) => {
+                this.emit(PlayerEvents.ERROR, e, queue.firstMessage, queue.playing);
+            });
     }
 
     /**
