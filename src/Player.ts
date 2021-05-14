@@ -1,12 +1,6 @@
 import { EventEmitter } from 'events';
 import { Client, Collection, Snowflake, Collector, Message, VoiceChannel, VoiceState } from 'discord.js';
-import {
-    LyricsData,
-    PlayerOptions as PlayerOptionsType,
-    PlayerProgressbarOptions,
-    PlayerStats,
-    QueueFilters
-} from './types/types';
+import { LyricsData, PlayerOptions as PlayerOptionsType, PlayerProgressbarOptions, PlayerStats, QueueFilters } from './types/types';
 import Util from './utils/Util';
 import AudioFilters from './utils/AudioFilters';
 import { Queue } from './Structures/Queue';
@@ -123,8 +117,7 @@ export class Player extends EventEmitter {
         const methods = ['validate', 'getInfo'];
 
         for (const method of methods) {
-            if (typeof extractor[method] !== 'function')
-                throw new PlayerError('Invalid extractor supplied!', 'PlayerExtractorError');
+            if (typeof extractor[method] !== 'function') throw new PlayerError('Invalid extractor supplied!', 'PlayerExtractorError');
         }
 
         this.Extractors.set(extractorName, new ExtractorModel(extractorName, extractor));
@@ -181,9 +174,7 @@ export class Player extends EventEmitter {
                     break;
                 case 'spotify_song':
                     {
-                        const matchSpotifyURL = query.match(
-                            /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/
-                        );
+                        const matchSpotifyURL = query.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/);
                         if (matchSpotifyURL) {
                             const spotifyData = await spotify.getData(query).catch(() => {});
                             if (spotifyData) {
@@ -192,10 +183,7 @@ export class Player extends EventEmitter {
                                     description: spotifyData.description ?? '',
                                     author: spotifyData.artists[0]?.name ?? 'Unknown Artist',
                                     url: spotifyData.external_urls?.spotify ?? query,
-                                    thumbnail:
-                                        spotifyData.album?.images[0]?.url ?? spotifyData.preview_url?.length
-                                            ? `https://i.scdn.co/image/${spotifyData.preview_url?.split('?cid=')[1]}`
-                                            : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    thumbnail: spotifyData.album?.images[0]?.url ?? spotifyData.preview_url?.length ? `https://i.scdn.co/image/${spotifyData.preview_url?.split('?cid=')[1]}` : 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
                                     duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms)),
                                     views: 0,
                                     requestedBy: message.author,
@@ -204,9 +192,7 @@ export class Player extends EventEmitter {
                                 });
 
                                 if (this.options.fetchBeforeQueued) {
-                                    const searchQueryString = this.options.disableArtistSearch
-                                        ? spotifyTrack.title
-                                        : `${spotifyTrack.title}${' - ' + spotifyTrack.author}`;
+                                    const searchQueryString = this.options.disableArtistSearch ? spotifyTrack.title : `${spotifyTrack.title}${' - ' + spotifyTrack.author}`;
                                     const ytv = await YouTube.search(searchQueryString, {
                                         limit: 1,
                                         type: 'video'
@@ -243,9 +229,7 @@ export class Player extends EventEmitter {
                                     description: m.description ?? '',
                                     author: m.artists[0]?.name ?? 'Unknown Artist',
                                     url: m.external_urls?.spotify ?? query,
-                                    thumbnail:
-                                        playlist.images[0]?.url ??
-                                        'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    thumbnail: playlist.images[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
                                     duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
                                     views: 0,
                                     requestedBy: message.author,
@@ -254,9 +238,7 @@ export class Player extends EventEmitter {
                                 });
 
                                 if (this.options.fetchBeforeQueued) {
-                                    const searchQueryString = this.options.disableArtistSearch
-                                        ? data.title
-                                        : `${data.title}${' - ' + data.author}`;
+                                    const searchQueryString = this.options.disableArtistSearch ? data.title : `${data.title}${' - ' + data.author}`;
                                     const ytv = await YouTube.search(searchQueryString, {
                                         limit: 1,
                                         type: 'video'
@@ -281,9 +263,7 @@ export class Player extends EventEmitter {
                                     description: m.track.description ?? '',
                                     author: m.track.artists[0]?.name ?? 'Unknown Artist',
                                     url: m.track.external_urls?.spotify ?? query,
-                                    thumbnail:
-                                        m.track.album?.images[0]?.url ??
-                                        'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    thumbnail: m.track.album?.images[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
                                     duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
                                     views: 0,
                                     requestedBy: message.author,
@@ -292,9 +272,7 @@ export class Player extends EventEmitter {
                                 });
 
                                 if (this.options.fetchBeforeQueued) {
-                                    const searchQueryString = this.options.disableArtistSearch
-                                        ? data.title
-                                        : `${data.title}${' - ' + data.author}`;
+                                    const searchQueryString = this.options.disableArtistSearch ? data.title : `${data.title}${' - ' + data.author}`;
                                     const ytv = await YouTube.search(searchQueryString, {
                                         limit: 1,
                                         type: 'video'
@@ -330,9 +308,7 @@ export class Player extends EventEmitter {
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                     } else {
                         const track = tracks[0];
-                        const queue = (await this._createQueue(message, track).catch(
-                            (e) => void this.emit(PlayerEvents.ERROR, e, message)
-                        )) as Queue;
+                        const queue = (await this._createQueue(message, track).catch((e) => void this.emit(PlayerEvents.ERROR, e, message))) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
                         tracks.shift();
@@ -387,9 +363,7 @@ export class Player extends EventEmitter {
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
                     } else {
                         const track = tracks[0];
-                        const queue = (await this._createQueue(message, track).catch(
-                            (e) => void this.emit(PlayerEvents.ERROR, e, message)
-                        )) as Queue;
+                        const queue = (await this._createQueue(message, track).catch((e) => void this.emit(PlayerEvents.ERROR, e, message))) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
                         tracks[0];
@@ -432,8 +406,7 @@ export class Player extends EventEmitter {
                         res.tracks.push(r);
                     }
 
-                    if (!res.tracks.length)
-                        return this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.PARSE_ERROR, message);
+                    if (!res.tracks.length) return this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.PARSE_ERROR, message);
                     res.duration = res.tracks.reduce((a, c) => a + c.durationMS, 0);
 
                     this.emit(PlayerEvents.PLAYLIST_PARSE_END, res, message);
@@ -443,9 +416,7 @@ export class Player extends EventEmitter {
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
                     } else {
                         const track = res.tracks[0];
-                        const queue = (await this._createQueue(message, track).catch(
-                            (e) => void this.emit(PlayerEvents.ERROR, e, message)
-                        )) as Queue;
+                        const queue = (await this._createQueue(message, track).catch((e) => void this.emit(PlayerEvents.ERROR, e, message))) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
                         res.tracks.shift();
@@ -522,13 +493,7 @@ export class Player extends EventEmitter {
             if (ytdl.validateURL(query)) {
                 const info = await ytdl.getBasicInfo(query).catch(() => {});
                 if (!info) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
-                if (info.videoDetails.isLiveContent && !this.options.enableLive)
-                    return void this.emit(
-                        PlayerEvents.ERROR,
-                        PlayerErrorEventCodes.LIVE_VIDEO,
-                        message,
-                        new PlayerError('Live video is not enabled!')
-                    );
+                if (info.videoDetails.isLiveContent && !this.options.enableLive) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.LIVE_VIDEO, message, new PlayerError('Live video is not enabled!'));
                 const lastThumbnail = info.videoDetails.thumbnails[info.videoDetails.thumbnails.length - 1];
 
                 track = new Track(this, {
@@ -610,21 +575,9 @@ export class Player extends EventEmitter {
     setFilters(message: Message, newFilters: QueueFilters): Promise<void> {
         return new Promise((resolve) => {
             const queue = this.queues.find((g) => g.guildID === message.guild.id);
-            if (!queue)
-                this.emit(
-                    PlayerEvents.ERROR,
-                    PlayerErrorEventCodes.NOT_PLAYING,
-                    message,
-                    new PlayerError('Not playing')
-                );
+            if (!queue) this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message, new PlayerError('Not playing'));
 
-            if (queue.playing.raw.live)
-                return void this.emit(
-                    PlayerEvents.ERROR,
-                    PlayerErrorEventCodes.LIVE_VIDEO,
-                    message,
-                    new PlayerError('Cannot use setFilters on livestream')
-                );
+            if (queue.playing.raw.live) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.LIVE_VIDEO, message, new PlayerError('Cannot use setFilters on livestream'));
 
             Object.keys(newFilters).forEach((filterName) => {
                 // @ts-ignore
@@ -650,11 +603,7 @@ export class Player extends EventEmitter {
 
             if (typeof time !== 'number' && !isNaN(time)) time = parseInt(time);
             if (queue.playing.durationMS <= time) return this.skip(message);
-            if (
-                queue.voiceConnection.dispatcher.streamTime === time ||
-                queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime === time
-            )
-                return resolve();
+            if (queue.voiceConnection.dispatcher.streamTime === time || queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime === time) return resolve();
             if (time < 0) this._playStream(queue, false).then(() => resolve());
 
             this._playStream(queue, false, time).then(() => resolve());
@@ -964,8 +913,7 @@ export class Player extends EventEmitter {
         const queue = this.getQueue(message);
         if (!queue) return;
 
-        const previousTracksTime =
-            queue.previousTracks.length > 0 ? queue.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
+        const previousTracksTime = queue.previousTracks.length > 0 ? queue.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
         const currentStreamTime = queueTime ? previousTracksTime + queue.currentStreamTime : queue.currentStreamTime;
         const totalTracksTime = queue.totalTime;
         const totalTime = queueTime ? previousTracksTime + totalTracksTime : queue.playing.durationMS;
@@ -989,23 +937,14 @@ export class Player extends EventEmitter {
         const queue = this.getQueue(message);
         if (!queue) return;
 
-        const previousTracksTime =
-            queue.previousTracks.length > 0 ? queue.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
-        const currentStreamTime = options?.queue
-            ? previousTracksTime + queue.currentStreamTime
-            : queue.currentStreamTime;
+        const previousTracksTime = queue.previousTracks.length > 0 ? queue.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
+        const currentStreamTime = options?.queue ? previousTracksTime + queue.currentStreamTime : queue.currentStreamTime;
         const totalTracksTime = queue.totalTime;
         const totalTime = options?.queue ? previousTracksTime + totalTracksTime : queue.playing.durationMS;
-        const length =
-            typeof options?.length === 'number'
-                ? options?.length <= 0 || options?.length === Infinity
-                    ? 15
-                    : options?.length
-                : 15;
+        const length = typeof options?.length === 'number' ? (options?.length <= 0 || options?.length === Infinity ? 15 : options?.length) : 15;
 
         const index = Math.round((currentStreamTime / totalTime) * length);
-        const indicator =
-            typeof options?.indicator === 'string' && options?.indicator.length > 0 ? options?.indicator : '🔘';
+        const indicator = typeof options?.indicator === 'string' && options?.indicator.length > 0 ? options?.indicator : '🔘';
         const line = typeof options?.line === 'string' && options?.line.length > 0 ? options?.line : '▬';
 
         if (index >= 1 && index <= length) {
@@ -1071,10 +1010,7 @@ export class Player extends EventEmitter {
             uptime: this.client.uptime,
             connections: this.client.voice.connections.size,
             // tslint:disable:no-shadowed-variable
-            users: this.client.voice.connections.reduce(
-                (a, c) => a + c.channel.members.filter((a) => a.user.id !== this.client.user.id).size,
-                0
-            ),
+            users: this.client.voice.connections.reduce((a, c) => a + c.channel.members.filter((a) => a.user.id !== this.client.user.id).size, 0),
             queues: this.queues.size,
             extractors: this.Extractors.size,
             versions: {
@@ -1164,13 +1100,7 @@ export class Player extends EventEmitter {
      */
     _addTrackToQueue(message: Message, track: Track): Queue {
         const queue = this.getQueue(message);
-        if (!queue)
-            this.emit(
-                PlayerEvents.ERROR,
-                PlayerErrorEventCodes.NOT_PLAYING,
-                message,
-                new PlayerError('Player is not available in this server')
-            );
+        if (!queue) this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_PLAYING, message, new PlayerError('Player is not available in this server'));
         if (!track || !(track instanceof Track)) throw new PlayerError('No track specified to add to the queue');
         queue.tracks.push(track);
         return queue;
@@ -1185,10 +1115,7 @@ export class Player extends EventEmitter {
      */
     _addTracksToQueue(message: Message, tracks: Track[]): Queue {
         const queue = this.getQueue(message);
-        if (!queue)
-            throw new PlayerError(
-                'Cannot add tracks to queue because no song is currently being played on the server.'
-            );
+        if (!queue) throw new PlayerError('Cannot add tracks to queue because no song is currently being played on the server.');
         queue.tracks.push(...tracks);
         return queue;
     }
@@ -1203,13 +1130,7 @@ export class Player extends EventEmitter {
     private _createQueue(message: Message, track: Track): Promise<Queue> {
         return new Promise((resolve) => {
             const channel = message.member.voice ? message.member.voice.channel : null;
-            if (!channel)
-                return void this.emit(
-                    PlayerEvents.ERROR,
-                    PlayerErrorEventCodes.NOT_CONNECTED,
-                    message,
-                    new PlayerError('Voice connection is not available in this server!')
-                );
+            if (!channel) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_CONNECTED, message, new PlayerError('Voice connection is not available in this server!'));
 
             const queue = new Queue(this, message);
             this.queues.set(message.guild.id, queue);
@@ -1228,12 +1149,7 @@ export class Player extends EventEmitter {
                 })
                 .catch((err) => {
                     this.queues.delete(message.guild.id);
-                    this.emit(
-                        PlayerEvents.ERROR,
-                        PlayerErrorEventCodes.UNABLE_TO_JOIN,
-                        message,
-                        new PlayerError(err.message ?? err)
-                    );
+                    this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.UNABLE_TO_JOIN, message, new PlayerError(err.message ?? err));
                 });
         });
     }
@@ -1248,7 +1164,7 @@ export class Player extends EventEmitter {
     private async _playTrack(queue: Queue, firstPlay: boolean): Promise<void> {
         if (queue.stopped) return;
 
-        if (!queue.autoPlay && queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
+        if (!(queue.autoPlay && ['youtube', 'spotify'].includes(queue.playing.source)) && queue.tracks.length === 1 && !queue.loopMode && !queue.repeatMode && !firstPlay) {
             if (this.options.leaveOnEnd && !queue.stopped) {
                 this.queues.delete(queue.guildID);
                 const timeout = setTimeout(() => {
@@ -1269,9 +1185,7 @@ export class Player extends EventEmitter {
         if (queue.autoPlay && !queue.repeatMode && !firstPlay) {
             const oldTrack = queue.tracks.shift();
 
-            const info = ['youtube', 'spotify'].includes(oldTrack.raw.source)
-                ? await ytdl.getInfo((oldTrack as any).backupLink ?? oldTrack.url).catch((e) => {})
-                : null;
+            const info = ['youtube', 'spotify'].includes(oldTrack.raw.source) ? await ytdl.getInfo((oldTrack as any).backupLink ?? oldTrack.url).catch((e) => {}) : null;
             if (info) {
                 const res = await Util.ytSearch(info.related_videos[0].title, {
                     player: this,
@@ -1296,7 +1210,7 @@ export class Player extends EventEmitter {
         const track = queue.playing;
 
         queue.lastSkipped = false;
-        if (queue.playing) this._playStream(queue, false).then(() => {
+        this._playStream(queue, false).then(() => {
             if (!firstPlay) this.emit(PlayerEvents.TRACK_START, queue.firstMessage, track, queue);
         });
     }
@@ -1314,12 +1228,7 @@ export class Player extends EventEmitter {
             const ffmpeg = Util.checkFFmpeg();
             if (!ffmpeg) return;
 
-            const seekTime =
-                typeof seek === 'number'
-                    ? seek
-                    : updateFilter
-                    ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime
-                    : undefined;
+            const seekTime = typeof seek === 'number' ? seek : updateFilter ? queue.voiceConnection.dispatcher.streamTime + queue.additionalStreamTime : undefined;
             const encoderArgsFilters: string[] = [];
 
             Object.keys(queue.filters).forEach((filterName) => {
@@ -1341,19 +1250,10 @@ export class Player extends EventEmitter {
 
             // modify spotify
             if (queue.playing.raw.source === 'spotify' && !(queue.playing as any).backupLink) {
-                const searchQueryString = this.options.disableArtistSearch
-                    ? queue.playing.title
-                    : `${queue.playing.title}${' - ' + queue.playing.author}`;
+                const searchQueryString = this.options.disableArtistSearch ? queue.playing.title : `${queue.playing.title}${' - ' + queue.playing.author}`;
                 const yteqv = await YouTube.search(searchQueryString, { type: 'video', limit: 1 }).catch(() => {});
 
-                if (!yteqv || !yteqv.length)
-                    return void this.emit(
-                        PlayerEvents.ERROR,
-                        PlayerErrorEventCodes.VIDEO_UNAVAILABLE,
-                        queue.firstMessage,
-                        queue.playing,
-                        new PlayerError('Could not find alternative track on youtube!', 'SpotifyTrackError')
-                    );
+                if (!yteqv || !yteqv.length) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.VIDEO_UNAVAILABLE, queue.firstMessage, queue.playing, new PlayerError('Could not find alternative track on youtube!', 'SpotifyTrackError'));
 
                 Util.define({
                     target: queue.playing,
@@ -1372,16 +1272,11 @@ export class Player extends EventEmitter {
                     ...this.options.ytdlDownloadOptions
                 });
             } else {
-                newStream = ytdl.arbitraryStream(
-                    queue.playing.raw.source === 'soundcloud'
-                        ? await queue.playing.raw.engine.downloadProgressive()
-                        : queue.playing.raw.engine,
-                    {
-                        opusEncoded: true,
-                        encoderArgs,
-                        seek: seekTime / 1000
-                    }
-                );
+                newStream = ytdl.arbitraryStream(queue.playing.raw.source === 'soundcloud' ? await queue.playing.raw.engine.downloadProgressive() : queue.playing.raw.engine, {
+                    opusEncoded: true,
+                    encoderArgs,
+                    seek: seekTime / 1000
+                });
             }
 
             setTimeout(() => {
@@ -1407,13 +1302,7 @@ export class Player extends EventEmitter {
 
                 newStream.on('error', (error: Error) => {
                     if (error.message.toLowerCase().includes('video unavailable')) {
-                        this.emit(
-                            PlayerEvents.ERROR,
-                            PlayerErrorEventCodes.VIDEO_UNAVAILABLE,
-                            queue.firstMessage,
-                            queue.playing,
-                            error
-                        );
+                        this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.VIDEO_UNAVAILABLE, queue.firstMessage, queue.playing, error);
                         this._playTrack(queue, false);
                     } else {
                         this.emit(PlayerEvents.ERROR, error, queue.firstMessage, error);

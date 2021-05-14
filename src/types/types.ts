@@ -67,19 +67,7 @@ export type QueueFilters = {
     fadein?: boolean;
 };
 
-export type QueryType =
-    | 'soundcloud_track'
-    | 'soundcloud_playlist'
-    | 'spotify_song'
-    | 'spotify_album'
-    | 'spotify_playlist'
-    | 'youtube_video'
-    | 'youtube_playlist'
-    | 'vimeo'
-    | 'facebook'
-    | 'reverbnation'
-    | 'attachment'
-    | 'youtube_search';
+export type QueryType = 'soundcloud_track' | 'soundcloud_playlist' | 'spotify_song' | 'spotify_album' | 'spotify_playlist' | 'youtube_video' | 'youtube_playlist' | 'vimeo' | 'facebook' | 'reverbnation' | 'attachment' | 'youtube_search';
 
 export interface ExtractorModelData {
     title: string;
@@ -131,17 +119,7 @@ export interface PlayerStats {
     };
     system: {
         arch: string;
-        platform:
-            | 'aix'
-            | 'android'
-            | 'darwin'
-            | 'freebsd'
-            | 'linux'
-            | 'openbsd'
-            | 'sunos'
-            | 'win32'
-            | 'cygwin'
-            | 'netbsd';
+        platform: 'aix' | 'android' | 'darwin' | 'freebsd' | 'linux' | 'openbsd' | 'sunos' | 'win32' | 'cygwin' | 'netbsd';
         cpu: number;
         memory: {
             total: string;
