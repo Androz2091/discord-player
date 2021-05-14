@@ -244,7 +244,8 @@ export class Player extends EventEmitter {
                                     author: m.artists[0]?.name ?? 'Unknown Artist',
                                     url: m.external_urls?.spotify ?? query,
                                     thumbnail:
-                                        playlist.images[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                        playlist.images[0]?.url ??
+                                        'https://www.scdn.co/i/_global/twitter_card-default.jpg',
                                     duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
                                     views: 0,
                                     requestedBy: message.author,
@@ -280,7 +281,9 @@ export class Player extends EventEmitter {
                                     description: m.track.description ?? '',
                                     author: m.track.artists[0]?.name ?? 'Unknown Artist',
                                     url: m.track.external_urls?.spotify ?? query,
-                                    thumbnail: m.track.album?.images[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    thumbnail:
+                                        m.track.album?.images[0]?.url ??
+                                        'https://www.scdn.co/i/_global/twitter_card-default.jpg',
                                     duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
                                     views: 0,
                                     requestedBy: message.author,
@@ -326,12 +329,13 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                     } else {
-                        const track = tracks.shift();
+                        const track = tracks[0];
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
+                        tracks.shift();
                         this._addTracksToQueue(message, tracks);
                     }
 
@@ -382,12 +386,13 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
                     } else {
-                        const track = tracks.shift();
+                        const track = tracks[0];
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
+                        tracks[0];
                         this._addTracksToQueue(message, tracks);
                     }
 
@@ -437,12 +442,13 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, res.tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
                     } else {
-                        const track = res.tracks.shift();
+                        const track = res.tracks[0];
                         const queue = (await this._createQueue(message, track).catch(
                             (e) => void this.emit(PlayerEvents.ERROR, e, message)
                         )) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
                         this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
+                        res.tracks.shift();
                         this._addTracksToQueue(message, res.tracks);
                     }
 
@@ -1549,6 +1555,7 @@ export default Player;
  * The type of Track source, either:
  * * `soundcloud` - a stream from SoundCloud
  * * `youtube` - a stream from YouTube
+ * * `spotify` - a spotify track
  * * `arbitrary` - arbitrary stream
  * @typedef {String} TrackSource
  */
