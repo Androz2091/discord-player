@@ -244,7 +244,8 @@ export class Player extends EventEmitter {
                                     author: m.artists[0]?.name ?? 'Unknown Artist',
                                     url: m.external_urls?.spotify ?? query,
                                     thumbnail:
-                                        playlist.images[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                        playlist.images[0]?.url ??
+                                        'https://www.scdn.co/i/_global/twitter_card-default.jpg',
                                     duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
                                     views: 0,
                                     requestedBy: message.author,
@@ -280,7 +281,9 @@ export class Player extends EventEmitter {
                                     description: m.track.description ?? '',
                                     author: m.track.artists[0]?.name ?? 'Unknown Artist',
                                     url: m.track.external_urls?.spotify ?? query,
-                                    thumbnail: m.track.album?.images[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                    thumbnail:
+                                        m.track.album?.images[0]?.url ??
+                                        'https://www.scdn.co/i/_global/twitter_card-default.jpg',
                                     duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
                                     views: 0,
                                     requestedBy: message.author,
