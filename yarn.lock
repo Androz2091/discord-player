@@ -4635,9 +4635,9 @@ yargs@^14.0.0:
     yargs-parser "^15.0.1"
 
 youtube-sr@^4.0.7:
-  version "4.0.7"
-  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.0.7.tgz#156137713a5df2d02c0698fd819fca2249f3a9f3"
-  integrity sha512-s05pA+NgD0iPw97XtRXiy5GaEbYyIVsfArmGO5UfvSO5etrG6DxAs1uKqTFbQH4IGTqMsb82M14iB5ohkOD2Mw==
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.0.8.tgz#ddb3370dfd26521d0f687bd1dbaa258368c5f059"
+  integrity sha512-I9dGR9o9WR6e2yXJRxNPJeBd/U/fpzlYe4vqWVaLAFgeIVE8KP0GnOV1odL/QDC6ie7fR+8GsfEGkkMHgAWqfg==
   dependencies:
     "@types/node-fetch" "^2.5.10"
     node-fetch "^2.6.1"
