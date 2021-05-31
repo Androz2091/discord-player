@@ -1630,7 +1630,7 @@ core-util-is@1.0.2, core-util-is@~1.0.0:
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
   integrity sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
 
-cross-fetch@^3.0.5:
+cross-fetch@~3.1.4:
   version "3.1.4"
   resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.4.tgz#9723f3a3a247bf8b89039f3a380a9244e8fa2f39"
   integrity sha512-1eAtFWdIubi6T4XPy6ei9iUFoKpUkIF971QLN8lIvvvwueI65+Nw5haMNKUwfJxabqlIIDODJKGrQ66gxC0PbQ==
@@ -2469,7 +2469,7 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
-himalaya@^1.1.0:
+himalaya@~1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/himalaya/-/himalaya-1.1.0.tgz#31724ae9d35714cd7c6f4be94888953f3604606a"
   integrity sha512-LLase1dHCRMel68/HZTFft0N0wti0epHr3nNY7ynpLbyZpmrKMQ8YIpiOV77TM97cNpC8Wb2n6f66IRggwdWPw==
@@ -3944,19 +3944,19 @@ split-string@^3.0.1, split-string@^3.0.2:
   dependencies:
     extend-shallow "^3.0.0"
 
-spotify-uri@^2.1.0:
+spotify-uri@~2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/spotify-uri/-/spotify-uri-2.2.0.tgz#8db641615cf6e122284874287fe39e89595922df"
   integrity sha512-uUybj02bfyfCoZ0MJ80MkqbKxtIVRJfbRGk05KJFq1li3zb7yNfN1f+TAw4wcXgp7jLWExeiw2wyPQXZ8PHtfg==
 
 spotify-url-info@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/spotify-url-info/-/spotify-url-info-2.2.0.tgz#7d14adbae65b54b918c46e2dcfdf02b1146f85c8"
-  integrity sha512-GEMoMf2RF+CSPsSGstY/9c7dgViKOKJ09bFZTwrU4KzQ+JpLq+0Ho4eMCeeGmES94yjBz+GHMtBfTcp+4DxEbA==
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/spotify-url-info/-/spotify-url-info-2.2.3.tgz#2f08400479f00472fb488eff4bd3c485db99361a"
+  integrity sha512-cZTE5nOnaAjIiaHG9psVYqKXWOlNUIgSU2e+bNInRaYZNgmVgOcKH0D7V1nSER3gv3h5BXvOo0EJTtrMQQo1bA==
   dependencies:
-    cross-fetch "^3.0.5"
-    himalaya "^1.1.0"
-    spotify-uri "^2.1.0"
+    cross-fetch "~3.1.4"
+    himalaya "~1.1.0"
+    spotify-uri "~2.2.0"
 
 sprintf-js@~1.0.2:
   version "1.0.3"
