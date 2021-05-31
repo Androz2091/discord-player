@@ -1133,6 +1133,7 @@ export class Player extends EventEmitter {
             if (!channel) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.NOT_CONNECTED, message, new PlayerError('Voice connection is not available in this server!'));
 
             const queue = new Queue(this, message);
+            queue.volume = this.options.volume || 100;
             this.queues.set(message.guild.id, queue);
 
             channel
@@ -1253,6 +1254,8 @@ export class Player extends EventEmitter {
             }
 
             let newStream: any;
+
+            if (!queue.playing?.raw?.source) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.VIDEO_UNAVAILABLE, queue.firstMessage, queue.playing, new PlayerError('Don\'t know how to play this item', 'PlayerError'));
 
             // modify spotify
             if (queue.playing.raw.source === 'spotify' && !(queue.playing as any).backupLink) {
@@ -1446,6 +1449,7 @@ export default Player;
  * @property {Boolean} [disableAutoRegister=false] If it should disable auto-registeration of `@discord-player/extractor`
  * @property {Boolean} [disableArtistSearch=false] If it should disable artist search for spotify
  * @property {Boolean} [fetchBeforeQueued=false] If it should fetch all songs loaded from spotify before playing
+ * @property {Number} [volume=100] Startup player volume
  */
 
 /**
@@ -1513,6 +1517,8 @@ export default Player;
  * @property {Boolean} [timecodes] If it should return progres bar with time codes
  * @property {Boolean} [queue] if it should return the progress bar of the whole queue
  * @property {Number} [length] The length of progress bar to build
+ * @property {String} [indicator] The progress indicator
+ * @property {String} [line] The progress bar track
  */
 
 /**

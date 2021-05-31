@@ -36,5 +36,6 @@ export const PlayerOptions: DP_OPTIONS = {
     leaveOnEmptyCooldown: 0,
     autoSelfDeaf: true,
     enableLive: false,
-    ytdlDownloadOptions: {}
+    ytdlDownloadOptions: {},
+    volume: 100
 };
