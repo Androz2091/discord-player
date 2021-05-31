@@ -1255,7 +1255,7 @@ export class Player extends EventEmitter {
 
             let newStream: any;
 
-            if (!queue.playing?.raw?.source) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.VIDEO_UNAVAILABLE, queue.firstMessage, queue.playing, new PlayerError('Don\'t know how to play this item', 'PlayerError'));
+            if (!queue.playing?.raw?.source) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.VIDEO_UNAVAILABLE, queue.firstMessage, queue.playing, new PlayerError("Don't know how to play this item", 'PlayerError'));
 
             // modify spotify
             if (queue.playing.raw.source === 'spotify' && !(queue.playing as any).backupLink) {
