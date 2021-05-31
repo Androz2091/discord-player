@@ -4085,7 +4085,7 @@ spotify-uri@~2.2.0:
   resolved "https://registry.yarnpkg.com/spotify-uri/-/spotify-uri-2.2.0.tgz#8db641615cf6e122284874287fe39e89595922df"
   integrity sha512-uUybj02bfyfCoZ0MJ80MkqbKxtIVRJfbRGk05KJFq1li3zb7yNfN1f+TAw4wcXgp7jLWExeiw2wyPQXZ8PHtfg==
 
-spotify-url-info@^2.2.0:
+spotify-url-info@^2.2.3:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/spotify-url-info/-/spotify-url-info-2.2.3.tgz#2f08400479f00472fb488eff4bd3c485db99361a"
   integrity sha512-cZTE5nOnaAjIiaHG9psVYqKXWOlNUIgSU2e+bNInRaYZNgmVgOcKH0D7V1nSER3gv3h5BXvOo0EJTtrMQQo1bA==
@@ -4753,14 +4753,14 @@ yargs@^14.0.0:
     y18n "^4.0.0"
     yargs-parser "^15.0.1"
 
-youtube-sr@^4.0.7:
+youtube-sr@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.1.1.tgz#e8fec9d2e0b430910bdedb77667a8dd54250cf4f"
   integrity sha512-5MluT51vQG39BaL6oKIEBoVkeA2y0aAbRoktbrH/b0y2s2hyhXnbTlR99JIvlSHd9I3sQxLQ2MWxwTjW9yK9xw==
   dependencies:
     node-fetch "^2.6.1"
 
-ytdl-core@^4.8.0:
+ytdl-core@^4.8.2:
   version "4.8.2"
   resolved "https://registry.yarnpkg.com/ytdl-core/-/ytdl-core-4.8.2.tgz#f034ad942c5d958f5987fc8ff0b0639664ae2fb7"
   integrity sha512-O3n++YcgZawaXJwbPmnRDgfN6b4kU0DpNdkI9Na5yM3JAdfJmoq5UHc8v9Xjgjr1RilQUUh7mhDnRRPDtKr0Kg==
