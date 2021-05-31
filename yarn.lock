@@ -940,14 +940,6 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
 
-"@types/node-fetch@^2.5.10":
-  version "2.5.10"
-  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.5.10.tgz#9b4d4a0425562f9fcea70b12cb3fcdd946ca8132"
-  integrity sha512-IpkX0AasN44hgEad0gEF/V6EgR5n69VEqPEgnmoM8GsIGro3PowbWs4tR6IhxUTyPLpOn+fiGG6nrQhcmoCuIQ==
-  dependencies:
-    "@types/node" "*"
-    form-data "^3.0.0"
-
 "@types/node@*", "@types/node@^14.14.41":
   version "14.14.41"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.41.tgz#d0b939d94c1d7bd53d04824af45f1139b8c45615"
@@ -2243,15 +2235,6 @@ forever-agent@~0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
   integrity sha1-+8cfDEGt6zf5bFd60e1C2P2sypE=
-
-form-data@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-3.0.1.tgz#ebd53791b78356a99af9a300d4282c4d5eb9755f"
-  integrity sha512-RHkBKtLWUVwd7SqRIvCZMEvAMoGUp0XU+seQiZejj0COz3RI3hWP4sCv3gZWWLjJTd7rGwcsF5eKZGii0r/hbg==
-  dependencies:
-    asynckit "^0.4.0"
-    combined-stream "^1.0.8"
-    mime-types "^2.1.12"
 
 form-data@~2.3.2:
   version "2.3.3"
@@ -4635,11 +4618,10 @@ yargs@^14.0.0:
     yargs-parser "^15.0.1"
 
 youtube-sr@^4.0.7:
-  version "4.0.7"
-  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.0.7.tgz#156137713a5df2d02c0698fd819fca2249f3a9f3"
-  integrity sha512-s05pA+NgD0iPw97XtRXiy5GaEbYyIVsfArmGO5UfvSO5etrG6DxAs1uKqTFbQH4IGTqMsb82M14iB5ohkOD2Mw==
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.1.1.tgz#e8fec9d2e0b430910bdedb77667a8dd54250cf4f"
+  integrity sha512-5MluT51vQG39BaL6oKIEBoVkeA2y0aAbRoktbrH/b0y2s2hyhXnbTlR99JIvlSHd9I3sQxLQ2MWxwTjW9yK9xw==
   dependencies:
-    "@types/node-fetch" "^2.5.10"
     node-fetch "^2.6.1"
 
 ytdl-core@^4.8.0:
