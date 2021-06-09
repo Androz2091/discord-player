@@ -17,7 +17,7 @@ export enum PlayerEvents {
     SEARCH_RESULTS = 'searchResults',
     TRACK_ADD = 'trackAdd',
     TRACK_START = 'trackStart'
-};
+}
 
 export enum PlayerErrorEventCodes {
     DEFAULT = 'PlayerError',
@@ -28,7 +28,7 @@ export enum PlayerErrorEventCodes {
     PARSE_ERROR = 'ParseError',
     VIDEO_UNAVAILABLE = 'VideoUnavailable',
     MUSIC_STARTING = 'MusicStarting'
-};
+}
 
 export const PlayerOptions: DP_OPTIONS = {
     leaveOnEnd: true,

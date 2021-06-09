@@ -30,10 +30,15 @@ export class Player extends EventEmitter {
         return new Promise<Queue>((resolve) => {
             if (this.queues.has(message.guild.id)) return this.queues.get(message.guild.id);
             const channel = message.member.voice?.channel;
-            if (!channel) return void this.emit(
-                PlayerEvents.ERROR,
-                new PlayerError('Voice connection is not available in this server!', PlayerErrorEventCodes.NOT_CONNECTED, message)
-            );
+            if (!channel)
+                return void this.emit(
+                    PlayerEvents.ERROR,
+                    new PlayerError(
+                        'Voice connection is not available in this server!',
+                        PlayerErrorEventCodes.NOT_CONNECTED,
+                        message
+                    )
+                );
 
             const queue = new Queue(this, message.guild);
             void this.queues.set(message.guild.id, queue);
@@ -57,7 +62,7 @@ export class Player extends EventEmitter {
                 });
 
             return queue;
-        })
+        });
     }
 
     public getQueue(message: Message) {
@@ -81,7 +86,7 @@ export class Player extends EventEmitter {
         if (query instanceof Track) track = query;
         else {
             if (ytdl.validateURL(query)) {
-                const info = await ytdl.getBasicInfo(query).catch(() => { });
+                const info = await ytdl.getBasicInfo(query).catch(() => {});
                 if (!info) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
                 if (info.videoDetails.isLiveContent && !queue.options.enableLive)
                     return void this.emit(

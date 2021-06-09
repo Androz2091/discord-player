@@ -1,12 +1,11 @@
-import Player from "../Player";
+import Player from '../Player';
 
 export class Playlist {
     player: Player;
 
     constructor(player: Player, data: any) {
-        Object.defineProperty(this, "player", { value: player });
+        Object.defineProperty(this, 'player', { value: player });
     }
-
 }
 
 export default Playlist;

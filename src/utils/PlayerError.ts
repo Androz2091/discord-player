@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { Message } from 'discord.js';
 
 export default class PlayerError extends Error {
     discordMessage: Message;
