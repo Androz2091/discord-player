@@ -50,11 +50,12 @@
   },
   "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
-    "discord-ytdl-core": "^5.0.2",
-    "soundcloud-scraper": "^4.0.3",
-    "spotify-url-info": "^2.2.0",
-    "youtube-sr": "^4.0.4",
-    "ytdl-core": "^4.5.0"
+    "@discordjs/voice": "^0.3.0",
+    "discord-ytdl-core": "^5.0.3",
+    "soundcloud-scraper": "^5.0.0",
+    "spotify-url-info": "^2.2.3",
+    "youtube-sr": "^4.1.4",
+    "ytdl-core": "^4.8.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.16",
@@ -65,12 +66,16 @@
     "@discordjs/opus": "^0.5.0",
     "@types/node": "^14.14.41",
     "@types/ws": "^7.4.1",
-    "discord.js": "discordjs/discord.js",
+    "discord.js": "^13.0.0-dev.dda5ee2e9f0839d3e42d25114ae1b47355cdfd27",
     "discord.js-docgen": "discordjs/docgen#ts-patch",
     "jsdoc-babel": "^0.5.0",
     "prettier": "^2.2.1",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
+    "typescipt": "^1.0.0",
     "typescript": "^4.2.3"
+  },
+  "optionalDependencies": {
+    "sodium": "^3.0.2"
   }
 }
