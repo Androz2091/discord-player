@@ -172,7 +172,7 @@ export class Player extends EventEmitter {
             collector.on('collect', ({ content }) => {
                 if (content === 'cancel') {
                     collector.stop();
-                    return this.emit(PlayerEvents.SEARCH_CANCEL, message, query, tracks);
+                    return void this.emit(PlayerEvents.SEARCH_CANCEL, message, query, tracks);
                 }
 
                 if (!isNaN(content) && parseInt(content) >= 1 && parseInt(content) <= tracks.length) {
