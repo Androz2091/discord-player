@@ -9,7 +9,6 @@ class Playlist {
         this.player = player;
         this.tracks = tracks ?? [];
     }
-
 }
 
 export { Playlist };

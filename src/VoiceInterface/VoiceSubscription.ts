@@ -12,6 +12,8 @@ import {
 } from "@discordjs/voice";
 import { Duplex, Readable } from "stream";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
+import Track from "../Structures/Track";
+import PlayerError from "../utils/PlayerError";
 
 export interface VoiceEvents {
     error: (error: AudioPlayerError) => any;
@@ -24,6 +26,7 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
     public readonly voiceConnection: VoiceConnection;
     public readonly audioPlayer: AudioPlayer;
     public connectPromise?: Promise<void>;
+    public audioResource?: AudioResource<Track>;
 
     constructor(connection: VoiceConnection) {
         super();
@@ -79,11 +82,13 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
      * @returns {AudioResource}
      */
     createStream(src: Readable | Duplex | string, ops?: { type?: StreamType; data?: any; inlineVolume?: boolean }) {
-        return createAudioResource(src, {
+        this.audioResource = createAudioResource(src, {
             inputType: ops?.type ?? StreamType.Arbitrary,
             metadata: ops?.data,
             inlineVolume: Boolean(ops?.inlineVolume)
         });
+
+        return this.audioResource;
     }
 
     /**
@@ -119,10 +124,17 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
      * Play stream
      * @param {AudioResource} resource The audio resource to play
      */
-    playStream(resource: AudioResource) {
+    playStream(resource: AudioResource<Track> = this.audioResource) {
+        if (!resource) throw new PlayerError("Audio resource is not available!");
+        if (!this.audioResource && resource) this.audioResource = resource;
         this.audioPlayer.play(resource);
 
         return this;
+    }
+
+    get streamTime() {
+        if (!this.audioResource) return 0;
+        return this.audioResource.playbackDuration;
     }
 }
 

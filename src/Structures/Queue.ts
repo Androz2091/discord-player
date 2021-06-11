@@ -1,6 +1,5 @@
 import { Guild, StageChannel, VoiceChannel } from "discord.js";
 import { Player } from "../Player";
-import { VoiceUtils } from "../VoiceInterface/VoiceUtils";
 import { VoiceSubscription } from "../VoiceInterface/VoiceSubscription";
 import Track from "./Track";
 import { PlayerOptions } from "../types/types";
@@ -36,10 +35,14 @@ class Queue {
         );
     }
 
+    get current() {
+        return this.voiceConnection.audioResource?.metadata ?? this.tracks[0];
+    }
+
     async joinVoiceChannel(channel: StageChannel | VoiceChannel) {
         if (!["stage", "voice"].includes(channel.type))
             throw new TypeError(`Channel type must be voice or stage, got ${channel.type}!`);
-        const connection = await VoiceUtils.connect(channel);
+        const connection = await this.player.voiceUtils.connect(channel);
         this.voiceConnection = connection;
 
         return this;
@@ -49,6 +52,10 @@ class Queue {
         this.voiceConnection.stop();
         this.voiceConnection.disconnect();
         this.player.queues.delete(this.guild.id);
+    }
+
+    play() {
+        throw new Error("Not implemented");
     }
 }
 

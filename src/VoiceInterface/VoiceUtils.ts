@@ -1,11 +1,9 @@
-import { VoiceChannel, StageChannel } from "discord.js";
+import { VoiceChannel, StageChannel, Collection, Snowflake } from "discord.js";
 import { entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
 import { VoiceSubscription } from "./VoiceSubscription";
 
 class VoiceUtils {
-    constructor() {
-        throw new Error("Cannot instantiate static class!");
-    }
+    public cache = new Collection<Snowflake, VoiceSubscription>();
 
     /**
      * Joins a voice channel
@@ -13,7 +11,7 @@ class VoiceUtils {
      * @param {({deaf?: boolean;maxTime?: number;})} [options] Join options
      * @returns {Promise<VoiceSubscription>}
      */
-    public static async connect(
+    public async connect(
         channel: VoiceChannel | StageChannel,
         options?: {
             deaf?: boolean;
@@ -29,7 +27,9 @@ class VoiceUtils {
 
         try {
             conn = await entersState(conn, VoiceConnectionStatus.Ready, options?.maxTime ?? 20000);
-            return new VoiceSubscription(conn);
+            const sub = new VoiceSubscription(conn);
+            this.cache.set(channel.guild.id, sub);
+            return sub;
         } catch (err) {
             conn.destroy();
             throw err;
@@ -40,9 +40,13 @@ class VoiceUtils {
      * Disconnects voice connection
      * @param {VoiceConnection} connection The voice connection
      */
-    public static disconnect(connection: VoiceConnection | VoiceSubscription) {
+    public disconnect(connection: VoiceConnection | VoiceSubscription) {
         if (connection instanceof VoiceSubscription) return connection.voiceConnection.destroy();
         return connection.destroy();
+    }
+
+    public getConnection(guild: Snowflake) {
+        return this.cache.get(guild);
     }
 }
 
