@@ -107,6 +107,14 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
         this.audioPlayer.stop();
     }
 
+    pause(interpolateSilence?: boolean) {
+        return this.audioPlayer.pause(interpolateSilence);
+    }
+
+    resume() {
+        return this.audioPlayer.unpause();
+    }
+
     /**
      * Play stream
      * @param {AudioResource} resource The audio resource to play
