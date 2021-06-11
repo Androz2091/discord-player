@@ -3,7 +3,6 @@ import { entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus }
 import { VoiceSubscription } from "./VoiceSubscription";
 
 class VoiceUtils {
-
     constructor() {
         throw new Error("Cannot instantiate static class!");
     }
@@ -17,9 +16,10 @@ class VoiceUtils {
     public static async connect(
         channel: VoiceChannel | StageChannel,
         options?: {
-            deaf?: boolean,
-            maxTime?: number
-    }): Promise<VoiceSubscription> {
+            deaf?: boolean;
+            maxTime?: number;
+        }
+    ): Promise<VoiceSubscription> {
         let conn = joinVoiceChannel({
             guildId: channel.guild.id,
             channelId: channel.id,
@@ -30,7 +30,7 @@ class VoiceUtils {
         try {
             conn = await entersState(conn, VoiceConnectionStatus.Ready, options?.maxTime ?? 20000);
             return new VoiceSubscription(conn);
-        } catch(err) {
+        } catch (err) {
             conn.destroy();
             throw err;
         }
@@ -43,7 +43,6 @@ class VoiceUtils {
     public static disconnect(connection: VoiceConnection) {
         connection.destroy();
     }
-
 }
 
-export { VoiceUtils }
+export { VoiceUtils };
