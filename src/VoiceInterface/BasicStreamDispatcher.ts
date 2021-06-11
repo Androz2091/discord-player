@@ -103,7 +103,9 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
      * Disconnects from voice
      */
     disconnect() {
-        this.voiceConnection.destroy();
+        try {
+            this.voiceConnection.destroy();
+        } catch {}
     }
 
     /**
@@ -125,19 +127,21 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
      * Play stream
      * @param {AudioResource} resource The audio resource to play
      */
-    playStream(resource: AudioResource<Track> = this.audioResource) {
+    async playStream(resource: AudioResource<Track> = this.audioResource) {
         if (!resource) throw new PlayerError("Audio resource is not available!");
         if (!this.audioResource) this.audioResource = resource;
+        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000);
         this.audioPlayer.play(resource);
 
         return this;
     }
 
     setVolume(value: number) {
-        if (!this.audioResource) return;
+        if (!this.audioResource || isNaN(value) || value < 0 || value > Infinity) return false;
 
         // ye boi logarithmic ✌
         this.audioResource.volume.setVolumeLogarithmic(value / 200);
+        return true;
     }
 
     get streamTime() {

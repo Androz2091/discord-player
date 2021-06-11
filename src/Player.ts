@@ -47,20 +47,20 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                 });
 
                 return videos.map((m) => {
-                        (m as any).source = "youtube";
-                        return new Track(this, {
-                            title: m.title,
-                            description: m.description,
-                            author: m.channel?.name,
-                            url: m.url,
-                            requestedBy: requestedBy,
-                            thumbnail: m.thumbnail?.displayThumbnailURL("maxresdefault"),
-                            views: m.views,
-                            fromPlaylist: false,
-                            duration: m.durationFormatted,
-                            raw: m
-                        })
+                    (m as any).source = "youtube";
+                    return new Track(this, {
+                        title: m.title,
+                        description: m.description,
+                        author: m.channel?.name,
+                        url: m.url,
+                        requestedBy: requestedBy,
+                        thumbnail: m.thumbnail?.displayThumbnailURL("maxresdefault"),
+                        views: m.views,
+                        fromPlaylist: false,
+                        duration: m.durationFormatted,
+                        raw: m
                     });
+                });
             }
             default:
                 return [];

@@ -60,7 +60,8 @@ class Queue {
 
     skip() {
         if (!this.connection) return false;
-        return this.connection.end();
+        this.connection.end();
+        return true;
     }
 
     addTrack(track: Track) {
@@ -69,6 +70,11 @@ class Queue {
 
     addTracks(tracks: Track[]) {
         this.tracks.push(...tracks);
+    }
+
+    setPaused(paused?: boolean) {
+        if (!this.connection) return false;
+        return paused ? this.connection.pause() : this.connection.resume();
     }
 
     async play(src?: Track) {
@@ -108,7 +114,7 @@ class Queue {
             });
         }
 
-        const dispatcher = this.connection.playStream(resource);
+        const dispatcher = await this.connection.playStream(resource);
         dispatcher.setVolume(this.options.initialVolume);
 
         dispatcher.on("start", () => {
