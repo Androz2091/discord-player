@@ -113,6 +113,8 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
      */
     playStream(resource: AudioResource) {
         this.audioPlayer.play(resource);
+
+        return this;
     }
 }
 
