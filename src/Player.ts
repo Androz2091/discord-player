@@ -41,14 +41,14 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         // @todo: add extractors
         const qt = QueryResolver.resolve(query);
         switch (qt) {
-            case QueryType.YOUTUBE: {
-                const videos = await YouTube.search(qt, {
+            case QueryType.YOUTUBE_SEARCH: {
+                const videos = await YouTube.search(query, {
                     type: "video"
                 });
 
-                return videos.map(
-                    (m) =>
-                        new Track(this, {
+                return videos.map((m) => {
+                        (m as any).source = "youtube";
+                        return new Track(this, {
                             title: m.title,
                             description: m.description,
                             author: m.channel?.name,
@@ -60,8 +60,10 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                             duration: m.durationFormatted,
                             raw: m
                         })
-                );
+                    });
             }
+            default:
+                return [];
         }
     }
 

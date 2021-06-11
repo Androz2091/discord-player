@@ -2,14 +2,11 @@
 node_modules
 package-lock.json
 
-# Tests
-test
-
 # Compiled files
 lib
 
 # Yarn logs
 yarn*.log
 
-# Demo
-demo
+# example
+example/config.ts

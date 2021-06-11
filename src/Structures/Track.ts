@@ -1,4 +1,4 @@
-import { User } from "discord.js";
+import { User, Util } from "discord.js";
 import { Player } from "../Player";
 import { RawTrackData } from "../types/types";
 import { Queue } from "./Queue";
@@ -14,7 +14,7 @@ class Track {
     public views!: number;
     public requestedBy!: User;
     public fromPlaylist!: boolean;
-    public raw!: RawTrackData;
+    public readonly raw!: RawTrackData;
 
     /**
      * Track constructor
@@ -94,7 +94,7 @@ class Track {
     }
 
     private _patch(data: RawTrackData) {
-        this.title = data.title ?? "";
+        this.title = Util.escapeMarkdown(data.title ?? "");
         this.author = data.author ?? "";
         this.url = data.url ?? "";
         this.thumbnail = data.thumbnail ?? "";
