@@ -1,9 +1,9 @@
-import { Player } from '../Player';
-import { User } from 'discord.js';
-import { TrackData } from '../types/types';
-import Queue from './Queue';
+import { User } from "discord.js";
+import { Player } from "../Player";
+import { RawTrackData } from "../types/types";
+import { Queue } from "./Queue";
 
-export class Track {
+class Track {
     public player!: Player;
     public title!: string;
     public description!: string;
@@ -14,21 +14,21 @@ export class Track {
     public views!: number;
     public requestedBy!: User;
     public fromPlaylist!: boolean;
-    public raw!: TrackData;
+    public raw!: RawTrackData;
 
     /**
      * Track constructor
      * @param {Player} player The player that instantiated this Track
-     * @param {TrackData} data Track data
+     * @param {RawTrackData} data Track data
      */
-    constructor(player: Player, data: TrackData) {
+    constructor(player: Player, data: RawTrackData) {
         /**
          * The player that instantiated this Track
          * @name Track#player
          * @type {Player}
          * @readonly
          */
-        Object.defineProperty(this, 'player', { value: player, enumerable: false });
+        Object.defineProperty(this, "player", { value: player, enumerable: false });
 
         /**
          * Title of this track
@@ -87,25 +87,24 @@ export class Track {
         /**
          * Raw track data
          * @name Track#raw
-         * @type {TrackData}
+         * @type {RawTrackData}
          */
 
         void this._patch(data);
     }
 
-    private _patch(data: TrackData) {
-        this.title = data.title ?? '';
-        this.description = data.description ?? '';
-        this.author = data.author ?? '';
-        this.url = data.url ?? '';
-        this.thumbnail = data.thumbnail ?? '';
-        this.duration = data.duration ?? '';
+    private _patch(data: RawTrackData) {
+        this.title = data.title ?? "";
+        this.author = data.author ?? "";
+        this.url = data.url ?? "";
+        this.thumbnail = data.thumbnail ?? "";
+        this.duration = data.duration ?? "";
         this.views = data.views ?? 0;
         this.requestedBy = data.requestedBy;
         this.fromPlaylist = Boolean(data.fromPlaylist);
 
         // raw
-        Object.defineProperty(this, 'raw', { get: () => data, enumerable: false });
+        Object.defineProperty(this, "raw", { get: () => data, enumerable: false });
     }
 
     /**
@@ -128,10 +127,18 @@ export class Track {
         };
 
         return this.duration
-            .split(':')
+            .split(":")
             .reverse()
             .map((m, i) => parseInt(m) * times(60, i))
             .reduce((a, c) => a + c, 0);
+    }
+
+    /**
+     * Returns source of this track
+     * @type {TrackSource}
+     */
+    get source() {
+        return this.raw.source ?? "arbitrary";
     }
 
     /**
@@ -144,3 +151,5 @@ export class Track {
 }
 
 export default Track;
+
+export { Track };

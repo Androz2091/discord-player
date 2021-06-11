@@ -1,42 +1,12 @@
-import { downloadOptions } from 'ytdl-core';
-import { User } from 'discord.js';
-import { Readable, Duplex } from 'stream';
-
-export interface PlayerOptions {
-    leaveOnEnd?: boolean;
-    leaveOnEndCooldown?: number;
-    leaveOnStop?: boolean;
-    leaveOnEmpty?: boolean;
-    leaveOnEmptyCooldown?: number;
-    autoSelfDeaf?: boolean;
-    enableLive?: boolean;
-    ytdlDownloadOptions?: downloadOptions;
-    useSafeSearch?: boolean;
-    disableAutoRegister?: boolean;
-}
+import { User } from "discord.js";
+import { downloadOptions } from "ytdl-core";
+import { Readable, Duplex } from "stream";
 
 export type FiltersName = keyof QueueFilters;
 
-export type TrackSource = 'soundcloud' | 'youtube' | 'arbitrary';
-
-export interface TrackData {
-    title: string;
-    description: string;
-    author: string;
-    url: string;
-    thumbnail: string;
-    duration: string;
-    views: number;
-    requestedBy: User;
-    fromPlaylist: boolean;
-    source?: TrackSource;
-    engine?: any;
-    live?: boolean;
-}
-
 export type QueueFilters = {
     bassboost?: boolean;
-    '8D'?: boolean;
+    "8D"?: boolean;
     vaporwave?: boolean;
     nightcore?: boolean;
     phaser?: boolean;
@@ -65,19 +35,51 @@ export type QueueFilters = {
     fadein?: boolean;
 };
 
-export type QueryType =
-    | 'soundcloud_track'
-    | 'soundcloud_playlist'
-    | 'spotify_song'
-    | 'spotify_album'
-    | 'spotify_playlist'
-    | 'youtube_video'
-    | 'youtube_playlist'
-    | 'vimeo'
-    | 'facebook'
-    | 'reverbnation'
-    | 'attachment'
-    | 'youtube_search';
+export type TrackSource = "soundcloud" | "youtube" | "spotify" | "arbitrary";
+
+export interface RawTrackData {
+    title: string;
+    description: string;
+    author: string;
+    url: string;
+    thumbnail: string;
+    duration: string;
+    views: number;
+    requestedBy: User;
+    fromPlaylist: boolean;
+    source?: TrackSource;
+    engine?: any;
+    live?: boolean;
+}
+
+export interface TimeData {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+}
+
+export interface PlayerProgressbarOptions {
+    timecodes?: boolean;
+    queue?: boolean;
+    length?: number;
+    line?: string;
+    indicator?: string;
+}
+
+export interface PlayerOptions {
+    leaveOnEnd?: boolean;
+    leaveOnEndCooldown?: number;
+    leaveOnStop?: boolean;
+    leaveOnEmpty?: boolean;
+    leaveOnEmptyCooldown?: number;
+    autoSelfDeaf?: boolean;
+    enableLive?: boolean;
+    ytdlDownloadOptions?: downloadOptions;
+    useSafeSearch?: boolean;
+    disableAutoRegister?: boolean;
+    fetchBeforeQueued?: boolean;
+}
 
 export interface ExtractorModelData {
     title: string;
@@ -90,67 +92,21 @@ export interface ExtractorModelData {
     url: string;
     version?: string;
     important?: boolean;
+    source?: TrackSource;
 }
 
-export interface PlayerProgressbarOptions {
-    timecodes?: boolean;
-    queue?: boolean;
-    length?: number;
-}
-
-export interface LyricsData {
-    title: string;
-    id: number;
-    thumbnail: string;
-    image: string;
-    url: string;
-    artist: {
-        name: string;
-        id: number;
-        url: string;
-        image: string;
-    };
-    lyrics?: string;
-}
-
-export interface PlayerStats {
-    uptime: number;
-    connections: number;
-    users: number;
-    queues: number;
-    extractors: number;
-    versions: {
-        ffmpeg: string;
-        node: string;
-        v8: string;
-    };
-    system: {
-        arch: string;
-        platform:
-            | 'aix'
-            | 'android'
-            | 'darwin'
-            | 'freebsd'
-            | 'linux'
-            | 'openbsd'
-            | 'sunos'
-            | 'win32'
-            | 'cygwin'
-            | 'netbsd';
-        cpu: number;
-        memory: {
-            total: string;
-            usage: string;
-            rss: string;
-            arrayBuffers: string;
-        };
-        uptime: number;
-    };
-}
-
-export interface TimeData {
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
+export enum QueryType {
+    YOUTUBE = "youtube",
+    YOUTUBE_PLAYLIST = "youtube_playlist",
+    SOUNDCLOUD_TRACK = "soundcloud_track",
+    SOUNDCLOUD_PLAYLIST = "soundcloud_playlist",
+    SOUNDCLOUD = "soundcloud",
+    SPOTIFY_SONG = "spotify_song",
+    SPOTIFY_ALBUM = "spotify_album",
+    SPOTIFY_PLAYLIST = "spotify_playlist",
+    FACEBOOK = "facebook",
+    VIMEO = "vimeo",
+    ARBITRARY = "arbitrary",
+    REVERBNATION = "reverbnation",
+    YOUTUBE_SEARCH = "youtube_search"
 }

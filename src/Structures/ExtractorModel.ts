@@ -1,4 +1,4 @@
-import { ExtractorModelData } from '../types/types';
+import { ExtractorModelData } from "../types/types";
 
 class ExtractorModel {
     name: string;
@@ -16,7 +16,7 @@ class ExtractorModel {
          */
         this.name = extractorName;
 
-        Object.defineProperty(this, '_raw', { value: data, configurable: false, writable: false, enumerable: false });
+        Object.defineProperty(this, "_raw", { value: data, configurable: false, writable: false, enumerable: false });
     }
 
     /**
@@ -54,7 +54,7 @@ class ExtractorModel {
      * @type {String}
      */
     get version(): string {
-        return this._raw.version ?? '0.0.0';
+        return this._raw.version ?? "0.0.0";
     }
 
     /**
@@ -66,5 +66,4 @@ class ExtractorModel {
     }
 }
 
-export default ExtractorModel;
 export { ExtractorModel };
