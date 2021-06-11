@@ -94,3 +94,19 @@ export interface ExtractorModelData {
     important?: boolean;
     source?: TrackSource;
 }
+
+export enum QueryType {
+    YOUTUBE = "youtube",
+    YOUTUBE_PLAYLIST = "youtube_playlist",
+    SOUNDCLOUD_TRACK = "soundcloud_track",
+    SOUNDCLOUD_PLAYLIST = "soundcloud_playlist",
+    SOUNDCLOUD = "soundcloud",
+    SPOTIFY_SONG = "spotify_song",
+    SPOTIFY_ALBUM = "spotify_album",
+    SPOTIFY_PLAYLIST = "spotify_playlist",
+    FACEBOOK = "facebook",
+    VIMEO = "vimeo",
+    ARBITRARY = "arbitrary",
+    REVERBNATION = "reverbnation",
+    YOUTUBE_SEARCH = "youtube_search"
+}
