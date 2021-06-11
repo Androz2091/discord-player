@@ -104,7 +104,7 @@ class Track {
         this.fromPlaylist = Boolean(data.fromPlaylist);
 
         // raw
-        Object.defineProperty(this, "raw", { get: () => data, enumerable: false });
+        Object.defineProperty(this, "raw", { get: () => data.raw ?? data, enumerable: false });
     }
 
     /**
@@ -147,6 +147,25 @@ class Track {
      */
     toString(): string {
         return `${this.title} by ${this.author}`;
+    }
+
+    /**
+     * Raw JSON representation of this track
+     * @returns {Object}
+     */
+    toJSON() {
+        return {
+            title: this.title,
+            description: this.description,
+            author: this.author,
+            url: this.url,
+            thumbnail: this.thumbnail,
+            duration: this.duration,
+            durationMS: this.durationMS,
+            views: this.views,
+            requested: this.requestedBy.id,
+            fromPlaylist: this.fromPlaylist
+        };
     }
 }
 

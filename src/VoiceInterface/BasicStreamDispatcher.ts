@@ -22,7 +22,7 @@ export interface VoiceEvents {
     finish: () => any;
 }
 
-class VoiceSubscription extends EventEmitter<VoiceEvents> {
+class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
     public readonly voiceConnection: VoiceConnection;
     public readonly audioPlayer: AudioPlayer;
     public connectPromise?: Promise<void>;
@@ -46,7 +46,7 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
                     this.voiceConnection.destroy();
                 }
             } else if (newState.status === VoiceConnectionStatus.Destroyed) {
-                this.stop();
+                this.end();
             } else if (
                 !this.connectPromise &&
                 (newState.status === VoiceConnectionStatus.Connecting ||
@@ -64,6 +64,7 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
 
         this.audioPlayer.on("stateChange", (oldState, newState) => {
             if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
+                this.audioResource = null;
                 void this.emit("finish");
             } else if (newState.status === AudioPlayerStatus.Playing) {
                 void this.emit("start");
@@ -78,14 +79,14 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
     /**
      * Creates stream
      * @param {Readable|Duplex|string} src The stream source
-     * @param {({type?:StreamType;data?:any;inlineVolume?:boolean})} [ops] Options
+     * @param {({type?:StreamType;data?:any;})} [ops] Options
      * @returns {AudioResource}
      */
-    createStream(src: Readable | Duplex | string, ops?: { type?: StreamType; data?: any; inlineVolume?: boolean }) {
+    createStream(src: Readable | Duplex | string, ops?: { type?: StreamType; data?: any }) {
         this.audioResource = createAudioResource(src, {
             inputType: ops?.type ?? StreamType.Arbitrary,
             metadata: ops?.data,
-            inlineVolume: Boolean(ops?.inlineVolume)
+            inlineVolume: true // we definitely need volume controls, right?
         });
 
         return this.audioResource;
@@ -108,7 +109,7 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
     /**
      * Stops the player
      */
-    stop() {
+    end() {
         this.audioPlayer.stop();
     }
 
@@ -126,10 +127,17 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
      */
     playStream(resource: AudioResource<Track> = this.audioResource) {
         if (!resource) throw new PlayerError("Audio resource is not available!");
-        if (!this.audioResource && resource) this.audioResource = resource;
+        if (!this.audioResource) this.audioResource = resource;
         this.audioPlayer.play(resource);
 
         return this;
+    }
+
+    setVolume(value: number) {
+        if (!this.audioResource) return;
+
+        // ye boi logarithmic ✌
+        this.audioResource.volume.setVolumeLogarithmic(value / 200);
     }
 
     get streamTime() {
@@ -138,4 +146,4 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
     }
 }
 
-export { VoiceSubscription };
+export { BasicStreamDispatcher as StreamDispatcher };

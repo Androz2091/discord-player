@@ -6,7 +6,8 @@
         "outDir": "./lib",
         "strict": true,
         "strictNullChecks": false,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "removeComments": true
     },
     "include": [
         "src/**/*"

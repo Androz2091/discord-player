@@ -1,6 +1,8 @@
 import { User } from "discord.js";
 import { downloadOptions } from "ytdl-core";
 import { Readable, Duplex } from "stream";
+import { Queue } from "../Structures/Queue";
+import Track from "../Structures/Track";
 
 export type FiltersName = keyof QueueFilters;
 
@@ -50,6 +52,7 @@ export interface RawTrackData {
     source?: TrackSource;
     engine?: any;
     live?: boolean;
+    raw?: any;
 }
 
 export interface TimeData {
@@ -79,6 +82,7 @@ export interface PlayerOptions {
     useSafeSearch?: boolean;
     disableAutoRegister?: boolean;
     fetchBeforeQueued?: boolean;
+    initialVolume?: number;
 }
 
 export interface ExtractorModelData {
@@ -109,4 +113,23 @@ export enum QueryType {
     ARBITRARY = "arbitrary",
     REVERBNATION = "reverbnation",
     YOUTUBE_SEARCH = "youtube_search"
+}
+
+export interface PlayerEvents {
+    botDisconnect: () => any;
+    channelEmpty: () => any;
+    connectionCreate: () => any;
+    error: () => any;
+    musicStop: () => any;
+    noResults: () => any;
+    playlistAdd: () => any;
+    playlistParseEnd: () => any;
+    playlistParseStart: () => any;
+    queueCreate: () => any;
+    queueEnd: (queue: Queue) => any;
+    searchCancel: () => any;
+    searchInvalidResponse: () => any;
+    searchResults: () => any;
+    trackAdd: () => any;
+    trackStart: (queue: Queue, track: Track) => any;
 }

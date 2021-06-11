@@ -18,7 +18,6 @@ const attachmentRegex =
 // scary things above *sigh*
 
 class QueryResolver {
-
     static resolve(query: string): QueryType {
         if (SoundcloudValidateURL(query, "track")) return QueryType.SOUNDCLOUD_TRACK;
         if (SoundcloudValidateURL(query, "playlist") || query.includes("/sets/")) return QueryType.SOUNDCLOUD_PLAYLIST;
