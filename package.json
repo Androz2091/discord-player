@@ -50,7 +50,7 @@
   },
   "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
-    "@discordjs/voice": "^0.3.0",
+    "@discordjs/voice": "^0.3.1",
     "discord-ytdl-core": "^5.0.3",
     "soundcloud-scraper": "^5.0.0",
     "spotify-url-info": "^2.2.3",
