@@ -94,6 +94,13 @@ class VoiceSubscription extends EventEmitter<VoiceEvents> {
     }
 
     /**
+     * Disconnects from voice
+     */
+    disconnect() {
+        this.voiceConnection.destroy();
+    }
+
+    /**
      * Stops the player
      */
     stop() {

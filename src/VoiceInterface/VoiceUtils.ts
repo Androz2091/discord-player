@@ -40,8 +40,9 @@ class VoiceUtils {
      * Disconnects voice connection
      * @param {VoiceConnection} connection The voice connection
      */
-    public static disconnect(connection: VoiceConnection) {
-        connection.destroy();
+    public static disconnect(connection: VoiceConnection | VoiceSubscription) {
+        if (connection instanceof VoiceSubscription) return connection.voiceConnection.destroy();
+        else connection.destroy();
     }
 }
 
