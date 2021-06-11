@@ -9,6 +9,10 @@ class Playlist {
         this.player = player;
         this.tracks = tracks ?? [];
     }
+
+    *[Symbol.iterator]() {
+        yield* this.tracks;
+    }
 }
 
 export { Playlist };

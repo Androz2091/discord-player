@@ -25,6 +25,10 @@ class DiscordPlayer extends EventEmitter {
     getQueue(guild: Snowflake) {
         return this.queues.get(guild);
     }
+
+    *[Symbol.iterator]() {
+        yield* Array.from(this.queues.values());
+    }
 }
 
 export { DiscordPlayer as Player };

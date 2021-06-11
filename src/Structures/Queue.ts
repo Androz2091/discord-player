@@ -57,6 +57,10 @@ class Queue {
     play() {
         throw new Error("Not implemented");
     }
+
+    *[Symbol.iterator]() {
+        yield* this.tracks;
+    }
 }
 
 export { Queue };
