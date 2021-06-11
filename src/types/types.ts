@@ -1,1 +1,32 @@
-export {};
+export type FiltersName = keyof QueueFilters;
+
+export type QueueFilters = {
+    bassboost?: boolean;
+    "8D"?: boolean;
+    vaporwave?: boolean;
+    nightcore?: boolean;
+    phaser?: boolean;
+    tremolo?: boolean;
+    vibrato?: boolean;
+    reverse?: boolean;
+    treble?: boolean;
+    normalizer?: boolean;
+    surrounding?: boolean;
+    pulsator?: boolean;
+    subboost?: boolean;
+    karaoke?: boolean;
+    flanger?: boolean;
+    gate?: boolean;
+    haas?: boolean;
+    mcompand?: boolean;
+    mono?: boolean;
+    mstlr?: boolean;
+    mstrr?: boolean;
+    compressor?: boolean;
+    expander?: boolean;
+    softlimiter?: boolean;
+    chorus?: boolean;
+    chorus2d?: boolean;
+    chorus3d?: boolean;
+    fadein?: boolean;
+};

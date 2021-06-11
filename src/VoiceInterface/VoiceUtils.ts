@@ -42,7 +42,7 @@ class VoiceUtils {
      */
     public static disconnect(connection: VoiceConnection | VoiceSubscription) {
         if (connection instanceof VoiceSubscription) return connection.voiceConnection.destroy();
-        else connection.destroy();
+        return connection.destroy();
     }
 }
 
