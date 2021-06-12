@@ -27,7 +27,7 @@ class VoiceUtils {
 
         try {
             conn = await entersState(conn, VoiceConnectionStatus.Ready, options?.maxTime ?? 20000);
-            const sub = new StreamDispatcher(conn);
+            const sub = new StreamDispatcher(conn, channel);
             this.cache.set(channel.guild.id, sub);
             return sub;
         } catch (err) {

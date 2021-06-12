@@ -133,3 +133,14 @@ export interface PlayerEvents {
     trackAdd: () => any;
     trackStart: (queue: Queue, track: Track) => any;
 }
+
+export interface PlayOptions {
+    /** If this play is triggered for filters update */
+    filtersUpdate?: boolean;
+
+    /** ffmpeg args passed to encoder */
+    encoderArgs?: string[];
+
+    /** Time to seek to before playing */
+    seek?: number;
+}

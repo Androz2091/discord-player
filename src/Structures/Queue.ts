@@ -2,17 +2,18 @@ import { Guild, StageChannel, VoiceChannel } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/BasicStreamDispatcher";
 import Track from "./Track";
-import { PlayerOptions } from "../types/types";
+import { PlayerOptions, PlayOptions } from "../types/types";
 import ytdl from "discord-ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
 
-class Queue {
+class Queue<T = unknown> {
     public readonly guild: Guild;
     public readonly player: Player;
     public connection: StreamDispatcher;
     public tracks: Track[] = [];
     public options: PlayerOptions;
     public playing = false;
+    public metadata?: T = null;
 
     constructor(player: Player, guild: Guild, options: PlayerOptions = {}) {
         this.player = player;
@@ -49,6 +50,8 @@ class Queue {
         const connection = await this.player.voiceUtils.connect(channel);
         this.connection = connection;
 
+        if (channel.type === "stage") await channel.guild.me.voice.setRequestToSpeak(true).catch((e) => {});
+
         return this;
     }
 
@@ -77,10 +80,16 @@ class Queue {
         return paused ? this.connection.pause() : this.connection.resume();
     }
 
-    async play(src?: Track) {
+    setBitrate(bitrate: number | "auto") {
+        if (!this.connection?.audioResource?.encoder) return;
+        if (bitrate === "auto") bitrate = this.connection.channel?.bitrate ?? 64000;
+        this.connection.audioResource.encoder.setBitrate(bitrate);
+    }
+
+    async play(src?: Track, options: PlayOptions = {}) {
         if (!this.connection || !this.connection.voiceConnection)
             throw new Error("Voice connection is not available, use <Queue>.connect()!");
-        const track = src ?? this.tracks.shift();
+        const track = options.filtersUpdate ? this.current : src ?? this.tracks.shift();
         if (!track) return;
 
         let resource: AudioResource<Track>;
@@ -89,7 +98,9 @@ class Queue {
             const stream = ytdl(track.raw.source === "spotify" ? track.raw.engine : track.url, {
                 // because we don't wanna decode opus into pcm again just for volume, let discord.js handle that
                 opusEncoded: false,
-                fmt: "s16le"
+                fmt: "s16le",
+                encoderArgs: options.encoderArgs ?? [],
+                seek: options.seek
             });
 
             resource = this.connection.createStream(stream, {
@@ -104,7 +115,9 @@ class Queue {
                 {
                     // because we don't wanna decode opus into pcm again just for volume, let discord.js handle that
                     opusEncoded: false,
-                    fmt: "s16le"
+                    fmt: "s16le",
+                    encoderArgs: options.encoderArgs ?? [],
+                    seek: options.seek
                 }
             );
 
@@ -119,11 +132,13 @@ class Queue {
 
         dispatcher.on("start", () => {
             this.playing = true;
-            this.player.emit("trackStart", this, this.current);
+            if (!options.filtersUpdate) this.player.emit("trackStart", this, this.current);
         });
 
         dispatcher.on("finish", () => {
             this.playing = false;
+            if (options.filtersUpdate) return;
+
             if (!this.tracks.length) {
                 this.destroy();
                 this.player.emit("queueEnd", this);

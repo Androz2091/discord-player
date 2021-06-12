@@ -17,16 +17,18 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         this.client = client;
     }
 
-    createQueue(guild: Guild, queueInitOptions?: PlayerOptions) {
-        if (this.queues.has(guild.id)) return this.queues.get(guild.id);
+    createQueue<T = unknown>(guild: Guild, queueInitOptions?: PlayerOptions & { metadata?: any }) {
+        if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
+
         const queue = new Queue(this, guild, queueInitOptions);
+        queue.metadata = queueInitOptions.metadata;
         this.queues.set(guild.id, queue);
 
-        return queue;
+        return queue as Queue<T>;
     }
 
-    getQueue(guild: Snowflake) {
-        return this.queues.get(guild);
+    getQueue<T = unknown>(guild: Snowflake) {
+        return this.queues.get(guild) as Queue<T>;
     }
 
     /**

@@ -10,6 +10,7 @@ import {
     VoiceConnection,
     VoiceConnectionStatus
 } from "@discordjs/voice";
+import { StageChannel, VoiceChannel } from "discord.js";
 import { Duplex, Readable } from "stream";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import Track from "../Structures/Track";
@@ -25,14 +26,17 @@ export interface VoiceEvents {
 class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
     public readonly voiceConnection: VoiceConnection;
     public readonly audioPlayer: AudioPlayer;
+    public readonly channel: VoiceChannel | StageChannel;
     public connectPromise?: Promise<void>;
     public audioResource?: AudioResource<Track>;
+    public paused = false;
 
-    constructor(connection: VoiceConnection) {
+    constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel) {
         super();
 
         this.voiceConnection = connection;
         this.audioPlayer = createAudioPlayer();
+        this.channel = channel;
 
         this.voiceConnection.on("stateChange", (_, newState) => {
             if (newState.status === VoiceConnectionStatus.Disconnected) {
@@ -64,10 +68,12 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
 
         this.audioPlayer.on("stateChange", (oldState, newState) => {
             if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
-                this.audioResource = null;
-                void this.emit("finish");
+                if (!this.paused) {
+                    this.audioResource = null;
+                    void this.emit("finish");
+                }
             } else if (newState.status === AudioPlayerStatus.Playing) {
-                void this.emit("start");
+                if (!this.paused) void this.emit("start");
             }
         });
 
@@ -116,11 +122,15 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
     }
 
     pause(interpolateSilence?: boolean) {
-        return this.audioPlayer.pause(interpolateSilence);
+        const success = this.audioPlayer.pause(interpolateSilence);
+        this.paused = success;
+        return success;
     }
 
     resume() {
-        return this.audioPlayer.unpause();
+        const success = this.audioPlayer.unpause();
+        this.paused = !success;
+        return success;
     }
 
     /**
