@@ -92,23 +92,17 @@ class Queue<T = unknown> {
         const track = options.filtersUpdate ? this.current : src ?? this.tracks.shift();
         if (!track) return;
 
-        let resource: AudioResource<Track>;
-
+        let stream;
         if (["youtube", "spotify"].includes(track.raw.source)) {
-            const stream = ytdl(track.raw.source === "spotify" ? track.raw.engine : track.url, {
+            stream = ytdl(track.raw.source === "spotify" ? track.raw.engine : track.url, {
                 // because we don't wanna decode opus into pcm again just for volume, let discord.js handle that
                 opusEncoded: false,
                 fmt: "s16le",
                 encoderArgs: options.encoderArgs ?? [],
                 seek: options.seek
             });
-
-            resource = this.connection.createStream(stream, {
-                type: StreamType.Raw,
-                data: track
-            });
         } else {
-            const stream = ytdl.arbitraryStream(
+            stream = ytdl.arbitraryStream(
                 track.raw.source === "soundcloud"
                     ? await track.raw.engine.downloadProgressive()
                     : (track.raw.engine as string),
@@ -120,12 +114,12 @@ class Queue<T = unknown> {
                     seek: options.seek
                 }
             );
-
-            resource = this.connection.createStream(stream, {
-                type: StreamType.Raw,
-                data: track
-            });
         }
+
+        const resource: AudioResource<Track> = this.connection.createStream(stream, {
+            type: StreamType.Raw,
+            data: track
+        });
 
         const dispatcher = await this.connection.playStream(resource);
         dispatcher.setVolume(this.options.initialVolume);
