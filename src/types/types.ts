@@ -119,23 +119,41 @@ export enum QueryType {
 }
 
 export interface PlayerEvents {
+    /**
+     * Emitted when bot gets disconnected from a voice channel
+     */
     botDisconnect: (queue: Queue) => any;
+    /**
+     * Emitted when the voice channel is empty
+     */
     channelEmpty: (queue: Queue) => any;
+    /**
+     * Emitted when bot connects to a voice channel
+     */
     connectionCreate: (queue: Queue) => any;
+    /**
+     * Debug information
+     */
     debug: (queue: Queue, message: string) => any;
+    /**
+     * Emitted on error
+     */
     error: (queue: Queue, error: Error) => any;
-    musicStop: (queue: Queue) => any;
-    noResults: (queue: Queue) => any;
-    playlistAdd: (queue: Queue) => any;
-    playlistParseEnd: (queue: Queue) => any;
-    playlistParseStart: (queue: Queue) => any;
-    queueCreate: (queue: Queue) => any;
+    /**
+     * Emitted when queue ends
+     */
     queueEnd: (queue: Queue) => any;
-    searchCancel: (queue: Queue) => any;
-    searchInvalidResponse: (queue: Queue) => any;
-    searchResults: (queue: Queue) => any;
+    /**
+     * Emitted when a single track is added
+     */
     trackAdd: (queue: Queue, track: Track) => any;
+    /**
+     * Emitted when multiple tracks are added
+     */
     tracksAdd: (queue: Queue, track: Track[]) => any;
+    /**
+     * Emitted when a track starts playing
+     */
     trackStart: (queue: Queue, track: Track) => any;
 }
 
