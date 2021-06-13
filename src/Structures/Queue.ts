@@ -128,7 +128,7 @@ class Queue<T = unknown> {
     async play(src?: Track, options: PlayOptions = {}): Promise<void> {
         if (!this.connection || !this.connection.voiceConnection) throw new Error("Voice connection is not available, use <Queue>.connect()!");
         if (src && (this.playing || this.tracks.length) && !options.immediate) return this.addTrack(src);
-        const track = options.filtersUpdate ? this.current : src ?? this.tracks.shift();
+        const track = options.filtersUpdate && !options.immediate ? this.current : src ?? this.tracks.shift();
         if (!track) return;
 
         if (!options.filtersUpdate) {
