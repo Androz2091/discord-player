@@ -6,13 +6,13 @@ class ExtractorModel {
 
     /**
      * Model for raw Discord Player extractors
-     * @param {String} extractorName Name of the extractor
-     * @param {Object} data Extractor object
+     * @param {string} extractorName Name of the extractor
+     * @param {object} data Extractor object
      */
     constructor(extractorName: string, data: any) {
         /**
          * The extractor name
-         * @type {String}
+         * @type {string}
          */
         this.name = extractorName;
 
@@ -21,7 +21,7 @@ class ExtractorModel {
 
     /**
      * Method to handle requests from `Player.play()`
-     * @param {String} query Query to handle
+     * @param {string} query Query to handle
      * @returns {Promise<ExtractorModelData>}
      */
     async handle(query: string): Promise<ExtractorModelData> {
@@ -42,8 +42,8 @@ class ExtractorModel {
 
     /**
      * Method used by Discord Player to validate query with this extractor
-     * @param {String} query The query to validate
-     * @returns {Boolean}
+     * @param {string} query The query to validate
+     * @returns {boolean}
      */
     validate(query: string): boolean {
         return Boolean(this._raw.validate(query));
@@ -51,7 +51,7 @@ class ExtractorModel {
 
     /**
      * The extractor version
-     * @type {String}
+     * @type {string}
      */
     get version(): string {
         return this._raw.version ?? "0.0.0";
@@ -59,7 +59,7 @@ class ExtractorModel {
 
     /**
      * If player should mark this extractor as important
-     * @type {Boolean}
+     * @type {boolean}
      */
     get important(): boolean {
         return Boolean(this._raw.important);

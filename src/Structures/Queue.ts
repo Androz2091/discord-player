@@ -50,7 +50,7 @@ class Queue<T = unknown> {
         const connection = await this.player.voiceUtils.connect(channel);
         this.connection = connection;
 
-        if (channel.type === "stage") await channel.guild.me.voice.setRequestToSpeak(true).catch((e) => {});
+        if (channel.type === "stage") await channel.guild.me.voice.setRequestToSpeak(true).catch(() => {});
 
         return this;
     }

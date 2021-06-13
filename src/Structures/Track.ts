@@ -33,43 +33,43 @@ class Track {
         /**
          * Title of this track
          * @name Track#title
-         * @type {String}
+         * @type {string}
          */
 
         /**
          * Description of this track
          * @name Track#description
-         * @type {String}
+         * @type {string}
          */
 
         /**
          * Author of this track
          * @name Track#author
-         * @type {String}
+         * @type {string}
          */
 
         /**
          * URL of this track
          * @name Track#url
-         * @type {String}
+         * @type {string}
          */
 
         /**
          * Thumbnail of this track
          * @name Track#thumbnail
-         * @type {String}
+         * @type {string}
          */
 
         /**
          * Duration of this track
          * @name Track#duration
-         * @type {String}
+         * @type {string}
          */
 
         /**
          * Views count of this track
          * @name Track#views
-         * @type {Number}
+         * @type {number}
          */
 
         /**
@@ -81,7 +81,7 @@ class Track {
         /**
          * If this track belongs to playlist
          * @name Track#fromPlaylist
-         * @type {Boolean}
+         * @type {boolean}
          */
 
         /**
@@ -117,7 +117,7 @@ class Track {
 
     /**
      * The track duration in millisecond
-     * @type {Number}
+     * @type {number}
      */
     get durationMS(): number {
         const times = (n: number, t: number) => {
@@ -143,7 +143,7 @@ class Track {
 
     /**
      * String representation of this track
-     * @returns {String}
+     * @returns {string}
      */
     toString(): string {
         return `${this.title} by ${this.author}`;
@@ -151,7 +151,7 @@ class Track {
 
     /**
      * Raw JSON representation of this track
-     * @returns {Object}
+     * @returns {object}
      */
     toJSON() {
         return {
