@@ -33,7 +33,12 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
 
     deleteQueue<T = unknown>(guild: Snowflake) {
         const prev = this.getQueue<T>(guild);
+
+        try {
+            prev.destroy();
+        } catch {}
         this.queues.delete(guild);
+
         return prev;
     }
 
