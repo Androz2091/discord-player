@@ -132,6 +132,7 @@ export interface PlayerEvents {
     searchInvalidResponse: () => any;
     searchResults: () => any;
     trackAdd: (queue: Queue, track: Track) => any;
+    tracksAdd: (queue: Queue, track: Track[]) => any;
     trackStart: (queue: Queue, track: Track) => any;
 }
 

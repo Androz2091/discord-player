@@ -67,12 +67,13 @@ class Queue<T = unknown> {
     }
 
     addTrack(track: Track) {
-        this.addTracks([track]);
+        this.tracks.push(track);
         this.player.emit("trackAdd", this, track);
     }
 
     addTracks(tracks: Track[]) {
         this.tracks.push(...tracks);
+        this.player.emit("tracksAdd", this, tracks);
     }
 
     setPaused(paused?: boolean) {
