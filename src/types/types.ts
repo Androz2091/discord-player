@@ -100,6 +100,7 @@ export interface ExtractorModelData {
 }
 
 export enum QueryType {
+    AUTO = "auto",
     YOUTUBE = "youtube",
     YOUTUBE_PLAYLIST = "youtube_playlist",
     SOUNDCLOUD_TRACK = "soundcloud_track",
@@ -112,7 +113,8 @@ export enum QueryType {
     VIMEO = "vimeo",
     ARBITRARY = "arbitrary",
     REVERBNATION = "reverbnation",
-    YOUTUBE_SEARCH = "youtube_search"
+    YOUTUBE_SEARCH = "youtube_search",
+    SOUNDCLOUD_SEARCH = "soundcloud_search"
 }
 
 export interface PlayerEvents {
@@ -148,4 +150,9 @@ export interface PlayOptions {
 
     /** If it should start playing provided track immediately */
     immediate?: boolean;
+}
+
+export interface SearchOptions {
+    requestedBy: User;
+    searchEngine?: QueryType;
 }

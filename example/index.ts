@@ -1,5 +1,6 @@
 import { Client, GuildMember, Message, TextChannel } from "discord.js";
 import { Player, Queue, Track } from "../src/index";
+import { QueryType } from "../src/types/types";
 import { config } from "./config";
 // use this in prod.
 // import { Player, Queue } from "discord-player";
@@ -42,6 +43,18 @@ client.on("message", async (message) => {
             {
                 name: "play",
                 description: "Plays a song from youtube",
+                options: [
+                    {
+                        name: "query",
+                        type: "STRING",
+                        description: "The song you want to play",
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: "soundcloud",
+                description: "Plays a song from soundcloud",
                 options: [
                     {
                         name: "query",
@@ -104,11 +117,16 @@ client.on("interaction", async (interaction) => {
         return void interaction.reply({ content: "You are not in my voice channel!", ephemeral: true });
     }
 
-    if (interaction.commandName === "play") {
+    if (interaction.commandName === "play" || interaction.commandName === "soundcloud") {
         await interaction.defer();
 
         const query = interaction.options.get("query")!.value! as string;
-        const searchResult = (await player.search(query, interaction.user).catch(() => [])) as Track[];
+        const searchResult = (await player
+            .search(query, {
+                requestedBy: interaction.user,
+                searchEngine: interaction.commandName === "soundcloud" ? QueryType.SOUNDCLOUD_SEARCH : QueryType.AUTO
+            })
+            .catch(() => [])) as Track[];
         if (!searchResult.length) return void interaction.followUp({ content: "No results were found!" });
 
         const queue = await player.createQueue(interaction.guild, {

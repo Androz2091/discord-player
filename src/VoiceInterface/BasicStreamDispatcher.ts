@@ -158,7 +158,7 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
     }
 
     get paused() {
-        return [AudioPlayerStatus.AutoPaused, AudioPlayerStatus.Paused].includes(this.audioPlayer.state.status)
+        return [AudioPlayerStatus.AutoPaused, AudioPlayerStatus.Paused].includes(this.audioPlayer.state.status);
     }
 }
 

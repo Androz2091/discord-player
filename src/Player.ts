@@ -2,10 +2,15 @@ import { Client, Collection, Guild, Snowflake, User } from "discord.js";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
-import { PlayerEvents, PlayerOptions, QueryType } from "./types/types";
+import { PlayerEvents, PlayerOptions, QueryType, SearchOptions } from "./types/types";
 import Track from "./Structures/Track";
 import { QueryResolver } from "./utils/QueryResolver";
 import YouTube from "youtube-sr";
+import { Util } from "./utils/Util";
+// @ts-ignore
+import { Client as SoundCloud } from "soundcloud-scraper";
+
+const soundcloud = new SoundCloud();
 
 class DiscordPlayer extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
@@ -75,11 +80,13 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
      * @param {Discord.User} requestedBy The person who requested track search
      * @returns {Promise<Track[]>}
      */
-    async search(query: string | Track, requestedBy: User) {
+    async search(query: string | Track, options: SearchOptions) {
         if (query instanceof Track) return [query];
+        if (!options) throw new Error("DiscordPlayer#search needs search options!");
+        if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
 
         // @todo: add extractors
-        const qt = QueryResolver.resolve(query);
+        const qt = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
         switch (qt) {
             case QueryType.YOUTUBE_SEARCH: {
                 const videos = await YouTube.search(query, {
@@ -93,7 +100,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                         description: m.description,
                         author: m.channel?.name,
                         url: m.url,
-                        requestedBy: requestedBy,
+                        requestedBy: options.requestedBy,
                         thumbnail: m.thumbnail?.displayThumbnailURL("maxresdefault"),
                         views: m.views,
                         fromPlaylist: false,
@@ -101,6 +108,35 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                         raw: m
                     });
                 });
+            }
+            case QueryType.SOUNDCLOUD_TRACK:
+            case QueryType.SOUNDCLOUD_SEARCH: {
+                const result: any[] = QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? [{ url: query }] : await soundcloud.search(query, "track").catch(() => {});
+                if (!result || !result.length) return [];
+                const res: Track[] = [];
+
+                for (const r of result) {
+                    const trackInfo = await soundcloud.getSongInfo(r.url).catch(() => {});
+                    if (!trackInfo) continue;
+
+                    const track = new Track(this, {
+                        title: trackInfo.title,
+                        url: trackInfo.url,
+                        duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
+                        description: trackInfo.description,
+                        thumbnail: trackInfo.thumbnail,
+                        views: trackInfo.playCount,
+                        author: trackInfo.author.name,
+                        requestedBy: options.requestedBy,
+                        fromPlaylist: false,
+                        source: "soundcloud",
+                        engine: trackInfo
+                    });
+
+                    res.push(track);
+                }
+
+                return res;
             }
             default:
                 return [];

@@ -54,8 +54,8 @@ class Queue<T = unknown> {
 
         if (channel.type === "stage") await channel.guild.me.voice.setRequestToSpeak(true).catch(() => {});
 
-        this.connection.on("error", err => this.player.emit("error", this, err));
-        this.connection.on("debug", msg => this.player.emit("debug", this, msg));
+        this.connection.on("error", (err) => this.player.emit("error", this, err));
+        this.connection.on("debug", (msg) => this.player.emit("debug", this, msg));
 
         return this;
     }
