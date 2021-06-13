@@ -19,7 +19,7 @@ class QueryResolver {
     static resolve(query: string): QueryType {
         if (SoundcloudValidateURL(query, "track")) return QueryType.SOUNDCLOUD_TRACK;
         if (SoundcloudValidateURL(query, "playlist") || query.includes("/sets/")) return QueryType.SOUNDCLOUD_PLAYLIST;
-        if (validateID(query) || validateURL(query)) return QueryType.YOUTUBE;
+        if (validateID(query) || validateURL(query)) return QueryType.YOUTUBE_SEARCH;
         if (YouTube.validate(query, "PLAYLIST_ID")) return QueryType.YOUTUBE_PLAYLIST;
         if (spotifySongRegex.test(query)) return QueryType.SPOTIFY_SONG;
         if (spotifyPlaylistRegex.test(query)) return QueryType.SPOTIFY_PLAYLIST;
