@@ -49,6 +49,9 @@ class Queue<T = unknown> {
         const connection = await this.player.voiceUtils.connect(channel);
         this.connection = connection;
 
+        // it's ok to use this here since Queue listens to the events 1 time per play
+        this.connection.setMaxListeners(Infinity);
+
         if (channel.type === "stage") await channel.guild.me.voice.setRequestToSpeak(true).catch(() => {});
 
         return this;
@@ -147,9 +150,6 @@ class Queue<T = unknown> {
                 this.play(nextTrack, { immediate: true });
             }
         });
-
-        dispatcher.on("error", (e) => this.player.emit("error", this, e));
-        dispatcher.on("debug", (msg) => this.player.emit("debug", this, msg));
     }
 
     *[Symbol.iterator]() {
