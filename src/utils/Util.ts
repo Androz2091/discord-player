@@ -1,3 +1,4 @@
+import { StageChannel, VoiceChannel } from "discord.js";
 import { TimeData } from "../types/types";
 
 class Util {
@@ -33,6 +34,10 @@ class Util {
     static last<T = any>(arr: T[]): T {
         if (!Array.isArray(arr)) return;
         return arr[arr.length - 1];
+    }
+
+    static isVoiceEmpty(channel: VoiceChannel | StageChannel) {
+        return channel.members.filter((member) => !member.user.bot).size === 0;
     }
 }
 

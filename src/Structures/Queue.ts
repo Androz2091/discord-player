@@ -1,4 +1,4 @@
-import { Guild, StageChannel, VoiceChannel } from "discord.js";
+import { Collection, Guild, Snowflake, StageChannel, VoiceChannel } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/BasicStreamDispatcher";
 import Track from "./Track";
@@ -18,6 +18,7 @@ class Queue<T = unknown> {
     public playing = false;
     public metadata?: T = null;
     public repeatMode: QueueRepeatMode = 0;
+    public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
 
     constructor(player: Player, guild: Guild, options: PlayerOptions = {}) {
         this.player = player;
@@ -46,6 +47,10 @@ class Queue<T = unknown> {
 
     get current() {
         return this.connection.audioResource?.metadata ?? this.tracks[0];
+    }
+
+    nowPlaying() {
+        return this.current;
     }
 
     async connect(channel: StageChannel | VoiceChannel) {
@@ -125,8 +130,12 @@ class Queue<T = unknown> {
         if (src && (this.playing || this.tracks.length) && !options.immediate) return this.addTrack(src);
         const track = options.filtersUpdate ? this.current : src ?? this.tracks.shift();
         if (!track) return;
-        this.previousTracks = this.previousTracks.filter((x) => x._trackID !== track._trackID);
-        this.previousTracks.push(track);
+
+        if (!options.filtersUpdate) {
+            this.previousTracks = this.previousTracks.filter((x) => x._trackID !== track._trackID);
+            this.previousTracks.push(track);
+        }
+
         let stream;
         if (["youtube", "spotify"].includes(track.raw.source)) {
             if (track.raw.source === "spotify" && !track.raw.engine) {

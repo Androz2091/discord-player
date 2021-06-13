@@ -1,4 +1,4 @@
-import { Client, Collection, Guild, Snowflake, User } from "discord.js";
+import { Client, Collection, Guild, Snowflake, User, VoiceState } from "discord.js";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
@@ -31,6 +31,39 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
          * @type {Discord.Client}
          */
         this.client = client;
+
+        this.client.on("voiceStateUpdate", this._handleVoiceState.bind(this));
+    }
+
+    private _handleVoiceState(oldState: VoiceState, newState: VoiceState): void {
+        const queue = this.getQueue(oldState.guild.id);
+        if (!queue) return;
+
+        if (oldState.member.id === this.client.user.id && !newState.channelID) {
+            queue.destroy();
+            return void this.emit("botDisconnect", queue);
+        }
+
+        if (!queue.options.leaveOnEmpty || !queue.connection || !queue.connection.channel) return;
+
+        if (!oldState.channelID || newState.channelID) {
+            const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
+            const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
+
+            if (!channelEmpty && emptyTimeout) {
+                clearTimeout(emptyTimeout);
+                queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+            }
+        } else {
+            if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+            const timeout = setTimeout(() => {
+                if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                if (!this.queues.has(queue.guild.id)) return;
+                queue.destroy();
+                this.emit("channelEmpty", queue);
+            }, queue.options.leaveOnEmptyCooldown || 0);
+            queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+        }
     }
 
     /**

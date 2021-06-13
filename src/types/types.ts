@@ -119,21 +119,21 @@ export enum QueryType {
 }
 
 export interface PlayerEvents {
-    botDisconnect: () => any;
-    channelEmpty: () => any;
-    connectionCreate: () => any;
+    botDisconnect: (queue: Queue) => any;
+    channelEmpty: (queue: Queue) => any;
+    connectionCreate: (queue: Queue) => any;
     debug: (queue: Queue, message: string) => any;
     error: (queue: Queue, error: Error) => any;
-    musicStop: () => any;
-    noResults: () => any;
-    playlistAdd: () => any;
-    playlistParseEnd: () => any;
-    playlistParseStart: () => any;
-    queueCreate: () => any;
+    musicStop: (queue: Queue) => any;
+    noResults: (queue: Queue) => any;
+    playlistAdd: (queue: Queue) => any;
+    playlistParseEnd: (queue: Queue) => any;
+    playlistParseStart: (queue: Queue) => any;
+    queueCreate: (queue: Queue) => any;
     queueEnd: (queue: Queue) => any;
-    searchCancel: () => any;
-    searchInvalidResponse: () => any;
-    searchResults: () => any;
+    searchCancel: (queue: Queue) => any;
+    searchInvalidResponse: (queue: Queue) => any;
+    searchResults: (queue: Queue) => any;
     trackAdd: (queue: Queue, track: Track) => any;
     tracksAdd: (queue: Queue, track: Track[]) => any;
     trackStart: (queue: Queue, track: Track) => any;
