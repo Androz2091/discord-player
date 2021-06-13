@@ -59,25 +59,24 @@
     "ytdl-core": "^4.8.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.13.16",
-    "@babel/core": "^7.13.16",
-    "@babel/preset-env": "^7.13.15",
-    "@babel/preset-typescript": "^7.13.0",
+    "@babel/cli": "^7.14.5",
+    "@babel/core": "^7.14.5",
+    "@babel/preset-env": "^7.14.5",
+    "@babel/preset-typescript": "^7.14.5",
     "@discord-player/extractor": "^3.0.0",
-    "@discordjs/opus": "^0.5.0",
-    "@types/node": "^14.14.41",
-    "@types/ws": "^7.4.1",
+    "@discordjs/opus": "^0.5.3",
+    "@types/node": "^15.12.2",
+    "@types/ws": "^7.4.4",
     "discord-api-types": "^0.18.1",
     "discord.js": "^13.0.0-dev.02693bc02f45980d8165820a103220f0027b96b7",
     "discord.js-docgen": "discordjs/docgen#ts-patch",
     "jsdoc-babel": "^0.5.0",
-    "prettier": "^2.2.1",
+    "prettier": "^2.3.1",
     "rimraf": "^3.0.2",
     "ts-node": "^10.0.0",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
-    "typescipt": "^1.0.0",
-    "typescript": "^4.2.3"
+    "typescript": "^4.3.2"
   },
   "optionalDependencies": {
     "sodium": "^3.0.2"
