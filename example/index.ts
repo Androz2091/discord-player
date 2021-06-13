@@ -23,6 +23,10 @@ client.on("warn", console.warn);
 const player = new Player(client);
 
 player.on("error", console.error);
+player.on("debug", (queue, message) => {
+    console.log(`DEBUG :: ${queue.guild.name}`);
+    console.log(message);
+});
 
 player.on("trackStart", (queue, track) => {
     const guildQueue = queue as Queue<TextChannel>;
@@ -32,6 +36,16 @@ player.on("trackStart", (queue, track) => {
 player.on("trackAdd", (queue, track) => {
     const guildQueue = queue as Queue<TextChannel>;
     guildQueue.metadata.send(`🎶 | Track **${track.title}** queued!`);
+});
+
+player.on("botDisconnect", (queue) => {
+    const guildQueue = queue as Queue<TextChannel>;
+    guildQueue.metadata.send("❌ | I was manually disconnected from the voice channel, clearing queue!");
+});
+
+player.on("channelEmpty", (queue) => {
+    const guildQueue = queue as Queue<TextChannel>;
+    guildQueue.metadata.send("❌ | Nobody is in the voice channel, leaving...");
 });
 
 client.on("message", async (message) => {
