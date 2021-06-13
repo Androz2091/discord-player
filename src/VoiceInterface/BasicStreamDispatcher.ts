@@ -29,7 +29,6 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
     public readonly channel: VoiceChannel | StageChannel;
     public connectPromise?: Promise<void>;
     public audioResource?: AudioResource<Track>;
-    public paused = false;
 
     constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel) {
         super();
@@ -118,13 +117,11 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
 
     pause(interpolateSilence?: boolean) {
         const success = this.audioPlayer.pause(interpolateSilence);
-        this.paused = success;
         return success;
     }
 
     resume() {
         const success = this.audioPlayer.unpause();
-        this.paused = !success;
         return success;
     }
 
@@ -158,6 +155,10 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
     get streamTime() {
         if (!this.audioResource) return 0;
         return this.audioResource.playbackDuration;
+    }
+
+    get paused() {
+        return [AudioPlayerStatus.AutoPaused, AudioPlayerStatus.Paused].includes(this.audioPlayer.state.status)
     }
 }
 
