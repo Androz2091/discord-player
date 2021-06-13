@@ -51,16 +51,11 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
                 }
             } else if (newState.status === VoiceConnectionStatus.Destroyed) {
                 this.end();
-            } else if (
-                !this.connectPromise &&
-                (newState.status === VoiceConnectionStatus.Connecting ||
-                    newState.status === VoiceConnectionStatus.Signalling)
-            ) {
+            } else if (!this.connectPromise && (newState.status === VoiceConnectionStatus.Connecting || newState.status === VoiceConnectionStatus.Signalling)) {
                 this.connectPromise = entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000)
                     .then(() => undefined)
                     .catch(() => {
-                        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed)
-                            this.voiceConnection.destroy();
+                        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
                     })
                     .finally(() => (this.connectPromise = undefined));
             }
@@ -140,8 +135,7 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
     async playStream(resource: AudioResource<Track> = this.audioResource) {
         if (!resource) throw new PlayerError("Audio resource is not available!");
         if (!this.audioResource) this.audioResource = resource;
-        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready)
-            await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000);
+        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000);
         this.audioPlayer.play(resource);
 
         return this;
@@ -153,6 +147,12 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
         // ye boi logarithmic ✌
         this.audioResource.volume.setVolumeLogarithmic(value / 200);
         return true;
+    }
+
+    get volume() {
+        if (!this.audioResource || !this.audioResource.volume) return 100;
+        const currentVol = this.audioResource.volume.volume;
+        return Math.round(Math.pow(currentVol, 1 / 1.660964) * 200);
     }
 
     get streamTime() {

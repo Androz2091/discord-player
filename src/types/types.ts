@@ -119,7 +119,8 @@ export interface PlayerEvents {
     botDisconnect: () => any;
     channelEmpty: () => any;
     connectionCreate: () => any;
-    error: () => any;
+    debug: (queue: Queue, message: string) => any;
+    error: (queue: Queue, error: Error) => any;
     musicStop: () => any;
     noResults: () => any;
     playlistAdd: () => any;
@@ -130,7 +131,7 @@ export interface PlayerEvents {
     searchCancel: () => any;
     searchInvalidResponse: () => any;
     searchResults: () => any;
-    trackAdd: () => any;
+    trackAdd: (queue: Queue, track: Track) => any;
     trackStart: (queue: Queue, track: Track) => any;
 }
 
@@ -143,4 +144,7 @@ export interface PlayOptions {
 
     /** Time to seek to before playing */
     seek?: number;
+
+    /** If it should start playing provided track immediately */
+    immediate?: boolean;
 }

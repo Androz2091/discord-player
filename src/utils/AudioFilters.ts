@@ -70,15 +70,11 @@ const FilterList = {
     },
 
     get names() {
-        return Object.keys(this).filter(
-            (p) => !["names", "length"].includes(p) && typeof this[p as FiltersName] !== "function"
-        );
+        return Object.keys(this).filter((p) => !["names", "length"].includes(p) && typeof this[p as FiltersName] !== "function");
     },
 
     get length() {
-        return Object.keys(this).filter(
-            (p) => !["names", "length"].includes(p) && typeof this[p as FiltersName] !== "function"
-        ).length;
+        return Object.keys(this).filter((p) => !["names", "length"].includes(p) && typeof this[p as FiltersName] !== "function").length;
     },
 
     toString() {

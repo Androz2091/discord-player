@@ -45,8 +45,7 @@ class Queue<T = unknown> {
     }
 
     async connect(channel: StageChannel | VoiceChannel) {
-        if (!["stage", "voice"].includes(channel?.type))
-            throw new TypeError(`Channel type must be voice or stage, got ${channel?.type}!`);
+        if (!["stage", "voice"].includes(channel?.type)) throw new TypeError(`Channel type must be voice or stage, got ${channel?.type}!`);
         const connection = await this.player.voiceUtils.connect(channel);
         this.connection = connection;
 
@@ -69,6 +68,7 @@ class Queue<T = unknown> {
 
     addTrack(track: Track) {
         this.addTracks([track]);
+        this.player.emit("trackAdd", this, track);
     }
 
     addTracks(tracks: Track[]) {
@@ -86,12 +86,21 @@ class Queue<T = unknown> {
         this.connection.audioResource.encoder.setBitrate(bitrate);
     }
 
+    setVolume(amount: number) {
+        if (!this.connection) return false;
+        return this.connection.setVolume(amount);
+    }
+
+    get volume() {
+        if (!this.connection) return 100;
+        return this.connection.volume;
+    }
+
     async play(src?: Track, options: PlayOptions = {}) {
-        if (!this.connection || !this.connection.voiceConnection)
-            throw new Error("Voice connection is not available, use <Queue>.connect()!");
+        if (!this.connection || !this.connection.voiceConnection) throw new Error("Voice connection is not available, use <Queue>.connect()!");
+        if (src && (this.playing || this.tracks.length) && !options.immediate) return this.addTrack(src);
         const track = options.filtersUpdate ? this.current : src ?? this.tracks.shift();
         if (!track) return;
-
         let stream;
         if (["youtube", "spotify"].includes(track.raw.source)) {
             stream = ytdl(track.raw.source === "spotify" ? track.raw.engine : track.url, {
@@ -102,18 +111,13 @@ class Queue<T = unknown> {
                 seek: options.seek
             });
         } else {
-            stream = ytdl.arbitraryStream(
-                track.raw.source === "soundcloud"
-                    ? await track.raw.engine.downloadProgressive()
-                    : (track.raw.engine as string),
-                {
-                    // because we don't wanna decode opus into pcm again just for volume, let discord.js handle that
-                    opusEncoded: false,
-                    fmt: "s16le",
-                    encoderArgs: options.encoderArgs ?? [],
-                    seek: options.seek
-                }
-            );
+            stream = ytdl.arbitraryStream(track.raw.source === "soundcloud" ? await track.raw.engine.downloadProgressive() : (track.raw.engine as string), {
+                // because we don't wanna decode opus into pcm again just for volume, let discord.js handle that
+                opusEncoded: false,
+                fmt: "s16le",
+                encoderArgs: options.encoderArgs ?? [],
+                seek: options.seek
+            });
         }
 
         const resource: AudioResource<Track> = this.connection.createStream(stream, {
@@ -124,12 +128,12 @@ class Queue<T = unknown> {
         const dispatcher = await this.connection.playStream(resource);
         dispatcher.setVolume(this.options.initialVolume);
 
-        dispatcher.on("start", () => {
+        dispatcher.once("start", () => {
             this.playing = true;
             if (!options.filtersUpdate) this.player.emit("trackStart", this, this.current);
         });
 
-        dispatcher.on("finish", () => {
+        dispatcher.once("finish", () => {
             this.playing = false;
             if (options.filtersUpdate) return;
 
@@ -138,9 +142,12 @@ class Queue<T = unknown> {
                 this.player.emit("queueEnd", this);
             } else {
                 const nextTrack = this.tracks.shift();
-                this.play(nextTrack);
+                this.play(nextTrack, { immediate: true });
             }
         });
+
+        dispatcher.on("error", (e) => this.player.emit("error", this, e));
+        dispatcher.on("debug", (msg) => this.player.emit("debug", this, msg));
     }
 
     *[Symbol.iterator]() {

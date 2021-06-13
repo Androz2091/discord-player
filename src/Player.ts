@@ -31,6 +31,12 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         return this.queues.get(guild) as Queue<T>;
     }
 
+    deleteQueue<T = unknown>(guild: Snowflake) {
+        const prev = this.getQueue<T>(guild);
+        this.queues.delete(guild);
+        return prev;
+    }
+
     /**
      * Search tracks
      * @param {string|Track} query The search query
