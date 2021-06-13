@@ -7,6 +7,7 @@ import Track from "./Structures/Track";
 import { QueryResolver } from "./utils/QueryResolver";
 import YouTube from "youtube-sr";
 import { Util } from "./utils/Util";
+import Spotify from "spotify-url-info";
 // @ts-ignore
 import { Client as SoundCloud } from "soundcloud-scraper";
 
@@ -137,6 +138,27 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                 }
 
                 return res;
+            }
+            case QueryType.SPOTIFY_SONG: {
+                const spotifyData = await Spotify.getData(query).catch(() => {});
+                if (!spotifyData) return [];
+                const spotifyTrack = new Track(this, {
+                    title: spotifyData.name,
+                    description: spotifyData.description ?? "",
+                    author: spotifyData.artists[0]?.name ?? "Unknown Artist",
+                    url: spotifyData.external_urls?.spotify ?? query,
+                    thumbnail:
+                        spotifyData.album?.images[0]?.url ?? spotifyData.preview_url?.length
+                            ? `https://i.scdn.co/image/${spotifyData.preview_url?.split("?cid=")[1]}`
+                            : "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                    duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms)),
+                    views: 0,
+                    requestedBy: options.requestedBy,
+                    fromPlaylist: false,
+                    source: "spotify"
+                });
+
+                return [spotifyTrack];
             }
             default:
                 return [];

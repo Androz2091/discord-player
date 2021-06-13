@@ -6,6 +6,7 @@ import { PlayerOptions, PlayOptions, QueueRepeatMode } from "../types/types";
 import ytdl from "discord-ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
 import { Util } from "../utils/Util";
+import YouTube from "youtube-sr";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -119,7 +120,7 @@ class Queue<T = unknown> {
         return await this.play(Util.last(this.previousTracks), { immediate: true });
     }
 
-    async play(src?: Track, options: PlayOptions = {}) {
+    async play(src?: Track, options: PlayOptions = {}): Promise<void> {
         if (!this.connection || !this.connection.voiceConnection) throw new Error("Voice connection is not available, use <Queue>.connect()!");
         if (src && (this.playing || this.tracks.length) && !options.immediate) return this.addTrack(src);
         const track = options.filtersUpdate ? this.current : src ?? this.tracks.shift();
@@ -128,7 +129,15 @@ class Queue<T = unknown> {
         this.previousTracks.push(track);
         let stream;
         if (["youtube", "spotify"].includes(track.raw.source)) {
-            stream = ytdl(track.raw.source === "spotify" ? track.raw.engine : track.url, {
+            if (track.raw.source === "spotify" && !track.raw.engine) {
+                track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
+                    .then((x) => x[0].url)
+                    .catch(() => null);
+            }
+            const link = track.raw.source === "spotify" ? track.raw.engine : track.url;
+            if (!link) return void this.play(this.tracks.shift(), { immediate: true });
+
+            stream = ytdl(link, {
                 // because we don't wanna decode opus into pcm again just for volume, let discord.js handle that
                 opusEncoded: false,
                 fmt: "s16le",
@@ -136,13 +145,16 @@ class Queue<T = unknown> {
                 seek: options.seek
             });
         } else {
-            stream = ytdl.arbitraryStream(track.raw.source === "soundcloud" ? await track.raw.engine.downloadProgressive() : (track.raw.engine as string), {
-                // because we don't wanna decode opus into pcm again just for volume, let discord.js handle that
-                opusEncoded: false,
-                fmt: "s16le",
-                encoderArgs: options.encoderArgs ?? [],
-                seek: options.seek
-            });
+            stream = ytdl.arbitraryStream(
+                track.raw.source === "soundcloud" ? await track.raw.engine.downloadProgressive() : typeof track.raw.engine === "function" ? await track.raw.engine() : track.raw.engine,
+                {
+                    // because we don't wanna decode opus into pcm again just for volume, let discord.js handle that
+                    opusEncoded: false,
+                    fmt: "s16le",
+                    encoderArgs: options.encoderArgs ?? [],
+                    seek: options.seek
+                }
+            );
         }
 
         const resource: AudioResource<Track> = this.connection.createStream(stream, {
