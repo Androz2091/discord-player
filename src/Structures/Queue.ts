@@ -89,6 +89,7 @@ class Queue<T = unknown> {
 
     setVolume(amount: number) {
         if (!this.connection) return false;
+        this.options.initialVolume = amount;
         return this.connection.setVolume(amount);
     }
 
