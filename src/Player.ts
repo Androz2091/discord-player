@@ -10,6 +10,7 @@ import { Util } from "./utils/Util";
 import Spotify from "spotify-url-info";
 // @ts-ignore
 import { Client as SoundCloud } from "soundcloud-scraper";
+import { Playlist } from "./Structures/Playlist";
 
 const soundcloud = new SoundCloud();
 
@@ -82,7 +83,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
      * @returns {Promise<Track[]>}
      */
     async search(query: string | Track, options: SearchOptions) {
-        if (query instanceof Track) return [query];
+        if (query instanceof Track) return { playlist: false, tracks: [query] };
         if (!options) throw new Error("DiscordPlayer#search needs search options!");
         if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
 
@@ -92,9 +93,10 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
             case QueryType.YOUTUBE_SEARCH: {
                 const videos = await YouTube.search(query, {
                     type: "video"
-                });
+                }).catch(() => {});
+                if (!videos) return { playlist: false, tracks: [] };
 
-                return videos.map((m) => {
+                const tracks = videos.map((m) => {
                     (m as any).source = "youtube";
                     return new Track(this, {
                         title: m.title,
@@ -104,16 +106,17 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                         requestedBy: options.requestedBy,
                         thumbnail: m.thumbnail?.displayThumbnailURL("maxresdefault"),
                         views: m.views,
-                        fromPlaylist: false,
                         duration: m.durationFormatted,
                         raw: m
                     });
                 });
+
+                return { playlist: false, tracks };
             }
             case QueryType.SOUNDCLOUD_TRACK:
             case QueryType.SOUNDCLOUD_SEARCH: {
                 const result: any[] = QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? [{ url: query }] : await soundcloud.search(query, "track").catch(() => {});
-                if (!result || !result.length) return [];
+                if (!result || !result.length) return { playlist: false, tracks: [] };
                 const res: Track[] = [];
 
                 for (const r of result) {
@@ -129,7 +132,6 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                         views: trackInfo.playCount,
                         author: trackInfo.author.name,
                         requestedBy: options.requestedBy,
-                        fromPlaylist: false,
                         source: "soundcloud",
                         engine: trackInfo
                     });
@@ -137,11 +139,11 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                     res.push(track);
                 }
 
-                return res;
+                return { playlist: false, tracks: res };
             }
             case QueryType.SPOTIFY_SONG: {
                 const spotifyData = await Spotify.getData(query).catch(() => {});
-                if (!spotifyData) return [];
+                if (!spotifyData) return { playlist: false, tracks: [] };
                 const spotifyTrack = new Track(this, {
                     title: spotifyData.name,
                     description: spotifyData.description ?? "",
@@ -154,14 +156,77 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                     duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms)),
                     views: 0,
                     requestedBy: options.requestedBy,
-                    fromPlaylist: false,
                     source: "spotify"
                 });
 
-                return [spotifyTrack];
+                return { playlist: false, tracks: [spotifyTrack] };
+            }
+            case QueryType.SPOTIFY_PLAYLIST:
+            case QueryType.SPOTIFY_ALBUM: {
+                const spotifyPlaylist = await Spotify.getData(query).catch(() => {});
+                if (!spotifyPlaylist) return { playlist: false, tracks: [] };
+
+                const playlist = new Playlist(this, {
+                    title: spotifyPlaylist.name ?? spotifyPlaylist.title,
+                    description: spotifyPlaylist.description ?? "",
+                    thumbnail: spotifyPlaylist.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                    type: spotifyPlaylist.type,
+                    source: "spotify",
+                    author:
+                        spotifyPlaylist.type !== "playlist"
+                            ? {
+                                  name: spotifyPlaylist.artists[0]?.name ?? "Unknown Artist",
+                                  url: spotifyPlaylist.artists[0]?.external_urls?.spotify ?? null
+                              }
+                            : {
+                                  name: spotifyPlaylist.owner?.display_name ?? spotifyPlaylist.owner?.id ?? "Unknown Artist",
+                                  url: spotifyPlaylist.owner?.external_urls?.spotify ?? null
+                              },
+                    tracks: [],
+                    id: spotifyPlaylist.id,
+                    url: spotifyPlaylist.external_urls?.spotify ?? query
+                });
+
+                if (spotifyPlaylist.type !== "playlist") {
+                    playlist.tracks = spotifyPlaylist.tracks.items.map((m: any) => {
+                        const data = new Track(this, {
+                            title: m.name ?? "",
+                            description: m.description ?? "",
+                            author: m.artists[0]?.name ?? "Unknown Artist",
+                            url: m.external_urls?.spotify ?? query,
+                            thumbnail: spotifyPlaylist.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                            duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
+                            views: 0,
+                            requestedBy: options.requestedBy,
+                            playlist,
+                            source: "spotify"
+                        });
+
+                        return data;
+                    }) as Track[];
+                } else {
+                    playlist.tracks = spotifyPlaylist.tracks.items.map((m: any) => {
+                        const data = new Track(this, {
+                            title: m.track.name ?? "",
+                            description: m.track.description ?? "",
+                            author: m.track.artists[0]?.name ?? "Unknown Artist",
+                            url: m.track.external_urls?.spotify ?? query,
+                            thumbnail: m.track.album?.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                            duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
+                            views: 0,
+                            requestedBy: options.requestedBy,
+                            playlist,
+                            source: "spotify"
+                        });
+
+                        return data;
+                    }) as Track[];
+                }
+
+                return { playlist: true, tracks: playlist.tracks };
             }
             default:
-                return [];
+                return { playlist: false, tracks: [] };
         }
     }
 

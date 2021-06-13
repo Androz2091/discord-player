@@ -1,6 +1,7 @@
 import { User, Util } from "discord.js";
 import { Player } from "../Player";
-import { RawTrackData } from "../types/types";
+import { RawTrackData, TrackJSON } from "../types/types";
+import { Playlist } from "./Playlist";
 import { Queue } from "./Queue";
 
 class Track {
@@ -13,7 +14,7 @@ class Track {
     public duration!: string;
     public views!: number;
     public requestedBy!: User;
-    public fromPlaylist!: boolean;
+    public playlist?: Playlist;
     public readonly raw!: RawTrackData;
     public readonly _trackID = Date.now();
 
@@ -102,7 +103,7 @@ class Track {
         this.duration = data.duration ?? "";
         this.views = data.views ?? 0;
         this.requestedBy = data.requestedBy;
-        this.fromPlaylist = Boolean(data.fromPlaylist);
+        this.playlist = data.playlist;
 
         // raw
         Object.defineProperty(this, "raw", { get: () => data.raw ?? data, enumerable: false });
@@ -164,9 +165,9 @@ class Track {
             duration: this.duration,
             durationMS: this.durationMS,
             views: this.views,
-            requested: this.requestedBy.id,
-            fromPlaylist: this.fromPlaylist
-        };
+            requestedBy: this.requestedBy.id,
+            playlist: this.playlist?.toJSON(false) ?? null
+        } as TrackJSON;
     }
 }
 

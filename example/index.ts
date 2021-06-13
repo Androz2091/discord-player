@@ -147,13 +147,13 @@ client.on("interaction", async (interaction) => {
         await interaction.defer();
 
         const query = interaction.options.get("query")!.value! as string;
-        const searchResult = (await player
+        const searchResult = await player
             .search(query, {
                 requestedBy: interaction.user,
                 searchEngine: interaction.commandName === "soundcloud" ? QueryType.SOUNDCLOUD_SEARCH : QueryType.AUTO
             })
-            .catch(() => [])) as Track[];
-        if (!searchResult.length) return void interaction.followUp({ content: "No results were found!" });
+            .catch(() => {});
+        if (!searchResult || !searchResult.tracks.length) return void interaction.followUp({ content: "No results were found!" });
 
         const queue = await player.createQueue(interaction.guild, {
             metadata: interaction.channel as TextChannel
@@ -167,7 +167,8 @@ client.on("interaction", async (interaction) => {
         }
 
         await interaction.followUp({ content: "⏱ | Loading your track..." });
-        await queue.play(searchResult[0]);
+        searchResult.playlist ? queue.addTracks(searchResult.tracks) : queue.addTrack(searchResult.tracks[0]);
+        if (!queue.playing) await queue.play();
     } else if (interaction.commandName === "volume") {
         await interaction.defer();
         const queue = player.getQueue(interaction.guildID);

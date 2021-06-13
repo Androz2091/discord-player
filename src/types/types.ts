@@ -1,8 +1,9 @@
-import { User } from "discord.js";
+import { Snowflake, User } from "discord.js";
 import { downloadOptions } from "ytdl-core";
 import { Readable, Duplex } from "stream";
 import { Queue } from "../Structures/Queue";
 import Track from "../Structures/Track";
+import { Playlist } from "../Structures/Playlist";
 
 export type FiltersName = keyof QueueFilters;
 
@@ -48,7 +49,7 @@ export interface RawTrackData {
     duration: string;
     views: number;
     requestedBy: User;
-    fromPlaylist: boolean;
+    playlist?: Playlist;
     source?: TrackSource;
     engine?: any;
     live?: boolean;
@@ -161,4 +162,47 @@ export enum QueueRepeatMode {
     OFF = 0,
     TRACK = 1,
     QUEUE = 2
+}
+
+export interface PlaylistInitData {
+    tracks: Track[];
+    title: string;
+    description: string;
+    thumbnail: string;
+    type: "album" | "playlist";
+    source: TrackSource;
+    author: {
+        name: string;
+        url: string;
+    };
+    id: string;
+    url: string;
+}
+
+export interface TrackJSON {
+    title: string;
+    description: string;
+    author: string;
+    url: string;
+    thumbnail: string;
+    duration: string;
+    durationMS: number;
+    views: number;
+    requestedBy: Snowflake;
+    playlist?: PlaylistJSON;
+}
+
+export interface PlaylistJSON {
+    id: string;
+    url: string;
+    title: string;
+    description: string;
+    thumbnail: string;
+    type: "album" | "playlist";
+    source: TrackSource;
+    author: {
+        name: string;
+        url: string;
+    };
+    tracks: TrackJSON[];
 }
