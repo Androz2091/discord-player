@@ -12,25 +12,52 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
 
+    /**
+     * Creates new Discord Player
+     * @param {Discord.Client} client The Discord Client
+     */
     constructor(client: Client) {
         super();
+
+        /**
+         * The discord.js client
+         * @type {Discord.Client}
+         */
         this.client = client;
     }
 
+    /**
+     * Creates a queue for a guild if not available, else returns existing queue
+     * @param {Discord.Guild} guild The guild
+     * @param {PlayerOptions} queueInitOptions Queue init options
+     * @returns {Queue}
+     */
     createQueue<T = unknown>(guild: Guild, queueInitOptions?: PlayerOptions & { metadata?: any }) {
         if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
 
+        const _meta = queueInitOptions.metadata;
+        delete queueInitOptions["metadata"];
         const queue = new Queue(this, guild, queueInitOptions);
-        if ("metadata" in queueInitOptions) queue.metadata = queueInitOptions.metadata;
+        queue.metadata = _meta;
         this.queues.set(guild.id, queue);
 
         return queue as Queue<T>;
     }
 
+    /**
+     * Returns the queue if available
+     * @param {Discord.Snowflake} guild The guild id
+     * @returns {Queue}
+     */
     getQueue<T = unknown>(guild: Snowflake) {
         return this.queues.get(guild) as Queue<T>;
     }
 
+    /**
+     * Deletes a queue and returns deleted queue object
+     * @param {Discord.Snowflake} guild The guild id to remove
+     * @returns {Queue}
+     */
     deleteQueue<T = unknown>(guild: Snowflake) {
         const prev = this.getQueue<T>(guild);
 
@@ -45,7 +72,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
     /**
      * Search tracks
      * @param {string|Track} query The search query
-     * @param {User} requestedBy The person who requested track search
+     * @param {Discord.User} requestedBy The person who requested track search
      * @returns {Promise<Track[]>}
      */
     async search(query: string | Track, requestedBy: User) {
