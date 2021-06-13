@@ -66,6 +66,8 @@ class Queue<T = unknown> {
         this.connection.on("error", (err) => this.player.emit("error", this, err));
         this.connection.on("debug", (msg) => this.player.emit("debug", this, msg));
 
+        this.player.emit("connectionCreate", this, this.connection);
+        
         return this;
     }
 

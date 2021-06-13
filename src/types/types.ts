@@ -4,6 +4,7 @@ import { Readable, Duplex } from "stream";
 import { Queue } from "../Structures/Queue";
 import Track from "../Structures/Track";
 import { Playlist } from "../Structures/Playlist";
+import { StreamDispatcher } from "../VoiceInterface/BasicStreamDispatcher";
 
 export type FiltersName = keyof QueueFilters;
 
@@ -130,7 +131,7 @@ export interface PlayerEvents {
     /**
      * Emitted when bot connects to a voice channel
      */
-    connectionCreate: (queue: Queue) => any;
+    connectionCreate: (queue: Queue, connection: StreamDispatcher) => any;
     /**
      * Debug information
      */
