@@ -29,6 +29,11 @@ class Util {
             .join(":");
         return final.length <= 3 ? `0:${final.padStart(2, "0") || 0}` : final;
     }
+
+    static last<T = any>(arr: T[]): T {
+        if (!Array.isArray(arr)) return;
+        return arr[arr.length - 1];
+    }
 }
 
 export { Util };

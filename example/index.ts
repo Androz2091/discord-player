@@ -1,6 +1,6 @@
 import { Client, GuildMember, Message, TextChannel } from "discord.js";
 import { Player, Queue, Track } from "../src/index";
-import { QueryType } from "../src/types/types";
+import { QueryType, QueueRepeatMode } from "../src/types/types";
 import { config } from "./config";
 // use this in prod.
 // import { Player, Queue } from "discord-player";
@@ -77,6 +77,32 @@ client.on("message", async (message) => {
                 ]
             },
             {
+                name: "loop",
+                description: "Sets loop mode",
+                options: [
+                    {
+                        name: "mode",
+                        type: "INTEGER",
+                        description: "Loop type",
+                        required: true,
+                        choices: [
+                            {
+                                name: "Off",
+                                value: 0
+                            },
+                            {
+                                name: "Track",
+                                value: 1
+                            },
+                            {
+                                name: "Queue",
+                                value: 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
                 name: "skip",
                 description: "Skip to the current song"
             },
@@ -130,7 +156,7 @@ client.on("interaction", async (interaction) => {
         if (!searchResult.length) return void interaction.followUp({ content: "No results were found!" });
 
         const queue = await player.createQueue(interaction.guild, {
-            metadata: interaction.channel
+            metadata: interaction.channel as TextChannel
         });
 
         try {
@@ -208,6 +234,14 @@ client.on("interaction", async (interaction) => {
         const queue = player.getQueue(interaction.guildID);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         return void interaction.followUp({ content: `🎶 | Current song: **${queue.current.title}**!` });
+    } else if (interaction.commandName === "loop") {
+        await interaction.defer();
+        const queue = player.getQueue(interaction.guildID);
+        if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
+        const loopMode = interaction.options.get("mode")!.value as QueueRepeatMode;
+        const success = queue.setRepeatMode(loopMode);
+        const mode = loopMode === QueueRepeatMode.TRACK ? "🔂" : loopMode === QueueRepeatMode.QUEUE ? "🔁" : "▶";
+        return void interaction.followUp({ content: success ? `${mode} | Updated loop mode!` : "❌ | Could not update loop mode!" });
     } else {
         interaction.reply({
             content: "Unknown command!",

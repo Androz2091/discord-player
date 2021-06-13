@@ -37,7 +37,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
      * @param {PlayerOptions} queueInitOptions Queue init options
      * @returns {Queue}
      */
-    createQueue<T = unknown>(guild: Guild, queueInitOptions?: PlayerOptions & { metadata?: any }) {
+    createQueue<T = unknown>(guild: Guild, queueInitOptions?: PlayerOptions & { metadata?: T }): Queue<T> {
         if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
 
         const _meta = queueInitOptions.metadata;

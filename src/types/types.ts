@@ -156,3 +156,9 @@ export interface SearchOptions {
     requestedBy: User;
     searchEngine?: QueryType;
 }
+
+export enum QueueRepeatMode {
+    OFF = 0,
+    TRACK = 1,
+    QUEUE = 2
+}

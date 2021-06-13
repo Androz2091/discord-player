@@ -15,6 +15,7 @@ class Track {
     public requestedBy!: User;
     public fromPlaylist!: boolean;
     public readonly raw!: RawTrackData;
+    public readonly _trackID = Date.now();
 
     /**
      * Track constructor
