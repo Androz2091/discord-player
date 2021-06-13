@@ -21,7 +21,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
 
         const queue = new Queue(this, guild, queueInitOptions);
-        queue.metadata = queueInitOptions.metadata;
+        if ("metadata" in queueInitOptions) queue.metadata = queueInitOptions.metadata;
         this.queues.set(guild.id, queue);
 
         return queue as Queue<T>;
