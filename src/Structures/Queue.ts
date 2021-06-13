@@ -49,10 +49,13 @@ class Queue<T = unknown> {
         const connection = await this.player.voiceUtils.connect(channel);
         this.connection = connection;
 
-        // it's ok to use this here since Queue listens to the events 1 time per play
+        // it's ok to use this here since Queue listens to the events 1 time per play and destroys the listener
         this.connection.setMaxListeners(Infinity);
 
         if (channel.type === "stage") await channel.guild.me.voice.setRequestToSpeak(true).catch(() => {});
+
+        this.connection.on("error", err => this.player.emit("error", this, err));
+        this.connection.on("debug", msg => this.player.emit("debug", this, msg));
 
         return this;
     }
