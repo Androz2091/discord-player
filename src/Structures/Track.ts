@@ -106,7 +106,7 @@ class Track {
         this.playlist = data.playlist;
 
         // raw
-        Object.defineProperty(this, "raw", { get: () => data.raw ?? data, enumerable: false });
+        Object.defineProperty(this, "raw", { get: () => Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data), enumerable: false });
     }
 
     /**

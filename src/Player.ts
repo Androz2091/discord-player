@@ -305,9 +305,9 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                 // @todo: better way of handling large playlists
                 await ytpl.fetch().catch(() => {});
 
-                const playlist = new Playlist(this, {
+                const playlist: Playlist = new Playlist(this, {
                     title: ytpl.title,
-                    thumbnail: ytpl.thumbnail?.displayThumbnailURL("maxresdefault"),
+                    thumbnail: ytpl.thumbnail as unknown as string,
                     description: "",
                     type: "playlist",
                     source: "youtube",
@@ -321,22 +321,22 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                     rawPlaylist: ytpl
                 });
 
-                for (const video of ytpl) {
-                    playlist.tracks.push(
+                playlist.tracks = ytpl.videos.map(
+                    (video) =>
                         new Track(this, {
                             title: video.title,
                             description: video.description,
                             author: video.channel?.name,
                             url: video.url,
                             requestedBy: options.requestedBy,
-                            thumbnail: video.thumbnail?.displayThumbnailURL("maxresdefault"),
+                            thumbnail: video.thumbnail.url,
                             views: video.views,
                             duration: video.durationFormatted,
                             raw: video,
-                            playlist: playlist
+                            playlist: playlist,
+                            source: "youtube"
                         })
-                    );
-                }
+                );
 
                 return { playlist: playlist, tracks: playlist.tracks };
             }
