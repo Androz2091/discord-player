@@ -50,7 +50,7 @@
   },
   "homepage": "https://discord-player.js.org",
   "dependencies": {
-    "@discordjs/voice": "^0.3.1",
+    "@discordjs/voice": "^0.4.0",
     "discord-ytdl-core": "^5.0.3",
     "soundcloud-scraper": "^5.0.0",
     "spotify-url-info": "^2.2.3",
