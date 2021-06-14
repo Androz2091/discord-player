@@ -337,6 +337,8 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                         })
                     );
                 }
+
+                return { playlist: playlist, tracks: playlist.tracks };
             }
             default:
                 return { playlist: null, tracks: [] };
