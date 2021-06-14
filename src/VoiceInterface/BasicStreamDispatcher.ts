@@ -142,14 +142,14 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
         if (!this.audioResource || isNaN(value) || value < 0 || value > Infinity) return false;
 
         // ye boi logarithmic ✌
-        this.audioResource.volume.setVolumeLogarithmic(value / 200);
+        this.audioResource.volume.setVolumeLogarithmic(value / 100);
         return true;
     }
 
     get volume() {
         if (!this.audioResource || !this.audioResource.volume) return 100;
         const currentVol = this.audioResource.volume.volume;
-        return Math.round(Math.pow(currentVol, 1 / 1.660964) * 200);
+        return Math.round(Math.pow(currentVol, 1 / 1.660964) * 100);
     }
 
     get streamTime() {

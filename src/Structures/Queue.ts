@@ -176,6 +176,7 @@ class Queue<T = unknown> {
         const dispatcher = await this.connection.playStream(resource);
         dispatcher.setVolume(this.options.initialVolume);
 
+        // need to use these events here
         dispatcher.once("start", () => {
             this.playing = true;
             if (!options.filtersUpdate) this.player.emit("trackStart", this, this.current);
