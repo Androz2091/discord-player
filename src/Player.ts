@@ -113,10 +113,10 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
      * Search tracks
      * @param {string|Track} query The search query
      * @param {Discord.User} requestedBy The person who requested track search
-     * @returns {Promise<Track[]>}
+     * @returns {Promise<{playlist?: Playlist; tracks: Track[]}>}
      */
     async search(query: string | Track, options: SearchOptions) {
-        if (query instanceof Track) return { playlist: false, tracks: [query] };
+        if (query instanceof Track) return { playlist: null, tracks: [query] };
         if (!options) throw new Error("DiscordPlayer#search needs search options!");
         if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
 
@@ -127,7 +127,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                 const videos = await YouTube.search(query, {
                     type: "video"
                 }).catch(() => {});
-                if (!videos) return { playlist: false, tracks: [] };
+                if (!videos) return { playlist: null, tracks: [] };
 
                 const tracks = videos.map((m) => {
                     (m as any).source = "youtube";
@@ -144,12 +144,12 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                     });
                 });
 
-                return { playlist: false, tracks };
+                return { playlist: null, tracks };
             }
             case QueryType.SOUNDCLOUD_TRACK:
             case QueryType.SOUNDCLOUD_SEARCH: {
                 const result: any[] = QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? [{ url: query }] : await soundcloud.search(query, "track").catch(() => {});
-                if (!result || !result.length) return { playlist: false, tracks: [] };
+                if (!result || !result.length) return { playlist: null, tracks: [] };
                 const res: Track[] = [];
 
                 for (const r of result) {
@@ -172,11 +172,11 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                     res.push(track);
                 }
 
-                return { playlist: false, tracks: res };
+                return { playlist: null, tracks: res };
             }
             case QueryType.SPOTIFY_SONG: {
                 const spotifyData = await Spotify.getData(query).catch(() => {});
-                if (!spotifyData) return { playlist: false, tracks: [] };
+                if (!spotifyData) return { playlist: null, tracks: [] };
                 const spotifyTrack = new Track(this, {
                     title: spotifyData.name,
                     description: spotifyData.description ?? "",
@@ -192,12 +192,12 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                     source: "spotify"
                 });
 
-                return { playlist: false, tracks: [spotifyTrack] };
+                return { playlist: null, tracks: [spotifyTrack] };
             }
             case QueryType.SPOTIFY_PLAYLIST:
             case QueryType.SPOTIFY_ALBUM: {
                 const spotifyPlaylist = await Spotify.getData(query).catch(() => {});
-                if (!spotifyPlaylist) return { playlist: false, tracks: [] };
+                if (!spotifyPlaylist) return { playlist: null, tracks: [] };
 
                 const playlist = new Playlist(this, {
                     title: spotifyPlaylist.name ?? spotifyPlaylist.title,
@@ -217,7 +217,8 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                               },
                     tracks: [],
                     id: spotifyPlaylist.id,
-                    url: spotifyPlaylist.external_urls?.spotify ?? query
+                    url: spotifyPlaylist.external_urls?.spotify ?? query,
+                    rawPlaylist: spotifyPlaylist
                 });
 
                 if (spotifyPlaylist.type !== "playlist") {
@@ -256,10 +257,87 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                     }) as Track[];
                 }
 
-                return { playlist: true, tracks: playlist.tracks };
+                return { playlist: playlist, tracks: playlist.tracks };
+            }
+            case QueryType.SOUNDCLOUD_PLAYLIST: {
+                const data = await SoundCloud.getPlaylist(query).catch(() => { });
+                if (!data) return { playlist: null, tracks: [] };
+
+                const res = new Playlist(this, {
+                    title: data.title,
+                    description: data.description ?? "",
+                    thumbnail: data.thumbnail ?? "https://soundcloud.com/pwa-icon-192.png",
+                    type: "playlist",
+                    source: "soundcloud",
+                    author: {
+                        name: data.author?.name ?? data.author?.username ?? "Unknown Artist",
+                        url: data.author?.profile
+                    },
+                    tracks: [],
+                    id: `${data.id}`, // stringified
+                    url: data.url,
+                    rawPlaylist: data
+                });
+
+                for (const song of data) {
+                    const track = new Track(this, {
+                        title: song.title,
+                        description: song.description ?? "",
+                        author: song.author?.username ?? song.author?.name ?? "Unknown Artist",
+                        url: song.url,
+                        thumbnail: song.thumbnail,
+                        duration: Util.buildTimeCode(Util.parseMS(song.duration)),
+                        views: song.playCount ?? 0,
+                        requestedBy: options.requestedBy,
+                        playlist: res,
+                        source: "soundcloud",
+                        engine: song
+                    });
+                    res.tracks.push(track);
+                }
+
+                return { playlist: res, tracks: res.tracks };
+            }
+            case QueryType.YOUTUBE_PLAYLIST: {
+                const ytpl = await YouTube.getPlaylist(query).catch(() => {});
+                if (!ytpl) return { playlist: null, tracks: [] };
+
+                // @todo: better way of handling large playlists
+                await ytpl.fetch().catch(() => {});
+
+                const playlist = new Playlist(this, {
+                    title: ytpl.title,
+                    thumbnail: ytpl.thumbnail?.displayThumbnailURL("maxresdefault"),
+                    description: "",
+                    type: "playlist",
+                    source: "youtube",
+                    author: {
+                        name: ytpl.channel.name,
+                        url: ytpl.channel.url
+                    },
+                    tracks: [],
+                    id: ytpl.id,
+                    url: ytpl.url,
+                    rawPlaylist: ytpl
+                });
+
+                for (const video of ytpl) {
+                    playlist.tracks.push(new Track(this, {
+                        title: video.title,
+                        description: video.description,
+                        author: video.channel?.name,
+                        url: video.url,
+                        requestedBy: options.requestedBy,
+                        thumbnail: video.thumbnail?.displayThumbnailURL("maxresdefault"),
+                        views: video.views,
+                        duration: video.durationFormatted,
+                        raw: video,
+                        playlist: playlist
+                    }));
+                }
             }
             default:
-                return { playlist: false, tracks: [] };
+                return { playlist: null, tracks: [] };
         }
     }
 

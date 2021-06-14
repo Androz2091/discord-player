@@ -16,6 +16,7 @@ class Playlist {
     };
     public id: string;
     public url: string;
+    public rawPlaylist?: any;
 
     constructor(player: Player, data: PlaylistInitData) {
         this.player = player;

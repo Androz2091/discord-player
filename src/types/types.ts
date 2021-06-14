@@ -196,6 +196,7 @@ export interface PlaylistInitData {
     };
     id: string;
     url: string;
+    rawPlaylist?: any;
 }
 
 export interface TrackJSON {
