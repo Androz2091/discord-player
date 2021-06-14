@@ -14,7 +14,6 @@ import { StageChannel, VoiceChannel } from "discord.js";
 import { Duplex, Readable } from "stream";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import Track from "../Structures/Track";
-import PlayerError from "../utils/PlayerError";
 
 export interface VoiceEvents {
     error: (error: AudioPlayerError) => any;
@@ -130,7 +129,7 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {AudioResource} resource The audio resource to play
      */
     async playStream(resource: AudioResource<Track> = this.audioResource) {
-        if (!resource) throw new PlayerError("Audio resource is not available!");
+        if (!resource) throw new Error("Audio resource is not available!");
         if (!this.audioResource) this.audioResource = resource;
         if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000);
         this.audioPlayer.play(resource);

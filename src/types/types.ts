@@ -88,17 +88,33 @@ export interface PlayerOptions {
 }
 
 export interface ExtractorModelData {
-    title: string;
-    duration: number;
-    thumbnail: string;
-    engine: string | Readable | Duplex;
-    views: number;
-    author: string;
-    description: string;
-    url: string;
-    version?: string;
-    important?: boolean;
-    source?: TrackSource;
+    playlist?: {
+        title: string;
+        description: string;
+        thumbnail: string;
+        type: "album" | "playlist";
+        source: TrackSource;
+        author: {
+            name: string;
+            url: string;
+        };
+        id: string;
+        url: string;
+        rawPlaylist?: any;
+    };
+    data: {
+        title: string;
+        duration: number;
+        thumbnail: string;
+        engine: string | Readable | Duplex;
+        views: number;
+        author: string;
+        description: string;
+        url: string;
+        version?: string;
+        important?: boolean;
+        source?: TrackSource;
+    }[];
 }
 
 export enum QueryType {
@@ -225,4 +241,8 @@ export interface PlaylistJSON {
         url: string;
     };
     tracks: TrackJSON[];
+}
+
+export interface DiscordPlayerInitOptions {
+    autoRegisterExtractor?: boolean;
 }

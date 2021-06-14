@@ -1,8 +1,8 @@
-import { Client, Collection, Guild, Snowflake, User, VoiceState } from "discord.js";
+import { Client, Collection, Guild, Snowflake, VoiceState } from "discord.js";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
-import { PlayerEvents, PlayerOptions, QueryType, SearchOptions } from "./types/types";
+import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, DiscordPlayerInitOptions } from "./types/types";
 import Track from "./Structures/Track";
 import { QueryResolver } from "./utils/QueryResolver";
 import YouTube from "youtube-sr";
@@ -11,19 +11,24 @@ import Spotify from "spotify-url-info";
 // @ts-ignore
 import { Client as SoundCloud } from "soundcloud-scraper";
 import { Playlist } from "./Structures/Playlist";
+import { ExtractorModel } from "./Structures/ExtractorModel";
 
 const soundcloud = new SoundCloud();
 
 class DiscordPlayer extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
+    public readonly options: DiscordPlayerInitOptions = {
+        autoRegisterExtractor: true
+    };
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
+    public readonly extractors = new Collection<string, ExtractorModel>();
 
     /**
      * Creates new Discord Player
      * @param {Discord.Client} client The Discord Client
      */
-    constructor(client: Client) {
+    constructor(client: Client, options: DiscordPlayerInitOptions = {}) {
         super();
 
         /**
@@ -32,7 +37,21 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
          */
         this.client = client;
 
+        /**
+         * The extractors collection
+         * @type {ExtractorModel}
+         */
+        this.options = Object.assign(this.options, options);
+
         this.client.on("voiceStateUpdate", this._handleVoiceState.bind(this));
+
+        if (this.options?.autoRegisterExtractor) {
+            let nv: any;
+
+            if ((nv = Util.require("@discord-player/extractor"))) {
+                ["Attachment", "Facebook", "Reverbnation", "Vimeo"].forEach((ext) => void this.use(ext, nv[ext]));
+            }
+        }
     }
 
     private _handleVoiceState(oldState: VoiceState, newState: VoiceState): void {
@@ -120,7 +139,33 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         if (!options) throw new Error("DiscordPlayer#search needs search options!");
         if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
 
-        // @todo: add extractors
+        for (const [_, extractor] of this.extractors) {
+            if (!extractor.validate(query)) continue;
+            const data = await extractor.handle(query);
+            if (data && data.data.length) {
+                const playlist = !data.playlist
+                    ? null
+                    : new Playlist(this, {
+                          ...data.playlist,
+                          tracks: []
+                      });
+
+                const tracks = data.data.map(
+                    (m) =>
+                        new Track(this, {
+                            ...m,
+                            requestedBy: options.requestedBy,
+                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
+                            playlist: playlist
+                        })
+                );
+
+                if (playlist) playlist.tracks = tracks;
+
+                return { playlist: playlist, tracks: tracks };
+            }
+        }
+
         const qt = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
         switch (qt) {
             case QueryType.YOUTUBE_SEARCH: {
@@ -343,6 +388,29 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
             default:
                 return { playlist: null, tracks: [] };
         }
+    }
+
+    use(extractorName: string, extractor: ExtractorModel | any, force = false) {
+        if (!extractorName) throw new Error("Cannot use unknown extractor!");
+        if (this.extractors.has(extractorName) && !force) return this;
+        if (extractor instanceof ExtractorModel) {
+            this.extractors.set(extractorName, extractor);
+            return this;
+        }
+
+        for (const method of ["validate", "getInfo"]) {
+            if (typeof extractor[method] !== "function") throw new Error("Invalid extractor data!");
+        }
+
+        const model = new ExtractorModel(extractorName, extractor);
+        this.extractors.set(model.name, model);
+
+        return this;
+    }
+
+    unuse(extractorName: string) {
+        if (!this.extractors.has(extractorName)) throw new Error(`Cannot find extractor "${extractorName}"`);
+        this.extractors.delete(extractorName);
     }
 
     *[Symbol.iterator]() {

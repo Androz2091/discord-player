@@ -39,6 +39,14 @@ class Util {
     static isVoiceEmpty(channel: VoiceChannel | StageChannel) {
         return channel.members.filter((member) => !member.user.bot).size === 0;
     }
+
+    static require(id: string) {
+        try {
+            return require(id);
+        } catch {
+            return null;
+        }
+    }
 }
 
 export { Util };

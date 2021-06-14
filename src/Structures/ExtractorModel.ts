@@ -29,14 +29,18 @@ class ExtractorModel {
         if (!data) return null;
 
         return {
-            title: data.title,
-            duration: data.duration,
-            thumbnail: data.thumbnail,
-            engine: data.engine,
-            views: data.views,
-            author: data.author,
-            description: data.description,
-            url: data.url
+            playlist: data.playlist ?? null,
+            data:
+                data.info?.map((m: any) => ({
+                    title: m.title,
+                    duration: m.duration,
+                    thumbnail: m.thumbnail,
+                    engine: m.engine,
+                    views: m.views,
+                    author: m.author,
+                    description: m.description,
+                    url: m.url
+                })) ?? []
         };
     }
 
@@ -55,14 +59,6 @@ class ExtractorModel {
      */
     get version(): string {
         return this._raw.version ?? "0.0.0";
-    }
-
-    /**
-     * If player should mark this extractor as important
-     * @type {boolean}
-     */
-    get important(): boolean {
-        return Boolean(this._raw.important);
     }
 }
 
