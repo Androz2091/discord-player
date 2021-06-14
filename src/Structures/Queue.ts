@@ -20,9 +20,29 @@ class Queue<T = unknown> {
     public repeatMode: QueueRepeatMode = 0;
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
 
+    /**
+     * Queue constructor
+     * @param {Player} player The player that instantiated this queue
+     * @param {Guild} guild The guild that instantiated this queue
+     * @param {PlayerOptions={}} options Player options for the queue
+     */
     constructor(player: Player, guild: Guild, options: PlayerOptions = {}) {
+        /**
+         * The player that instantiated this queue
+         * @type {Player}
+         */
         this.player = player;
+
+        /**
+         * The guild that instantiated this queue
+         * @type {Guild}
+         */
         this.guild = guild;
+
+        /**
+         * The player options for this queue
+         * @type {PlayerOptions}
+         */
         this.options = {};
 
         Object.assign(
@@ -45,14 +65,27 @@ class Queue<T = unknown> {
         );
     }
 
+    /**
+     * Returns current track
+     * @returns {Track}
+     */
     get current() {
         return this.connection.audioResource?.metadata ?? this.tracks[0];
     }
 
+    /**
+     * Returns current track
+     * @returns {Track}
+     */
     nowPlaying() {
         return this.current;
     }
 
+    /**
+     * Connects to a voice channel
+     * @param  {StageChannel|VoiceChannel} channel
+     * @returns {Promise<Queue>}
+     */
     async connect(channel: StageChannel | VoiceChannel) {
         if (!["stage", "voice"].includes(channel?.type)) throw new TypeError(`Channel type must be voice or stage, got ${channel?.type}!`);
         const connection = await this.player.voiceUtils.connect(channel, {
@@ -73,45 +106,80 @@ class Queue<T = unknown> {
         return this;
     }
 
+    /**
+     * Destroys this queue
+     */
     destroy() {
         this.connection.end();
         this.connection.disconnect();
         this.player.queues.delete(this.guild.id);
     }
 
+    /**
+     * Skips current track
+     * @returns {boolean}
+     */
     skip() {
         if (!this.connection) return false;
         this.connection.end();
         return true;
     }
 
+    /**
+     * Adds single track to the queue
+     * @param {Track} track The track to add
+     * @returns {void}
+     */
     addTrack(track: Track) {
         this.tracks.push(track);
         this.player.emit("trackAdd", this, track);
     }
 
+    
+    /**
+     * Adds multiple tracks to the queue
+     * @param {Track[]} tracks Array of tracks to add
+     */
     addTracks(tracks: Track[]) {
         this.tracks.push(...tracks);
         this.player.emit("tracksAdd", this, tracks);
     }
 
+    /**
+     * Sets paused state
+     * @param {boolean} paused The paused state
+     * @returns {boolean}
+     */
     setPaused(paused?: boolean) {
         if (!this.connection) return false;
         return paused ? this.connection.pause() : this.connection.resume();
     }
 
+    /**
+     * Sets bitrate
+     * @param  {number|"auto"} bitrate bitrate to set
+     */
     setBitrate(bitrate: number | "auto") {
         if (!this.connection?.audioResource?.encoder) return;
         if (bitrate === "auto") bitrate = this.connection.channel?.bitrate ?? 64000;
         this.connection.audioResource.encoder.setBitrate(bitrate);
     }
 
+    /**
+     * Sets volume
+     * @param {number} amount The volume amount
+     * @returns {boolean}
+     */
     setVolume(amount: number) {
         if (!this.connection) return false;
         this.options.initialVolume = amount;
         return this.connection.setVolume(amount);
     }
-
+    /**
+     * Sets repeat mode
+     * @param  {QueueRepeatMode} mode The repeat mode
+     * @returns {boolean}
+     */
     setRepeatMode(mode: QueueRepeatMode) {
         if (![QueueRepeatMode.OFF, QueueRepeatMode.QUEUE, QueueRepeatMode.TRACK].includes(mode)) throw new Error(`Unknown repeat mode "${mode}"!`);
         const prev = this.repeatMode;
@@ -120,15 +188,27 @@ class Queue<T = unknown> {
         return true;
     }
 
+    /**
+     * Returns current volume amount
+     */
     get volume() {
         if (!this.connection) return 100;
         return this.connection.volume;
     }
 
+    /**
+     * Plays previous track
+     * @returns {Promise<void>}
+     */
     async back() {
         return await this.play(Util.last(this.previousTracks), { immediate: true });
     }
 
+    /**
+     * @param  {Track} [src] The track to play (if empty, uses first track from the queue)
+     * @param  {PlayOptions={}} options The options
+     * @returns {Promise<void>}
+     */
     async play(src?: Track, options: PlayOptions = {}): Promise<void> {
         if (!this.connection || !this.connection.voiceConnection) throw new Error("Voice connection is not available, use <Queue>.connect()!");
         if (src && (this.playing || this.tracks.length) && !options.immediate) return this.addTrack(src);
@@ -204,6 +284,10 @@ class Queue<T = unknown> {
         yield* this.tracks;
     }
 
+    /**
+     * JSON representation of this queue
+     * @returns {object}
+     */
     toJSON() {
         return {
             guild: this.guild.id,
@@ -212,6 +296,10 @@ class Queue<T = unknown> {
         };
     }
 
+    /**
+     * String representation of this queue
+     * @returns {string}
+     */
     toString() {
         if (!this.tracks.length) return "No songs available to display!";
         return `**Upcoming Songs:**\n${this.tracks.map((m, i) => `${i + 1}. **${m.title}**`).join("\n")}`;
