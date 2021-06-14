@@ -35,7 +35,7 @@ class Queue<T = unknown> {
                 leaveOnEmptyCooldown: 1000,
                 autoSelfDeaf: true,
                 enableLive: false,
-                ytdlDownloadOptions: {},
+                ytdlOptions: {},
                 useSafeSearch: false,
                 disableAutoRegister: false,
                 fetchBeforeQueued: false,

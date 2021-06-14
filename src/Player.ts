@@ -18,7 +18,8 @@ const soundcloud = new SoundCloud();
 class DiscordPlayer extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
     public readonly options: DiscordPlayerInitOptions = {
-        autoRegisterExtractor: true
+        autoRegisterExtractor: true,
+        ytdlOptions: {}
     };
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
@@ -96,6 +97,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
 
         const _meta = queueInitOptions.metadata;
         delete queueInitOptions["metadata"];
+        queueInitOptions.ytdlOptions ??= this.options.ytdlOptions
         const queue = new Queue(this, guild, queueInitOptions);
         queue.metadata = _meta;
         this.queues.set(guild.id, queue);

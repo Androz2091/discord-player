@@ -1,10 +1,10 @@
 import { Snowflake, User } from "discord.js";
-import { downloadOptions } from "ytdl-core";
 import { Readable, Duplex } from "stream";
 import { Queue } from "../Structures/Queue";
 import Track from "../Structures/Track";
 import { Playlist } from "../Structures/Playlist";
 import { StreamDispatcher } from "../VoiceInterface/BasicStreamDispatcher";
+import { downloadOptions } from "ytdl-core";
 
 export type FiltersName = keyof QueueFilters;
 
@@ -80,7 +80,7 @@ export interface PlayerOptions {
     leaveOnEmptyCooldown?: number;
     autoSelfDeaf?: boolean;
     enableLive?: boolean;
-    ytdlDownloadOptions?: downloadOptions;
+    ytdlOptions?: downloadOptions;
     useSafeSearch?: boolean;
     disableAutoRegister?: boolean;
     fetchBeforeQueued?: boolean;
@@ -245,4 +245,5 @@ export interface PlaylistJSON {
 
 export interface DiscordPlayerInitOptions {
     autoRegisterExtractor?: boolean;
+    ytdlOptions?: downloadOptions;
 }
