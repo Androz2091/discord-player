@@ -260,7 +260,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                 return { playlist: playlist, tracks: playlist.tracks };
             }
             case QueryType.SOUNDCLOUD_PLAYLIST: {
-                const data = await SoundCloud.getPlaylist(query).catch(() => { });
+                const data = await SoundCloud.getPlaylist(query).catch(() => {});
                 if (!data) return { playlist: null, tracks: [] };
 
                 const res = new Playlist(this, {
@@ -322,18 +322,20 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                 });
 
                 for (const video of ytpl) {
-                    playlist.tracks.push(new Track(this, {
-                        title: video.title,
-                        description: video.description,
-                        author: video.channel?.name,
-                        url: video.url,
-                        requestedBy: options.requestedBy,
-                        thumbnail: video.thumbnail?.displayThumbnailURL("maxresdefault"),
-                        views: video.views,
-                        duration: video.durationFormatted,
-                        raw: video,
-                        playlist: playlist
-                    }));
+                    playlist.tracks.push(
+                        new Track(this, {
+                            title: video.title,
+                            description: video.description,
+                            author: video.channel?.name,
+                            url: video.url,
+                            requestedBy: options.requestedBy,
+                            thumbnail: video.thumbnail?.displayThumbnailURL("maxresdefault"),
+                            views: video.views,
+                            duration: video.durationFormatted,
+                            raw: video,
+                            playlist: playlist
+                        })
+                    );
                 }
             }
             default:
