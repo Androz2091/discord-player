@@ -97,7 +97,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
 
         const _meta = queueInitOptions.metadata;
         delete queueInitOptions["metadata"];
-        queueInitOptions.ytdlOptions ??= this.options.ytdlOptions
+        queueInitOptions.ytdlOptions ??= this.options.ytdlOptions;
         const queue = new Queue(this, guild, queueInitOptions);
         queue.metadata = _meta;
         this.queues.set(guild.id, queue);

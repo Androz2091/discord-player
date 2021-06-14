@@ -55,7 +55,9 @@ class Queue<T = unknown> {
 
     async connect(channel: StageChannel | VoiceChannel) {
         if (!["stage", "voice"].includes(channel?.type)) throw new TypeError(`Channel type must be voice or stage, got ${channel?.type}!`);
-        const connection = await this.player.voiceUtils.connect(channel);
+        const connection = await this.player.voiceUtils.connect(channel, {
+            deaf: this.options.autoSelfDeaf
+        });
         this.connection = connection;
 
         // it's ok to use this here since Queue listens to the events 1 time per play and destroys the listener
@@ -149,7 +151,8 @@ class Queue<T = unknown> {
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
             stream = ytdl(link, {
-                // because we don't wanna decode opus into pcm again just for volume, let discord.js handle that
+                ...this.options.ytdlOptions,
+                // discord-ytdl-core
                 opusEncoded: false,
                 fmt: "s16le",
                 encoderArgs: options.encoderArgs ?? [],
@@ -159,7 +162,6 @@ class Queue<T = unknown> {
             stream = ytdl.arbitraryStream(
                 track.raw.source === "soundcloud" ? await track.raw.engine.downloadProgressive() : typeof track.raw.engine === "function" ? await track.raw.engine() : track.raw.engine,
                 {
-                    // because we don't wanna decode opus into pcm again just for volume, let discord.js handle that
                     opusEncoded: false,
                     fmt: "s16le",
                     encoderArgs: options.encoderArgs ?? [],
