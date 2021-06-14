@@ -1,4 +1,4 @@
-import { Collection, Guild, Snowflake, StageChannel, VoiceChannel } from "discord.js";
+import { Collection, Guild, StageChannel, VoiceChannel } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/BasicStreamDispatcher";
 import Track from "./Track";
