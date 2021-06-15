@@ -15,7 +15,7 @@ class Track {
     public views!: number;
     public requestedBy!: User;
     public playlist?: Playlist;
-    public readonly raw!: RawTrackData;
+    public readonly raw: RawTrackData = {} as RawTrackData;
     public readonly _trackID = Date.now();
 
     /**
@@ -106,7 +106,7 @@ class Track {
         this.playlist = data.playlist;
 
         // raw
-        Object.defineProperty(this, "raw", { get: () => Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data), enumerable: false });
+        Object.defineProperty(this, "raw", { value: Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data), enumerable: false });
     }
 
     /**
