@@ -135,7 +135,6 @@ class Queue<T = unknown> {
         this.player.emit("trackAdd", this, track);
     }
 
-    
     /**
      * Adds multiple tracks to the queue
      * @param {Track[]} tracks Array of tracks to add
