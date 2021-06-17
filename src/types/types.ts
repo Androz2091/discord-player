@@ -1,4 +1,4 @@
-import { Snowflake, User } from "discord.js";
+import { Snowflake, User, UserResolvable } from "discord.js";
 import { Readable, Duplex } from "stream";
 import { Queue } from "../Structures/Queue";
 import Track from "../Structures/Track";
@@ -189,7 +189,7 @@ export interface PlayOptions {
 }
 
 export interface SearchOptions {
-    requestedBy: User;
+    requestedBy: UserResolvable;
     searchEngine?: QueryType;
 }
 

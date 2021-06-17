@@ -1,4 +1,4 @@
-import { Client, Collection, Guild, GuildResolvable, Snowflake, VoiceState } from "discord.js";
+import { Client, Collection, Guild, GuildResolvable, Snowflake, User, UserResolvable, VoiceState } from "discord.js";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
@@ -139,12 +139,13 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
     /**
      * Search tracks
      * @param {string|Track} query The search query
-     * @param {User} requestedBy The person who requested track search
+     * @param {UserResolvable} requestedBy The person who requested track search
      * @returns {Promise<{playlist?: Playlist; tracks: Track[]}>}
      */
     async search(query: string | Track, options: SearchOptions) {
         if (query instanceof Track) return { playlist: null, tracks: [query] };
         if (!options) throw new Error("DiscordPlayer#search needs search options!");
+        options.requestedBy = this.client.users.resolve(options.requestedBy);
         if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
 
         for (const [_, extractor] of this.extractors) {
@@ -162,7 +163,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                     (m) =>
                         new Track(this, {
                             ...m,
-                            requestedBy: options.requestedBy,
+                            requestedBy: options.requestedBy as User,
                             duration: Util.buildTimeCode(Util.parseMS(m.duration)),
                             playlist: playlist
                         })
@@ -189,7 +190,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                         description: m.description,
                         author: m.channel?.name,
                         url: m.url,
-                        requestedBy: options.requestedBy,
+                        requestedBy: options.requestedBy as User,
                         thumbnail: m.thumbnail?.displayThumbnailURL("maxresdefault"),
                         views: m.views,
                         duration: m.durationFormatted,
@@ -284,7 +285,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                             thumbnail: spotifyPlaylist.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
                             duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
                             views: 0,
-                            requestedBy: options.requestedBy,
+                            requestedBy: options.requestedBy as User,
                             playlist,
                             source: "spotify"
                         });
@@ -301,7 +302,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                             thumbnail: m.track.album?.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
                             duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
                             views: 0,
-                            requestedBy: options.requestedBy,
+                            requestedBy: options.requestedBy as User,
                             playlist,
                             source: "spotify"
                         });
@@ -381,7 +382,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
                             description: video.description,
                             author: video.channel?.name,
                             url: video.url,
-                            requestedBy: options.requestedBy,
+                            requestedBy: options.requestedBy as User,
                             thumbnail: video.thumbnail.url,
                             views: video.views,
                             duration: video.durationFormatted,
