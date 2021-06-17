@@ -399,12 +399,12 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         }
     }
 
-    use(extractorName: string, extractor: ExtractorModel | any, force = false) {
+    use(extractorName: string, extractor: ExtractorModel | any, force = false): ExtractorModel {
         if (!extractorName) throw new Error("Cannot use unknown extractor!");
-        if (this.extractors.has(extractorName) && !force) return this;
+        if (this.extractors.has(extractorName) && !force) return this.extractors.get(extractorName);
         if (extractor instanceof ExtractorModel) {
             this.extractors.set(extractorName, extractor);
-            return this;
+            return extractor;
         }
 
         for (const method of ["validate", "getInfo"]) {
@@ -414,12 +414,14 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         const model = new ExtractorModel(extractorName, extractor);
         this.extractors.set(model.name, model);
 
-        return this;
+        return model;
     }
 
     unuse(extractorName: string) {
         if (!this.extractors.has(extractorName)) throw new Error(`Cannot find extractor "${extractorName}"`);
+        const prev = this.extractors.get(extractorName);
         this.extractors.delete(extractorName);
+        return prev;
     }
 
     *[Symbol.iterator]() {
