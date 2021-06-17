@@ -243,7 +243,7 @@ class Queue<T = unknown> {
                 fmt: "s16le",
                 encoderArgs: options.encoderArgs ?? [],
                 seek: options.seek
-            });
+            }).on("error", (err) => this.player.emit("error", this, err));
         } else {
             stream = ytdl.arbitraryStream(
                 track.raw.source === "soundcloud" ? await track.raw.engine.downloadProgressive() : typeof track.raw.engine === "function" ? await track.raw.engine() : track.raw.engine,
@@ -253,7 +253,7 @@ class Queue<T = unknown> {
                     encoderArgs: options.encoderArgs ?? [],
                     seek: options.seek
                 }
-            );
+            ).on("error", (err) => this.player.emit("error", this, err));
         }
 
         const resource: AudioResource<Track> = this.connection.createStream(stream, {
