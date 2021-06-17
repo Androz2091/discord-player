@@ -27,14 +27,14 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
 
     /**
      * Creates new Discord Player
-     * @param {Discord.Client} client The Discord Client
+     * @param {Client} client The Discord Client
      */
     constructor(client: Client, options: DiscordPlayerInitOptions = {}) {
         super();
 
         /**
          * The discord.js client
-         * @type {Discord.Client}
+         * @type {Client}
          */
         this.client = client;
 
@@ -139,7 +139,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
     /**
      * Search tracks
      * @param {string|Track} query The search query
-     * @param {Discord.User} requestedBy The person who requested track search
+     * @param {User} requestedBy The person who requested track search
      * @returns {Promise<{playlist?: Playlist; tracks: Track[]}>}
      */
     async search(query: string | Track, options: SearchOptions) {
