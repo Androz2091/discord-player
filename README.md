@@ -46,13 +46,13 @@ Here is the code you will need to get started with discord-player. Then, you wil
 
 ```js
 const Discord = require("discord.js"),
-client = new Discord.Client,
+client = new Discord.Client({ intents: ["GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILDS"] }),
 settings = {
     prefix: "!",
     token: "Your Discord Token"
 };
 
-const { Player } = require("discord-player");
+const { Player, QueryType } = require("discord-player");
 
 // Create a new Player (you don't need any API Key)
 const player = new Player(client);
@@ -61,7 +61,7 @@ const player = new Player(client);
 client.player = player;
 
 // add the trackStart event so when a song will be played this message will be sent
-client.player.on("trackStart", (message, track) => message.channel.send(`Now playing ${track.title}...`))
+client.player.on("trackStart", (queue, track) => queue.metadata.channel.send(`Now playing ${track.title}...`))
 
 client.once("ready", () => {
     console.log("I'm ready !");
@@ -74,9 +74,28 @@ client.on("message", async (message) => {
 
     // !play Despacito
     // will play "Despacito" in the voice channel
-    if(command === "play"){
-        client.player.play(message, args[0]);
-        // as we registered the event above, no need to send a success message here
+    if (command === "play") {
+        if (!message.member.voice.channel) return void message.reply("You are not in a voice channel!");
+        if (message.guild.me.voice.channel && message.member.voice.channelID !== message.guild.me.voice.channelID) return void message.reply("You are not in my voice channel!");
+
+        const queue = client.player.createQueue(message.guild, {
+            metadata: message
+        });
+        
+        // verify vc connection
+        try {
+            if (!queue.connection) await queue.connect(message.member.voice.channel);
+        } catch {
+            queue.destroy();
+            return void message.reply("Could not join your voice channel!");
+        }
+
+        const track = await client.player.search(args[0], {
+            searchEngine: QueryType.YOUTUBE_SEARCH
+        }).then(x => x.tracks[1]);
+        if (!track) return void message.reply("Track not found!");
+
+        queue.play(track);
     }
 
 });

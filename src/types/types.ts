@@ -74,7 +74,6 @@ export interface PlayerProgressbarOptions {
 
 export interface PlayerOptions {
     leaveOnEnd?: boolean;
-    leaveOnEndCooldown?: number;
     leaveOnStop?: boolean;
     leaveOnEmpty?: boolean;
     leaveOnEmptyCooldown?: number;

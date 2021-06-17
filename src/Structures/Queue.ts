@@ -49,7 +49,6 @@ class Queue<T = unknown> {
             this.options,
             {
                 leaveOnEnd: true,
-                leaveOnEndCooldown: 1000,
                 leaveOnStop: true,
                 leaveOnEmpty: true,
                 leaveOnEmptyCooldown: 1000,
@@ -109,9 +108,9 @@ class Queue<T = unknown> {
     /**
      * Destroys this queue
      */
-    destroy() {
+    destroy(disconnect = this.options.leaveOnStop) {
         this.connection.end();
-        this.connection.disconnect();
+        if (disconnect) this.connection.disconnect();
         this.player.queues.delete(this.guild.id);
     }
 
@@ -245,15 +244,17 @@ class Queue<T = unknown> {
                 seek: options.seek
             }).on("error", (err) => this.player.emit("error", this, err));
         } else {
-            stream = ytdl.arbitraryStream(
-                track.raw.source === "soundcloud" ? await track.raw.engine.downloadProgressive() : typeof track.raw.engine === "function" ? await track.raw.engine() : track.raw.engine,
-                {
-                    opusEncoded: false,
-                    fmt: "s16le",
-                    encoderArgs: options.encoderArgs ?? [],
-                    seek: options.seek
-                }
-            ).on("error", (err) => this.player.emit("error", this, err));
+            stream = ytdl
+                .arbitraryStream(
+                    track.raw.source === "soundcloud" ? await track.raw.engine.downloadProgressive() : typeof track.raw.engine === "function" ? await track.raw.engine() : track.raw.engine,
+                    {
+                        opusEncoded: false,
+                        fmt: "s16le",
+                        encoderArgs: options.encoderArgs ?? [],
+                        seek: options.seek
+                    }
+                )
+                .on("error", (err) => this.player.emit("error", this, err));
         }
 
         const resource: AudioResource<Track> = this.connection.createStream(stream, {
@@ -275,7 +276,7 @@ class Queue<T = unknown> {
             if (options.filtersUpdate) return;
 
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
-                this.destroy();
+                if (this.options.leaveOnEnd) this.destroy();
                 this.player.emit("queueEnd", this);
             } else {
                 if (this.repeatMode === QueueRepeatMode.TRACK) return void this.play(Util.last(this.previousTracks), { immediate: true });
