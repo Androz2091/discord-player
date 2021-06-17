@@ -8,12 +8,14 @@ import {
     entersState,
     StreamType,
     VoiceConnection,
-    VoiceConnectionStatus
+    VoiceConnectionStatus,
+    VoiceConnectionDisconnectReason
 } from "@discordjs/voice";
 import { StageChannel, VoiceChannel } from "discord.js";
 import { Duplex, Readable } from "stream";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import Track from "../Structures/Track";
+import { Util } from "../utils/Util";
 
 export interface VoiceEvents {
     error: (error: AudioPlayerError) => any;
@@ -26,8 +28,8 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
     public readonly voiceConnection: VoiceConnection;
     public readonly audioPlayer: AudioPlayer;
     public readonly channel: VoiceChannel | StageChannel;
-    public connectPromise?: Promise<void>;
     public audioResource?: AudioResource<Track>;
+    private readyLock: boolean = false;
 
     constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel) {
         super();
@@ -36,26 +38,31 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
         this.audioPlayer = createAudioPlayer();
         this.channel = channel;
 
-        this.voiceConnection.on("stateChange", (_, newState) => {
+        this.voiceConnection.on("stateChange", async (_, newState) => {
             if (newState.status === VoiceConnectionStatus.Disconnected) {
-                if (this.voiceConnection.reconnectAttempts < 5) {
-                    setTimeout(() => {
-                        if (this.voiceConnection.state.status === VoiceConnectionStatus.Disconnected) {
-                            this.voiceConnection.reconnect();
-                        }
-                    }, (this.voiceConnection.reconnectAttempts + 1) * 5000).unref();
+                if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
+                    try {
+                        await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, 5000);
+                    } catch {
+                        this.voiceConnection.destroy();
+                    }
+                } else if (this.voiceConnection.rejoinAttempts < 5) {
+                    await Util.wait((this.voiceConnection.rejoinAttempts + 1) * 5000);
+                    this.voiceConnection.rejoin();
                 } else {
                     this.voiceConnection.destroy();
                 }
             } else if (newState.status === VoiceConnectionStatus.Destroyed) {
                 this.end();
-            } else if (!this.connectPromise && (newState.status === VoiceConnectionStatus.Connecting || newState.status === VoiceConnectionStatus.Signalling)) {
-                this.connectPromise = entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000)
-                    .then(() => undefined)
-                    .catch(() => {
-                        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
-                    })
-                    .finally(() => (this.connectPromise = undefined));
+            } else if (!this.readyLock && (newState.status === VoiceConnectionStatus.Connecting || newState.status === VoiceConnectionStatus.Signalling)) {
+                this.readyLock = true;
+                try {
+                    await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000);
+                } catch {
+                    if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
+                } finally {
+                    this.readyLock = false;
+                }
             }
         });
 

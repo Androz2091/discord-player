@@ -1,4 +1,4 @@
-import { Client, Collection, Guild, Snowflake, VoiceState } from "discord.js";
+import { Client, Collection, Guild, GuildResolvable, Snowflake, VoiceState } from "discord.js";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
@@ -88,11 +88,13 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
 
     /**
      * Creates a queue for a guild if not available, else returns existing queue
-     * @param {Discord.Guild} guild The guild
+     * @param {GuildResolvable} guild The guild
      * @param {PlayerOptions} queueInitOptions Queue init options
      * @returns {Queue}
      */
-    createQueue<T = unknown>(guild: Guild, queueInitOptions?: PlayerOptions & { metadata?: T }): Queue<T> {
+    createQueue<T = unknown>(guild: GuildResolvable, queueInitOptions?: PlayerOptions & { metadata?: T }): Queue<T> {
+        guild = this.client.guilds.resolve(guild);
+        if (!guild) throw new Error("Unknown Guild");
         if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
 
         const _meta = queueInitOptions.metadata;
@@ -107,25 +109,29 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
 
     /**
      * Returns the queue if available
-     * @param {Discord.Snowflake} guild The guild id
+     * @param {GuildResolvable} guild The guild id
      * @returns {Queue}
      */
-    getQueue<T = unknown>(guild: Snowflake) {
-        return this.queues.get(guild) as Queue<T>;
+    getQueue<T = unknown>(guild: GuildResolvable) {
+        guild = this.client.guilds.resolve(guild);
+        if (!guild) throw new Error("Unknown Guild");
+        return this.queues.get(guild.id) as Queue<T>;
     }
 
     /**
      * Deletes a queue and returns deleted queue object
-     * @param {Discord.Snowflake} guild The guild id to remove
+     * @param {GuildResolvable} guild The guild id to remove
      * @returns {Queue}
      */
-    deleteQueue<T = unknown>(guild: Snowflake) {
+    deleteQueue<T = unknown>(guild: GuildResolvable) {
+        guild = this.client.guilds.resolve(guild);
+        if (!guild) throw new Error("Unknown Guild");
         const prev = this.getQueue<T>(guild);
 
         try {
             prev.destroy();
         } catch {}
-        this.queues.delete(guild);
+        this.queues.delete(guild.id);
 
         return prev;
     }

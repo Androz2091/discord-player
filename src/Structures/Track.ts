@@ -155,7 +155,7 @@ class Track {
      * Raw JSON representation of this track
      * @returns {object}
      */
-    toJSON() {
+    toJSON(hidePlaylist?: boolean) {
         return {
             title: this.title,
             description: this.description,
@@ -166,7 +166,7 @@ class Track {
             durationMS: this.durationMS,
             views: this.views,
             requestedBy: this.requestedBy.id,
-            playlist: this.playlist?.toJSON(false) ?? null
+            playlist: hidePlaylist ? null : this.playlist?.toJSON(false) ?? null
         } as TrackJSON;
     }
 }

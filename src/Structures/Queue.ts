@@ -59,7 +59,7 @@ class Queue<T = unknown> {
                 useSafeSearch: false,
                 disableAutoRegister: false,
                 fetchBeforeQueued: false,
-                initialVolume: 100
+                initialVolume: 50
             } as PlayerOptions,
             options
         );
@@ -193,6 +193,13 @@ class Queue<T = unknown> {
     get volume() {
         if (!this.connection) return 100;
         return this.connection.volume;
+    }
+
+    /**
+     * Alternative volume setter
+     */
+    set volume(amount: number) {
+        this.setVolume(amount);
     }
 
     /**

@@ -50,7 +50,7 @@
   },
   "homepage": "https://discord-player.js.org",
   "dependencies": {
-    "@discordjs/voice": "^0.4.0",
+    "@discordjs/voice": "^0.5.0",
     "discord-ytdl-core": "^5.0.3",
     "soundcloud-scraper": "^5.0.0",
     "spotify-url-info": "^2.2.3",
@@ -68,7 +68,7 @@
     "@types/node": "^15.12.2",
     "@types/ws": "^7.4.4",
     "discord-api-types": "^0.18.1",
-    "discord.js": "^13.0.0-dev.02693bc02f45980d8165820a103220f0027b96b7",
+    "discord.js": "^13.0.0-dev.a3cbcca13da1af416c219bd64a0a6e84bb87a057",
     "discord.js-docgen": "discordjs/docgen#ts-patch",
     "jsdoc-babel": "^0.5.0",
     "prettier": "^2.3.1",

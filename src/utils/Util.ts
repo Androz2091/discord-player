@@ -47,6 +47,10 @@ class Util {
             return null;
         }
     }
+
+    static wait(time: number) {
+        return new Promise((r) => setTimeout(r, time).unref());
+    }
 }
 
 export { Util };

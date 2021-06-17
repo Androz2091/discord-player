@@ -48,7 +48,7 @@ class Playlist {
             tracks: [] as TrackJSON[]
         };
 
-        if (withTracks) payload.tracks = this.tracks.map((m) => m.toJSON());
+        if (withTracks) payload.tracks = this.tracks.map((m) => m.toJSON(true));
 
         return payload as PlaylistJSON;
     }

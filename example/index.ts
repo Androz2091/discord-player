@@ -1,7 +1,6 @@
-import { Client, GuildMember, Message, TextChannel } from "discord.js";
-import { Player, Queue, Track } from "../src/index";
-import { QueryType, QueueRepeatMode } from "../src/types/types";
+import { Client, GuildMember, TextChannel } from "discord.js";
 import { config } from "./config";
+import { Player, Queue, QueryType, QueueRepeatMode } from "../src/index";
 // use this in prod.
 // import { Player, Queue } from "discord-player";
 
@@ -23,10 +22,6 @@ client.on("warn", console.warn);
 const player = new Player(client);
 
 player.on("error", console.error);
-player.on("debug", (queue, message) => {
-    console.log(`DEBUG :: ${queue.guild.name}`);
-    console.log(message);
-});
 
 player.on("trackStart", (queue, track) => {
     const guildQueue = queue as Queue<TextChannel>;
@@ -46,6 +41,11 @@ player.on("botDisconnect", (queue) => {
 player.on("channelEmpty", (queue) => {
     const guildQueue = queue as Queue<TextChannel>;
     guildQueue.metadata.send("❌ | Nobody is in the voice channel, leaving...");
+});
+
+player.on("queueEnd", (queue) => {
+    const guildQueue = queue as Queue<TextChannel>;
+    guildQueue.metadata.send("✅ | Queue finished!");
 });
 
 client.on("message", async (message) => {
