@@ -1,0 +1,16 @@
+{
+  "name": "music-bot",
+  "version": "1.0.0",
+  "description": "Simple music bot created with discord-player",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Snowflake107",
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/opus": "^0.5.3",
+    "discord.js": "^13.0.0-dev.807ea2d3c197c7c6556bd1c894114932f6657d49",
+    "libsodium-wrappers": "^0.7.9"
+  }
+}
