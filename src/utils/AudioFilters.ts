@@ -78,7 +78,7 @@ const FilterList = {
     },
 
     toString() {
-        return `${Object.values(this).join(",")}`;
+        return this.names.map(m => (this as any)[m]).join(",");
     },
 
     create(filter?: FiltersName[]): string {
