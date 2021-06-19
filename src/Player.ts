@@ -1,4 +1,4 @@
-import { Client, Collection, Guild, GuildResolvable, Snowflake, User, UserResolvable, VoiceState } from "discord.js";
+import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState } from "discord.js";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
