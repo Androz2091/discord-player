@@ -220,6 +220,7 @@ class Queue<T = unknown> {
         const newFilters = AudioFilters.create(_filters);
 
         return await this.play(this.current, {
+            immediate: true,
             filtersUpdate: true,
             seek: this.streamTime,
             encoderArgs: ["-af", newFilters]
@@ -267,7 +268,7 @@ class Queue<T = unknown> {
                 fmt: "s16le",
                 encoderArgs: options.encoderArgs ?? [],
                 seek: options.seek
-            }).on("error", (err) => this.player.emit("error", this, err));
+            }).on("error", (err) => (err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err)));
         } else {
             stream = ytdl
                 .arbitraryStream(
@@ -279,7 +280,7 @@ class Queue<T = unknown> {
                         seek: options.seek
                     }
                 )
-                .on("error", (err) => this.player.emit("error", this, err));
+                .on("error", (err) => (err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err)));
         }
 
         const resource: AudioResource<Track> = this.connection.createStream(stream, {
