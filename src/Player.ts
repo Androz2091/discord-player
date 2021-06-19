@@ -12,6 +12,7 @@ import Spotify from "spotify-url-info";
 import { Client as SoundCloud } from "soundcloud-scraper";
 import { Playlist } from "./Structures/Playlist";
 import { ExtractorModel } from "./Structures/ExtractorModel";
+import { generateDependencyReport } from "@discordjs/voice";
 
 const soundcloud = new SoundCloud();
 
@@ -422,6 +423,10 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         const prev = this.extractors.get(extractorName);
         this.extractors.delete(extractorName);
         return prev;
+    }
+
+    scanDeps() {
+        return generateDependencyReport();
     }
 
     *[Symbol.iterator]() {
