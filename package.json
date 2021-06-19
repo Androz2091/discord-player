@@ -8,7 +8,7 @@
     "lib/"
   ],
   "scripts": {
-    "test": "cd example && ts-node index.ts",
+    "dev": "cd example/test && ts-node index.ts",
     "build": "rimraf lib && tsc",
     "format": "prettier --write \"src/**/*.ts\" \"example/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
@@ -79,6 +79,6 @@
     "typescript": "^4.3.2"
   },
   "optionalDependencies": {
-    "sodium": "^3.0.2"
+    "libsodium-wrappers": "^0.7.9"
   }
 }

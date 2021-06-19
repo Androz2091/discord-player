@@ -9,4 +9,6 @@ lib
 yarn*.log
 
 # example
-example/config.ts
+example/test
+
+test/
