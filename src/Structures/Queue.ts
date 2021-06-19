@@ -2,11 +2,12 @@ import { Collection, Guild, StageChannel, VoiceChannel } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/BasicStreamDispatcher";
 import Track from "./Track";
-import { PlayerOptions, PlayOptions, QueueRepeatMode } from "../types/types";
+import { PlayerOptions, PlayOptions, QueueFilters, QueueRepeatMode } from "../types/types";
 import ytdl from "discord-ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
 import { Util } from "../utils/Util";
 import YouTube from "youtube-sr";
+import AudioFilters from "../utils/AudioFilters";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -18,7 +19,9 @@ class Queue<T = unknown> {
     public playing = false;
     public metadata?: T = null;
     public repeatMode: QueueRepeatMode = 0;
+    public _streamTime: number = 0;
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
+    private _activeFilters: any = {};
 
     /**
      * Queue constructor
@@ -200,6 +203,30 @@ class Queue<T = unknown> {
         this.setVolume(amount);
     }
 
+    get streamTime() {
+        if (!this.connection) return 0;
+        return this._streamTime + this.connection.streamTime;
+    }
+
+    async setFilters(filters: QueueFilters) {
+        if (!Object.keys(filters).length) return;
+
+        const _filters: any[] = [];
+
+        for (const filter in filters) {
+            if (filters[filter as keyof QueueFilters] === true) _filters.push(filter);
+        }
+
+        const newFilters = AudioFilters.create(_filters);
+
+        return await this.play(this.current, {
+            immediate: true,
+            filtersUpdate: true,
+            seek: this.streamTime,
+            encoderArgs: ["-af", newFilters]
+        });
+    }
+
     /**
      * Plays previous track
      * @returns {Promise<void>}
@@ -216,7 +243,7 @@ class Queue<T = unknown> {
     async play(src?: Track, options: PlayOptions = {}): Promise<void> {
         if (!this.connection || !this.connection.voiceConnection) throw new Error("Voice connection is not available, use <Queue>.connect()!");
         if (src && (this.playing || this.tracks.length) && !options.immediate) return this.addTrack(src);
-        const track = options.filtersUpdate && !options.immediate ? this.current : src ?? this.tracks.shift();
+        const track = options.filtersUpdate && !options.immediate ? src || this.current : src ?? this.tracks.shift();
         if (!track) return;
 
         if (!options.filtersUpdate) {
@@ -261,8 +288,10 @@ class Queue<T = unknown> {
             data: track
         });
 
+        if (options.seek) this._streamTime = options.seek;
+
         const dispatcher = await this.connection.playStream(resource);
-        dispatcher.setVolume(this.options.initialVolume);
+        dispatcher.setVolume(options.encoderArgs && options.encoderArgs[1]?.includes("bass=g") ? this.options.initialVolume + 35 : this.options.initialVolume);
 
         // need to use these events here
         dispatcher.once("start", () => {
@@ -273,6 +302,8 @@ class Queue<T = unknown> {
         dispatcher.once("finish", () => {
             this.playing = false;
             if (options.filtersUpdate) return;
+
+            this._streamTime = 0;
 
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
                 if (this.options.leaveOnEnd) this.destroy();
