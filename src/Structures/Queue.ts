@@ -220,7 +220,6 @@ class Queue<T = unknown> {
         const newFilters = AudioFilters.create(_filters);
 
         return await this.play(this.current, {
-            immediate: true,
             filtersUpdate: true,
             seek: this.streamTime,
             encoderArgs: ["-af", newFilters]
