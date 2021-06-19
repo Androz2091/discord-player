@@ -150,7 +150,7 @@ class Queue<T = unknown> {
      */
     setPaused(paused?: boolean) {
         if (!this.connection) return false;
-        return paused ? this.connection.pause() : this.connection.resume();
+        return paused ? this.connection.pause(true) : this.connection.resume();
     }
 
     /**
@@ -180,8 +180,7 @@ class Queue<T = unknown> {
      */
     setRepeatMode(mode: QueueRepeatMode) {
         if (![QueueRepeatMode.OFF, QueueRepeatMode.QUEUE, QueueRepeatMode.TRACK].includes(mode)) throw new Error(`Unknown repeat mode "${mode}"!`);
-        const prev = this.repeatMode;
-        if (mode === prev) return false;
+        if (mode === this.repeatMode) return false;
         this.repeatMode = mode;
         return true;
     }
