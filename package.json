@@ -69,7 +69,7 @@
     "@types/node": "^15.12.2",
     "@types/ws": "^7.4.4",
     "discord-api-types": "^0.18.1",
-    "discord.js": "^13.0.0-dev.807ea2d3c197c7c6556bd1c894114932f6657d49",
+    "discord.js": "^13.0.0-dev.1f8f3ab0f8dbd346154bbfa14a98726b8df25d57",
     "discord.js-docgen": "discordjs/docgen#ts-patch",
     "jsdoc-babel": "^0.5.0",
     "prettier": "^2.3.1",
