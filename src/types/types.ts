@@ -138,74 +138,21 @@ export enum QueryType {
 }
 
 export interface PlayerEvents {
-    /**
-     * Emitted when bot gets disconnected from a voice channel
-     * @event Player#botDisconnect
-     * @param {Queue} queue The queue
-     */
     botDisconnect: (queue: Queue) => any;
-
-    /**
-     * Emitted when the voice channel is empty
-     * @event Player#channelEmpty
-     * @param {Queue} queue The queue
-     */
     channelEmpty: (queue: Queue) => any;
 
-    /**
-     * Emitted when bot connects to a voice channel
-     * @event Player#connectionCreate
-     * @param {Queue} queue The queue
-     * @param {StreamDispatcher} connection The discord player connection object
-     */
     connectionCreate: (queue: Queue, connection: StreamDispatcher) => any;
 
-    /**
-     * Debug information
-     * @event Player#debug
-     * @param {Queue} queue The queue
-     * @param {string} message The message
-     */
     debug: (queue: Queue, message: string) => any;
 
-    /**
-     * Emitted on error
-     * <warn>This event should handled properly otherwise it may crash your process!</warn>
-     * @event Player#error
-     * @param {Queue} queue The queue
-     * @param {Error} error The error
-     */
     error: (queue: Queue, error: Error) => any;
 
-    /**
-     * Emitted when queue ends
-     * @event Player#queueEnd
-     * @param {Queue} queue The queue
-     */
     queueEnd: (queue: Queue) => any;
 
-    /**
-     * Emitted when a single track is added
-     * @event Player#trackAdd
-     * @param {Queue} queue The queue
-     * @param {Track} track The track
-     */
     trackAdd: (queue: Queue, track: Track) => any;
 
-    /**
-     * Emitted when multiple tracks are added
-     * @event Player#tracksAdd
-     * @param {Queue} queue The queue
-     * @param {Track[]} tracks The tracks
-     */
     tracksAdd: (queue: Queue, track: Track[]) => any;
 
-    /**
-     * Emitted when a track starts playing
-     * @event Player#trackStart
-     * @param {Queue} queue The queue
-     * @param {Track} track The track
-     */
     trackStart: (queue: Queue, track: Track) => any;
 }
 
