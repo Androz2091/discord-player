@@ -33,6 +33,7 @@ import { FiltersName } from "../types/types";
  * @property {string} chorus3d The chorus3d filter
  * @property {string} fadein The fadein filter
  * @property {string} dim The dim filter
+ * @property {string} earrape The earrape filter
  */
 
 const FilterList = {
