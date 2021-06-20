@@ -32,6 +32,7 @@ import { FiltersName } from "../types/types";
  * @property {string} chorus2d The chorus2d filter
  * @property {string} chorus3d The chorus3d filter
  * @property {string} fadein The fadein filter
+ * @property {string} dim The dim filter
  */
 
 const FilterList = {
@@ -64,6 +65,8 @@ const FilterList = {
     chorus2d: "chorus=0.6:0.9:50|60:0.4|0.32:0.25|0.4:2|1.3",
     chorus3d: "chorus=0.5:0.9:50|60|40:0.4|0.32|0.3:0.25|0.4|0.3:2|2.3|1.3",
     fadein: "afade=t=in:ss=0:d=10",
+    dim: `afftfilt="'real=re * (1-clip((b/nb)*b,0,1))':imag='im * (1-clip((b/nb)*b,0,1))'"`,
+    earrape: "channelsplit,sidechaingate=level_in=64",
 
     *[Symbol.iterator](): IterableIterator<{ name: FiltersName; value: string }> {
         for (const [k, v] of Object.entries(this)) {

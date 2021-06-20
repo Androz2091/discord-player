@@ -38,6 +38,8 @@ export type QueueFilters = {
     chorus2d?: boolean;
     chorus3d?: boolean;
     fadein?: boolean;
+    dim?: string;
+    earrape?: string;
 };
 
 export type TrackSource = "soundcloud" | "youtube" | "spotify" | "arbitrary";
