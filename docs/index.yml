@@ -2,6 +2,10 @@
   files:
     - name: Welcome
       path: welcome.md
+- name: Migrating
+  files:
+    - name: Migrating to v5
+      path: migrating.md
 - name: Extractors
   files:
     - name: Extractors API
@@ -10,6 +14,8 @@
   files:
     - name: Custom Filters
       path: custom_filters.md
+    - name: Slash Commands
+      path: slash_commands.md
 - name: YouTube
   files:
     - name: Using Cookies
