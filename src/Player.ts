@@ -16,7 +16,7 @@ import { generateDependencyReport } from "@discordjs/voice";
 
 const soundcloud = new SoundCloud();
 
-class DiscordPlayer extends EventEmitter<PlayerEvents> {
+class Player extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
     public readonly options: DiscordPlayerInitOptions = {
         autoRegisterExtractor: true,
@@ -456,4 +456,4 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
     }
 }
 
-export { DiscordPlayer as Player };
+export { Player };
