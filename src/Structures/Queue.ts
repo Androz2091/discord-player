@@ -242,7 +242,7 @@ class Queue<T = unknown> {
 
         if (this._activeFilters.join("") === _filters.join("")) return;
 
-        const newFilters = AudioFilters.create(_filters);
+        const newFilters = AudioFilters.create(_filters).trim();
         const streamTime = this.streamTime;
         this._activeFilters = _filters;
 
@@ -250,7 +250,7 @@ class Queue<T = unknown> {
             immediate: true,
             filtersUpdate: true,
             seek: streamTime,
-            encoderArgs: ["-af", newFilters]
+            encoderArgs: !_filters.length ? undefined : ["-af", newFilters]
         });
     }
 
