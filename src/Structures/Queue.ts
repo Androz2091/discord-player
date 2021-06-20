@@ -258,7 +258,7 @@ class Queue<T = unknown> {
         if (!this.playing || !this.current) return false;
         if (position < 1) position = 0;
         if (position >= this.current.durationMS) return this.skip();
-        
+
         await this.play(this.current, {
             immediate: true,
             filtersUpdate: true, // to stop events
@@ -361,11 +361,14 @@ class Queue<T = unknown> {
                         if (this.options.leaveOnEnd) this.destroy();
                         return void this.player.emit("queueEnd", this);
                     }
-                    const info = await ytdl.getInfo(track.url).then(x => x.related_videos[0]).catch(() => {});
+                    const info = await ytdl
+                        .getInfo(track.url)
+                        .then((x) => x.related_videos[0])
+                        .catch(() => {});
                     if (!info) {
                         if (this.options.leaveOnEnd) this.destroy();
                         return void this.player.emit("queueEnd", this);
-                    };
+                    }
 
                     const nextTrack = new Track(this.player, {
                         title: info.title,
