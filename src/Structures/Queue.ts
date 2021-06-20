@@ -292,7 +292,8 @@ class Queue<T = unknown> {
             this.previousTracks.push(track);
         }
 
-        let stream;
+        let stream,
+            pauseEvent = false;
         if (["youtube", "spotify"].includes(track.raw.source)) {
             if (track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
@@ -309,7 +310,10 @@ class Queue<T = unknown> {
                 fmt: "s16le",
                 encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
                 seek: options.seek ? options.seek / 1000 : 0
-            }).on("error", (err) => (err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err)));
+            }).on("error", (err) => {
+                pauseEvent = true;
+                return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
+            });
         } else {
             stream = ytdl
                 .arbitraryStream(
@@ -321,7 +325,10 @@ class Queue<T = unknown> {
                         seek: options.seek ? options.seek / 1000 : 0
                     }
                 )
-                .on("error", (err) => (err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err)));
+                .on("error", (err) => {
+                    pauseEvent = true;
+                    return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
+                });
         }
 
         const resource: AudioResource<Track> = this.connection.createStream(stream, {
@@ -337,12 +344,13 @@ class Queue<T = unknown> {
         // need to use these events here
         dispatcher.once("start", () => {
             this.playing = true;
-            if (!options.filtersUpdate) this.player.emit("trackStart", this, this.current);
+            if (options.filtersUpdate || pauseEvent) return;
+            this.player.emit("trackStart", this, this.current);
         });
 
         dispatcher.once("finish", async () => {
             this.playing = false;
-            if (options.filtersUpdate) return;
+            if (options.filtersUpdate || pauseEvent) return;
 
             this._streamTime = 0;
 
@@ -350,7 +358,7 @@ class Queue<T = unknown> {
                 if (this.options.leaveOnEnd) this.destroy();
                 this.player.emit("queueEnd", this);
             } else {
-                if (this.repeatMode !== QueueRepeatMode.AUTOPLAY) {
+                if (this.tracks.length > 1 || this.repeatMode !== QueueRepeatMode.AUTOPLAY) {
                     if (this.repeatMode === QueueRepeatMode.TRACK) return void this.play(Util.last(this.previousTracks), { immediate: true });
                     if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.push(Util.last(this.previousTracks));
                     const nextTrack = this.tracks.shift();
