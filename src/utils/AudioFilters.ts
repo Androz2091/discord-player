@@ -12,7 +12,8 @@ import { FiltersName } from "../types/types";
  * @property {String} vibrato The vibrato filter
  * @property {String} reverse The reverse filter
  * @property {String} treble The treble filter
- * @property {String} normalizer The normalizer filter
+ * @property {String} normalizer The normalizer filter (dynamic audio normalizer based)
+ * @property {String} normalizer2 The normalizer filter (audio compressor based)
  * @property {String} surrounding The surrounding filter
  * @property {String} pulsator The pulsator filter
  * @property {String} subboost The subboost filter
