@@ -77,7 +77,7 @@ class Track {
         /**
          * Person who requested this track
          * @name Track#requestedBy
-         * @type {DiscordUser}
+         * @type {User}
          */
 
         /**
