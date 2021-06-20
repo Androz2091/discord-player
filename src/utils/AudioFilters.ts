@@ -2,36 +2,36 @@ import { FiltersName } from "../types/types";
 
 /**
  * The available audio filters
- * @typedef {Object} AudioFilters
- * @property {String} bassboost The bassboost filter
- * @property {String} 8D The 8D filter
- * @property {String} vaporwave The vaporwave filter
- * @property {String} nightcore The nightcore filter
- * @property {String} phaser The phaser filter
- * @property {String} tremolo The tremolo filter
- * @property {String} vibrato The vibrato filter
- * @property {String} reverse The reverse filter
- * @property {String} treble The treble filter
- * @property {String} normalizer The normalizer filter (dynamic audio normalizer based)
- * @property {String} normalizer2 The normalizer filter (audio compressor based)
- * @property {String} surrounding The surrounding filter
- * @property {String} pulsator The pulsator filter
- * @property {String} subboost The subboost filter
- * @property {String} kakaoke The kakaoke filter
- * @property {String} flanger The flanger filter
- * @property {String} gate The gate filter
- * @property {String} haas The haas filter
- * @property {String} mcompand The mcompand filter
- * @property {String} mono The mono filter
- * @property {String} mstlr The mstlr filter
- * @property {String} mstrr The mstrr filter
- * @property {String} compressor The compressor filter
- * @property {String} expander The expander filter
- * @property {String} softlimiter The softlimiter filter
- * @property {String} chorus The chorus filter
- * @property {String} chorus2d The chorus2d filter
- * @property {String} chorus3d The chorus3d filter
- * @property {String} fadein The fadein filter
+ * @typedef {object} AudioFilters
+ * @property {string} bassboost The bassboost filter
+ * @property {string} 8D The 8D filter
+ * @property {string} vaporwave The vaporwave filter
+ * @property {string} nightcore The nightcore filter
+ * @property {string} phaser The phaser filter
+ * @property {string} tremolo The tremolo filter
+ * @property {string} vibrato The vibrato filter
+ * @property {string} reverse The reverse filter
+ * @property {string} treble The treble filter
+ * @property {string} normalizer The normalizer filter (dynamic audio normalizer based)
+ * @property {string} normalizer2 The normalizer filter (audio compressor based)
+ * @property {string} surrounding The surrounding filter
+ * @property {string} pulsator The pulsator filter
+ * @property {string} subboost The subboost filter
+ * @property {string} kakaoke The kakaoke filter
+ * @property {string} flanger The flanger filter
+ * @property {string} gate The gate filter
+ * @property {string} haas The haas filter
+ * @property {string} mcompand The mcompand filter
+ * @property {string} mono The mono filter
+ * @property {string} mstlr The mstlr filter
+ * @property {string} mstrr The mstrr filter
+ * @property {string} compressor The compressor filter
+ * @property {string} expander The expander filter
+ * @property {string} softlimiter The softlimiter filter
+ * @property {string} chorus The chorus filter
+ * @property {string} chorus2d The chorus2d filter
+ * @property {string} chorus3d The chorus3d filter
+ * @property {string} fadein The fadein filter
  */
 
 const FilterList = {
