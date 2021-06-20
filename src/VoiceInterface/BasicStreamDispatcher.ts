@@ -160,7 +160,7 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
 
     get streamTime() {
         if (!this.audioResource) return 0;
-        return Math.floor(this.audioResource.playbackDuration / 1000);
+        return this.audioResource.playbackDuration;
     }
 
     get paused() {

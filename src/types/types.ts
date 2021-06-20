@@ -19,6 +19,7 @@ export type QueueFilters = {
     reverse?: boolean;
     treble?: boolean;
     normalizer?: boolean;
+    normalizer2?: boolean;
     surrounding?: boolean;
     pulsator?: boolean;
     subboost?: boolean;

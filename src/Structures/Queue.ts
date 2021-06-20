@@ -19,9 +19,9 @@ class Queue<T = unknown> {
     public playing = false;
     public metadata?: T = null;
     public repeatMode: QueueRepeatMode = 0;
-    public _streamTime: number = 0;
+    private _streamTime: number = 0;
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
-    private _activeFilters: any = {};
+    private _activeFilters: any[] = [];
 
     /**
      * Queue constructor
@@ -61,7 +61,7 @@ class Queue<T = unknown> {
                 useSafeSearch: false,
                 disableAutoRegister: false,
                 fetchBeforeQueued: false,
-                initialVolume: 50
+                initialVolume: 100
             } as PlayerOptions,
             options
         );
@@ -205,11 +205,34 @@ class Queue<T = unknown> {
 
     get streamTime() {
         if (!this.connection) return 0;
-        return this._streamTime + this.connection.streamTime;
+        const playbackTime = this._streamTime + this.connection.streamTime;
+        const NC = this._activeFilters.includes("nightcore") ? 1.25 : null;
+        const VW = this._activeFilters.includes("vaporwave") ? 0.8 : null;
+
+        if (NC && VW) return playbackTime * (NC + VW);
+        return NC ? playbackTime * NC : VW ? playbackTime * VW : playbackTime;
     }
 
-    async setFilters(filters: QueueFilters) {
-        if (!Object.keys(filters).length) return;
+    getFiltersEnabled() {
+        return AudioFilters.names.filter((x) => this._activeFilters.includes(x));
+    }
+
+    getFiltersDisabled() {
+        return AudioFilters.names.filter((x) => !this._activeFilters.includes(x));
+    }
+
+    async setFilters(filters?: QueueFilters) {
+        if (!filters || !Object.keys(filters).length) {
+            // reset filters
+            const streamTime = this.streamTime;
+            this._activeFilters = [];
+            return await this.play(this.current, {
+                immediate: true,
+                filtersUpdate: true,
+                seek: streamTime,
+                encoderArgs: []
+            });
+        }
 
         const _filters: any[] = [];
 
@@ -217,12 +240,16 @@ class Queue<T = unknown> {
             if (filters[filter as keyof QueueFilters] === true) _filters.push(filter);
         }
 
+        if (this._activeFilters.join("") === _filters.join("")) return;
+
         const newFilters = AudioFilters.create(_filters);
+        const streamTime = this.streamTime;
+        this._activeFilters = _filters;
 
         return await this.play(this.current, {
             immediate: true,
             filtersUpdate: true,
-            seek: this.streamTime,
+            seek: streamTime,
             encoderArgs: ["-af", newFilters]
         });
     }
@@ -266,8 +293,8 @@ class Queue<T = unknown> {
                 // discord-ytdl-core
                 opusEncoded: false,
                 fmt: "s16le",
-                encoderArgs: options.encoderArgs ?? [],
-                seek: options.seek
+                encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
+                seek: options.seek ? options.seek / 1000 : 0
             }).on("error", (err) => (err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err)));
         } else {
             stream = ytdl
@@ -276,8 +303,8 @@ class Queue<T = unknown> {
                     {
                         opusEncoded: false,
                         fmt: "s16le",
-                        encoderArgs: options.encoderArgs ?? [],
-                        seek: options.seek
+                        encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
+                        seek: options.seek ? options.seek / 1000 : 0
                     }
                 )
                 .on("error", (err) => (err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err)));
@@ -291,7 +318,7 @@ class Queue<T = unknown> {
         if (options.seek) this._streamTime = options.seek;
 
         const dispatcher = await this.connection.playStream(resource);
-        dispatcher.setVolume(options.encoderArgs && options.encoderArgs[1]?.includes("bass=g") ? this.options.initialVolume + 35 : this.options.initialVolume);
+        dispatcher.setVolume(this.options.initialVolume);
 
         // need to use these events here
         dispatcher.once("start", () => {

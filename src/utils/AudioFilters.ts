@@ -34,7 +34,7 @@ import { FiltersName } from "../types/types";
  */
 
 const FilterList = {
-    bassboost: "bass=g=20",
+    bassboost: "bass=g=20:f=110:w=0.3",
     "8D": "apulsator=hz=0.09",
     vaporwave: "aresample=48000,asetrate=48000*0.8",
     nightcore: "aresample=48000,asetrate=48000*1.25",
@@ -44,6 +44,7 @@ const FilterList = {
     reverse: "areverse",
     treble: "treble=g=5",
     normalizer: "dynaudnorm=g=101",
+    normalizer2: "acompressor",
     surrounding: "surround",
     pulsator: "apulsator=hz=1",
     subboost: "asubboost",
