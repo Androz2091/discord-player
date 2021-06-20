@@ -34,7 +34,7 @@ class VoiceUtils {
         let conn = joinVoiceChannel({
             guildId: channel.guild.id,
             channelId: channel.id,
-            adapterCreator: channel.guild.voiceAdapterCreator,
+            adapterCreator: (channel.guild as any).voiceAdapterCreator,
             selfDeaf: Boolean(options.deaf)
         });
 
