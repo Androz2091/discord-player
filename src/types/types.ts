@@ -196,7 +196,8 @@ export interface SearchOptions {
 export enum QueueRepeatMode {
     OFF = 0,
     TRACK = 1,
-    QUEUE = 2
+    QUEUE = 2,
+    AUTOPLAY = 3
 }
 
 export interface PlaylistInitData {

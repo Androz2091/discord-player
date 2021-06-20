@@ -340,7 +340,7 @@ class Queue<T = unknown> {
             if (!options.filtersUpdate) this.player.emit("trackStart", this, this.current);
         });
 
-        dispatcher.once("finish", () => {
+        dispatcher.once("finish", async () => {
             this.playing = false;
             if (options.filtersUpdate) return;
 
@@ -350,10 +350,24 @@ class Queue<T = unknown> {
                 if (this.options.leaveOnEnd) this.destroy();
                 this.player.emit("queueEnd", this);
             } else {
-                if (this.repeatMode === QueueRepeatMode.TRACK) return void this.play(Util.last(this.previousTracks), { immediate: true });
-                if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.push(Util.last(this.previousTracks));
-                const nextTrack = this.tracks.shift();
-                this.play(nextTrack, { immediate: true });
+                if (this.repeatMode !== QueueRepeatMode.AUTOPLAY) {
+                    if (this.repeatMode === QueueRepeatMode.TRACK) return void this.play(Util.last(this.previousTracks), { immediate: true });
+                    if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.push(Util.last(this.previousTracks));
+                    const nextTrack = this.tracks.shift();
+                    this.play(nextTrack, { immediate: true });
+                } else {
+                    if (track.source !== "youtube" || track.raw?.source !== "youtube") {
+                        if (this.options.leaveOnEnd) this.destroy();
+                        return void this.player.emit("queueEnd", this);
+                    }
+                    const info = await ytdl.getInfo(track.source).catch(() => {});
+                    if (!info) {
+                        if (this.options.leaveOnEnd) this.destroy();
+                        return void this.player.emit("queueEnd", this);
+                    };
+
+                    // @todo: add track parser and player
+                }
             }
         });
     }
