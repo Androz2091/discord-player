@@ -182,7 +182,7 @@ class Queue<T = unknown> {
      * @returns {boolean}
      */
     setRepeatMode(mode: QueueRepeatMode) {
-        if (![QueueRepeatMode.OFF, QueueRepeatMode.QUEUE, QueueRepeatMode.TRACK].includes(mode)) throw new Error(`Unknown repeat mode "${mode}"!`);
+        if (![QueueRepeatMode.OFF, QueueRepeatMode.QUEUE, QueueRepeatMode.TRACK, QueueRepeatMode.AUTOPLAY].includes(mode)) throw new Error(`Unknown repeat mode "${mode}"!`);
         if (mode === this.repeatMode) return false;
         this.repeatMode = mode;
         return true;
@@ -355,18 +355,31 @@ class Queue<T = unknown> {
                     if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.push(Util.last(this.previousTracks));
                     const nextTrack = this.tracks.shift();
                     this.play(nextTrack, { immediate: true });
+                    return;
                 } else {
-                    if (track.source !== "youtube" || track.raw?.source !== "youtube") {
+                    if (![track.source, track.raw?.source].includes("youtube")) {
                         if (this.options.leaveOnEnd) this.destroy();
                         return void this.player.emit("queueEnd", this);
                     }
-                    const info = await ytdl.getInfo(track.source).catch(() => {});
+                    const info = await ytdl.getInfo(track.url).then(x => x.related_videos[0]).catch(() => {});
                     if (!info) {
                         if (this.options.leaveOnEnd) this.destroy();
                         return void this.player.emit("queueEnd", this);
                     };
 
-                    // @todo: add track parser and player
+                    const nextTrack = new Track(this.player, {
+                        title: info.title,
+                        url: `https://www.youtube.com/watch?v=${info.id}`,
+                        duration: info.length_seconds ? Util.buildTimeCode(Util.parseMS(info.length_seconds * 1000)) : "0:00",
+                        description: "",
+                        thumbnail: Util.last(info.thumbnails).url,
+                        views: parseInt(info.view_count.replace(/[^0-9]/g, "")),
+                        author: typeof info.author === "string" ? info.author : info.author.name,
+                        requestedBy: track.requestedBy,
+                        source: "youtube"
+                    });
+
+                    this.play(nextTrack, { immediate: true });
                 }
             }
         });
@@ -383,6 +396,7 @@ class Queue<T = unknown> {
     toJSON() {
         return {
             guild: this.guild.id,
+            voiceChannel: this.connection?.channel?.id,
             options: this.options,
             tracks: this.tracks.map((m) => m.toJSON())
         };
