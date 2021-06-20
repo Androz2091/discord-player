@@ -95,15 +95,19 @@ client.on("message", async (message) => {
                         choices: [
                             {
                                 name: "Off",
-                                value: 0
+                                value: QueueRepeatMode.OFF
                             },
                             {
                                 name: "Track",
-                                value: 1
+                                value: QueueRepeatMode.TRACK
                             },
                             {
                                 name: "Queue",
-                                value: 2
+                                value: QueueRepeatMode.QUEUE
+                            },
+                            {
+                                name: "Autoplay",
+                                value: QueueRepeatMode.AUTOPLAY
                             }
                         ]
                     }
