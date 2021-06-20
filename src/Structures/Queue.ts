@@ -302,6 +302,7 @@ class Queue<T = unknown> {
     }
 
     /**
+     * Play stream in a voice/stage channel
      * @param {Track} [src] The track to play (if empty, uses first track from the queue)
      * @param {PlayOptions} [options={}] The options
      * @returns {Promise<void>}

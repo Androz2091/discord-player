@@ -8,5 +8,5 @@ const { AudioFilters } = require("discord-player");
 AudioFilters.define("3D", "apulsator=hz=0.128");
 
 // later, it can be used like this
-queue.setFilters(message, { "3D": true });
+queue.setFilters({ "3D": true });
 ```
