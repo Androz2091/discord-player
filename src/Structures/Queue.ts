@@ -254,6 +254,20 @@ class Queue<T = unknown> {
         });
     }
 
+    async seek(position: number) {
+        if (!this.playing || !this.current) return false;
+        if (position < 1) position = 0;
+        if (position >= this.current.durationMS) return this.skip();
+        
+        await this.play(this.current, {
+            immediate: true,
+            filtersUpdate: true, // to stop events
+            seek: position
+        });
+
+        return true;
+    }
+
     /**
      * Plays previous track
      * @returns {Promise<void>}
