@@ -24,7 +24,8 @@ jobs:
 
       - name: Publish
         run: |
-          npm run build --skipLibCheck
+          rimraf lib
+          tsc --skipLibCheck
           npm version --git-tag-version=false $(jq --raw-output '.version' package.json).$(git rev-parse --verify HEAD)
           npm publish --tag dev || true
         env:
