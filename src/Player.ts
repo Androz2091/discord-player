@@ -410,7 +410,7 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * @param {string} extractorName The extractor name
      * @param {ExtractorModel|any} extractor The extractor object
-     * @param {boolean} [force=false]
+     * @param {boolean} [force=false] Overwrite existing extractor with this name (if available)
      * @returns {ExtractorModel}
      */
     use(extractorName: string, extractor: ExtractorModel | any, force = false): ExtractorModel {
