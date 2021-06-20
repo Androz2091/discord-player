@@ -10,10 +10,6 @@
   files:
     - name: Custom Filters
       path: custom_filters.md
-    - name: Livestreams
-      path: live_video.md
-    - name: Pause & Resume
-      path: pause_resume.md
 - name: YouTube
   files:
     - name: Using Cookies

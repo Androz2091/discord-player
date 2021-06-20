@@ -3,13 +3,24 @@ import { entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus }
 import { StreamDispatcher } from "./BasicStreamDispatcher";
 
 class VoiceUtils {
-    public cache = new Collection<Snowflake, StreamDispatcher>();
+    public cache: Collection<Snowflake, StreamDispatcher>;
 
     /**
-     * Joins a voice channel
+     * The voice utils
+     */
+    constructor() {
+        /**
+         * The cache where voice utils stores stream managers
+         * @type {Collection<Snowflake, StreamDispatcher>}
+         */
+        this.cache = new Collection<Snowflake, StreamDispatcher>();
+    }
+
+    /**
+     * Joins a voice channel, creating basic stream dispatch manager
      * @param {StageChannel|VoiceChannel} channel The voice channel
-     * @param {({deaf?: boolean;maxTime?: number;})} [options] Join options
-     * @returns {Promise<BasicStreamDispatcher>}
+     * @param {object} [options={}] Join options
+     * @returns {Promise<StreamDispatcher>}
      */
     public async connect(
         channel: VoiceChannel | StageChannel,
@@ -24,6 +35,12 @@ class VoiceUtils {
         return sub;
     }
 
+    /**
+     * Joins a voice channel
+     * @param {StageChannel|VoiceChannel} [channel] The voice/stage channel to join
+     * @param {object} [options={}] Join options
+     * @returns {VoiceConnection}
+     */
     public async join(
         channel: VoiceChannel | StageChannel,
         options?: {
@@ -50,12 +67,18 @@ class VoiceUtils {
     /**
      * Disconnects voice connection
      * @param {VoiceConnection} connection The voice connection
+     * @returns {void}
      */
     public disconnect(connection: VoiceConnection | StreamDispatcher) {
         if (connection instanceof StreamDispatcher) return connection.voiceConnection.destroy();
         return connection.destroy();
     }
 
+    /**
+     * Returns Discord Player voice connection
+     * @param {Snowflake} guild The guild id
+     * @returns {StreamDispatcher}
+     */
     public getConnection(guild: Snowflake) {
         return this.cache.get(guild);
     }

@@ -24,18 +24,37 @@ export interface VoiceEvents {
     finish: () => any;
 }
 
-class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
+class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public readonly voiceConnection: VoiceConnection;
     public readonly audioPlayer: AudioPlayer;
     public readonly channel: VoiceChannel | StageChannel;
     public audioResource?: AudioResource<Track>;
     private readyLock: boolean = false;
 
+    /**
+     * Creates new connection object
+     * @param {VoiceConnection} connection The connection
+     * @param {VoiceChannel|StageChannel} channel The connected channel
+     */
     constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel) {
         super();
 
+        /**
+         * The voice connection
+         * @type {VoiceConnection}
+         */
         this.voiceConnection = connection;
+
+        /**
+         * The audio player
+         * @type {AudioPlayer}
+         */
         this.audioPlayer = createAudioPlayer();
+
+        /**
+         * The voice channel
+         * @type {VoiceChannel|StageChannel}
+         */
         this.channel = channel;
 
         this.voiceConnection.on("stateChange", async (_, newState) => {
@@ -85,7 +104,7 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
     /**
      * Creates stream
      * @param {Readable|Duplex|string} src The stream source
-     * @param {({type?:StreamType;data?:any;})} [ops] Options
+     * @param {object} [ops={}] Options
      * @returns {AudioResource}
      */
     createStream(src: Readable | Duplex | string, ops?: { type?: StreamType; data?: any }) {
@@ -100,6 +119,7 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
 
     /**
      * The player status
+     * @type {AudioPlayerStatus}
      */
     get status() {
         return this.audioPlayer.state.status;
@@ -107,6 +127,7 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
 
     /**
      * Disconnects from voice
+     * @returns {void}
      */
     disconnect() {
         try {
@@ -116,16 +137,26 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
 
     /**
      * Stops the player
+     * @returns {void}
      */
     end() {
         this.audioPlayer.stop();
     }
 
+    /**
+     * Pauses the stream playback
+     * @param {boolean} [interpolateSilence=false] If true, the player will play 5 packets of silence after pausing to prevent audio glitches.
+     * @returns {boolean}
+     */
     pause(interpolateSilence?: boolean) {
         const success = this.audioPlayer.pause(interpolateSilence);
         return success;
     }
 
+    /**
+     * Resumes the stream playback
+     * @returns {boolean}
+     */
     resume() {
         const success = this.audioPlayer.unpause();
         return success;
@@ -133,7 +164,8 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
 
     /**
      * Play stream
-     * @param {AudioResource} resource The audio resource to play
+     * @param {AudioResource<Track>} [resource=this.audioResource] The audio resource to play
+     * @returns {Promise<StreamDispatcher>}
      */
     async playStream(resource: AudioResource<Track> = this.audioResource) {
         if (!resource) throw new Error("Audio resource is not available!");
@@ -144,6 +176,11 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
         return this;
     }
 
+    /**
+     * Sets playback volume
+     * @param {number} value The volume amount
+     * @returns {boolean}
+     */
     setVolume(value: number) {
         if (!this.audioResource || isNaN(value) || value < 0 || value > Infinity) return false;
 
@@ -152,20 +189,32 @@ class BasicStreamDispatcher extends EventEmitter<VoiceEvents> {
         return true;
     }
 
+    /**
+     * The current volume
+     * @type {number}
+     */
     get volume() {
         if (!this.audioResource || !this.audioResource.volume) return 100;
         const currentVol = this.audioResource.volume.volume;
         return Math.round(Math.pow(currentVol, 1 / 1.660964) * 100);
     }
 
+    /**
+     * The playback time
+     * @type {number}
+     */
     get streamTime() {
         if (!this.audioResource) return 0;
         return this.audioResource.playbackDuration;
     }
 
+    /**
+     * The paused state
+     * @type {boolean}
+     */
     get paused() {
         return [AudioPlayerStatus.AutoPaused, AudioPlayerStatus.Paused].includes(this.audioPlayer.state.status);
     }
 }
 
-export { BasicStreamDispatcher as StreamDispatcher };
+export { StreamDispatcher as StreamDispatcher };

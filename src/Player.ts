@@ -56,6 +56,13 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         }
     }
 
+    /**
+     * Handles voice state update
+     * @param {VoiceState} oldState The old voice state
+     * @param {VoiceState} newState The new voice state
+     * @returns {void}
+     * @private
+     */
     private _handleVoiceState(oldState: VoiceState, newState: VoiceState): void {
         const queue = this.getQueue(oldState.guild.id);
         if (!queue) return;
@@ -141,7 +148,7 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
      * Search tracks
      * @param {string|Track} query The search query
      * @param {UserResolvable} requestedBy The person who requested track search
-     * @returns {Promise<{playlist?: Playlist; tracks: Track[]}>}
+     * @returns {Promise<object>}
      */
     async search(query: string | Track, options: SearchOptions) {
         if (query instanceof Track) return { playlist: null, tracks: [query] };
@@ -400,6 +407,12 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         }
     }
 
+    /**
+     * @param {string} extractorName The extractor name
+     * @param {ExtractorModel|any} extractor The extractor object
+     * @param {boolean} [force=false]
+     * @returns {ExtractorModel}
+     */
     use(extractorName: string, extractor: ExtractorModel | any, force = false): ExtractorModel {
         if (!extractorName) throw new Error("Cannot use unknown extractor!");
         if (this.extractors.has(extractorName) && !force) return this.extractors.get(extractorName);
@@ -418,6 +431,11 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         return model;
     }
 
+    /**
+     * Removes registered extractor
+     * @param {string} extractorName The extractor name
+     * @returns {ExtractorModel}
+     */
     unuse(extractorName: string) {
         if (!this.extractors.has(extractorName)) throw new Error(`Cannot find extractor "${extractorName}"`);
         const prev = this.extractors.get(extractorName);
@@ -425,6 +443,10 @@ class DiscordPlayer extends EventEmitter<PlayerEvents> {
         return prev;
     }
 
+    /**
+     * Generates a report of the dependencies used by the `@discordjs/voice` module. Useful for debugging.
+     * @returns {string}
+     */
     scanDeps() {
         return generateDependencyReport();
     }

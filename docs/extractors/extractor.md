@@ -32,9 +32,6 @@ Your extractor should have 2 methods (required):
         url: "Some Link"
     }
     ```
- - `important: boolean`
-   
-   You can mark your Extractor as `important` by adding `important: true` to your extractor object. Doing this will disable rest of the extractors that comes after your extractor and use your extractor to get data. By default, it is set to `false`.
 
  - `version: string`
 

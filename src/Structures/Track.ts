@@ -92,6 +92,13 @@ class Track {
          * @type {RawTrackData}
          */
 
+        /**
+         * The track id
+         * @name Track#_trackID
+         * @type {number}
+         * @readonly
+         */
+
         void this._patch(data);
     }
 
@@ -153,7 +160,7 @@ class Track {
 
     /**
      * Raw JSON representation of this track
-     * @returns {object}
+     * @returns {TrackJSON}
      */
     toJSON(hidePlaylist?: boolean) {
         return {

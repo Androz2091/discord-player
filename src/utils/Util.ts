@@ -2,12 +2,29 @@ import { StageChannel, VoiceChannel } from "discord.js";
 import { TimeData } from "../types/types";
 
 class Util {
+    /**
+     * Utils
+     */
+    constructor() {
+        throw new Error("Cannot instantiate static class");
+    }
+
+    /**
+     * Creates duration string
+     * @param {object} durObj The duration object
+     * @returns {string}
+     */
     static durationString(durObj: object) {
         return Object.values(durObj)
             .map((m) => (isNaN(m) ? 0 : m))
             .join(":");
     }
 
+    /**
+     * Parses milliseconds to consumable time object
+     * @param {number} milliseconds The time in ms
+     * @returns {TimeData}
+     */
     static parseMS(milliseconds: number) {
         const round = milliseconds > 0 ? Math.floor : Math.ceil;
 
@@ -19,6 +36,11 @@ class Util {
         } as TimeData;
     }
 
+    /**
+     * Builds time code
+     * @param {TimeData} duration The duration object
+     * @returns {string}
+     */
     static buildTimeCode(duration: TimeData) {
         const items = Object.keys(duration);
         const required = ["days", "hours", "minutes", "seconds"];
@@ -31,15 +53,30 @@ class Util {
         return final.length <= 3 ? `0:${final.padStart(2, "0") || 0}` : final;
     }
 
+    /**
+     * Picks last item of the given array
+     * @param {any[]} arr The array
+     * @returns {any}
+     */
     static last<T = any>(arr: T[]): T {
         if (!Array.isArray(arr)) return;
         return arr[arr.length - 1];
     }
 
+    /**
+     * Checks if the voice channel is empty
+     * @param {VoiceChannel|StageChannel} channel The voice channel
+     * @returns {boolean}
+     */
     static isVoiceEmpty(channel: VoiceChannel | StageChannel) {
         return channel.members.filter((member) => !member.user.bot).size === 0;
     }
 
+    /**
+     * Safer require
+     * @param {string} id Node require id
+     * @returns {any}
+     */
     static require(id: string) {
         try {
             return require(id);
@@ -48,6 +85,11 @@ class Util {
         }
     }
 
+    /**
+     * Asynchronous timeout
+     * @param {number} time The time in ms to wait
+     * @returns {Promise<unknown>}
+     */
     static wait(time: number) {
         return new Promise((r) => setTimeout(r, time).unref());
     }

@@ -3,6 +3,10 @@ Complete framework to facilitate music commands using **[discord.js](https://dis
 
 [![downloadsBadge](https://img.shields.io/npm/dt/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
 [![versionBadge](https://img.shields.io/npm/v/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
+[![discordBadge](https://img.shields.io/discord/558328638911545423?style=for-the-badge&color=7289da)](https://androz2091.fr/discord)
+[![wakatime](https://wakatime.com/badge/github/Androz2091/discord-player.svg)](https://wakatime.com/badge/github/Androz2091/discord-player)
+
+> V5 WIP
 
 ## Installation
 
@@ -43,13 +47,13 @@ Here is the code you will need to get started with discord-player. Then, you wil
 
 ```js
 const Discord = require("discord.js"),
-client = new Discord.Client,
+client = new Discord.Client({ intents: ["GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILDS"] }),
 settings = {
     prefix: "!",
     token: "Your Discord Token"
 };
 
-const { Player } = require("discord-player");
+const { Player, QueryType } = require("discord-player");
 
 // Create a new Player (you don't need any API Key)
 const player = new Player(client);
@@ -58,7 +62,7 @@ const player = new Player(client);
 client.player = player;
 
 // add the trackStart event so when a song will be played this message will be sent
-client.player.on("trackStart", (message, track) => message.channel.send(`Now playing ${track.title}...`))
+client.player.on("trackStart", (queue, track) => queue.metadata.channel.send(`Now playing ${track.title}...`))
 
 client.once("ready", () => {
     console.log("I'm ready !");
@@ -70,10 +74,29 @@ client.on("message", async (message) => {
     const command = args.shift().toLowerCase();
 
     // !play Despacito
-    // will play the song "Despacito" in the voice channel
-    if(command === "play"){
-        client.player.play(message, args[0]);
-        // as we registered the event above, no need to send a success message here
+    // will play "Despacito" in the voice channel
+    if (command === "play") {
+        if (!message.member.voice.channel) return void message.reply("You are not in a voice channel!");
+        if (message.guild.me.voice.channel && message.member.voice.channelID !== message.guild.me.voice.channelID) return void message.reply("You are not in my voice channel!");
+
+        const queue = client.player.createQueue(message.guild, {
+            metadata: message
+        });
+        
+        // verify vc connection
+        try {
+            if (!queue.connection) await queue.connect(message.member.voice.channel);
+        } catch {
+            queue.destroy();
+            return void message.reply("Could not join your voice channel!");
+        }
+
+        const track = await client.player.search(args[0], {
+            searchEngine: QueryType.YOUTUBE_SEARCH
+        }).then(x => x.tracks[1]);
+        if (!track) return void message.reply("Track not found!");
+
+        queue.play(track);
     }
 
 });
@@ -106,13 +129,13 @@ These bots are made by the community, they can help you build your own!
 * [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox)
 * [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
 
-## FAQ
+## Advanced
 
-### How to use cookies
+### Use cookies
 
 ```js
 const player = new Player(client, {
-    ytdlDownloadOptions: {
+    ytdlOptions: {
         requestOptions: {
             headers: {
                 cookie: "YOUR_YOUTUBE_COOKIE"
@@ -122,7 +145,7 @@ const player = new Player(client, {
 });
 ```
 
-### How to use custom proxies
+### Use custom proxies
 
 ```js
 const HttpsProxyAgent = require("https-proxy-agent");
@@ -132,7 +155,7 @@ const proxy = "http://user:pass@111.111.111.111:8080";
 const agent = HttpsProxyAgent(proxy);
 
 const player = new Player(client, {
-    ytdlDownloadOptions: {
+    ytdlOptions: {
         requestOptions: { agent }
     }
 });

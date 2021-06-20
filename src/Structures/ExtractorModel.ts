@@ -16,6 +16,12 @@ class ExtractorModel {
          */
         this.name = extractorName;
 
+        /**
+         * The raw model
+         * @name ExtractorModel#_raw
+         * @type {any}
+         * @private
+         */
         Object.defineProperty(this, "_raw", { value: data, configurable: false, writable: false, enumerable: false });
     }
 

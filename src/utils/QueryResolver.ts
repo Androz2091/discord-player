@@ -16,6 +16,18 @@ const attachmentRegex =
 // scary things above *sigh*
 
 class QueryResolver {
+    /**
+     * Query resolver
+     */
+    constructor() {
+        throw new Error("Cannot instantiate static class!");
+    }
+
+    /**
+     * Resolves the given search query
+     * @param {string} query The query
+     * @returns {QueryType}
+     */
     static resolve(query: string): QueryType {
         if (SoundcloudValidateURL(query, "track")) return QueryType.SOUNDCLOUD_TRACK;
         if (SoundcloudValidateURL(query, "playlist") || query.includes("/sets/")) return QueryType.SOUNDCLOUD_PLAYLIST;
@@ -32,6 +44,11 @@ class QueryResolver {
         return QueryType.YOUTUBE_SEARCH;
     }
 
+    /**
+     * Parses vimeo id from url
+     * @param {string} query The query
+     * @returns {string}
+     */
     static getVimeoID(query: string): string {
         return QueryResolver.resolve(query) === QueryType.VIMEO
             ? query

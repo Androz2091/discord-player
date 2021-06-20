@@ -27,18 +27,20 @@ class Queue<T = unknown> {
      * Queue constructor
      * @param {Player} player The player that instantiated this queue
      * @param {Guild} guild The guild that instantiated this queue
-     * @param {PlayerOptions={}} options Player options for the queue
+     * @param {PlayerOptions} [options={}] Player options for the queue
      */
     constructor(player: Player, guild: Guild, options: PlayerOptions = {}) {
         /**
          * The player that instantiated this queue
          * @type {Player}
+         * @readonly
          */
         this.player = player;
 
         /**
          * The guild that instantiated this queue
          * @type {Guild}
+         * @readonly
          */
         this.guild = guild;
 
@@ -69,7 +71,7 @@ class Queue<T = unknown> {
 
     /**
      * Returns current track
-     * @returns {Track}
+     * @type {Track}
      */
     get current() {
         return this.connection.audioResource?.metadata ?? this.tracks[0];
@@ -85,7 +87,7 @@ class Queue<T = unknown> {
 
     /**
      * Connects to a voice channel
-     * @param  {StageChannel|VoiceChannel} channel
+     * @param {StageChannel|VoiceChannel} channel The voice/stage channel
      * @returns {Promise<Queue>}
      */
     async connect(channel: StageChannel | VoiceChannel) {
@@ -110,6 +112,8 @@ class Queue<T = unknown> {
 
     /**
      * Destroys this queue
+     * @param {boolean} [disconnect=this.options.leaveOnStop] If it should leave on destroy
+     * @returns {void}
      */
     destroy(disconnect = this.options.leaveOnStop) {
         this.connection.end();
@@ -159,6 +163,7 @@ class Queue<T = unknown> {
     /**
      * Sets bitrate
      * @param  {number|"auto"} bitrate bitrate to set
+     * @returns {void}
      */
     setBitrate(bitrate: number | "auto") {
         if (!this.connection?.audioResource?.encoder) return;
@@ -189,20 +194,22 @@ class Queue<T = unknown> {
     }
 
     /**
-     * Returns current volume amount
+     * The current volume amount
+     * @type {number}
      */
     get volume() {
         if (!this.connection) return 100;
         return this.connection.volume;
     }
 
-    /**
-     * Alternative volume setter
-     */
     set volume(amount: number) {
         this.setVolume(amount);
     }
 
+    /**
+     * The stream time of this queue
+     * @type {number}
+     */
     get streamTime() {
         if (!this.connection) return 0;
         const playbackTime = this._streamTime + this.connection.streamTime;
@@ -213,14 +220,27 @@ class Queue<T = unknown> {
         return NC ? playbackTime * NC : VW ? playbackTime * VW : playbackTime;
     }
 
+    /**
+     * Returns enabled filters
+     * @returns {AudioFilters}
+     */
     getFiltersEnabled() {
         return AudioFilters.names.filter((x) => this._activeFilters.includes(x));
     }
 
+    /**
+     * Returns disabled filters
+     * @returns {AudioFilters}
+     */
     getFiltersDisabled() {
         return AudioFilters.names.filter((x) => !this._activeFilters.includes(x));
     }
 
+    /**
+     * Sets filters
+     * @param {QueueFilters} filters Queue filters
+     * @returns {Promise<void>}
+     */
     async setFilters(filters?: QueueFilters) {
         if (!filters || !Object.keys(filters).length) {
             // reset filters
@@ -254,6 +274,11 @@ class Queue<T = unknown> {
         });
     }
 
+    /**
+     * Seeks to the given time
+     * @param {number} position The position
+     * @returns {boolean}
+     */
     async seek(position: number) {
         if (!this.playing || !this.current) return false;
         if (position < 1) position = 0;
@@ -277,8 +302,8 @@ class Queue<T = unknown> {
     }
 
     /**
-     * @param  {Track} [src] The track to play (if empty, uses first track from the queue)
-     * @param  {PlayOptions={}} options The options
+     * @param {Track} [src] The track to play (if empty, uses first track from the queue)
+     * @param {PlayOptions} [options={}] The options
      * @returns {Promise<void>}
      */
     async play(src?: Track, options: PlayOptions = {}): Promise<void> {
