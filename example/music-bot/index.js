@@ -177,7 +177,7 @@ client.on("interaction", async (interaction) => {
             return void interaction.followUp({ content: "Could not join your voice channel!" });
         }
 
-        await interaction.followUp({ content: "⏱ | Loading your track..." });
+        await interaction.followUp({ content: `⏱ | Loading your ${searchResult.playlist ? "playlist" : "track"}...` });
         searchResult.playlist ? queue.addTracks(searchResult.tracks) : queue.addTrack(searchResult.tracks[0]);
         if (!queue.playing) await queue.play();
     } else if (interaction.commandName === "volume") {
