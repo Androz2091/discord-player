@@ -158,7 +158,7 @@ class Queue<T = unknown> {
 
     /**
      * Sets bitrate
-     * @param  {number|"auto"} bitrate bitrate to set
+     * @param  {number|auto} bitrate bitrate to set
      * @returns {void}
      */
     setBitrate(bitrate: number | "auto") {
