@@ -42,8 +42,32 @@ export type QueueFilters = {
     earrape?: boolean;
 };
 
+/**
+ * The track source:
+ * - soundcloud
+ * - youtube
+ * - spotify
+ * - arbitrary
+ * @typedef {string} TrackSource
+ */
 export type TrackSource = "soundcloud" | "youtube" | "spotify" | "arbitrary";
 
+/**
+ * @typedef {object} RawTrackData
+ * @property {string} title The title
+ * @property {string} description The description
+ * @property {string} author The author
+ * @property {string} url The url
+ * @property {string} thumbnail The thumbnail
+ * @property {string} duration The duration
+ * @property {number} views The views
+ * @property {User} requestedBy The user who requested this track
+ * @property {Playlist} [playlist] The playlist
+ * @property {TrackSource} [source="arbitrary"] The source
+ * @property {any} [engine] The engine
+ * @property {boolean} [live] If this track is live
+ * @property {any} [raw] The raw data
+ */
 export interface RawTrackData {
     title: string;
     description: string;
@@ -60,6 +84,13 @@ export interface RawTrackData {
     raw?: any;
 }
 
+/**
+ * @typedef {object} TimeData
+ * @property {number} days Time in days
+ * @property {number} hours Time in hours
+ * @property {number} minutes Time in minutes
+ * @property {number} seconds Time in seconds
+ */
 export interface TimeData {
     days: number;
     hours: number;
@@ -67,6 +98,14 @@ export interface TimeData {
     seconds: number;
 }
 
+/**
+ * @typedef {object} PlayerProgressbarOptions
+ * @property {boolean} [timecodes] If it should render time codes
+ * @property {boolean} [queue] If it should create progress bar for the whole queue
+ * @property {number} [length] The bar length
+ * @property {string} [line] The bar track
+ * @property {string} [indicator] The indicator
+ */
 export interface PlayerProgressbarOptions {
     timecodes?: boolean;
     queue?: boolean;
@@ -75,20 +114,57 @@ export interface PlayerProgressbarOptions {
     indicator?: string;
 }
 
+/**
+ * @typedef {object} PlayerOptions
+ * @property {boolean} [leaveOnEnd=true] If it should leave on end
+ * @property {boolean} [leaveOnStop=true] If it should leave on stop
+ * @property {boolean} [leaveOnEmpty=true] If it should leave on empty
+ * @property {number} [leaveOnEmptyCooldown=1000] The cooldown in ms
+ * @property {boolean} [autoSelfDeaf=true] If it should set the bot in deaf mode
+ * @property {object} [ytdlOptions={}] The youtube download options
+ * @property {number} [initialVolume=100] The initial player volume
+ */
 export interface PlayerOptions {
     leaveOnEnd?: boolean;
     leaveOnStop?: boolean;
     leaveOnEmpty?: boolean;
     leaveOnEmptyCooldown?: number;
     autoSelfDeaf?: boolean;
-    enableLive?: boolean;
     ytdlOptions?: downloadOptions;
-    useSafeSearch?: boolean;
-    disableAutoRegister?: boolean;
-    fetchBeforeQueued?: boolean;
     initialVolume?: number;
 }
 
+/**
+ * The extractor model data
+ * @typedef {object} ExtractorModelData
+ * @property {object} [playlist] The playlist info (if any)
+ * @property {string} [playlist.title] The playlist title
+ * @property {string} [playlist.description] The playlist description
+ * @property {string} [playlist.thumbnail] The playlist thumbnail
+ * @property {("album"|"playlist")} [playlist.type] The playlist type: `album` | `playlist`
+ * @property {TrackSource} [playlist.source] The playlist source
+ * @property {object} [playlist.author] The playlist author
+ * @property {string} [playlist.author.name] The author name
+ * @property {string} [playlist.author.url] The author url
+ * @property {string} [playlist.id] The playlist id
+ * @property {string} [playlist.url] The playlist url
+ * @property {any} [playlist.rawPlaylist] The raw data
+ * @property {ExtractorData[]} data The data
+ */
+
+/**
+ * @typedef {object} ExtractorData
+ * @property {string} title The title
+ * @property {number} duration The duration
+ * @property {string} thumbnail The thumbnail
+ * @property {string|Readable|Duplex} engine The stream engine
+ * @property {number} views The views count
+ * @property {string} author The author
+ * @property {string} description The description
+ * @property {string} url The url
+ * @property {string} [version] The extractor version
+ * @property {TrackSource} [source="arbitrary"] The source
+ */
 export interface ExtractorModelData {
     playlist?: {
         title: string;
@@ -114,11 +190,30 @@ export interface ExtractorModelData {
         description: string;
         url: string;
         version?: string;
-        important?: boolean;
         source?: TrackSource;
     }[];
 }
 
+/**
+ * The search query type
+ * This can be one of:
+ * - AUTO
+ * - YOUTUBE
+ * - YOUTUBE_PLAYLIST
+ * - SOUNDCLOUD_TRACK
+ * - SOUNDCLOUD_PLAYLIST
+ * - SOUNDCLOUD
+ * - SPOTIFY_SONG
+ * - SPOTIFY_ALBUM
+ * - SPOTIFY_PLAYLIST
+ * - FACEBOOK
+ * - VIMEO
+ * - ARBITRARY
+ * - REVERBNATION
+ * - YOUTUBE_SEARCH
+ * - SOUNDCLOUD_SEARCH
+ * @typedef {string} QueryType
+ */
 export enum QueryType {
     AUTO = "auto",
     YOUTUBE = "youtube",
@@ -137,44 +232,114 @@ export enum QueryType {
     SOUNDCLOUD_SEARCH = "soundcloud_search"
 }
 
+/**
+ * Emitted when bot gets disconnected from a voice channel
+ * @event Player#botDisconnect
+ * @param {Queue} queue The queue
+ */
+
+/**
+ * Emitted when the voice channel is empty
+ * @event Player#channelEmpty
+ * @param {Queue} queue The queue
+ */
+
+/**
+ * Emitted when bot connects to a voice channel
+ * @event Player#connectionCreate
+ * @param {Queue} queue The queue
+ * @param {StreamDispatcher} connection The discord player connection object
+ */
+
+/**
+ * Debug information
+ * @event Player#debug
+ * @param {Queue} queue The queue
+ * @param {string} message The message
+ */
+
+/**
+ * Emitted on error
+ * <warn>This event should handled properly otherwise it may crash your process!</warn>
+ * @event Player#error
+ * @param {Queue} queue The queue
+ * @param {Error} error The error
+ */
+
+/**
+ * Emitted when queue ends
+ * @event Player#queueEnd
+ * @param {Queue} queue The queue
+ */
+
+/**
+ * Emitted when a single track is added
+ * @event Player#trackAdd
+ * @param {Queue} queue The queue
+ * @param {Track} track The track
+ */
+
+/**
+ * Emitted when multiple tracks are added
+ * @event Player#tracksAdd
+ * @param {Queue} queue The queue
+ * @param {Track[]} tracks The tracks
+ */
+
+/**
+ * Emitted when a track starts playing
+ * @event Player#trackStart
+ * @param {Queue} queue The queue
+ * @param {Track} track The track
+ */
+
 export interface PlayerEvents {
     botDisconnect: (queue: Queue) => any;
     channelEmpty: (queue: Queue) => any;
-
     connectionCreate: (queue: Queue, connection: StreamDispatcher) => any;
-
     debug: (queue: Queue, message: string) => any;
-
     error: (queue: Queue, error: Error) => any;
-
     queueEnd: (queue: Queue) => any;
-
     trackAdd: (queue: Queue, track: Track) => any;
-
     tracksAdd: (queue: Queue, track: Track[]) => any;
-
     trackStart: (queue: Queue, track: Track) => any;
 }
 
+/**
+ * Options passed to `<Queue>.play()`
+ * @typedef {object} PlayOptions
+ * @property {boolean} [filtersUpdate=false] If this play was triggered for filters update
+ * @property {string[]} [encoderArgs=[]] FFmpeg args passed to encoder
+ * @property {number} [seek] Time to seek to before playing
+ * @property {boolean} [immediate=false] If it should start playing the provided track immediately
+ */
+
 export interface PlayOptions {
-    /** If this play is triggered for filters update */
     filtersUpdate?: boolean;
-
-    /** ffmpeg args passed to encoder */
     encoderArgs?: string[];
-
-    /** Time to seek to before playing */
     seek?: number;
-
-    /** If it should start playing provided track immediately */
     immediate?: boolean;
 }
 
+/**
+ * Options passed to `<Player>.search()`
+ * @typedef {object} SearchOptions
+ * @property {UserResolvable} requestedBy The user who requested this search
+ * @property {QueryType} searchEngine The query search engine
+ */
 export interface SearchOptions {
     requestedBy: UserResolvable;
     searchEngine?: QueryType;
 }
 
+/**
+ * The queue repeat mode. This can be one of:
+ * - OFF
+ * - TRACK
+ * - QUEUE
+ * - AUTOPLAY
+ * @typedef {number} QueueRepeatMode
+ */
 export enum QueueRepeatMode {
     OFF = 0,
     TRACK = 1,
@@ -182,6 +347,22 @@ export enum QueueRepeatMode {
     AUTOPLAY = 3
 }
 
+/**
+ * Playlist init data
+ * @typedef {object} PlaylistInitData
+ * @property {Track[]} tracks The tracks of this playlist
+ * @property {string} title The playlist title
+ * @property {string} description The description
+ * @property {string} thumbnail The thumbnail
+ * @property {("album"|"playlist")} type The playlist type: `album` | `playlist`
+ * @property {TrackSource} source The playlist source
+ * @property {object} author The playlist author
+ * @property {string} [author.name] The author name
+ * @property {string} [author.url] The author url
+ * @property {string} id The playlist id
+ * @property {string} url The playlist url
+ * @property {any} [rawPlaylist] The raw playlist data
+ */
 export interface PlaylistInitData {
     tracks: Track[];
     title: string;
@@ -198,6 +379,20 @@ export interface PlaylistInitData {
     rawPlaylist?: any;
 }
 
+/**
+ * The JSON representation of a track
+ * @typedef {object} TrackJSON
+ * @property {string} title The track title
+ * @property {string} description The track description
+ * @property {string} author The author
+ * @property {string} url The url
+ * @property {string} thumbnail The thumbnail
+ * @property {string} duration The duration
+ * @property {number} durationMS The duration in ms
+ * @property {number} views The views count
+ * @property {Snowflake} requestedBy The id of the user who requested this track
+ * @property {PlaylistJSON} [playlist] The playlist info (if any)
+ */
 export interface TrackJSON {
     title: string;
     description: string;
@@ -211,6 +406,21 @@ export interface TrackJSON {
     playlist?: PlaylistJSON;
 }
 
+/**
+ * The JSON representation of the playlist
+ * @typedef {object} PlaylistJSON
+ * @property {string} id The playlist id
+ * @property {string} url The playlist url
+ * @property {string} title The playlist title
+ * @property {string} description The playlist description
+ * @property {string} thumbnail The thumbnail
+ * @property {("album"|"playlist")} type The playlist type: `album` | `playlist`
+ * @property {TrackSource} source The track source
+ * @property {object} author The playlist author
+ * @property {string} [author.name] The author name
+ * @property {string} [author.url] The author url
+ * @property {TrackJSON[]} tracks The tracks data (if any)
+ */
 export interface PlaylistJSON {
     id: string;
     url: string;
@@ -226,6 +436,11 @@ export interface PlaylistJSON {
     tracks: TrackJSON[];
 }
 
+/**
+ * @typedef {object} DiscordPlayerInitOptions
+ * @property {boolean} [autoRegisterExtractor=true] If it should automatically register `@discord-player/extractor`
+ * @property {object} [ytdlOptions={}] The options passed to `ytdl-core`
+ */
 export interface DiscordPlayerInitOptions {
     autoRegisterExtractor?: boolean;
     ytdlOptions?: downloadOptions;

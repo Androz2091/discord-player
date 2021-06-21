@@ -58,11 +58,7 @@ class Queue<T = unknown> {
                 leaveOnEmpty: true,
                 leaveOnEmptyCooldown: 1000,
                 autoSelfDeaf: true,
-                enableLive: false,
                 ytdlOptions: {},
-                useSafeSearch: false,
-                disableAutoRegister: false,
-                fetchBeforeQueued: false,
                 initialVolume: 100
             } as PlayerOptions,
             options
