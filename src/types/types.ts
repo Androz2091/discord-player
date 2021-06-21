@@ -141,7 +141,7 @@ export interface PlayerOptions {
  * @property {string} [playlist.title] The playlist title
  * @property {string} [playlist.description] The playlist description
  * @property {string} [playlist.thumbnail] The playlist thumbnail
- * @property {("album"|"playlist")} [playlist.type] The playlist type: `album` | `playlist`
+ * @property {album|playlist} [playlist.type] The playlist type: `album` | `playlist`
  * @property {TrackSource} [playlist.source] The playlist source
  * @property {object} [playlist.author] The playlist author
  * @property {string} [playlist.author.name] The author name
@@ -354,7 +354,7 @@ export enum QueueRepeatMode {
  * @property {string} title The playlist title
  * @property {string} description The description
  * @property {string} thumbnail The thumbnail
- * @property {("album"|"playlist")} type The playlist type: `album` | `playlist`
+ * @property {album|playlist} type The playlist type: `album` | `playlist`
  * @property {TrackSource} source The playlist source
  * @property {object} author The playlist author
  * @property {string} [author.name] The author name
@@ -414,7 +414,7 @@ export interface TrackJSON {
  * @property {string} title The playlist title
  * @property {string} description The playlist description
  * @property {string} thumbnail The thumbnail
- * @property {("album"|"playlist")} type The playlist type: `album` | `playlist`
+ * @property {album|playlist} type The playlist type: `album` | `playlist`
  * @property {TrackSource} source The track source
  * @property {object} author The playlist author
  * @property {string} [author.name] The author name
