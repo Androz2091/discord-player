@@ -146,10 +146,15 @@ class Player extends EventEmitter<PlayerEvents> {
     }
 
     /**
+     * @typedef {object} SearchResult
+     * @property {Playlist} [playlist] The playlist (if any)
+     * @property {Track[]} tracks The tracks
+     */
+    /**
      * Search tracks
      * @param {string|Track} query The search query
-     * @param {UserResolvable} requestedBy The person who requested track search
-     * @returns {Promise<object>}
+     * @param {SearchOptions} options The search options
+     * @returns {Promise<SearchResult>}
      */
     async search(query: string | Track, options: SearchOptions) {
         if (query instanceof Track) return { playlist: null, tracks: [query] };
@@ -409,6 +414,7 @@ class Player extends EventEmitter<PlayerEvents> {
     }
 
     /**
+     * Registers extractor
      * @param {string} extractorName The extractor name
      * @param {ExtractorModel|any} extractor The extractor object
      * @param {boolean} [force=false] Overwrite existing extractor with this name (if available)

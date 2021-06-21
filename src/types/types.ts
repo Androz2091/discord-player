@@ -135,7 +135,6 @@ export interface PlayerOptions {
 }
 
 /**
- * The extractor model data
  * @typedef {object} ExtractorModelData
  * @property {object} [playlist] The playlist info (if any)
  * @property {string} [playlist.title] The playlist title
@@ -306,7 +305,6 @@ export interface PlayerEvents {
 }
 
 /**
- * Options passed to `<Queue>.play()`
  * @typedef {object} PlayOptions
  * @property {boolean} [filtersUpdate=false] If this play was triggered for filters update
  * @property {string[]} [encoderArgs=[]] FFmpeg args passed to encoder
@@ -322,7 +320,6 @@ export interface PlayOptions {
 }
 
 /**
- * Options passed to `<Player>.search()`
  * @typedef {object} SearchOptions
  * @property {UserResolvable} requestedBy The user who requested this search
  * @property {QueryType} searchEngine The query search engine
@@ -348,7 +345,6 @@ export enum QueueRepeatMode {
 }
 
 /**
- * Playlist init data
  * @typedef {object} PlaylistInitData
  * @property {Track[]} tracks The tracks of this playlist
  * @property {string} title The playlist title
@@ -380,7 +376,6 @@ export interface PlaylistInitData {
 }
 
 /**
- * The JSON representation of a track
  * @typedef {object} TrackJSON
  * @property {string} title The track title
  * @property {string} description The track description
@@ -407,7 +402,6 @@ export interface TrackJSON {
 }
 
 /**
- * The JSON representation of the playlist
  * @typedef {object} PlaylistJSON
  * @property {string} id The playlist id
  * @property {string} url The playlist url
