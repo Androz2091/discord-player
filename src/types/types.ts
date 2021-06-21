@@ -121,7 +121,7 @@ export interface PlayerProgressbarOptions {
  * @property {boolean} [leaveOnEmpty=true] If it should leave on empty
  * @property {number} [leaveOnEmptyCooldown=1000] The cooldown in ms
  * @property {boolean} [autoSelfDeaf=true] If it should set the bot in deaf mode
- * @property {object} [ytdlOptions={}] The youtube download options
+ * @property {YTDLDownloadOptions} [ytdlOptions={}] The youtube download options
  * @property {number} [initialVolume=100] The initial player volume
  */
 export interface PlayerOptions {
@@ -433,7 +433,7 @@ export interface PlaylistJSON {
 /**
  * @typedef {object} DiscordPlayerInitOptions
  * @property {boolean} [autoRegisterExtractor=true] If it should automatically register `@discord-player/extractor`
- * @property {object} [ytdlOptions={}] The options passed to `ytdl-core`
+ * @property {YTDLDownloadOptions} [ytdlOptions={}] The options passed to `ytdl-core`
  */
 export interface DiscordPlayerInitOptions {
     autoRegisterExtractor?: boolean;
