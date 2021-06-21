@@ -7,6 +7,7 @@ class VoiceUtils {
 
     /**
      * The voice utils
+     * @private
      */
     constructor() {
         /**

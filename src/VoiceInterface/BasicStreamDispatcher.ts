@@ -35,6 +35,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * Creates new connection object
      * @param {VoiceConnection} connection The connection
      * @param {VoiceChannel|StageChannel} channel The connected channel
+     * @private
      */
     constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel) {
         super();
