@@ -203,6 +203,7 @@ class Queue<T = unknown> {
      */
     addTrack(track: Track) {
         this.#watchDestroyed();
+        if (!(track instanceof Track)) throw new Error("invalid track");
         this.tracks.push(track);
         this.player.emit("trackAdd", this, track);
     }
@@ -213,6 +214,7 @@ class Queue<T = unknown> {
      */
     addTracks(tracks: Track[]) {
         this.#watchDestroyed();
+        if (!tracks.every((y) => y instanceof Track)) throw new Error("invalid track");
         this.tracks.push(...tracks);
         this.player.emit("tracksAdd", this, tracks);
     }
