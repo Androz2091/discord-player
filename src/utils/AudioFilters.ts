@@ -1,9 +1,13 @@
 import { FiltersName } from "../types/types";
 
+const bass = (g: number) => `bass=g=${g}:f=110:w=0.3`;
+
 /**
  * The available audio filters
  * @typedef {object} AudioFilters
- * @property {string} bassboost The bassboost filter
+ * @property {string} bassboost_low The bassboost filter (+15dB)
+ * @property {string} bassboost The bassboost filter (+20dB)
+ * @property {string} bassboost_high The bassboost filter (+30dB)
  * @property {string} 8D The 8D filter
  * @property {string} vaporwave The vaporwave filter
  * @property {string} nightcore The nightcore filter
@@ -37,7 +41,9 @@ import { FiltersName } from "../types/types";
  */
 
 const FilterList = {
-    bassboost: "bass=g=20:f=110:w=0.3",
+    bassboost_low: bass(15),
+    bassboost: bass(20),
+    bassboost_high: bass(30),
     "8D": "apulsator=hz=0.09",
     vaporwave: "aresample=48000,asetrate=48000*0.8",
     nightcore: "aresample=48000,asetrate=48000*1.25",
@@ -76,7 +82,7 @@ const FilterList = {
     },
 
     get names() {
-        return Object.keys(this).filter((p) => !["names", "length"].includes(p) && typeof this[p as FiltersName] !== "function");
+        return Object.keys(this).filter((p) => !["names", "length"].includes(p) && typeof this[p as FiltersName] !== "function") as FiltersName[];
     },
 
     get length() {

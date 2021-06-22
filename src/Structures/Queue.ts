@@ -2,7 +2,7 @@ import { Collection, Guild, StageChannel, VoiceChannel } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/BasicStreamDispatcher";
 import Track from "./Track";
-import { PlayerOptions, PlayOptions, QueueFilters, QueueRepeatMode } from "../types/types";
+import { FiltersName, PlayerOptions, PlayOptions, QueueFilters, QueueRepeatMode } from "../types/types";
 import ytdl from "discord-ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
 import { Util } from "../utils/Util";

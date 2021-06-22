@@ -12,7 +12,9 @@ export type FiltersName = keyof QueueFilters;
  * @typedef {AudioFilters} QueueFilters
  */
 export type QueueFilters = {
+    bassboost_low?: boolean;
     bassboost?: boolean;
+    bassboost_high?: boolean;
     "8D"?: boolean;
     vaporwave?: boolean;
     nightcore?: boolean;

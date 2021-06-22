@@ -19,7 +19,12 @@ client.on("warn", console.warn);
 // instantiate the player
 const player = new Player(client);
 
-player.on("error", console.error);
+player.on("error", (queue, error) => {
+    console.log(`[${queue.guild.name}] Error emitted from the queue: ${error.message}`);
+});
+player.on("connectionError", (queue, error) => {
+    console.log(`[${queue.guild.name}] Error emitted from the connection: ${error.message}`);
+});
 
 player.on("trackStart", (queue, track) => {
     queue.metadata.send(`🎶 | Started playing: **${track.title}** in **${queue.connection.channel.name}**!`);
@@ -136,6 +141,10 @@ client.on("message", async (message) => {
             {
                 name: "np",
                 description: "Now Playing"
+            },
+            {
+                name: "bassboost",
+                description: "Toggles bassboost filter"
             }
         ]);
 
@@ -254,6 +263,16 @@ client.on("interaction", async (interaction) => {
         const success = queue.setRepeatMode(loopMode);
         const mode = loopMode === QueueRepeatMode.TRACK ? "🔂" : loopMode === QueueRepeatMode.QUEUE ? "🔁" : "▶";
         return void interaction.followUp({ content: success ? `${mode} | Updated loop mode!` : "❌ | Could not update loop mode!" });
+    } else if (interaction.commandName === "bassboost") {
+        await interaction.defer();
+        const queue = player.getQueue(interaction.guildID);
+        if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
+        await queue.setFilters({
+            bassboost: !queue.getFiltersEnabled().includes("bassboost"),
+            normalizer2: !queue.getFiltersEnabled().includes("bassboost") // because we need to toggle it with bass
+        });
+
+        return void interaction.followUp({ content: `🎵 | Bassboost ${queue.getFiltersEnabled().includes("bassboost") ? "Enabled" : "Disabled"}!` });
     } else {
         interaction.reply({
             content: "Unknown command!",
