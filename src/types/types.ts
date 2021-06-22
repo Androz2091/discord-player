@@ -322,7 +322,6 @@ export interface PlayerEvents {
  * @property {number} [seek] Time to seek to before playing
  * @property {boolean} [immediate=false] If it should start playing the provided track immediately
  */
-
 export interface PlayOptions {
     filtersUpdate?: boolean;
     encoderArgs?: string[];
