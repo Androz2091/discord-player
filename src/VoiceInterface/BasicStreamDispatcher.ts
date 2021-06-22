@@ -132,6 +132,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     disconnect() {
         try {
+            this.audioPlayer.stop(true);
             this.voiceConnection.destroy();
         } catch {}
     }

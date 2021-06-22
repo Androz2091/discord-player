@@ -266,6 +266,13 @@ export enum QueryType {
  */
 
 /**
+ * Emitted on connection error. Sometimes stream errors are emitted here as well.
+ * @event Player#connectionError
+ * @param {Queue} queue The queue
+ * @param {Error} error The error
+ */
+
+/**
  * Emitted when queue ends
  * @event Player#queueEnd
  * @param {Queue} queue The queue
@@ -298,6 +305,7 @@ export interface PlayerEvents {
     connectionCreate: (queue: Queue, connection: StreamDispatcher) => any;
     debug: (queue: Queue, message: string) => any;
     error: (queue: Queue, error: Error) => any;
+    connectionError: (queue: Queue, error: Error) => any;
     queueEnd: (queue: Queue) => any;
     trackAdd: (queue: Queue, track: Track) => any;
     tracksAdd: (queue: Queue, track: Track[]) => any;
