@@ -15,7 +15,7 @@
     "docs": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml --output docs/docs.json",
     "docs:test": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml",
     "lint": "eslint src --ext .ts",
-		"lint:fix": "eslint src --ext .ts --fix"
+    "lint:fix": "eslint src --ext .ts --fix"
   },
   "funding": "https://github.com/Androz2091/discord-player?sponsor=1",
   "contributors": [
