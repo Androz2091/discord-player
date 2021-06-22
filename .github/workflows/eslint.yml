@@ -1,5 +1,19 @@
 name: ESLint
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - '*'
+      - '!docs'
+      - '!develop'
+      - '!master'
+      - '!gh-pages'
+  pull_request:
+    branches:
+      - '*'
+      - '!docs'
+      - '!develop'
+      - '!master'
+      - '!gh-pages'
 jobs:
   test:
     strategy:
