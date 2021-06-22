@@ -50,10 +50,10 @@
   },
   "homepage": "https://discord-player.js.org",
   "dependencies": {
-    "discord-ytdl-core": "^5.0.3",
+    "discord-ytdl-core": "^5.0.4",
     "soundcloud-scraper": "^5.0.0",
     "spotify-url-info": "^2.2.3",
-    "youtube-sr": "^4.1.1",
+    "youtube-sr": "^4.1.5",
     "ytdl-core": "^4.8.2"
   },
   "devDependencies": {
