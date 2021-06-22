@@ -8,6 +8,9 @@ import { downloadOptions } from "ytdl-core";
 
 export type FiltersName = keyof QueueFilters;
 
+/**
+ * @typedef {AudioFilters} QueueFilters
+ */
 export type QueueFilters = {
     bassboost?: boolean;
     "8D"?: boolean;
