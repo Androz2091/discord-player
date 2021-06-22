@@ -1,7 +1,7 @@
 ---
 name: Question
 about: Some questions related to this lib
-title: "[QUESTION] "
+title: ""
 labels: question
 assignees: ''
 

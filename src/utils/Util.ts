@@ -53,10 +53,7 @@ export class Util {
     static alertFFmpeg(): void {
         const hasFFmpeg = Util.checkFFmpeg();
 
-        if (!hasFFmpeg)
-            console.warn(
-                '[Discord Player] FFmpeg/Avconv not found! Install via "npm install ffmpeg-static" or download from https://ffmpeg.org/download.html'
-            );
+        if (!hasFFmpeg) console.warn('[Discord Player] FFmpeg/Avconv not found! Install via "npm install ffmpeg-static" or download from https://ffmpeg.org/download.html');
     }
 
     /**
