@@ -1,0 +1,32 @@
+name: ESLint
+on: [push, pull_request]
+  branches:
+    - '*'
+    - '!docs'
+    - '!gh-pages'
+    - '!develop'
+    - '!master'
+jobs:
+  test:
+    strategy:
+      matrix:
+        node: ['14', '16']
+    name: ESLint (Node v${{ matrix.node }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Node v${{ matrix.node }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TSC
+        run: npm run build:check
