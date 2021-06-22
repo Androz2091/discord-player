@@ -6,4 +6,5 @@ export { Queue } from "./Structures/Queue";
 export { Track } from "./Structures/Track";
 export { VoiceUtils } from "./VoiceInterface/VoiceUtils";
 export { VoiceEvents, StreamDispatcher } from "./VoiceInterface/BasicStreamDispatcher";
+export { VoiceAdapterCreator } from "./VoiceInterface/AdapterCreator";
 export * from "./types/types";

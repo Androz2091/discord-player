@@ -96,7 +96,7 @@ class Util {
     }
 
     static get noop() {
-        return () => { }; // eslint-disable-line @typescript-eslint/no-empty-function
+        return () => {}; // eslint-disable-line @typescript-eslint/no-empty-function
     }
 }
 
