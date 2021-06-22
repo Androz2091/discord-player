@@ -141,16 +141,17 @@ class Queue<T = unknown> {
 
         this.player.emit("connectionCreate", this, this.connection);
 
-        this.connection.on("start", () => {
+        this.connection.on("start", (resource) => {
             this.playing = true;
-            if (!this._filtersUpdate) this.player.emit("trackStart", this, this.current);
+            if (!this._filtersUpdate) this.player.emit("trackStart", this, resource.metadata);
             this._filtersUpdate = false;
         });
 
-        this.connection.on("finish", async () => {
+        this.connection.on("finish", async (resource) => {
             this.playing = false;
             if (this._filtersUpdate) return;
             this._streamTime = 0;
+            this.previousTracks.push(resource.metadata);
 
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
                 if (this.options.leaveOnEnd) this.destroy();
@@ -405,7 +406,6 @@ class Queue<T = unknown> {
 
         if (!options.filtersUpdate) {
             this.previousTracks = this.previousTracks.filter((x) => x._trackID !== track._trackID);
-            this.previousTracks.push(track);
         }
 
         let stream;

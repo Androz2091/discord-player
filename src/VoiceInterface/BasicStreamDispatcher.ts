@@ -20,8 +20,8 @@ import { Util } from "../utils/Util";
 export interface VoiceEvents {
     error: (error: AudioPlayerError) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
     debug: (message: string) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    start: () => any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    finish: () => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    start: (resource: AudioResource<Track>) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    finish: (resource: AudioResource<Track>) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 class StreamDispatcher extends EventEmitter<VoiceEvents> {
@@ -89,11 +89,11 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
         this.audioPlayer.on("stateChange", (oldState, newState) => {
             if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
                 if (!this.paused) {
+                    void this.emit("finish", this.audioResource);
                     this.audioResource = null;
-                    void this.emit("finish");
                 }
             } else if (newState.status === AudioPlayerStatus.Playing) {
-                if (!this.paused) void this.emit("start");
+                if (!this.paused) void this.emit("start", this.audioResource);
             }
         });
 
