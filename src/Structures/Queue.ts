@@ -143,7 +143,7 @@ class Queue<T = unknown> {
 
         this.connection.on("start", (resource) => {
             this.playing = true;
-            if (!this._filtersUpdate) this.player.emit("trackStart", this, resource.metadata);
+            if (!this._filtersUpdate) this.player.emit("trackStart", this, resource?.metadata ?? this.current);
             this._filtersUpdate = false;
         });
 
@@ -151,7 +151,7 @@ class Queue<T = unknown> {
             this.playing = false;
             if (this._filtersUpdate) return;
             this._streamTime = 0;
-            this.previousTracks.push(resource.metadata);
+            if (resource) this.previousTracks.push(resource.metadata);
 
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
                 if (this.options.leaveOnEnd) this.destroy();
@@ -385,6 +385,9 @@ class Queue<T = unknown> {
         return await this.play(prev, { immediate: true });
     }
 
+    /**
+     * Clear this queue
+     */
     clear() {
         this.#watchDestroyed();
         this.tracks = [];
@@ -457,6 +460,11 @@ class Queue<T = unknown> {
         });
     }
 
+    /**
+     * Private method to handle autoplay
+     * @param {Track} track The source track to find its similar track for autoplay
+     * @returns {Promise<void>}
+     */
     private async _handleAutoplay(track: Track): Promise<void> {
         this.#watchDestroyed();
         if (!track || ![track.source, track.raw?.source].includes("youtube")) {
