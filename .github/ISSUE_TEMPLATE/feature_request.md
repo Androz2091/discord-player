@@ -1,10 +1,6 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-<<<<<<< HEAD
-=======
-title: ""
->>>>>>> 082780cce26bbec4d1069359763b96ac619fd7ce
 labels: enhancement
 assignees: ''
 

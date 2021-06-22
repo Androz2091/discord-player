@@ -1,10 +1,6 @@
 ---
 name: Bug report
 about: Create a bug report to help us improve
-<<<<<<< HEAD
-=======
-title: ""
->>>>>>> 082780cce26bbec4d1069359763b96ac619fd7ce
 labels: bug
 assignees: ''
 
