@@ -1,11 +1,5 @@
 name: ESLint
 on: [push, pull_request]
-  branches:
-    - '*'
-    - '!docs'
-    - '!gh-pages'
-    - '!develop'
-    - '!master'
 jobs:
   test:
     strategy:
