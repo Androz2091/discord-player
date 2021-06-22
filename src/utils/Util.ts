@@ -14,7 +14,7 @@ class Util {
      * @param {object} durObj The duration object
      * @returns {string}
      */
-    static durationString(durObj: object) {
+    static durationString(durObj: Record<string, number>) {
         return Object.values(durObj)
             .map((m) => (isNaN(m) ? 0 : m))
             .join(":");
@@ -58,6 +58,7 @@ class Util {
      * @param {any[]} arr The array
      * @returns {any}
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static last<T = any>(arr: T[]): T {
         if (!Array.isArray(arr)) return;
         return arr[arr.length - 1];
@@ -92,6 +93,10 @@ class Util {
      */
     static wait(time: number) {
         return new Promise((r) => setTimeout(r, time).unref());
+    }
+
+    static get noop() {
+        return () => {}; // eslint-disable-line @typescript-eslint/no-empty-function
     }
 }
 

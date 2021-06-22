@@ -18,10 +18,10 @@ import Track from "../Structures/Track";
 import { Util } from "../utils/Util";
 
 export interface VoiceEvents {
-    error: (error: AudioPlayerError) => any;
-    debug: (message: string) => any;
-    start: () => any;
-    finish: () => any;
+    error: (error: AudioPlayerError) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    debug: (message: string) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    start: () => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    finish: () => any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 class StreamDispatcher extends EventEmitter<VoiceEvents> {
@@ -29,7 +29,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public readonly audioPlayer: AudioPlayer;
     public readonly channel: VoiceChannel | StageChannel;
     public audioResource?: AudioResource<Track>;
-    private readyLock: boolean = false;
+    private readyLock = false;
 
     /**
      * Creates new connection object
@@ -108,6 +108,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {object} [ops={}] Options
      * @returns {AudioResource}
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createStream(src: Readable | Duplex | string, ops?: { type?: StreamType; data?: any }) {
         this.audioResource = createAudioResource(src, {
             inputType: ops?.type ?? StreamType.Arbitrary,
@@ -134,7 +135,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
         try {
             this.audioPlayer.stop(true);
             this.voiceConnection.destroy();
-        } catch {}
+        } catch {} // eslint-disable-line no-empty
     }
 
     /**

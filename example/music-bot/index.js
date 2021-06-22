@@ -172,7 +172,7 @@ client.on("interaction", async (interaction) => {
                 requestedBy: interaction.user,
                 searchEngine: interaction.commandName === "soundcloud" ? QueryType.SOUNDCLOUD_SEARCH : QueryType.AUTO
             })
-            .catch(() => {});
+            .catch(Util.noop);
         if (!searchResult || !searchResult.tracks.length) return void interaction.followUp({ content: "No results were found!" });
 
         const queue = await player.createQueue(interaction.guild, {

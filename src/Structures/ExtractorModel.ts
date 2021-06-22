@@ -2,13 +2,14 @@ import { ExtractorModelData } from "../types/types";
 
 class ExtractorModel {
     name: string;
-    private _raw: any;
+    private _raw: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     /**
      * Model for raw Discord Player extractors
      * @param {string} extractorName Name of the extractor
      * @param {object} data Extractor object
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(extractorName: string, data: any) {
         /**
          * The extractor name
@@ -37,6 +38,7 @@ class ExtractorModel {
         return {
             playlist: data.playlist ?? null,
             data:
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 data.info?.map((m: any) => ({
                     title: m.title,
                     duration: m.duration,

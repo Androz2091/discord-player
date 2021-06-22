@@ -10,10 +10,12 @@
   "scripts": {
     "dev": "cd example/test && ts-node index.ts",
     "build": "rimraf lib && tsc",
+    "build:check": "tsc --noEmit --incremental false",
     "format": "prettier --write \"src/**/*.ts\" \"example/**/*.ts\"",
-    "lint": "tslint -p tsconfig.json",
     "docs": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml --output docs/docs.json",
-    "docs:test": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml"
+    "docs:test": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml",
+    "lint": "eslint src --ext .ts",
+		"lint:fix": "eslint src --ext .ts --fix"
   },
   "funding": "https://github.com/Androz2091/discord-player?sponsor=1",
   "contributors": [
@@ -68,15 +70,16 @@
     "@discordjs/opus": "^0.5.3",
     "@types/node": "^15.12.2",
     "@types/ws": "^7.4.4",
+    "@typescript-eslint/eslint-plugin": "^4.28.0",
+    "@typescript-eslint/parser": "^4.28.0",
     "discord-api-types": "^0.18.1",
     "discord.js": "^13.0.0-dev.c850ae10270076c4b2e10b130dd8f88eed4ed201",
     "discord.js-docgen": "discordjs/docgen#ts-patch",
+    "eslint": "^7.29.0",
     "jsdoc-babel": "^0.5.0",
     "prettier": "^2.3.1",
     "rimraf": "^3.0.2",
     "ts-node": "^10.0.0",
-    "tslint": "^6.1.3",
-    "tslint-config-prettier": "^1.18.0",
-    "typescript": "^4.3.2"
+    "typescript": "^4.3.4"
   }
 }

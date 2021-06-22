@@ -52,7 +52,7 @@ class VoiceUtils {
         let conn = joinVoiceChannel({
             guildId: channel.guild.id,
             channelId: channel.id,
-            adapterCreator: (channel.guild as any).voiceAdapterCreator,
+            adapterCreator: (channel.guild as any).voiceAdapterCreator, // eslint-disable-line @typescript-eslint/no-explicit-any
             selfDeaf: Boolean(options.deaf)
         });
 

@@ -2,7 +2,7 @@ import { Collection, Guild, StageChannel, VoiceChannel } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/BasicStreamDispatcher";
 import Track from "./Track";
-import { FiltersName, PlayerOptions, PlayOptions, QueueFilters, QueueRepeatMode } from "../types/types";
+import { PlayerOptions, PlayOptions, QueueFilters, QueueRepeatMode } from "../types/types";
 import ytdl from "discord-ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
 import { Util } from "../utils/Util";
@@ -19,9 +19,9 @@ class Queue<T = unknown> {
     public playing = false;
     public metadata?: T = null;
     public repeatMode: QueueRepeatMode = 0;
-    private _streamTime: number = 0;
+    private _streamTime = 0;
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
-    private _activeFilters: any[] = [];
+    private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
     private _filtersUpdate = false;
     public destroyed = false;
 
@@ -134,7 +134,7 @@ class Queue<T = unknown> {
         });
         this.connection = connection;
 
-        if (channel.type === "stage") await channel.guild.me.voice.setRequestToSpeak(true).catch(() => {});
+        if (channel.type === "stage") await channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
 
         this.connection.on("error", (err) => this.player.emit("connectionError", this, err));
         this.connection.on("debug", (msg) => this.player.emit("debug", this, msg));
@@ -332,7 +332,7 @@ class Queue<T = unknown> {
             });
         }
 
-        const _filters: any[] = [];
+        const _filters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         for (const filter in filters) {
             if (filters[filter as keyof QueueFilters] === true) _filters.push(filter);
@@ -466,7 +466,7 @@ class Queue<T = unknown> {
         const info = await ytdl
             .getInfo(track.url)
             .then((x) => x.related_videos[0])
-            .catch(() => {});
+            .catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
         if (!info) {
             if (this.options.leaveOnEnd) this.destroy();
             return void this.player.emit("queueEnd", this);

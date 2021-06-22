@@ -8,6 +8,7 @@ import { QueryResolver } from "./utils/QueryResolver";
 import YouTube from "youtube-sr";
 import { Util } from "./utils/Util";
 import Spotify from "spotify-url-info";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Client as SoundCloud } from "soundcloud-scraper";
 import { Playlist } from "./Structures/Playlist";
@@ -49,7 +50,7 @@ class Player extends EventEmitter<PlayerEvents> {
         this.client.on("voiceStateUpdate", this._handleVoiceState.bind(this));
 
         if (this.options?.autoRegisterExtractor) {
-            let nv: any;
+            let nv: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
             if ((nv = Util.require("@discord-player/extractor"))) {
                 ["Attachment", "Facebook", "Reverbnation", "Vimeo"].forEach((ext) => void this.use(ext, nv[ext]));
@@ -139,7 +140,7 @@ class Player extends EventEmitter<PlayerEvents> {
 
         try {
             prev.destroy();
-        } catch {}
+        } catch {} // eslint-disable-line no-empty
         this.queues.delete(guild.id);
 
         return prev;
@@ -162,6 +163,7 @@ class Player extends EventEmitter<PlayerEvents> {
         options.requestedBy = this.client.users.resolve(options.requestedBy);
         if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const [_, extractor] of this.extractors) {
             if (!extractor.validate(query)) continue;
             const data = await extractor.handle(query);
@@ -194,11 +196,11 @@ class Player extends EventEmitter<PlayerEvents> {
             case QueryType.YOUTUBE_SEARCH: {
                 const videos = await YouTube.search(query, {
                     type: "video"
-                }).catch(() => {});
+                }).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
                 if (!videos) return { playlist: null, tracks: [] };
 
                 const tracks = videos.map((m) => {
-                    (m as any).source = "youtube";
+                    (m as any).source = "youtube"; // eslint-disable-line @typescript-eslint/no-explicit-any
                     return new Track(this, {
                         title: m.title,
                         description: m.description,
@@ -216,12 +218,13 @@ class Player extends EventEmitter<PlayerEvents> {
             }
             case QueryType.SOUNDCLOUD_TRACK:
             case QueryType.SOUNDCLOUD_SEARCH: {
-                const result: any[] = QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? [{ url: query }] : await soundcloud.search(query, "track").catch(() => {});
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function
+                const result: any[] = QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? [{ url: query }] : await soundcloud.search(query, "track").catch(Util.noop);
                 if (!result || !result.length) return { playlist: null, tracks: [] };
                 const res: Track[] = [];
 
                 for (const r of result) {
-                    const trackInfo = await soundcloud.getSongInfo(r.url).catch(() => {});
+                    const trackInfo = await soundcloud.getSongInfo(r.url).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
                     if (!trackInfo) continue;
 
                     const track = new Track(this, {
@@ -243,7 +246,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 return { playlist: null, tracks: res };
             }
             case QueryType.SPOTIFY_SONG: {
-                const spotifyData = await Spotify.getData(query).catch(() => {});
+                const spotifyData = await Spotify.getData(query).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
                 if (!spotifyData) return { playlist: null, tracks: [] };
                 const spotifyTrack = new Track(this, {
                     title: spotifyData.name,
@@ -264,7 +267,7 @@ class Player extends EventEmitter<PlayerEvents> {
             }
             case QueryType.SPOTIFY_PLAYLIST:
             case QueryType.SPOTIFY_ALBUM: {
-                const spotifyPlaylist = await Spotify.getData(query).catch(() => {});
+                const spotifyPlaylist = await Spotify.getData(query).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
                 if (!spotifyPlaylist) return { playlist: null, tracks: [] };
 
                 const playlist = new Playlist(this, {
@@ -290,6 +293,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 });
 
                 if (spotifyPlaylist.type !== "playlist") {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     playlist.tracks = spotifyPlaylist.tracks.items.map((m: any) => {
                         const data = new Track(this, {
                             title: m.name ?? "",
@@ -307,6 +311,7 @@ class Player extends EventEmitter<PlayerEvents> {
                         return data;
                     }) as Track[];
                 } else {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     playlist.tracks = spotifyPlaylist.tracks.items.map((m: any) => {
                         const data = new Track(this, {
                             title: m.track.name ?? "",
@@ -328,7 +333,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 return { playlist: playlist, tracks: playlist.tracks };
             }
             case QueryType.SOUNDCLOUD_PLAYLIST: {
-                const data = await SoundCloud.getPlaylist(query).catch(() => {});
+                const data = await SoundCloud.getPlaylist(query).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
                 if (!data) return { playlist: null, tracks: [] };
 
                 const res = new Playlist(this, {
@@ -367,11 +372,11 @@ class Player extends EventEmitter<PlayerEvents> {
                 return { playlist: res, tracks: res.tracks };
             }
             case QueryType.YOUTUBE_PLAYLIST: {
-                const ytpl = await YouTube.getPlaylist(query).catch(() => {});
+                const ytpl = await YouTube.getPlaylist(query).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
                 if (!ytpl) return { playlist: null, tracks: [] };
 
                 // @todo: better way of handling large playlists
-                await ytpl.fetch().catch(() => {});
+                await ytpl.fetch().catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
 
                 const playlist: Playlist = new Playlist(this, {
                     title: ytpl.title,
@@ -420,6 +425,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @param {boolean} [force=false] Overwrite existing extractor with this name (if available)
      * @returns {ExtractorModel}
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     use(extractorName: string, extractor: ExtractorModel | any, force = false): ExtractorModel {
         if (!extractorName) throw new Error("Cannot use unknown extractor!");
         if (this.extractors.has(extractorName) && !force) return this.extractors.get(extractorName);

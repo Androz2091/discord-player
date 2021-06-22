@@ -16,7 +16,7 @@ class Playlist {
     };
     public id: string;
     public url: string;
-    public readonly rawPlaylist?: any;
+    public readonly rawPlaylist?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     /**
      * Playlist constructor

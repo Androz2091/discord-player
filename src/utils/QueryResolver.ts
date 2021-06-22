@@ -1,6 +1,7 @@
 import { validateID, validateURL } from "ytdl-core";
 import { YouTube } from "youtube-sr";
 import { QueryType } from "../types/types";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { validateURL as SoundcloudValidateURL } from "soundcloud-scraper";
 

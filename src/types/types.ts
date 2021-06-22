@@ -84,9 +84,9 @@ export interface RawTrackData {
     requestedBy: User;
     playlist?: Playlist;
     source?: TrackSource;
-    engine?: any;
+    engine?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     live?: boolean;
-    raw?: any;
+    raw?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 /**
@@ -182,7 +182,7 @@ export interface ExtractorModelData {
         };
         id: string;
         url: string;
-        rawPlaylist?: any;
+        rawPlaylist?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     };
     data: {
         title: string;
@@ -304,6 +304,7 @@ export enum QueryType {
  * @param {Track} track The track
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface PlayerEvents {
     botDisconnect: (queue: Queue) => any;
     channelEmpty: (queue: Queue) => any;
@@ -316,6 +317,8 @@ export interface PlayerEvents {
     tracksAdd: (queue: Queue, track: Track[]) => any;
     trackStart: (queue: Queue, track: Track) => any;
 }
+
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * @typedef {object} PlayOptions
@@ -384,7 +387,7 @@ export interface PlaylistInitData {
     };
     id: string;
     url: string;
-    rawPlaylist?: any;
+    rawPlaylist?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 /**
