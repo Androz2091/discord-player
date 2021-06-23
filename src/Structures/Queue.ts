@@ -135,8 +135,9 @@ class Queue<T = unknown> {
         this.connection = connection;
 
         if (channel.type === "stage") {
-            await channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
-            await channel.guild.me.voice.setSuppressed(false).catch(Util.noop);
+            await channel.guild.me.voice.setSuppressed(false).catch(async () => {
+                return await channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+            });
         }
 
         this.connection.on("error", (err) => this.player.emit("connectionError", this, err));
@@ -146,7 +147,7 @@ class Queue<T = unknown> {
 
         this.connection.on("start", (resource) => {
             this.playing = true;
-            if (!this._filtersUpdate) this.player.emit("trackStart", this, resource?.metadata ?? this.current);
+            if (!this._filtersUpdate && resource?.metadata) this.player.emit("trackStart", this, resource?.metadata ?? this.current);
             this._filtersUpdate = false;
         });
 
@@ -154,7 +155,7 @@ class Queue<T = unknown> {
             this.playing = false;
             if (this._filtersUpdate) return;
             this._streamTime = 0;
-            if (resource) this.previousTracks.push(resource.metadata);
+            if (resource && resource.metadata) this.previousTracks.push(resource.metadata);
 
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
                 if (this.options.leaveOnEnd) this.destroy();

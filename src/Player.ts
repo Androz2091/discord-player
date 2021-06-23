@@ -69,6 +69,29 @@ class Player extends EventEmitter<PlayerEvents> {
         const queue = this.getQueue(oldState.guild.id);
         if (!queue) return;
 
+        // update channel
+        if (oldState.channelID && newState.channelID && oldState.channelID !== newState.channelID) {
+            queue.connection.channel = newState.channel;
+        }
+
+        if (!oldState.channelID && newState.channelID && newState.member.id === newState.guild.me.id) {
+            if (newState.serverMute || !newState.serverMute) {
+                queue.setPaused(newState.serverMute);
+            } else if (newState.suppress || !newState.suppress) {
+                if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                queue.setPaused(newState.suppress);
+            }
+        }
+
+        if (oldState.channelID === newState.channelID && oldState.member.id === newState.guild.me.id) {
+            if (oldState.serverMute !== newState.serverMute) {
+                queue.setPaused(newState.serverMute);
+            } else if (oldState.suppress !== newState.suppress) {
+                if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                queue.setPaused(newState.suppress);
+            }
+        }
+
         if (oldState.member.id === this.client.user.id && !newState.channelID) {
             queue.destroy();
             return void this.emit("botDisconnect", queue);

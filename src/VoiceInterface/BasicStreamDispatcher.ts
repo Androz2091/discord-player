@@ -27,9 +27,10 @@ export interface VoiceEvents {
 class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public readonly voiceConnection: VoiceConnection;
     public readonly audioPlayer: AudioPlayer;
-    public readonly channel: VoiceChannel | StageChannel;
+    public channel: VoiceChannel | StageChannel;
     public audioResource?: AudioResource<Track>;
     private readyLock = false;
+    public paused: boolean;
 
     /**
      * Creates new connection object
@@ -57,6 +58,12 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
          * @type {VoiceChannel|StageChannel}
          */
         this.channel = channel;
+
+        /**
+         * The paused state
+         * @type {boolean}
+         */
+        this.paused = false;
 
         this.voiceConnection.on("stateChange", async (_, newState) => {
             if (newState.status === VoiceConnectionStatus.Disconnected) {
@@ -153,6 +160,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     pause(interpolateSilence?: boolean) {
         const success = this.audioPlayer.pause(interpolateSilence);
+        this.paused = success;
         return success;
     }
 
@@ -162,6 +170,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     resume() {
         const success = this.audioPlayer.unpause();
+        this.paused = !success;
         return success;
     }
 
@@ -209,14 +218,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     get streamTime() {
         if (!this.audioResource) return 0;
         return this.audioResource.playbackDuration;
-    }
-
-    /**
-     * The paused state
-     * @type {boolean}
-     */
-    get paused() {
-        return [AudioPlayerStatus.AutoPaused, AudioPlayerStatus.Paused].includes(this.audioPlayer.state.status);
     }
 }
 
