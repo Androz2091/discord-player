@@ -11,7 +11,7 @@ export type FiltersName = keyof QueueFilters;
 /**
  * @typedef {AudioFilters} QueueFilters
  */
-export type QueueFilters = {
+export interface QueueFilters {
     bassboost_low?: boolean;
     bassboost?: boolean;
     bassboost_high?: boolean;
@@ -45,7 +45,7 @@ export type QueueFilters = {
     fadein?: boolean;
     dim?: boolean;
     earrape?: boolean;
-};
+}
 
 /**
  * The track source:
