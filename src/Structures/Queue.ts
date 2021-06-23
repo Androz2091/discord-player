@@ -134,7 +134,10 @@ class Queue<T = unknown> {
         });
         this.connection = connection;
 
-        if (channel.type === "stage") await channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
+        if (channel.type === "stage") {
+            await channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+            await channel.guild.me.voice.setSuppressed(false).catch(Util.noop);
+        }
 
         this.connection.on("error", (err) => this.player.emit("connectionError", this, err));
         this.connection.on("debug", (msg) => this.player.emit("debug", this, msg));
@@ -409,6 +412,7 @@ class Queue<T = unknown> {
 
         if (!options.filtersUpdate) {
             this.previousTracks = this.previousTracks.filter((x) => x._trackID !== track._trackID);
+            this.previousTracks.push(track);
         }
 
         let stream;
@@ -471,10 +475,9 @@ class Queue<T = unknown> {
             if (this.options.leaveOnEnd) this.destroy();
             return void this.player.emit("queueEnd", this);
         }
-        const info = await ytdl
-            .getInfo(track.url)
-            .then((x) => x.related_videos[0])
-            .catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
+        const info = await YouTube.getVideo(track.url)
+            .then((x) => x.videos[0])
+            .catch(Util.noop);
         if (!info) {
             if (this.options.leaveOnEnd) this.destroy();
             return void this.player.emit("queueEnd", this);
@@ -483,11 +486,11 @@ class Queue<T = unknown> {
         const nextTrack = new Track(this.player, {
             title: info.title,
             url: `https://www.youtube.com/watch?v=${info.id}`,
-            duration: info.length_seconds ? Util.buildTimeCode(Util.parseMS(info.length_seconds * 1000)) : "0:00",
+            duration: info.durationFormatted ? Util.buildTimeCode(Util.parseMS(info.duration * 1000)) : "0:00",
             description: "",
-            thumbnail: Util.last(info.thumbnails).url,
-            views: parseInt(info.view_count.replace(/[^0-9]/g, "")),
-            author: typeof info.author === "string" ? info.author : info.author.name,
+            thumbnail: typeof info.thumbnail === "string" ? info.thumbnail : info.thumbnail.url,
+            views: info.views,
+            author: info.channel.name,
             requestedBy: track.requestedBy,
             source: "youtube"
         });

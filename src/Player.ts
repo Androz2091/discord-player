@@ -196,7 +196,7 @@ class Player extends EventEmitter<PlayerEvents> {
             case QueryType.YOUTUBE_SEARCH: {
                 const videos = await YouTube.search(query, {
                     type: "video"
-                }).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
+                }).catch(Util.noop);
                 if (!videos) return { playlist: null, tracks: [] };
 
                 const tracks = videos.map((m) => {
@@ -224,7 +224,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 const res: Track[] = [];
 
                 for (const r of result) {
-                    const trackInfo = await soundcloud.getSongInfo(r.url).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
+                    const trackInfo = await soundcloud.getSongInfo(r.url).catch(Util.noop);
                     if (!trackInfo) continue;
 
                     const track = new Track(this, {
@@ -246,7 +246,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 return { playlist: null, tracks: res };
             }
             case QueryType.SPOTIFY_SONG: {
-                const spotifyData = await Spotify.getData(query).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
+                const spotifyData = await Spotify.getData(query).catch(Util.noop);
                 if (!spotifyData) return { playlist: null, tracks: [] };
                 const spotifyTrack = new Track(this, {
                     title: spotifyData.name,
@@ -267,7 +267,7 @@ class Player extends EventEmitter<PlayerEvents> {
             }
             case QueryType.SPOTIFY_PLAYLIST:
             case QueryType.SPOTIFY_ALBUM: {
-                const spotifyPlaylist = await Spotify.getData(query).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
+                const spotifyPlaylist = await Spotify.getData(query).catch(Util.noop);
                 if (!spotifyPlaylist) return { playlist: null, tracks: [] };
 
                 const playlist = new Playlist(this, {
@@ -333,7 +333,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 return { playlist: playlist, tracks: playlist.tracks };
             }
             case QueryType.SOUNDCLOUD_PLAYLIST: {
-                const data = await SoundCloud.getPlaylist(query).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
+                const data = await SoundCloud.getPlaylist(query).catch(Util.noop);
                 if (!data) return { playlist: null, tracks: [] };
 
                 const res = new Playlist(this, {
@@ -372,11 +372,11 @@ class Player extends EventEmitter<PlayerEvents> {
                 return { playlist: res, tracks: res.tracks };
             }
             case QueryType.YOUTUBE_PLAYLIST: {
-                const ytpl = await YouTube.getPlaylist(query).catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
+                const ytpl = await YouTube.getPlaylist(query).catch(Util.noop);
                 if (!ytpl) return { playlist: null, tracks: [] };
 
                 // @todo: better way of handling large playlists
-                await ytpl.fetch().catch(Util.noop); // eslint-disable-line @typescript-eslint/no-empty-function
+                await ytpl.fetch().catch(Util.noop);
 
                 const playlist: Playlist = new Playlist(this, {
                     title: ytpl.title,
