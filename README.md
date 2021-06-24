@@ -5,8 +5,7 @@ Complete framework to facilitate music commands using **[discord.js](https://dis
 [![versionBadge](https://img.shields.io/npm/v/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
 [![discordBadge](https://img.shields.io/discord/558328638911545423?style=for-the-badge&color=7289da)](https://androz2091.fr/discord)
 [![wakatime](https://wakatime.com/badge/github/Androz2091/discord-player.svg)](https://wakatime.com/badge/github/Androz2091/discord-player)
-
-> V5 WIP
+[![CodeFactor](https://www.codefactor.io/repository/github/androz2091/discord-player/badge/v5)](https://www.codefactor.io/repository/github/androz2091/discord-player/overview/v5)
 
 ## Installation
 
