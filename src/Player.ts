@@ -188,6 +188,7 @@ class Player extends EventEmitter<PlayerEvents> {
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const [_, extractor] of this.extractors) {
+            if (options.blockExtractor) break;
             if (!extractor.validate(query)) continue;
             const data = await extractor.handle(query);
             if (data && data.data.length) {

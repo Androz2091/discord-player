@@ -8,7 +8,9 @@ The new update brings new features as well as better management of different thi
 ```diff
 - player.play(message, query);
 + const queue = player.createQueue(message.guild);
-+ const song = await player.search(query);
++ const song = await player.search(query, {
++   requestedBy: message.author
+});
 + 
 + try {
 +   await queue.connect(message.member.voice.channel);

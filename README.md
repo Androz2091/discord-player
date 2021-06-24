@@ -92,7 +92,7 @@ client.on("message", async (message) => {
         }
 
         const track = await client.player.search(args[0], {
-            searchEngine: QueryType.YOUTUBE_SEARCH
+            requestedBy: message.author
         }).then(x => x.tracks[1]);
         if (!track) return void message.reply("Track not found!");
 

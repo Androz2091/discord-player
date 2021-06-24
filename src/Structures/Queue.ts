@@ -2,7 +2,7 @@ import { Collection, Guild, StageChannel, VoiceChannel } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/BasicStreamDispatcher";
 import Track from "./Track";
-import { PlayerOptions, PlayOptions, QueueFilters, QueueRepeatMode } from "../types/types";
+import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode } from "../types/types";
 import ytdl from "discord-ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
 import { Util } from "../utils/Util";
@@ -300,6 +300,11 @@ class Queue<T = unknown> {
         return NC ? playbackTime * NC : VW ? playbackTime * VW : playbackTime;
     }
 
+    set streamTime(time: number) {
+        this.#watchDestroyed();
+        this.seek(time);
+    }
+
     /**
      * Returns enabled filters
      * @returns {AudioFilters}
@@ -396,6 +401,138 @@ class Queue<T = unknown> {
         this.#watchDestroyed();
         this.tracks = [];
         this.previousTracks = [];
+    }
+
+    /**
+     * Stops the player
+     * @returns {void}
+     */
+    stop() {
+        return this.destroy();
+    }
+
+    /**
+     * Shuffles this queue
+     * @returns {boolean}
+     */
+    shuffle() {
+        if (!this.tracks.length || this.tracks.length < 3) return false;
+        const currentTrack = this.tracks.shift();
+
+        for (let i = this.tracks.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.tracks[i], this.tracks[j]] = [this.tracks[j], this.tracks[i]];
+        }
+
+        this.tracks.unshift(currentTrack);
+
+        return true;
+    }
+
+    /**
+     * Removes a track from the queue
+     * @param {Track|number} track The track to remove
+     * @returns {Track}
+     */
+    remove(track: Track | number) {
+        let trackFound: Track = null;
+        if (typeof track === "number") {
+            trackFound = this.tracks[track];
+            if (trackFound) {
+                this.tracks = this.tracks.filter((t) => t._trackID !== trackFound._trackID);
+            }
+        } else {
+            trackFound = this.tracks.find((s) => s._trackID === track._trackID);
+            if (trackFound) {
+                this.tracks = this.tracks.filter((s) => s._trackID !== trackFound._trackID);
+            }
+        }
+
+        return trackFound;
+    }
+
+    /**
+     * Jumps to particular track
+     * @param {Track|number} track The track
+     * @returns {void}
+     */
+    jump(track: Track | number): void {
+        const foundTrack = this.remove(track);
+        if (!foundTrack) throw new Error("Track not found");
+        this.tracks.splice(1, 0, foundTrack);
+
+        return void this.skip();
+    }
+
+    /**
+     * @typedef {object} PlayerTimestamp
+     * @param {string} current The current progress
+     * @param {string} end The total time
+     * @param {number} progress Progress in %
+     */
+
+    /**
+     * Returns player stream timestamp
+     * @param {boolean} [queue=false] If it should generate timestamp for the queue
+     * @returns {PlayerTimestamp}
+     */
+    getPlayerTimestamp(queue = false) {
+        const previousTracksTime = this.previousTracks.length > 0 ? this.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
+        const currentStreamTime = queue ? previousTracksTime + this.streamTime : this.streamTime;
+        const totalTracksTime = this.totalTime;
+        const totalTime = queue ? previousTracksTime + totalTracksTime : this.current.durationMS;
+
+        const currentTimecode = Util.buildTimeCode(Util.parseMS(currentStreamTime));
+        const endTimecode = Util.buildTimeCode(Util.parseMS(totalTime));
+
+        return {
+            current: currentTimecode,
+            end: endTimecode,
+            progress: Math.round((currentStreamTime / totalTime) * 100)
+        };
+    }
+
+    /**
+     * Creates progress bar string
+     * @param {PlayerProgressbarOptions} options The progress bar options
+     * @returns {string}
+     */
+    createProgressBar(options: PlayerProgressbarOptions = { timecodes: true, queue: false }) {
+        const previousTracksTime = this.previousTracks.length > 0 ? this.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
+        const currentStreamTime = options.queue ? previousTracksTime + this.streamTime : this.streamTime;
+        const totalTracksTime = this.totalTime;
+        const totalTime = options.queue ? previousTracksTime + totalTracksTime : this.current.durationMS;
+        const length = typeof options.length === "number" ? (options.length <= 0 || options.length === Infinity ? 15 : options.length) : 15;
+
+        const index = Math.round((currentStreamTime / totalTime) * length);
+        const indicator = typeof options.indicator === "string" && options.indicator.length > 0 ? options.indicator : "🔘";
+        const line = typeof options.line === "string" && options.line.length > 0 ? options.line : "▬";
+
+        if (index >= 1 && index <= length) {
+            const bar = line.repeat(length - 1).split("");
+            bar.splice(index, 0, indicator);
+            if (options.timecodes) {
+                const timestamp = this.getPlayerTimestamp(options.queue);
+                return `${timestamp.current} ┃ ${bar.join("")} ┃ ${timestamp.end}`;
+            } else {
+                return `${bar.join("")}`;
+            }
+        } else {
+            if (options.timecodes) {
+                const timestamp = this.getPlayerTimestamp(options.queue);
+                return `${timestamp.current} ┃ ${indicator}${line.repeat(length - 1)} ┃ ${timestamp.end}`;
+            } else {
+                return `${indicator}${line.repeat(length - 1)}`;
+            }
+        }
+    }
+
+    /**
+     * Total duration
+     * @type {Number}
+     */
+    get totalTime(): number {
+        return this.tracks.length > 0 ? this.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0;
     }
 
     /**

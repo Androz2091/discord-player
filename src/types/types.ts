@@ -337,11 +337,13 @@ export interface PlayOptions {
 /**
  * @typedef {object} SearchOptions
  * @property {UserResolvable} requestedBy The user who requested this search
- * @property {QueryType} searchEngine The query search engine
+ * @property {QueryType} [searchEngine=QueryType.AUTO] The query search engine
+ * @property {boolean} [blockExtractor=false] If it should block custom extractors
  */
 export interface SearchOptions {
     requestedBy: UserResolvable;
     searchEngine?: QueryType;
+    blockExtractor?: boolean;
 }
 
 /**
