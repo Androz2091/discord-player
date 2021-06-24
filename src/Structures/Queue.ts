@@ -23,7 +23,7 @@ class Queue<T = unknown> {
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
     private _filtersUpdate = false;
-    public destroyed = false;
+    #destroyed = false;
 
     /**
      * Queue constructor
@@ -51,12 +51,6 @@ class Queue<T = unknown> {
          * @type {PlayerOptions}
          */
         this.options = {};
-
-        /**
-         * If this queue is destroyed
-         * @type {boolean}
-         * @name Queue#destroyed
-         */
 
         /**
          * Queue repeat mode
@@ -110,6 +104,14 @@ class Queue<T = unknown> {
     get current() {
         this.#watchDestroyed();
         return this.connection.audioResource?.metadata ?? this.tracks[0];
+    }
+
+    /**
+     * If this queue is destroyed
+     * @type {boolean}
+     */
+    get destroyed() {
+        return this.#destroyed;
     }
 
     /**
@@ -182,11 +184,12 @@ class Queue<T = unknown> {
      * @returns {void}
      */
     destroy(disconnect = this.options.leaveOnStop) {
+        this.#watchDestroyed();
         this.connection.end();
         if (disconnect) this.connection.disconnect();
         this.player.queues.delete(this.guild.id);
         this.player.voiceUtils.cache.delete(this.guild.id);
-        this.destroyed = true;
+        this.#destroyed = true;
     }
 
     /**
@@ -408,6 +411,7 @@ class Queue<T = unknown> {
      * @returns {void}
      */
     stop() {
+        this.#watchDestroyed();
         return this.destroy();
     }
 
@@ -416,6 +420,7 @@ class Queue<T = unknown> {
      * @returns {boolean}
      */
     shuffle() {
+        this.#watchDestroyed();
         if (!this.tracks.length || this.tracks.length < 3) return false;
         const currentTrack = this.tracks.shift();
 
@@ -435,6 +440,7 @@ class Queue<T = unknown> {
      * @returns {Track}
      */
     remove(track: Track | number) {
+        this.#watchDestroyed();
         let trackFound: Track = null;
         if (typeof track === "number") {
             trackFound = this.tracks[track];
@@ -457,6 +463,7 @@ class Queue<T = unknown> {
      * @returns {void}
      */
     jump(track: Track | number): void {
+        this.#watchDestroyed();
         const foundTrack = this.remove(track);
         if (!foundTrack) throw new Error("Track not found");
         this.tracks.splice(1, 0, foundTrack);
@@ -466,9 +473,9 @@ class Queue<T = unknown> {
 
     /**
      * @typedef {object} PlayerTimestamp
-     * @param {string} current The current progress
-     * @param {string} end The total time
-     * @param {number} progress Progress in %
+     * @property {string} current The current progress
+     * @property {string} end The total time
+     * @property {number} progress Progress in %
      */
 
     /**
@@ -477,6 +484,7 @@ class Queue<T = unknown> {
      * @returns {PlayerTimestamp}
      */
     getPlayerTimestamp(queue = false) {
+        this.#watchDestroyed();
         const previousTracksTime = this.previousTracks.length > 0 ? this.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
         const currentStreamTime = queue ? previousTracksTime + this.streamTime : this.streamTime;
         const totalTracksTime = this.totalTime;
@@ -498,6 +506,7 @@ class Queue<T = unknown> {
      * @returns {string}
      */
     createProgressBar(options: PlayerProgressbarOptions = { timecodes: true, queue: false }) {
+        this.#watchDestroyed();
         const previousTracksTime = this.previousTracks.length > 0 ? this.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
         const currentStreamTime = options.queue ? previousTracksTime + this.streamTime : this.streamTime;
         const totalTracksTime = this.totalTime;
@@ -532,6 +541,7 @@ class Queue<T = unknown> {
      * @type {Number}
      */
     get totalTime(): number {
+        this.#watchDestroyed();
         return this.tracks.length > 0 ? this.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0;
     }
 
@@ -666,7 +676,7 @@ class Queue<T = unknown> {
     }
 
     #watchDestroyed() {
-        if (this.destroyed) throw new Error("Cannot use destroyed queue");
+        if (this.#destroyed) throw new Error("Cannot use destroyed queue");
     }
 }
 
