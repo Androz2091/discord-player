@@ -1,6 +1,7 @@
 import { VoiceChannel, StageChannel, Collection, Snowflake } from "discord.js";
 import { DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
 import { StreamDispatcher } from "./BasicStreamDispatcher";
+import { VoiceAdapterCreator } from "./AdapterCreator";
 
 class VoiceUtils {
     public cache: Collection<Snowflake, StreamDispatcher>;
@@ -53,7 +54,7 @@ class VoiceUtils {
         let conn = joinVoiceChannel({
             guildId: channel.guild.id,
             channelId: channel.id,
-            adapterCreator: options.adapter ?? (channel.guild as any).voiceAdapterCreator, // eslint-disable-line @typescript-eslint/no-explicit-any
+            adapterCreator: options.adapter ?? (channel.guild as any).voiceAdapterCreator ?? VoiceAdapterCreator(channel), // eslint-disable-line @typescript-eslint/no-explicit-any
             selfDeaf: Boolean(options.deaf)
         });
 
