@@ -4,7 +4,6 @@ export { Playlist } from "./Structures/Playlist";
 export { Player } from "./Player";
 export { QueryResolver } from "./utils/QueryResolver";
 export { Queue } from "./Structures/Queue";
-export { StreamUtils } from "./utils/StreamUtils";
 export { Track } from "./Structures/Track";
 export { Util } from "./utils/Util";
 export { VoiceUtils } from "./VoiceInterface/VoiceUtils";
