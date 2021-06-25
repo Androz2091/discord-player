@@ -289,6 +289,14 @@ class Queue<T = unknown> {
     }
 
     /**
+     * Mutes the playback
+     * @returns {void}
+     */
+    mute() {
+        this.volume = 0;
+    }
+
+    /**
      * The stream time of this queue
      * @type {number}
      */
