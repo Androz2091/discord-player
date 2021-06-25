@@ -1,4 +1,4 @@
-import { Collection, Guild, StageChannel, VoiceChannel } from "discord.js";
+import { Collection, Guild, StageChannel, VoiceChannel, Snowflake, SnowflakeUtil } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
 import Track from "./Track";
@@ -19,6 +19,7 @@ class Queue<T = unknown> {
     public playing = false;
     public metadata?: T = null;
     public repeatMode: QueueRepeatMode = 0;
+    public readonly id: Snowflake = SnowflakeUtil.generate();
     private _streamTime = 0;
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -80,6 +81,12 @@ class Queue<T = unknown> {
          * The connection
          * @type {StreamDispatcher}
          * @name Queue#connection
+         */
+
+        /**
+         * The ID of this queue
+         * @type {Snowflake}
+         * @name Queue#id
          */
 
         Object.assign(
@@ -444,21 +451,21 @@ class Queue<T = unknown> {
 
     /**
      * Removes a track from the queue
-     * @param {Track|number} track The track to remove
+     * @param {Track|Snowflake|number} track The track to remove
      * @returns {Track}
      */
-    remove(track: Track | number) {
+    remove(track: Track | Snowflake | number) {
         this.#watchDestroyed();
         let trackFound: Track = null;
         if (typeof track === "number") {
             trackFound = this.tracks[track];
             if (trackFound) {
-                this.tracks = this.tracks.filter((t) => t._trackID !== trackFound._trackID);
+                this.tracks = this.tracks.filter((t) => t.id !== trackFound.id);
             }
         } else {
-            trackFound = this.tracks.find((s) => s._trackID === track._trackID);
+            trackFound = this.tracks.find((s) => s.id === (track instanceof Track ? track.id : track));
             if (trackFound) {
-                this.tracks = this.tracks.filter((s) => s._trackID !== trackFound._trackID);
+                this.tracks = this.tracks.filter((s) => s.id !== trackFound.id);
             }
         }
 
@@ -567,7 +574,7 @@ class Queue<T = unknown> {
         if (!track) return;
 
         if (!options.filtersUpdate) {
-            this.previousTracks = this.previousTracks.filter((x) => x._trackID !== track._trackID);
+            this.previousTracks = this.previousTracks.filter((x) => x.id !== track.id);
             this.previousTracks.push(track);
         }
 
@@ -667,6 +674,7 @@ class Queue<T = unknown> {
     toJSON() {
         this.#watchDestroyed();
         return {
+            id: this.id,
             guild: this.guild.id,
             voiceChannel: this.connection?.channel?.id,
             options: this.options,

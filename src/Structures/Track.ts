@@ -1,4 +1,4 @@
-import { User, Util } from "discord.js";
+import { User, Util, SnowflakeUtil, Snowflake } from "discord.js";
 import { Player } from "../Player";
 import { RawTrackData, TrackJSON } from "../types/types";
 import { Playlist } from "./Playlist";
@@ -16,7 +16,7 @@ class Track {
     public requestedBy!: User;
     public playlist?: Playlist;
     public readonly raw: RawTrackData = {} as RawTrackData;
-    public readonly _trackID = Date.now();
+    public readonly id: Snowflake = SnowflakeUtil.generate();
 
     /**
      * Track constructor
@@ -164,6 +164,7 @@ class Track {
      */
     toJSON(hidePlaylist?: boolean) {
         return {
+            id: this.id,
             title: this.title,
             description: this.description,
             author: this.author,

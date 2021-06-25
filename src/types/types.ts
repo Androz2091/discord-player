@@ -406,6 +406,7 @@ export interface PlaylistInitData {
  * @property {PlaylistJSON} [playlist] The playlist info (if any)
  */
 export interface TrackJSON {
+    id: Snowflake;
     title: string;
     description: string;
     author: string;
