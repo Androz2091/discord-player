@@ -94,8 +94,8 @@ class Track {
 
         /**
          * The track id
-         * @name Track#_trackID
-         * @type {number}
+         * @name Track#id
+         * @type {Snowflake}
          * @readonly
          */
 
