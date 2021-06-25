@@ -1,6 +1,6 @@
 import { Collection, Guild, StageChannel, VoiceChannel } from "discord.js";
 import { Player } from "../Player";
-import { StreamDispatcher } from "../VoiceInterface/BasicStreamDispatcher";
+import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
 import Track from "./Track";
 import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode } from "../types/types";
 import ytdl from "discord-ytdl-core";
@@ -616,6 +616,7 @@ class Queue<T = unknown> {
      * Private method to handle autoplay
      * @param {Track} track The source track to find its similar track for autoplay
      * @returns {Promise<void>}
+     * @private
      */
     private async _handleAutoplay(track: Track): Promise<void> {
         this.#watchDestroyed();

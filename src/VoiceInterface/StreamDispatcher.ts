@@ -18,10 +18,12 @@ import Track from "../Structures/Track";
 import { Util } from "../utils/Util";
 
 export interface VoiceEvents {
-    error: (error: AudioPlayerError) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    debug: (message: string) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    start: (resource: AudioResource<Track>) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    finish: (resource: AudioResource<Track>) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    error: (error: AudioPlayerError) => any;
+    debug: (message: string) => any;
+    start: (resource: AudioResource<Track>) => any;
+    finish: (resource: AudioResource<Track>) => any;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 class StreamDispatcher extends EventEmitter<VoiceEvents> {
