@@ -1,6 +1,6 @@
 {
   "name": "discord-player",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "description": "Complete framework to facilitate music commands using discord.js",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -54,7 +54,7 @@
     "soundcloud-scraper": "^5.0.0",
     "spotify-url-info": "^2.2.3",
     "youtube-sr": "^4.1.5",
-    "ytdl-core": "^4.8.2"
+    "ytdl-core": "^4.8.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.16",
