@@ -24,6 +24,7 @@ class Queue<T = unknown> {
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
     private _filtersUpdate = false;
+    #lastVolume = 0;
     #destroyed = false;
 
     /**
@@ -265,6 +266,7 @@ class Queue<T = unknown> {
     setVolume(amount: number) {
         this.#watchDestroyed();
         if (!this.connection) return false;
+        this.#lastVolume = amount;
         this.options.initialVolume = amount;
         return this.connection.setVolume(amount);
     }
@@ -300,7 +302,17 @@ class Queue<T = unknown> {
      * @returns {void}
      */
     mute() {
+        const lv = this.#lastVolume;
         this.volume = 0;
+        this.#lastVolume = lv;
+    }
+
+    /**
+     * Unmutes the playback. If the last volume was set to 0, unmute will produce no effect.
+     * @returns {void}
+     */
+    unmute() {
+        this.volume = this.#lastVolume;
     }
 
     /**
@@ -623,7 +635,7 @@ class Queue<T = unknown> {
         this._filtersUpdate = options.filtersUpdate;
 
         this.connection.playStream(resource).then(() => {
-            this.connection.setVolume(this.options.initialVolume);
+            this.setVolume(this.options.initialVolume);
         });
     }
 
