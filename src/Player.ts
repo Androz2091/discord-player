@@ -488,32 +488,53 @@ export class Player extends EventEmitter {
         if (typeof query === 'string') query = query.replace(/<(.+)>/g, '$1');
         let track;
 
-        if (query instanceof Track) query = query.url;
+        if (query instanceof Track) track = query;
         else {
-            for (const [_, extractor] of this.Extractors) {
-                if (extractor.validate(query)) {
-                    const data = await extractor.handle(query);
-                    if (data) {
-                        track = new Track(this, {
-                            title: data.title,
-                            description: data.description,
-                            duration: Util.buildTimeCode(Util.parseMS(data.duration)),
-                            thumbnail: data.thumbnail,
-                            author: data.author,
-                            views: data.views,
-                            engine: data.engine,
-                            source: data.source ?? 'arbitrary',
-                            fromPlaylist: false,
-                            requestedBy: message.author,
-                            url: data.url
-                        });
+            if (ytdl.validateURL(query)) {
+                const info = await ytdl.getBasicInfo(query).catch(() => {});
+                if (!info) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
+                if (info.videoDetails.isLiveContent && !this.options.enableLive) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.LIVE_VIDEO, message, new PlayerError('Live video is not enabled!'));
+                const lastThumbnail = info.videoDetails.thumbnails[info.videoDetails.thumbnails.length - 1];
 
-                        if (extractor.important) break;
+                track = new Track(this, {
+                    title: info.videoDetails.title,
+                    description: info.videoDetails.description,
+                    author: info.videoDetails.author.name,
+                    url: info.videoDetails.video_url,
+                    thumbnail: lastThumbnail.url,
+                    duration: Util.buildTimeCode(Util.parseMS(parseInt(info.videoDetails.lengthSeconds) * 1000)),
+                    views: parseInt(info.videoDetails.viewCount),
+                    requestedBy: message.author,
+                    fromPlaylist: false,
+                    source: 'youtube',
+                    live: Boolean(info.videoDetails.isLiveContent)
+                });
+            } else {
+                for (const [_, extractor] of this.Extractors) {
+                    if (extractor.validate(query)) {
+                        const data = await extractor.handle(query);
+                        if (data) {
+                            track = new Track(this, {
+                                title: data.title,
+                                description: data.description,
+                                duration: Util.buildTimeCode(Util.parseMS(data.duration)),
+                                thumbnail: data.thumbnail,
+                                author: data.author,
+                                views: data.views,
+                                engine: data.engine,
+                                source: data.source ?? 'arbitrary',
+                                fromPlaylist: false,
+                                requestedBy: message.author,
+                                url: data.url
+                            });
+
+                            if (extractor.important) break;
+                        }
                     }
                 }
-            }
 
-            if (!track) track = await this._searchTracks(message, query, firstResult);
+                if (!track) track = await this._searchTracks(message, query, firstResult);
+            }
         }
 
         if (track) {
