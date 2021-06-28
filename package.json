@@ -1,6 +1,6 @@
 {
   "name": "discord-player",
-  "version": "4.1.3",
+  "version": "4.1.4",
   "description": "Complete framework to facilitate music commands using discord.js",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

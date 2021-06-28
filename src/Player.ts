@@ -488,32 +488,53 @@ export class Player extends EventEmitter {
         if (typeof query === 'string') query = query.replace(/<(.+)>/g, '$1');
         let track;
 
-        if (query instanceof Track) query = query.url;
+        if (query instanceof Track) track = query;
         else {
-            for (const [_, extractor] of this.Extractors) {
-                if (extractor.validate(query)) {
-                    const data = await extractor.handle(query);
-                    if (data) {
-                        track = new Track(this, {
-                            title: data.title,
-                            description: data.description,
-                            duration: Util.buildTimeCode(Util.parseMS(data.duration)),
-                            thumbnail: data.thumbnail,
-                            author: data.author,
-                            views: data.views,
-                            engine: data.engine,
-                            source: data.source ?? 'arbitrary',
-                            fromPlaylist: false,
-                            requestedBy: message.author,
-                            url: data.url
-                        });
+            if (ytdl.validateURL(query)) {
+                const info = await YouTube.getVideo(query).catch(() => {});
+                if (!info) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
+                if (info.live && !this.options.enableLive) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.LIVE_VIDEO, message, new PlayerError('Live video is not enabled!'));
+                const lastThumbnail = typeof info.thumbnail === "string" ? info.thumbnail : info.thumbnail.url;
 
-                        if (extractor.important) break;
+                track = new Track(this, {
+                    title: info.title,
+                    description: info.description || "",
+                    author: info.channel.name,
+                    url: info.url,
+                    thumbnail: lastThumbnail,
+                    duration: Util.buildTimeCode(Util.parseMS(info.duration * 1000)),
+                    views: parseInt(info.views as unknown as string),
+                    requestedBy: message.author,
+                    fromPlaylist: false,
+                    source: 'youtube',
+                    live: Boolean(info.live)
+                });
+            } else {
+                for (const [_, extractor] of this.Extractors) {
+                    if (extractor.validate(query)) {
+                        const data = await extractor.handle(query);
+                        if (data) {
+                            track = new Track(this, {
+                                title: data.title,
+                                description: data.description,
+                                duration: Util.buildTimeCode(Util.parseMS(data.duration)),
+                                thumbnail: data.thumbnail,
+                                author: data.author,
+                                views: data.views,
+                                engine: data.engine,
+                                source: data.source ?? 'arbitrary',
+                                fromPlaylist: false,
+                                requestedBy: message.author,
+                                url: data.url
+                            });
+
+                            if (extractor.important) break;
+                        }
                     }
                 }
-            }
 
-            if (!track) track = await this._searchTracks(message, query, firstResult);
+                if (!track) track = await this._searchTracks(message, query, firstResult);
+            }
         }
 
         if (track) {
