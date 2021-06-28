@@ -1020,6 +1020,7 @@ export class Player extends EventEmitter {
             },
             system: {
                 arch: process.arch,
+                // @ts-ignore
                 platform: process.platform,
                 cpu: os.cpus().length,
                 memory: {
