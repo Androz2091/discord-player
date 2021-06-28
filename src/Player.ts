@@ -491,23 +491,23 @@ export class Player extends EventEmitter {
         if (query instanceof Track) track = query;
         else {
             if (ytdl.validateURL(query)) {
-                const info = await ytdl.getBasicInfo(query).catch(() => {});
+                const info = await YouTube.getVideo(query).catch(() => {});
                 if (!info) return void this.emit(PlayerEvents.NO_RESULTS, message, query);
-                if (info.videoDetails.isLiveContent && !this.options.enableLive) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.LIVE_VIDEO, message, new PlayerError('Live video is not enabled!'));
-                const lastThumbnail = info.videoDetails.thumbnails[info.videoDetails.thumbnails.length - 1];
+                if (info.live && !this.options.enableLive) return void this.emit(PlayerEvents.ERROR, PlayerErrorEventCodes.LIVE_VIDEO, message, new PlayerError('Live video is not enabled!'));
+                const lastThumbnail = typeof info.thumbnail === "string" ? info.thumbnail : info.thumbnail.url;
 
                 track = new Track(this, {
-                    title: info.videoDetails.title,
-                    description: info.videoDetails.description,
-                    author: info.videoDetails.author.name,
-                    url: info.videoDetails.video_url,
-                    thumbnail: lastThumbnail.url,
-                    duration: Util.buildTimeCode(Util.parseMS(parseInt(info.videoDetails.lengthSeconds) * 1000)),
-                    views: parseInt(info.videoDetails.viewCount),
+                    title: info.title,
+                    description: info.description || "",
+                    author: info.channel.name,
+                    url: info.url,
+                    thumbnail: lastThumbnail,
+                    duration: Util.buildTimeCode(Util.parseMS(info.duration * 1000)),
+                    views: parseInt(info.views as unknown as string),
                     requestedBy: message.author,
                     fromPlaylist: false,
                     source: 'youtube',
-                    live: Boolean(info.videoDetails.isLiveContent)
+                    live: Boolean(info.live)
                 });
             } else {
                 for (const [_, extractor] of this.Extractors) {
