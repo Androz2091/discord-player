@@ -499,6 +499,20 @@ class Queue<T = unknown> {
     }
 
     /**
+     * Inserts the given track to specified index
+     * @param {Track} track The track to insert
+     * @param {number} [index=0] The index where this track should be
+     */
+    insert(track: Track, index = 0) {
+        if (!track || !(track instanceof Track)) throw new TypeError("track must be the instance of Track");
+        if (typeof index !== "number" || index < 0 || !Number.isFinite(index)) throw new Error(`Invalid index "${index}"`);
+
+        this.tracks.splice(index, 0, track);
+
+        this.player.emit("trackAdd", this, track);
+    }
+
+    /**
      * @typedef {object} PlayerTimestamp
      * @property {string} current The current progress
      * @property {string} end The total time
