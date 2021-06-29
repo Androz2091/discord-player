@@ -5,6 +5,8 @@ on:
       - '*'
       - '!docs'
       - '!gh-pages'
+    tags:
+      - '*'
 jobs:
   docs:
     name: Documentation
