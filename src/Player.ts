@@ -309,7 +309,7 @@ export class Player extends EventEmitter {
                         const prioritisedTrack = tracks.splice(startFromIndex, 1);
                         tracks.unshift(prioritisedTrack);
                         const queue = this._addTracksToQueue(message, tracks);
-                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
+                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                     } else {
                         const track = tracks[startFromIndex];                       
                         const queue = (await this._createQueue(message, track).catch((e) =&gt; void this.emit(PlayerEvents.ERROR, e, message))) as Queue;                        
