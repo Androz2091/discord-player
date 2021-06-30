@@ -141,6 +141,7 @@ export class Player extends EventEmitter {
      * @param {DiscordMessage} message The message
      * @param {string} query The query
      * @param {boolean} [firstResult=false] If it should return the first result
+     * @param {number} [startFromIndex=0] Prioritise playing the track with following index (Only works with playlist)
      * @returns {Promise<Track>}
      * @private
      */
@@ -483,6 +484,7 @@ export class Player extends EventEmitter {
      * @param {DiscordMessage} message The discord.js message object
      * @param {string|Track} query Search query, can be `Player.Track` instance
      * @param {Boolean} [firstResult=false] If it should play the first result
+     * @param {number} [startFromIndex=0] Prioritise playing the track with following index (Only works with playlist)
      * @example await player.play(message, "never gonna give you up", true)
      * @returns {Promise<void>}
      */
