@@ -58,7 +58,7 @@ client.on("message", async (message) => {
                 options: [
                     {
                         name: "query",
-                        type: "String",
+                        type: "STRING",
                         description: "The song you want to play",
                         required: true
                     }
@@ -70,7 +70,7 @@ client.on("message", async (message) => {
                 options: [
                     {
                         name: "query",
-                        type: "String",
+                        type: "STRING",
                         description: "The song you want to play",
                         required: true
                     }
@@ -82,7 +82,7 @@ client.on("message", async (message) => {
                 options: [
                     {
                         name: "amount",
-                        type: "Integer",
+                        type: "INTEGER",
                         description: "The volume amount to set (0-100)",
                         required: false
                     }
@@ -94,7 +94,7 @@ client.on("message", async (message) => {
                 options: [
                     {
                         name: "mode",
-                        type: "Integer",
+                        type: "INTEGER",
                         description: "Loop type",
                         required: true,
                         choices: [
