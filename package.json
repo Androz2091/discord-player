@@ -52,7 +52,7 @@
   },
   "homepage": "https://discord-player.js.org",
   "dependencies": {
-    "@discordjs/voice": "^0.5.0",
+    "@discordjs/voice": "^0.5.1",
     "discord-ytdl-core": "^5.0.4",
     "libsodium-wrappers": "^0.7.9",
     "soundcloud-scraper": "^5.0.0",
@@ -73,7 +73,7 @@
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "@typescript-eslint/parser": "^4.28.0",
     "discord-api-types": "^0.18.1",
-    "discord.js": "^13.0.0-dev.6d3d00b44577a70e840f0187d6894043677c5329",
+    "discord.js": "^13.0.0-dev.5842e35.1625011425",
     "discord.js-docgen": "discordjs/docgen#ts-patch",
     "eslint": "^7.29.0",
     "jsdoc-babel": "^0.5.0",

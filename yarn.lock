@@ -963,10 +963,10 @@
     "@discordjs/node-pre-gyp" "^0.4.0"
     node-addon-api "^3.2.1"
 
-"@discordjs/voice@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@discordjs/voice/-/voice-0.5.0.tgz#238d6f8c1dc7e30ff781edb08fb0540bca5aa23d"
-  integrity sha512-YPfY8ium1lExmRETz+vC4d3gGvHhGvWQMWLTOkNBoUkN6VyEpO/RVrL5EI+0qUefKAWwv2Gus/c7QM1xhAUwow==
+"@discordjs/voice@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@discordjs/voice/-/voice-0.5.1.tgz#265b05712196bbbb5b082b073807ef4582f067c7"
+  integrity sha512-51NrtmfkGe6xJVMULjxXdQ9apPsqNyV1vZ/Qa57x6qM3TzWWQNyMfrLkjD+YvQtesZZpKZcQZI8NIknWUYiBNQ==
   dependencies:
     "@types/ws" "^7.4.4"
     discord-api-types "^0.18.1"
@@ -1027,10 +1027,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@sapphire/async-queue@^1.1.2":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@sapphire/async-queue/-/async-queue-1.1.3.tgz#fbc70f2687a2473bd824a4723e962dfce933eba7"
-  integrity sha512-pyV+0njfBq6rHKEOpux5xy2cEM5u9KFjVzpmKsgk/8mdslLCuNXX4QvxWsSerLq/EtLhkvvl998cdFbGtpHa9Q==
+"@sapphire/async-queue@^1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@sapphire/async-queue/-/async-queue-1.1.4.tgz#ae431310917a8880961cebe8e59df6ffa40f2957"
+  integrity sha512-fFrlF/uWpGOX5djw5Mu2Hnnrunao75WGey0sP0J3jnhmrJ5TAPzHYOmytD5iN/+pMxS+f+u/gezqHa9tPhRHEA==
 
 "@tootallnate/once@1":
   version "1.1.2"
@@ -1067,7 +1067,7 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-15.12.4.tgz#e1cf817d70a1e118e81922c4ff6683ce9d422e26"
   integrity sha512-zrNj1+yqYF4WskCMOHwN+w9iuD12+dGm0rQ35HLl9/Ouuq52cEtd0CH9qMgrdNmi5ejC1/V7vKEXYubB+65DkA==
 
-"@types/ws@^7.4.4":
+"@types/ws@^7.4.4", "@types/ws@^7.4.5":
   version "7.4.5"
   resolved "https://registry.yarnpkg.com/@types/ws/-/ws-7.4.5.tgz#8ff0f7efcd8fea19f51f9dd66cb8b498d172a752"
   integrity sha512-8mbDgtc8xpxDDem5Gwj76stBDJX35KQ3YBoayxlqUQcL5BZUthiqP/VQ4PQnLHqM4PmlbyO74t98eJpURO+gPA==
@@ -1986,6 +1986,11 @@ discord-api-types@^0.18.1:
   resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.18.1.tgz#5d08ed1263236be9c21a22065d0e6b51f790f492"
   integrity sha512-hNC38R9ZF4uaujaZQtQfm5CdQO58uhdkoHQAVvMfIL0LgOSZeW575W8H6upngQOuoxWd8tiRII3LLJm9zuQKYg==
 
+discord-api-types@^0.19.0-next.f393ba520d7d6d2aacaca7b3ca5d355fab614f6e:
+  version "0.19.0-next.f393ba520d7d6d2aacaca7b3ca5d355fab614f6e"
+  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.19.0-next.f393ba520d7d6d2aacaca7b3ca5d355fab614f6e.tgz#d5f36f5712ec8fe2fe928b5c37618c94a3969d6a"
+  integrity sha512-ttRA/8e/WKHDbGFfED5WlS7gID+kalmNr6iMiWBCvkphQ7kFHiTOVbnj/zX9ksaRaYXp/I38SCQ+qZvLu8DJZg==
+
 discord-ytdl-core@^5.0.4:
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/discord-ytdl-core/-/discord-ytdl-core-5.0.4.tgz#84a2af1a8e8c235b4fc109b23350d12782ab66cd"
@@ -2003,19 +2008,19 @@ discord.js-docgen@discordjs/docgen#ts-patch:
     tsubaki "^1.3.2"
     yargs "^14.0.0"
 
-discord.js@^13.0.0-dev.6d3d00b44577a70e840f0187d6894043677c5329:
-  version "13.0.0-dev.6d3d00b44577a70e840f0187d6894043677c5329"
-  resolved "https://registry.yarnpkg.com/discord.js/-/discord.js-13.0.0-dev.6d3d00b44577a70e840f0187d6894043677c5329.tgz#7593fc7d86651f65c4e1f6a67802b7b72c532695"
-  integrity sha512-K2jlMXX4cB8+/6CYh/QywULgUcMSJcR6CycEGnONeCskrejtArCUmiV8dKu20ABv3CeHWgTVN261BQWRTTelRg==
+discord.js@^13.0.0-dev.5842e35.1625011425:
+  version "13.0.0-dev.5842e35.1625011425"
+  resolved "https://registry.yarnpkg.com/discord.js/-/discord.js-13.0.0-dev.5842e35.1625011425.tgz#aa9dff8bac393dafbcd4a29132b53931c2297a84"
+  integrity sha512-68yUruYVN3mYKVMNfAfQp6RDl+zcgNSHS82S83HExWwdzTRSd4lnO3MJrk1Oc+Eoy4UNVE1LoCXkOUN64MitSA==
   dependencies:
     "@discordjs/collection" "^0.1.6"
     "@discordjs/form-data" "^3.0.1"
-    "@sapphire/async-queue" "^1.1.2"
-    "@types/ws" "^7.4.4"
+    "@sapphire/async-queue" "^1.1.4"
+    "@types/ws" "^7.4.5"
     abort-controller "^3.0.0"
-    discord-api-types "^0.18.1"
+    discord-api-types "^0.19.0-next.f393ba520d7d6d2aacaca7b3ca5d355fab614f6e"
     node-fetch "^2.6.1"
-    ws "^7.4.6"
+    ws "^7.5.0"
 
 dmd@^4.0.5:
   version "4.0.6"
@@ -4840,10 +4845,15 @@ write@1.0.3:
   dependencies:
     mkdirp "^0.5.1"
 
-ws@^7.4.4, ws@^7.4.5, ws@^7.4.6:
+ws@^7.4.4, ws@^7.4.5:
   version "7.5.0"
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.0.tgz#0033bafea031fb9df041b2026fc72a571ca44691"
   integrity sha512-6ezXvzOZupqKj4jUqbQ9tXuJNo+BR2gU8fFRk3XCP3e0G6WT414u5ELe6Y0vtp7kmSJ3F7YWObSNr1ESsgi4vw==
+
+ws@^7.5.0:
+  version "7.5.1"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.1.tgz#44fc000d87edb1d9c53e51fbc69a0ac1f6871d66"
+  integrity sha512-2c6faOUH/nhoQN6abwMloF7Iyl0ZS2E9HGtsiLrWn0zOOMWlhtDmdf/uihDt6jnuCxgtwGBNy6Onsoy2s2O2Ow==
 
 xml-name-validator@^3.0.0:
   version "3.0.0"
