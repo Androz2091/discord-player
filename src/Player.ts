@@ -145,7 +145,7 @@ export class Player extends EventEmitter {
      * @returns {Promise<Track>}
      * @private
      */
-    private _searchTracks(message: Message, query: string, firstResult?: boolean, startFromIndex?: number = 0): Promise<Track> {
+    private _searchTracks(message: Message, query: string, firstResult?: boolean, startFromIndex = 0): Promise<Track> {
         return new Promise(async (resolve) => {
             let tracks: Track[] = [];
             const queryType = Util.getQueryType(query);
@@ -312,12 +312,12 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                     } else {
-                        const track = tracks[startFromIndex];                       
-                        const queue = (await this._createQueue(message, track).catch((e) =&gt; void this.emit(PlayerEvents.ERROR, e, message))) as Queue;                        
+                        const track = tracks[startFromIndex];
+                        const queue = (await this._createQueue(message, track).catch((e) => void this.emit(PlayerEvents.ERROR, e, message))) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
-                        tracks.splice(startFromIndex, 1);                        
-                        this._addTracksToQueue(message, tracks);                        
-                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
+                        tracks.splice(startFromIndex, 1);
+                        this._addTracksToQueue(message, tracks);
+                        this.emit(PlayerEvents.TRACK_START, message, track, queue);
                     }
 
                     return;
@@ -371,12 +371,12 @@ export class Player extends EventEmitter {
                         const queue = this._addTracksToQueue(message, tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
                     } else {
-                        const track = tracks[startFromIndex];                       
-                        const queue = (await this._createQueue(message, track).catch((e) =&gt; void this.emit(PlayerEvents.ERROR, e, message))) as Queue;                        
+                        const track = tracks[startFromIndex];
+                        const queue = (await this._createQueue(message, track).catch((e) => void this.emit(PlayerEvents.ERROR, e, message))) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
-                        tracks.splice(startFromIndex, 1);                        
-                        this._addTracksToQueue(message, tracks);                        
-                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
+                        tracks.splice(startFromIndex, 1);
+                        this._addTracksToQueue(message, tracks);
+                        this.emit(PlayerEvents.TRACK_START, message, track, queue);
                     }
 
                     return;
@@ -427,12 +427,12 @@ export class Player extends EventEmitter {
                         res.tracks.unshift(prioritisedTrack);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
                     } else {
-                        const track = res.tracks[startFromIndex ? startFromIndex - 1 : 0];        
+                        const track = res.tracks[startFromIndex];
                         const queue = (await this._createQueue(message, track).catch((e) => void this.emit(PlayerEvents.ERROR, e, message))) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
-                        res.tracks.splice(startFromIndex ? startFromIndex - 1 : 0, 1);   
+                        res.tracks.splice(startFromIndex, 1);
                         this._addTracksToQueue(message, res.tracks);
-                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
+                        this.emit(PlayerEvents.TRACK_START, message, track, queue);
                     }
 
                     return;
@@ -488,7 +488,7 @@ export class Player extends EventEmitter {
      * @example await player.play(message, "never gonna give you up", true)
      * @returns {Promise<void>}
      */
-    async play(message: Message, query: string | Track, firstResult?: boolean, startFromIndex?: number = 0): Promise<void> {
+    async play(message: Message, query: string | Track, firstResult?: boolean, startFromIndex = 0): Promise<void> {
         if (!message) throw new PlayerError('Play function needs message');
         if (!query) throw new PlayerError('Play function needs search query as a string or Player.Track object');
 
