@@ -534,6 +534,7 @@ class Queue<T = unknown> {
         const currentTimecode = Util.buildTimeCode(Util.parseMS(currentStreamTime));
         const endTimecode = Util.buildTimeCode(Util.parseMS(totalTime));
 
+        // why 
         return {
             current: currentTimecode,
             end: endTimecode,
@@ -593,11 +594,13 @@ class Queue<T = unknown> {
      * @returns {Promise<void>}
      */
     async play(src?: Track, options: PlayOptions = {}): Promise<void> {
-        this.#watchDestroyed();
+        if (!this.destroyed) this.#watchDestroyed();
         if (!this.connection || !this.connection.voiceConnection) throw new Error("Voice connection is not available, use <Queue>.connect()!");
         if (src && (this.playing || this.tracks.length) && !options.immediate) return this.addTrack(src);
         const track = options.filtersUpdate && !options.immediate ? src || this.current : src ?? this.tracks.shift();
         if (!track) return;
+
+        this.player.emit("debug", this, "Received play request");
 
         if (!options.filtersUpdate) {
             this.previousTracks = this.previousTracks.filter((x) => x.id !== track.id);
