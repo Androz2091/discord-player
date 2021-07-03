@@ -92,7 +92,7 @@ class Util {
      * @returns {Promise<unknown>}
      */
     static wait(time: number) {
-        return new Promise((r) => setTimeout(r, time).unref());
+        return new Promise((r) => setTimeout(r, time));
     }
 
     static get noop() {

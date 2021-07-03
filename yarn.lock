@@ -2030,10 +2030,10 @@ discord-ytdl-core@^5.0.4:
   dependencies:
     prism-media "^1.2.9"
 
-discord.js@^13.0.0-dev.3a718d8.1625270632:
-  version "13.0.0-dev.fe6cc0c.1625227356"
-  resolved "https://registry.yarnpkg.com/discord.js/-/discord.js-13.0.0-dev.fe6cc0c.1625227356.tgz#1fafefe671758898afd3c092cef6447286d2ca27"
-  integrity sha512-m9oY7nlAX6RhZYxTzg9s5JHGdkm6Fk+XKCHj2qeD7pG+GOmFV9mrqVBt5xZq4NZME81BmPASLhn0q6us4uDfJA==
+discord.js@^13.0.0-dev.56b5b7e.1625313788:
+  version "13.0.0-dev.56b5b7e.1625313788"
+  resolved "https://registry.yarnpkg.com/discord.js/-/discord.js-13.0.0-dev.56b5b7e.1625313788.tgz#32931b0dd7fe25b32aec13e230497fdd1b3bee0d"
+  integrity sha512-D1d0fqjwa6ktn4yyZOE83Q/1sTl8ZNgJ95+cMUlK+FZBIe9G3nLHpHcCg+ph+SJIvQKUJubpzk2Yhbm/oJ1EvA==
   dependencies:
     "@discordjs/builders" "^0.1.1"
     "@discordjs/collection" "^0.1.6"
