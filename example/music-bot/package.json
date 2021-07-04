@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/opus": "^0.5.3",
-    "discord-player": "^5.0.0-dev.m3",
-    "discord.js": "^13.0.0-dev.610b0b4.1625357028"
+    "discord-player": "^5.0.0-dev.b0fa95473878f59791f5ac373b747d9cf0592f08",
+    "discord.js": "^13.0.0-dev.6d3d00b44577a70e840f0187d6894043677c5329"
   }
 }
