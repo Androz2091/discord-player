@@ -487,6 +487,15 @@ class Player extends EventEmitter<PlayerEvents> {
         return generateDependencyReport();
     }
 
+    /**
+     * Resolves qeuue
+     * @param {GuildResolvable|Queue} queueLike Queue like object
+     * @returns {Queue}
+     */
+    resolveQueue<T>(queueLike: GuildResolvable | Queue): Queue<T> {
+        return this.getQueue(queueLike instanceof Queue ? queueLike.guild : queueLike);
+    }
+
     *[Symbol.iterator]() {
         yield* Array.from(this.queues.values());
     }
