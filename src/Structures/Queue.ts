@@ -1,4 +1,4 @@
-import { Collection, Guild, StageChannel, VoiceChannel, Snowflake, SnowflakeUtil } from "discord.js";
+import { Collection, Guild, StageChannel, VoiceChannel, Snowflake, SnowflakeUtil, GuildChannelResolvable } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
 import Track from "./Track";
@@ -133,20 +133,21 @@ class Queue<T = unknown> {
 
     /**
      * Connects to a voice channel
-     * @param {StageChannel|VoiceChannel} channel The voice/stage channel
+     * @param {GuildChannelResolvable} channel The voice/stage channel
      * @returns {Promise<Queue>}
      */
-    async connect(channel: StageChannel | VoiceChannel) {
+    async connect(channel: GuildChannelResolvable) {
         this.#watchDestroyed();
-        if (!["stage", "voice"].includes(channel?.type)) throw new TypeError(`Channel type must be voice or stage, got ${channel?.type}!`);
-        const connection = await this.player.voiceUtils.connect(channel, {
+        const _channel = this.guild.channels.resolve(channel) as StageChannel | VoiceChannel;
+        if (!["stage", "voice"].includes(_channel?.type)) throw new TypeError(`Channel type must be voice or stage, got ${_channel?.type}!`);
+        const connection = await this.player.voiceUtils.connect(_channel, {
             deaf: this.options.autoSelfDeaf
         });
         this.connection = connection;
 
-        if (channel.type === "stage") {
-            await channel.guild.me.voice.setSuppressed(false).catch(async () => {
-                return await channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+        if (_channel.type === "stage") {
+            await _channel.guild.me.voice.setSuppressed(false).catch(async () => {
+                return await _channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
             });
         }
 
