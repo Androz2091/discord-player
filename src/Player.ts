@@ -398,7 +398,6 @@ class Player extends EventEmitter<PlayerEvents> {
                 const ytpl = await YouTube.getPlaylist(query).catch(Util.noop);
                 if (!ytpl) return { playlist: null, tracks: [] };
 
-                // @todo: better way of handling large playlists
                 await ytpl.fetch().catch(Util.noop);
 
                 const playlist: Playlist = new Playlist(this, {
