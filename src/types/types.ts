@@ -113,7 +113,6 @@ export interface TimeData {
  */
 export interface PlayerProgressbarOptions {
     timecodes?: boolean;
-    queue?: boolean;
     length?: number;
     line?: string;
     indicator?: string;
@@ -449,11 +448,11 @@ export interface PlaylistJSON {
 }
 
 /**
- * @typedef {object} DiscordPlayerInitOptions
+ * @typedef {object} PlayerInitOptions
  * @property {boolean} [autoRegisterExtractor=true] If it should automatically register `@discord-player/extractor`
  * @property {YTDLDownloadOptions} [ytdlOptions={}] The options passed to `ytdl-core`
  */
-export interface DiscordPlayerInitOptions {
+export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
     ytdlOptions?: downloadOptions;
 }

@@ -522,20 +522,16 @@ class Queue<T = unknown> {
 
     /**
      * Returns player stream timestamp
-     * @param {boolean} [queue=false] If it should generate timestamp for the queue
      * @returns {PlayerTimestamp}
      */
-    getPlayerTimestamp(queue = false) {
+    getPlayerTimestamp() {
         this.#watchDestroyed();
-        const previousTracksTime = this.previousTracks.length > 0 ? this.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
-        const currentStreamTime = queue ? previousTracksTime + this.streamTime : this.streamTime;
-        const totalTracksTime = this.totalTime;
-        const totalTime = queue ? previousTracksTime + totalTracksTime : this.current.durationMS;
+        const currentStreamTime = this.streamTime;
+        const totalTime = this.current.durationMS;
 
         const currentTimecode = Util.buildTimeCode(Util.parseMS(currentStreamTime));
         const endTimecode = Util.buildTimeCode(Util.parseMS(totalTime));
 
-        // why 
         return {
             current: currentTimecode,
             end: endTimecode,
@@ -548,15 +544,11 @@ class Queue<T = unknown> {
      * @param {PlayerProgressbarOptions} options The progress bar options
      * @returns {string}
      */
-    createProgressBar(options: PlayerProgressbarOptions = { timecodes: true, queue: false }) {
+    createProgressBar(options: PlayerProgressbarOptions = { timecodes: true }) {
         this.#watchDestroyed();
-        const previousTracksTime = this.previousTracks.length > 0 ? this.previousTracks.reduce((p, c) => p + c.durationMS, 0) : 0;
-        const currentStreamTime = options.queue ? previousTracksTime + this.streamTime : this.streamTime;
-        const totalTracksTime = this.totalTime;
-        const totalTime = options.queue ? previousTracksTime + totalTracksTime : this.current.durationMS;
         const length = typeof options.length === "number" ? (options.length <= 0 || options.length === Infinity ? 15 : options.length) : 15;
 
-        const index = Math.round((currentStreamTime / totalTime) * length);
+        const index = Math.round((this.streamTime / this.current.durationMS) * length);
         const indicator = typeof options.indicator === "string" && options.indicator.length > 0 ? options.indicator : "🔘";
         const line = typeof options.line === "string" && options.line.length > 0 ? options.line : "▬";
 
@@ -564,14 +556,14 @@ class Queue<T = unknown> {
             const bar = line.repeat(length - 1).split("");
             bar.splice(index, 0, indicator);
             if (options.timecodes) {
-                const timestamp = this.getPlayerTimestamp(options.queue);
+                const timestamp = this.getPlayerTimestamp();
                 return `${timestamp.current} ┃ ${bar.join("")} ┃ ${timestamp.end}`;
             } else {
                 return `${bar.join("")}`;
             }
         } else {
             if (options.timecodes) {
-                const timestamp = this.getPlayerTimestamp(options.queue);
+                const timestamp = this.getPlayerTimestamp();
                 return `${timestamp.current} ┃ ${indicator}${line.repeat(length - 1)} ┃ ${timestamp.end}`;
             } else {
                 return `${indicator}${line.repeat(length - 1)}`;

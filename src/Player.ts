@@ -2,7 +2,7 @@ import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState } from
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
-import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, DiscordPlayerInitOptions } from "./types/types";
+import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions } from "./types/types";
 import Track from "./Structures/Track";
 import { QueryResolver } from "./utils/QueryResolver";
 import YouTube from "youtube-sr";
@@ -19,7 +19,7 @@ const soundcloud = new SoundCloud();
 
 class Player extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
-    public readonly options: DiscordPlayerInitOptions = {
+    public readonly options: PlayerInitOptions = {
         autoRegisterExtractor: true,
         ytdlOptions: {}
     };
@@ -30,9 +30,9 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * Creates new Discord Player
      * @param {Client} client The Discord Client
-     * @param {DiscordPlayerInitOptions} [options={}] The player init options
+     * @param {PlayerInitOptions} [options={}] The player init options
      */
-    constructor(client: Client, options: DiscordPlayerInitOptions = {}) {
+    constructor(client: Client, options: PlayerInitOptions = {}) {
         super();
 
         /**
