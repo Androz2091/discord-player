@@ -973,10 +973,10 @@
     "@discordjs/node-pre-gyp" "^0.4.0"
     node-addon-api "^3.2.1"
 
-"@discordjs/voice@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@discordjs/voice/-/voice-0.5.0.tgz#238d6f8c1dc7e30ff781edb08fb0540bca5aa23d"
-  integrity sha512-YPfY8ium1lExmRETz+vC4d3gGvHhGvWQMWLTOkNBoUkN6VyEpO/RVrL5EI+0qUefKAWwv2Gus/c7QM1xhAUwow==
+"@discordjs/voice@^0.5.3":
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/@discordjs/voice/-/voice-0.5.3.tgz#fbb1821b64d3dff1d379ec3821d632f1e11b95bb"
+  integrity sha512-We7rumaR6prv/nHavWQzo/4Qk8enROWJ0Y8Zpe5GwI8vRXxas0Tn+oiD7PE+VTmIAx3QyMuB3l26mHv7zydTdQ==
   dependencies:
     "@types/ws" "^7.4.4"
     discord-api-types "^0.18.1"
