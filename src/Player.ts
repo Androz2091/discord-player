@@ -69,11 +69,11 @@ class Player extends EventEmitter<PlayerEvents> {
         const queue = this.getQueue(oldState.guild.id);
         if (!queue) return;
 
-        if (oldState.channelID && newState.channelID && oldState.channelID !== newState.channelID) {
+        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
             queue.connection.channel = newState.channel;
         }
 
-        if (!oldState.channelID && newState.channelID && newState.member.id === newState.guild.me.id) {
+        if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.me.id) {
             if (newState.serverMute || !newState.serverMute) {
                 queue.setPaused(newState.serverMute);
             } else if (newState.suppress || !newState.suppress) {
@@ -82,7 +82,7 @@ class Player extends EventEmitter<PlayerEvents> {
             }
         }
 
-        if (oldState.channelID === newState.channelID && oldState.member.id === newState.guild.me.id) {
+        if (oldState.channelId === newState.channelId && oldState.member.id === newState.guild.me.id) {
             if (oldState.serverMute !== newState.serverMute) {
                 queue.setPaused(newState.serverMute);
             } else if (oldState.suppress !== newState.suppress) {
@@ -91,14 +91,14 @@ class Player extends EventEmitter<PlayerEvents> {
             }
         }
 
-        if (oldState.member.id === this.client.user.id && !newState.channelID) {
+        if (oldState.member.id === this.client.user.id && !newState.channelId) {
             queue.destroy();
             return void this.emit("botDisconnect", queue);
         }
 
         if (!queue.options.leaveOnEmpty || !queue.connection || !queue.connection.channel) return;
 
-        if (!oldState.channelID || newState.channelID) {
+        if (!oldState.channelId || newState.channelId) {
             const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
             const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
 
