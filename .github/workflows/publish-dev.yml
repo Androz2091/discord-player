@@ -22,10 +22,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Deprecate old releases
+        run: npm deprecate discord-player@"~5.0.0-dev" "outdated version" || true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+
       - name: Publish
         run: |
           npx tsc --skipLibCheck
-          npm version --git-tag-version=false $(jq --raw-output '.version' package.json).$(git rev-parse --verify HEAD)
+          npm version --git-tag-version=false $(jq --raw-output '.version' package.json).$(git rev-parse --short HEAD).$(date +%s)
           npm publish --tag dev || true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
