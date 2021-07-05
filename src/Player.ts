@@ -1062,7 +1062,7 @@ export class Player extends EventEmitter {
         if (!queue) return;
 
         if (newState.member.id === this.client.user.id && !newState.channelID) {
-            queue.stream.destroy();
+            if (queue.stream) queue.stream.destroy();
             this.queues.delete(newState.guild.id);
             this.emit(PlayerEvents.BOT_DISCONNECT, queue.firstMessage);
         }
