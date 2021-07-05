@@ -1,13 +1,11 @@
 import { StageChannel, VoiceChannel } from "discord.js";
 import { TimeData } from "../types/types";
 
-class Util {
+class Util extends null {
     /**
      * Utils
      */
-    constructor() {
-        throw new Error("Cannot instantiate static class");
-    }
+    private constructor() { } // eslint-disable-line @typescript-eslint/no-empty-function
 
     /**
      * Creates duration string
