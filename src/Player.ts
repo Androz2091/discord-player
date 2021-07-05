@@ -502,7 +502,7 @@ export class Player extends EventEmitter {
                     author: info.channel.name,
                     url: info.url,
                     thumbnail: lastThumbnail,
-                    duration: Util.buildTimeCode(Util.parseMS(info.duration * 1000)),
+                    duration: Util.buildTimeCode(Util.parseMS(info.duration)),
                     views: parseInt(info.views as unknown as string),
                     requestedBy: message.author,
                     fromPlaylist: false,
