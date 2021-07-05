@@ -5,7 +5,7 @@ class Util extends null {
     /**
      * Utils
      */
-    private constructor() { } // eslint-disable-line @typescript-eslint/no-empty-function
+    private constructor() {} // eslint-disable-line @typescript-eslint/no-empty-function
 
     /**
      * Creates duration string
