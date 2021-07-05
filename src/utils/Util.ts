@@ -181,9 +181,10 @@ export class Util {
         const items = Object.keys(data);
         const required = ['days', 'hours', 'minutes', 'seconds'];
 
-        const parsed = items.filter((x) => required.includes(x)).map((m) => (data[m] > 0 ? data[m] : ''));
+        const parsed = items.filter((x) => required.includes(x)).map((m) => data[m]);
+
         const final = parsed
-            .filter((x) => !!x)
+            .slice(parsed.findIndex((x) => x !== 0))
             .map((x) => x.toString().padStart(2, '0'))
             .join(':');
         return final.length <= 3 ? `0:${final.padStart(2, '0') || 0}` : final;
