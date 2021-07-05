@@ -152,7 +152,7 @@ client.on("messageCreate", async (message) => {
     }
 });
 
-client.on("interaction", async (interaction) => {
+client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand() || !interaction.guildId) return;
 
     if (!(interaction.member instanceof GuildMember) || !interaction.member.voice.channel) {
