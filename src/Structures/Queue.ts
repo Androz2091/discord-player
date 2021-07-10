@@ -139,13 +139,13 @@ class Queue<T = unknown> {
     async connect(channel: GuildChannelResolvable) {
         this.#watchDestroyed();
         const _channel = this.guild.channels.resolve(channel) as StageChannel | VoiceChannel;
-        if (!["stage", "voice"].includes(_channel?.type)) throw new TypeError(`Channel type must be voice or stage, got ${_channel?.type}!`);
+        if (!["GUILD_STAGE_VOICE", "GUILD_VOICE"].includes(_channel?.type)) throw new TypeError(`Channel type must be GUILD_VOICE or GUILD_STAGE_VOICE, got ${_channel?.type}!`);
         const connection = await this.player.voiceUtils.connect(_channel, {
             deaf: this.options.autoSelfDeaf
         });
         this.connection = connection;
 
-        if (_channel.type === "stage") {
+        if (_channel.type === "GUILD_STAGE_VOICE") {
             await _channel.guild.me.voice.setSuppressed(false).catch(async () => {
                 return await _channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
             });
