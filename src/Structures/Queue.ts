@@ -715,7 +715,7 @@ class Queue<T = unknown> {
     }
 
     #watchDestroyed() {
-        if (this.#destroyed) throw new Error("Cannot use destroyed queue");
+        if (this.#destroyed) this.player.emit("error", this, {message: "Cannot use destroyed queue"})
     }
 }
 
