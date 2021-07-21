@@ -99,7 +99,8 @@ class Queue<T = unknown> {
                 leaveOnEmptyCooldown: 1000,
                 autoSelfDeaf: true,
                 ytdlOptions: {},
-                initialVolume: 100
+                initialVolume: 100,
+                bufferingTimeout: 1000
             } as PlayerOptions,
             options
         );
@@ -644,9 +645,11 @@ class Queue<T = unknown> {
         if (options.seek) this._streamTime = options.seek;
         this._filtersUpdate = options.filtersUpdate;
 
-        this.connection.playStream(resource).then(() => {
-            this.setVolume(this.options.initialVolume);
-        });
+        setTimeout(() => {
+            this.connection.playStream(resource).then(() => {
+                this.setVolume(this.options.initialVolume);
+            });
+        }, this.#getBufferingTimeout());
     }
 
     /**
@@ -716,6 +719,13 @@ class Queue<T = unknown> {
 
     #watchDestroyed() {
         if (this.#destroyed) throw new Error("Cannot use destroyed queue");
+    }
+
+    #getBufferingTimeout() {
+        const timeout = this.options.bufferingTimeout;
+
+        if (isNaN(timeout) || timeout < 0 || !Number.isFinite(timeout)) return 1000;
+        return timeout;
     }
 }
 

@@ -52,14 +52,14 @@
   },
   "homepage": "https://discord-player.js.org",
   "dependencies": {
-    "@discordjs/voice": "^0.5.3",
+    "@discordjs/voice": "^0.5.4",
     "discord-ytdl-core": "^5.0.4",
     "libsodium-wrappers": "^0.7.9",
     "soundcloud-scraper": "^5.0.0",
     "spotify-url-info": "^2.2.3",
     "tiny-typed-emitter": "^2.0.3",
     "youtube-sr": "^4.1.7",
-    "ytdl-core": "^4.8.3"
+    "ytdl-core": "^4.9.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.5",
@@ -74,7 +74,7 @@
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
     "discord-api-types": "^0.18.1",
-    "discord.js": "^13.0.0-dev.d6c43a5.1625875428",
+    "discord.js": "^13.0.0-dev.1e90be8.1626825831",
     "eslint": "^7.30.0",
     "jsdoc-babel": "^0.5.0",
     "prettier": "^2.3.2",

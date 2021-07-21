@@ -981,10 +981,10 @@
     "@discordjs/node-pre-gyp" "^0.4.0"
     node-addon-api "^3.2.1"
 
-"@discordjs/voice@^0.5.3":
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/@discordjs/voice/-/voice-0.5.3.tgz#fbb1821b64d3dff1d379ec3821d632f1e11b95bb"
-  integrity sha512-We7rumaR6prv/nHavWQzo/4Qk8enROWJ0Y8Zpe5GwI8vRXxas0Tn+oiD7PE+VTmIAx3QyMuB3l26mHv7zydTdQ==
+"@discordjs/voice@^0.5.4":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@discordjs/voice/-/voice-0.5.4.tgz#02af74778177be8f42772118ba2193af481f442e"
+  integrity sha512-CLkJH1YXHhLyocvwAgIJBeyCe3iBVvg6pDPcJUEAwg09TykjJRH6qSpg2ly858WffzR7jOsLcliODAOMDwKtnA==
   dependencies:
     "@types/ws" "^7.4.4"
     discord-api-types "^0.18.1"
@@ -1099,10 +1099,17 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.3.1.tgz#24691fa2b0c3ec8c0d34bfcfd495edac5593ebb4"
   integrity sha512-N87VuQi7HEeRJkhzovao/JviiqKjDKMVKxKMfUvSKw+MbkbW8R0nA3fi/MQhhlxV2fQ+2ReM+/Nt4efdrJx3zA==
 
-"@types/ws@^7.4.4", "@types/ws@^7.4.5", "@types/ws@^7.4.6":
+"@types/ws@^7.4.4", "@types/ws@^7.4.6":
   version "7.4.6"
   resolved "https://registry.yarnpkg.com/@types/ws/-/ws-7.4.6.tgz#c4320845e43d45a7129bb32905e28781c71c1fff"
   integrity sha512-ijZ1vzRawI7QoWnTNL8KpHixd2b2XVb9I9HAqI3triPsh1EC0xH0Eg6w2O3TKbDCgiNNlJqfrof6j4T2I+l9vw==
+  dependencies:
+    "@types/node" "*"
+
+"@types/ws@^7.4.5":
+  version "7.4.7"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-7.4.7.tgz#f7c390a36f7a0679aa69de2d501319f4f8d9b702"
+  integrity sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==
   dependencies:
     "@types/node" "*"
 
@@ -2018,10 +2025,10 @@ discord-api-types@^0.18.1:
   resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.18.1.tgz#5d08ed1263236be9c21a22065d0e6b51f790f492"
   integrity sha512-hNC38R9ZF4uaujaZQtQfm5CdQO58uhdkoHQAVvMfIL0LgOSZeW575W8H6upngQOuoxWd8tiRII3LLJm9zuQKYg==
 
-discord-api-types@^0.19.0-next.f393ba520d7d6d2aacaca7b3ca5d355fab614f6e:
-  version "0.19.0-next.f393ba520d7d6d2aacaca7b3ca5d355fab614f6e"
-  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.19.0-next.f393ba520d7d6d2aacaca7b3ca5d355fab614f6e.tgz#d5f36f5712ec8fe2fe928b5c37618c94a3969d6a"
-  integrity sha512-ttRA/8e/WKHDbGFfED5WlS7gID+kalmNr6iMiWBCvkphQ7kFHiTOVbnj/zX9ksaRaYXp/I38SCQ+qZvLu8DJZg==
+discord-api-types@^0.19.0:
+  version "0.19.0"
+  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.19.0.tgz#86ba8021b29190cf860e90a2bc3e29b1d7aab3ba"
+  integrity sha512-t2HKLd43Lbe+rf+ffYfKVv9Kk5f6p7sFqvO6CMV55ZB0PgZv8WigCkt9FoJciYo5S3Q6CGYK+WnE/ZG+6vkBDQ==
 
 discord-ytdl-core@^5.0.4:
   version "5.0.4"
@@ -2030,10 +2037,10 @@ discord-ytdl-core@^5.0.4:
   dependencies:
     prism-media "^1.2.9"
 
-discord.js@^13.0.0-dev.d6c43a5.1625875428:
-  version "13.0.0-dev.d6c43a5.1625875428"
-  resolved "https://registry.yarnpkg.com/discord.js/-/discord.js-13.0.0-dev.d6c43a5.1625875428.tgz#e8d963b33d18c7af77098e5fc6ef719972e73242"
-  integrity sha512-mTW3MpURf2QMjZe1O/H8owreUZttTfDyGY48Ka79l3GIJIHXOKx+hxv+yI5ve5GWF2ie6z8MPQ4hHqlTHk8OKg==
+discord.js@^13.0.0-dev.1e90be8.1626825831:
+  version "13.0.0-dev.1e90be8.1626825831"
+  resolved "https://registry.yarnpkg.com/discord.js/-/discord.js-13.0.0-dev.1e90be8.1626825831.tgz#2acfc7a95482863f4bafbe54464392f8d4a8ed3d"
+  integrity sha512-Kv32vfxiqHzSB4HY1MfHdvf868toZde86sPOCBhvmLbKZo5XaiZKMuZgfAUv7pBriNNTA0FtKoIid/2BqjuZqg==
   dependencies:
     "@discordjs/builders" "^0.2.0"
     "@discordjs/collection" "^0.1.6"
@@ -2041,7 +2048,7 @@ discord.js@^13.0.0-dev.d6c43a5.1625875428:
     "@sapphire/async-queue" "^1.1.4"
     "@types/ws" "^7.4.5"
     abort-controller "^3.0.0"
-    discord-api-types "^0.19.0-next.f393ba520d7d6d2aacaca7b3ca5d355fab614f6e"
+    discord-api-types "^0.19.0"
     node-fetch "^2.6.1"
     ws "^7.5.1"
 
@@ -4935,10 +4942,10 @@ youtube-sr@^4.1.7:
   dependencies:
     node-fetch "^2.6.1"
 
-ytdl-core@^4.8.3:
-  version "4.8.3"
-  resolved "https://registry.yarnpkg.com/ytdl-core/-/ytdl-core-4.8.3.tgz#21570d1834db13dec7828cf87bbf4c83c0fe68d7"
-  integrity sha512-cWCBeX4FCgjcKmuVK384MT582RIAakpUSeMF/NPVmhO8cWiG+LeQLnBordvLolb0iXYzfUvalgmycYAE5Sy6Xw==
+ytdl-core@^4.9.0:
+  version "4.9.0"
+  resolved "https://registry.yarnpkg.com/ytdl-core/-/ytdl-core-4.9.0.tgz#d166f6e7ab7c2ac344ada9568f507af1255c6406"
+  integrity sha512-pfuWqEIrP3iYqz5jOMmaz9m+DAzfQpt8X1jmzoOsPdYWrLMV4ml7+p/zhDi0F8IF90i4Jmd0Pq0W1awnKDatKg==
   dependencies:
     m3u8stream "^0.8.3"
     miniget "^4.0.0"
