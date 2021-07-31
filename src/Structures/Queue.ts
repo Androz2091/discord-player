@@ -169,6 +169,8 @@ class Queue<T = unknown> {
             this._streamTime = 0;
             if (resource && resource.metadata) this.previousTracks.push(resource.metadata);
 
+            this.player.emit("trackEnd", this, resource.metadata);
+
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
                 if (this.options.leaveOnEnd) this.destroy();
                 this.player.emit("queueEnd", this);
