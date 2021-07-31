@@ -141,10 +141,11 @@ export class Player extends EventEmitter {
      * @param {DiscordMessage} message The message
      * @param {string} query The query
      * @param {boolean} [firstResult=false] If it should return the first result
+     * @param {number} [startFromIndex=0] Prioritise playing the track with following index (Only works with playlist)
      * @returns {Promise<Track>}
      * @private
      */
-    private _searchTracks(message: Message, query: string, firstResult?: boolean): Promise<Track> {
+    private _searchTracks(message: Message, query: string, firstResult?: boolean, startFromIndex = 0): Promise<Track> {
         return new Promise(async (resolve) => {
             let tracks: Track[] = [];
             const queryType = Util.getQueryType(query);
@@ -302,17 +303,21 @@ export class Player extends EventEmitter {
                     };
 
                     this.emit(PlayerEvents.PLAYLIST_PARSE_END, pl, message);
+                    if (startFromIndex < 0) startFromIndex = 0;
+                    if (startFromIndex > tracks.length - 1) startFromIndex = tracks.length - 1;
 
                     if (this.isPlaying(message)) {
+                        const prioritisedTrack = tracks.splice(startFromIndex, 1);
+                        tracks.unshift(prioritisedTrack);
                         const queue = this._addTracksToQueue(message, tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
                     } else {
-                        const track = tracks[0];
+                        const track = tracks[startFromIndex];
                         const queue = (await this._createQueue(message, track).catch((e) => void this.emit(PlayerEvents.ERROR, e, message))) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
-                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
-                        tracks.shift();
+                        tracks.splice(startFromIndex, 1);
                         this._addTracksToQueue(message, tracks);
+                        this.emit(PlayerEvents.TRACK_START, message, track, queue);
                     }
 
                     return;
@@ -357,17 +362,21 @@ export class Player extends EventEmitter {
                     // @ts-ignore
                     // tslint:disable-next-line:no-shadowed-variable
                     const tracks = playlist.videos as Track[];
+                    if (startFromIndex < 0) startFromIndex = 0;
+                    if (startFromIndex > tracks.length - 1) startFromIndex = tracks.length - 1;
 
                     if (this.isPlaying(message)) {
+                        const prioritisedTrack = tracks.splice(startFromIndex, 1);
+                        tracks.unshift(prioritisedTrack);
                         const queue = this._addTracksToQueue(message, tracks);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
                     } else {
-                        const track = tracks[0];
+                        const track = tracks[startFromIndex];
                         const queue = (await this._createQueue(message, track).catch((e) => void this.emit(PlayerEvents.ERROR, e, message))) as Queue;
-                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, playlist);
-                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
-                        tracks[0];
+                        this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, pl);
+                        tracks.splice(startFromIndex, 1);
                         this._addTracksToQueue(message, tracks);
+                        this.emit(PlayerEvents.TRACK_START, message, track, queue);
                     }
 
                     return;
@@ -410,17 +419,20 @@ export class Player extends EventEmitter {
                     res.duration = res.tracks.reduce((a, c) => a + c.durationMS, 0);
 
                     this.emit(PlayerEvents.PLAYLIST_PARSE_END, res, message);
+                    if (startFromIndex < 0) res.startFromIndex = 0;
+                    if (startFromIndex > tracks.length - 1) startFromIndex = res.tracks.length - 1;
 
                     if (this.isPlaying(message)) {
-                        const queue = this._addTracksToQueue(message, res.tracks);
+                        const prioritisedTrack = res.tracks.splice(startFromIndex, 1);
+                        res.tracks.unshift(prioritisedTrack);
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
                     } else {
-                        const track = res.tracks[0];
+                        const track = res.tracks[startFromIndex];
                         const queue = (await this._createQueue(message, track).catch((e) => void this.emit(PlayerEvents.ERROR, e, message))) as Queue;
                         this.emit(PlayerEvents.PLAYLIST_ADD, message, queue, res);
-                        this.emit(PlayerEvents.TRACK_START, message, queue.tracks[0], queue);
-                        res.tracks.shift();
+                        res.tracks.splice(startFromIndex, 1);
                         this._addTracksToQueue(message, res.tracks);
+                        this.emit(PlayerEvents.TRACK_START, message, track, queue);
                     }
 
                     return;
@@ -459,7 +471,6 @@ export class Player extends EventEmitter {
                     this.emit(PlayerEvents.SEARCH_INVALID_RESPONSE, message, query, tracks, content, collector);
                 }
             });
-
             collector.on('end', (_, reason) => {
                 if (reason === 'time') {
                     this.emit(PlayerEvents.SEARCH_CANCEL, message, query, tracks);
@@ -473,10 +484,11 @@ export class Player extends EventEmitter {
      * @param {DiscordMessage} message The discord.js message object
      * @param {string|Track} query Search query, can be `Player.Track` instance
      * @param {Boolean} [firstResult=false] If it should play the first result
+     * @param {number} [startFromIndex=0] Prioritise playing the track with following index (Only works with playlist)
      * @example await player.play(message, "never gonna give you up", true)
      * @returns {Promise<void>}
      */
-    async play(message: Message, query: string | Track, firstResult?: boolean): Promise<void> {
+    async play(message: Message, query: string | Track, firstResult?: boolean, startFromIndex = 0): Promise<void> {
         if (!message) throw new PlayerError('Play function needs message');
         if (!query) throw new PlayerError('Play function needs search query as a string or Player.Track object');
 
@@ -533,7 +545,7 @@ export class Player extends EventEmitter {
                     }
                 }
 
-                if (!track) track = await this._searchTracks(message, query, firstResult);
+                if (!track) track = await this._searchTracks(message, query, firstResult, startFromIndex);
             }
         }
 
