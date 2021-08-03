@@ -1060,7 +1060,7 @@ export class Player extends EventEmitter {
         const queue = this.queues.find((g) => g.guildID === oldState.guild.id);
         if (!queue) return;
 
-        if (newState.member.id === this.client.user.id && !newState.channelID) {
+        if (newState.member.id === this.client.user.id && !newState.channelId) {
             queue.stream.destroy();
             this.queues.delete(newState.guild.id);
             this.emit(PlayerEvents.BOT_DISCONNECT, queue.firstMessage);
@@ -1069,7 +1069,7 @@ export class Player extends EventEmitter {
         if (!queue.voiceConnection || !queue.voiceConnection.channel) return;
         if (!this.options.leaveOnEmpty) return;
 
-        if (!oldState.channelID || newState.channelID) {
+        if (!oldState.channelId || newState.channelId) {
             const emptyTimeout = this._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
 
             // @todo: make stage channels stable
