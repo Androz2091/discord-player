@@ -98,7 +98,9 @@ class Queue<T = unknown> {
                 leaveOnEmpty: true,
                 leaveOnEmptyCooldown: 1000,
                 autoSelfDeaf: true,
-                ytdlOptions: {},
+                ytdlOptions: {
+                    highWaterMark: 1 << 25
+                },
                 initialVolume: 100,
                 bufferingTimeout: 1000
             } as PlayerOptions,

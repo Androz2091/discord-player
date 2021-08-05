@@ -21,7 +21,9 @@ class Player extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
     public readonly options: PlayerInitOptions = {
         autoRegisterExtractor: true,
-        ytdlOptions: {}
+        ytdlOptions: {
+            highWaterMark: 1 << 25
+        }
     };
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
