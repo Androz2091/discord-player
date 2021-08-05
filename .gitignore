@@ -4,7 +4,7 @@ package-lock.json
 yarn.lock
 
 # Compiled files
-lib
+dist
 
 # Yarn logs
 yarn*.log

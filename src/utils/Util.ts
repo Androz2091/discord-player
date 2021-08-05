@@ -1,7 +1,7 @@
 import { StageChannel, VoiceChannel } from "discord.js";
 import { TimeData } from "../types/types";
 
-class Util extends null {
+class Util {
     /**
      * Utils
      */

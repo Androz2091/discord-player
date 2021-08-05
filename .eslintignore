@@ -1,6 +1,6 @@
 example/
 node_modules/
-lib/
+dist/
 .github/
 docs/
 

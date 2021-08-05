@@ -2,15 +2,22 @@
   "name": "discord-player",
   "version": "5.0.0-dev",
   "description": "Complete framework to facilitate music commands using discord.js",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "lib/"
+    "dist/"
   ],
+  "module": "dist/index.mjs",
+  "exports": {
+    "require": "./dist/index.js",
+    "import": "./dist/index.mjs"
+  },
   "scripts": {
     "dev": "cd example/test && ts-node index.ts",
-    "build": "rimraf lib && tsc",
+    "build": "rimraf dist && tsc && npm run build:esm",
     "build:check": "tsc --noEmit --incremental false",
+    "prepublishOnly": "rollup-type-bundler -e stream",
+    "build:esm": "gen-esm-wrapper ./dist/index.js ./dist/index.mjs",
     "format": "prettier --write \"src/**/*.ts\" \"example/**/*.ts\"",
     "docs": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml --output docs/docs.json",
     "docs:test": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml",
@@ -69,6 +76,7 @@
     "@devsnowflake/docgen": "devsnowflake/docgen#ts-patch",
     "@discord-player/extractor": "^3.0.2",
     "@discordjs/opus": "^0.5.3",
+    "@favware/rollup-type-bundler": "^1.0.3",
     "@types/node": "^16.4.12",
     "@types/ws": "^7.4.7",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
@@ -76,6 +84,7 @@
     "discord-api-types": "^0.22.0",
     "discord.js": "^13.0.0-dev.t1628124537.3eb4140",
     "eslint": "^7.32.0",
+    "gen-esm-wrapper": "^1.1.2",
     "husky": "^7.0.1",
     "jsdoc-babel": "^0.5.0",
     "prettier": "^2.3.2",
