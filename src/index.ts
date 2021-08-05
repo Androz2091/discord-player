@@ -8,5 +8,4 @@ export { Track } from "./Structures/Track";
 export { Util } from "./utils/Util";
 export { VoiceUtils } from "./VoiceInterface/VoiceUtils";
 export { VoiceEvents, StreamDispatcher } from "./VoiceInterface/StreamDispatcher";
-export { VoiceAdapterCreator } from "./VoiceInterface/AdapterCreator";
 export * from "./types/types";
