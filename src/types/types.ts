@@ -317,6 +317,7 @@ export interface PlayerEvents {
     trackAdd: (queue: Queue, track: Track) => any;
     tracksAdd: (queue: Queue, track: Track[]) => any;
     trackStart: (queue: Queue, track: Track) => any;
+    trackEnd: (queue: Queue, track: Track) => any;
 }
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
