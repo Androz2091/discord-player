@@ -76,6 +76,7 @@
     "discord-api-types": "^0.22.0",
     "discord.js": "^13.0.0-dev.t1628124537.3eb4140",
     "eslint": "^7.32.0",
+    "husky": "^7.0.1",
     "jsdoc-babel": "^0.5.0",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
