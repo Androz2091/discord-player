@@ -13,10 +13,10 @@ jobs:
         with:
           ref: v5
 
-      - name: Install Node v14
+      - name: Install Node v16
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 16
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
@@ -30,7 +30,7 @@ jobs:
       - name: Publish
         run: |
           npx tsc --skipLibCheck
-          npm version --git-tag-version=false $(jq --raw-output '.version' package.json).$(git rev-parse --short HEAD).$(date +%s)
+          npm version --git-tag-version=false $(jq --raw-output '.version' package.json).$(date +%s).$(git rev-parse --short HEAD)
           npm publish --tag dev || true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
