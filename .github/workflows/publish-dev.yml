@@ -22,11 +22,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Deprecate old releases
-        run: npm deprecate discord-player@"~$(jq --raw-output '.version' package.json)-dev" "outdated version" || true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
-
       - name: Publish
         run: |
           npx tsc --skipLibCheck
