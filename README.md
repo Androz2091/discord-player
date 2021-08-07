@@ -52,7 +52,7 @@ settings = {
     token: "Your Discord Token"
 };
 
-const { Player, QueryType } = require("discord-player");
+const { Player } = require("discord-player");
 
 // Create a new Player (you don't need any API Key)
 const player = new Player(client);
