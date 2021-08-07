@@ -41,7 +41,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {VoiceChannel|StageChannel} channel The connected channel
      * @private
      */
-    constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel) {
+    constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel, public readonly connectionTimeout: number = 20000) {
         super();
 
         /**
@@ -72,7 +72,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             if (newState.status === VoiceConnectionStatus.Disconnected) {
                 if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
                     try {
-                        await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, 5000);
+                        await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, this.connectionTimeout);
                     } catch {
                         this.voiceConnection.destroy();
                     }
@@ -87,7 +87,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             } else if (!this.readyLock && (newState.status === VoiceConnectionStatus.Connecting || newState.status === VoiceConnectionStatus.Signalling)) {
                 this.readyLock = true;
                 try {
-                    await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000);
+                    await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, this.connectionTimeout);
                 } catch {
                     if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
                 } finally {

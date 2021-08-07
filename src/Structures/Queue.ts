@@ -146,7 +146,8 @@ class Queue<T = unknown> {
         if (!["GUILD_STAGE_VOICE", "GUILD_VOICE"].includes(_channel?.type))
             throw new PlayerError(`Channel type must be GUILD_VOICE or GUILD_STAGE_VOICE, got ${_channel?.type}!`, ErrorStatusCode.INVALID_ARG_TYPE);
         const connection = await this.player.voiceUtils.connect(_channel, {
-            deaf: this.options.autoSelfDeaf
+            deaf: this.options.autoSelfDeaf,
+            maxTime: this.player.options.connectionTimeout || 20000
         });
         this.connection = connection;
 

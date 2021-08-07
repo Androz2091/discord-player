@@ -24,7 +24,8 @@ class Player extends EventEmitter<PlayerEvents> {
         autoRegisterExtractor: true,
         ytdlOptions: {
             highWaterMark: 1 << 25
-        }
+        },
+        connectionTimeout: 20000
     };
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
