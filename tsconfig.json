@@ -3,10 +3,12 @@
         "target": "ES6",
         "module": "commonjs",
         "declaration": true,
-        "outDir": "./lib",
+        "outDir": "./dist",
         "strict": true,
         "strictNullChecks": false,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "pretty": true,
+        "skipLibCheck": true
     },
     "include": [
         "src/**/*"

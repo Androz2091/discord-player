@@ -1,15 +1,15 @@
 # Node
 node_modules
 package-lock.json
-
-# Tests
-test
+yarn.lock
 
 # Compiled files
-lib
+dist
 
 # Yarn logs
 yarn*.log
 
-# Demo
-demo
+# example
+example/test
+example/music-bot/node_modules
+example/music-bot/package-lock.json

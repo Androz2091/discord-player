@@ -1,7 +1,12 @@
 - name: General
   files:
     - name: Welcome
-      path: welcome.md
+      id: welcome
+      path: ../../README.md
+- name: Migrating
+  files:
+    - name: Migrating to v5
+      path: migrating.md
 - name: Extractors
   files:
     - name: Extractors API
@@ -10,10 +15,8 @@
   files:
     - name: Custom Filters
       path: custom_filters.md
-    - name: Livestreams
-      path: live_video.md
-    - name: Pause & Resume
-      path: pause_resume.md
+    - name: Slash Commands
+      path: slash_commands.md
 - name: YouTube
   files:
     - name: Using Cookies

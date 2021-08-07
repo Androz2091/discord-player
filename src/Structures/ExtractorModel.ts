@@ -1,27 +1,34 @@
-import { ExtractorModelData } from '../types/types';
+import { ExtractorModelData } from "../types/types";
 
 class ExtractorModel {
     name: string;
-    private _raw: any;
+    private _raw: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     /**
      * Model for raw Discord Player extractors
-     * @param {String} extractorName Name of the extractor
-     * @param {Object} data Extractor object
+     * @param {string} extractorName Name of the extractor
+     * @param {object} data Extractor object
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(extractorName: string, data: any) {
         /**
          * The extractor name
-         * @type {String}
+         * @type {string}
          */
         this.name = extractorName;
 
-        Object.defineProperty(this, '_raw', { value: data, configurable: false, writable: false, enumerable: false });
+        /**
+         * The raw model
+         * @name ExtractorModel#_raw
+         * @type {any}
+         * @private
+         */
+        Object.defineProperty(this, "_raw", { value: data, configurable: false, writable: false, enumerable: false });
     }
 
     /**
      * Method to handle requests from `Player.play()`
-     * @param {String} query Query to handle
+     * @param {string} query Query to handle
      * @returns {Promise<ExtractorModelData>}
      */
     async handle(query: string): Promise<ExtractorModelData> {
@@ -29,21 +36,26 @@ class ExtractorModel {
         if (!data) return null;
 
         return {
-            title: data.title,
-            duration: data.duration,
-            thumbnail: data.thumbnail,
-            engine: data.engine,
-            views: data.views,
-            author: data.author,
-            description: data.description,
-            url: data.url
+            playlist: data.playlist ?? null,
+            data:
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                data.info?.map((m: any) => ({
+                    title: m.title,
+                    duration: m.duration,
+                    thumbnail: m.thumbnail,
+                    engine: m.engine,
+                    views: m.views,
+                    author: m.author,
+                    description: m.description,
+                    url: m.url
+                })) ?? []
         };
     }
 
     /**
      * Method used by Discord Player to validate query with this extractor
-     * @param {String} query The query to validate
-     * @returns {Boolean}
+     * @param {string} query The query to validate
+     * @returns {boolean}
      */
     validate(query: string): boolean {
         return Boolean(this._raw.validate(query));
@@ -51,20 +63,11 @@ class ExtractorModel {
 
     /**
      * The extractor version
-     * @type {String}
+     * @type {string}
      */
     get version(): string {
-        return this._raw.version ?? '0.0.0';
-    }
-
-    /**
-     * If player should mark this extractor as important
-     * @type {Boolean}
-     */
-    get important(): boolean {
-        return Boolean(this._raw.important);
+        return this._raw.version ?? "0.0.0";
     }
 }
 
-export default ExtractorModel;
 export { ExtractorModel };
