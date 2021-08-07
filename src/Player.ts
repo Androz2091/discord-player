@@ -117,7 +117,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 if (!this.queues.has(queue.guild.id)) return;
                 queue.destroy();
                 this.emit("channelEmpty", queue);
-            }, queue.options.leaveOnEmptyCooldown || 0);
+            }, queue.options.leaveOnEmptyCooldown || 0).unref();
             queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
         }
     }

@@ -52,3 +52,8 @@ You have to use `<Queue>.destroy()` to destroy the queue. It will also stop the 
 const queue = player.getQueue(message.guild.id);
 if (queue) queue.destroy();
 ```
+
+## Updating filters
+
+Discord Player v5.x has new option `bufferingTimeout` in queue init options which allows you to set stream buffering timeout before playing.
+This might be useful if you want to have smooth filters update. By default, it is set to 3 seconds.

@@ -657,7 +657,7 @@ class Queue<T = unknown> {
             this.connection.playStream(resource).then(() => {
                 this.setVolume(this.options.initialVolume);
             });
-        }, this.#getBufferingTimeout());
+        }, this.#getBufferingTimeout()).unref();
     }
 
     /**

@@ -215,7 +215,7 @@ client.on("interactionCreate", async (interaction) => {
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         const currentTrack = queue.current;
         const tracks = queue.tracks.slice(0, 10).map((m, i) => {
-            return `${i + 1}. **${m.title}**`;
+            return `${i + 1}. **${m.title}** ([link](${m.url}))`;
         });
 
         return void interaction.followUp({
@@ -228,7 +228,7 @@ client.on("interactionCreate", async (interaction) => {
                             : ""
                     }`,
                     color: 0xff0000,
-                    fields: [{ name: "Now Playing", value: `🎶 | **${currentTrack.title}**` }]
+                    fields: [{ name: "Now Playing", value: `🎶 | **${currentTrack.title}** ([link](${currentTrack.url}))` }]
                 }
             ]
         });

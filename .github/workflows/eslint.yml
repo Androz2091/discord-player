@@ -16,19 +16,16 @@ on:
       - '!gh-pages'
 jobs:
   test:
-    strategy:
-      matrix:
-        node: ['14', '16']
-    name: ESLint (Node v${{ matrix.node }})
+    name: ESLint (Node v16)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install Node v${{ matrix.node }}
+      - name: Install Node v16
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 16
 
       - name: Install dependencies
         run: npm install

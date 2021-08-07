@@ -91,7 +91,7 @@ class Util {
      * @returns {Promise<unknown>}
      */
     static wait(time: number) {
-        return new Promise((r) => setTimeout(r, time));
+        return new Promise((r) => setTimeout(r, time).unref());
     }
 
     static noop() {} // eslint-disable-line @typescript-eslint/no-empty-function
