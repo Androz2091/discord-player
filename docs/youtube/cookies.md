@@ -4,7 +4,7 @@
 const { Player } = require("discord-player");
 
 const player = new Player(client, {
-    ytdlDownloadOptions: {
+    ytdlOptions: {
         requestOptions: {
             headers: {
                 cookie: "YOUR_YOUTUBE_COOKIE"

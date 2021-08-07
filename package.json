@@ -2,18 +2,27 @@
   "name": "discord-player",
   "version": "5.0.0-dev",
   "description": "Complete framework to facilitate music commands using discord.js",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "lib/"
+    "dist/"
   ],
+  "module": "dist/index.mjs",
+  "exports": {
+    "require": "./dist/index.js",
+    "import": "./dist/index.mjs"
+  },
   "scripts": {
-    "test": "cd test && ts-node index.ts",
-    "build": "tsc",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "tslint -p tsconfig.json",
-    "docs": "docgen --jsdoc jsdoc.json --verbose --source src/*.ts src/**/*.ts --custom docs/index.yml --output docs/docs.json",
-    "docs:test": "docgen --jsdoc jsdoc.json --verbose --source src/*.ts src/**/*.ts --custom docs/index.yml"
+    "dev": "cd example/test && ts-node index.ts",
+    "build": "rimraf dist && tsc && npm run build:esm",
+    "build:check": "tsc --noEmit --incremental false",
+    "prepublishOnly": "rollup-type-bundler -e stream",
+    "build:esm": "gen-esm-wrapper ./dist/index.js ./dist/index.mjs",
+    "format": "prettier --write \"src/**/*.ts\" \"example/**/*.ts\"",
+    "docs": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml --output docs/docs.json",
+    "docs:test": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
   },
   "funding": "https://github.com/Androz2091/discord-player?sponsor=1",
   "contributors": [
@@ -48,37 +57,39 @@
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
-  "homepage": "https://github.com/Androz2091/discord-player#readme",
+  "homepage": "https://discord-player.js.org",
   "dependencies": {
-    "@discordjs/voice": "^0.3.1",
-    "discord-ytdl-core": "^5.0.3",
-    "soundcloud-scraper": "^5.0.0",
+    "@discordjs/voice": "^0.5.5",
+    "discord-ytdl-core": "^5.0.4",
+    "libsodium-wrappers": "^0.7.9",
+    "soundcloud-scraper": "^5.0.1",
     "spotify-url-info": "^2.2.3",
-    "tiny-typed-emitter": "^2.0.3",
-    "youtube-sr": "^4.1.4",
-    "ytdl-core": "^4.8.2"
+    "tiny-typed-emitter": "^2.1.0",
+    "youtube-sr": "^4.1.7",
+    "ytdl-core": "^4.9.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.13.16",
-    "@babel/core": "^7.13.16",
-    "@babel/preset-env": "^7.13.15",
-    "@babel/preset-typescript": "^7.13.0",
-    "@discord-player/extractor": "^2.0.0",
-    "@discordjs/opus": "^0.5.0",
-    "@types/node": "^14.14.41",
-    "@types/ws": "^7.4.1",
-    "discord-api-types": "^0.18.1",
-    "discord.js": "^13.0.0-dev.f5f3f772865ee98bbb44df938e0e71f9f8865c10",
-    "discord.js-docgen": "discordjs/docgen#ts-patch",
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-typescript": "^7.15.0",
+    "@devsnowflake/docgen": "devsnowflake/docgen#ts-patch",
+    "@discord-player/extractor": "^3.0.2",
+    "@discordjs/opus": "github:discordjs/opus",
+    "@favware/rollup-type-bundler": "^1.0.3",
+    "@types/node": "^16.4.13",
+    "@types/ws": "^7.4.7",
+    "@typescript-eslint/eslint-plugin": "^4.29.0",
+    "@typescript-eslint/parser": "^4.29.0",
+    "discord-api-types": "^0.22.0",
+    "discord.js": "^13.0.1",
+    "eslint": "^7.32.0",
+    "gen-esm-wrapper": "^1.1.2",
+    "husky": "^7.0.1",
     "jsdoc-babel": "^0.5.0",
-    "prettier": "^2.2.1",
-    "ts-node": "^10.0.0",
-    "tslint": "^6.1.3",
-    "tslint-config-prettier": "^1.18.0",
-    "typescipt": "^1.0.0",
-    "typescript": "^4.2.3"
-  },
-  "optionalDependencies": {
-    "sodium": "^3.0.2"
+    "prettier": "^2.3.2",
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.1.0",
+    "typescript": "^4.3.5"
   }
 }

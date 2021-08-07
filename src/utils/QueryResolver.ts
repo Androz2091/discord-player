@@ -1,16 +1,15 @@
 import { validateID, validateURL } from "ytdl-core";
 import { YouTube } from "youtube-sr";
 import { QueryType } from "../types/types";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { validateURL as SoundcloudValidateURL } from "soundcloud-scraper";
 
 // scary things below *sigh*
 const spotifySongRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/;
-const spotifyPlaylistRegex =
-    /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})/;
+const spotifyPlaylistRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})/;
 const spotifyAlbumRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:album\/|\?uri=spotify:album:)((\w|-){22})/;
-const vimeoRegex =
-    /(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)/;
+const vimeoRegex = /(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)/;
 const facebookRegex = /(https?:\/\/)(www\.|m\.)?(facebook|fb).com\/.*\/videos\/.*/;
 const reverbnationRegex = /https:\/\/(www.)?reverbnation.com\/(.+)\/song\/(.+)/;
 const attachmentRegex =
@@ -18,12 +17,21 @@ const attachmentRegex =
 // scary things above *sigh*
 
 class QueryResolver {
+    /**
+     * Query resolver
+     */
+    private constructor() {} // eslint-disable-line @typescript-eslint/no-empty-function
 
+    /**
+     * Resolves the given search query
+     * @param {string} query The query
+     * @returns {QueryType}
+     */
     static resolve(query: string): QueryType {
         if (SoundcloudValidateURL(query, "track")) return QueryType.SOUNDCLOUD_TRACK;
         if (SoundcloudValidateURL(query, "playlist") || query.includes("/sets/")) return QueryType.SOUNDCLOUD_PLAYLIST;
-        if (validateID(query) || validateURL(query)) return QueryType.YOUTUBE;
-        if (YouTube.validate(query, "PLAYLIST_ID")) return QueryType.YOUTUBE_PLAYLIST;
+        if (YouTube.isPlaylist(query)) return QueryType.YOUTUBE_PLAYLIST;
+        if (validateID(query) || validateURL(query)) return QueryType.YOUTUBE_SEARCH;
         if (spotifySongRegex.test(query)) return QueryType.SPOTIFY_SONG;
         if (spotifyPlaylistRegex.test(query)) return QueryType.SPOTIFY_PLAYLIST;
         if (spotifyAlbumRegex.test(query)) return QueryType.SPOTIFY_ALBUM;
@@ -35,6 +43,11 @@ class QueryResolver {
         return QueryType.YOUTUBE_SEARCH;
     }
 
+    /**
+     * Parses vimeo id from url
+     * @param {string} query The query
+     * @returns {string}
+     */
     static getVimeoID(query: string): string {
         return QueryResolver.resolve(query) === QueryType.VIMEO
             ? query
