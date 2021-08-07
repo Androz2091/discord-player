@@ -103,7 +103,7 @@ class Queue<T = unknown> {
                     highWaterMark: 1 << 25
                 },
                 initialVolume: 100,
-                bufferingTimeout: 1000
+                bufferingTimeout: 3000
             } as PlayerOptions,
             options
         );

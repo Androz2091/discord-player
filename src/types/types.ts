@@ -127,7 +127,7 @@ export interface PlayerProgressbarOptions {
  * @property {boolean} [autoSelfDeaf=true] If it should set the bot in deaf mode
  * @property {YTDLDownloadOptions} [ytdlOptions={}] The youtube download options
  * @property {number} [initialVolume=100] The initial player volume
- * @property {number} [bufferingTimeout=1000] Buffering timeout for the stream
+ * @property {number} [bufferingTimeout=3000] Buffering timeout for the stream
  */
 export interface PlayerOptions {
     leaveOnEnd?: boolean;
