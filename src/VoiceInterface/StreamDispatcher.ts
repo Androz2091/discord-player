@@ -16,6 +16,7 @@ import { Duplex, Readable } from "stream";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import Track from "../Structures/Track";
 import { Util } from "../utils/Util";
+import { PlayerError, ErrorStatusCode } from "../Structures/PlayerError";
 
 export interface VoiceEvents {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -182,7 +183,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {Promise<StreamDispatcher>}
      */
     async playStream(resource: AudioResource<Track> = this.audioResource) {
-        if (!resource) throw new Error("Audio resource is not available!");
+        if (!resource) throw new PlayerError("Audio resource is not available!", ErrorStatusCode.NO_AUDIO_RESOURCE);
         if (!this.audioResource) this.audioResource = resource;
         if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000);
         this.audioPlayer.play(resource);

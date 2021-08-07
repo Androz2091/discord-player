@@ -8,6 +8,7 @@ import { QueryResolver } from "./utils/QueryResolver";
 import YouTube from "youtube-sr";
 import { Util } from "./utils/Util";
 import Spotify from "spotify-url-info";
+import { PlayerError, ErrorStatusCode } from "./Structures/PlayerError";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Client as SoundCloud } from "soundcloud-scraper";
@@ -128,7 +129,7 @@ class Player extends EventEmitter<PlayerEvents> {
      */
     createQueue<T = unknown>(guild: GuildResolvable, queueInitOptions: PlayerOptions & { metadata?: T } = {}): Queue<T> {
         guild = this.client.guilds.resolve(guild);
-        if (!guild) throw new Error("Unknown Guild");
+        if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
 
         const _meta = queueInitOptions.metadata;
@@ -148,7 +149,7 @@ class Player extends EventEmitter<PlayerEvents> {
      */
     getQueue<T = unknown>(guild: GuildResolvable) {
         guild = this.client.guilds.resolve(guild);
-        if (!guild) throw new Error("Unknown Guild");
+        if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         return this.queues.get(guild.id) as Queue<T>;
     }
 
@@ -159,7 +160,7 @@ class Player extends EventEmitter<PlayerEvents> {
      */
     deleteQueue<T = unknown>(guild: GuildResolvable) {
         guild = this.client.guilds.resolve(guild);
-        if (!guild) throw new Error("Unknown Guild");
+        if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         const prev = this.getQueue<T>(guild);
 
         try {
@@ -183,7 +184,7 @@ class Player extends EventEmitter<PlayerEvents> {
      */
     async search(query: string | Track, options: SearchOptions) {
         if (query instanceof Track) return { playlist: null, tracks: [query] };
-        if (!options) throw new Error("DiscordPlayer#search needs search options!");
+        if (!options) throw new PlayerError("DiscordPlayer#search needs search options!", ErrorStatusCode.INVALID_ARG_TYPE);
         options.requestedBy = this.client.users.resolve(options.requestedBy);
         if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
 
@@ -451,7 +452,7 @@ class Player extends EventEmitter<PlayerEvents> {
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     use(extractorName: string, extractor: ExtractorModel | any, force = false): ExtractorModel {
-        if (!extractorName) throw new Error("Cannot use unknown extractor!");
+        if (!extractorName) throw new PlayerError("Cannot use unknown extractor!", ErrorStatusCode.UNKNOWN_EXTRACTOR);
         if (this.extractors.has(extractorName) && !force) return this.extractors.get(extractorName);
         if (extractor instanceof ExtractorModel) {
             this.extractors.set(extractorName, extractor);
@@ -459,7 +460,7 @@ class Player extends EventEmitter<PlayerEvents> {
         }
 
         for (const method of ["validate", "getInfo"]) {
-            if (typeof extractor[method] !== "function") throw new Error("Invalid extractor data!");
+            if (typeof extractor[method] !== "function") throw new PlayerError("Invalid extractor data!", ErrorStatusCode.INVALID_EXTRACTOR);
         }
 
         const model = new ExtractorModel(extractorName, extractor);
@@ -474,7 +475,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @returns {ExtractorModel}
      */
     unuse(extractorName: string) {
-        if (!this.extractors.has(extractorName)) throw new Error(`Cannot find extractor "${extractorName}"`);
+        if (!this.extractors.has(extractorName)) throw new PlayerError(`Cannot find extractor "${extractorName}"`, ErrorStatusCode.UNKNOWN_EXTRACTOR);
         const prev = this.extractors.get(extractorName);
         this.extractors.delete(extractorName);
         return prev;
