@@ -42,65 +42,94 @@ $ npm install --save @discordjs/opus
 
 ## Getting Started
 
-Here is the code you will need to get started with discord-player. Then, you will be able to use `client.player` everywhere in your code!
+First of all, you will need to register slash commands:
 
 ```js
-const Discord = require("discord.js"),
-client = new Discord.Client({ intents: ["GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILDS"] }),
-settings = {
-    prefix: "!",
-    token: "Your Discord Token"
-};
+const { REST } = require("@discordjs/rest");
+const { Routes } = require("discord-api-types/v9");
 
+const commands = [{
+    name: "play",
+    description: "Plays a song!",
+    options: [
+        {
+            name: "query",
+            type: "STRING",
+            description: "The song you want to play",
+            required: true
+        }
+    ]
+}]; 
+
+const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN);
+
+(async () => {
+  try {
+    console.log("Started refreshing application [/] commands.");
+
+    await rest.put(
+      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+      { body: commands },
+    );
+
+    console.log("Successfully reloaded application [/] commands.");
+  } catch (error) {
+    console.error(error);
+  }
+})();
+```
+
+Now you can implement your bot's logic:
+
+```js
+const { Client, Intents } = require("discord.js");
+const client = new Discord.Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
 const { Player } = require("discord-player");
 
 // Create a new Player (you don't need any API Key)
 const player = new Player(client);
 
-// To easily access the player
-client.player = player;
-
 // add the trackStart event so when a song will be played this message will be sent
-client.player.on("trackStart", (queue, track) => queue.metadata.channel.send(`Now playing ${track.title}...`))
+player.on("trackStart", (queue, track) => queue.metadata.send(`🎶 | Now playing **${track.title}**!`))
 
 client.once("ready", () => {
     console.log("I'm ready !");
 });
 
-client.on("message", async (message) => {
+client.on("interactionCreate", async (interaction) => {
+    if (!interaction.isCommand()) return;
 
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-
-    // !play Despacito
+    // /play Despacito
     // will play "Despacito" in the voice channel
-    if (command === "play") {
-        if (!message.member.voice.channel) return void message.reply("You are not in a voice channel!");
-        if (message.guild.me.voice.channel && message.member.voice.channelID !== message.guild.me.voice.channelID) return void message.reply("You are not in my voice channel!");
-
-        const queue = client.player.createQueue(message.guild, {
-            metadata: message
+    if (interaction.commandName === "play") {
+        if (!interaction.member.voice.channelId) return await interaction.reply({ content: "You are not in a voice channel!", empheral: true });
+        if (interaction.guild.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.me.voice.channelId) return await interaction.reply({ content: "You are not in my voice channel!", empheral: true });
+        const query = interaction.options.get("query").value;
+        const queue = player.createQueue(message.guild, {
+            metadata: interaction.channel
         });
         
         // verify vc connection
         try {
-            if (!queue.connection) await queue.connect(message.member.voice.channel);
+            if (!queue.connection) await queue.connect(interaction.member.voice.channel);
         } catch {
             queue.destroy();
-            return void message.reply("Could not join your voice channel!");
+            return await interaction.reply({ content: "Could not join your voice channel!", empheral: true });
         }
 
-        const track = await client.player.search(args[0], {
+        await interaction.defer();
+        const track = await player.search(query, {
             requestedBy: message.author
         }).then(x => x.tracks[1]);
-        if (!track) return void message.reply("Track not found!");
+        if (!track) return await interaction.followUp({ content: `❌ | Track **${query}** not found!` });
 
         queue.play(track);
-    }
 
+        return await interaction.followUp({ content: `⏱️ | Loading track **${track.title}**!` });
+    }
 });
 
-client.login(settings.token);
+client.login(process.env.DISCORD_TOKEN);
 ```
 
 ## Supported websites
