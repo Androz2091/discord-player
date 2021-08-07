@@ -1,6 +1,6 @@
 const { Client, GuildMember } = require("discord.js");
 const config = require("./config");
-const { Player, QueryType, QueueRepeatMode } = require("discord-player");
+const { Player, QueryType, QueueRepeatMode } = require("../../");
 
 const client = new Client({
     intents: ["GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILDS"]
@@ -164,7 +164,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 
     if (interaction.commandName === "play" || interaction.commandName === "soundcloud") {
-        await interaction.defer();
+        await interaction.deferReply();
 
         const query = interaction.options.get("query").value;
         const searchResult = await player
@@ -190,7 +190,7 @@ client.on("interactionCreate", async (interaction) => {
         searchResult.playlist ? queue.addTracks(searchResult.tracks) : queue.addTrack(searchResult.tracks[0]);
         if (!queue.playing) await queue.play();
     } else if (interaction.commandName === "volume") {
-        await interaction.defer();
+        await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         const vol = interaction.options.get("amount");
@@ -201,7 +201,7 @@ client.on("interactionCreate", async (interaction) => {
             content: success ? `✅ | Volume set to **${vol.value}%**!` : "❌ | Something went wrong!"
         });
     } else if (interaction.commandName === "skip") {
-        await interaction.defer();
+        await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         const currentTrack = queue.current;
@@ -210,7 +210,7 @@ client.on("interactionCreate", async (interaction) => {
             content: success ? `✅ | Skipped **${currentTrack}**!` : "❌ | Something went wrong!"
         });
     } else if (interaction.commandName === "queue") {
-        await interaction.defer();
+        await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         const currentTrack = queue.current;
@@ -233,25 +233,25 @@ client.on("interactionCreate", async (interaction) => {
             ]
         });
     } else if (interaction.commandName === "pause") {
-        await interaction.defer();
+        await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         const success = queue.setPaused(true);
         return void interaction.followUp({ content: success ? "⏸ | Paused!" : "❌ | Something went wrong!" });
     } else if (interaction.commandName === "resume") {
-        await interaction.defer();
+        await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         const success = queue.setPaused(false);
         return void interaction.followUp({ content: success ? "▶ | Resumed!" : "❌ | Something went wrong!" });
     } else if (interaction.commandName === "stop") {
-        await interaction.defer();
+        await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         queue.destroy();
         return void interaction.followUp({ content: "🛑 | Stopped the player!" });
     } else if (interaction.commandName === "np") {
-        await interaction.defer();
+        await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         const progress = queue.createProgressBar();
@@ -273,7 +273,7 @@ client.on("interactionCreate", async (interaction) => {
             ]
         });
     } else if (interaction.commandName === "loop") {
-        await interaction.defer();
+        await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         const loopMode = interaction.options.get("mode").value;
@@ -281,7 +281,7 @@ client.on("interactionCreate", async (interaction) => {
         const mode = loopMode === QueueRepeatMode.TRACK ? "🔂" : loopMode === QueueRepeatMode.QUEUE ? "🔁" : "▶";
         return void interaction.followUp({ content: success ? `${mode} | Updated loop mode!` : "❌ | Could not update loop mode!" });
     } else if (interaction.commandName === "bassboost") {
-        await interaction.defer();
+        await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         await queue.setFilters({
