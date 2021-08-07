@@ -93,9 +93,7 @@ class Util {
         return new Promise((r) => setTimeout(r, time));
     }
 
-    static get noop() {
-        return () => {}; // eslint-disable-line @typescript-eslint/no-empty-function
-    }
+    static noop() { }  // eslint-disable-line @typescript-eslint/no-empty-function
 }
 
 export { Util };
