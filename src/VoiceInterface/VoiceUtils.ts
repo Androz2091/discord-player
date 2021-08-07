@@ -31,7 +31,7 @@ class VoiceUtils {
         }
     ): Promise<StreamDispatcher> {
         const conn = await this.join(channel, options);
-        const sub = new StreamDispatcher(conn, channel);
+        const sub = new StreamDispatcher(conn, channel, options.maxTime);
         this.cache.set(channel.guild.id, sub);
         return sub;
     }
