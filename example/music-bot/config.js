@@ -1,3 +1,3 @@
 module.exports = {
-    token: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    token: process.env.DISCORD_TOKEN
 };

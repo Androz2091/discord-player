@@ -9,6 +9,7 @@ import YouTube from "youtube-sr";
 import { Util } from "./utils/Util";
 import Spotify from "spotify-url-info";
 import { PlayerError, ErrorStatusCode } from "./Structures/PlayerError";
+import { getInfo as ytdlGetInfo } from "ytdl-core";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Client as SoundCloud } from "soundcloud-scraper";
@@ -220,6 +221,25 @@ class Player extends EventEmitter<PlayerEvents> {
 
         const qt = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
         switch (qt) {
+            case QueryType.YOUTUBE_VIDEO: {
+                const info = await ytdlGetInfo(query).catch(Util.noop);
+                if (!info) return { playlist: null, tracks: [] };
+
+                const track = new Track(this, {
+                    title: info.videoDetails.title,
+                    description: info.videoDetails.description,
+                    author: info.videoDetails.author?.name,
+                    url: info.videoDetails.video_url,
+                    requestedBy: options.requestedBy as User,
+                    thumbnail: Util.last(info.videoDetails.thumbnails)?.url,
+                    views: parseInt(info.videoDetails.viewCount.replace(/[^0-9]/g, "")) || 0,
+                    duration: Util.buildTimeCode(Util.parseMS(parseInt(info.videoDetails.lengthSeconds) * 1000)),
+                    source: "youtube",
+                    raw: info
+                });
+
+                return { playlist: null, tracks: [track] };
+            }
             case QueryType.YOUTUBE_SEARCH: {
                 const videos = await YouTube.search(query, {
                     type: "video"
@@ -237,6 +257,7 @@ class Player extends EventEmitter<PlayerEvents> {
                         thumbnail: m.thumbnail?.displayThumbnailURL("maxresdefault"),
                         views: m.views,
                         duration: m.durationFormatted,
+                        source: "youtube",
                         raw: m
                     });
                 });

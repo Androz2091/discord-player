@@ -216,6 +216,7 @@ export interface ExtractorModelData {
  * - ARBITRARY
  * - REVERBNATION
  * - YOUTUBE_SEARCH
+ * - YOUTUBE_VIDEO
  * - SOUNDCLOUD_SEARCH
  * @typedef {string} QueryType
  */
@@ -234,6 +235,7 @@ export enum QueryType {
     ARBITRARY = "arbitrary",
     REVERBNATION = "reverbnation",
     YOUTUBE_SEARCH = "youtube_search",
+    YOUTUBE_VIDEO = "youtube_video",
     SOUNDCLOUD_SEARCH = "soundcloud_search"
 }
 
