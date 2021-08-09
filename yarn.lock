@@ -984,12 +984,12 @@
     node-addon-api "^3.2.1"
 
 "@discordjs/voice@^0.5.5":
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/@discordjs/voice/-/voice-0.5.5.tgz#25dfe4709e5da103875f212f40cf63068abd8850"
-  integrity sha512-i7QSRlPq34UAoTUfxLjlyWJONdrxJ4kZH7F6ZfoDK1rt3AHZv5vFzijBu8bsy040zaYpU3LZQ2MPw/kz1uCr5w==
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/@discordjs/voice/-/voice-0.5.6.tgz#78d52567acacab28411fca1dbf8fe3f7b6cc86d3"
+  integrity sha512-CGwD5pz1YB8MXfERcXQ6jVCThfMjzPKbad8pYuvPt4ozFcLWGRKFJ5lj+CSRNDj0Cobc6MIKOKpFfOPlXTKTrw==
   dependencies:
     "@types/ws" "^7.4.4"
-    discord-api-types "^0.19.0"
+    discord-api-types "^0.22.0"
     prism-media "^1.3.1"
     tiny-typed-emitter "^2.0.3"
     ws "^7.4.4"
@@ -2041,11 +2041,6 @@ dir-glob@^3.0.1:
   integrity sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==
   dependencies:
     path-type "^4.0.0"
-
-discord-api-types@^0.19.0:
-  version "0.19.0"
-  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.19.0.tgz#86ba8021b29190cf860e90a2bc3e29b1d7aab3ba"
-  integrity sha512-t2HKLd43Lbe+rf+ffYfKVv9Kk5f6p7sFqvO6CMV55ZB0PgZv8WigCkt9FoJciYo5S3Q6CGYK+WnE/ZG+6vkBDQ==
 
 discord-api-types@^0.22.0:
   version "0.22.0"
