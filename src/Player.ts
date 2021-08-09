@@ -46,7 +46,7 @@ class Player extends EventEmitter<PlayerEvents> {
          */
         this.client = client;
 
-        if (new Intents(this.client.options.intents).has(Intents.FLAGS.GUILD_VOICE_STATES)) {
+        if (!(new Intents(this.client.options.intents).has(Intents.FLAGS.GUILD_VOICE_STATES))) {
             throw new PlayerError('client is missing "GUILD_VOICE_STATES" intent');
         }
 
