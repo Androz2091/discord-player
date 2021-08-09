@@ -1,9 +1,9 @@
 require("dotenv").config();
-const { Client, GuildMember } = require("discord.js");
+const { Client, GuildMember, Intents } = require("discord.js");
 const config = require("./config");
 const { Player, QueryType, QueueRepeatMode } = require("discord-player");
 const client = new Client({
-    intents: ["GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILDS"]
+    intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS]
 });
 
 client.on("ready", () => {
