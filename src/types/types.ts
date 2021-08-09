@@ -307,6 +307,13 @@ export enum QueryType {
  * @param {Track} track The track
  */
 
+/**
+ * Emitted when a track ends
+ * @event Player#trackEnd
+ * @param {Queue} queue The queue
+ * @param {Track} track The track
+ */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface PlayerEvents {
     botDisconnect: (queue: Queue) => any;
