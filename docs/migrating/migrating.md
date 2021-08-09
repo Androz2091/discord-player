@@ -35,7 +35,7 @@ const queue = player.createQueue(message.guild, {
 });
 ```
 
-The metadata `message` will always be available in every events emitted for that specific `Queue`. You can access it via `queue.metadata`:
+The metadata `message` will always be available in every event emitted for that specific `Queue`. You can access it via `queue.metadata`:
 
 ```js
 player.on("trackStart", (queue, track) => {

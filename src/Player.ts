@@ -512,7 +512,7 @@ class Player extends EventEmitter<PlayerEvents> {
     }
 
     /**
-     * Resolves qeuue
+     * Resolves queue
      * @param {GuildResolvable|Queue} queueLike Queue like object
      * @returns {Queue}
      */
