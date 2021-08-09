@@ -1,4 +1,4 @@
-import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState } from "discord.js";
+import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, Intents } from "discord.js";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
@@ -45,6 +45,10 @@ class Player extends EventEmitter<PlayerEvents> {
          * @type {Client}
          */
         this.client = client;
+
+        if (new Intents(this.client.options.intents).has(Intents.FLAGS.GUILD_VOICE_STATES)) {
+            throw new PlayerError('client is missing "GUILD_VOICE_STATES" intent');
+        }
 
         /**
          * The extractors collection
