@@ -1,9 +1,9 @@
 require("dotenv").config();
-const { Client, GuildMember } = require("discord.js");
+const { Client, GuildMember, Intents } = require("discord.js");
 const config = require("./config");
 const { Player, QueryType, QueueRepeatMode } = require("discord-player");
 const client = new Client({
-    intents: ["GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILDS"]
+    intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS]
 });
 
 client.on("ready", () => {
@@ -145,6 +145,10 @@ client.on("messageCreate", async (message) => {
             {
                 name: "bassboost",
                 description: "Toggles bassboost filter"
+            },
+            {
+                name: "ping",
+                description: "Shows bot latency"
             }
         ]);
 
@@ -154,6 +158,24 @@ client.on("messageCreate", async (message) => {
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand() || !interaction.guildId) return;
+
+    if (interaction.commandName === "ping") {
+        await interaction.deferReply();
+        const queue = player.getQueue(interaction.guild);
+
+        return void interaction.followUp({
+            embeds: [
+                {
+                    title: "⏱️ | Latency",
+                    fields: [
+                        { name: "Bot Latency", value: `\`${Math.round(client.ws.ping)}ms\`` },
+                        { name: "Voice Latency", value: !queue ? "N/A" : `UDP: \`${queue.connection.voiceConnection.ping.udp ?? "N/A"}\`ms\nWebSocket: \`${queue.connection.voiceConnection.ping.ws ?? "N/A"}\`ms` }
+                    ],
+                    color: 0xFFFFFF
+                }
+            ]
+        });
+    }
 
     if (!(interaction.member instanceof GuildMember) || !interaction.member.voice.channel) {
         return void interaction.reply({ content: "You are not in a voice channel!", ephemeral: true });
