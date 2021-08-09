@@ -12,7 +12,7 @@ We are using **[Prettier](https://prettier.io)** to format the code.
 ## Some Rules
 - Use `camelCase` for `Function names`, `Variables`, etc. and `PascalCase` for `Class name`
 - Do not make unused variables/imports
-- Don't forget to write `JSDOC` for each properties and methods
+- Don't forget to write `JSDOC` for each property and method
 - Use English language
 
 # Pull Requests
