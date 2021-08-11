@@ -503,7 +503,7 @@ class Queue<T = unknown> {
         if (this.#watchDestroyed()) return;
         const foundTrack = this.remove(track);
         if (!foundTrack) throw new PlayerError("Track not found", ErrorStatusCode.TRACK_NOT_FOUND);
-        this.tracks.splice(1, 0, foundTrack);
+        this.tracks.splice(0, 0, foundTrack);
 
         return void this.skip();
     }
