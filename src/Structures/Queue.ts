@@ -157,18 +157,26 @@ class Queue<T = unknown> {
             });
         }
 
-        this.connection.on("error", (err) => this.player.emit("connectionError", this, err));
-        this.connection.on("debug", (msg) => this.player.emit("debug", this, msg));
+        this.connection.on("error", (err) => {
+            if (this.#watchDestroyed(false)) return;
+            this.player.emit("connectionError", this, err);
+        });
+        this.connection.on("debug", (msg) => {
+            if (this.#watchDestroyed(false)) return;
+            this.player.emit("debug", this, msg);
+        });
 
         this.player.emit("connectionCreate", this, this.connection);
 
         this.connection.on("start", (resource) => {
+            if (this.#watchDestroyed(false)) return;
             this.playing = true;
             if (!this._filtersUpdate && resource?.metadata) this.player.emit("trackStart", this, resource?.metadata ?? this.current);
             this._filtersUpdate = false;
         });
 
         this.connection.on("finish", async (resource) => {
+            if (this.#watchDestroyed(false)) return;
             this.playing = false;
             if (this._filtersUpdate) return;
             this._streamTime = 0;
@@ -596,7 +604,7 @@ class Queue<T = unknown> {
      * @returns {Promise<void>}
      */
     async play(src?: Track, options: PlayOptions = {}): Promise<void> {
-        if (!this.destroyed) this.#watchDestroyed();
+        if (this.#watchDestroyed(false)) return;
         if (!this.connection || !this.connection.voiceConnection) throw new PlayerError("Voice connection is not available, use <Queue>.connect()!", ErrorStatusCode.NO_CONNECTION);
         if (src && (this.playing || this.tracks.length) && !options.immediate) return this.addTrack(src);
         const track = options.filtersUpdate && !options.immediate ? src || this.current : src ?? this.tracks.shift();
@@ -725,11 +733,13 @@ class Queue<T = unknown> {
         return `**Upcoming Songs:**\n${this.tracks.map((m, i) => `${i + 1}. **${m.title}**`).join("\n")}`;
     }
 
-    #watchDestroyed() {
+    #watchDestroyed(emit = true) {
         if (this.#destroyed) {
-            this.player.emit("error", this, new PlayerError("Cannot use destroyed queue", ErrorStatusCode.DESTROYED_QUEUE));
+            if (emit) this.player.emit("error", this, new PlayerError("Cannot use destroyed queue", ErrorStatusCode.DESTROYED_QUEUE));
             return true;
         }
+
+        return false;
     }
 
     #getBufferingTimeout() {
