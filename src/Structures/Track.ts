@@ -174,7 +174,7 @@ class Track {
             durationMS: this.durationMS,
             views: this.views,
             requestedBy: this.requestedBy.id,
-            playlist: hidePlaylist ? null : this.playlist?.toJSON(false) ?? null
+            playlist: hidePlaylist ? null : this.playlist?.toJSON() ?? null
         } as TrackJSON;
     }
 }
