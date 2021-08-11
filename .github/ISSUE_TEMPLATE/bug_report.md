@@ -3,7 +3,6 @@ name: Bug report
 about: Create a bug report to help us improve
 labels: bug
 assignees: ''
-
 ---
 
 **Describe the bug**
@@ -23,9 +22,9 @@ Steps to reproduce the behavior:
 <!-- If applicable, add screenshots to help explain your problem. -->
 
 **Please complete the following information:**
- - Node Version: [x.x.x]
- - Discord Player Version: [x.x.x]
- - Discord.js Version: [x.x.x]
+ - Node Version: x.x.x
+ - Discord Player Version: x.x.x
+ - Discord.js Version: x.x.x
 
 **Additional context**
 <!-- Add any other context about the problem here. -->
