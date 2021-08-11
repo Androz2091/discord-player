@@ -116,7 +116,7 @@ class Playlist {
      * @param {boolean} [withTracks=true] If it should build json with tracks
      * @returns {PlaylistJSON}
      */
-    toJSON(withTracks = true) {
+    toJSON(withTracks = false) {
         const payload = {
             id: this.id,
             url: this.url,
@@ -129,7 +129,7 @@ class Playlist {
             tracks: [] as TrackJSON[]
         };
 
-        if (withTracks) payload.tracks = this.tracks.map((m) => m.toJSON(true));
+        if (withTracks) payload.tracks = this.tracks.map((m) => m.toJSON(false));
 
         return payload as PlaylistJSON;
     }
