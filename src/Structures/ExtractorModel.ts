@@ -38,16 +38,16 @@ class ExtractorModel {
         return {
             playlist: data.playlist ?? null,
             data:
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                data.info?.map((m: any) => ({
-                    title: m.title,
-                    duration: m.duration,
-                    thumbnail: m.thumbnail,
+                (data.info as Omit<ExtractorModelData, "playlist">["data"])?.map((m) => ({
+                    title: m.title as string,
+                    duration: m.duration as number,
+                    thumbnail: m.thumbnail as string,
                     engine: m.engine,
-                    views: m.views,
-                    author: m.author,
-                    description: m.description,
-                    url: m.url
+                    views: m.views as number,
+                    author: m.author as string,
+                    description: m.description as string,
+                    url: m.url as string,
+                    source: m.source || "arbitrary"
                 })) ?? []
         };
     }
