@@ -193,7 +193,11 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             }
         }
 
-        this.audioPlayer.play(resource);
+        try {
+            this.audioPlayer.play(resource);
+        } catch(e) {
+            this.emit("error", e as AudioPlayerError);
+        }
 
         return this;
     }
