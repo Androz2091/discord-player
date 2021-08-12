@@ -316,24 +316,6 @@ class Queue<T = unknown> {
     }
 
     /**
-     * Mutes the playback
-     * @returns {void}
-     */
-    mute() {
-        const lv = this.#lastVolume;
-        this.volume = 0;
-        this.#lastVolume = lv;
-    }
-
-    /**
-     * Unmutes the playback. If the last volume was set to 0, unmute will produce no effect.
-     * @returns {void}
-     */
-    unmute() {
-        this.volume = this.#lastVolume;
-    }
-
-    /**
      * The stream time of this queue
      * @type {number}
      */
