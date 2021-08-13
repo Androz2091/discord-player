@@ -107,6 +107,8 @@ class Queue<T = unknown> {
             } as PlayerOptions,
             options
         );
+
+        this.player.emit("debug", this, `Queue initialized:\n\n${this.player.scanDeps()}`);
     }
 
     /**
@@ -599,6 +601,7 @@ class Queue<T = unknown> {
             this.previousTracks.push(track);
         }
 
+        // TODO: remove discord-ytdl-core
         let stream;
         if (["youtube", "spotify"].includes(track.raw.source)) {
             if (track.raw.source === "spotify" && !track.raw.engine) {
