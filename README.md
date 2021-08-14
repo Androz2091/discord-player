@@ -119,7 +119,7 @@ client.on("interactionCreate", async (interaction) => {
             return await interaction.reply({ content: "Could not join your voice channel!", empheral: true });
         }
 
-        await interaction.defer();
+        await interaction.deferReply();
         const track = await player.search(query, {
             requestedBy: message.author
         }).then(x => x.tracks[1]);
