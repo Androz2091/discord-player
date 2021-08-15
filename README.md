@@ -122,7 +122,7 @@ client.on("interactionCreate", async (interaction) => {
         await interaction.deferReply();
         const track = await player.search(query, {
             requestedBy: message.author
-        }).then(x => x.tracks[1]);
+        }).then(x => x.tracks[0]);
         if (!track) return await interaction.followUp({ content: `❌ | Track **${query}** not found!` });
 
         queue.play(track);
