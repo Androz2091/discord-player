@@ -121,7 +121,7 @@ client.on("interactionCreate", async (interaction) => {
 
         await interaction.deferReply();
         const track = await player.search(query, {
-            requestedBy: message.author
+            requestedBy: interaction.user
         }).then(x => x.tracks[0]);
         if (!track) return await interaction.followUp({ content: `❌ | Track **${query}** not found!` });
 
