@@ -102,8 +102,8 @@ client.on("interactionCreate", async (interaction) => {
     // /play Despacito
     // will play "Despacito" in the voice channel
     if (interaction.commandName === "play") {
-        if (!interaction.member.voice.channelId) return await interaction.reply({ content: "You are not in a voice channel!", empheral: true });
-        if (interaction.guild.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.me.voice.channelId) return await interaction.reply({ content: "You are not in my voice channel!", empheral: true });
+        if (!interaction.member.voice.channelId) return await interaction.reply({ content: "You are not in a voice channel!", ephemeral: true });
+        if (interaction.guild.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.me.voice.channelId) return await interaction.reply({ content: "You are not in my voice channel!", ephemeral: true });
         const query = interaction.options.get("query").value;
         const queue = player.createQueue(interaction.guild, {
             metadata: {
@@ -116,7 +116,7 @@ client.on("interactionCreate", async (interaction) => {
             if (!queue.connection) await queue.connect(interaction.member.voice.channel);
         } catch {
             queue.destroy();
-            return await interaction.reply({ content: "Could not join your voice channel!", empheral: true });
+            return await interaction.reply({ content: "Could not join your voice channel!", ephemeral: true });
         }
 
         await interaction.deferReply();
