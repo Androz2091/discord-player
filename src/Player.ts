@@ -105,7 +105,7 @@ class Player extends EventEmitter<PlayerEvents> {
             return void this.emit("botDisconnect", queue);
         }
 
-        if (!queue.options.leaveOnEmpty || !queue.connection || !queue.connection.channel) return;
+        if (!queue.connection || !queue.connection.channel) return;
 
         if (!oldState.channelId || newState.channelId) {
             const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
@@ -120,7 +120,7 @@ class Player extends EventEmitter<PlayerEvents> {
             const timeout = setTimeout(() => {
                 if (!Util.isVoiceEmpty(queue.connection.channel)) return;
                 if (!this.queues.has(queue.guild.id)) return;
-                queue.destroy();
+                if (queue.options.leaveOnEmpty) queue.destroy();
                 this.emit("channelEmpty", queue);
             }, queue.options.leaveOnEmptyCooldown || 0).unref();
             queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
