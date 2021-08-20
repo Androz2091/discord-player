@@ -258,14 +258,14 @@ client.on("interactionCreate", async (interaction) => {
         await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
-        const success = queue.setPaused(true);
-        return void interaction.followUp({ content: success ? "⏸ | Paused!" : "❌ | Something went wrong!" });
+        const paused = queue.setPaused(true);
+        return void interaction.followUp({ content: paused ? "⏸ | Paused!" : "❌ | Something went wrong!" });
     } else if (interaction.commandName === "resume") {
         await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
-        const success = queue.setPaused(false);
-        return void interaction.followUp({ content: success ? "❌ | Something went wrong!" : "▶ | Resumed!" });
+        const paused = queue.setPaused(false);
+        return void interaction.followUp({ content: !paused ? "❌ | Something went wrong!" : "▶ | Resumed!" });
     } else if (interaction.commandName === "stop") {
         await interaction.deferReply();
         const queue = player.getQueue(interaction.guildId);
