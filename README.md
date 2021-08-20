@@ -155,9 +155,11 @@ You just need to install it using `npm i --save @discord-player/extractor` (disc
 
 These bots are made by the community, they can help you build your own!
 
-* [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091)
-* [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox)
-* [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
+* [Discord Music Bot](https://github.com/Androz2091/discord-music-bot) by [Androz2091](https://github.com/Androz2091)
+
+* [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
+* [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
+* [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev) (**outdated**)
 
 ## Advanced
 
