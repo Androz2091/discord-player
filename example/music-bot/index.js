@@ -19,7 +19,13 @@ client.on("error", console.error);
 client.on("warn", console.warn);
 
 // instantiate the player
-const player = new Player(client);
+const player = new Player(client, {
+    ytdlOptions: {
+        headers: {
+            cookie: process.env.YT_COOKIE
+        }
+    }
+});
 
 player.on("error", (queue, error) => {
     console.log(`[${queue.guild.name}] Error emitted from the queue: ${error.message}`);
