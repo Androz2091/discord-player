@@ -10,9 +10,7 @@ import { Util } from "./utils/Util";
 import Spotify from "spotify-url-info";
 import { PlayerError, ErrorStatusCode } from "./Structures/PlayerError";
 import { getInfo as ytdlGetInfo } from "ytdl-core";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { Client as SoundCloud } from "soundcloud-scraper";
+import { Client as SoundCloud, SearchResult as SoundCloudSearchResult } from "soundcloud-scraper";
 import { Playlist } from "./Structures/Playlist";
 import { ExtractorModel } from "./Structures/ExtractorModel";
 import { generateDependencyReport } from "@discordjs/voice";
@@ -270,8 +268,7 @@ class Player extends EventEmitter<PlayerEvents> {
             }
             case QueryType.SOUNDCLOUD_TRACK:
             case QueryType.SOUNDCLOUD_SEARCH: {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function
-                const result: any[] = QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? [{ url: query }] : await soundcloud.search(query, "track").catch(Util.noop);
+                const result: SoundCloudSearchResult[] = QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? [{ url: query }] : await soundcloud.search(query, "track").catch(() => []);
                 if (!result || !result.length) return { playlist: null, tracks: [] };
                 const res: Track[] = [];
 
@@ -385,7 +382,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 return { playlist: playlist, tracks: playlist.tracks };
             }
             case QueryType.SOUNDCLOUD_PLAYLIST: {
-                const data = await SoundCloud.getPlaylist(query).catch(Util.noop);
+                const data = await soundcloud.getPlaylist(query).catch(Util.noop);
                 if (!data) return { playlist: null, tracks: [] };
 
                 const res = new Playlist(this, {
@@ -404,7 +401,7 @@ class Player extends EventEmitter<PlayerEvents> {
                     rawPlaylist: data
                 });
 
-                for (const song of data) {
+                for (const song of data.tracks) {
                     const track = new Track(this, {
                         title: song.title,
                         description: song.description ?? "",
