@@ -4350,9 +4350,9 @@ sort-array@^2.0.0:
     typical "^2.6.0"
 
 soundcloud-scraper@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/soundcloud-scraper/-/soundcloud-scraper-5.0.1.tgz#4872d3c09d7cac40a81c99b3c509095ab17bcbcc"
-  integrity sha512-f3JxM/afLRumaT06YsLs8u/WtXDZYvMBis7kB3+rFcx0cyJeu825D3b8D3oTSflNWeFgbGt2+QRrvsXnUi/n1Q==
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/soundcloud-scraper/-/soundcloud-scraper-5.0.2.tgz#3ec6bc74688869164eb7ca1b0759078e09e1d8c2"
+  integrity sha512-QAPvRIG4eefc7JdmCQCG/QEhm4D90XgHbe9lJMHmKIxU0INdAD2LycUR1m0mCIKF3F2dk4NvGEkxGfVLI8Af+A==
   dependencies:
     cheerio "^1.0.0-rc.10"
     m3u8stream "^0.8.4"
