@@ -1,4 +1,6 @@
-require("dotenv").config();
+require("dotenv").config({
+    path: __dirname+"/.env"
+});
 const { Client, GuildMember, Intents } = require("discord.js");
 const config = require("./config");
 const { Player, QueryType, QueueRepeatMode } = require("discord-player");
