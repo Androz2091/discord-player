@@ -645,11 +645,10 @@ class Queue<T = unknown> {
 
         if (options.seek) this._streamTime = options.seek;
         this._filtersUpdate = options.filtersUpdate;
+        this.setVolume(this.options.initialVolume);
 
         setTimeout(() => {
-            this.connection.playStream(resource).then(() => {
-                this.setVolume(this.options.initialVolume);
-            });
+            this.connection.playStream(resource);
         }, this.#getBufferingTimeout()).unref();
     }
 
