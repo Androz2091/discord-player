@@ -488,20 +488,15 @@ class Queue<T = unknown> {
 
     /**
      * Jumps to particular track
-     * @param {Track|number} track The track
+     * @param {number} track The track position in queue
      * @returns {void}
      */
-    jump(track: Track | number): void {
+    jump(track: number): void {
         if (this.#watchDestroyed()) return;
-        // remove the track if exists
-        const foundTrack = this.remove(track);
-        if (!foundTrack) throw new PlayerError("Track not found", ErrorStatusCode.TRACK_NOT_FOUND);
-        // since we removed the existing track from the queue,
-        // we now have to place that to position 1
-        // because we want to jump to that track
-        // this will skip current track and play the next one which will be the foundTrack
-        this.tracks.splice(1, 0, foundTrack);
-
+        if (!track | typeof index !== "number" || index < 0 || !Number.isFinite(index)) throw new PlayerError(`Invalid index "${index}"`, ErrorStatusCode.INVALID_ARG_TYPE);
+        // this will remove that amount of track
+        this.tracks.splice(0, track);
+        // this will play the next one which will be that particular track
         return void this.skip();
     }
 
