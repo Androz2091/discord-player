@@ -12,7 +12,7 @@ assignees: ''
 <!-- An example of code that will use the feature. -->
 
 **Screenshots**
-<!-- If you can, add screensho
+<!-- If you can, add screenshots to help explain the feature -->
 
 **Additional context**
 <!-- Add any other context about the suggestion here. -->
