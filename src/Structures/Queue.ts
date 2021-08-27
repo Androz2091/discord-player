@@ -500,7 +500,7 @@ class Queue<T = unknown> {
         // we now have to place that to position 1
         // because we want to jump to that track
         // this will skip current track and play the next one which will be the foundTrack
-        this.tracks.splice(1, 0, foundTrack);
+          this.tracks.splice(0, 0, foundTrack);
 
         return void this.skip();
     }
