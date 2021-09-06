@@ -12,7 +12,7 @@
     - name: Extractors API
       path: extractor.md
     - name: Creating Stream
-      path: create_Stream.md
+      path: create_stream.md
 - name: FAQ
   files:
     - name: Custom Filters
