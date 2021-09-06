@@ -645,16 +645,18 @@ class Queue<T = unknown> {
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
             if (customDownloader) {
-                stream = ytdl
-                    .arbitraryStream(await this.createStream(track, link), {
-                        opusEncoded: false,
-                        fmt: "s16le",
-                        encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
-                        seek: options.seek ? options.seek / 1000 : 0
-                    })
-                    .on("error", (err) => {
-                        return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
-                    });
+                stream = (await this.createStream(track, link)) ?? null;
+                if (stream)
+                    stream = ytdl
+                        .arbitraryStream(stream, {
+                            opusEncoded: false,
+                            fmt: "s16le",
+                            encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
+                            seek: options.seek ? options.seek / 1000 : 0
+                        })
+                        .on("error", (err) => {
+                            return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
+                        });
             } else {
                 stream = ytdl(link, {
                     ...this.options.ytdlOptions,
@@ -668,8 +670,9 @@ class Queue<T = unknown> {
                 });
             }
         } else {
-            const arbitrarySource = customDownloader
-                ? await this.createStream(track, track.raw.source || track.raw.engine)
+            const tryArb = (customDownloader && (await this.createStream(track, track.raw.source || track.raw.engine))) || null;
+            const arbitrarySource = tryArb
+                ? tryArb
                 : track.raw.source === "soundcloud"
                 ? await track.raw.engine.downloadProgressive()
                 : typeof track.raw.engine === "function"
