@@ -534,6 +534,7 @@ class Queue<T = unknown> {
      * @param {number} [index=0] The index where this track should be
      */
     insert(track: Track, index = 0) {
+        if (this.#watchDestroyed()) return;
         if (!track || !(track instanceof Track)) throw new PlayerError("track must be the instance of Track", ErrorStatusCode.INVALID_TRACK);
         if (typeof index !== "number" || index < 0 || !Number.isFinite(index)) throw new PlayerError(`Invalid index "${index}"`, ErrorStatusCode.INVALID_ARG_TYPE);
 
