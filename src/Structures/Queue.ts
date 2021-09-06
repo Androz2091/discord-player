@@ -487,6 +487,17 @@ class Queue<T = unknown> {
     }
 
     /**
+     * Returns the index of the specified track. If found, returns the track index else returns -1.
+     * @param {number|Track|Snowflake} track The track
+     * @returns {number}
+     */
+    getTrackPosition(track: number | Track | Snowflake) {
+        if (this.#watchDestroyed()) return;
+        if (typeof track === "number") return this.tracks[track] != null ? track : -1;
+        return this.tracks.findIndex((pred) => pred.id === (track instanceof Track ? track.id : track));
+    }
+
+    /**
      * Jumps to particular track
      * @param {Track|number} track The track
      * @returns {void}
@@ -497,6 +508,22 @@ class Queue<T = unknown> {
         if (!foundTrack) throw new PlayerError("Track not found", ErrorStatusCode.TRACK_NOT_FOUND);
 
         this.tracks.splice(0, 0, foundTrack);
+
+        return void this.skip();
+    }
+
+    /**
+     * Jumps to particular track, removing other tracks on the way
+     * @param {Track|number} track The track
+     * @returns {void}
+     */
+    skipTo(track: Track | number): void {
+        if (this.#watchDestroyed()) return;
+        const trackIndex = this.getTrackPosition(track);
+        const removedTrack = this.remove(track);
+        if (!removedTrack) throw new PlayerError("Track not found", ErrorStatusCode.TRACK_NOT_FOUND);
+
+        this.tracks.splice(0, trackIndex, removedTrack);
 
         return void this.skip();
     }
