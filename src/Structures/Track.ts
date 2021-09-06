@@ -121,7 +121,7 @@ class Track {
      * @type {Queue}
      */
     get queue(): Queue {
-        return this.player.queues.find((q) => q.tracks.includes(this));
+        return this.player.queues.find((q) => q.tracks.some((ab) => ab.id === this.id));
     }
 
     /**

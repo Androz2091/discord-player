@@ -2,13 +2,14 @@ import { Collection, Guild, StageChannel, VoiceChannel, Snowflake, SnowflakeUtil
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
 import Track from "./Track";
-import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode } from "../types/types";
+import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode, TrackSource } from "../types/types";
 import ytdl from "discord-ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
 import { Util } from "../utils/Util";
 import YouTube from "youtube-sr";
 import AudioFilters from "../utils/AudioFilters";
 import { PlayerError, ErrorStatusCode } from "./PlayerError";
+import type { Readable } from "stream";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -27,6 +28,7 @@ class Queue<T = unknown> {
     private _filtersUpdate = false;
     #lastVolume = 0;
     #destroyed = false;
+    public createStream: (track: Track, source: TrackSource) => Promise<Readable> | Readable = null;
 
     /**
      * Queue constructor
@@ -630,8 +632,9 @@ class Queue<T = unknown> {
             this.previousTracks.push(track);
         }
 
-        // TODO: remove discord-ytdl-core
-        let stream;
+        let stream = null;
+        const customDownloader = typeof this.createStream === "function";
+
         if (["youtube", "spotify"].includes(track.raw.source)) {
             if (track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
@@ -641,27 +644,44 @@ class Queue<T = unknown> {
             const link = track.raw.source === "spotify" ? track.raw.engine : track.url;
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
-            stream = ytdl(link, {
-                ...this.options.ytdlOptions,
-                // discord-ytdl-core
-                opusEncoded: false,
-                fmt: "s16le",
-                encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
-                seek: options.seek ? options.seek / 1000 : 0
-            }).on("error", (err) => {
-                return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
-            });
-        } else {
-            stream = ytdl
-                .arbitraryStream(
-                    track.raw.source === "soundcloud" ? await track.raw.engine.downloadProgressive() : typeof track.raw.engine === "function" ? await track.raw.engine() : track.raw.engine,
-                    {
+            if (customDownloader) {
+                stream = ytdl
+                    .arbitraryStream(await this.createStream(track, link), {
                         opusEncoded: false,
                         fmt: "s16le",
                         encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
                         seek: options.seek ? options.seek / 1000 : 0
-                    }
-                )
+                    })
+                    .on("error", (err) => {
+                        return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
+                    });
+            } else {
+                stream = ytdl(link, {
+                    ...this.options.ytdlOptions,
+                    // discord-ytdl-core
+                    opusEncoded: false,
+                    fmt: "s16le",
+                    encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
+                    seek: options.seek ? options.seek / 1000 : 0
+                }).on("error", (err) => {
+                    return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
+                });
+            }
+        } else {
+            const arbitrarySource = customDownloader
+                ? await this.createStream(track, track.raw.source || track.raw.engine)
+                : track.raw.source === "soundcloud"
+                ? await track.raw.engine.downloadProgressive()
+                : typeof track.raw.engine === "function"
+                ? await track.raw.engine()
+                : track.raw.engine;
+            stream = ytdl
+                .arbitraryStream(arbitrarySource, {
+                    opusEncoded: false,
+                    fmt: "s16le",
+                    encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
+                    seek: options.seek ? options.seek / 1000 : 0
+                })
                 .on("error", (err) => {
                     return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
                 });
