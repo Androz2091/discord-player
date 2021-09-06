@@ -28,7 +28,7 @@ class Queue<T = unknown> {
     private _filtersUpdate = false;
     #lastVolume = 0;
     #destroyed = false;
-    public createStream: (track: Track, source: TrackSource) => Promise<Readable> | Readable = null;
+    public createStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable> | Readable = null;
 
     /**
      * Queue constructor
@@ -645,7 +645,7 @@ class Queue<T = unknown> {
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
             if (customDownloader) {
-                stream = (await this.createStream(track, link)) ?? null;
+                stream = (await this.createStream(track, link, this)) ?? null;
                 if (stream)
                     stream = ytdl
                         .arbitraryStream(stream, {
@@ -670,7 +670,7 @@ class Queue<T = unknown> {
                 });
             }
         } else {
-            const tryArb = (customDownloader && (await this.createStream(track, track.raw.source || track.raw.engine))) || null;
+            const tryArb = (customDownloader && (await this.createStream(track, track.raw.source || track.raw.engine, this))) || null;
             const arbitrarySource = tryArb
                 ? tryArb
                 : track.raw.source === "soundcloud"
