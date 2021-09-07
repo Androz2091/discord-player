@@ -191,3 +191,30 @@ const player = new Player(client, {
     }
 });
 ```
+
+### Custom stream Engine
+
+Discord Player by default uses **[node-ytdl-core](https://github.com/fent/node-ytdl-core)** for youtube and some other extractors for other sources.
+If you need to modify this behavior without touching extractors, you need to use `createStream` functionality of discord player.
+Here's an example on how you can use **[play-dl](https://npmjs.com/package/play-dl)** to download youtube streams instead of using ytdl-core.
+
+```js
+const playdl = require("play-dl");
+
+// other code
+
+const queue = player.createQueue(...);
+if (!queue.createStream) {
+    queue.createStream = async (track, source, _queue) => {
+        // only trap youtube source
+        if (source === "youtube") {
+            // track here would be youtube track
+            return (await playdl.stream(track.url)).stream;
+            // we must return readable stream or void (returning void means telling discord-player to look for default extractor)
+        }
+    };
+}
+```
+
+`<Queue>.createStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
+streams. `source` here will be a video source. Streams from `createStream` are then piped to `FFmpeg` and finally sent to Discord voice servers.

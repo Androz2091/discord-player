@@ -645,7 +645,7 @@ class Queue<T = unknown> {
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
             if (customDownloader) {
-                stream = (await this.createStream(track, link, this)) ?? null;
+                stream = (await this.createStream(track, "youtube", this)) ?? null;
                 if (stream)
                     stream = ytdl
                         .arbitraryStream(stream, {
