@@ -420,9 +420,10 @@ class Queue<T = unknown> {
      */
     async back() {
         if (this.#watchDestroyed()) return;
-        const prev = this.previousTracks[this.previousTracks.length - 2]; // because last item is the current track
-        if (!prev) throw new PlayerError("Could not find previous track", ErrorStatusCode.TRACK_NOT_FOUND);
-
+        if (this.previousTracks.length < 2) throw new PlayerError("Could not find previous track", ErrorStatusCode.TRACK_NOT_FOUND);
+        const current = this.previousTracks.pop();
+        const prev = this.previousTracks.pop(); // because last item is the current track
+        this.tracks.unshift(current);
         return await this.play(prev, { immediate: true });
     }
 
@@ -451,14 +452,11 @@ class Queue<T = unknown> {
     shuffle() {
         if (this.#watchDestroyed()) return;
         if (!this.tracks.length || this.tracks.length < 3) return false;
-        const currentTrack = this.tracks.shift();
 
         for (let i = this.tracks.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [this.tracks[i], this.tracks[j]] = [this.tracks[j], this.tracks[i]];
         }
-
-        this.tracks.unshift(currentTrack);
 
         return true;
     }
@@ -500,7 +498,7 @@ class Queue<T = unknown> {
         // we now have to place that to position 1
         // because we want to jump to that track
         // this will skip current track and play the next one which will be the foundTrack
-        this.tracks.splice(1, 0, foundTrack);
+        this.tracks.unshift(foundTrack);
 
         return void this.skip();
     }
