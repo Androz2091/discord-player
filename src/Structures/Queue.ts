@@ -25,6 +25,7 @@ class Queue<T = unknown> {
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
     private _filtersUpdate = false;
+    private _trackSkipped = false;
     #lastVolume = 0;
     #destroyed = false;
 
@@ -191,7 +192,7 @@ class Queue<T = unknown> {
                 this.player.emit("queueEnd", this);
             } else {
                 if (this.repeatMode !== QueueRepeatMode.AUTOPLAY) {
-                    if (this.repeatMode === QueueRepeatMode.TRACK) return void this.play(Util.last(this.previousTracks), { immediate: true });
+                    if (this.repeatMode === QueueRepeatMode.TRACK && !this._trackSkipped) return void this.play(Util.last(this.previousTracks), { immediate: true });
                     if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.push(Util.last(this.previousTracks));
                     const nextTrack = this.tracks.shift();
                     this.play(nextTrack, { immediate: true });
@@ -227,6 +228,7 @@ class Queue<T = unknown> {
         if (this.#watchDestroyed()) return;
         if (!this.connection) return false;
         this._filtersUpdate = false;
+        this._trackSkipped = true;
         this.connection.end();
         return true;
     }
@@ -597,6 +599,7 @@ class Queue<T = unknown> {
         const track = options.filtersUpdate && !options.immediate ? src || this.current : src ?? this.tracks.shift();
         if (!track) return;
 
+        this._trackSkipped = false;
         this.player.emit("debug", this, "Received play request");
 
         if (!options.filtersUpdate) {
