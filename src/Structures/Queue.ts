@@ -176,6 +176,7 @@ class Queue<T = unknown> {
             this.playing = true;
             if (!this._filtersUpdate && resource?.metadata) this.player.emit("trackStart", this, resource?.metadata ?? this.current);
             this._filtersUpdate = false;
+            this._trackSkipped = false;
         });
 
         this.connection.on("finish", async (resource) => {
@@ -597,8 +598,6 @@ class Queue<T = unknown> {
         if (src && (this.playing || this.tracks.length) && !options.immediate) return this.addTrack(src);
         const track = options.filtersUpdate && !options.immediate ? src || this.current : src ?? this.tracks.shift();
         if (!track) return;
-
-        this._trackSkipped = false;
         this.player.emit("debug", this, "Received play request");
 
         if (!options.filtersUpdate) {
