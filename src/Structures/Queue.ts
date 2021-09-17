@@ -183,7 +183,6 @@ class Queue<T = unknown> {
             this.playing = false;
             if (this._filtersUpdate) return;
             this._streamTime = 0;
-            if (resource && resource.metadata) this.previousTracks.push(resource.metadata);
 
             this.player.emit("trackEnd", this, resource.metadata);
 
