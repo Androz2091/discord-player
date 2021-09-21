@@ -173,7 +173,7 @@ class Track {
             duration: this.duration,
             durationMS: this.durationMS,
             views: this.views,
-            requestedBy: this.requestedBy.id,
+            requestedBy: this.requestedBy?.id,
             playlist: hidePlaylist ? null : this.playlist?.toJSON() ?? null
         } as TrackJSON;
     }
