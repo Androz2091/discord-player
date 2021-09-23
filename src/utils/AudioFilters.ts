@@ -21,7 +21,7 @@ const bass = (g: number) => `bass=g=${g}:f=110:w=0.3`;
  * @property {string} surrounding The surrounding filter
  * @property {string} pulsator The pulsator filter
  * @property {string} subboost The subboost filter
- * @property {string} kakaoke The kakaoke filter
+ * @property {string} karaoke The kakaoke filter
  * @property {string} flanger The flanger filter
  * @property {string} gate The gate filter
  * @property {string} haas The haas filter
