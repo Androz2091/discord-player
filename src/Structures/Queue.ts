@@ -26,6 +26,7 @@ class Queue<T = unknown> {
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
     private _filtersUpdate = false;
     private _trackSkipped = false;
+    private _leaveTimeout: NodeJS.Timeout = null;
     #lastVolume = 0;
     #destroyed = false;
 
@@ -173,6 +174,10 @@ class Queue<T = unknown> {
 
         this.connection.on("start", (resource) => {
             if (this.#watchDestroyed(false)) return;
+            if (this._leaveTimeout != null) {
+                clearTimeout(this._leaveTimeout);
+                this._leaveTimeout = null;
+            }
             this.playing = true;
             if (!this._filtersUpdate && resource?.metadata) this.player.emit("trackStart", this, resource?.metadata ?? this.current);
             this._filtersUpdate = false;
@@ -189,6 +194,7 @@ class Queue<T = unknown> {
 
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
                 if (this.options.leaveOnEnd) this.destroy();
+                if (this.options.leaveOnEmpty) this._leaveTimeout = setTimeout(() => {this.destroy();}, this.options.leaveOnEmptyCooldown);
                 this.player.emit("queueEnd", this);
             } else {
                 if (this.repeatMode !== QueueRepeatMode.AUTOPLAY) {
