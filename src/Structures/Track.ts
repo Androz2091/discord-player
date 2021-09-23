@@ -121,7 +121,7 @@ class Track {
      * @type {Queue}
      */
     get queue(): Queue {
-        return this.player.queues.find((q) => q.tracks.includes(this));
+        return this.player.queues.find((q) => q.tracks.some((ab) => ab.id === this.id));
     }
 
     /**
@@ -173,7 +173,7 @@ class Track {
             duration: this.duration,
             durationMS: this.durationMS,
             views: this.views,
-            requestedBy: this.requestedBy.id,
+            requestedBy: this.requestedBy?.id,
             playlist: hidePlaylist ? null : this.playlist?.toJSON() ?? null
         } as TrackJSON;
     }

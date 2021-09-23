@@ -76,7 +76,7 @@ class Player extends EventEmitter<PlayerEvents> {
         const queue = this.getQueue(oldState.guild.id);
         if (!queue) return;
 
-        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
+        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId && newState.member.id === newState.guild.me.id) {
             if (queue?.connection) queue.connection.channel = newState.channel;
         }
 
