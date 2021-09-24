@@ -9,6 +9,7 @@ import { Util } from "../utils/Util";
 import YouTube from "youtube-sr";
 import AudioFilters from "../utils/AudioFilters";
 import { PlayerError, ErrorStatusCode } from "./PlayerError";
+import ytdlCore  from "ytdl-core";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -608,7 +609,10 @@ class Queue<T = unknown> {
 
         // TODO: remove discord-ytdl-core
         let stream;
-        if (["youtube", "spotify"].includes(track.raw.source)) {
+        if(["youtube"].includes(track.raw.source)){
+            stream = ytdlCore(track.url, { filter: 'audioonly' });
+        }
+        else if (["spotify"].includes(track.raw.source)) {
             if (track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
                     .then((x) => x[0].url)
@@ -644,7 +648,7 @@ class Queue<T = unknown> {
         }
 
         const resource: AudioResource<Track> = this.connection.createStream(stream, {
-            type: StreamType.Raw,
+            type: (track.raw.source === "youtube") ? StreamType.WebmOpus : StreamType.Raw,
             data: track
         });
 
