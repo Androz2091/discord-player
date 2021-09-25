@@ -202,19 +202,18 @@ Here's an example on how you can use **[play-dl](https://npmjs.com/package/play-
 const playdl = require("play-dl");
 
 // other code
-
-const queue = player.createQueue(...);
-if (!queue.createStream) {
-    queue.createStream = async (track, source, _queue) => {
+const queue = player.createQueue(..., {
+    ...,
+    async onBeforeCreateStream(track, source, _queue) {
         // only trap youtube source
         if (source === "youtube") {
             // track here would be youtube track
             return (await playdl.stream(track.url)).stream;
             // we must return readable stream or void (returning void means telling discord-player to look for default extractor)
         }
-    };
-}
+    }
+});
 ```
 
-`<Queue>.createStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
-streams. `source` here will be a video source. Streams from `createStream` are then piped to `FFmpeg` and finally sent to Discord voice servers.
+`<Queue>.onBeforeCreateStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
+streams. `source` here will be a video source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and finally sent to Discord voice servers.

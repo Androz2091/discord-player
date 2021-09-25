@@ -28,7 +28,7 @@ class Queue<T = unknown> {
     private _filtersUpdate = false;
     #lastVolume = 0;
     #destroyed = false;
-    public createStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable> | Readable = null;
+    public onBeforeCreateStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable> = null;
 
     /**
      * Queue constructor
@@ -109,6 +109,8 @@ class Queue<T = unknown> {
             } as PlayerOptions,
             options
         );
+
+        if ("onBeforeCreateStream" in this.options) this.onBeforeCreateStream = this.options.onBeforeCreateStream;
 
         this.player.emit("debug", this, `Queue initialized:\n\n${this.player.scanDeps()}`);
     }
@@ -633,7 +635,7 @@ class Queue<T = unknown> {
         }
 
         let stream = null;
-        const customDownloader = typeof this.createStream === "function";
+        const customDownloader = typeof this.onBeforeCreateStream === "function";
 
         if (["youtube", "spotify"].includes(track.raw.source)) {
             if (track.raw.source === "spotify" && !track.raw.engine) {
@@ -645,7 +647,7 @@ class Queue<T = unknown> {
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
             if (customDownloader) {
-                stream = (await this.createStream(track, "youtube", this)) ?? null;
+                stream = (await this.onBeforeCreateStream(track, "youtube", this)) ?? null;
                 if (stream)
                     stream = ytdl
                         .arbitraryStream(stream, {
@@ -670,7 +672,7 @@ class Queue<T = unknown> {
                 });
             }
         } else {
-            const tryArb = (customDownloader && (await this.createStream(track, track.raw.source || track.raw.engine, this))) || null;
+            const tryArb = (customDownloader && (await this.onBeforeCreateStream(track, track.raw.source || track.raw.engine, this))) || null;
             const arbitrarySource = tryArb
                 ? tryArb
                 : track.raw.source === "soundcloud"

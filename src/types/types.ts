@@ -128,6 +128,7 @@ export interface PlayerProgressbarOptions {
  * @property {YTDLDownloadOptions} [ytdlOptions={}] The youtube download options
  * @property {number} [initialVolume=100] The initial player volume
  * @property {number} [bufferingTimeout=3000] Buffering timeout for the stream
+ * @property {Function} [onBeforeCreateStream] Runs before creating stream
  */
 export interface PlayerOptions {
     leaveOnEnd?: boolean;
@@ -138,6 +139,7 @@ export interface PlayerOptions {
     ytdlOptions?: downloadOptions;
     initialVolume?: number;
     bufferingTimeout?: number;
+    onBeforeCreateStream?: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable>;
 }
 
 /**
