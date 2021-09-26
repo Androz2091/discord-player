@@ -315,18 +315,18 @@ export enum QueryType {
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export interface PlayerEvents {
-    botDisconnect: (queue: Queue) => any;
-    channelEmpty: (queue: Queue) => any;
-    connectionCreate: (queue: Queue, connection: StreamDispatcher) => any;
-    debug: (queue: Queue, message: string) => any;
-    error: (queue: Queue, error: Error) => any;
-    connectionError: (queue: Queue, error: Error) => any;
-    queueEnd: (queue: Queue) => any;
-    trackAdd: (queue: Queue, track: Track) => any;
-    tracksAdd: (queue: Queue, track: Track[]) => any;
-    trackStart: (queue: Queue, track: Track) => any;
-    trackEnd: (queue: Queue, track: Track) => any;
+export interface PlayerEvents<QueueMetaData = {}> {
+    botDisconnect: (queue: Queue<QueueMetaData>) => any;
+    channelEmpty: (queue: Queue<QueueMetaData>) => any;
+    connectionCreate: (queue: Queue<QueueMetaData>, connection: StreamDispatcher) => any;
+    debug: (queue: Queue<QueueMetaData>, message: string) => any;
+    error: (queue: Queue<QueueMetaData>, error: Error) => any;
+    connectionError: (queue: Queue<QueueMetaData>, error: Error) => any;
+    queueEnd: (queue: Queue<QueueMetaData>) => any;
+    trackAdd: (queue: Queue<QueueMetaData>, track: Track) => any;
+    tracksAdd: (queue: Queue<QueueMetaData>, track: Track[]) => any;
+    trackStart: (queue: Queue<QueueMetaData>, track: Track) => any;
+    trackEnd: (queue: Queue<QueueMetaData>, track: Track) => any;
 }
 
 /* eslint-enable @typescript-eslint/no-explicit-any */

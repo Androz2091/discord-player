@@ -17,7 +17,7 @@ import { generateDependencyReport } from "@discordjs/voice";
 
 const soundcloud = new SoundCloud();
 
-class Player extends EventEmitter<PlayerEvents> {
+class Player<MetaData extends Object = {}> extends EventEmitter<PlayerEvents<MetaData>> {
     public readonly client: Client;
     public readonly options: PlayerInitOptions = {
         autoRegisterExtractor: true,
@@ -131,7 +131,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @param {PlayerOptions} queueInitOptions Queue init options
      * @returns {Queue}
      */
-    createQueue<T = unknown>(guild: GuildResolvable, queueInitOptions: PlayerOptions & { metadata?: T } = {}): Queue<T> {
+    createQueue<T = MetaData>(guild: GuildResolvable, queueInitOptions: PlayerOptions & { metadata?: T } = {}): Queue<T> {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
@@ -151,7 +151,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @param {GuildResolvable} guild The guild id
      * @returns {Queue}
      */
-    getQueue<T = unknown>(guild: GuildResolvable) {
+    getQueue<T = MetaData>(guild: GuildResolvable) {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         return this.queues.get(guild.id) as Queue<T>;
@@ -162,7 +162,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @param {GuildResolvable} guild The guild id to remove
      * @returns {Queue}
      */
-    deleteQueue<T = unknown>(guild: GuildResolvable) {
+    deleteQueue<T = MetaData>(guild: GuildResolvable) {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         const prev = this.getQueue<T>(guild);
