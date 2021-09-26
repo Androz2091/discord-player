@@ -17,7 +17,10 @@ import { generateDependencyReport } from "@discordjs/voice";
 
 const soundcloud = new SoundCloud();
 
-class Player<MetaData extends Object = {}> extends EventEmitter<PlayerEvents<MetaData>> {
+type AnyMetaData<T> = {
+    [m in keyof T]: T[m];
+} & { [k: string]: any };
+class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitter<PlayerEvents<AnyMetaData<MetaData>>> {
     public readonly client: Client;
     public readonly options: PlayerInitOptions = {
         autoRegisterExtractor: true,
@@ -131,7 +134,7 @@ class Player<MetaData extends Object = {}> extends EventEmitter<PlayerEvents<Met
      * @param {PlayerOptions} queueInitOptions Queue init options
      * @returns {Queue}
      */
-    createQueue<T = MetaData>(guild: GuildResolvable, queueInitOptions: PlayerOptions & { metadata?: T } = {}): Queue<T> {
+    createQueue<T = AnyMetaData<MetaData>>(guild: GuildResolvable, queueInitOptions: PlayerOptions & { metadata?: T } = {}): Queue<T> {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
@@ -151,7 +154,7 @@ class Player<MetaData extends Object = {}> extends EventEmitter<PlayerEvents<Met
      * @param {GuildResolvable} guild The guild id
      * @returns {Queue}
      */
-    getQueue<T = MetaData>(guild: GuildResolvable) {
+    getQueue<T = AnyMetaData<MetaData>>(guild: GuildResolvable) {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         return this.queues.get(guild.id) as Queue<T>;
@@ -162,7 +165,7 @@ class Player<MetaData extends Object = {}> extends EventEmitter<PlayerEvents<Met
      * @param {GuildResolvable} guild The guild id to remove
      * @returns {Queue}
      */
-    deleteQueue<T = MetaData>(guild: GuildResolvable) {
+    deleteQueue<T = AnyMetaData<MetaData>>(guild: GuildResolvable) {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         const prev = this.getQueue<T>(guild);
