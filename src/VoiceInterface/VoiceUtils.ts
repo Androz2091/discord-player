@@ -2,8 +2,8 @@ import { VoiceChannel, StageChannel, Collection, Snowflake } from "discord.js";
 import { DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
 import { StreamDispatcher } from "./StreamDispatcher";
 
-class VoiceUtils {
-    public cache: Collection<Snowflake, StreamDispatcher>;
+class VoiceUtils<T extends { [k: string]: any }> {
+    public cache: Collection<Snowflake, StreamDispatcher<T>>;
 
     /**
      * The voice utils
@@ -14,7 +14,7 @@ class VoiceUtils {
          * The cache where voice utils stores stream managers
          * @type {Collection<Snowflake, StreamDispatcher>}
          */
-        this.cache = new Collection<Snowflake, StreamDispatcher>();
+        this.cache = new Collection<Snowflake, StreamDispatcher<T>>();
     }
 
     /**
@@ -29,9 +29,9 @@ class VoiceUtils {
             deaf?: boolean;
             maxTime?: number;
         }
-    ): Promise<StreamDispatcher> {
+    ): Promise<StreamDispatcher<T>> {
         const conn = await this.join(channel, options);
-        const sub = new StreamDispatcher(conn, channel, options.maxTime);
+        const sub = new StreamDispatcher<T>(conn, channel, options.maxTime);
         this.cache.set(channel.guild.id, sub);
         return sub;
     }
@@ -70,7 +70,7 @@ class VoiceUtils {
      * @param {VoiceConnection} connection The voice connection
      * @returns {void}
      */
-    public disconnect(connection: VoiceConnection | StreamDispatcher) {
+    public disconnect(connection: VoiceConnection | StreamDispatcher<T>) {
         if (connection instanceof StreamDispatcher) return connection.voiceConnection.destroy();
         return connection.destroy();
     }

@@ -4,8 +4,8 @@ import { RawTrackData, TrackJSON } from "../types/types";
 import { Playlist } from "./Playlist";
 import { Queue } from "./Queue";
 
-class Track {
-    public player!: Player;
+class Track<T extends { [k: string]: any }> {
+    public player!: Player<T>;
     public title!: string;
     public description!: string;
     public author!: string;
@@ -14,8 +14,8 @@ class Track {
     public duration!: string;
     public views!: number;
     public requestedBy!: User;
-    public playlist?: Playlist;
-    public readonly raw: RawTrackData = {} as RawTrackData;
+    public playlist?: Playlist<T>;
+    public readonly raw: RawTrackData<T> = {} as RawTrackData<T>;
     public readonly id: Snowflake = SnowflakeUtil.generate();
 
     /**
@@ -23,7 +23,7 @@ class Track {
      * @param {Player} player The player that instantiated this Track
      * @param {RawTrackData} data Track data
      */
-    constructor(player: Player, data: RawTrackData) {
+    constructor(player: Player<T>, data: RawTrackData<T>) {
         /**
          * The player that instantiated this Track
          * @name Track#player
@@ -102,7 +102,7 @@ class Track {
         void this._patch(data);
     }
 
-    private _patch(data: RawTrackData) {
+    private _patch(data: RawTrackData<T>) {
         this.title = Util.escapeMarkdown(data.title ?? "");
         this.author = data.author ?? "";
         this.url = data.url ?? "";
@@ -120,8 +120,8 @@ class Track {
      * The queue in which this track is located
      * @type {Queue}
      */
-    get queue(): Queue {
-        return this.player.queues.find((q) => q.tracks.includes(this));
+    get queue(): Queue<T> {
+        return this.player.queues.find((q) => q.tracks.some((ab) => ab.id === this.id)) as unknown as Queue<T>;
     }
 
     /**
@@ -173,7 +173,7 @@ class Track {
             duration: this.duration,
             durationMS: this.durationMS,
             views: this.views,
-            requestedBy: this.requestedBy.id,
+            requestedBy: this.requestedBy?.id,
             playlist: hidePlaylist ? null : this.playlist?.toJSON() ?? null
         } as TrackJSON;
     }

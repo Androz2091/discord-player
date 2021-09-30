@@ -2,21 +2,22 @@ import { Collection, Guild, StageChannel, VoiceChannel, Snowflake, SnowflakeUtil
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
 import Track from "./Track";
-import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode } from "../types/types";
+import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode, TrackSource } from "../types/types";
 import ytdl from "discord-ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
 import { Util } from "../utils/Util";
 import YouTube from "youtube-sr";
 import AudioFilters from "../utils/AudioFilters";
 import { PlayerError, ErrorStatusCode } from "./PlayerError";
+import type { Readable } from "stream";
 
-class Queue<T = unknown> {
+class Queue<T extends { [k: string]: any }> {
     public readonly guild: Guild;
-    public readonly player: Player;
-    public connection: StreamDispatcher;
-    public tracks: Track[] = [];
-    public previousTracks: Track[] = [];
-    public options: PlayerOptions;
+    public readonly player: Player<T>;
+    public connection: StreamDispatcher<T>;
+    public tracks: Track<T>[] = [];
+    public previousTracks: Track<T>[] = [];
+    public options: PlayerOptions<T>;
     public playing = false;
     public metadata?: T = null;
     public repeatMode: QueueRepeatMode = 0;
@@ -27,6 +28,7 @@ class Queue<T = unknown> {
     private _filtersUpdate = false;
     #lastVolume = 0;
     #destroyed = false;
+    public onBeforeCreateStream: (track: Track<T>, source: TrackSource, queue: Queue<T>) => Promise<Readable|undefined> = null;
 
     /**
      * Queue constructor
@@ -34,7 +36,7 @@ class Queue<T = unknown> {
      * @param {Guild} guild The guild that instantiated this queue
      * @param {PlayerOptions} [options={}] Player options for the queue
      */
-    constructor(player: Player, guild: Guild, options: PlayerOptions = {}) {
+    constructor(player: Player<T>, guild: Guild, options: PlayerOptions<T> = {}) {
         /**
          * The player that instantiated this queue
          * @type {Player}
@@ -104,9 +106,11 @@ class Queue<T = unknown> {
                 },
                 initialVolume: 100,
                 bufferingTimeout: 3000
-            } as PlayerOptions,
+            } as PlayerOptions<T>,
             options
         );
+
+        if ("onBeforeCreateStream" in this.options) this.onBeforeCreateStream = this.options.onBeforeCreateStream;
 
         this.player.emit("debug", this, `Queue initialized:\n\n${this.player.scanDeps()}`);
     }
@@ -151,7 +155,7 @@ class Queue<T = unknown> {
             deaf: this.options.autoSelfDeaf,
             maxTime: this.player.options.connectionTimeout || 20000
         });
-        this.connection = connection;
+        this.connection = connection as unknown as StreamDispatcher<T>;
 
         if (_channel.type === "GUILD_STAGE_VOICE") {
             await _channel.guild.me.voice.setSuppressed(false).catch(async () => {
@@ -236,7 +240,7 @@ class Queue<T = unknown> {
      * @param {Track} track The track to add
      * @returns {void}
      */
-    addTrack(track: Track) {
+    addTrack(track: Track<T>) {
         if (this.#watchDestroyed()) return;
         if (!(track instanceof Track)) throw new PlayerError("invalid track", ErrorStatusCode.INVALID_TRACK);
         this.tracks.push(track);
@@ -247,7 +251,7 @@ class Queue<T = unknown> {
      * Adds multiple tracks to the queue
      * @param {Track[]} tracks Array of tracks to add
      */
-    addTracks(tracks: Track[]) {
+    addTracks(tracks: Track<T>[]) {
         if (this.#watchDestroyed()) return;
         if (!tracks.every((y) => y instanceof Track)) throw new PlayerError("invalid track", ErrorStatusCode.INVALID_TRACK);
         this.tracks.push(...tracks);
@@ -468,9 +472,9 @@ class Queue<T = unknown> {
      * @param {Track|Snowflake|number} track The track to remove
      * @returns {Track}
      */
-    remove(track: Track | Snowflake | number) {
+    remove(track: Track<T> | Snowflake | number) {
         if (this.#watchDestroyed()) return;
-        let trackFound: Track = null;
+        let trackFound: Track<T> = null;
         if (typeof track === "number") {
             trackFound = this.tracks[track];
             if (trackFound) {
@@ -487,20 +491,43 @@ class Queue<T = unknown> {
     }
 
     /**
+     * Returns the index of the specified track. If found, returns the track index else returns -1.
+     * @param {number|Track|Snowflake} track The track
+     * @returns {number}
+     */
+    getTrackPosition(track: number | Track<T> | Snowflake) {
+        if (this.#watchDestroyed()) return;
+        if (typeof track === "number") return this.tracks[track] != null ? track : -1;
+        return this.tracks.findIndex((pred) => pred.id === (track instanceof Track ? track.id : track));
+    }
+
+    /**
      * Jumps to particular track
      * @param {Track|number} track The track
      * @returns {void}
      */
-    jump(track: Track | number): void {
+    jump(track: Track<T> | number): void {
         if (this.#watchDestroyed()) return;
-        // remove the track if exists
         const foundTrack = this.remove(track);
         if (!foundTrack) throw new PlayerError("Track not found", ErrorStatusCode.TRACK_NOT_FOUND);
-        // since we removed the existing track from the queue,
-        // we now have to place that to position 1
-        // because we want to jump to that track
-        // this will skip current track and play the next one which will be the foundTrack
-        this.tracks.splice(1, 0, foundTrack);
+
+        this.tracks.splice(0, 0, foundTrack);
+
+        return void this.skip();
+    }
+
+    /**
+     * Jumps to particular track, removing other tracks on the way
+     * @param {Track|number} track The track
+     * @returns {void}
+     */
+    skipTo(track: Track<T> | number): void {
+        if (this.#watchDestroyed()) return;
+        const trackIndex = this.getTrackPosition(track);
+        const removedTrack = this.remove(track);
+        if (!removedTrack) throw new PlayerError("Track not found", ErrorStatusCode.TRACK_NOT_FOUND);
+
+        this.tracks.splice(0, trackIndex, removedTrack);
 
         return void this.skip();
     }
@@ -510,7 +537,8 @@ class Queue<T = unknown> {
      * @param {Track} track The track to insert
      * @param {number} [index=0] The index where this track should be
      */
-    insert(track: Track, index = 0) {
+    insert(track: Track<T>, index = 0) {
+        if (this.#watchDestroyed()) return;
         if (!track || !(track instanceof Track)) throw new PlayerError("track must be the instance of Track", ErrorStatusCode.INVALID_TRACK);
         if (typeof index !== "number" || index < 0 || !Number.isFinite(index)) throw new PlayerError(`Invalid index "${index}"`, ErrorStatusCode.INVALID_ARG_TYPE);
 
@@ -592,7 +620,7 @@ class Queue<T = unknown> {
      * @param {PlayOptions} [options={}] The options
      * @returns {Promise<void>}
      */
-    async play(src?: Track, options: PlayOptions = {}): Promise<void> {
+    async play(src?: Track<T>, options: PlayOptions = {}): Promise<void> {
         if (this.#watchDestroyed(false)) return;
         if (!this.connection || !this.connection.voiceConnection) throw new PlayerError("Voice connection is not available, use <Queue>.connect()!", ErrorStatusCode.NO_CONNECTION);
         if (src && (this.playing || this.tracks.length) && !options.immediate) return this.addTrack(src);
@@ -606,8 +634,9 @@ class Queue<T = unknown> {
             this.previousTracks.push(track);
         }
 
-        // TODO: remove discord-ytdl-core
-        let stream;
+        let stream = null;
+        const customDownloader = typeof this.onBeforeCreateStream === "function";
+
         if (["youtube", "spotify"].includes(track.raw.source)) {
             if (track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
@@ -617,33 +646,53 @@ class Queue<T = unknown> {
             const link = track.raw.source === "spotify" ? track.raw.engine : track.url;
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
-            stream = ytdl(link, {
-                ...this.options.ytdlOptions,
-                // discord-ytdl-core
-                opusEncoded: false,
-                fmt: "s16le",
-                encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
-                seek: options.seek ? options.seek / 1000 : 0
-            }).on("error", (err) => {
-                return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
-            });
+            if (customDownloader) {
+                stream = (await this.onBeforeCreateStream(track, "youtube", this)) ?? null;
+                if (stream)
+                    stream = ytdl
+                        .arbitraryStream(stream, {
+                            opusEncoded: false,
+                            fmt: "s16le",
+                            encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
+                            seek: options.seek ? options.seek / 1000 : 0
+                        })
+                        .on("error", (err) => {
+                            return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
+                        });
+            } else {
+                stream = ytdl(link, {
+                    ...this.options.ytdlOptions,
+                    // discord-ytdl-core
+                    opusEncoded: false,
+                    fmt: "s16le",
+                    encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
+                    seek: options.seek ? options.seek / 1000 : 0
+                }).on("error", (err) => {
+                    return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
+                });
+            }
         } else {
+            const tryArb = (customDownloader && (await this.onBeforeCreateStream(track, track.raw.source || track.raw.engine, this))) || null;
+            const arbitrarySource = tryArb
+                ? tryArb
+                : track.raw.source === "soundcloud"
+                ? await track.raw.engine.downloadProgressive()
+                : typeof track.raw.engine === "function"
+                ? await track.raw.engine()
+                : track.raw.engine;
             stream = ytdl
-                .arbitraryStream(
-                    track.raw.source === "soundcloud" ? await track.raw.engine.downloadProgressive() : typeof track.raw.engine === "function" ? await track.raw.engine() : track.raw.engine,
-                    {
-                        opusEncoded: false,
-                        fmt: "s16le",
-                        encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
-                        seek: options.seek ? options.seek / 1000 : 0
-                    }
-                )
+                .arbitraryStream(arbitrarySource, {
+                    opusEncoded: false,
+                    fmt: "s16le",
+                    encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
+                    seek: options.seek ? options.seek / 1000 : 0
+                })
                 .on("error", (err) => {
                     return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
                 });
         }
 
-        const resource: AudioResource<Track> = this.connection.createStream(stream, {
+        const resource: AudioResource<Track<T>> = this.connection.createStream(stream, {
             type: StreamType.Raw,
             data: track
         });
@@ -663,7 +712,7 @@ class Queue<T = unknown> {
      * @returns {Promise<void>}
      * @private
      */
-    private async _handleAutoplay(track: Track): Promise<void> {
+    private async _handleAutoplay(track: Track<T>): Promise<void> {
         if (this.#watchDestroyed()) return;
         if (!track || ![track.source, track.raw?.source].includes("youtube")) {
             if (this.options.leaveOnEnd) this.destroy();
@@ -677,7 +726,7 @@ class Queue<T = unknown> {
             return void this.player.emit("queueEnd", this);
         }
 
-        const nextTrack = new Track(this.player, {
+        const nextTrack = new Track<T>(this.player, {
             title: info.title,
             url: `https://www.youtube.com/watch?v=${info.id}`,
             duration: info.durationFormatted ? Util.buildTimeCode(Util.parseMS(info.duration * 1000)) : "0:00",

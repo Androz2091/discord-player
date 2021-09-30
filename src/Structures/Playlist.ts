@@ -2,9 +2,9 @@ import { Player } from "../Player";
 import { Track } from "./Track";
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from "../types/types";
 
-class Playlist {
-    public readonly player: Player;
-    public tracks: Track[];
+class Playlist<T extends { [k: string]: any }> {
+    public readonly player: Player<T>;
+    public tracks: Track<T>[];
     public title: string;
     public description: string;
     public thumbnail: string;
@@ -23,7 +23,7 @@ class Playlist {
      * @param {Player} player The player
      * @param {PlaylistInitData} data The data
      */
-    constructor(player: Player, data: PlaylistInitData) {
+    constructor(player: Player<T>, data: PlaylistInitData<T>) {
         /**
          * The player
          * @name Playlist#player

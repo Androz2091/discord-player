@@ -73,7 +73,7 @@ export type TrackSource = "soundcloud" | "youtube" | "spotify" | "arbitrary";
  * @property {boolean} [live] If this track is live
  * @property {any} [raw] The raw data
  */
-export interface RawTrackData {
+export interface RawTrackData<T extends { [k: string]: any }> {
     title: string;
     description: string;
     author: string;
@@ -82,7 +82,7 @@ export interface RawTrackData {
     duration: string;
     views: number;
     requestedBy: User;
-    playlist?: Playlist;
+    playlist?: Playlist<T>;
     source?: TrackSource;
     engine?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     live?: boolean;
@@ -128,8 +128,9 @@ export interface PlayerProgressbarOptions {
  * @property {YTDLDownloadOptions} [ytdlOptions={}] The youtube download options
  * @property {number} [initialVolume=100] The initial player volume
  * @property {number} [bufferingTimeout=3000] Buffering timeout for the stream
+ * @property {Function} [onBeforeCreateStream] Runs before creating stream
  */
-export interface PlayerOptions {
+export interface PlayerOptions<T extends { [k: string]: any }> {
     leaveOnEnd?: boolean;
     leaveOnStop?: boolean;
     leaveOnEmpty?: boolean;
@@ -138,6 +139,7 @@ export interface PlayerOptions {
     ytdlOptions?: downloadOptions;
     initialVolume?: number;
     bufferingTimeout?: number;
+    onBeforeCreateStream?: (track: Track<T>, source: TrackSource, queue: Queue<T>) => Promise<Readable>;
 }
 
 /**
@@ -315,18 +317,18 @@ export enum QueryType {
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export interface PlayerEvents<QueueMetaData = {}> {
-    botDisconnect: (queue: Queue<QueueMetaData>) => any;
-    channelEmpty: (queue: Queue<QueueMetaData>) => any;
-    connectionCreate: (queue: Queue<QueueMetaData>, connection: StreamDispatcher) => any;
-    debug: (queue: Queue<QueueMetaData>, message: string) => any;
-    error: (queue: Queue<QueueMetaData>, error: Error) => any;
-    connectionError: (queue: Queue<QueueMetaData>, error: Error) => any;
-    queueEnd: (queue: Queue<QueueMetaData>) => any;
-    trackAdd: (queue: Queue<QueueMetaData>, track: Track) => any;
-    tracksAdd: (queue: Queue<QueueMetaData>, track: Track[]) => any;
-    trackStart: (queue: Queue<QueueMetaData>, track: Track) => any;
-    trackEnd: (queue: Queue<QueueMetaData>, track: Track) => any;
+export interface PlayerEvents<T extends { [k: string]: any }> {
+    botDisconnect: (queue: Queue<T>) => any;
+    channelEmpty: (queue: Queue<T>) => any;
+    connectionCreate: (queue: Queue<T>, connection: StreamDispatcher<T>) => any;
+    debug: (queue: Queue<T>, message: string) => any;
+    error: (queue: Queue<T>, error: Error) => any;
+    connectionError: (queue: Queue<T>, error: Error) => any;
+    queueEnd: (queue: Queue<T>) => any;
+    trackAdd: (queue: Queue<T>, track: Track<T>) => any;
+    tracksAdd: (queue: Queue<T>, track: Track<T>[]) => any;
+    trackStart: (queue: Queue<T>, track: Track<T>) => any;
+    trackEnd: (queue: Queue<T>, track: Track<T>) => any;
 }
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -387,8 +389,8 @@ export enum QueueRepeatMode {
  * @property {string} url The playlist url
  * @property {any} [rawPlaylist] The raw playlist data
  */
-export interface PlaylistInitData {
-    tracks: Track[];
+export interface PlaylistInitData<T extends { [k: string]: any }> {
+    tracks: Track<T>[];
     title: string;
     description: string;
     thumbnail: string;

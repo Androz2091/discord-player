@@ -17,10 +17,16 @@ import { generateDependencyReport } from "@discordjs/voice";
 
 const soundcloud = new SoundCloud();
 
-type AnyMetaData<T> = {
+type MetaDataWithAny<T> = {
     [m in keyof T]: T[m];
 } & { [k: string]: any };
-class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitter<PlayerEvents<AnyMetaData<MetaData>>> {
+
+type search<T> = {
+    playlist?: Playlist<T>,
+    tracks?: Track<T>[]
+}
+
+class Player<MetaData extends { [k: string]: any } = { [k: string]: any }> extends EventEmitter<PlayerEvents<MetaDataWithAny<MetaData>>> {
     public readonly client: Client;
     public readonly options: PlayerInitOptions = {
         autoRegisterExtractor: true,
@@ -29,7 +35,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
         },
         connectionTimeout: 20000
     };
-    public readonly queues = new Collection<Snowflake, Queue>();
+    public readonly queues = new Collection<Snowflake, Queue<MetaDataWithAny<MetaData>>>();
     public readonly voiceUtils = new VoiceUtils();
     public readonly extractors = new Collection<string, ExtractorModel>();
 
@@ -79,7 +85,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
         const queue = this.getQueue(oldState.guild.id);
         if (!queue) return;
 
-        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
+        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId && newState.member.id === newState.guild.me.id) {
             if (queue?.connection) queue.connection.channel = newState.channel;
         }
 
@@ -134,17 +140,17 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
      * @param {PlayerOptions} queueInitOptions Queue init options
      * @returns {Queue}
      */
-    createQueue<T = AnyMetaData<MetaData>>(guild: GuildResolvable, queueInitOptions: PlayerOptions & { metadata?: T } = {}): Queue<T> {
+    createQueue<T extends MetaDataWithAny<MetaData> = MetaDataWithAny<MetaData>>(guild: GuildResolvable, queueInitOptions: PlayerOptions<T> & { metadata?: T } = {}): Queue<T> {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
-        if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
+        if (this.queues.has(guild.id)) return this.queues.get(guild.id) as unknown as Queue<T>;
 
         const _meta = queueInitOptions.metadata;
         delete queueInitOptions["metadata"];
         queueInitOptions.ytdlOptions ??= this.options.ytdlOptions;
-        const queue = new Queue(this, guild, queueInitOptions);
+        const queue = new Queue<T>(this as unknown as Player<T>, guild, queueInitOptions);
         queue.metadata = _meta;
-        this.queues.set(guild.id, queue);
+        this.queues.set(guild.id, queue as unknown as Queue<MetaDataWithAny<MetaData>>);
 
         return queue as Queue<T>;
     }
@@ -154,10 +160,10 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
      * @param {GuildResolvable} guild The guild id
      * @returns {Queue}
      */
-    getQueue<T = AnyMetaData<MetaData>>(guild: GuildResolvable) {
+    getQueue<T extends MetaDataWithAny<MetaData> = MetaDataWithAny<MetaData>>(guild: GuildResolvable): Queue<T> {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
-        return this.queues.get(guild.id) as Queue<T>;
+        return this.queues.get(guild.id) as unknown as Queue<T>;
     }
 
     /**
@@ -165,7 +171,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
      * @param {GuildResolvable} guild The guild id to remove
      * @returns {Queue}
      */
-    deleteQueue<T = AnyMetaData<MetaData>>(guild: GuildResolvable) {
+    deleteQueue<T extends MetaDataWithAny<MetaData> = MetaDataWithAny<MetaData>>(guild: GuildResolvable) {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         const prev = this.getQueue<T>(guild);
@@ -189,7 +195,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
      * @param {SearchOptions} options The search options
      * @returns {Promise<SearchResult>}
      */
-    async search(query: string | Track, options: SearchOptions) {
+    async search<T extends MetaDataWithAny<MetaData> = MetaDataWithAny<MetaData>>(query: string | Track<T>, options: SearchOptions): Promise<search<T>> {
         if (query instanceof Track) return { playlist: null, tracks: [query] };
         if (!options) throw new PlayerError("DiscordPlayer#search needs search options!", ErrorStatusCode.INVALID_ARG_TYPE);
         options.requestedBy = this.client.users.resolve(options.requestedBy);
@@ -203,14 +209,14 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
             if (data && data.data.length) {
                 const playlist = !data.playlist
                     ? null
-                    : new Playlist(this, {
+                    : new Playlist<T>(this as unknown as Player<T>, {
                           ...data.playlist,
                           tracks: []
                       });
 
                 const tracks = data.data.map(
                     (m) =>
-                        new Track(this, {
+                        new Track<T>(this as unknown as Player<T>, {
                             ...m,
                             requestedBy: options.requestedBy as User,
                             duration: Util.buildTimeCode(Util.parseMS(m.duration)),
@@ -230,7 +236,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
                 const info = await ytdlGetInfo(query).catch(Util.noop);
                 if (!info) return { playlist: null, tracks: [] };
 
-                const track = new Track(this, {
+                const track = new Track<T>(this as unknown as Player<T>, {
                     title: info.videoDetails.title,
                     description: info.videoDetails.description,
                     author: info.videoDetails.author?.name,
@@ -253,7 +259,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
 
                 const tracks = videos.map((m) => {
                     (m as any).source = "youtube"; // eslint-disable-line @typescript-eslint/no-explicit-any
-                    return new Track(this, {
+                    return new Track<T>(this as unknown as Player<T>, {
                         title: m.title,
                         description: m.description,
                         author: m.channel?.name,
@@ -273,13 +279,13 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
             case QueryType.SOUNDCLOUD_SEARCH: {
                 const result: SoundCloudSearchResult[] = QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? [{ url: query }] : await soundcloud.search(query, "track").catch(() => []);
                 if (!result || !result.length) return { playlist: null, tracks: [] };
-                const res: Track[] = [];
+                const res: Track<T>[] = [];
 
                 for (const r of result) {
                     const trackInfo = await soundcloud.getSongInfo(r.url).catch(Util.noop);
                     if (!trackInfo) continue;
 
-                    const track = new Track(this, {
+                    const track = new Track<T>(this as unknown as Player<T>, {
                         title: trackInfo.title,
                         url: trackInfo.url,
                         duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
@@ -300,7 +306,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
             case QueryType.SPOTIFY_SONG: {
                 const spotifyData = await Spotify.getData(query).catch(Util.noop);
                 if (!spotifyData) return { playlist: null, tracks: [] };
-                const spotifyTrack = new Track(this, {
+                const spotifyTrack = new Track<T>(this as unknown as Player<T>, {
                     title: spotifyData.name,
                     description: spotifyData.description ?? "",
                     author: spotifyData.artists[0]?.name ?? "Unknown Artist",
@@ -322,7 +328,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
                 const spotifyPlaylist = await Spotify.getData(query).catch(Util.noop);
                 if (!spotifyPlaylist) return { playlist: null, tracks: [] };
 
-                const playlist = new Playlist(this, {
+                const playlist = new Playlist<T>(this as unknown as Player<T>, {
                     title: spotifyPlaylist.name ?? spotifyPlaylist.title,
                     description: spotifyPlaylist.description ?? "",
                     thumbnail: spotifyPlaylist.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
@@ -347,7 +353,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
                 if (spotifyPlaylist.type !== "playlist") {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     playlist.tracks = spotifyPlaylist.tracks.items.map((m: any) => {
-                        const data = new Track(this, {
+                        const data = new Track<T>(this as unknown as Player<T>, {
                             title: m.name ?? "",
                             description: m.description ?? "",
                             author: m.artists[0]?.name ?? "Unknown Artist",
@@ -361,11 +367,11 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
                         });
 
                         return data;
-                    }) as Track[];
+                    }) as Track<T>[];
                 } else {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     playlist.tracks = spotifyPlaylist.tracks.items.map((m: any) => {
-                        const data = new Track(this, {
+                        const data = new Track<T>(this as unknown as Player<T>, {
                             title: m.track.name ?? "",
                             description: m.track.description ?? "",
                             author: m.track.artists[0]?.name ?? "Unknown Artist",
@@ -379,7 +385,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
                         });
 
                         return data;
-                    }) as Track[];
+                    }) as Track<T>[];
                 }
 
                 return { playlist: playlist, tracks: playlist.tracks };
@@ -388,7 +394,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
                 const data = await soundcloud.getPlaylist(query).catch(Util.noop);
                 if (!data) return { playlist: null, tracks: [] };
 
-                const res = new Playlist(this, {
+                const res = new Playlist<T>(this as unknown as Player<T>, {
                     title: data.title,
                     description: data.description ?? "",
                     thumbnail: data.thumbnail ?? "https://soundcloud.com/pwa-icon-192.png",
@@ -405,7 +411,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
                 });
 
                 for (const song of data.tracks) {
-                    const track = new Track(this, {
+                    const track = new Track<T>(this as unknown as Player<T>, {
                         title: song.title,
                         description: song.description ?? "",
                         author: song.author?.username ?? song.author?.name ?? "Unknown Artist",
@@ -429,7 +435,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
 
                 await ytpl.fetch().catch(Util.noop);
 
-                const playlist: Playlist = new Playlist(this, {
+                const playlist: Playlist<T> = new Playlist<T>(this as unknown as Player<T>, {
                     title: ytpl.title,
                     thumbnail: ytpl.thumbnail as unknown as string,
                     description: "",
@@ -447,7 +453,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
 
                 playlist.tracks = ytpl.videos.map(
                     (video) =>
-                        new Track(this, {
+                        new Track<T>(this as unknown as Player<T>, {
                             title: video.title,
                             description: video.description,
                             author: video.channel?.name,
@@ -520,7 +526,7 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
      * @param {GuildResolvable|Queue} queueLike Queue like object
      * @returns {Queue}
      */
-    resolveQueue<T>(queueLike: GuildResolvable | Queue): Queue<T> {
+    resolveQueue<T extends MetaDataWithAny<MetaData> = MetaDataWithAny<MetaData>>(queueLike: GuildResolvable | Queue<T>): Queue<T> {
         return this.getQueue(queueLike instanceof Queue ? queueLike.guild : queueLike);
     }
 
@@ -528,5 +534,4 @@ class Player<MetaData extends Object = { [k: string]: any }> extends EventEmitte
         yield* Array.from(this.queues.values());
     }
 }
-
 export { Player };

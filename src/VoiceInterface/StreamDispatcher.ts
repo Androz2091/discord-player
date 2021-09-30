@@ -18,20 +18,20 @@ import Track from "../Structures/Track";
 import { Util } from "../utils/Util";
 import { PlayerError, ErrorStatusCode } from "../Structures/PlayerError";
 
-export interface VoiceEvents {
+export interface VoiceEvents<T extends { [k: string]: any }> {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     error: (error: AudioPlayerError) => any;
     debug: (message: string) => any;
-    start: (resource: AudioResource<Track>) => any;
-    finish: (resource: AudioResource<Track>) => any;
+    start: (resource: AudioResource<Track<T>>) => any;
+    finish: (resource: AudioResource<Track<T>>) => any;
     /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
-class StreamDispatcher extends EventEmitter<VoiceEvents> {
+class StreamDispatcher<T extends { [k: string]: any }> extends EventEmitter<VoiceEvents<T>> {
     public readonly voiceConnection: VoiceConnection;
     public readonly audioPlayer: AudioPlayer;
     public channel: VoiceChannel | StageChannel;
-    public audioResource?: AudioResource<Track>;
+    public audioResource?: AudioResource<Track<T>>;
     private readyLock = false;
     public paused: boolean;
 
@@ -74,13 +74,21 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                     try {
                         await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, this.connectionTimeout);
                     } catch {
-                        this.voiceConnection.destroy();
+                        try {
+                            this.voiceConnection.destroy();
+                        } catch (err) {
+                            this.emit("error", err as AudioPlayerError);
+                        }
                     }
                 } else if (this.voiceConnection.rejoinAttempts < 5) {
                     await Util.wait((this.voiceConnection.rejoinAttempts + 1) * 5000);
                     this.voiceConnection.rejoin();
                 } else {
-                    this.voiceConnection.destroy();
+                    try {
+                        this.voiceConnection.destroy();
+                    } catch (err) {
+                        this.emit("error", err as AudioPlayerError);
+                    }
                 }
             } else if (newState.status === VoiceConnectionStatus.Destroyed) {
                 this.end();
@@ -89,7 +97,13 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                 try {
                     await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, this.connectionTimeout);
                 } catch {
-                    if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
+                    if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
+                        try {
+                            this.voiceConnection.destroy();
+                        } catch (err) {
+                            this.emit("error", err as AudioPlayerError);
+                        }
+                    }
                 } finally {
                     this.readyLock = false;
                 }
@@ -182,7 +196,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {AudioResource<Track>} [resource=this.audioResource] The audio resource to play
      * @returns {Promise<StreamDispatcher>}
      */
-    async playStream(resource: AudioResource<Track> = this.audioResource) {
+    async playStream(resource: AudioResource<Track<T>> = this.audioResource) {
         if (!resource) throw new PlayerError("Audio resource is not available!", ErrorStatusCode.NO_AUDIO_RESOURCE);
         if (resource.ended) return void this.emit("error", new PlayerError("Cannot play a resource that has already ended.") as unknown as AudioPlayerError);
         if (!this.audioResource) this.audioResource = resource;
