@@ -18,6 +18,7 @@ import Track from "../Structures/Track";
 import { Util } from "../utils/Util";
 import { PlayerError, ErrorStatusCode } from "../Structures/PlayerError";
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 export interface VoiceEvents<T extends { [k: string]: any }> {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     error: (error: AudioPlayerError) => any;
@@ -27,6 +28,7 @@ export interface VoiceEvents<T extends { [k: string]: any }> {
     /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 class StreamDispatcher<T extends { [k: string]: any }> extends EventEmitter<VoiceEvents<T>> {
     public readonly voiceConnection: VoiceConnection;
     public readonly audioPlayer: AudioPlayer;

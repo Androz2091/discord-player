@@ -2,6 +2,7 @@ import { VoiceChannel, StageChannel, Collection, Snowflake } from "discord.js";
 import { DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
 import { StreamDispatcher } from "./StreamDispatcher";
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 class VoiceUtils<T extends { [k: string]: any }> {
     public cache: Collection<Snowflake, StreamDispatcher<T>>;
 

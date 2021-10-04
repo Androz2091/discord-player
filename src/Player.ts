@@ -17,15 +17,17 @@ import { generateDependencyReport } from "@discordjs/voice";
 
 const soundcloud = new SoundCloud();
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 type MetaDataWithAny<T> = {
     [m in keyof T]: T[m];
 } & { [k: string]: any };
 
 type search<T> = {
-    playlist?: Playlist<T>,
-    tracks?: Track<T>[]
-}
+    playlist?: Playlist<T>;
+    tracks?: Track<T>[];
+};
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 class Player<MetaData extends { [k: string]: any } = { [k: string]: any }> extends EventEmitter<PlayerEvents<MetaDataWithAny<MetaData>>> {
     public readonly client: Client;
     public readonly options: PlayerInitOptions = {

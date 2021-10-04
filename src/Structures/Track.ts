@@ -4,6 +4,7 @@ import { RawTrackData, TrackJSON } from "../types/types";
 import { Playlist } from "./Playlist";
 import { Queue } from "./Queue";
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 class Track<T extends { [k: string]: any }> {
     public player!: Player<T>;
     public title!: string;

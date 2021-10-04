@@ -73,6 +73,7 @@ export type TrackSource = "soundcloud" | "youtube" | "spotify" | "arbitrary";
  * @property {boolean} [live] If this track is live
  * @property {any} [raw] The raw data
  */
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 export interface RawTrackData<T extends { [k: string]: any }> {
     title: string;
     description: string;
@@ -130,6 +131,7 @@ export interface PlayerProgressbarOptions {
  * @property {number} [bufferingTimeout=3000] Buffering timeout for the stream
  * @property {Function} [onBeforeCreateStream] Runs before creating stream
  */
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 export interface PlayerOptions<T extends { [k: string]: any }> {
     leaveOnEnd?: boolean;
     leaveOnStop?: boolean;
@@ -389,6 +391,7 @@ export enum QueueRepeatMode {
  * @property {string} url The playlist url
  * @property {any} [rawPlaylist] The raw playlist data
  */
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 export interface PlaylistInitData<T extends { [k: string]: any }> {
     tracks: Track<T>[];
     title: string;

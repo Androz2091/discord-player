@@ -2,6 +2,7 @@ import { Player } from "../Player";
 import { Track } from "./Track";
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from "../types/types";
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 class Playlist<T extends { [k: string]: any }> {
     public readonly player: Player<T>;
     public tracks: Track<T>[];

@@ -11,6 +11,7 @@ import AudioFilters from "../utils/AudioFilters";
 import { PlayerError, ErrorStatusCode } from "./PlayerError";
 import type { Readable } from "stream";
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 class Queue<T extends { [k: string]: any }> {
     public readonly guild: Guild;
     public readonly player: Player<T>;
@@ -28,7 +29,7 @@ class Queue<T extends { [k: string]: any }> {
     private _filtersUpdate = false;
     #lastVolume = 0;
     #destroyed = false;
-    public onBeforeCreateStream: (track: Track<T>, source: TrackSource, queue: Queue<T>) => Promise<Readable|undefined> = null;
+    public onBeforeCreateStream: (track: Track<T>, source: TrackSource, queue: Queue<T>) => Promise<Readable | undefined> = null;
 
     /**
      * Queue constructor
