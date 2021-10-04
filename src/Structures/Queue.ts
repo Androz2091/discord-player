@@ -645,9 +645,11 @@ class Queue<T = unknown> {
             }
             const link = track.raw.source === "spotify" ? track.raw.engine : track.url;
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
+            
+            const customDownloaderStream = customDownloader ? (await this.onBeforeCreateStream(track, track.raw.source, this)) ?? null : null;
 
-            if (customDownloader) {
-                stream = (await this.onBeforeCreateStream(track, "youtube", this)) ?? null;
+            if (customDownloaderStream) {
+                stream = customDownloaderStream
                 if (stream)
                     stream = ytdl
                         .arbitraryStream(stream, {
