@@ -649,7 +649,7 @@ class Queue<T = unknown> {
             const customDownloaderStream = customDownloader ? (await this.onBeforeCreateStream(track, track.raw.source, this)) ?? null : null;
 
             if (customDownloaderStream) {
-                stream = customDownloaderStream
+                stream = customDownloaderStream;
                 if (stream)
                     stream = ytdl
                         .arbitraryStream(stream, {
