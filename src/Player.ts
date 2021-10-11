@@ -224,7 +224,7 @@ class Player extends EventEmitter<PlayerEvents> {
         const qt = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
         switch (qt) {
             case QueryType.YOUTUBE_VIDEO: {
-                const info = await ytdlGetInfo(query).catch(Util.noop);
+                const info = await ytdlGetInfo(query, this.options.ytdlOptions).catch(Util.noop);
                 if (!info) return { playlist: null, tracks: [] };
 
                 const track = new Track(this, {
