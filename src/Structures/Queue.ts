@@ -189,16 +189,14 @@ class Queue<T = unknown> {
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
                 if (this.options.leaveOnEnd) this.destroy();
                 this.player.emit("queueEnd", this);
+            } else if (!this.tracks.length && this.repeatMode === QueueRepeatMode.AUTOPLAY) {
+                this._handleAutoplay(Util.last(this.previousTracks));
             } else {
-                if (this.repeatMode !== QueueRepeatMode.AUTOPLAY) {
-                    if (this.repeatMode === QueueRepeatMode.TRACK) return void this.play(Util.last(this.previousTracks), { immediate: true });
-                    if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.push(Util.last(this.previousTracks));
-                    const nextTrack = this.tracks.shift();
-                    this.play(nextTrack, { immediate: true });
-                    return;
-                } else {
-                    this._handleAutoplay(Util.last(this.previousTracks));
-                }
+                if (this.repeatMode === QueueRepeatMode.TRACK) return void this.play(Util.last(this.previousTracks), { immediate: true });
+                if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.push(Util.last(this.previousTracks));
+                const nextTrack = this.tracks.shift();
+                this.play(nextTrack, { immediate: true });
+                return;
             }
         });
 
