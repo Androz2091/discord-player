@@ -28,7 +28,7 @@ class Queue<T = unknown> {
     private _filtersUpdate = false;
     #lastVolume = 0;
     #destroyed = false;
-    public onBeforeCreateStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable|undefined> = null;
+    public onBeforeCreateStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable | undefined> = null;
 
     /**
      * Queue constructor
