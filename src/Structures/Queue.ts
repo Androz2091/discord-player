@@ -639,16 +639,18 @@ class Queue<T = unknown> {
         const customDownloader = typeof this.onBeforeCreateStream === "function";
 
         if (["youtube", "spotify"].includes(track.raw.source)) {
+            let spotifyResolved = false;
             if (this.options.spotifyBridge && track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
                     .then((x) => x[0].url)
                     .catch(() => null);
+                spotifyResolved = true;
             }
             const link = track.raw.source === "spotify" ? track.raw.engine : track.url;
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
             if (customDownloader) {
-                stream = (await this.onBeforeCreateStream(track, track.raw.source || "youtube", this)) ?? null;
+                stream = (await this.onBeforeCreateStream(track, spotifyResolved ? "youtube" : track.raw.source, this)) ?? null;
                 if (stream)
                     stream = ytdl
                         .arbitraryStream(stream, {
