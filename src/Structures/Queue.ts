@@ -105,7 +105,8 @@ class Queue<T = unknown> {
                     highWaterMark: 1 << 25
                 },
                 initialVolume: 100,
-                bufferingTimeout: 3000
+                bufferingTimeout: 3000,
+                spotifyBridge: true
             } as PlayerOptions,
             options
         );
@@ -638,7 +639,7 @@ class Queue<T = unknown> {
         const customDownloader = typeof this.onBeforeCreateStream === "function";
 
         if (["youtube", "spotify"].includes(track.raw.source)) {
-            if (track.raw.source === "spotify" && !track.raw.engine) {
+            if (this.options.spotifyBridge && track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
                     .then((x) => x[0].url)
                     .catch(() => null);
@@ -647,7 +648,7 @@ class Queue<T = unknown> {
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
             if (customDownloader) {
-                stream = (await this.onBeforeCreateStream(track, "youtube", this)) ?? null;
+                stream = (await this.onBeforeCreateStream(track, track.raw.source || "youtube", this)) ?? null;
                 if (stream)
                     stream = ytdl
                         .arbitraryStream(stream, {
