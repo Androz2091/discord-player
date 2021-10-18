@@ -129,6 +129,7 @@ export interface PlayerProgressbarOptions {
  * @property {YTDLDownloadOptions} [ytdlOptions={}] The youtube download options
  * @property {number} [initialVolume=100] The initial player volume
  * @property {number} [bufferingTimeout=3000] Buffering timeout for the stream
+ * @property {boolean} [spotifyBridge=true] If player should bridge spotify source to youtube
  * @property {Function} [onBeforeCreateStream] Runs before creating stream
  */
 /* eslint-disable  @typescript-eslint/no-explicit-any */
@@ -141,6 +142,7 @@ export interface PlayerOptions<T extends { [k: string]: any }> {
     ytdlOptions?: downloadOptions;
     initialVolume?: number;
     bufferingTimeout?: number;
+    spotifyBridge?: boolean;
     onBeforeCreateStream?: (track: Track<T>, source: TrackSource, queue: Queue<T>) => Promise<Readable>;
 }
 
