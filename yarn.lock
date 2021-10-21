@@ -1121,15 +1121,15 @@
     strip-json-comments "^3.1.1"
 
 "@favware/rollup-type-bundler@^1.0.3":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@favware/rollup-type-bundler/-/rollup-type-bundler-1.0.4.tgz#bfbc535f508d73a1faf63f5a8fb62a71053b6707"
-  integrity sha512-Zy8qlL7hIUF7FucEyLixSBaMC37gGmXHifV975dipTtitpsMuc2WmRq0IMskaBQOhOs0+aASysP79oXDcZxFHA==
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@favware/rollup-type-bundler/-/rollup-type-bundler-1.0.6.tgz#003d1cd3efe3f35b4482e0279f6e08be03584b46"
+  integrity sha512-dyIcTHaH7WdlLWQ8PMid6gtLa+XmKVbGHMtbXRjxogkfKC9Lim+VyW5CAUh/96Ci1TGDAFT12qyOhZ9I/WRkRg==
   dependencies:
-    "@sapphire/utilities" "^2.0.1"
-    colorette "^2.0.12"
+    "@sapphire/utilities" "^3.0.3"
+    colorette "^2.0.16"
     commander "^8.2.0"
     js-yaml "^4.1.0"
-    rollup "^2.57.0"
+    rollup "^2.58.0"
     rollup-plugin-dts "^4.0.0"
 
 "@humanwhocodes/config-array@^0.5.0":
@@ -1177,10 +1177,10 @@
   resolved "https://registry.yarnpkg.com/@sapphire/async-queue/-/async-queue-1.1.4.tgz#ae431310917a8880961cebe8e59df6ffa40f2957"
   integrity sha512-fFrlF/uWpGOX5djw5Mu2Hnnrunao75WGey0sP0J3jnhmrJ5TAPzHYOmytD5iN/+pMxS+f+u/gezqHa9tPhRHEA==
 
-"@sapphire/utilities@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@sapphire/utilities/-/utilities-2.0.1.tgz#c436c5b2b72679c89a40abe46d2f9301d03e63e2"
-  integrity sha512-KgJsgQ1cnfVKqscrMX4GH29mIVhVQkF8kSTIRCB+hgCCRfIvUU5peE4g/cegnesPS5eMiQqV+NWk7cNwhjextQ==
+"@sapphire/utilities@^3.0.3":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@sapphire/utilities/-/utilities-3.0.4.tgz#fe1ede01201f9f95a1262b7bbf78230965f72305"
+  integrity sha512-E76dWoeaI3R93sGpVpW6247Qg7BmKUFTWLpqFtyocvh/xBqIdzzDiGPOsMZuiMsyWsG0rwNsCQ7oKSCUyPQFLg==
 
 "@sindresorhus/is@^4.0.1":
   version "4.0.1"
@@ -1776,10 +1776,10 @@ colorette@^1.2.2:
   resolved "https://registry.yarnpkg.com/colorette/-/colorette-1.2.2.tgz#cbcc79d5e99caea2dbf10eb3a26fd8b3e6acfa94"
   integrity sha512-MKGMzyfeuutC/ZJ1cba9NqcNpfeqMUcYmyF1ZFY6/Cn7CNSAKx6a+s48sqLqyAiZuaP2TcqMhoo+dlwFnVxT9w==
 
-colorette@^2.0.12:
-  version "2.0.14"
-  resolved "https://registry.yarnpkg.com/colorette/-/colorette-2.0.14.tgz#1629bb27a13cd719ff37d66bc341234af564122e"
-  integrity sha512-TLcu0rCLNjDIdKGLGqMtPEAOAZmavC1QCX4mEs3P0mrA/DDoU/tA+Y4UQK/862FkX2TTlbyVIkREZNbf7Y9YwA==
+colorette@^2.0.16:
+  version "2.0.16"
+  resolved "https://registry.yarnpkg.com/colorette/-/colorette-2.0.16.tgz#713b9af84fdb000139f04546bd4a93f62a5085da"
+  integrity sha512-hUewv7oMjCp+wkBv5Rm0v87eJhq4woh5rSR+42YSQJKecCqgIqNkZ6lAlQms/BwHPJA5NKMRlpxPRv0n8HQW6g==
 
 combined-stream@^1.0.8:
   version "1.0.8"
@@ -3745,7 +3745,7 @@ rollup-plugin-dts@^4.0.0:
   optionalDependencies:
     "@babel/code-frame" "^7.14.5"
 
-rollup@^2.57.0:
+rollup@^2.58.0:
   version "2.58.0"
   resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.58.0.tgz#a643983365e7bf7f5b7c62a8331b983b7c4c67fb"
   integrity sha512-NOXpusKnaRpbS7ZVSzcEXqxcLDOagN6iFS8p45RkoiMqPHDLwJm758UF05KlMoCRbLBTZsPOIa887gZJ1AiXvw==
