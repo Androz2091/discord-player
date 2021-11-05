@@ -2,7 +2,7 @@ import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, Inten
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
-import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions } from "./types/types";
+import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlayerSearchResult } from "./types/types";
 import Track from "./Structures/Track";
 import { QueryResolver } from "./utils/QueryResolver";
 import YouTube from "youtube-sr";
@@ -198,13 +198,40 @@ class Player extends EventEmitter<PlayerEvents> {
      * Search tracks
      * @param {string|Track} query The search query
      * @param {SearchOptions} options The search options
-     * @returns {Promise<SearchResult>}
+     * @returns {Promise<PlayerSearchResult>}
      */
-    async search(query: string | Track, options: SearchOptions) {
-        if (query instanceof Track) return { playlist: null, tracks: [query] };
+    async search(query: string | Track, options: SearchOptions): Promise<PlayerSearchResult> {
+        if (query instanceof Track) return { playlist: query.playlist || null, tracks: [query] };
         if (!options) throw new PlayerError("DiscordPlayer#search needs search options!", ErrorStatusCode.INVALID_ARG_TYPE);
         options.requestedBy = this.client.users.resolve(options.requestedBy);
         if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
+        if (this.extractors.has(options.searchEngine)) {
+            const extractor = this.extractors.get(options.searchEngine);
+            if (!extractor.validate(query)) return { playlist: null, tracks: [] };
+            const data = await extractor.handle(query);
+            if (data && data.data.length) {
+                const playlist = !data.playlist
+                    ? null
+                    : new Playlist(this, {
+                          ...data.playlist,
+                          tracks: []
+                      });
+
+                const tracks = data.data.map(
+                    (m) =>
+                        new Track(this, {
+                            ...m,
+                            requestedBy: options.requestedBy as User,
+                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
+                            playlist: playlist
+                        })
+                );
+
+                if (playlist) playlist.tracks = tracks;
+
+                return { playlist: playlist, tracks: tracks };
+            }
+        }
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const [_, extractor] of this.extractors) {

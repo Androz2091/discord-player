@@ -8,6 +8,11 @@ import { downloadOptions } from "ytdl-core";
 
 export type FiltersName = keyof QueueFilters;
 
+export interface PlayerSearchResult {
+    playlist: Playlist | null;
+    tracks: Track[];
+}
+
 /**
  * @typedef {AudioFilters} QueueFilters
  */
