@@ -227,25 +227,25 @@ export interface ExtractorModelData {
  * - YOUTUBE_SEARCH
  * - YOUTUBE_VIDEO
  * - SOUNDCLOUD_SEARCH
- * @typedef {string} QueryType
+ * @typedef {number} QueryType
  */
 export enum QueryType {
-    AUTO = "auto",
-    YOUTUBE = "youtube",
-    YOUTUBE_PLAYLIST = "youtube_playlist",
-    SOUNDCLOUD_TRACK = "soundcloud_track",
-    SOUNDCLOUD_PLAYLIST = "soundcloud_playlist",
-    SOUNDCLOUD = "soundcloud",
-    SPOTIFY_SONG = "spotify_song",
-    SPOTIFY_ALBUM = "spotify_album",
-    SPOTIFY_PLAYLIST = "spotify_playlist",
-    FACEBOOK = "facebook",
-    VIMEO = "vimeo",
-    ARBITRARY = "arbitrary",
-    REVERBNATION = "reverbnation",
-    YOUTUBE_SEARCH = "youtube_search",
-    YOUTUBE_VIDEO = "youtube_video",
-    SOUNDCLOUD_SEARCH = "soundcloud_search"
+    AUTO,
+    YOUTUBE,
+    YOUTUBE_PLAYLIST,
+    SOUNDCLOUD_TRACK,
+    SOUNDCLOUD_PLAYLIST,
+    SOUNDCLOUD,
+    SPOTIFY_SONG,
+    SPOTIFY_ALBUM,
+    SPOTIFY_PLAYLIST,
+    FACEBOOK,
+    VIMEO,
+    ARBITRARY,
+    REVERBNATION,
+    YOUTUBE_SEARCH,
+    YOUTUBE_VIDEO,
+    SOUNDCLOUD_SEARCH
 }
 
 /**
@@ -357,12 +357,12 @@ export interface PlayOptions {
 /**
  * @typedef {object} SearchOptions
  * @property {UserResolvable} requestedBy The user who requested this search
- * @property {QueryType} [searchEngine=QueryType.AUTO] The query search engine
+ * @property {QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
  * @property {boolean} [blockExtractor=false] If it should block custom extractors
  */
 export interface SearchOptions {
     requestedBy: UserResolvable;
-    searchEngine?: QueryType;
+    searchEngine?: QueryType | string;
     blockExtractor?: boolean;
 }
 

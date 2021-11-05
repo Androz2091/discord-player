@@ -190,7 +190,7 @@ class Player extends EventEmitter<PlayerEvents> {
     }
 
     /**
-     * @typedef {object} SearchResult
+     * @typedef {object} PlayerSearchResult
      * @property {Playlist} [playlist] The playlist (if any)
      * @property {Track[]} tracks The tracks
      */
@@ -205,7 +205,7 @@ class Player extends EventEmitter<PlayerEvents> {
         if (!options) throw new PlayerError("DiscordPlayer#search needs search options!", ErrorStatusCode.INVALID_ARG_TYPE);
         options.requestedBy = this.client.users.resolve(options.requestedBy);
         if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
-        if (this.extractors.has(options.searchEngine)) {
+        if (typeof options.searchEngine === "string" && this.extractors.has(options.searchEngine)) {
             const extractor = this.extractors.get(options.searchEngine);
             if (!extractor.validate(query)) return { playlist: null, tracks: [] };
             const data = await extractor.handle(query);
