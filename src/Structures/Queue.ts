@@ -493,14 +493,9 @@ class Queue<T = unknown> {
      */
     jump(track: Track | number): void {
         if (this.#watchDestroyed()) return;
-        // remove the track if exists
         const foundTrack = this.remove(track);
         if (!foundTrack) throw new PlayerError("Track not found", ErrorStatusCode.TRACK_NOT_FOUND);
-        // since we removed the existing track from the queue,
-        // we now have to place that to position 1
-        // because we want to jump to that track
-        // this will skip current track and play the next one which will be the foundTrack
-        this.tracks.splice(1, 0, foundTrack);
+        this.tracks.splice(0, 0, foundTrack);
 
         return void this.skip();
     }
