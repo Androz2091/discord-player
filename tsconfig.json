@@ -8,7 +8,9 @@
         "strictNullChecks": false,
         "esModuleInterop": true,
         "pretty": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "importHelpers": true
     },
     "include": [
         "src/**/*"
