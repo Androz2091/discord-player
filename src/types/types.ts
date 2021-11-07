@@ -8,6 +8,12 @@ import { downloadOptions } from "ytdl-core";
 
 export type FiltersName = keyof QueueFilters;
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+export interface PlayerSearchResult<T extends { [k: string]: any }> {
+    playlist: Playlist<T> | null;
+    tracks: Track<T>[];
+}
+
 /**
  * @typedef {AudioFilters} QueueFilters
  */
