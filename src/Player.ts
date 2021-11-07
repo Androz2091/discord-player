@@ -2,7 +2,7 @@ import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, Inten
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
-import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions } from "./types/types";
+import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlayerSearchResult } from "./types/types";
 import Track from "./Structures/Track";
 import { QueryResolver } from "./utils/QueryResolver";
 import YouTube from "youtube-sr";
@@ -87,52 +87,66 @@ class Player<MetaData extends { [k: string]: any } = { [k: string]: any }> exten
         const queue = this.getQueue(oldState.guild.id);
         if (!queue) return;
 
-        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId && newState.member.id === newState.guild.me.id) {
-            if (queue?.connection) queue.connection.channel = newState.channel;
-        }
-
-        if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.me.id) {
-            if (newState.serverMute || !newState.serverMute) {
-                queue.setPaused(newState.serverMute);
-            } else if (newState.suppress || !newState.suppress) {
-                if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
-                queue.setPaused(newState.suppress);
-            }
-        }
-
-        if (oldState.channelId === newState.channelId && oldState.member.id === newState.guild.me.id) {
-            if (oldState.serverMute !== newState.serverMute) {
-                queue.setPaused(newState.serverMute);
-            } else if (oldState.suppress !== newState.suppress) {
-                if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
-                queue.setPaused(newState.suppress);
-            }
-        }
-
-        if (oldState.member.id === this.client.user.id && !newState.channelId) {
-            queue.destroy();
-            return void this.emit("botDisconnect", queue);
-        }
-
-        if (!queue.connection || !queue.connection.channel) return;
-
-        if (!oldState.channelId || newState.channelId) {
-            const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-            const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
-
-            if (!channelEmpty && emptyTimeout) {
-                clearTimeout(emptyTimeout);
-                queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
-            }
-        } else {
-            if (!Util.isVoiceEmpty(queue.connection.channel)) return;
-            const timeout = setTimeout(() => {
+        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
+            if (queue?.connection && newState.member.id === newState.guild.me.id) queue.connection.channel = newState.channel;
+            if (newState.member.id === newState.guild.me.id || (newState.member.id !== newState.guild.me.id && oldState.channelId === queue.connection.channel.id)) {
                 if (!Util.isVoiceEmpty(queue.connection.channel)) return;
-                if (!this.queues.has(queue.guild.id)) return;
-                if (queue.options.leaveOnEmpty) queue.destroy();
-                this.emit("channelEmpty", queue);
-            }, queue.options.leaveOnEmptyCooldown || 0).unref();
-            queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+                const timeout = setTimeout(() => {
+                    if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                    if (!this.queues.has(queue.guild.id)) return;
+                    if (queue.options.leaveOnEmpty) queue.destroy();
+                    this.emit("channelEmpty", queue);
+                }, queue.options.leaveOnEmptyCooldown || 0).unref();
+                queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+            }
+
+            if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.me.id) {
+                if (newState.serverMute || !newState.serverMute) {
+                    queue.setPaused(newState.serverMute);
+                } else if (newState.suppress || !newState.suppress) {
+                    if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                    queue.setPaused(newState.suppress);
+                }
+            }
+
+            if (oldState.channelId === newState.channelId && oldState.member.id === newState.guild.me.id) {
+                if (oldState.serverMute !== newState.serverMute) {
+                    queue.setPaused(newState.serverMute);
+                } else if (oldState.suppress !== newState.suppress) {
+                    if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                    queue.setPaused(newState.suppress);
+                }
+            }
+
+            if (oldState.member.id === this.client.user.id && !newState.channelId) {
+                queue.destroy();
+                return void this.emit("botDisconnect", queue);
+            }
+
+            if (!queue.connection || !queue.connection.channel) return;
+
+            if (!oldState.channelId || newState.channelId) {
+                const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
+                const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
+
+                if (newState.channelId === queue.connection.channel.id) {
+                    if (!channelEmpty && emptyTimeout) {
+                        clearTimeout(emptyTimeout);
+                        queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+                    }
+                }
+            } else {
+                if (oldState.channelId === queue.connection.channel.id) {
+                    if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                    const timeout = setTimeout(() => {
+                        if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                        if (!this.queues.has(queue.guild.id)) return;
+                        if (queue.options.leaveOnEmpty) queue.destroy();
+                        this.emit("channelEmpty", queue);
+                    }, queue.options.leaveOnEmptyCooldown || 0).unref();
+                    queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+                }
+            }
         }
     }
 
@@ -187,7 +201,7 @@ class Player<MetaData extends { [k: string]: any } = { [k: string]: any }> exten
     }
 
     /**
-     * @typedef {object} SearchResult
+     * @typedef {object} PlayerSearchResult
      * @property {Playlist} [playlist] The playlist (if any)
      * @property {Track[]} tracks The tracks
      */
@@ -195,13 +209,40 @@ class Player<MetaData extends { [k: string]: any } = { [k: string]: any }> exten
      * Search tracks
      * @param {string|Track} query The search query
      * @param {SearchOptions} options The search options
-     * @returns {Promise<SearchResult>}
+     * @returns {Promise<PlayerSearchResult>}
      */
-    async search<T extends MetaDataWithAny<MetaData> = MetaDataWithAny<MetaData>>(query: string | Track<T>, options: SearchOptions): Promise<search<T>> {
-        if (query instanceof Track) return { playlist: null, tracks: [query] };
+    async search<T extends MetaDataWithAny<MetaData> = MetaDataWithAny<MetaData>>(query: string | Track<T>, options: SearchOptions): Promise<PlayerSearchResult<T>> {
+        if (query instanceof Track) return { playlist: query.playlist || null, tracks: [query] };
         if (!options) throw new PlayerError("DiscordPlayer#search needs search options!", ErrorStatusCode.INVALID_ARG_TYPE);
         options.requestedBy = this.client.users.resolve(options.requestedBy);
         if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
+        if (typeof options.searchEngine === "string" && this.extractors.has(options.searchEngine)) {
+            const extractor = this.extractors.get(options.searchEngine);
+            if (!extractor.validate(query)) return { playlist: null, tracks: [] };
+            const data = await extractor.handle(query);
+            if (data && data.data.length) {
+                const playlist = !data.playlist
+                    ? null
+                    : new Playlist(this, {
+                          ...data.playlist,
+                          tracks: []
+                      });
+
+                const tracks = data.data.map(
+                    (m) =>
+                        new Track(this, {
+                            ...m,
+                            requestedBy: options.requestedBy as User,
+                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
+                            playlist: playlist
+                        })
+                );
+
+                if (playlist) playlist.tracks = tracks;
+
+                return { playlist: playlist, tracks: tracks };
+            }
+        }
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const [_, extractor] of this.extractors) {
@@ -235,7 +276,7 @@ class Player<MetaData extends { [k: string]: any } = { [k: string]: any }> exten
         const qt = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
         switch (qt) {
             case QueryType.YOUTUBE_VIDEO: {
-                const info = await ytdlGetInfo(query).catch(Util.noop);
+                const info = await ytdlGetInfo(query, this.options.ytdlOptions).catch(Util.noop);
                 if (!info) return { playlist: null, tracks: [] };
 
                 const track = new Track<T>(this as unknown as Player<T>, {
