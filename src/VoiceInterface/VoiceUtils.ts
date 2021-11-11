@@ -52,6 +52,7 @@ class VoiceUtils {
         let conn = joinVoiceChannel({
             guildId: channel.guild.id,
             channelId: channel.id,
+            group: channel.client.user.id,
             adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
             selfDeaf: Boolean(options.deaf)
         });
