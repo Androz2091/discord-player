@@ -997,9 +997,9 @@
     node-addon-api "^4.0.0"
 
 "@discordjs/voice@^0.7.2":
-  version "0.7.2"
-  resolved "https://registry.yarnpkg.com/@discordjs/voice/-/voice-0.7.2.tgz#4abb42189aee986f85e5ece5399afe7be27c9308"
-  integrity sha512-7dRvyKNI6TSvtOoTTXjTTZ2G7nuk4f5rt+5WLkqZ7QR3xsj0u1Pd+t7HdzMaAUn9/FmTe2iKdnAfOpwgassOLg==
+  version "0.7.5"
+  resolved "https://registry.yarnpkg.com/@discordjs/voice/-/voice-0.7.5.tgz#c95bd4ecf73905f51990827df5209eb26472dbd5"
+  integrity sha512-lUk+CmIXNKslT6DkC9IF9rpsqhzlTiedauUCPBzepjd4XWxwBZiyVIzR6QpbAirxkAwCoAbbje+3Ho71PGLEAw==
   dependencies:
     "@types/ws" "^8.2.0"
     discord-api-types "^0.24.0"
