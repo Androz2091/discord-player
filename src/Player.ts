@@ -2,7 +2,7 @@ import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, Inten
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
-import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions } from "./types/types";
+import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlayerSearchResult } from "./types/types";
 import Track from "./Structures/Track";
 import { QueryResolver } from "./utils/QueryResolver";
 import YouTube from "youtube-sr";
@@ -29,6 +29,7 @@ class Player extends EventEmitter<PlayerEvents> {
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
     public readonly extractors = new Collection<string, ExtractorModel>();
+    public requiredEvents = ["error", "connectionError"] as string[];
 
     /**
      * Creates new Discord Player
@@ -77,51 +78,65 @@ class Player extends EventEmitter<PlayerEvents> {
         if (!queue) return;
 
         if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-            if (queue?.connection) queue.connection.channel = newState.channel;
-        }
-
-        if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.me.id) {
-            if (newState.serverMute || !newState.serverMute) {
-                queue.setPaused(newState.serverMute);
-            } else if (newState.suppress || !newState.suppress) {
-                if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
-                queue.setPaused(newState.suppress);
-            }
-        }
-
-        if (oldState.channelId === newState.channelId && oldState.member.id === newState.guild.me.id) {
-            if (oldState.serverMute !== newState.serverMute) {
-                queue.setPaused(newState.serverMute);
-            } else if (oldState.suppress !== newState.suppress) {
-                if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
-                queue.setPaused(newState.suppress);
-            }
-        }
-
-        if (oldState.member.id === this.client.user.id && !newState.channelId) {
-            queue.destroy();
-            return void this.emit("botDisconnect", queue);
-        }
-
-        if (!queue.connection || !queue.connection.channel) return;
-
-        if (!oldState.channelId || newState.channelId) {
-            const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-            const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
-
-            if (!channelEmpty && emptyTimeout) {
-                clearTimeout(emptyTimeout);
-                queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
-            }
-        } else {
-            if (!Util.isVoiceEmpty(queue.connection.channel)) return;
-            const timeout = setTimeout(() => {
+            if (queue?.connection && newState.member.id === newState.guild.me.id) queue.connection.channel = newState.channel;
+            if (newState.member.id === newState.guild.me.id || (newState.member.id !== newState.guild.me.id && oldState.channelId === queue.connection.channel.id)) {
                 if (!Util.isVoiceEmpty(queue.connection.channel)) return;
-                if (!this.queues.has(queue.guild.id)) return;
-                if (queue.options.leaveOnEmpty) queue.destroy();
-                this.emit("channelEmpty", queue);
-            }, queue.options.leaveOnEmptyCooldown || 0).unref();
-            queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+                const timeout = setTimeout(() => {
+                    if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                    if (!this.queues.has(queue.guild.id)) return;
+                    if (queue.options.leaveOnEmpty) queue.destroy();
+                    this.emit("channelEmpty", queue);
+                }, queue.options.leaveOnEmptyCooldown || 0).unref();
+                queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+            }
+
+            if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.me.id) {
+                if (newState.serverMute || !newState.serverMute) {
+                    queue.setPaused(newState.serverMute);
+                } else if (newState.suppress || !newState.suppress) {
+                    if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                    queue.setPaused(newState.suppress);
+                }
+            }
+
+            if (oldState.channelId === newState.channelId && oldState.member.id === newState.guild.me.id) {
+                if (oldState.serverMute !== newState.serverMute) {
+                    queue.setPaused(newState.serverMute);
+                } else if (oldState.suppress !== newState.suppress) {
+                    if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                    queue.setPaused(newState.suppress);
+                }
+            }
+
+            if (oldState.member.id === this.client.user.id && !newState.channelId) {
+                queue.destroy();
+                return void this.emit("botDisconnect", queue);
+            }
+
+            if (!queue.connection || !queue.connection.channel) return;
+
+            if (!oldState.channelId || newState.channelId) {
+                const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
+                const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
+
+                if (newState.channelId === queue.connection.channel.id) {
+                    if (!channelEmpty && emptyTimeout) {
+                        clearTimeout(emptyTimeout);
+                        queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+                    }
+                }
+            } else {
+                if (oldState.channelId === queue.connection.channel.id) {
+                    if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                    const timeout = setTimeout(() => {
+                        if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                        if (!this.queues.has(queue.guild.id)) return;
+                        if (queue.options.leaveOnEmpty) queue.destroy();
+                        this.emit("channelEmpty", queue);
+                    }, queue.options.leaveOnEmptyCooldown || 0).unref();
+                    queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+                }
+            }
         }
     }
 
@@ -176,7 +191,7 @@ class Player extends EventEmitter<PlayerEvents> {
     }
 
     /**
-     * @typedef {object} SearchResult
+     * @typedef {object} PlayerSearchResult
      * @property {Playlist} [playlist] The playlist (if any)
      * @property {Track[]} tracks The tracks
      */
@@ -184,13 +199,40 @@ class Player extends EventEmitter<PlayerEvents> {
      * Search tracks
      * @param {string|Track} query The search query
      * @param {SearchOptions} options The search options
-     * @returns {Promise<SearchResult>}
+     * @returns {Promise<PlayerSearchResult>}
      */
-    async search(query: string | Track, options: SearchOptions) {
-        if (query instanceof Track) return { playlist: null, tracks: [query] };
+    async search(query: string | Track, options: SearchOptions): Promise<PlayerSearchResult> {
+        if (query instanceof Track) return { playlist: query.playlist || null, tracks: [query] };
         if (!options) throw new PlayerError("DiscordPlayer#search needs search options!", ErrorStatusCode.INVALID_ARG_TYPE);
         options.requestedBy = this.client.users.resolve(options.requestedBy);
         if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
+        if (typeof options.searchEngine === "string" && this.extractors.has(options.searchEngine)) {
+            const extractor = this.extractors.get(options.searchEngine);
+            if (!extractor.validate(query)) return { playlist: null, tracks: [] };
+            const data = await extractor.handle(query);
+            if (data && data.data.length) {
+                const playlist = !data.playlist
+                    ? null
+                    : new Playlist(this, {
+                          ...data.playlist,
+                          tracks: []
+                      });
+
+                const tracks = data.data.map(
+                    (m) =>
+                        new Track(this, {
+                            ...m,
+                            requestedBy: options.requestedBy as User,
+                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
+                            playlist: playlist
+                        })
+                );
+
+                if (playlist) playlist.tracks = tracks;
+
+                return { playlist: playlist, tracks: tracks };
+            }
+        }
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const [_, extractor] of this.extractors) {
@@ -224,7 +266,7 @@ class Player extends EventEmitter<PlayerEvents> {
         const qt = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
         switch (qt) {
             case QueryType.YOUTUBE_VIDEO: {
-                const info = await ytdlGetInfo(query).catch(Util.noop);
+                const info = await ytdlGetInfo(query, this.options.ytdlOptions).catch(Util.noop);
                 if (!info) return { playlist: null, tracks: [] };
 
                 const track = new Track(this, {
@@ -509,7 +551,25 @@ class Player extends EventEmitter<PlayerEvents> {
      * @returns {string}
      */
     scanDeps() {
-        return generateDependencyReport();
+        const line = "-".repeat(50);
+        const depsReport = generateDependencyReport();
+        const extractorReport = this.extractors
+            .map((m) => {
+                return `${m.name} :: ${m.version || "0.1.0"}`;
+            })
+            .join("\n");
+        return `${depsReport}\n${line}\nLoaded Extractors:\n${extractorReport || "None"}`;
+    }
+
+    emit<U extends keyof PlayerEvents>(eventName: U, ...args: Parameters<PlayerEvents[U]>): boolean {
+        if (this.requiredEvents.includes(eventName) && !super.eventNames().includes(eventName)) {
+            // eslint-disable-next-line no-console
+            console.error(...args);
+            process.emitWarning(`[DiscordPlayerWarning] Unhandled "${eventName}" event! Events ${this.requiredEvents.map((m) => `"${m}"`).join(", ")} must have event listeners!`);
+            return false;
+        } else {
+            return super.emit(eventName, ...args);
+        }
     }
 
     /**

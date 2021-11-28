@@ -32,11 +32,12 @@ $ npm install --save @discordjs/opus
 - Simple & easy to use 🤘
 - Beginner friendly 😱
 - Audio filters 🎸
-- Lightweight 🛬
+- Lightweight ☁️
 - Custom extractors support 🌌
-- Lyrics 📃
 - Multiple sources support ✌
 - Play in multiple servers at the same time 🚗
+- Does not inject anything to discord.js or your discord.js client 💉
+- Allows you to have full control over what is going to be streamed 👑
 
 ## [Documentation](https://discord-player.js.org)
 
@@ -99,7 +100,7 @@ client.once("ready", () => {
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand()) return;
 
-    // /play Despacito
+    // /play track:Despacito
     // will play "Despacito" in the voice channel
     if (interaction.commandName === "play") {
         if (!interaction.member.voice.channelId) return await interaction.reply({ content: "You are not in a voice channel!", ephemeral: true });
@@ -156,9 +157,12 @@ You just need to install it using `npm i --save @discord-player/extractor` (disc
 These bots are made by the community, they can help you build your own!
 
 * **[Discord Music Bot](https://github.com/Androz2091/discord-music-bot)** by [Androz2091](https://github.com/Androz2091)
+* [Dodong](https://github.com/nizeic/Dodong) by [nizeic](https://github.com/nizeic)
+* [Musico](https://github.com/Whirl21/Musico) by [Whirl21](https://github.com/Whirl21)
+* [Eyesense-Music-Bot](https://github.com/naseif/Eyesense-Music-Bot) by [naseif](https://github.com/naseif)
+* [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
 * [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
 * [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
-* [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev) (**outdated**)
 
 ## Advanced
 
@@ -191,3 +195,32 @@ const player = new Player(client, {
     }
 });
 ```
+
+> You may also create a simple proxy server and forward requests through it.
+> See **[https://github.com/http-party/node-http-proxy](https://github.com/http-party/node-http-proxy)** for more info.
+
+### Custom stream Engine
+
+Discord Player by default uses **[node-ytdl-core](https://github.com/fent/node-ytdl-core)** for youtube and some other extractors for other sources.
+If you need to modify this behavior without touching extractors, you need to use `createStream` functionality of discord player.
+Here's an example on how you can use **[play-dl](https://npmjs.com/package/play-dl)** to download youtube streams instead of using ytdl-core.
+
+```js
+const playdl = require("play-dl");
+
+// other code
+const queue = player.createQueue(..., {
+    ...,
+    async onBeforeCreateStream(track, source, _queue) {
+        // only trap youtube source
+        if (source === "youtube") {
+            // track here would be youtube track
+            return (await playdl.stream(track.url)).stream;
+            // we must return readable stream or void (returning void means telling discord-player to look for default extractor)
+        }
+    }
+});
+```
+
+`<Queue>.onBeforeCreateStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
+streams. `source` here will be a video source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and finally sent to Discord voice servers.

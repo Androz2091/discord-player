@@ -11,12 +11,16 @@
   files:
     - name: Extractors API
       path: extractor.md
+    - name: Creating Stream
+      path: create_stream.md
 - name: FAQ
   files:
     - name: Custom Filters
       path: custom_filters.md
     - name: Slash Commands
       path: slash_commands.md
+    - name: How Does It Work
+      path: how_does_it_work.md
 - name: YouTube
   files:
     - name: Using Cookies
