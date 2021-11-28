@@ -39,7 +39,12 @@ export class PlayerError extends Error {
     }
 
     toJSON() {
-        return { stack: this.stack, code: this.statusCode, created: this.createdTimestamp };
+        return {
+            stack: this.stack,
+            code: this.statusCode,
+            message: this.message,
+            created: this.createdTimestamp
+        };
     }
 
     toString() {
