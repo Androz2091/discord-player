@@ -29,6 +29,7 @@ class Player extends EventEmitter<PlayerEvents> {
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
     public readonly extractors = new Collection<string, ExtractorModel>();
+    public requiredEvents = ["error", "connectionError"] as string[];
 
     /**
      * Creates new Discord Player
@@ -552,10 +553,23 @@ class Player extends EventEmitter<PlayerEvents> {
     scanDeps() {
         const line = "-".repeat(50);
         const depsReport = generateDependencyReport();
-        const extractorReport = this.extractors.map((m) => {
-            return `${m.name} :: ${m.version || "0.1.0"}`;
-        }).join("\n");
+        const extractorReport = this.extractors
+            .map((m) => {
+                return `${m.name} :: ${m.version || "0.1.0"}`;
+            })
+            .join("\n");
         return `${depsReport}\n${line}\nLoaded Extractors:\n${extractorReport || "None"}`;
+    }
+
+    emit<U extends keyof PlayerEvents>(eventName: U, ...args: Parameters<PlayerEvents[U]>): boolean {        
+        if (this.requiredEvents.includes(eventName) && !super.eventNames().includes(eventName)) {
+            // eslint-disable-next-line no-console
+            console.error(...args);
+            process.emitWarning(`[DiscordPlayerWarning] Unhandled "${eventName}" event! Events ${this.requiredEvents.map(m => `"${m}"`).join(", ")} must have event listeners!`);
+            return false;
+        } else {
+            return super.emit(eventName, ...args);
+        }
     }
 
     /**
