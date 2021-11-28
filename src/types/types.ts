@@ -134,6 +134,7 @@ export interface PlayerProgressbarOptions {
  * @property {number} [initialVolume=100] The initial player volume
  * @property {number} [bufferingTimeout=3000] Buffering timeout for the stream
  * @property {boolean} [spotifyBridge=true] If player should bridge spotify source to youtube
+ * @property {boolean} [disableVolume=false] If player should disable inline volume
  * @property {Function} [onBeforeCreateStream] Runs before creating stream
  */
 export interface PlayerOptions {
@@ -146,6 +147,7 @@ export interface PlayerOptions {
     initialVolume?: number;
     bufferingTimeout?: number;
     spotifyBridge?: boolean;
+    disableVolume?: boolean;
     onBeforeCreateStream?: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable>;
 }
 

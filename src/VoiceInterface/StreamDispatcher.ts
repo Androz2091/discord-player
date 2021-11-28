@@ -133,11 +133,12 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {AudioResource}
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createStream(src: Readable | Duplex | string, ops?: { type?: StreamType; data?: any }) {
+    createStream(src: Readable | Duplex | string, ops?: { type?: StreamType; data?: any; disableVolume?: boolean }) {
         this.audioResource = createAudioResource(src, {
             inputType: ops?.type ?? StreamType.Arbitrary,
             metadata: ops?.data,
-            inlineVolume: true // we definitely need volume controls, right?
+            // eslint-disable-next-line no-extra-boolean-cast
+            inlineVolume: !Boolean(ops?.disableVolume)
         });
 
         return this.audioResource;
@@ -223,9 +224,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {boolean}
      */
     setVolume(value: number) {
-        if (!this.audioResource || isNaN(value) || value < 0 || value > Infinity) return false;
+        if (!this.audioResource?.volume || isNaN(value) || value < 0 || value > Infinity) return false;
 
-        // ye boi logarithmic ✌
         this.audioResource.volume.setVolumeLogarithmic(value / 100);
         return true;
     }
@@ -235,7 +235,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @type {number}
      */
     get volume() {
-        if (!this.audioResource || !this.audioResource.volume) return 100;
+        if (!this.audioResource?.volume) return 100;
         const currentVol = this.audioResource.volume.volume;
         return Math.round(Math.pow(currentVol, 1 / 1.660964) * 100);
     }

@@ -106,7 +106,8 @@ class Queue<T = unknown> {
                 },
                 initialVolume: 100,
                 bufferingTimeout: 3000,
-                spotifyBridge: true
+                spotifyBridge: true,
+                disableVolume: false
             } as PlayerOptions,
             options
         );
@@ -695,7 +696,8 @@ class Queue<T = unknown> {
 
         const resource: AudioResource<Track> = this.connection.createStream(stream, {
             type: StreamType.Raw,
-            data: track
+            data: track,
+            disableVolume: Boolean(this.options.disableVolume)
         });
 
         if (options.seek) this._streamTime = options.seek;

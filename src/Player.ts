@@ -561,11 +561,11 @@ class Player extends EventEmitter<PlayerEvents> {
         return `${depsReport}\n${line}\nLoaded Extractors:\n${extractorReport || "None"}`;
     }
 
-    emit<U extends keyof PlayerEvents>(eventName: U, ...args: Parameters<PlayerEvents[U]>): boolean {        
+    emit<U extends keyof PlayerEvents>(eventName: U, ...args: Parameters<PlayerEvents[U]>): boolean {
         if (this.requiredEvents.includes(eventName) && !super.eventNames().includes(eventName)) {
             // eslint-disable-next-line no-console
             console.error(...args);
-            process.emitWarning(`[DiscordPlayerWarning] Unhandled "${eventName}" event! Events ${this.requiredEvents.map(m => `"${m}"`).join(", ")} must have event listeners!`);
+            process.emitWarning(`[DiscordPlayerWarning] Unhandled "${eventName}" event! Events ${this.requiredEvents.map((m) => `"${m}"`).join(", ")} must have event listeners!`);
             return false;
         } else {
             return super.emit(eventName, ...args);
