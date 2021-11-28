@@ -550,7 +550,12 @@ class Player extends EventEmitter<PlayerEvents> {
      * @returns {string}
      */
     scanDeps() {
-        return generateDependencyReport();
+        const line = "-".repeat(50);
+        const depsReport = generateDependencyReport();
+        const extractorReport = this.extractors.map((m) => {
+            return `${m.name} :: ${m.version || "0.1.0"}`;
+        }).join("\n");
+        return `${depsReport}\n${line}\nLoaded Extractors:\n${extractorReport || "None"}`;
     }
 
     /**
