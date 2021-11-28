@@ -19,4 +19,8 @@ to modify how and which stream will be played.
 
 - Final stream is a pcm format, required for volume controls which is created by Discord Player itself.
 
+- Since inline volume is enabled by default for volume controls, you may face more resource usage.
+
+- You can disable inline volume for better performance but setting volume won't work and current volume will always be 100.
+
 - All the audio filters are handled by FFmpeg and stream has to reload in order to update filters.
