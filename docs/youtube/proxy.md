@@ -14,3 +14,6 @@ const player = new Player(client, {
     }
 });
 ```
+
+> You may also create a simple proxy server and forward requests through it.
+> See **[https://github.com/http-party/node-http-proxy](https://github.com/http-party/node-http-proxy)** for more info.
