@@ -37,6 +37,7 @@ $ npm install --save @discordjs/opus
 - Lyrics 📃
 - Multiple sources support ✌
 - Play in multiple servers at the same time 🚗
+- Does not inject anything to discord.js or your discord.js client
 
 ## [Documentation](https://discord-player.js.org)
 
@@ -192,6 +193,9 @@ const player = new Player(client, {
     }
 });
 ```
+
+> You may also create a simple proxy server and forward requests through it.
+> See **[https://github.com/http-party/node-http-proxy](https://github.com/http-party/node-http-proxy)** for more info.
 
 ### Custom stream Engine
 
