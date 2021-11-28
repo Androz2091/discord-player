@@ -45,3 +45,7 @@ streams. `source` here will be a video source. Streams from `onBeforeCreateStrea
 ## Can I use this for other sources, like soundcloud?
 
 > Absolutely.
+
+## This is not working properly
+
+> `onBeforeCreateStream` may not work properly if you have `spotifyBridge` enabled (enabled by default).
