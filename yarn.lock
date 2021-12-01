@@ -2008,6 +2008,11 @@ discord-api-types@^0.24.0:
   resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.24.0.tgz#9e429b8a1ddb4147134dfb3109093422de7ec549"
   integrity sha512-X0uA2a92cRjowUEXpLZIHWl4jiX1NsUpDhcEOpa1/hpO1vkaokgZ8kkPtPih9hHth5UVQ3mHBu/PpB4qjyfJ4A==
 
+discord-api-types@^0.25.2:
+  version "0.25.2"
+  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.25.2.tgz#e50ed152e6d48fe7963f5de1002ca6f2df57c61b"
+  integrity sha512-O243LXxb5gLLxubu5zgoppYQuolapGVWPw3ll0acN0+O8TnPUE2kFp9Bt3sTRYodw8xFIknOVxjSeyWYBpVcEQ==
+
 discord-ytdl-core@^5.0.4:
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/discord-ytdl-core/-/discord-ytdl-core-5.0.4.tgz#84a2af1a8e8c235b4fc109b23350d12782ab66cd"
