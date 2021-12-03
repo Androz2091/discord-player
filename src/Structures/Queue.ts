@@ -716,32 +716,38 @@ class Queue<T = unknown> {
      * @private
      */
     private async _handleAutoplay(track: Track): Promise<void> {
-        if (this.#watchDestroyed()) return;
-        if (!track || ![track.source, track.raw?.source].includes("youtube")) {
-            if (this.options.leaveOnEnd) this.destroy();
-            return void this.player.emit("queueEnd", this);
-        }
-        const info = await YouTube.getVideo(track.url)
-            .then((x) => x.videos[0])
-            .catch(Util.noop);
-        if (!info) {
-            if (this.options.leaveOnEnd) this.destroy();
-            return void this.player.emit("queueEnd", this);
-        }
-
-        const nextTrack = new Track(this.player, {
-            title: info.title,
-            url: `https://www.youtube.com/watch?v=${info.id}`,
-            duration: info.durationFormatted ? Util.buildTimeCode(Util.parseMS(info.duration * 1000)) : "0:00",
-            description: "",
-            thumbnail: typeof info.thumbnail === "string" ? info.thumbnail : info.thumbnail.url,
-            views: info.views,
-            author: info.channel.name,
-            requestedBy: track.requestedBy,
-            source: "youtube"
+         var _a;
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function*() {
+            if ((0, tslib_1.__classPrivateFieldGet)(this, _Queue_instances, "m", _Queue_watchDestroyed).call(this))
+                return;
+            if (!track || ![track.source, (_a = track.raw) === null || _a === void 0 ? void 0 : _a.source].includes("youtube")) {
+                if (this.options.leaveOnEnd)
+                    this.destroy();
+                return void this.player.emit("queueEnd", this);
+            }
+            const x = yield youtube_sr_1.default.search(`${track.author}`, { type: "video" })
+                .then((x) => x)
+                .catch(err => console.log(err));
+            const info = x[Math.floor(Math.random() * x.length)];
+            if (!info) {
+                if (this.options.leaveOnEnd)
+                    this.destroy();
+                return void this.player.emit("queueEnd", this);
+            }
+            const nextTrack = new Track_1.default(this.player, {
+                title: info.title,
+                url: `https://www.youtube.com/watch?v=${info.id}`,
+                duration: info.durationFormatted ? Util_1.Util.buildTimeCode(Util_1.Util.parseMS(info.duration * 1000)) : "0:00",
+                description: "",
+                thumbnail: typeof info.thumbnail === "string" ? info.thumbnail : info.thumbnail.url,
+                views: info.views,
+                author: info.channel.name,
+                requestedBy: track.requestedBy,
+                source: "youtube"
+            });
+            this.play(nextTrack, { immediate: true });
         });
-
-        this.play(nextTrack, { immediate: true });
+    }
     }
 
     *[Symbol.iterator]() {
