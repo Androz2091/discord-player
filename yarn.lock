@@ -4598,9 +4598,9 @@ yn@3.1.1:
   integrity sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
 
 youtube-sr@^4.1.9:
-  version "4.1.9"
-  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.1.9.tgz#ab0ed33d9c58b0f3d3b12a4cb0cfa689aa4c2557"
-  integrity sha512-QAx8WCzvahVkx3RCEO+8VNCe0QhZudnz91rI1/Laj2gz/jl5481y6Tmp+MYU3oyfNtrM/2oD9kcFoNz3PO5C+Q==
+  version "4.1.10"
+  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.1.10.tgz#ca26d3a0010f5685af9a9b995aec67e8d0c6b108"
+  integrity sha512-o7v7UxMeHIzu0GVYGCYFcNrzEZg+LaIbqUzfVpuas5tBlnR8zcpRYZTkiJ8iegVnFMEdoMnvRFabN/jc0c52Tw==
   dependencies:
     node-fetch "^2.6.5"
 
