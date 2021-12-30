@@ -455,14 +455,11 @@ class Queue<T = unknown> {
     shuffle() {
         if (this.#watchDestroyed()) return;
         if (!this.tracks.length || this.tracks.length < 3) return false;
-        const currentTrack = this.tracks.shift();
 
         for (let i = this.tracks.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [this.tracks[i], this.tracks[j]] = [this.tracks[j], this.tracks[i]];
         }
-
-        this.tracks.unshift(currentTrack);
 
         return true;
     }
