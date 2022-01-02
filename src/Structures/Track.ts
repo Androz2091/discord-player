@@ -99,6 +99,12 @@ class Track {
          * @readonly
          */
 
+        /**
+         * The playlist which track belongs
+         * @name Track#playlist
+         * @type {Playlist}
+         */
+
         void this._patch(data);
     }
 
