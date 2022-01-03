@@ -79,7 +79,7 @@ class Player extends EventEmitter<PlayerEvents> {
 
         if (oldState.channelId && !newState.channelId && oldState.channelId !== newState.channelId) {
             if (queue?.connection && newState.member.id === newState.guild.me.id) queue.connection.channel = newState.channel;
-            if (newState.member.id === newState.guild.me.id || (newState.member.id !== newState.guild.me.id && oldState.channelId === queue.connection.channel.id)) {
+            if (queue.connection.channel && newState.member.id === newState.guild.me.id || (newState.member.id !== newState.guild.me.id && oldState.channelId === queue.connection.channel?.id)) {
                 if (!Util.isVoiceEmpty(queue.connection.channel)) return;
                 const timeout = setTimeout(() => {
                     if (!Util.isVoiceEmpty(queue.connection.channel)) return;
