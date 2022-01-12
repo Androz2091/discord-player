@@ -97,15 +97,15 @@ class Player extends EventEmitter<PlayerEvents> {
             }
             else if (oldState.suppress !== newState.suppress) {
                 if (newState.suppress)
-                    newState.guild.me.voice.setRequestToSpeak(true).catch(Util_1.Util.noop);
+                    newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
                 queue.setPaused(newState.suppress);
             }
         }
         
         if (!newState.channelId && oldState.channelId === queue.connection.channel.id) {
-            if (!Util_1.Util.isVoiceEmpty(queue.connection.channel)) return;
+            if (!Util.isVoiceEmpty(queue.connection.channel)) return;
             const timeout = setTimeout(() => {
-                if (!Util_1.Util.isVoiceEmpty(queue.connection.channel)) return;
+                if (!Util.isVoiceEmpty(queue.connection.channel)) return;
                 if (!this.queues.has(queue.guild.id)) return;
                 if (queue.options.leaveOnEmpty) queue.destroy();
                 this.emit("channelEmpty", queue);
@@ -115,7 +115,7 @@ class Player extends EventEmitter<PlayerEvents> {
         
         if (newState.channelId && newState.channelId === queue.connection.channel.id) {
             const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-            const channelEmpty = Util_1.Util.isVoiceEmpty(queue.connection.channel);
+            const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
             if (!channelEmpty && emptyTimeout) {
                 clearTimeout(emptyTimeout);
                 queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
@@ -125,13 +125,13 @@ class Player extends EventEmitter<PlayerEvents> {
         if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId && newState.member.id === newState.guild.me.id) {
             if (queue?.connection && newState.member.id === newState.guild.me.id) queue.connection.channel = newState.channel;
             const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-            const channelEmpty = Util_1.Util.isVoiceEmpty(queue.connection.channel);
+            const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
             if (!channelEmpty && emptyTimeout) {
                 clearTimeout(emptyTimeout);
                 queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
             } else {
                 const timeout = setTimeout(() => {
-                    if (!Util_1.Util.isVoiceEmpty(queue.connection.channel)) return;
+                    if (!Util.isVoiceEmpty(queue.connection.channel)) return;
                     if (!this.queues.has(queue.guild.id)) return;
                     if (queue.options.leaveOnEmpty) queue.destroy();
                     this.emit("channelEmpty", queue);
