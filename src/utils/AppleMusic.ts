@@ -79,7 +79,7 @@ function getRawPlaylist(document: string): RawPlaylist {
         tracks,
         numTracks: tracks.length,
         type: "playlist",
-        thumbnail: $("meta[property='og:image'").attr("content") ?? ""
+        thumbnail: $("meta[property='og:image']").attr("content") ?? ""
     };
     return playlist;
 }
@@ -126,7 +126,7 @@ function getRawAlbum(document: string): RawAlbum {
         tracks,
         numTracks: tracks.length,
         type: "album",
-        thumbnail: $("meta[property='og:image'").attr("content") ?? ""
+        thumbnail: $("meta[property='og:image']").attr("content") ?? ""
     };
     return playlist;
 }
