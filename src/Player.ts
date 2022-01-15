@@ -5,7 +5,7 @@ import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
 import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlayerSearchResult } from "./types/types";
 import Track from "./Structures/Track";
 import { QueryResolver } from "./utils/QueryResolver";
-import YouTube from "youtube-sr";
+import YouTube, { Video } from "youtube-sr";
 import { Util } from "./utils/Util";
 import Spotify from "spotify-url-info";
 import { PlayerError, ErrorStatusCode } from "./Structures/PlayerError";
@@ -14,6 +14,7 @@ import { Client as SoundCloud, SearchResult as SoundCloudSearchResult } from "so
 import { Playlist } from "./Structures/Playlist";
 import { ExtractorModel } from "./Structures/ExtractorModel";
 import { generateDependencyReport } from "@discordjs/voice";
+import { RawAlbum, RawPlaylist, search } from "./utils/AppleMusic";
 
 const soundcloud = new SoundCloud();
 
@@ -265,6 +266,70 @@ class Player extends EventEmitter<PlayerEvents> {
 
         const qt = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
         switch (qt) {
+            case QueryType.APPLE_MUSIC_TRACK: {
+                const data = await search(query);
+                const videos = await YouTube.search(data.title, {
+                    type: "video"
+                });
+                if (!videos) return null;
+
+                const track = new Track(this, {
+                    title: data.title,
+                    description: videos[0].description,
+                    author: videos[0].channel.name,
+                    url: videos[0].url,
+                    requestedBy: options.requestedBy as User,
+                    thumbnail: videos[0].thumbnail.url,
+                    views: 0,
+                    duration: videos[0].durationFormatted,
+                    source: "applemusic",
+                    raw: videos[0]
+                });
+
+                return { playlist: null, tracks: [track] };
+            }
+            case QueryType.APPLE_MUSIC_ALBUM:
+            case QueryType.APPLE_MUSIC_PLAYLIST: {
+                const data = (await search(query)) as RawAlbum | RawPlaylist;
+
+                const playlist = new Playlist(this, {
+                    title: data.title,
+                    thumbnail: data.thumbnail,
+                    description: data.description,
+                    type: "playlist",
+                    source: "applemusic",
+                    author: {
+                        name: data.type === "playlist" ? data.creator.name : data.artist.name,
+                        url: data.type === "playlist" ? data.creator.url : data.artist.url
+                    },
+                    tracks: [],
+                    id: "",
+                    url: query,
+                    rawPlaylist: data
+                });
+
+                for (const m of data.tracks) {
+                    const videos = (await YouTube.search(m.title, {
+                        type: "video"
+                    }).catch(Util.noop)) as Video[];
+
+                    const data = new Track(this, {
+                        title: videos[0].title ?? "",
+                        description: videos[0].description ?? "",
+                        author: m.artist.name ?? "Unknown Artist",
+                        url: videos[0].url,
+                        thumbnail: videos[0].thumbnail.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                        duration: videos[0].durationFormatted,
+                        views: 0,
+                        requestedBy: options.requestedBy as User,
+                        source: "applemusic"
+                    });
+
+                    playlist.tracks.push(data);
+                }
+
+                return { playlist: playlist, tracks: playlist.tracks };
+            }
             case QueryType.YOUTUBE_VIDEO: {
                 const info = await ytdlGetInfo(query, this.options.ytdlOptions).catch(Util.noop);
                 if (!info) return { playlist: null, tracks: [] };

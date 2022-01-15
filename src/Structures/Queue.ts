@@ -637,7 +637,7 @@ class Queue<T = unknown> {
         let stream = null;
         const customDownloader = typeof this.onBeforeCreateStream === "function";
 
-        if (["youtube", "spotify"].includes(track.raw.source)) {
+        if (["youtube", "spotify", "applemusic"].includes(track.raw.source)) {
             let spotifyResolved = false;
             if (this.options.spotifyBridge && track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })

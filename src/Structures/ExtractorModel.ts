@@ -1,4 +1,5 @@
 import { ExtractorModelData } from "../types/types";
+import { linkType, makeData } from "../utils/AppleMusic";
 
 class ExtractorModel {
     name: string;
@@ -32,7 +33,14 @@ class ExtractorModel {
      * @returns {Promise<ExtractorModelData>}
      */
     async handle(query: string): Promise<ExtractorModelData> {
-        const data = await this._raw.getInfo(query);
+        let data;
+
+        if (!linkType(query)) {
+            data = await this._raw.getInfo(query);
+        } else {
+            return makeData(query);
+        }
+
         if (!data) return null;
 
         return {

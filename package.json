@@ -61,6 +61,8 @@
   "homepage": "https://discord-player.js.org",
   "dependencies": {
     "@discordjs/voice": "^0.7.5",
+    "axios": "^0.24.0",
+    "cheerio": "^1.0.0-rc.10",
     "discord-ytdl-core": "^5.0.4",
     "libsodium-wrappers": "^0.7.9",
     "soundcloud-scraper": "^5.0.2",

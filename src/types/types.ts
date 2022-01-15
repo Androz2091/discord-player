@@ -60,7 +60,7 @@ export interface QueueFilters {
  * - arbitrary
  * @typedef {string} TrackSource
  */
-export type TrackSource = "soundcloud" | "youtube" | "spotify" | "arbitrary";
+export type TrackSource = "soundcloud" | "youtube" | "spotify" | "arbitrary" | "applemusic";
 
 /**
  * @typedef {object} RawTrackData
@@ -247,7 +247,10 @@ export enum QueryType {
     REVERBNATION,
     YOUTUBE_SEARCH,
     YOUTUBE_VIDEO,
-    SOUNDCLOUD_SEARCH
+    SOUNDCLOUD_SEARCH,
+    APPLE_MUSIC_TRACK,
+    APPLE_MUSIC_PLAYLIST,
+    APPLE_MUSIC_ALBUM
 }
 
 /**
