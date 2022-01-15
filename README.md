@@ -137,7 +137,7 @@ client.login(process.env.DISCORD_TOKEN);
 
 ## Supported websites
 
-By default, discord-player supports **YouTube**, **Spotify** and **SoundCloud** streams only.
+By default, discord-player supports **YouTube**, **Spotify**, **Apple Music** and **SoundCloud** streams only.
 
 ### Optional dependencies
 
