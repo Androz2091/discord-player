@@ -9,8 +9,11 @@
   ],
   "module": "dist/index.mjs",
   "exports": {
-    "require": "./dist/index.js",
-    "import": "./dist/index.mjs"
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./smoothVolume": "./dist/smoothVolume.js"
   },
   "scripts": {
     "dev": "cd example/test && ts-node index.ts",
