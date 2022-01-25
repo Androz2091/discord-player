@@ -702,6 +702,11 @@ class Queue<T = unknown> {
 
         if (options.seek) this._streamTime = options.seek;
         this._filtersUpdate = options.filtersUpdate;
+
+        if (resource.volume && typeof this.options.volumeSmoothness === "number") {
+            Reflect.set(resource.volume, "_smoothing", this.options.volumeSmoothness || 0);
+        }
+
         this.setVolume(this.options.initialVolume);
 
         setTimeout(() => {
