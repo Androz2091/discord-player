@@ -60,14 +60,14 @@
   },
   "homepage": "https://discord-player.js.org",
   "dependencies": {
-    "@discordjs/voice": "^0.7.5",
+    "@discordjs/voice": "^0.8.0",
     "discord-ytdl-core": "^5.0.4",
     "libsodium-wrappers": "^0.7.9",
     "soundcloud-scraper": "^5.0.2",
     "spotify-url-info": "^2.2.3",
     "tiny-typed-emitter": "^2.1.0",
-    "youtube-sr": "^4.1.9",
-    "ytdl-core": "^4.9.1"
+    "youtube-sr": "^4.1.12",
+    "ytdl-core": "^4.10.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
