@@ -3530,10 +3530,6 @@ prism-media@^1.2.9, prism-media@^1.3.2:
   resolved "https://registry.yarnpkg.com/prism-media/-/prism-media-1.3.2.tgz#a1f04423ec15d22f3d62b1987b6a25dc49aad13b"
   integrity sha512-L6UsGHcT6i4wrQhFF1aPK+MNYgjRqR2tUoIqEY+CG1NqVkMjPRKzS37j9f8GiYPlD6wG9ruBj+q5Ax+bH8Ik1g==
 
-"prism-media@https://codeload.github.com/discord-player/prism-media/tar.gz/main":
-  version "1.3.3"
-  resolved "https://codeload.github.com/discord-player/prism-media/tar.gz/main#d89848eb1884517541daad06d6ec9fa6cc1b7031"
-
 progress@^2.0.0:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
@@ -4497,10 +4493,10 @@ yn@3.1.1:
   resolved "https://registry.yarnpkg.com/yn/-/yn-3.1.1.tgz#1e87401a09d767c1d5eab26a6e4c185182d2eb50"
   integrity sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
 
-youtube-sr@^4.1.12:
-  version "4.1.12"
-  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.1.12.tgz#b5898d203dc742f4fd350d77cd04bd2e8e688005"
-  integrity sha512-Zc+5Rntoje0koZYLaRWa5c7vK0wtvfGfdHcBGx27IJ0tTMTrjEig9NhE7UYnyfOcXvHR0To/8GUumjXp3dlQhQ==
+youtube-sr@^4.1.13:
+  version "4.1.13"
+  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.1.13.tgz#dee8a22306607c688ee186129534c7dfc08966a7"
+  integrity sha512-25zwQm6VUy1if6LzeE3CxjfIFJe6z9rNgfjQgWVEvlNEvChHrgA8TkzPzHOww4GFJ37kT3mNrqFRjtO1O5298w==
 
 ytdl-core@^4.10.0:
   version "4.10.0"

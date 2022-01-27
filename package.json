@@ -1,6 +1,6 @@
 {
   "name": "discord-player",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "description": "Complete framework to facilitate music commands using discord.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -66,11 +66,10 @@
     "@discordjs/voice": "^0.8.0",
     "discord-ytdl-core": "^5.0.4",
     "libsodium-wrappers": "^0.7.9",
-    "prism-media": "https://codeload.github.com/discord-player/prism-media/tar.gz/main",
     "soundcloud-scraper": "^5.0.2",
     "spotify-url-info": "^2.2.3",
     "tiny-typed-emitter": "^2.1.0",
-    "youtube-sr": "^4.1.12",
+    "youtube-sr": "^4.1.13",
     "ytdl-core": "^4.10.0"
   },
   "devDependencies": {
