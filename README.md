@@ -166,6 +166,20 @@ These bots are made by the community, they can help you build your own!
 
 ## Advanced
 
+### Smooth Volume
+
+Discord Player will make volume transition smooth. To enable this, you need to add this line at the top of your main file:
+
+```js
+// CJS
+require("discord-player/smoothVolume");
+
+// ESM
+import "discord-player/smoothVolume"
+```
+
+> ⚠️ Make sure that line is situated at the **TOP** of your **main** file.
+
 ### Use cookies
 
 ```js
@@ -215,7 +229,7 @@ const queue = player.createQueue(..., {
         // only trap youtube source
         if (source === "youtube") {
             // track here would be youtube track
-            return (await playdl.stream(track.url)).stream;
+            return (await playdl.stream(track.url, { discordPlayerCompatibility : true })).stream;
             // we must return readable stream or void (returning void means telling discord-player to look for default extractor)
         }
     }
