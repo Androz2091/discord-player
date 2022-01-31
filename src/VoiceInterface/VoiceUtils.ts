@@ -49,13 +49,17 @@ class VoiceUtils {
             maxTime?: number;
         }
     ) {
-        let conn = joinVoiceChannel({
+        const conn = joinVoiceChannel({
             guildId: channel.guild.id,
             channelId: channel.id,
             adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
             selfDeaf: Boolean(options.deaf)
         });
 
+        return conn;
+    }
+
+    public async enterReady(conn: VoiceConnection, options: { maxTime?: number } = {}) {
         try {
             conn = await entersState(conn, VoiceConnectionStatus.Ready, options?.maxTime ?? 20000);
             return conn;
