@@ -168,7 +168,7 @@ These bots are made by the community, they can help you build your own!
 
 ### Smooth Volume
 
-Discord Player will make volume transition smooth. To enable this, you need to add this line at the top of your main file:
+Discord Player will by default try to implement this. If smooth volume does not work, you need to add this line at the top of your main file:
 
 ```js
 // CJS
