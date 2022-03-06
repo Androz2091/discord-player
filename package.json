@@ -68,12 +68,11 @@
     "@discordjs/voice": "^0.8.0",
     "discord-ytdl-core": "^5.0.4",
     "libsodium-wrappers": "^0.7.9",
-    "prism-media": "https://codeload.github.com/discord-player/prism-media/tar.gz/main",
     "soundcloud-scraper": "^5.0.2",
-    "spotify-url-info": "^2.2.5",
+    "spotify-url-info": "^2.2.7",
     "tiny-typed-emitter": "^2.1.0",
-    "youtube-sr": "^4.1.13",
-    "ytdl-core": "^4.10.0"
+    "youtube-sr": "^4.1.15",
+    "ytdl-core": "^4.11.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
