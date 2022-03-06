@@ -16,6 +16,7 @@ export class VolumeTransformer extends Transform {
     private _chunk: Buffer;
     public volume: number;
     private _targetVolume: number;
+    public type: "s16le" | "s32le" | "s16be" | "s32be";
     constructor(options: VolumeTransformerOptions = {}) {
         super(options);
         switch (options.type) {
@@ -42,9 +43,11 @@ export class VolumeTransformer extends Transform {
             default:
                 throw new Error("VolumeTransformer type should be one of s16le, s16be, s32le, s32be");
         }
+        this.type = options.type;
         this._bytes = this._bits / 8;
         this._extremum = Math.pow(2, this._bits - 1);
-        this.volume = typeof options.volume === "undefined" ? 1 : options.volume;
+        this.volume = Number.isNaN(options.volume) ? 1 : Number(options.volume);
+        if (!Number.isFinite(this.volume)) this.volume = 1;
         this._targetVolume = this.volume;
         this._chunk = Buffer.alloc(0);
         this._smoothing = options.smoothness || 0;
@@ -57,14 +60,16 @@ export class VolumeTransformer extends Transform {
         return index;
     }
 
-    _transform(chunk: Buffer, encoding: BufferEncoding, done: () => unknown) {
-        if (this._smoothing > 0 && this.volume !== this._targetVolume) {
-            if (this.volume < this._targetVolume) {
-                this.volume = this.volume + this._smoothing >= this._targetVolume ? this._targetVolume : this.volume + this._smoothing;
-            } else if (this.volume > this._targetVolume) {
-                this.volume = this.volume - this._smoothing <= this._targetVolume ? this._targetVolume : this.volume - this._smoothing;
-            }
+    _applySmoothness() {
+        if (this.volume < this._targetVolume) {
+            this.volume = this.volume + this._smoothing >= this._targetVolume ? this._targetVolume : this.volume + this._smoothing;
+        } else if (this.volume > this._targetVolume) {
+            this.volume = this.volume - this._smoothing <= this._targetVolume ? this._targetVolume : this.volume - this._smoothing;
         }
+    }
+
+    _transform(chunk: Buffer, encoding: BufferEncoding, done: () => unknown) {
+        if (this.smoothingEnabled() && this.volume !== this._targetVolume) this._applySmoothness();
 
         if (this.volume === 1) {
             this.push(chunk);
@@ -94,6 +99,9 @@ export class VolumeTransformer extends Transform {
     }
 
     setVolume(volume: number) {
+        if (Number.isNaN(volume)) volume = 1;
+        if (typeof volume !== "number") volume = Number(volume);
+        if (!Number.isFinite(volume)) volume = volume < 0 ? 0 : 1;
         this._targetVolume = volume;
         if (this._smoothing <= 0) this.volume = volume;
     }
@@ -112,5 +120,25 @@ export class VolumeTransformer extends Transform {
 
     get volumeLogarithmic() {
         return Math.pow(this.volume, 1 / 1.660964);
+    }
+
+    get smoothness() {
+        return this._smoothing;
+    }
+
+    setSmoothness(smoothness: number) {
+        this._smoothing = smoothness;
+    }
+
+    smoothingEnabled() {
+        return Number.isFinite(this._smoothing) && this._smoothing > 0;
+    }
+
+    get hasSmoothness() {
+        return true;
+    }
+
+    static get hasSmoothing() {
+        return true;
     }
 }

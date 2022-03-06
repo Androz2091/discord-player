@@ -45,7 +45,7 @@ class Player extends EventEmitter<PlayerEvents> {
          */
         this.client = client;
 
-        if (!new Intents(this.client.options.intents).has(Intents.FLAGS.GUILD_VOICE_STATES)) {
+        if (this.client?.options?.intents && !new Intents(this.client?.options?.intents).has(Intents.FLAGS.GUILD_VOICE_STATES)) {
             throw new PlayerError('client is missing "GUILD_VOICE_STATES" intent');
         }
 
@@ -153,7 +153,7 @@ class Player extends EventEmitter<PlayerEvents> {
 
         const _meta = queueInitOptions.metadata;
         delete queueInitOptions["metadata"];
-        queueInitOptions.volumeSmoothness ??= 0.1;
+        queueInitOptions.volumeSmoothness ??= 0.08;
         queueInitOptions.ytdlOptions ??= this.options.ytdlOptions;
         const queue = new Queue(this, guild, queueInitOptions);
         queue.metadata = _meta;

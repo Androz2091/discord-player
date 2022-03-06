@@ -1,7 +1,6 @@
 require("dotenv").config({
     path: __dirname+"/.env"
 });
-require("discord-player/smoothVolume");
 const { Client, GuildMember, Intents } = require("discord.js");
 const config = require("./config");
 const { Player, QueryType, QueueRepeatMode } = require("discord-player");

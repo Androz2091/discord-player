@@ -1,3 +1,6 @@
+// try applying smooth volume patch on load
+import "./smoothVolume";
+
 export { AudioFilters } from "./utils/AudioFilters";
 export { ExtractorModel } from "./Structures/ExtractorModel";
 export { Playlist } from "./Structures/Playlist";
