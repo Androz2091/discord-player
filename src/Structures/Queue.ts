@@ -220,11 +220,11 @@ class Queue<T = unknown> {
      */
     destroy(disconnect = this.options.leaveOnStop) {
         if (this.#watchDestroyed()) return;
+        this.#destroyed = true;
         if (this.connection) this.connection.end();
         if (disconnect) this.connection?.disconnect();
         this.player.queues.delete(this.guild.id);
         this.player.voiceUtils.cache.delete(this.guild.id);
-        this.#destroyed = true;
     }
 
     /**
