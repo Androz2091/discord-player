@@ -93,9 +93,9 @@ export class VolumeTransformer extends Transform {
         return done();
     }
 
-    _destroy(err: Error, cb: (error: Error) => void) {
+    _destroy(err: Error, cb: (error: Error | null) => void) {
         super._destroy(err, cb);
-        this._chunk = null;
+        this._chunk = Buffer.alloc(0);
     }
 
     setVolume(volume: number) {

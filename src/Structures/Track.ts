@@ -1,21 +1,83 @@
-import { User, Util, SnowflakeUtil, Snowflake } from "discord.js";
+import { Snowflake, SnowflakeUtil, User, Util } from "discord.js";
 import { Player } from "../Player";
-import { RawTrackData, TrackJSON } from "../types/types";
+import { RawTrackData, TrackJSON, TrackSource } from "../types/types";
 import { Playlist } from "./Playlist";
 import { Queue } from "./Queue";
 
 class Track {
-    public player!: Player;
-    public title!: string;
-    public description!: string;
-    public author!: string;
-    public url!: string;
-    public thumbnail!: string;
-    public duration!: string;
-    public views!: number;
-    public requestedBy!: User;
+    /**
+     * The player that instantiated this Track
+     * @name Track#player
+     * @type {Player}
+     * @readonly
+     */
+    public player: Player;
+    /**
+     * Title of this track
+     * @name Track#title
+     * @type {string}
+     */
+    public title: string;
+    /**
+     * Description of this track
+     * @name Track#description
+     * @type {string}
+     */
+    public description: string;
+    /**
+     * Author of this track
+     * @name Track#author
+     * @type {string}
+     */
+    public author: string;
+    /**
+     * URL of this track
+     * @name Track#url
+     * @type {string}
+     */
+    public url: string;
+    /**
+     * Thumbnail of this track
+     * @name Track#thumbnail
+     * @type {string}
+     */
+    public thumbnail: string;
+    /**
+     * Duration of this track
+     * @name Track#duration
+     * @type {string}
+     */
+    public duration: string;
+    /**
+     * Views count of this track
+     * @name Track#views
+     * @type {number}
+     */
+    public views: number;
+    /**
+     * Person who requested this track
+     * @name Track#requestedBy
+     * @type {User}
+     */
+    public requestedBy: User;
+    /**
+     * The playlist which track belongs
+     * @name Track#playlist
+     * @type {Playlist}
+     */
     public playlist?: Playlist;
-    public readonly raw: RawTrackData = {} as RawTrackData;
+    /**
+     * Raw track data
+     * @name Track#raw
+     * @type {RawTrackData}
+     */
+    public readonly raw: RawTrackData;
+    /**
+     * The track id
+     * @name Track#id
+     * @type {Snowflake}
+     * @readonly
+     */
     public readonly id: Snowflake = SnowflakeUtil.generate();
 
     /**
@@ -24,109 +86,24 @@ class Track {
      * @param {RawTrackData} data Track data
      */
     constructor(player: Player, data: RawTrackData) {
-        /**
-         * The player that instantiated this Track
-         * @name Track#player
-         * @type {Player}
-         * @readonly
-         */
-        Object.defineProperty(this, "player", { value: player, enumerable: false });
-
-        /**
-         * Title of this track
-         * @name Track#title
-         * @type {string}
-         */
-
-        /**
-         * Description of this track
-         * @name Track#description
-         * @type {string}
-         */
-
-        /**
-         * Author of this track
-         * @name Track#author
-         * @type {string}
-         */
-
-        /**
-         * URL of this track
-         * @name Track#url
-         * @type {string}
-         */
-
-        /**
-         * Thumbnail of this track
-         * @name Track#thumbnail
-         * @type {string}
-         */
-
-        /**
-         * Duration of this track
-         * @name Track#duration
-         * @type {string}
-         */
-
-        /**
-         * Views count of this track
-         * @name Track#views
-         * @type {number}
-         */
-
-        /**
-         * Person who requested this track
-         * @name Track#requestedBy
-         * @type {User}
-         */
-
-        /**
-         * If this track belongs to playlist
-         * @name Track#fromPlaylist
-         * @type {boolean}
-         */
-
-        /**
-         * Raw track data
-         * @name Track#raw
-         * @type {RawTrackData}
-         */
-
-        /**
-         * The track id
-         * @name Track#id
-         * @type {Snowflake}
-         * @readonly
-         */
-
-        /**
-         * The playlist which track belongs
-         * @name Track#playlist
-         * @type {Playlist}
-         */
-
-        void this._patch(data);
-    }
-
-    private _patch(data: RawTrackData) {
-        this.title = Util.escapeMarkdown(data.title ?? "");
-        this.author = data.author ?? "";
-        this.url = data.url ?? "";
-        this.thumbnail = data.thumbnail ?? "";
-        this.duration = data.duration ?? "";
-        this.views = data.views ?? 0;
+        this.player = player;
+        this.title = Util.escapeMarkdown(data.title);
+        this.description = data.description;
+        this.author = data.author;
+        this.url = data.url;
+        this.thumbnail = data.thumbnail;
+        this.duration = data.duration;
+        this.views = data.views;
         this.requestedBy = data.requestedBy;
         this.playlist = data.playlist;
-
-        // raw
-        Object.defineProperty(this, "raw", { value: Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data), enumerable: false });
+        this.raw = Object.assign({}, data.raw ?? data);
     }
 
     /**
      * The queue in which this track is located
-     * @type {Queue}
+     * @type {(Queue|undefined)}
      */
-    get queue(): Queue {
+    get queue(): Queue | undefined {
         return this.player.queues.find((q) => q.tracks.some((ab) => ab.id === this.id));
     }
 
@@ -152,7 +129,7 @@ class Track {
      * Returns source of this track
      * @type {TrackSource}
      */
-    get source() {
+    get source(): TrackSource {
         return this.raw.source ?? "arbitrary";
     }
 
@@ -168,7 +145,7 @@ class Track {
      * Raw JSON representation of this track
      * @returns {TrackJSON}
      */
-    toJSON(hidePlaylist?: boolean) {
+    toJSON(hidePlaylist?: boolean): TrackJSON {
         return {
             id: this.id,
             title: this.title,
@@ -180,8 +157,8 @@ class Track {
             durationMS: this.durationMS,
             views: this.views,
             requestedBy: this.requestedBy?.id,
-            playlist: hidePlaylist ? null : this.playlist?.toJSON() ?? null
-        } as TrackJSON;
+            playlist: hidePlaylist ? undefined : this.playlist?.toJSON() ?? undefined
+        };
     }
 }
 

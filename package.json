@@ -23,7 +23,7 @@
     "build:check": "tsc --noEmit --incremental false",
     "prepublishOnly": "rollup-type-bundler -e stream",
     "build:esm": "gen-esm-wrapper ./dist/index.js ./dist/index.mjs",
-    "format": "prettier --write \"src/**/*.ts\" \"example/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"example/**/*.{js,ts}\"",
     "docs": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml --output docs/docs.json",
     "docs:test": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/index.yml",
     "lint": "eslint src --ext .ts",

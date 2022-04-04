@@ -1,130 +1,133 @@
-import { Collection, Guild, StageChannel, VoiceChannel, Snowflake, SnowflakeUtil, GuildChannelResolvable } from "discord.js";
-import { Player } from "../Player";
-import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
-import Track from "./Track";
-import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode, TrackSource } from "../types/types";
-import ytdl from "discord-ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
-import { Util } from "../utils/Util";
-import YouTube from "youtube-sr";
-import AudioFilters from "../utils/AudioFilters";
-import { PlayerError, ErrorStatusCode } from "./PlayerError";
+import ytdl from "discord-ytdl-core";
+import { Collection, Guild, GuildChannelResolvable, Snowflake, SnowflakeUtil, StageChannel, VoiceChannel } from "discord.js";
 import type { Readable } from "stream";
+import YouTube from "youtube-sr";
+import { Player } from "../Player";
+import { PlayerOptions, PlayerProgressbarOptions, PlayerTimestamp, PlayOptions, QueueFilters, QueueJSON, QueueRepeatMode, TrackSource } from "../types/types";
+import AudioFilters from "../utils/AudioFilters";
+import { Util } from "../utils/Util";
+import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
 import { VolumeTransformer } from "../VoiceInterface/VolumeTransformer";
+import { ErrorStatusCode, PlayerError } from "./PlayerError";
+import Track from "./Track";
 
-class Queue<T = unknown> {
-    public readonly guild: Guild;
+export class Queue<T = unknown> {
+    /**
+     * The player that instantiated this queue
+     * @type {Player}
+     * @readonly
+     */
     public readonly player: Player;
-    public connection: StreamDispatcher;
+    /**
+     * The guild that instantiated this queue
+     * @type {Guild}
+     * @readonly
+     */
+    public readonly guild: Guild;
+    /**
+     * The connection
+     * @type {(StreamDispatcher|undefined)}
+     * @name Queue#connection
+     */
+    public connection: StreamDispatcher | undefined;
+    /**
+     * Regular tracks
+     * @type {Track[]}
+     * @name Queue#tracks
+     */
     public tracks: Track[] = [];
+    /**
+     * Previous tracks
+     * @type {Track[]}
+     * @name Queue#previousTracks
+     */
     public previousTracks: Track[] = [];
-    public options: PlayerOptions;
+    /**
+     * The player options for this queue
+     * @default
+     * ```
+     * const options = {
+        leaveOnEnd: true,
+        leaveOnStop: true,
+        leaveOnEmpty: true,
+        leaveOnEmptyCooldown: 1000,
+        autoSelfDeaf: true,
+        ytdlOptions: {
+            highWaterMark: 1 << 25
+        },
+        initialVolume: 100,
+        bufferingTimeout: 3000,
+        spotifyBridge: true,
+        disableVolume: false
+    };
+     * ```
+     * @type {PlayerOptions}
+     */
+    public options: PlayerOptions = {
+        leaveOnEnd: true,
+        leaveOnStop: true,
+        leaveOnEmpty: true,
+        leaveOnEmptyCooldown: 1000,
+        autoSelfDeaf: true,
+        ytdlOptions: {
+            highWaterMark: 1 << 25
+        },
+        initialVolume: 100,
+        bufferingTimeout: 3000,
+        spotifyBridge: true,
+        disableVolume: false
+    };
     public playing = false;
-    public metadata?: T = null;
+    /**
+     * Queue metadata
+     * @type {any}
+     * @name Queue#metadata
+     */
+    public metadata?: T | undefined;
+    /**
+     * Queue repeat mode
+     * @type {QueueRepeatMode}
+     * @name Queue#repeatMode
+     */
     public repeatMode: QueueRepeatMode = 0;
+    /**
+     * The ID of this queue
+     * @type {Snowflake}
+     * @name Queue#id
+     */
     public readonly id: Snowflake = SnowflakeUtil.generate();
     private _streamTime = 0;
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
-    private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
+    private _activeFilters: (keyof QueueFilters)[] = [];
     private _filtersUpdate = false;
     #lastVolume = 0;
     #destroyed = false;
-    public onBeforeCreateStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable | undefined> = null;
+    public onBeforeCreateStream: ((track: Track, source: TrackSource, queue: Queue) => Promise<Readable | undefined>) | null = null;
 
     /**
      * Queue constructor
-     * @param {Player} player The player that instantiated this queue
-     * @param {Guild} guild The guild that instantiated this queue
+     * @param {Player} player The player that should instantiate this queue
+     * @param {Guild} guild The guild that should instantiate this queue
      * @param {PlayerOptions} [options={}] Player options for the queue
      */
     constructor(player: Player, guild: Guild, options: PlayerOptions = {}) {
-        /**
-         * The player that instantiated this queue
-         * @type {Player}
-         * @readonly
-         */
         this.player = player;
-
-        /**
-         * The guild that instantiated this queue
-         * @type {Guild}
-         * @readonly
-         */
         this.guild = guild;
+        this.options = Object.assign(this.options, options);
 
-        /**
-         * The player options for this queue
-         * @type {PlayerOptions}
-         */
-        this.options = {};
-
-        /**
-         * Queue repeat mode
-         * @type {QueueRepeatMode}
-         * @name Queue#repeatMode
-         */
-
-        /**
-         * Queue metadata
-         * @type {any}
-         * @name Queue#metadata
-         */
-
-        /**
-         * Previous tracks
-         * @type {Track[]}
-         * @name Queue#previousTracks
-         */
-
-        /**
-         * Regular tracks
-         * @type {Track[]}
-         * @name Queue#tracks
-         */
-
-        /**
-         * The connection
-         * @type {StreamDispatcher}
-         * @name Queue#connection
-         */
-
-        /**
-         * The ID of this queue
-         * @type {Snowflake}
-         * @name Queue#id
-         */
-
-        Object.assign(
-            this.options,
-            {
-                leaveOnEnd: true,
-                leaveOnStop: true,
-                leaveOnEmpty: true,
-                leaveOnEmptyCooldown: 1000,
-                autoSelfDeaf: true,
-                ytdlOptions: {
-                    highWaterMark: 1 << 25
-                },
-                initialVolume: 100,
-                bufferingTimeout: 3000,
-                spotifyBridge: true,
-                disableVolume: false
-            } as PlayerOptions,
-            options
-        );
-
-        if ("onBeforeCreateStream" in this.options) this.onBeforeCreateStream = this.options.onBeforeCreateStream;
+        if (this.options.onBeforeCreateStream) this.onBeforeCreateStream = this.options.onBeforeCreateStream;
 
         this.player.emit("debug", this, `Queue initialized:\n\n${this.player.scanDeps()}`);
     }
 
     /**
-     * Returns current track
-     * @type {Track}
+     * Returns current track if available
+     * @type {(Track|undefined)}
      */
-    get current() {
+    get current(): Track | undefined {
         if (this.#watchDestroyed()) return;
-        return this.connection.audioResource?.metadata ?? this.tracks[0];
+        return this.connection?.audioResource?.metadata ?? this.tracks[0];
     }
 
     /**
@@ -136,75 +139,81 @@ class Queue<T = unknown> {
     }
 
     /**
-     * Returns current track
-     * @returns {Track}
+     * Returns current track if available. Same as queue.current
+     * @returns {(Track|undefined)}
      */
-    nowPlaying() {
-        if (this.#watchDestroyed()) return;
+    nowPlaying(): Track | undefined {
         return this.current;
     }
 
     /**
      * Connects to a voice channel
      * @param {GuildChannelResolvable} channel The voice/stage channel
+     * @throws {PlayerError} Channel type must be GUILD_VOICE or GUILD_STAGE_VOICE, got ${_channel?.type}!
      * @returns {Promise<Queue>}
      */
-    async connect(channel: GuildChannelResolvable) {
+    async connect(channel: GuildChannelResolvable): Promise<Queue | undefined> {
         if (this.#watchDestroyed()) return;
         const _channel = this.guild.channels.resolve(channel) as StageChannel | VoiceChannel;
         if (!["GUILD_STAGE_VOICE", "GUILD_VOICE"].includes(_channel?.type))
             throw new PlayerError(`Channel type must be GUILD_VOICE or GUILD_STAGE_VOICE, got ${_channel?.type}!`, ErrorStatusCode.INVALID_ARG_TYPE);
+
         const connection = await this.player.voiceUtils.connect(_channel, {
             deaf: this.options.autoSelfDeaf
         });
         this.connection = connection;
 
         if (_channel.type === "GUILD_STAGE_VOICE") {
-            await _channel.guild.me.voice.setSuppressed(false).catch(async () => {
-                return await _channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+            await _channel.guild.me?.voice.setSuppressed(false).catch(async () => {
+                return await _channel.guild.me?.voice.setRequestToSpeak(true).catch(Util.noop);
             });
         }
 
-        this.connection.on("error", (err) => {
-            if (this.#watchDestroyed(false)) return;
-            this.player.emit("connectionError", this, err);
-        });
-        this.connection.on("debug", (msg) => {
-            if (this.#watchDestroyed(false)) return;
-            this.player.emit("debug", this, msg);
-        });
+        // register connection listeners
+        this.connection
+            .on("error", (err) => {
+                if (this.#watchDestroyed(false)) return;
+                this.player.emit("connectionError", this, err);
+            })
+            .on("debug", (msg) => {
+                if (this.#watchDestroyed(false)) return;
+                this.player.emit("debug", this, msg);
+            })
+            .on("start", (resource) => {
+                if (this.#watchDestroyed(false)) return;
+                this.playing = true;
+                if (!this._filtersUpdate && resource?.metadata) this.player.emit("trackStart", this, resource?.metadata ?? this.current);
+                this._filtersUpdate = false;
+            })
+            .on("finish", async (resource) => {
+                if (this.#watchDestroyed(false)) return;
+                this.playing = false;
+                if (this._filtersUpdate) return;
+                this._streamTime = 0;
+                if (resource && resource.metadata) this.previousTracks.push(resource.metadata);
+
+                this.player.emit("trackEnd", this, resource.metadata);
+
+                if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
+                    if (this.options.leaveOnEnd) this.destroy();
+                    this.player.emit("queueEnd", this);
+                } else if (!this.tracks.length && this.repeatMode === QueueRepeatMode.AUTOPLAY) {
+                    const last = Util.last(this.previousTracks);
+                    if (last) this._handleAutoplay(last);
+                } else {
+                    const last = Util.last(this.previousTracks);
+                    if (this.repeatMode === QueueRepeatMode.TRACK) {
+                        if (last) this.play(last, { immediate: true });
+                        return;
+                    }
+                    if (this.repeatMode === QueueRepeatMode.QUEUE && last) this.tracks.push(last);
+                    const nextTrack = this.tracks.shift();
+                    this.play(nextTrack, { immediate: true });
+                    return;
+                }
+            });
 
         this.player.emit("connectionCreate", this, this.connection);
-
-        this.connection.on("start", (resource) => {
-            if (this.#watchDestroyed(false)) return;
-            this.playing = true;
-            if (!this._filtersUpdate && resource?.metadata) this.player.emit("trackStart", this, resource?.metadata ?? this.current);
-            this._filtersUpdate = false;
-        });
-
-        this.connection.on("finish", async (resource) => {
-            if (this.#watchDestroyed(false)) return;
-            this.playing = false;
-            if (this._filtersUpdate) return;
-            this._streamTime = 0;
-            if (resource && resource.metadata) this.previousTracks.push(resource.metadata);
-
-            this.player.emit("trackEnd", this, resource.metadata);
-
-            if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
-                if (this.options.leaveOnEnd) this.destroy();
-                this.player.emit("queueEnd", this);
-            } else if (!this.tracks.length && this.repeatMode === QueueRepeatMode.AUTOPLAY) {
-                this._handleAutoplay(Util.last(this.previousTracks));
-            } else {
-                if (this.repeatMode === QueueRepeatMode.TRACK) return void this.play(Util.last(this.previousTracks), { immediate: true });
-                if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.push(Util.last(this.previousTracks));
-                const nextTrack = this.tracks.shift();
-                this.play(nextTrack, { immediate: true });
-                return;
-            }
-        });
 
         await this.player.voiceUtils.enterReady(this.connection.voiceConnection, {
             maxTime: this.player.options.connectionTimeout || 30_000
@@ -220,19 +229,19 @@ class Queue<T = unknown> {
      */
     destroy(disconnect = this.options.leaveOnStop) {
         if (this.#watchDestroyed()) return;
+        this.#destroyed = true;
         if (this.connection) this.connection.end();
         if (disconnect) this.connection?.disconnect();
         this.player.queues.delete(this.guild.id);
         this.player.voiceUtils.cache.delete(this.guild.id);
-        this.#destroyed = true;
     }
 
     /**
      * Skips current track
-     * @returns {boolean}
+     * @returns {boolean} Whether the track has been skipped
      */
-    skip() {
-        if (this.#watchDestroyed()) return;
+    skip(): boolean {
+        if (this.#watchDestroyed()) return false;
         if (!this.connection) return false;
         this._filtersUpdate = false;
         this.connection.end();
@@ -242,6 +251,7 @@ class Queue<T = unknown> {
     /**
      * Adds single track to the queue
      * @param {Track} track The track to add
+     * @throws {PlayerError} invalid track
      * @returns {void}
      */
     addTrack(track: Track) {
@@ -254,6 +264,7 @@ class Queue<T = unknown> {
     /**
      * Adds multiple tracks to the queue
      * @param {Track[]} tracks Array of tracks to add
+     * @throws {PlayerError} invalid track
      */
     addTracks(tracks: Track[]) {
         if (this.#watchDestroyed()) return;
@@ -265,10 +276,10 @@ class Queue<T = unknown> {
     /**
      * Sets paused state
      * @param {boolean} paused The paused state
-     * @returns {boolean}
+     * @returns {boolean} Whether the queue has been paused
      */
-    setPaused(paused?: boolean) {
-        if (this.#watchDestroyed()) return;
+    setPaused(paused?: boolean): boolean {
+        if (this.#watchDestroyed()) return false;
         if (!this.connection) return false;
         return paused ? this.connection.pause(true) : this.connection.resume();
     }
@@ -288,10 +299,10 @@ class Queue<T = unknown> {
     /**
      * Sets volume
      * @param {number} amount The volume amount
-     * @returns {boolean}
+     * @returns {boolean} Whether the volume has been set
      */
-    setVolume(amount: number) {
-        if (this.#watchDestroyed()) return;
+    setVolume(amount: number): boolean {
+        if (this.#watchDestroyed()) return false;
         if (!this.connection) return false;
         this.#lastVolume = amount;
         this.options.initialVolume = amount;
@@ -300,10 +311,11 @@ class Queue<T = unknown> {
     /**
      * Sets repeat mode
      * @param  {QueueRepeatMode} mode The repeat mode
-     * @returns {boolean}
+     * @throws {PlayerError} Unknown repeat mode "${mode}"!
+     * @returns {boolean} Whether the repeat mode has been set. **false** if given mode is equal to current mode
      */
-    setRepeatMode(mode: QueueRepeatMode) {
-        if (this.#watchDestroyed()) return;
+    setRepeatMode(mode: QueueRepeatMode): boolean {
+        if (this.#watchDestroyed()) return false;
         if (![QueueRepeatMode.OFF, QueueRepeatMode.QUEUE, QueueRepeatMode.TRACK, QueueRepeatMode.AUTOPLAY].includes(mode))
             throw new PlayerError(`Unknown repeat mode "${mode}"!`, ErrorStatusCode.UNKNOWN_REPEAT_MODE);
         if (mode === this.repeatMode) return false;
@@ -312,11 +324,11 @@ class Queue<T = unknown> {
     }
 
     /**
-     * The current volume amount
+     * The current volume or 0 if queue is destroyed
      * @type {number}
      */
-    get volume() {
-        if (this.#watchDestroyed()) return;
+    get volume(): number {
+        if (this.#watchDestroyed()) return 0;
         if (!this.connection) return 100;
         return this.connection.volume;
     }
@@ -326,11 +338,11 @@ class Queue<T = unknown> {
     }
 
     /**
-     * The stream time of this queue
+     * The stream time of this queue or 0 if queue is destroyed
      * @type {number}
      */
-    get streamTime() {
-        if (this.#watchDestroyed()) return;
+    get streamTime(): number {
+        if (this.#watchDestroyed()) return 0;
         if (!this.connection) return 0;
         const playbackTime = this._streamTime + this.connection.streamTime;
         const NC = this._activeFilters.includes("nightcore") ? 1.25 : null;
@@ -347,19 +359,19 @@ class Queue<T = unknown> {
 
     /**
      * Returns enabled filters
-     * @returns {AudioFilters}
+     * @returns {string[]}
      */
-    getFiltersEnabled() {
-        if (this.#watchDestroyed()) return;
+    getFiltersEnabled(): (keyof QueueFilters)[] {
+        if (this.#watchDestroyed()) return [];
         return AudioFilters.names.filter((x) => this._activeFilters.includes(x));
     }
 
     /**
      * Returns disabled filters
-     * @returns {AudioFilters}
+     * @returns {string[]}
      */
-    getFiltersDisabled() {
-        if (this.#watchDestroyed()) return;
+    getFiltersDisabled(): (keyof QueueFilters)[] {
+        if (this.#watchDestroyed()) return [];
         return AudioFilters.names.filter((x) => !this._activeFilters.includes(x));
     }
 
@@ -382,13 +394,14 @@ class Queue<T = unknown> {
             });
         }
 
-        const _filters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
+        const _filters: (keyof QueueFilters)[] = [];
 
-        for (const filter in filters) {
-            if (filters[filter as keyof QueueFilters] === true) _filters.push(filter);
+        for (const filterName in filters) {
+            const key = filterName as keyof QueueFilters;
+            if (filters[key] === true) _filters.push(key);
         }
 
-        if (this._activeFilters.join("") === _filters.join("")) return;
+        if (!this._activeFilters.length && !_filters.length) return;
 
         const newFilters = AudioFilters.create(_filters).trim();
         const streamTime = this.streamTime;
@@ -405,10 +418,10 @@ class Queue<T = unknown> {
     /**
      * Seeks to the given time
      * @param {number} position The position
-     * @returns {boolean}
+     * @returns {Promise<boolean>} Whether the seek was successful
      */
-    async seek(position: number) {
-        if (this.#watchDestroyed()) return;
+    async seek(position: number): Promise<boolean> {
+        if (this.#watchDestroyed()) return false;
         if (!this.playing || !this.current) return false;
         if (position < 1) position = 0;
         if (position >= this.current.durationMS) return this.skip();
@@ -424,6 +437,7 @@ class Queue<T = unknown> {
 
     /**
      * Plays previous track
+     * @throws {PlayerError} Could not find previous track
      * @returns {Promise<void>}
      */
     async back() {
@@ -454,10 +468,10 @@ class Queue<T = unknown> {
 
     /**
      * Shuffles this queue
-     * @returns {boolean}
+     * @returns {boolean} Whether the queue has been shuffled
      */
-    shuffle() {
-        if (this.#watchDestroyed()) return;
+    shuffle(): boolean {
+        if (this.#watchDestroyed()) return false;
         if (!this.tracks.length || this.tracks.length < 3) return false;
         const currentTrack = this.tracks.shift();
 
@@ -466,7 +480,7 @@ class Queue<T = unknown> {
             [this.tracks[i], this.tracks[j]] = [this.tracks[j], this.tracks[i]];
         }
 
-        this.tracks.unshift(currentTrack);
+        if (currentTrack) this.tracks.unshift(currentTrack);
 
         return true;
     }
@@ -474,33 +488,24 @@ class Queue<T = unknown> {
     /**
      * Removes a track from the queue
      * @param {Track|Snowflake|number} track The track to remove
-     * @returns {Track}
+     * @returns {Track} The removed track or undefined if no track available
      */
-    remove(track: Track | Snowflake | number) {
+    remove(track: Track | Snowflake | number): Track | undefined {
         if (this.#watchDestroyed()) return;
-        let trackFound: Track = null;
-        if (typeof track === "number") {
-            trackFound = this.tracks[track];
-            if (trackFound) {
-                this.tracks = this.tracks.filter((t) => t.id !== trackFound.id);
-            }
-        } else {
-            trackFound = this.tracks.find((s) => s.id === (track instanceof Track ? track.id : track));
-            if (trackFound) {
-                this.tracks = this.tracks.filter((s) => s.id !== trackFound.id);
-            }
+        const trackFound = typeof track === "number" ? this.tracks[track] : this.tracks.find((s) => s.id === (track instanceof Track ? track.id : track));
+        if (trackFound) {
+            this.tracks = this.tracks.filter((s) => s.id !== trackFound.id);
         }
-
         return trackFound;
     }
 
     /**
-     * Returns the index of the specified track. If found, returns the track index else returns -1.
+     * Returns the index of the specified track
      * @param {number|Track|Snowflake} track The track
-     * @returns {number}
+     * @returns {number} Track index or -1 if not found
      */
-    getTrackPosition(track: number | Track | Snowflake) {
-        if (this.#watchDestroyed()) return;
+    getTrackPosition(track: number | Track | Snowflake): number {
+        if (this.#watchDestroyed()) return -1;
         if (typeof track === "number") return this.tracks[track] != null ? track : -1;
         return this.tracks.findIndex((pred) => pred.id === (track instanceof Track ? track.id : track));
     }
@@ -508,6 +513,7 @@ class Queue<T = unknown> {
     /**
      * Jumps to particular track
      * @param {Track|number} track The track
+     * @throws {PlayerError} Track not found
      * @returns {void}
      */
     jump(track: Track | number): void {
@@ -516,13 +522,13 @@ class Queue<T = unknown> {
         if (!foundTrack) throw new PlayerError("Track not found", ErrorStatusCode.TRACK_NOT_FOUND);
 
         this.tracks.splice(0, 0, foundTrack);
-
-        return void this.skip();
+        this.skip();
     }
 
     /**
      * Jumps to particular track, removing other tracks on the way
      * @param {Track|number} track The track
+     * @throws {PlayerError} Track not found
      * @returns {void}
      */
     skipTo(track: Track | number): void {
@@ -532,14 +538,15 @@ class Queue<T = unknown> {
         if (!removedTrack) throw new PlayerError("Track not found", ErrorStatusCode.TRACK_NOT_FOUND);
 
         this.tracks.splice(0, trackIndex, removedTrack);
-
-        return void this.skip();
+        this.skip();
     }
 
     /**
      * Inserts the given track to specified index
      * @param {Track} track The track to insert
      * @param {number} [index=0] The index where this track should be
+     * @throws {PlayerError} track must be the instance of Track
+     * @throws {PlayerError} Invalid index "${index}"
      */
     insert(track: Track, index = 0) {
         if (this.#watchDestroyed()) return;
@@ -547,23 +554,15 @@ class Queue<T = unknown> {
         if (typeof index !== "number" || index < 0 || !Number.isFinite(index)) throw new PlayerError(`Invalid index "${index}"`, ErrorStatusCode.INVALID_ARG_TYPE);
 
         this.tracks.splice(index, 0, track);
-
         this.player.emit("trackAdd", this, track);
     }
 
     /**
-     * @typedef {object} PlayerTimestamp
-     * @property {string} current The current progress
-     * @property {string} end The total time
-     * @property {number} progress Progress in %
-     */
-
-    /**
      * Returns player stream timestamp
-     * @returns {PlayerTimestamp}
+     * @returns {PlayerTimestamp} Player timestamp or undefined if not current track
      */
-    getPlayerTimestamp() {
-        if (this.#watchDestroyed()) return;
+    getPlayerTimestamp(): PlayerTimestamp | undefined {
+        if (this.#watchDestroyed() || !this.current) return;
         const currentStreamTime = this.streamTime;
         const totalTime = this.current.durationMS;
 
@@ -580,28 +579,29 @@ class Queue<T = unknown> {
     /**
      * Creates progress bar string
      * @param {PlayerProgressbarOptions} options The progress bar options
-     * @returns {string}
+     * @returns {string} Progress bar or empty string if no current track
      */
-    createProgressBar(options: PlayerProgressbarOptions = { timecodes: true }) {
-        if (this.#watchDestroyed()) return;
+    createProgressBar(options: PlayerProgressbarOptions = { timecodes: true }): string {
+        if (this.#watchDestroyed() || !this.current) return "";
         const length = typeof options.length === "number" ? (options.length <= 0 || options.length === Infinity ? 15 : options.length) : 15;
 
         const index = Math.round((this.streamTime / this.current.durationMS) * length);
         const indicator = typeof options.indicator === "string" && options.indicator.length > 0 ? options.indicator : "🔘";
         const line = typeof options.line === "string" && options.line.length > 0 ? options.line : "▬";
 
+        const timestamp = this.getPlayerTimestamp();
+        if (!timestamp) return "";
+
         if (index >= 1 && index <= length) {
             const bar = line.repeat(length - 1).split("");
             bar.splice(index, 0, indicator);
             if (options.timecodes) {
-                const timestamp = this.getPlayerTimestamp();
                 return `${timestamp.current} ┃ ${bar.join("")} ┃ ${timestamp.end}`;
             } else {
                 return `${bar.join("")}`;
             }
         } else {
             if (options.timecodes) {
-                const timestamp = this.getPlayerTimestamp();
                 return `${timestamp.current} ┃ ${indicator}${line.repeat(length - 1)} ┃ ${timestamp.end}`;
             } else {
                 return `${indicator}${line.repeat(length - 1)}`;
@@ -610,11 +610,11 @@ class Queue<T = unknown> {
     }
 
     /**
-     * Total duration
+     * Total duration or 0 if queue not available
      * @type {Number}
      */
     get totalTime(): number {
-        if (this.#watchDestroyed()) return;
+        if (this.#watchDestroyed()) return 0;
         return this.tracks.length > 0 ? this.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0;
     }
 
@@ -622,6 +622,7 @@ class Queue<T = unknown> {
      * Play stream in a voice/stage channel
      * @param {Track} [src] The track to play (if empty, uses first track from the queue)
      * @param {PlayOptions} [options={}] The options
+     * @throws {PlayerError} Voice connection is not available, use <Queue>.connect()!
      * @returns {Promise<void>}
      */
     async play(src?: Track, options: PlayOptions = {}): Promise<void> {
@@ -641,7 +642,7 @@ class Queue<T = unknown> {
         let stream = null;
         const customDownloader = typeof this.onBeforeCreateStream === "function";
 
-        if (["youtube", "spotify"].includes(track.raw.source)) {
+        if (["youtube", "spotify"].includes(track.raw.source ?? "")) {
             let spotifyResolved = false;
             if (this.options.spotifyBridge && track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
@@ -653,8 +654,8 @@ class Queue<T = unknown> {
             if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
             if (customDownloader) {
-                stream = (await this.onBeforeCreateStream(track, spotifyResolved ? "youtube" : track.raw.source, this)) ?? null;
-                if (stream)
+                stream = (await this.onBeforeCreateStream?.(track, spotifyResolved ? "youtube" : track.raw.source ?? "youtube", this)) ?? null;
+                if (stream) {
                     stream = ytdl
                         .arbitraryStream(stream, {
                             opusEncoded: false,
@@ -665,6 +666,7 @@ class Queue<T = unknown> {
                         .on("error", (err) => {
                             return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
                         });
+                }
             } else {
                 stream = ytdl(link, {
                     ...this.options.ytdlOptions,
@@ -678,7 +680,7 @@ class Queue<T = unknown> {
                 });
             }
         } else {
-            const tryArb = (customDownloader && (await this.onBeforeCreateStream(track, track.raw.source || track.raw.engine, this))) || null;
+            const tryArb = (customDownloader && (await this.onBeforeCreateStream?.(track, track.raw.source || track.raw.engine, this))) || null;
             const arbitrarySource = tryArb
                 ? tryArb
                 : track.raw.source === "soundcloud"
@@ -698,24 +700,25 @@ class Queue<T = unknown> {
                 });
         }
 
-        const resource: AudioResource<Track> = this.connection.createStream(stream, {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const resource: AudioResource<Track> = this.connection.createStream(stream!, {
             type: StreamType.Raw,
             data: track,
             disableVolume: Boolean(this.options.disableVolume)
         });
 
         if (options.seek) this._streamTime = options.seek;
-        this._filtersUpdate = options.filtersUpdate;
+        this._filtersUpdate = options.filtersUpdate ?? false;
 
         const volumeTransformer = resource.volume as VolumeTransformer;
         if (volumeTransformer?.hasSmoothness && typeof this.options.volumeSmoothness === "number") {
             if (typeof volumeTransformer.setSmoothness === "function") volumeTransformer.setSmoothness(this.options.volumeSmoothness || 0);
         }
 
-        this.setVolume(this.options.initialVolume);
+        this.setVolume(this.options.initialVolume ?? 100);
 
         setTimeout(() => {
-            this.connection.playStream(resource);
+            this.connection?.playStream(resource);
         }, this.#getBufferingTimeout()).unref();
     }
 
@@ -732,7 +735,7 @@ class Queue<T = unknown> {
             return void this.player.emit("queueEnd", this);
         }
         const info = await YouTube.getVideo(track.url)
-            .then((x) => x.videos[0])
+            .then((x) => (x.videos ? x.videos[0] : undefined))
             .catch(Util.noop);
         if (!info) {
             if (this.options.leaveOnEnd) this.destroy();
@@ -740,13 +743,13 @@ class Queue<T = unknown> {
         }
 
         const nextTrack = new Track(this.player, {
-            title: info.title,
+            title: info.title ?? "",
             url: `https://www.youtube.com/watch?v=${info.id}`,
             duration: info.durationFormatted ? Util.buildTimeCode(Util.parseMS(info.duration * 1000)) : "0:00",
             description: "",
-            thumbnail: typeof info.thumbnail === "string" ? info.thumbnail : info.thumbnail.url,
+            thumbnail: typeof info.thumbnail === "string" ? info.thumbnail : info.thumbnail?.url ?? "",
             views: info.views,
-            author: info.channel.name,
+            author: info.channel?.name ?? "",
             requestedBy: track.requestedBy,
             source: "youtube"
         });
@@ -761,10 +764,10 @@ class Queue<T = unknown> {
 
     /**
      * JSON representation of this queue
-     * @returns {object}
+     * @returns {QueueJSON}
      */
-    toJSON() {
-        if (this.#watchDestroyed()) return;
+    toJSON(): QueueJSON {
+        if (this.#watchDestroyed()) return { id: this.id, guild: this.guild.id, options: this.options, tracks: [] };
         return {
             id: this.id,
             guild: this.guild.id,
@@ -776,10 +779,10 @@ class Queue<T = unknown> {
 
     /**
      * String representation of this queue
-     * @returns {string}
+     * @returns {string} String representation or empty string if queue is destroyed
      */
-    toString() {
-        if (this.#watchDestroyed()) return;
+    toString(): string {
+        if (this.#watchDestroyed()) return "";
         if (!this.tracks.length) return "No songs available to display!";
         return `**Upcoming Songs:**\n${this.tracks.map((m, i) => `${i + 1}. **${m.title}**`).join("\n")}`;
     }
@@ -796,9 +799,7 @@ class Queue<T = unknown> {
     #getBufferingTimeout() {
         const timeout = this.options.bufferingTimeout;
 
-        if (isNaN(timeout) || timeout < 0 || !Number.isFinite(timeout)) return 1000;
+        if (!timeout || isNaN(timeout) || timeout < 0 || !Number.isFinite(timeout)) return 1000;
         return timeout;
     }
 }
-
-export { Queue };

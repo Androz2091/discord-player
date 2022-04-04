@@ -5,14 +5,12 @@
         "declaration": true,
         "outDir": "./dist",
         "strict": true,
-        "strictNullChecks": false,
+        "strictNullChecks": true,
         "esModuleInterop": true,
         "pretty": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "importHelpers": true
     },
-    "include": [
-        "src/**/*"
-    ]
+    "include": ["src/**/*"]
 }

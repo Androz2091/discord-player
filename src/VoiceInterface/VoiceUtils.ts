@@ -1,5 +1,5 @@
-import { VoiceChannel, StageChannel, Collection, Snowflake } from "discord.js";
 import { DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
+import { Collection, Snowflake, StageChannel, VoiceChannel } from "discord.js";
 import { StreamDispatcher } from "./StreamDispatcher";
 
 class VoiceUtils {
@@ -31,7 +31,7 @@ class VoiceUtils {
         }
     ): Promise<StreamDispatcher> {
         const conn = await this.join(channel, options);
-        const sub = new StreamDispatcher(conn, channel, options.maxTime);
+        const sub = new StreamDispatcher(conn, channel, options?.maxTime);
         this.cache.set(channel.guild.id, sub);
         return sub;
     }
@@ -53,7 +53,7 @@ class VoiceUtils {
             guildId: channel.guild.id,
             channelId: channel.id,
             adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
-            selfDeaf: Boolean(options.deaf)
+            selfDeaf: Boolean(options?.deaf)
         });
 
         return conn;
