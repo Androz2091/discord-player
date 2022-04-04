@@ -1,5 +1,5 @@
 require("dotenv").config({
-    path: __dirname+"/.env"
+    path: __dirname + "/.env"
 });
 const { Client, GuildMember, Intents } = require("discord.js");
 const config = require("./config");
@@ -177,9 +177,12 @@ client.on("interactionCreate", async (interaction) => {
                     title: "⏱️ | Latency",
                     fields: [
                         { name: "Bot Latency", value: `\`${Math.round(client.ws.ping)}ms\`` },
-                        { name: "Voice Latency", value: !queue ? "N/A" : `UDP: \`${queue.connection.voiceConnection.ping.udp ?? "N/A"}\`ms\nWebSocket: \`${queue.connection.voiceConnection.ping.ws ?? "N/A"}\`ms` }
+                        {
+                            name: "Voice Latency",
+                            value: !queue ? "N/A" : `UDP: \`${queue.connection.voiceConnection.ping.udp ?? "N/A"}\`ms\nWebSocket: \`${queue.connection.voiceConnection.ping.ws ?? "N/A"}\`ms`
+                        }
                     ],
-                    color: 0xFFFFFF
+                    color: 0xffffff
                 }
             ]
         });
@@ -225,7 +228,7 @@ client.on("interactionCreate", async (interaction) => {
         if (!queue || !queue.playing) return void interaction.followUp({ content: "❌ | No music is being played!" });
         const vol = interaction.options.get("amount");
         if (!vol) return void interaction.followUp({ content: `🎧 | Current volume is **${queue.volume}**%!` });
-        if ((vol.value) < 0 || (vol.value) > 100) return void interaction.followUp({ content: "❌ | Volume range must be 0-100" });
+        if (vol.value < 0 || vol.value > 100) return void interaction.followUp({ content: "❌ | Volume range must be 0-100" });
         const success = queue.setVolume(vol.value);
         return void interaction.followUp({
             content: success ? `✅ | Volume set to **${vol.value}%**!` : "❌ | Something went wrong!"
