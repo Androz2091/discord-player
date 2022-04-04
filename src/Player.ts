@@ -1,24 +1,42 @@
-import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, Intents } from "discord.js";
-import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
-import { Queue } from "./Structures/Queue";
-import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
-import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlayerSearchResult } from "./types/types";
-import Track from "./Structures/Track";
-import { QueryResolver } from "./utils/QueryResolver";
-import YouTube from "youtube-sr";
-import { Util } from "./utils/Util";
-import Spotify from "spotify-url-info";
-import { PlayerError, ErrorStatusCode } from "./Structures/PlayerError";
-import { getInfo as ytdlGetInfo } from "ytdl-core";
-import { Client as SoundCloud, SearchResult as SoundCloudSearchResult } from "soundcloud-scraper";
-import { Playlist } from "./Structures/Playlist";
-import { ExtractorModel } from "./Structures/ExtractorModel";
 import { generateDependencyReport } from "@discordjs/voice";
+import { Client, Collection, GuildResolvable, Intents, Snowflake, User, VoiceState } from "discord.js";
+import { Client as SoundCloud, SearchResult as SoundCloudSearchResult } from "soundcloud-scraper";
+import Spotify from "spotify-url-info";
+import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
+import YouTube from "youtube-sr";
+import { getInfo as ytdlGetInfo } from "ytdl-core";
+import { ExtractorModel } from "./Structures/ExtractorModel";
+import { ErrorStatusCode, PlayerError } from "./Structures/PlayerError";
+import { Playlist } from "./Structures/Playlist";
+import { Queue } from "./Structures/Queue";
+import Track from "./Structures/Track";
+import { PlayerEvents, PlayerInitOptions, PlayerOptions, PlayerSearchResult, QueryType, SearchOptions } from "./types/types";
+import { QueryResolver } from "./utils/QueryResolver";
+import { Util } from "./utils/Util";
+import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
 
 const soundcloud = new SoundCloud();
 
-class Player extends EventEmitter<PlayerEvents> {
+export class Player extends EventEmitter<PlayerEvents> {
+    /**
+     * The discord.js client
+     * @type {Client}
+     */
     public readonly client: Client;
+    /**
+     * The player options
+     * @default
+     * ```
+     * const options = {
+        autoRegisterExtractor: true,
+        ytdlOptions: {
+            highWaterMark: 1 << 25
+        },
+        connectionTimeout: 20000
+    };
+     * ```
+     * @type {ExtractorModel}
+     */
     public readonly options: PlayerInitOptions = {
         autoRegisterExtractor: true,
         ytdlOptions: {
@@ -35,25 +53,16 @@ class Player extends EventEmitter<PlayerEvents> {
      * Creates new Discord Player
      * @param {Client} client The Discord Client
      * @param {PlayerInitOptions} [options={}] The player init options
+     * @throws {PlayerError} 'client is missing "GUILD_VOICE_STATES" intent'
      */
     constructor(client: Client, options: PlayerInitOptions = {}) {
         super();
-
-        /**
-         * The discord.js client
-         * @type {Client}
-         */
         this.client = client;
+        this.options = Object.assign(this.options, options);
 
         if (this.client?.options?.intents && !new Intents(this.client?.options?.intents).has(Intents.FLAGS.GUILD_VOICE_STATES)) {
             throw new PlayerError('client is missing "GUILD_VOICE_STATES" intent');
         }
-
-        /**
-         * The extractors collection
-         * @type {ExtractorModel}
-         */
-        this.options = Object.assign(this.options, options);
 
         this.client.on("voiceStateUpdate", this._handleVoiceState.bind(this));
 
@@ -78,11 +87,11 @@ class Player extends EventEmitter<PlayerEvents> {
         if (!queue) return;
 
         if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-            if (queue?.connection && newState.member.id === newState.guild.me.id) queue.connection.channel = newState.channel;
-            if (newState.member.id === newState.guild.me.id || (newState.member.id !== newState.guild.me.id && oldState.channelId === queue.connection.channel.id)) {
-                if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+            if (queue?.connection && newState.member?.id === newState.guild.me?.id && newState.channel) queue.connection.channel = newState.channel;
+            if (newState.member?.id === newState.guild.me?.id || (newState.member?.id !== newState.guild.me?.id && oldState.channelId === queue.connection?.channel.id)) {
+                if (!queue.connection || !Util.isVoiceEmpty(queue.connection.channel)) return;
                 const timeout = setTimeout(() => {
-                    if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                    if (!queue.connection || !Util.isVoiceEmpty(queue.connection.channel)) return;
                     if (!this.queues.has(queue.guild.id)) return;
                     if (queue.options.leaveOnEmpty) queue.destroy();
                     this.emit("channelEmpty", queue);
@@ -90,25 +99,25 @@ class Player extends EventEmitter<PlayerEvents> {
                 queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
             }
 
-            if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.me.id) {
-                if (newState.serverMute || !newState.serverMute) {
+            if (!oldState.channelId && newState.channelId && newState.member?.id === newState.guild.me?.id) {
+                if (typeof newState.serverMute === "boolean") {
                     queue.setPaused(newState.serverMute);
                 } else if (newState.suppress || !newState.suppress) {
-                    if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                    if (newState.suppress) newState.guild.me?.voice.setRequestToSpeak(true).catch(Util.noop);
                     queue.setPaused(newState.suppress);
                 }
             }
 
-            if (oldState.channelId === newState.channelId && oldState.member.id === newState.guild.me.id) {
-                if (oldState.serverMute !== newState.serverMute) {
+            if (oldState.channelId === newState.channelId && oldState.member?.id === newState.guild.me?.id) {
+                if (typeof newState.serverMute === "boolean" && oldState.serverMute !== newState.serverMute) {
                     queue.setPaused(newState.serverMute);
                 } else if (oldState.suppress !== newState.suppress) {
-                    if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                    if (newState.suppress) newState.guild.me?.voice.setRequestToSpeak(true).catch(Util.noop);
                     queue.setPaused(newState.suppress);
                 }
             }
 
-            if (oldState.member.id === this.client.user.id && !newState.channelId) {
+            if (oldState.member?.id === this.client.user?.id && !newState.channelId) {
                 queue.destroy();
                 return void this.emit("botDisconnect", queue);
             }
@@ -129,7 +138,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 if (oldState.channelId === queue.connection.channel.id) {
                     if (!Util.isVoiceEmpty(queue.connection.channel)) return;
                     const timeout = setTimeout(() => {
-                        if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                        if (!queue.connection || !Util.isVoiceEmpty(queue.connection.channel)) return;
                         if (!this.queues.has(queue.guild.id)) return;
                         if (queue.options.leaveOnEmpty) queue.destroy();
                         this.emit("channelEmpty", queue);
@@ -144,20 +153,21 @@ class Player extends EventEmitter<PlayerEvents> {
      * Creates a queue for a guild if not available, else returns existing queue
      * @param {GuildResolvable} guild The guild
      * @param {PlayerOptions} queueInitOptions Queue init options
+     * @throws {PlayerError} Unknown guild
      * @returns {Queue}
      */
     createQueue<T = unknown>(guild: GuildResolvable, queueInitOptions: PlayerOptions & { metadata?: T } = {}): Queue<T> {
-        guild = this.client.guilds.resolve(guild);
-        if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
-        if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
+        const _guild = this.client.guilds.resolve(guild);
+        if (!_guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
+        if (this.queues.has(_guild.id)) return this.queues.get(_guild.id) as Queue<T>;
 
         const _meta = queueInitOptions.metadata;
         delete queueInitOptions["metadata"];
         queueInitOptions.volumeSmoothness ??= 0.08;
         queueInitOptions.ytdlOptions ??= this.options.ytdlOptions;
-        const queue = new Queue(this, guild, queueInitOptions);
+        const queue = new Queue(this, _guild, queueInitOptions);
         queue.metadata = _meta;
-        this.queues.set(guild.id, queue);
+        this.queues.set(_guild.id, queue);
 
         return queue as Queue<T>;
     }
@@ -165,28 +175,31 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * Returns the queue if available
      * @param {GuildResolvable} guild The guild id
-     * @returns {Queue}
+     * @throws {PlayerError} Unknown guild
+     * @returns {(Queue|undefined)} Queue or undefined if queue not available
      */
     getQueue<T = unknown>(guild: GuildResolvable) {
-        guild = this.client.guilds.resolve(guild);
-        if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
-        return this.queues.get(guild.id) as Queue<T>;
+        const _guild = this.client.guilds.resolve(guild);
+        if (!_guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
+        return this.queues.get(_guild.id) as Queue<T> | undefined;
     }
 
     /**
      * Deletes a queue and returns deleted queue object
      * @param {GuildResolvable} guild The guild id to remove
-     * @returns {Queue}
+     * @throws {PlayerError} Unknown guild
+     * @returns {(Queue|undefined)} Deleted queue or undefined if queue not available
      */
     deleteQueue<T = unknown>(guild: GuildResolvable) {
-        guild = this.client.guilds.resolve(guild);
-        if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
-        const prev = this.getQueue<T>(guild);
+        const _guild = this.client.guilds.resolve(guild);
+        if (!_guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
+        const prev = this.getQueue<T>(_guild);
 
         try {
-            prev.destroy();
-        } catch {} // eslint-disable-line no-empty
-        this.queues.delete(guild.id);
+            prev?.destroy();
+        } finally {
+            this.queues.delete(_guild.id);
+        }
 
         return prev;
     }
@@ -200,18 +213,27 @@ class Player extends EventEmitter<PlayerEvents> {
      * Search tracks
      * @param {string|Track} query The search query
      * @param {SearchOptions} options The search options
+     * @throws {PlayerError} DiscordPlayer#search needs search options!
+     * @throws {PlayerError} DiscordPlayer#search requestedBy user does not exist in guild!
+     * @throws {PlayerError} DiscordPlayer#search unknown extractor!
      * @returns {Promise<PlayerSearchResult>}
      */
     async search(query: string | Track, options: SearchOptions): Promise<PlayerSearchResult> {
         if (query instanceof Track) return { playlist: query.playlist || null, tracks: [query] };
         if (!options) throw new PlayerError("DiscordPlayer#search needs search options!", ErrorStatusCode.INVALID_ARG_TYPE);
-        options.requestedBy = this.client.users.resolve(options.requestedBy);
-        if (!("searchEngine" in options)) options.searchEngine = QueryType.AUTO;
+
+        const requestedBy = this.client.users.resolve(options.requestedBy);
+        if (!requestedBy) throw new PlayerError("DiscordPlayer#search requestedBy user does not exist in guild!", ErrorStatusCode.INVALID_ARG_TYPE);
+        options.requestedBy = requestedBy;
+
+        options.searchEngine ||= QueryType.AUTO;
         if (typeof options.searchEngine === "string" && this.extractors.has(options.searchEngine)) {
             const extractor = this.extractors.get(options.searchEngine);
+            if (!extractor) throw new PlayerError("DiscordPlayer#search unknown extractor!", ErrorStatusCode.UNKNOWN_EXTRACTOR);
             if (!extractor.validate(query)) return { playlist: null, tracks: [] };
+
             const data = await extractor.handle(query);
-            if (data && data.data.length) {
+            if (data?.data.length) {
                 const playlist = !data.playlist
                     ? null
                     : new Playlist(this, {
@@ -225,7 +247,7 @@ class Player extends EventEmitter<PlayerEvents> {
                             ...m,
                             requestedBy: options.requestedBy as User,
                             duration: Util.buildTimeCode(Util.parseMS(m.duration)),
-                            playlist: playlist
+                            playlist: playlist ?? undefined
                         })
                 );
 
@@ -235,8 +257,7 @@ class Player extends EventEmitter<PlayerEvents> {
             }
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const [_, extractor] of this.extractors) {
+        for (const extractor of this.extractors.values()) {
             if (options.blockExtractor) break;
             if (!extractor.validate(query)) continue;
             const data = await extractor.handle(query);
@@ -254,7 +275,7 @@ class Player extends EventEmitter<PlayerEvents> {
                             ...m,
                             requestedBy: options.requestedBy as User,
                             duration: Util.buildTimeCode(Util.parseMS(m.duration)),
-                            playlist: playlist
+                            playlist: playlist ?? undefined
                         })
                 );
 
@@ -272,11 +293,11 @@ class Player extends EventEmitter<PlayerEvents> {
 
                 const track = new Track(this, {
                     title: info.videoDetails.title,
-                    description: info.videoDetails.description,
+                    description: info.videoDetails.description ?? "",
                     author: info.videoDetails.author?.name,
                     url: info.videoDetails.video_url,
                     requestedBy: options.requestedBy as User,
-                    thumbnail: Util.last(info.videoDetails.thumbnails)?.url,
+                    thumbnail: Util.last(info.videoDetails.thumbnails)?.url ?? "",
                     views: parseInt(info.videoDetails.viewCount.replace(/[^0-9]/g, "")) || 0,
                     duration: Util.buildTimeCode(Util.parseMS(parseInt(info.videoDetails.lengthSeconds) * 1000)),
                     source: "youtube",
@@ -294,12 +315,12 @@ class Player extends EventEmitter<PlayerEvents> {
                 const tracks = videos.map((m) => {
                     (m as any).source = "youtube"; // eslint-disable-line @typescript-eslint/no-explicit-any
                     return new Track(this, {
-                        title: m.title,
-                        description: m.description,
-                        author: m.channel?.name,
+                        title: m.title ?? "",
+                        description: m.description ?? "",
+                        author: m.channel?.name ?? "",
                         url: m.url,
                         requestedBy: options.requestedBy as User,
-                        thumbnail: m.thumbnail?.displayThumbnailURL("maxresdefault"),
+                        thumbnail: m.thumbnail?.displayThumbnailURL("maxresdefault") ?? "",
                         views: m.views,
                         duration: m.durationFormatted,
                         source: "youtube",
@@ -311,7 +332,10 @@ class Player extends EventEmitter<PlayerEvents> {
             }
             case QueryType.SOUNDCLOUD_TRACK:
             case QueryType.SOUNDCLOUD_SEARCH: {
-                const result: SoundCloudSearchResult[] = QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? [{ url: query }] : await soundcloud.search(query, "track").catch(() => []);
+                const result: SoundCloudSearchResult[] =
+                    QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK
+                        ? [{ artist: "", index: 0, itemName: "", name: "", type: "unknown", url: query }]
+                        : await soundcloud.search(query, "track").catch(() => []);
                 if (!result || !result.length) return { playlist: null, tracks: [] };
                 const res: Track[] = [];
 
@@ -470,30 +494,30 @@ class Player extends EventEmitter<PlayerEvents> {
                 await ytpl.fetch().catch(Util.noop);
 
                 const playlist: Playlist = new Playlist(this, {
-                    title: ytpl.title,
+                    title: ytpl.title ?? "",
                     thumbnail: ytpl.thumbnail as unknown as string,
                     description: "",
                     type: "playlist",
                     source: "youtube",
                     author: {
-                        name: ytpl.channel.name,
-                        url: ytpl.channel.url
+                        name: ytpl.channel?.name ?? "",
+                        url: ytpl.channel?.url ?? ""
                     },
                     tracks: [],
-                    id: ytpl.id,
-                    url: ytpl.url,
+                    id: ytpl.id ?? "",
+                    url: ytpl.url ?? "",
                     rawPlaylist: ytpl
                 });
 
                 playlist.tracks = ytpl.videos.map(
                     (video) =>
                         new Track(this, {
-                            title: video.title,
-                            description: video.description,
-                            author: video.channel?.name,
+                            title: video.title ?? "",
+                            description: video.description ?? "",
+                            author: video.channel?.name ?? "",
                             url: video.url,
                             requestedBy: options.requestedBy as User,
-                            thumbnail: video.thumbnail.url,
+                            thumbnail: video.thumbnail?.url ?? "",
                             views: video.views,
                             duration: video.durationFormatted,
                             raw: video,
@@ -514,12 +538,14 @@ class Player extends EventEmitter<PlayerEvents> {
      * @param {string} extractorName The extractor name
      * @param {ExtractorModel|any} extractor The extractor object
      * @param {boolean} [force=false] Overwrite existing extractor with this name (if available)
+     * @throws {PlayerError} Cannot use unknown extractor!
+     * @throws {PlayerError} Invalid extractor data!
      * @returns {ExtractorModel}
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     use(extractorName: string, extractor: ExtractorModel | any, force = false): ExtractorModel {
         if (!extractorName) throw new PlayerError("Cannot use unknown extractor!", ErrorStatusCode.UNKNOWN_EXTRACTOR);
-        if (this.extractors.has(extractorName) && !force) return this.extractors.get(extractorName);
+        if (this.extractors.has(extractorName) && !force) return this.extractors.get(extractorName) as ExtractorModel;
         if (extractor instanceof ExtractorModel) {
             this.extractors.set(extractorName, extractor);
             return extractor;
@@ -538,20 +564,21 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * Removes registered extractor
      * @param {string} extractorName The extractor name
+     * @throws {PlayerError} Cannot find extractor "${extractorName}"
      * @returns {ExtractorModel}
      */
-    unuse(extractorName: string) {
+    unuse(extractorName: string): ExtractorModel {
         if (!this.extractors.has(extractorName)) throw new PlayerError(`Cannot find extractor "${extractorName}"`, ErrorStatusCode.UNKNOWN_EXTRACTOR);
         const prev = this.extractors.get(extractorName);
         this.extractors.delete(extractorName);
-        return prev;
+        return prev as ExtractorModel;
     }
 
     /**
      * Generates a report of the dependencies used by the `@discordjs/voice` module. Useful for debugging.
      * @returns {string}
      */
-    scanDeps() {
+    scanDeps(): string {
         const line = "-".repeat(50);
         const depsReport = generateDependencyReport();
         const extractorReport = this.extractors
@@ -576,15 +603,13 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * Resolves queue
      * @param {GuildResolvable|Queue} queueLike Queue like object
-     * @returns {Queue}
+     * @returns {(Queue|undefined)} Resolved queue or undefined if queue not available
      */
-    resolveQueue<T>(queueLike: GuildResolvable | Queue): Queue<T> {
-        return this.getQueue(queueLike instanceof Queue ? queueLike.guild : queueLike);
+    resolveQueue<T>(queueLike: GuildResolvable | Queue): Queue<T> | undefined {
+        return this.getQueue<T>(queueLike instanceof Queue ? queueLike.guild : queueLike);
     }
 
     *[Symbol.iterator]() {
         yield* Array.from(this.queues.values());
     }
 }
-
-export { Player };

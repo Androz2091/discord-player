@@ -1,6 +1,6 @@
 import { ExtractorModelData } from "../types/types";
 
-class ExtractorModel {
+export class ExtractorModel {
     name: string;
     private _raw: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -29,9 +29,9 @@ class ExtractorModel {
     /**
      * Method to handle requests from `Player.play()`
      * @param {string} query Query to handle
-     * @returns {Promise<ExtractorModelData>}
+     * @returns {Promise<ExtractorModelData|null>}
      */
-    async handle(query: string): Promise<ExtractorModelData> {
+    async handle(query: string): Promise<ExtractorModelData | null> {
         const data = await this._raw.getInfo(query);
         if (!data) return null;
 
@@ -69,5 +69,3 @@ class ExtractorModel {
         return this._raw.version ?? "0.0.0";
     }
 }
-
-export { ExtractorModel };

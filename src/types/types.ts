@@ -1,10 +1,10 @@
 import { Snowflake, User, UserResolvable } from "discord.js";
-import { Readable, Duplex } from "stream";
+import { Duplex, Readable } from "stream";
+import { downloadOptions } from "ytdl-core";
+import { Playlist } from "../Structures/Playlist";
 import { Queue } from "../Structures/Queue";
 import Track from "../Structures/Track";
-import { Playlist } from "../Structures/Playlist";
 import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
-import { downloadOptions } from "ytdl-core";
 
 export type FiltersName = keyof QueueFilters;
 
@@ -13,9 +13,6 @@ export interface PlayerSearchResult {
     tracks: Track[];
 }
 
-/**
- * @typedef {AudioFilters} QueueFilters
- */
 export interface QueueFilters {
     bassboost_low?: boolean;
     bassboost?: boolean;
@@ -152,6 +149,18 @@ export interface PlayerOptions {
     disableVolume?: boolean;
     volumeSmoothness?: number;
     onBeforeCreateStream?: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable>;
+}
+
+/**
+ * @typedef {object} PlayerTimestamp
+ * @property {string} current The current progress
+ * @property {string} end The total time
+ * @property {number} progress Progress in %
+ */
+export interface PlayerTimestamp {
+    current: string;
+    end: string;
+    progress: number;
 }
 
 /**
@@ -483,4 +492,20 @@ export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
     ytdlOptions?: downloadOptions;
     connectionTimeout?: number;
+}
+
+/**
+ * @typedef {object} QueueJSON
+ * @property {string} id Queue id
+ * @property {string} guild Guild id that instantiated the queue
+ * @property {(string | undefined)} voiceChannel Voice channel id
+ * * @property {PlayerOptions} options Queue options
+ * * @property {TrackJSON[]} tracks Queue tracks
+ */
+export interface QueueJSON {
+    id: string;
+    guild: string;
+    voiceChannel?: string;
+    options: PlayerOptions;
+    tracks: TrackJSON[];
 }

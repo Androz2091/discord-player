@@ -58,7 +58,7 @@ class Util {
      * @returns {any}
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static last<T = any>(arr: T[]): T {
+    static last<T = any>(arr: T[]): T | undefined {
         if (!Array.isArray(arr)) return;
         return arr[arr.length - 1];
     }
