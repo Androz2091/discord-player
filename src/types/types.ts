@@ -118,6 +118,7 @@ export interface TimeData {
  */
 export interface PlayerProgressbarOptions {
     timecodes?: boolean;
+    queue?: boolean;
     length?: number;
     line?: string;
     indicator?: string;
