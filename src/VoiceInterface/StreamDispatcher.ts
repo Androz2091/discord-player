@@ -67,7 +67,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
          * @type {boolean}
          */
         this.paused = false;
-
+        // @ts-ignore
         this.voiceConnection.on("stateChange", async (_, newState) => {
             if (newState.status === VoiceConnectionStatus.Disconnected) {
                 if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
@@ -109,7 +109,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                 }
             }
         });
-
+        // @ts-ignore
         this.audioPlayer.on("stateChange", (oldState, newState) => {
             if (newState.status === AudioPlayerStatus.Playing) {
                 if (!this.paused) return void this.emit("start", this.audioResource);
