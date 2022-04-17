@@ -16,7 +16,7 @@ class Track {
     public requestedBy!: User;
     public playlist?: Playlist;
     public readonly raw: RawTrackData = {} as RawTrackData;
-    public readonly id: Snowflake = SnowflakeUtil.generate();
+    public readonly id: Snowflake = String(SnowflakeUtil.generate());
 
     /**
      * Track constructor
