@@ -1,4 +1,4 @@
-import { Collection, Guild, StageChannel, VoiceChannel, Snowflake, SnowflakeUtil, GuildChannelResolvable } from "discord.js";
+import { Collection, Guild, StageChannel, VoiceChannel, SnowflakeUtil, GuildChannelResolvable, ChannelType } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
 import Track from "./Track";
@@ -22,7 +22,7 @@ class Queue<T = unknown> {
     public playing = false;
     public metadata?: T = null;
     public repeatMode: QueueRepeatMode = 0;
-    public readonly id: Snowflake = SnowflakeUtil.generate();
+    public readonly id = SnowflakeUtil.generate().toString();
     private _streamTime = 0;
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -152,16 +152,16 @@ class Queue<T = unknown> {
     async connect(channel: GuildChannelResolvable) {
         if (this.#watchDestroyed()) return;
         const _channel = this.guild.channels.resolve(channel) as StageChannel | VoiceChannel;
-        if (!["GUILD_STAGE_VOICE", "GUILD_VOICE"].includes(_channel?.type))
-            throw new PlayerError(`Channel type must be GUILD_VOICE or GUILD_STAGE_VOICE, got ${_channel?.type}!`, ErrorStatusCode.INVALID_ARG_TYPE);
+        if (![ChannelType.GuildStageVoice, ChannelType.GuildVoice].includes(_channel?.type))
+            throw new PlayerError(`Channel type must be GuildVoice or GuildStageVoice, got ${_channel?.type}!`, ErrorStatusCode.INVALID_ARG_TYPE);
         const connection = await this.player.voiceUtils.connect(_channel, {
             deaf: this.options.autoSelfDeaf
         });
         this.connection = connection;
 
-        if (_channel.type === "GUILD_STAGE_VOICE") {
-            await _channel.guild.me.voice.setSuppressed(false).catch(async () => {
-                return await _channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+        if (_channel.type === ChannelType.GuildStageVoice) {
+            await _channel.guild.members.me.voice.setSuppressed(false).catch(async () => {
+                return await _channel.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
             });
         }
 
@@ -473,10 +473,10 @@ class Queue<T = unknown> {
 
     /**
      * Removes a track from the queue
-     * @param {Track|Snowflake|number} track The track to remove
+     * @param {Track|string|number} track The track to remove
      * @returns {Track}
      */
-    remove(track: Track | Snowflake | number) {
+    remove(track: Track | string | number) {
         if (this.#watchDestroyed()) return;
         let trackFound: Track = null;
         if (typeof track === "number") {
@@ -496,10 +496,10 @@ class Queue<T = unknown> {
 
     /**
      * Returns the index of the specified track. If found, returns the track index else returns -1.
-     * @param {number|Track|Snowflake} track The track
+     * @param {number|Track|string} track The track
      * @returns {number}
      */
-    getTrackPosition(track: number | Track | Snowflake) {
+    getTrackPosition(track: number | Track | string) {
         if (this.#watchDestroyed()) return;
         if (typeof track === "number") return this.tracks[track] != null ? track : -1;
         return this.tracks.findIndex((pred) => pred.id === (track instanceof Track ? track.id : track));

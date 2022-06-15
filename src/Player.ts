@@ -1,4 +1,4 @@
-import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, Intents } from "discord.js";
+import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, IntentsBitField } from "discord.js";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
@@ -45,8 +45,8 @@ class Player extends EventEmitter<PlayerEvents> {
          */
         this.client = client;
 
-        if (this.client?.options?.intents && !new Intents(this.client?.options?.intents).has(Intents.FLAGS.GUILD_VOICE_STATES)) {
-            throw new PlayerError('client is missing "GUILD_VOICE_STATES" intent');
+        if (this.client?.options?.intents && !new IntentsBitField(this.client?.options?.intents).has(IntentsBitField.Flags.GuildVoiceStates)) {
+            throw new PlayerError('client is missing "GuildVoiceStates" intent');
         }
 
         /**
@@ -78,8 +78,8 @@ class Player extends EventEmitter<PlayerEvents> {
         if (!queue) return;
 
         if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-            if (queue?.connection && newState.member.id === newState.guild.me.id) queue.connection.channel = newState.channel;
-            if (newState.member.id === newState.guild.me.id || (newState.member.id !== newState.guild.me.id && oldState.channelId === queue.connection.channel.id)) {
+            if (queue?.connection && newState.member.id === newState.guild.members.me.id) queue.connection.channel = newState.channel;
+            if (newState.member.id === newState.guild.members.me.id || (newState.member.id !== newState.guild.members.me.id && oldState.channelId === queue.connection.channel.id)) {
                 if (!Util.isVoiceEmpty(queue.connection.channel)) return;
                 const timeout = setTimeout(() => {
                     if (!Util.isVoiceEmpty(queue.connection.channel)) return;
@@ -90,20 +90,20 @@ class Player extends EventEmitter<PlayerEvents> {
                 queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
             }
 
-            if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.me.id) {
+            if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.members.me.id) {
                 if (newState.serverMute || !newState.serverMute) {
                     queue.setPaused(newState.serverMute);
                 } else if (newState.suppress || !newState.suppress) {
-                    if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                    if (newState.suppress) newState.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
                     queue.setPaused(newState.suppress);
                 }
             }
 
-            if (oldState.channelId === newState.channelId && oldState.member.id === newState.guild.me.id) {
+            if (oldState.channelId === newState.channelId && oldState.member.id === newState.guild.members.me.id) {
                 if (oldState.serverMute !== newState.serverMute) {
                     queue.setPaused(newState.serverMute);
                 } else if (oldState.suppress !== newState.suppress) {
-                    if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                    if (newState.suppress) newState.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
                     queue.setPaused(newState.suppress);
                 }
             }
@@ -338,7 +338,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 return { playlist: null, tracks: res };
             }
             case QueryType.SPOTIFY_SONG: {
-                const spotifyData = await Spotify.getData(query).catch(Util.noop);
+                const spotifyData = await Spotify(Util.getFetch()).getData(query).catch(Util.noop);
                 if (!spotifyData) return { playlist: null, tracks: [] };
                 const spotifyTrack = new Track(this, {
                     title: spotifyData.name,
@@ -359,7 +359,9 @@ class Player extends EventEmitter<PlayerEvents> {
             }
             case QueryType.SPOTIFY_PLAYLIST:
             case QueryType.SPOTIFY_ALBUM: {
-                const spotifyPlaylist = await Spotify.getData(query).catch(Util.noop);
+                const spotifyPlaylist = await Spotify(await Util.getFetch())
+                    .getData(query)
+                    .catch(Util.noop);
                 if (!spotifyPlaylist) return { playlist: null, tracks: [] };
 
                 const playlist = new Playlist(this, {

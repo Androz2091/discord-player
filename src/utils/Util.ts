@@ -95,6 +95,15 @@ class Util {
     }
 
     static noop() {} // eslint-disable-line @typescript-eslint/no-empty-function
+
+    static async getFetch() {
+        if ("fetch" in globalThis) return globalThis.fetch;
+        try {
+            return await import("undici").then((res) => res.default);
+        } catch {
+            // uh?
+        }
+    }
 }
 
 export { Util };
