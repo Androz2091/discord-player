@@ -1,30 +1,36 @@
 ---
 name: Bug report
-about: Create a bug report to help us improve
-labels: bug
-assignees: ''
+about: Report incorrect or unexpected behavior of the Music Bot
+title: ""
+labels: "s: unverified, type: bug"
+assignees: ""
 ---
 
-**Describe the bug**
-<!-- A clear and concise description of what the bug is. -->
+<!-- Use Discord for questions: https://discord.gg/sbySMS7m3v -->
 
-**To Reproduce**
-Steps to reproduce the behavior:
-<!-- 1. Go to '...'
-1. Click on '....'
-2. Scroll down to '....'
-3. See error -->
+**Please describe the problem you are having in as much detail as possible:**
 
-**Expected behavior**
-<!-- A clear and concise description of what you expected to happen. -->
+**Include a reproducible code sample here, if possible:**
 
-**Screenshots**
-<!-- If applicable, add screenshots to help explain your problem. -->
+```js
+// Place your code here
+```
 
-**Please complete the following information:**
- - Node Version: x.x.x
- - Discord Player Version: x.x.x
- - Discord.js Version: x.x.x
+**Further details:**
 
-**Additional context**
-<!-- Add any other context about the problem here. -->
+- discord.js version:
+- Node.js version:
+- Operating system:
+- Priority this issue should have – please be realistic and elaborate if possible:
+
+**Relevant client options:**
+
+- partials: none
+- gateway intents: none
+- other: none
+
+<!--
+Remove the comment and fill out the commit hash if this applies to you:
+(While it's not a requirement to test your issue on the master branch, it would make fixing the problem a lot easier for us, so please do so if possible.)
+
+-->
