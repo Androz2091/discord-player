@@ -131,7 +131,7 @@ export interface PlayerProgressbarOptions {
  * @property {boolean} [leaveOnEmpty=true] If it should leave on empty
  * @property {number} [leaveOnEmptyCooldown=1000] The cooldown in ms
  * @property {boolean} [autoSelfDeaf=true] If it should set the bot in deaf mode
- * @property {YTDLDownloadOptions} [ytdlOptions={}] The youtube download options
+ * @property {YTDLDownloadOptions} [ytdlOptions] The youtube download options
  * @property {number} [initialVolume=100] The initial player volume
  * @property {number} [bufferingTimeout=3000] Buffering timeout for the stream
  * @property {boolean} [spotifyBridge=true] If player should bridge spotify source to youtube
@@ -477,7 +477,7 @@ export interface PlaylistJSON {
 /**
  * @typedef {object} PlayerInitOptions
  * @property {boolean} [autoRegisterExtractor=true] If it should automatically register `@discord-player/extractor`
- * @property {YTDLDownloadOptions} [ytdlOptions={}] The options passed to `ytdl-core`
+ * @property {YTDLDownloadOptions} [ytdlOptions] The options passed to `ytdl-core`
  * @property {number} [connectionTimeout=20000] The voice connection timeout
  */
 export interface PlayerInitOptions {

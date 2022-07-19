@@ -34,7 +34,7 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * Creates new Discord Player
      * @param {Client} client The Discord Client
-     * @param {PlayerInitOptions} [options={}] The player init options
+     * @param {PlayerInitOptions} [options] The player init options
      */
     constructor(client: Client, options: PlayerInitOptions = {}) {
         super();

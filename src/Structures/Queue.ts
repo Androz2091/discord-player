@@ -35,7 +35,7 @@ class Queue<T = unknown> {
      * Queue constructor
      * @param {Player} player The player that instantiated this queue
      * @param {Guild} guild The guild that instantiated this queue
-     * @param {PlayerOptions} [options={}] Player options for the queue
+     * @param {PlayerOptions} [options] Player options for the queue
      */
     constructor(player: Player, guild: Guild, options: PlayerOptions = {}) {
         /**
@@ -621,7 +621,7 @@ class Queue<T = unknown> {
     /**
      * Play stream in a voice/stage channel
      * @param {Track} [src] The track to play (if empty, uses first track from the queue)
-     * @param {PlayOptions} [options={}] The options
+     * @param {PlayOptions} [options] The options
      * @returns {Promise<void>}
      */
     async play(src?: Track, options: PlayOptions = {}): Promise<void> {

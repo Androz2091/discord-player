@@ -20,7 +20,7 @@ class VoiceUtils {
     /**
      * Joins a voice channel, creating basic stream dispatch manager
      * @param {StageChannel|VoiceChannel} channel The voice channel
-     * @param {object} [options={}] Join options
+     * @param {object} [options] Join options
      * @returns {Promise<StreamDispatcher>}
      */
     public async connect(
@@ -39,7 +39,7 @@ class VoiceUtils {
     /**
      * Joins a voice channel
      * @param {StageChannel|VoiceChannel} [channel] The voice/stage channel to join
-     * @param {object} [options={}] Join options
+     * @param {object} [options] Join options
      * @returns {VoiceConnection}
      */
     public async join(
