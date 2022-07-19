@@ -98,10 +98,12 @@ class Util {
 
     static async getFetch() {
         if ("fetch" in globalThis) return globalThis.fetch;
-        try {
-            return await import("undici").then((res) => res.default);
-        } catch {
-            // uh?
+        for (const lib of ["undici", "node-fetch"]) {
+            try {
+                return await import(lib).then((res) => res.fetch || res.default?.fetch || res.default);
+            } catch {
+                // uh?
+            }
         }
     }
 }
