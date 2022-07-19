@@ -121,6 +121,7 @@ export interface PlayerProgressbarOptions {
     length?: number;
     line?: string;
     indicator?: string;
+    queue?: boolean;
 }
 
 /**
