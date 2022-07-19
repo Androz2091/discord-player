@@ -87,9 +87,9 @@ class Player extends EventEmitter<PlayerEvents> {
         }
 
         if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.members.me.id) {
-            if (newState.serverMute || !newState.serverMute) {
+            if (oldState.serverMute !== newState.serverMute) {
                 queue.setPaused(newState.serverMute);
-            } else if (newState.suppress || !newState.suppress) {
+            } else if (oldState.suppress !== newState.suppress) {
                 if (newState.suppress) newState.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
                 queue.setPaused(newState.suppress);
             }
