@@ -713,7 +713,6 @@ class Queue<T = unknown> {
             if (typeof volumeTransformer.setSmoothness === "function") volumeTransformer.setSmoothness(this.options.volumeSmoothness || 0);
         }
 
-
         setTimeout(() => {
             this.connection.playStream(resource);
         }, this.#getBufferingTimeout()).unref();
