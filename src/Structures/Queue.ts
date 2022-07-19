@@ -708,11 +708,11 @@ class Queue<T = unknown> {
         this._filtersUpdate = options.filtersUpdate;
 
         const volumeTransformer = resource.volume as VolumeTransformer;
+        if (volumeTransformer && typeof this.options.initialVolume === "number") Reflect.set(volumeTransformer, "volume", Math.pow(this.options.initialVolume, 1.660964));
         if (volumeTransformer?.hasSmoothness && typeof this.options.volumeSmoothness === "number") {
             if (typeof volumeTransformer.setSmoothness === "function") volumeTransformer.setSmoothness(this.options.volumeSmoothness || 0);
         }
 
-        this.setVolume(this.options.initialVolume);
 
         setTimeout(() => {
             this.connection.playStream(resource);
