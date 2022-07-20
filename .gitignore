@@ -9,10 +9,4 @@ dist
 # Yarn logs
 yarn*.log
 
-# example
-example/test
-example/music-bot/node_modules
-example/music-bot/package-lock.json
-example/music-bot/.env
-
 dev/

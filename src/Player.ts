@@ -415,9 +415,9 @@ class Player extends EventEmitter<PlayerEvents> {
                         const data = new Track(this, {
                             title: m.track.name ?? "",
                             description: m.track.description ?? "",
-                            author: m.track.artists[0]?.name ?? "Unknown Artist",
+                            author: m.track.artists?.[0]?.name ?? "Unknown Artist",
                             url: m.track.external_urls?.spotify ?? query,
-                            thumbnail: m.track.album?.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                            thumbnail: m.track.album?.images?.[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
                             duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
                             views: 0,
                             requestedBy: options.requestedBy as User,

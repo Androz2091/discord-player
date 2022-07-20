@@ -136,7 +136,7 @@ export interface PlayerProgressbarOptions {
  * @property {number} [bufferingTimeout=3000] Buffering timeout for the stream
  * @property {boolean} [spotifyBridge=true] If player should bridge spotify source to youtube
  * @property {boolean} [disableVolume=false] If player should disable inline volume
- * @property {boolean} [volumeSmoothness=0] The volume transition smoothness between volume changes (lower the value to get better result)
+ * @property {number} [volumeSmoothness=0] The volume transition smoothness between volume changes (lower the value to get better result)
  * Setting this or leaving this empty will disable this effect. Example: `volumeSmoothness: 0.1`
  * @property {Function} [onBeforeCreateStream] Runs before creating stream
  */
