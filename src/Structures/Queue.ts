@@ -730,9 +730,14 @@ class Queue<T = unknown> {
             if (this.options.leaveOnEnd) this.destroy();
             return void this.player.emit("queueEnd", this);
         }
-        const info = await YouTube.getVideo(track.url)
+        let info = await YouTube.getVideo(track.url)
             .then((x) => x.videos[0])
             .catch(Util.noop);
+        // fallback
+        if (!info)
+            info = await YouTube.search(track.author)
+                .then((x) => x[0])
+                .catch(Util.noop);
         if (!info) {
             if (this.options.leaveOnEnd) this.destroy();
             return void this.player.emit("queueEnd", this);
