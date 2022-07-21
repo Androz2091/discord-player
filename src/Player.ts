@@ -87,20 +87,24 @@ class Player extends EventEmitter<PlayerEvents> {
         }
 
         if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.members.me.id) {
-            if (oldState.serverMute !== newState.serverMute) {
+            if (!oldState.serverMute && newState.serverMute) {
                 queue.setPaused(newState.serverMute);
-            } else if (oldState.suppress !== newState.suppress) {
-                if (newState.suppress) newState.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
+            } else if (!oldState.suppress && newState.suppress) {
                 queue.setPaused(newState.suppress);
+                if (newState.suppress) {
+                    newState.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                }
             }
         }
 
         if (oldState.channelId === newState.channelId && newState.member.id === newState.guild.members.me.id) {
-            if (oldState.serverMute !== newState.serverMute) {
+            if (!oldState.serverMute && newState.serverMute) {
                 queue.setPaused(newState.serverMute);
-            } else if (oldState.suppress !== newState.suppress) {
-                if (newState.suppress) newState.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
+            } else if (!oldState.suppress && newState.suppress) {
                 queue.setPaused(newState.suppress);
+                if (newState.suppress) {
+                    newState.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                }
             }
         }
 
