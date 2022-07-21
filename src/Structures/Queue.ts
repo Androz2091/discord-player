@@ -206,10 +206,6 @@ class Queue<T = unknown> {
             }
         });
 
-        await this.player.voiceUtils.enterReady(this.connection.voiceConnection, {
-            maxTime: this.player.options.connectionTimeout || 30_000
-        });
-
         return this;
     }
 
