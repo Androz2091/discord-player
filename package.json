@@ -66,7 +66,6 @@
   "homepage": "https://discord-player.js.org",
   "dependencies": {
     "@discordjs/voice": "^0.11.0",
-    "discord-ytdl-core": "^5.0.4",
     "libsodium-wrappers": "^0.7.10",
     "soundcloud-scraper": "^5.0.3",
     "spotify-url-info": "^3.1.2",

@@ -3,7 +3,7 @@ import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
 import Track from "./Track";
 import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode, TrackSource } from "../types/types";
-import ytdl from "discord-ytdl-core";
+import ytdl from "ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
 import { Util } from "../utils/Util";
 import YouTube from "youtube-sr";
@@ -11,6 +11,7 @@ import AudioFilters from "../utils/AudioFilters";
 import { PlayerError, ErrorStatusCode } from "./PlayerError";
 import type { Readable } from "stream";
 import { VolumeTransformer } from "../VoiceInterface/VolumeTransformer";
+import { createFFmpegStream } from "../utils/FFmpegStream";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -635,66 +636,46 @@ class Queue<T = unknown> {
         }
 
         let stream = null;
-        const customDownloader = typeof this.onBeforeCreateStream === "function";
+        const hasCustomDownloader = typeof this.onBeforeCreateStream === "function";
 
         if (["youtube", "spotify"].includes(track.raw.source)) {
             let spotifyResolved = false;
             if (this.options.spotifyBridge && track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
-                    .then((x) => x[0].url)
+                    .then((res) => res[0].url)
                     .catch(() => null);
                 spotifyResolved = true;
             }
-            const link = track.raw.source === "spotify" ? track.raw.engine : track.url;
-            if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
-            if (customDownloader) {
-                stream = (await this.onBeforeCreateStream(track, spotifyResolved ? "youtube" : track.raw.source, this)) ?? null;
-                if (stream)
-                    stream = ytdl
-                        .arbitraryStream(stream, {
-                            opusEncoded: false,
-                            fmt: "s16le",
-                            encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
-                            seek: options.seek ? options.seek / 1000 : 0
-                        })
-                        .on("error", (err) => {
-                            return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
-                        });
-            } else {
-                stream = ytdl(link, {
-                    ...this.options.ytdlOptions,
-                    // discord-ytdl-core
-                    opusEncoded: false,
-                    fmt: "s16le",
-                    encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
-                    seek: options.seek ? options.seek / 1000 : 0
-                }).on("error", (err) => {
-                    return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
-                });
+            const url = track.raw.source === "spotify" ? track.raw.engine : track.url;
+            if (!url) return void this.play(this.tracks.shift(), { immediate: true });
+
+            if (hasCustomDownloader) {
+                stream = (await this.onBeforeCreateStream(track, spotifyResolved ? "youtube" : track.raw.source, this)) || null;
+            }
+
+            if (!stream) {
+                stream = ytdl(url, this.options.ytdlOptions);
             }
         } else {
-            const tryArb = (customDownloader && (await this.onBeforeCreateStream(track, track.raw.source || track.raw.engine, this))) || null;
-            const arbitrarySource = tryArb
-                ? tryArb
-                : track.raw.source === "soundcloud"
-                ? await track.raw.engine.downloadProgressive()
-                : typeof track.raw.engine === "function"
-                ? await track.raw.engine()
-                : track.raw.engine;
-            stream = ytdl
-                .arbitraryStream(arbitrarySource, {
-                    opusEncoded: false,
-                    fmt: "s16le",
-                    encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
-                    seek: options.seek ? options.seek / 1000 : 0
-                })
-                .on("error", (err) => {
-                    return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
-                });
+            const arbitraryStream = (hasCustomDownloader && (await this.onBeforeCreateStream(track, track.raw.source || track.raw.engine, this))) || null;
+            stream =
+                arbitraryStream || track.raw.source === "soundcloud"
+                    ? await track.raw.engine.downloadProgressive()
+                    : typeof track.raw.engine === "function"
+                    ? await track.raw.engine
+                    : track.raw.engine;
         }
 
-        const resource: AudioResource<Track> = this.connection.createStream(stream, {
+        const ffmpegStream = createFFmpegStream(stream, {
+            encoderArgs: options.encoderArgs || this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
+            seek: options.seek ? options.seek / 1000 : 0,
+            fmt: "s16le"
+        }).on("error", (err) => {
+            if (!`${err}`.toLowerCase().includes("premature close")) this.player.emit("error", this, err);
+        });
+
+        const resource: AudioResource<Track> = this.connection.createStream(ffmpegStream, {
             type: StreamType.Raw,
             data: track,
             disableVolume: Boolean(this.options.disableVolume)

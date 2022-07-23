@@ -102,7 +102,13 @@ class Util {
             try {
                 return await import(lib).then((res) => res.fetch || res.default?.fetch || res.default);
             } catch {
-                // uh?
+                try {
+                    // eslint-disable-next-line
+                    const res = require(lib);
+                    if (res) return res.fetch || res.default?.fetch || res.default;
+                } catch {
+                    // no?
+                }
             }
         }
     }
