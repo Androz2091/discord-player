@@ -660,10 +660,10 @@ class Queue<T = unknown> {
         } else {
             const arbitraryStream = (hasCustomDownloader && (await this.onBeforeCreateStream(track, track.raw.source || track.raw.engine, this))) || null;
             stream =
-                arbitraryStream || track.raw.source === "soundcloud"
+                arbitraryStream || (track.raw.source === "soundcloud" && typeof track.raw.engine?.downloadProgressive === "function")
                     ? await track.raw.engine.downloadProgressive()
                     : typeof track.raw.engine === "function"
-                    ? await track.raw.engine
+                    ? await track.raw.engine()
                     : track.raw.engine;
         }
 
