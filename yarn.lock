@@ -4526,9 +4526,9 @@ yn@3.1.1:
   integrity sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
 
 youtube-sr@^4.1.15:
-  version "4.1.15"
-  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.1.15.tgz#15a008e08509ef7dd66fafbfabeeb34b9e1168ef"
-  integrity sha512-zYWruRHhVwREeTbQX7TwT2xh3RxTSMJyIjgYs/Da2uyKRVHXz8JH1GIpJwVHVzsrXcozsNNs/iMo8puFdFnu+Q==
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.3.0.tgz#6c3ab661b0c2572946d1098451ed7699d7ad4be5"
+  integrity sha512-cRMOeJZi/DYIRqru0R9UsBLwkj4tQvekldnCj4MZOT+ijlfesrllbUDXqKuA2RbYA4ByJlFf9wxZ1ndvuCJ5Ow==
 
 ytdl-core@^4.11.0:
   version "4.11.0"
