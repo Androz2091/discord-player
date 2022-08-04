@@ -5,7 +5,7 @@ The Extractor API allows you to build your own stream extractor for **Discord Pl
 Your extractor should have 2 methods (required):
  - `validate(query): boolean`
    
-   This method is called by Discord Player while validating the query provided via `Player.play()`. (Note that only `string` queries are passed to your extractor)
+   This method is called by Discord Player while validating the query provided via `Player.search()`. (Note that only `string` queries are passed to your extractor)
 
  - `getInfo(query): object`
    
