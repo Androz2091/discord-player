@@ -13,6 +13,7 @@ export { VoiceUtils } from "./VoiceInterface/VoiceUtils";
 export { VoiceEvents, StreamDispatcher } from "./VoiceInterface/StreamDispatcher";
 export { Util } from "./utils/Util";
 export * from "./types/types";
+export * from "./utils/FFmpegStream";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 export const version: string = require(`${__dirname}/../package.json`).version;

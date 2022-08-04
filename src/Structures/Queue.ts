@@ -1,9 +1,9 @@
-import { Collection, Guild, StageChannel, VoiceChannel, Snowflake, SnowflakeUtil, GuildChannelResolvable } from "discord.js";
+import { Collection, Guild, StageChannel, VoiceChannel, SnowflakeUtil, GuildChannelResolvable, ChannelType } from "discord.js";
 import { Player } from "../Player";
 import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
 import Track from "./Track";
 import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode, TrackSource } from "../types/types";
-import ytdl from "discord-ytdl-core";
+import ytdl from "ytdl-core";
 import { AudioResource, StreamType } from "@discordjs/voice";
 import { Util } from "../utils/Util";
 import YouTube from "youtube-sr";
@@ -11,6 +11,7 @@ import AudioFilters from "../utils/AudioFilters";
 import { PlayerError, ErrorStatusCode } from "./PlayerError";
 import type { Readable } from "stream";
 import { VolumeTransformer } from "../VoiceInterface/VolumeTransformer";
+import { createFFmpegStream } from "../utils/FFmpegStream";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -22,7 +23,7 @@ class Queue<T = unknown> {
     public playing = false;
     public metadata?: T = null;
     public repeatMode: QueueRepeatMode = 0;
-    public readonly id: Snowflake = SnowflakeUtil.generate();
+    public readonly id = SnowflakeUtil.generate().toString();
     private _streamTime = 0;
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -35,7 +36,7 @@ class Queue<T = unknown> {
      * Queue constructor
      * @param {Player} player The player that instantiated this queue
      * @param {Guild} guild The guild that instantiated this queue
-     * @param {PlayerOptions} [options={}] Player options for the queue
+     * @param {PlayerOptions} [options] Player options for the queue
      */
     constructor(player: Player, guild: Guild, options: PlayerOptions = {}) {
         /**
@@ -152,16 +153,16 @@ class Queue<T = unknown> {
     async connect(channel: GuildChannelResolvable) {
         if (this.#watchDestroyed()) return;
         const _channel = this.guild.channels.resolve(channel) as StageChannel | VoiceChannel;
-        if (!["GUILD_STAGE_VOICE", "GUILD_VOICE"].includes(_channel?.type))
-            throw new PlayerError(`Channel type must be GUILD_VOICE or GUILD_STAGE_VOICE, got ${_channel?.type}!`, ErrorStatusCode.INVALID_ARG_TYPE);
+        if (![ChannelType.GuildStageVoice, ChannelType.GuildVoice].includes(_channel?.type))
+            throw new PlayerError(`Channel type must be GuildVoice or GuildStageVoice, got ${_channel?.type}!`, ErrorStatusCode.INVALID_ARG_TYPE);
         const connection = await this.player.voiceUtils.connect(_channel, {
             deaf: this.options.autoSelfDeaf
         });
         this.connection = connection;
 
-        if (_channel.type === "GUILD_STAGE_VOICE") {
-            await _channel.guild.me.voice.setSuppressed(false).catch(async () => {
-                return await _channel.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
+        if (_channel.type === ChannelType.GuildStageVoice) {
+            await _channel.guild.members.me.voice.setSuppressed(false).catch(async () => {
+                return await _channel.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
             });
         }
 
@@ -179,7 +180,7 @@ class Queue<T = unknown> {
         this.connection.on("start", (resource) => {
             if (this.#watchDestroyed(false)) return;
             this.playing = true;
-            if (!this._filtersUpdate && resource?.metadata) this.player.emit("trackStart", this, resource?.metadata ?? this.current);
+            if (!this._filtersUpdate) this.player.emit("trackStart", this, resource?.metadata ?? this.current);
             this._filtersUpdate = false;
         });
 
@@ -188,7 +189,7 @@ class Queue<T = unknown> {
             this.playing = false;
             if (this._filtersUpdate) return;
             this._streamTime = 0;
-            if (resource && resource.metadata) this.previousTracks.push(resource.metadata);
+            if (resource?.metadata) this.previousTracks.push(resource.metadata);
 
             this.player.emit("trackEnd", this, resource.metadata);
 
@@ -204,10 +205,6 @@ class Queue<T = unknown> {
                 this.play(nextTrack, { immediate: true });
                 return;
             }
-        });
-
-        await this.player.voiceUtils.enterReady(this.connection.voiceConnection, {
-            maxTime: this.player.options.connectionTimeout || 30_000
         });
 
         return this;
@@ -473,10 +470,10 @@ class Queue<T = unknown> {
 
     /**
      * Removes a track from the queue
-     * @param {Track|Snowflake|number} track The track to remove
+     * @param {Track|string|number} track The track to remove
      * @returns {Track}
      */
-    remove(track: Track | Snowflake | number) {
+    remove(track: Track | string | number) {
         if (this.#watchDestroyed()) return;
         let trackFound: Track = null;
         if (typeof track === "number") {
@@ -496,10 +493,10 @@ class Queue<T = unknown> {
 
     /**
      * Returns the index of the specified track. If found, returns the track index else returns -1.
-     * @param {number|Track|Snowflake} track The track
+     * @param {number|Track|string} track The track
      * @returns {number}
      */
-    getTrackPosition(track: number | Track | Snowflake) {
+    getTrackPosition(track: number | Track | string) {
         if (this.#watchDestroyed()) return;
         if (typeof track === "number") return this.tracks[track] != null ? track : -1;
         return this.tracks.findIndex((pred) => pred.id === (track instanceof Track ? track.id : track));
@@ -621,7 +618,7 @@ class Queue<T = unknown> {
     /**
      * Play stream in a voice/stage channel
      * @param {Track} [src] The track to play (if empty, uses first track from the queue)
-     * @param {PlayOptions} [options={}] The options
+     * @param {PlayOptions} [options] The options
      * @returns {Promise<void>}
      */
     async play(src?: Track, options: PlayOptions = {}): Promise<void> {
@@ -639,66 +636,46 @@ class Queue<T = unknown> {
         }
 
         let stream = null;
-        const customDownloader = typeof this.onBeforeCreateStream === "function";
+        const hasCustomDownloader = typeof this.onBeforeCreateStream === "function";
 
         if (["youtube", "spotify"].includes(track.raw.source)) {
             let spotifyResolved = false;
             if (this.options.spotifyBridge && track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
-                    .then((x) => x[0].url)
+                    .then((res) => res[0].url)
                     .catch(() => null);
                 spotifyResolved = true;
             }
-            const link = track.raw.source === "spotify" ? track.raw.engine : track.url;
-            if (!link) return void this.play(this.tracks.shift(), { immediate: true });
 
-            if (customDownloader) {
-                stream = (await this.onBeforeCreateStream(track, spotifyResolved ? "youtube" : track.raw.source, this)) ?? null;
-                if (stream)
-                    stream = ytdl
-                        .arbitraryStream(stream, {
-                            opusEncoded: false,
-                            fmt: "s16le",
-                            encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
-                            seek: options.seek ? options.seek / 1000 : 0
-                        })
-                        .on("error", (err) => {
-                            return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
-                        });
-            } else {
-                stream = ytdl(link, {
-                    ...this.options.ytdlOptions,
-                    // discord-ytdl-core
-                    opusEncoded: false,
-                    fmt: "s16le",
-                    encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
-                    seek: options.seek ? options.seek / 1000 : 0
-                }).on("error", (err) => {
-                    return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
-                });
+            const url = track.raw.source === "spotify" ? track.raw.engine : track.url;
+            if (!url) return void this.play(this.tracks.shift(), { immediate: true });
+
+            if (hasCustomDownloader) {
+                stream = (await this.onBeforeCreateStream(track, spotifyResolved ? "youtube" : track.raw.source, this)) || null;
+            }
+
+            if (!stream) {
+                stream = ytdl(url, this.options.ytdlOptions);
             }
         } else {
-            const tryArb = (customDownloader && (await this.onBeforeCreateStream(track, track.raw.source || track.raw.engine, this))) || null;
-            const arbitrarySource = tryArb
-                ? tryArb
-                : track.raw.source === "soundcloud"
-                ? await track.raw.engine.downloadProgressive()
-                : typeof track.raw.engine === "function"
-                ? await track.raw.engine()
-                : track.raw.engine;
-            stream = ytdl
-                .arbitraryStream(arbitrarySource, {
-                    opusEncoded: false,
-                    fmt: "s16le",
-                    encoderArgs: options.encoderArgs ?? this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
-                    seek: options.seek ? options.seek / 1000 : 0
-                })
-                .on("error", (err) => {
-                    return err.message.toLowerCase().includes("premature close") ? null : this.player.emit("error", this, err);
-                });
+            const arbitraryStream = (hasCustomDownloader && (await this.onBeforeCreateStream(track, track.raw.source || track.raw.engine, this))) || null;
+            stream =
+                arbitraryStream || (track.raw.source === "soundcloud" && typeof track.raw.engine?.downloadProgressive === "function")
+                    ? await track.raw.engine.downloadProgressive()
+                    : typeof track.raw.engine === "function"
+                    ? await track.raw.engine()
+                    : track.raw.engine;
         }
 
-        const resource: AudioResource<Track> = this.connection.createStream(stream, {
+        const ffmpegStream = createFFmpegStream(stream, {
+            encoderArgs: options.encoderArgs || this._activeFilters.length ? ["-af", AudioFilters.create(this._activeFilters)] : [],
+            seek: options.seek ? options.seek / 1000 : 0,
+            fmt: "s16le"
+        }).on("error", (err) => {
+            if (!`${err}`.toLowerCase().includes("premature close")) this.player.emit("error", this, err);
+        });
+
+        const resource: AudioResource<Track> = this.connection.createStream(ffmpegStream, {
             type: StreamType.Raw,
             data: track,
             disableVolume: Boolean(this.options.disableVolume)
@@ -708,11 +685,10 @@ class Queue<T = unknown> {
         this._filtersUpdate = options.filtersUpdate;
 
         const volumeTransformer = resource.volume as VolumeTransformer;
+        if (volumeTransformer && typeof this.options.initialVolume === "number") Reflect.set(volumeTransformer, "volume", Math.pow(this.options.initialVolume / 100, 1.660964));
         if (volumeTransformer?.hasSmoothness && typeof this.options.volumeSmoothness === "number") {
             if (typeof volumeTransformer.setSmoothness === "function") volumeTransformer.setSmoothness(this.options.volumeSmoothness || 0);
         }
-
-        this.setVolume(this.options.initialVolume);
 
         setTimeout(() => {
             this.connection.playStream(resource);
@@ -731,9 +707,14 @@ class Queue<T = unknown> {
             if (this.options.leaveOnEnd) this.destroy();
             return void this.player.emit("queueEnd", this);
         }
-        const info = await YouTube.getVideo(track.url)
+        let info = await YouTube.getVideo(track.url)
             .then((x) => x.videos[0])
             .catch(Util.noop);
+        // fallback
+        if (!info)
+            info = await YouTube.search(track.author)
+                .then((x) => x[0])
+                .catch(Util.noop);
         if (!info) {
             if (this.options.leaveOnEnd) this.destroy();
             return void this.player.emit("queueEnd", this);

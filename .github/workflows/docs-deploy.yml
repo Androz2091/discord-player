@@ -15,10 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@master
 
-      - name: Install Node v14
+      - name: Install Node v18
         uses: actions/setup-node@master
         with:
-          node-version: 14
+          node-version: 18
 
       - name: Install dependencies
         run: npm install

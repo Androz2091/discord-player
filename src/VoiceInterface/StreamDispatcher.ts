@@ -129,7 +129,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     /**
      * Creates stream
      * @param {Readable|Duplex|string} src The stream source
-     * @param {object} [ops={}] Options
+     * @param {object} [ops] Options
      * @returns {AudioResource}
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

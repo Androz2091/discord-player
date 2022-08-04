@@ -1,5 +1,5 @@
 import { VoiceChannel, StageChannel, Collection, Snowflake } from "discord.js";
-import { DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
+import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection } from "@discordjs/voice";
 import { StreamDispatcher } from "./StreamDispatcher";
 
 class VoiceUtils {
@@ -20,7 +20,7 @@ class VoiceUtils {
     /**
      * Joins a voice channel, creating basic stream dispatch manager
      * @param {StageChannel|VoiceChannel} channel The voice channel
-     * @param {object} [options={}] Join options
+     * @param {object} [options] Join options
      * @returns {Promise<StreamDispatcher>}
      */
     public async connect(
@@ -39,7 +39,7 @@ class VoiceUtils {
     /**
      * Joins a voice channel
      * @param {StageChannel|VoiceChannel} [channel] The voice/stage channel to join
-     * @param {object} [options={}] Join options
+     * @param {object} [options] Join options
      * @returns {VoiceConnection}
      */
     public async join(
@@ -57,16 +57,6 @@ class VoiceUtils {
         });
 
         return conn;
-    }
-
-    public async enterReady(conn: VoiceConnection, options: { maxTime?: number } = {}) {
-        try {
-            conn = await entersState(conn, VoiceConnectionStatus.Ready, options?.maxTime ?? 20000);
-            return conn;
-        } catch (err) {
-            conn.destroy();
-            throw err;
-        }
     }
 
     /**

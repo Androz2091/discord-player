@@ -1,8 +1,8 @@
-import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, Intents } from "discord.js";
+import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, IntentsBitField } from "discord.js";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Queue } from "./Structures/Queue";
 import { VoiceUtils } from "./VoiceInterface/VoiceUtils";
-import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlayerSearchResult } from "./types/types";
+import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlayerSearchResult, PlaylistInitData } from "./types/types";
 import Track from "./Structures/Track";
 import { QueryResolver } from "./utils/QueryResolver";
 import YouTube from "youtube-sr";
@@ -34,7 +34,7 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * Creates new Discord Player
      * @param {Client} client The Discord Client
-     * @param {PlayerInitOptions} [options={}] The player init options
+     * @param {PlayerInitOptions} [options] The player init options
      */
     constructor(client: Client, options: PlayerInitOptions = {}) {
         super();
@@ -45,8 +45,8 @@ class Player extends EventEmitter<PlayerEvents> {
          */
         this.client = client;
 
-        if (this.client?.options?.intents && !new Intents(this.client?.options?.intents).has(Intents.FLAGS.GUILD_VOICE_STATES)) {
-            throw new PlayerError('client is missing "GUILD_VOICE_STATES" intent');
+        if (this.client?.options?.intents && !new IntentsBitField(this.client?.options?.intents).has(IntentsBitField.Flags.GuildVoiceStates)) {
+            throw new PlayerError('client is missing "GuildVoiceStates" intent');
         }
 
         /**
@@ -75,67 +75,78 @@ class Player extends EventEmitter<PlayerEvents> {
      */
     private _handleVoiceState(oldState: VoiceState, newState: VoiceState): void {
         const queue = this.getQueue(oldState.guild.id);
-        if (!queue) return;
+        if (!queue || !queue.connection) return;
 
-        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-            if (queue?.connection && newState.member.id === newState.guild.me.id) queue.connection.channel = newState.channel;
-            if (newState.member.id === newState.guild.me.id || (newState.member.id !== newState.guild.me.id && oldState.channelId === queue.connection.channel.id)) {
+        if (oldState.channelId && !newState.channelId && newState.member.id === newState.guild.members.me.id) {
+            try {
+                queue.destroy();
+            } catch {
+                /* noop */
+            }
+            return void this.emit("botDisconnect", queue);
+        }
+
+        if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.members.me.id) {
+            if (!oldState.serverMute && newState.serverMute) {
+                // state.serverMute can be null
+                queue.setPaused(!!newState.serverMute);
+            } else if (!oldState.suppress && newState.suppress) {
+                // state.suppress can be null
+                queue.setPaused(!!newState.suppress);
+                if (newState.suppress) {
+                    newState.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                }
+            }
+        }
+
+        if (oldState.channelId === newState.channelId && newState.member.id === newState.guild.members.me.id) {
+            if (!oldState.serverMute && newState.serverMute) {
+                // state.serverMute can be null
+                queue.setPaused(!!newState.serverMute);
+            } else if (!oldState.suppress && newState.suppress) {
+                // state.suppress can be null
+                queue.setPaused(!!newState.suppress);
+                if (newState.suppress) {
+                    newState.guild.members.me.voice.setRequestToSpeak(true).catch(Util.noop);
+                }
+            }
+        }
+
+        if (queue.connection && !newState.channelId && oldState.channelId === queue.connection.channel.id) {
+            if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+            const timeout = setTimeout(() => {
                 if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                if (!this.queues.has(queue.guild.id)) return;
+                if (queue.options.leaveOnEmpty) queue.destroy(true);
+                this.emit("channelEmpty", queue);
+            }, queue.options.leaveOnEmptyCooldown || 0).unref();
+            queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+        }
+
+        if (queue.connection && newState.channelId && newState.channelId === queue.connection.channel.id) {
+            const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
+            const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
+            if (!channelEmpty && emptyTimeout) {
+                clearTimeout(emptyTimeout);
+                queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+            }
+        }
+
+        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId && newState.member.id === newState.guild.members.me.id) {
+            if (queue.connection && newState.member.id === newState.guild.members.me.id) queue.connection.channel = newState.channel;
+            const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
+            const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
+            if (!channelEmpty && emptyTimeout) {
+                clearTimeout(emptyTimeout);
+                queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+            } else {
                 const timeout = setTimeout(() => {
-                    if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                    if (queue.connection && !Util.isVoiceEmpty(queue.connection.channel)) return;
                     if (!this.queues.has(queue.guild.id)) return;
-                    if (queue.options.leaveOnEmpty) queue.destroy();
+                    if (queue.options.leaveOnEmpty) queue.destroy(true);
                     this.emit("channelEmpty", queue);
                 }, queue.options.leaveOnEmptyCooldown || 0).unref();
                 queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
-            }
-
-            if (!oldState.channelId && newState.channelId && newState.member.id === newState.guild.me.id) {
-                if (newState.serverMute || !newState.serverMute) {
-                    queue.setPaused(newState.serverMute);
-                } else if (newState.suppress || !newState.suppress) {
-                    if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
-                    queue.setPaused(newState.suppress);
-                }
-            }
-
-            if (oldState.channelId === newState.channelId && oldState.member.id === newState.guild.me.id) {
-                if (oldState.serverMute !== newState.serverMute) {
-                    queue.setPaused(newState.serverMute);
-                } else if (oldState.suppress !== newState.suppress) {
-                    if (newState.suppress) newState.guild.me.voice.setRequestToSpeak(true).catch(Util.noop);
-                    queue.setPaused(newState.suppress);
-                }
-            }
-
-            if (oldState.member.id === this.client.user.id && !newState.channelId) {
-                queue.destroy();
-                return void this.emit("botDisconnect", queue);
-            }
-
-            if (!queue.connection || !queue.connection.channel) return;
-
-            if (!oldState.channelId || newState.channelId) {
-                const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-                const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
-
-                if (newState.channelId === queue.connection.channel.id) {
-                    if (!channelEmpty && emptyTimeout) {
-                        clearTimeout(emptyTimeout);
-                        queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
-                    }
-                }
-            } else {
-                if (oldState.channelId === queue.connection.channel.id) {
-                    if (!Util.isVoiceEmpty(queue.connection.channel)) return;
-                    const timeout = setTimeout(() => {
-                        if (!Util.isVoiceEmpty(queue.connection.channel)) return;
-                        if (!this.queues.has(queue.guild.id)) return;
-                        if (queue.options.leaveOnEmpty) queue.destroy();
-                        this.emit("channelEmpty", queue);
-                    }, queue.options.leaveOnEmptyCooldown || 0).unref();
-                    queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
-                }
             }
         }
     }
@@ -338,7 +349,9 @@ class Player extends EventEmitter<PlayerEvents> {
                 return { playlist: null, tracks: res };
             }
             case QueryType.SPOTIFY_SONG: {
-                const spotifyData = await Spotify.getData(query).catch(Util.noop);
+                const spotifyData = await Spotify(await Util.getFetch())
+                    .getData(query)
+                    .catch(Util.noop);
                 if (!spotifyData) return { playlist: null, tracks: [] };
                 const spotifyTrack = new Track(this, {
                     title: spotifyData.name,
@@ -359,7 +372,9 @@ class Player extends EventEmitter<PlayerEvents> {
             }
             case QueryType.SPOTIFY_PLAYLIST:
             case QueryType.SPOTIFY_ALBUM: {
-                const spotifyPlaylist = await Spotify.getData(query).catch(Util.noop);
+                const spotifyPlaylist = await Spotify(await Util.getFetch())
+                    .getData(query)
+                    .catch(Util.noop);
                 if (!spotifyPlaylist) return { playlist: null, tracks: [] };
 
                 const playlist = new Playlist(this, {
@@ -408,9 +423,9 @@ class Player extends EventEmitter<PlayerEvents> {
                         const data = new Track(this, {
                             title: m.track.name ?? "",
                             description: m.track.description ?? "",
-                            author: m.track.artists[0]?.name ?? "Unknown Artist",
+                            author: m.track.artists?.[0]?.name ?? "Unknown Artist",
                             url: m.track.external_urls?.spotify ?? query,
-                            thumbnail: m.track.album?.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                            thumbnail: m.track.album?.images?.[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
                             duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
                             views: 0,
                             requestedBy: options.requestedBy as User,
@@ -584,6 +599,14 @@ class Player extends EventEmitter<PlayerEvents> {
 
     *[Symbol.iterator]() {
         yield* Array.from(this.queues.values());
+    }
+
+    /**
+     * Creates `Playlist` instance
+     * @param data The data to initialize a playlist
+     */
+    createPlaylist(data: PlaylistInitData) {
+        return new Playlist(this, data);
     }
 }
 

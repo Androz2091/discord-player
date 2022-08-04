@@ -47,34 +47,33 @@ First of all, you will need to register slash commands:
 
 ```js
 const { REST } = require("@discordjs/rest");
-const { Routes } = require("discord-api-types/v9");
+const { Routes, ApplicationCommandOptionType } = require("discord.js");
 
-const commands = [{
+const commands = [
+  {
     name: "play",
     description: "Plays a song!",
     options: [
         {
             name: "query",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             description: "The song you want to play",
             required: true
         }
     ]
-}]; 
+  }
+];
 
-const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN);
+const rest = new REST({ version: "10" }).setToken("BOT_TOKEN");
 
 (async () => {
   try {
     console.log("Started refreshing application [/] commands.");
 
-    await rest.put(
-      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
-      { body: commands },
-    );
+    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: commands });
 
     console.log("Successfully reloaded application [/] commands.");
-  } catch (error) {
+  } catch(error) {
     console.error(error);
   }
 })();
@@ -83,8 +82,13 @@ const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN);
 Now you can implement your bot's logic:
 
 ```js
-const { Client, Intents } = require("discord.js");
-const client = new Discord.Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
+const { Client } = require("discord.js");
+const client = new Discord.Client({
+    intents: [
+        "Guilds",
+        "GuildVoiceStates"
+    ]
+});
 const { Player } = require("discord-player");
 
 // Create a new Player (you don't need any API Key)
@@ -98,14 +102,14 @@ client.once("ready", () => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-    if (!interaction.isCommand()) return;
+    if (!interaction.isChatInputCommand()) return;
 
     // /play track:Despacito
     // will play "Despacito" in the voice channel
     if (interaction.commandName === "play") {
         if (!interaction.member.voice.channelId) return await interaction.reply({ content: "You are not in a voice channel!", ephemeral: true });
-        if (interaction.guild.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.me.voice.channelId) return await interaction.reply({ content: "You are not in my voice channel!", ephemeral: true });
-        const query = interaction.options.get("query").value;
+        if (interaction.guild.members.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId) return await interaction.reply({ content: "You are not in my voice channel!", ephemeral: true });
+        const query = interaction.options.getString("query");
         const queue = player.createQueue(interaction.guild, {
             metadata: {
                 channel: interaction.channel
@@ -132,7 +136,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login("BOT_TOKEN");
 ```
 
 ## Supported websites
@@ -143,14 +147,14 @@ By default, discord-player supports **YouTube**, **Spotify** and **SoundCloud** 
 
 Discord Player provides an **Extractor API** that enables you to use your custom stream extractor with it. Some packages have been made by the community to add new features using this API.
 
-#### [@discord-player/extractor](https://github.com/Snowflake107/discord-player-extractors) (optional)
+#### [@discord-player/extractor](https://github.com/DevAndromeda/discord-player-extractors) (optional)
 
 Optional package that adds support for `vimeo`, `reverbnation`, `facebook`, `attachment links` and `lyrics`.
 You just need to install it using `npm i --save @discord-player/extractor` (discord-player will automatically detect and use it).
 
-#### [@discord-player/downloader](https://github.com/DevSnowflake/discord-player-downloader) (optional)
+#### [@discord-player/downloader](https://github.com/DevAndromeda/discord-player-downloader) (optional)
 
-`@discord-player/downloader` is an optional package that brings support for +700 websites. The documentation is available [here](https://github.com/DevSnowflake/discord-player-downloader).
+`@discord-player/downloader` is an optional package that brings support for +700 websites. The documentation is available [here](https://github.com/DevAndromeda/discord-player-downloader).
 
 ## Examples of bots made with Discord Player
 
