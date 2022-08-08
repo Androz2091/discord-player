@@ -1,6 +1,6 @@
 {
   "name": "discord-player",
-  "version": "5.3.0",
+  "version": "5.3.1",
   "description": "Complete framework to facilitate music commands using discord.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,7 +18,7 @@
     "./dist/*": "./dist/*"
   },
   "scripts": {
-    "dev": "cd example/test && ts-node index.ts",
+    "dev": "cd examples/test && ts-node index.ts",
     "build": "rimraf dist && tsc && npm run build:esm",
     "build:check": "tsc --noEmit --incremental false",
     "prepublishOnly": "rollup-type-bundler -e stream",
