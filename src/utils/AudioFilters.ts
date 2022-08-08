@@ -54,18 +54,18 @@ class AudioFilters {
     }
 
     public static *[Symbol.iterator](): IterableIterator<{ name: FiltersName; value: string }> {
-        for (const [k, v] of Object.entries(this)) {
-            if (typeof this.filters[k as FiltersName] === "string") yield { name: k as FiltersName, value: v as string };
+        for (const [k, v] of Object.entries(this.filters)) {
+            yield { name: k as FiltersName, value: v as string };
         }
     }
 
     public static get names() {
-        return Object.keys(this).filter((p) => !["names", "length"].includes(p) && typeof this.filters[p as FiltersName] !== "function") as FiltersName[];
+        return Object.keys(this.filters) as FiltersName[];
     }
 
     // @ts-expect-error AudioFilters.length
     public static get length() {
-        return Object.keys(this).filter((p) => !["names", "length"].includes(p) && typeof this.filters[p as FiltersName] !== "function").length;
+        return this.names.length;
     }
 
     public static toString() {
@@ -77,7 +77,7 @@ class AudioFilters {
      * @param filter The filter name
      * @returns
      */
-    public static create(filters?: FiltersName[]) {
+    public static create<K extends FiltersName>(filters?: K[]) {
         if (!filters || !Array.isArray(filters)) return this.toString();
         return filters
             .filter((predicate) => typeof predicate === "string")
