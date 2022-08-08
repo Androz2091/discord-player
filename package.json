@@ -18,7 +18,7 @@
     "./dist/*": "./dist/*"
   },
   "scripts": {
-    "dev": "cd example/test && ts-node index.ts",
+    "dev": "cd examples/test && ts-node index.ts",
     "build": "rimraf dist && tsc && npm run build:esm",
     "build:check": "tsc --noEmit --incremental false",
     "prepublishOnly": "rollup-type-bundler -e stream",
