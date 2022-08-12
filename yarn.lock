@@ -1121,7 +1121,7 @@ lunr@^2.3.9:
   resolved "https://registry.yarnpkg.com/lunr/-/lunr-2.3.9.tgz#18b123142832337dd6e964df1a5a7707b25d35e1"
   integrity sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==
 
-m3u8stream@^0.8.4, m3u8stream@^0.8.6:
+m3u8stream@^0.8.3, m3u8stream@^0.8.4:
   version "0.8.6"
   resolved "https://registry.yarnpkg.com/m3u8stream/-/m3u8stream-0.8.6.tgz#0d6de4ce8ee69731734e6b616e7b05dd9d9a55b1"
   integrity sha512-LZj8kIVf9KCphiHmH7sbFQTVe4tOemb202fWwvJwR9W5ENW/1hxJN6ksAWGhQgSBSa3jyWhnjKU1Fw1GaOdbyA==
@@ -1164,7 +1164,7 @@ micromatch@^4.0.4:
     braces "^3.0.1"
     picomatch "^2.2.3"
 
-miniget@^4.2.2:
+miniget@^4.0.0, miniget@^4.2.2:
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/miniget/-/miniget-4.2.2.tgz#db20320f265efdc4c1826a0be431d56753074475"
   integrity sha512-a7voNL1N5lDMxvTMExOkg+Fq89jM2vY8pAi9ZEWzZtfNmdfP6RXkvUtFnCAXoCv2T9k1v/fUJVaAEuepGcvLYA==
@@ -1714,11 +1714,11 @@ youtube-sr@^4.3.0:
   resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.3.0.tgz#6c3ab661b0c2572946d1098451ed7699d7ad4be5"
   integrity sha512-cRMOeJZi/DYIRqru0R9UsBLwkj4tQvekldnCj4MZOT+ijlfesrllbUDXqKuA2RbYA4ByJlFf9wxZ1ndvuCJ5Ow==
 
-ytdl-core@^4.11.0:
-  version "4.11.0"
-  resolved "https://registry.yarnpkg.com/ytdl-core/-/ytdl-core-4.11.0.tgz#79a3ea94d9d662b4b3acecdb1372ed3f1a9ea9db"
-  integrity sha512-Q3hCLiUA9AOGQXzPvno14GN+HgF9wsO1ZBHlj0COTcyxjIyFpWvMfii0UC4/cAbVaIjEdbWB71GdcGuc4J1Lmw==
+ytdl-core@==4.9.1:
+  version "4.9.1"
+  resolved "https://registry.yarnpkg.com/ytdl-core/-/ytdl-core-4.9.1.tgz#f587e2bd8329b5133c0bac4ce5ee1f3c7a1175a9"
+  integrity sha512-6Jbp5RDhUEozlaJQAR+l8oV8AHsx3WUXxSyPxzE6wOIAaLql7Hjiy0ZM58wZoyj1YEenlEPjEqcJIjKYKxvHtQ==
   dependencies:
-    m3u8stream "^0.8.6"
-    miniget "^4.2.2"
+    m3u8stream "^0.8.3"
+    miniget "^4.0.0"
     sax "^1.1.3"
