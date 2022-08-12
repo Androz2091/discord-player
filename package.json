@@ -72,7 +72,7 @@
     "tiny-typed-emitter": "^2.1.0",
     "tslib": "^2.4.0",
     "youtube-sr": "^4.3.0",
-    "ytdl-core": "==4.9.1"
+    "ytdl-core": "4.9.1"
   },
   "devDependencies": {
     "@discordjs/ts-docgen": "^0.4.1",
