@@ -101,6 +101,7 @@ class Queue<T = unknown> {
                 leaveOnEnd: true,
                 leaveOnStop: true,
                 leaveOnEmpty: true,
+                leaveOnEndCooldown: 1000,
                 leaveOnEmptyCooldown: 1000,
                 autoSelfDeaf: true,
                 ytdlOptions: {
@@ -194,8 +195,7 @@ class Queue<T = unknown> {
             this.player.emit("trackEnd", this, resource.metadata);
 
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
-                if (this.options.leaveOnEnd) this.destroy();
-                this.player.emit("queueEnd", this);
+                this.emitEnd();
             } else if (!this.tracks.length && this.repeatMode === QueueRepeatMode.AUTOPLAY) {
                 this._handleAutoplay(Util.last(this.previousTracks));
             } else {
@@ -208,6 +208,25 @@ class Queue<T = unknown> {
         });
 
         return this;
+    }
+
+    private emitEnd() {
+        const timeout = setTimeout(() => {
+            if (!this.player.queues.has(this.guild.id)) return;
+            if (this.tracks.length || this.current) return;
+            if (this.options.leaveOnEnd) this.destroy();
+            this.player.emit("queueEnd", this);
+        }, this.options.leaveOnEndCooldown || 0).unref();
+
+        this._cooldownsTimeout.set(`queueEnd_${this.guild.id}`, timeout);
+    }
+
+    private refreshEndCooldown() {
+        const existingTimeout = this._cooldownsTimeout.get(`queueEnd_${this.guild.id}`);
+        if (this.tracks.length || this.current) {
+            clearTimeout(existingTimeout);
+            this._cooldownsTimeout.delete(`queueEnd_${this.guild.id}`);
+        }
     }
 
     /**
@@ -245,6 +264,7 @@ class Queue<T = unknown> {
         if (this.#watchDestroyed()) return;
         if (!(track instanceof Track)) throw new PlayerError("invalid track", ErrorStatusCode.INVALID_TRACK);
         this.tracks.push(track);
+        this.refreshEndCooldown();
         this.player.emit("trackAdd", this, track);
     }
 
@@ -256,6 +276,7 @@ class Queue<T = unknown> {
         if (this.#watchDestroyed()) return;
         if (!tracks.every((y) => y instanceof Track)) throw new PlayerError("invalid track", ErrorStatusCode.INVALID_TRACK);
         this.tracks.push(...tracks);
+        this.refreshEndCooldown();
         this.player.emit("tracksAdd", this, tracks);
     }
 
@@ -701,8 +722,7 @@ class Queue<T = unknown> {
     private async _handleAutoplay(track: Track): Promise<void> {
         if (this.#watchDestroyed()) return;
         if (!track || ![track.source, track.raw?.source].includes("youtube")) {
-            if (this.options.leaveOnEnd) this.destroy();
-            return void this.player.emit("queueEnd", this);
+            return this.emitEnd();
         }
         let info = await YouTube.getVideo(track.url)
             .then((x) => x.videos[0])
@@ -713,8 +733,7 @@ class Queue<T = unknown> {
                 .then((x) => x[0])
                 .catch(Util.noop);
         if (!info) {
-            if (this.options.leaveOnEnd) this.destroy();
-            return void this.player.emit("queueEnd", this);
+            return this.emitEnd();
         }
 
         const nextTrack = new Track(this.player, {

@@ -130,6 +130,7 @@ export interface PlayerProgressbarOptions {
  * @property {boolean} [leaveOnStop=true] If it should leave on stop
  * @property {boolean} [leaveOnEmpty=true] If it should leave on empty
  * @property {number} [leaveOnEmptyCooldown=1000] The cooldown in ms
+ * @property {number} [leaveOnEndCooldown=1000] The cooldown in ms
  * @property {boolean} [autoSelfDeaf=true] If it should set the bot in deaf mode
  * @property {YTDLDownloadOptions} [ytdlOptions] The youtube download options
  * @property {number} [initialVolume=100] The initial player volume
@@ -142,6 +143,7 @@ export interface PlayerProgressbarOptions {
  */
 export interface PlayerOptions {
     leaveOnEnd?: boolean;
+    leaveOnEndCooldown?: number;
     leaveOnStop?: boolean;
     leaveOnEmpty?: boolean;
     leaveOnEmptyCooldown?: number;
