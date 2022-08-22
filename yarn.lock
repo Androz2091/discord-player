@@ -1710,9 +1710,9 @@ yocto-queue@^0.1.0:
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
 youtube-sr@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.3.0.tgz#6c3ab661b0c2572946d1098451ed7699d7ad4be5"
-  integrity sha512-cRMOeJZi/DYIRqru0R9UsBLwkj4tQvekldnCj4MZOT+ijlfesrllbUDXqKuA2RbYA4ByJlFf9wxZ1ndvuCJ5Ow==
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/youtube-sr/-/youtube-sr-4.3.1.tgz#46c359d4b84232d2f0cc0ba83acdfef717e18cac"
+  integrity sha512-PTR2WJZxe+Cd7+niMdQctm/dudzhF5fwhtpIZfQjY08IZn5C0noj8bJdmXZ9jpyuzxyquKhjJDTTzjpfUztdpw==
 
 ytdl-core@^4.11.0:
   version "4.11.0"
