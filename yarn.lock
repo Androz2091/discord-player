@@ -94,15 +94,15 @@
     strip-json-comments "^3.1.1"
 
 "@favware/rollup-type-bundler@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/@favware/rollup-type-bundler/-/rollup-type-bundler-1.0.10.tgz#3b71310ff76cd5d5b3d162b393cac5a49a9adf63"
-  integrity sha512-7UDim5gncFBA58XLlXUR6jTmuwZCEQ/wATIALGfxf3jklXA/gnWlpfww3uaFEv5Oy5GUsOvqIcHk0bCMGWklDw==
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/@favware/rollup-type-bundler/-/rollup-type-bundler-1.0.11.tgz#39551ffea5dd1af0a358c6023d5ceb684fee8787"
+  integrity sha512-QhP2vLE2j1yR1iWz+ltyR3sEFHsXmgTq0X4lsBM6KEibLbfVFPGrP77kNPo3ZLzkmVprFrZOFLRLbqhQiGs0+Q==
   dependencies:
-    "@sapphire/utilities" "^3.8.0"
+    "@sapphire/utilities" "^3.9.2"
     colorette "^2.0.19"
     commander "^9.4.0"
     js-yaml "^4.1.0"
-    rollup "^2.77.2"
+    rollup "^2.78.1"
     rollup-plugin-dts "^4.2.2"
     typescript "^4.7.4"
 
@@ -182,10 +182,10 @@
   resolved "https://registry.yarnpkg.com/@sapphire/snowflake/-/snowflake-3.2.2.tgz#faacdc1b5f7c43145a71eddba917de2b707ef780"
   integrity sha512-ula2O0kpSZtX9rKXNeQMrHwNd7E4jPDJYUXmEGTFdMRfyfMw+FPyh04oKMjAiDuOi64bYgVkOV3MjK+loImFhQ==
 
-"@sapphire/utilities@^3.8.0":
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/@sapphire/utilities/-/utilities-3.8.0.tgz#a75b0ed7107d769a453973b4e609ec031319ca65"
-  integrity sha512-y33Uuk11z07qjUCuDOHihFF/dF1pq4YfSrgNNRQk6Y0yy5buxfoA8OPTGr4YTIdGq9359ncfIty+HT9htMbygQ==
+"@sapphire/utilities@^3.9.2":
+  version "3.9.2"
+  resolved "https://registry.yarnpkg.com/@sapphire/utilities/-/utilities-3.9.2.tgz#fba479e5d7ee7e3a604caa6c98d48bce0706d45d"
+  integrity sha512-CG8mFPse+VDUVenj3PqZyh9PATFd/pzrQaX2gZqv0f7AzGnlyfm/ygh0tnQRVKpMDFr39uCQqVse8i0f51DAkg==
 
 "@tokenizer/token@^0.3.0":
   version "0.3.0"
@@ -1381,10 +1381,10 @@ rollup-plugin-dts@^4.2.2:
   optionalDependencies:
     "@babel/code-frame" "^7.16.7"
 
-rollup@^2.77.2:
-  version "2.77.2"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.77.2.tgz#6b6075c55f9cc2040a5912e6e062151e42e2c4e3"
-  integrity sha512-m/4YzYgLcpMQbxX3NmAqDvwLATZzxt8bIegO78FZLl+lAgKJBd1DRAOeEiZcKOIOPjxE6ewHWHNgGEalFXuz1g==
+rollup@^2.78.1:
+  version "2.78.1"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.78.1.tgz#52fe3934d9c83cb4f7c4cb5fb75d88591be8648f"
+  integrity sha512-VeeCgtGi4P+o9hIg+xz4qQpRl6R401LWEXBmxYKOV4zlF82lyhgh2hTZnheFUbANE8l2A41F458iwj2vEYaXJg==
   optionalDependencies:
     fsevents "~2.3.2"
 
