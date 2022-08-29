@@ -176,7 +176,7 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * Returns the queue if available
      * @param {GuildResolvable} guild The guild id
-     * @returns {Queue}
+     * @returns {Queue | null}
      */
     getQueue<T = unknown>(guild: GuildResolvable): Queue<T> | null {
         guild = this.client.guilds.resolve(guild);
