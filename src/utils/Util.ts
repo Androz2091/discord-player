@@ -24,6 +24,7 @@ class Util {
      * @returns {TimeData}
      */
     static parseMS(milliseconds: number) {
+        if (isNaN(milliseconds)) milliseconds = 0;
         const round = milliseconds > 0 ? Math.floor : Math.ceil;
 
         return {

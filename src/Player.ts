@@ -359,10 +359,11 @@ class Player extends EventEmitter<PlayerEvents> {
                     author: spotifyData.artists[0]?.name ?? "Unknown Artist",
                     url: spotifyData.external_urls?.spotify ?? query,
                     thumbnail:
-                        spotifyData.album?.images[0]?.url ?? spotifyData.preview_url?.length
-                            ? `https://i.scdn.co/image/${spotifyData.preview_url?.split("?cid=")[1]}`
-                            : "https://www.scdn.co/i/_global/twitter_card-default.jpg",
-                    duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms)),
+                        (spotifyData.coverArt?.sources?.[0]?.url ??
+                            spotifyData.album?.images[0]?.url ??
+                            (spotifyData.preview_url?.length && `https://i.scdn.co/image/${spotifyData.preview_url?.split("?cid=")[1]}`)) ||
+                        "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                    duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms ?? spotifyData.duration ?? spotifyData.maxDuration)),
                     views: 0,
                     requestedBy: options.requestedBy,
                     source: "spotify"
@@ -380,7 +381,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 const playlist = new Playlist(this, {
                     title: spotifyPlaylist.name ?? spotifyPlaylist.title,
                     description: spotifyPlaylist.description ?? "",
-                    thumbnail: spotifyPlaylist.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                    thumbnail: spotifyPlaylist.coverArt?.sources?.[0]?.url ?? spotifyPlaylist.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
                     type: spotifyPlaylist.type,
                     source: "spotify",
                     author:
