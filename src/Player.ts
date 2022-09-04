@@ -176,12 +176,12 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * Returns the queue if available
      * @param {GuildResolvable} guild The guild id
-     * @returns {Queue}
+     * @returns {Queue | undefined}
      */
-    getQueue<T = unknown>(guild: GuildResolvable) {
+    getQueue<T = unknown>(guild: GuildResolvable): Queue<T> | undefined {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
-        return this.queues.get(guild.id) as Queue<T>;
+        return this.queues.get(guild.id);
     }
 
     /**
