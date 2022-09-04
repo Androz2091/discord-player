@@ -661,7 +661,9 @@ class Queue<T = unknown> {
             if (this.options.spotifyBridge && track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
                     .then((res) => res[0].url)
-                    .catch(() => null);
+                    .catch(() => {
+                        /* void */
+                    });
                 spotifyResolved = true;
             }
 

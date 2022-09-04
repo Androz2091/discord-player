@@ -181,7 +181,7 @@ class Player extends EventEmitter<PlayerEvents> {
     getQueue<T = unknown>(guild: GuildResolvable): Queue<T> | undefined {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
-        return this.queues.get(guild.id);
+        return this.queues.get(guild.id) as Queue<T>;
     }
 
     /**
