@@ -481,9 +481,11 @@ export interface PlaylistJSON {
  * @property {boolean} [autoRegisterExtractor=true] If it should automatically register `@discord-player/extractor`
  * @property {YTDLDownloadOptions} [ytdlOptions] The options passed to `ytdl-core`
  * @property {number} [connectionTimeout=20000] The voice connection timeout
+ * @property {boolean} [smoothVolume=true] Toggle smooth volume transition
  */
 export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
     ytdlOptions?: downloadOptions;
     connectionTimeout?: number;
+    smoothVolume?: boolean;
 }

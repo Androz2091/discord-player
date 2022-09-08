@@ -131,7 +131,7 @@ export class VolumeTransformer extends Transform {
     }
 
     smoothingEnabled() {
-        return Number.isFinite(this._smoothing) && this._smoothing > 0;
+        return typeof this._smoothing === "number" && !Number.isNaN(this._smoothing) && Number.isFinite(this._smoothing) && this._smoothing > 0;
     }
 
     get hasSmoothness() {

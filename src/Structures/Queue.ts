@@ -121,6 +121,18 @@ class Queue<T = unknown> {
     }
 
     /**
+     * Forces next play
+     * @returns {Promise<void>}
+     */
+    public async forceNext() {
+        if (this.connection.audioResource) {
+            this.connection.emit("finish", this.connection.audioResource);
+        } else if (this.tracks.length) {
+            await this.play();
+        }
+    }
+
+    /**
      * Returns current track
      * @type {Track}
      */

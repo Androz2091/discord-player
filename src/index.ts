@@ -11,6 +11,7 @@ export { Queue } from "./Structures/Queue";
 export { Track } from "./Structures/Track";
 export { VoiceUtils } from "./VoiceInterface/VoiceUtils";
 export { VoiceEvents, StreamDispatcher } from "./VoiceInterface/StreamDispatcher";
+export * from "./VoiceInterface/VolumeTransformer";
 export { Util } from "./utils/Util";
 export * from "./types/types";
 export * from "./utils/FFmpegStream";

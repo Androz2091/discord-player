@@ -24,7 +24,8 @@ class Player extends EventEmitter<PlayerEvents> {
         ytdlOptions: {
             highWaterMark: 1 << 25
         },
-        connectionTimeout: 20000
+        connectionTimeout: 20000,
+        smoothVolume: true
     };
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
@@ -164,7 +165,7 @@ class Player extends EventEmitter<PlayerEvents> {
 
         const _meta = queueInitOptions.metadata;
         delete queueInitOptions["metadata"];
-        queueInitOptions.volumeSmoothness ??= 0.08;
+        queueInitOptions.volumeSmoothness ??= this.options.smoothVolume ? 0.08 : 0;
         queueInitOptions.ytdlOptions ??= this.options.ytdlOptions;
         const queue = new Queue(this, guild, queueInitOptions);
         queue.metadata = _meta;
