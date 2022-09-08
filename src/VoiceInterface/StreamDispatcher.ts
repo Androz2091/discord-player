@@ -199,7 +199,9 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     async playStream(resource: AudioResource<Track> = this.audioResource) {
         if (!resource) throw new PlayerError("Audio resource is not available!", ErrorStatusCode.NO_AUDIO_RESOURCE);
-        if (resource.ended) return void this.emit("error", new PlayerError("Cannot play a resource that has already ended.") as unknown as AudioPlayerError);
+        if (resource.ended) {
+            return void this.emit("finish", resource);
+        }
         if (!this.audioResource) this.audioResource = resource;
         if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) {
             try {
