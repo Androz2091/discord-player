@@ -90,7 +90,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * Generates statistics
      */
     generateStatistics() {
-        return this.queues.map(m => m.generateStatistics());
+        return this.queues.map((m) => m.generateStatistics());
     }
 
     /**
