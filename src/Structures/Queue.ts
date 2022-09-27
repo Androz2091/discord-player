@@ -12,6 +12,8 @@ import { PlayerError, ErrorStatusCode } from "./PlayerError";
 import type { Readable } from "stream";
 import { VolumeTransformer } from "../VoiceInterface/VolumeTransformer";
 import { createFFmpegStream } from "../utils/FFmpegStream";
+import os from "os";
+import { parentPort } from "worker_threads";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -641,6 +643,41 @@ class Queue<T = unknown> {
     get totalTime(): number {
         if (this.#watchDestroyed()) return;
         return this.tracks.length > 0 ? this.tracks.map((t) => t.durationMS).reduce((p, c) => p + c) : 0;
+    }
+
+    /**
+     * Generates statistics
+     */
+    generateStatistics() {
+        return {
+            guild: this.guild.id,
+            memory: process.memoryUsage(),
+            tracks: this.tracks.length,
+            os: {
+                cpuCount: os.cpus().length,
+                totalMem: os.totalmem(),
+                freeMem: os.freemem(),
+                platform: process.platform
+            },
+            isShard: typeof process.send === "function" || parentPort != null,
+            latency: {
+                client: this.player.client.ws.ping,
+                udp: this.connection.voiceConnection.ping.udp,
+                ws: this.connection.voiceConnection.ping.ws,
+                eventLoop: this.player.eventLoopLag
+            },
+            subscribers: this.player.queues.size,
+            connections: this.player.queues.filter((x) => x.connection?.voiceConnection != null).size,
+            extractors: this.player.extractors.size
+        };
+    }
+
+    /**
+     * Voice connection latency in ms
+     * @type {number}
+     */
+    public get ping() {
+        return this.connection.voiceConnection.ping.udp;
     }
 
     /**

@@ -25,12 +25,14 @@ class Player extends EventEmitter<PlayerEvents> {
             highWaterMark: 1 << 25
         },
         connectionTimeout: 20000,
-        smoothVolume: true
+        smoothVolume: true,
+        lagMonitor: 30000
     };
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
     public readonly extractors = new Collection<string, ExtractorModel>();
     public requiredEvents = ["error", "connectionError"] as string[];
+    #lastLatency = -1;
 
     /**
      * Creates new Discord Player
@@ -65,6 +67,30 @@ class Player extends EventEmitter<PlayerEvents> {
                 ["Attachment", "Facebook", "Reverbnation", "Vimeo"].forEach((ext) => void this.use(ext, nv[ext]));
             }
         }
+
+        if (typeof this.options.lagMonitor === "number" && this.options.lagMonitor > 0) {
+            setInterval(() => {
+                const start = performance.now();
+                setTimeout(() => {
+                    this.#lastLatency = performance.now() - start;
+                }, 0).unref();
+            }, this.options.lagMonitor).unref();
+        }
+    }
+
+    /**
+     * Event loop lag
+     * @type {number}
+     */
+    get eventLoopLag() {
+        return this.#lastLatency;
+    }
+
+    /**
+     * Generates statistics
+     */
+    generateStatistics() {
+        return this.queues.map(m => m.generateStatistics());
     }
 
     /**
