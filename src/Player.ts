@@ -24,12 +24,15 @@ class Player extends EventEmitter<PlayerEvents> {
         ytdlOptions: {
             highWaterMark: 1 << 25
         },
-        connectionTimeout: 20000
+        connectionTimeout: 20000,
+        smoothVolume: true,
+        lagMonitor: 30000
     };
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
     public readonly extractors = new Collection<string, ExtractorModel>();
     public requiredEvents = ["error", "connectionError"] as string[];
+    #lastLatency = -1;
 
     /**
      * Creates new Discord Player
@@ -64,6 +67,30 @@ class Player extends EventEmitter<PlayerEvents> {
                 ["Attachment", "Facebook", "Reverbnation", "Vimeo"].forEach((ext) => void this.use(ext, nv[ext]));
             }
         }
+
+        if (typeof this.options.lagMonitor === "number" && this.options.lagMonitor > 0) {
+            setInterval(() => {
+                const start = performance.now();
+                setTimeout(() => {
+                    this.#lastLatency = performance.now() - start;
+                }, 0).unref();
+            }, this.options.lagMonitor).unref();
+        }
+    }
+
+    /**
+     * Event loop lag
+     * @type {number}
+     */
+    get eventLoopLag() {
+        return this.#lastLatency;
+    }
+
+    /**
+     * Generates statistics
+     */
+    generateStatistics() {
+        return this.queues.map((m) => m.generateStatistics());
     }
 
     /**
@@ -164,7 +191,7 @@ class Player extends EventEmitter<PlayerEvents> {
 
         const _meta = queueInitOptions.metadata;
         delete queueInitOptions["metadata"];
-        queueInitOptions.volumeSmoothness ??= 0.08;
+        queueInitOptions.volumeSmoothness ??= this.options.smoothVolume ? 0.08 : 0;
         queueInitOptions.ytdlOptions ??= this.options.ytdlOptions;
         const queue = new Queue(this, guild, queueInitOptions);
         queue.metadata = _meta;
@@ -176,9 +203,9 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * Returns the queue if available
      * @param {GuildResolvable} guild The guild id
-     * @returns {Queue}
+     * @returns {Queue | undefined}
      */
-    getQueue<T = unknown>(guild: GuildResolvable) {
+    getQueue<T = unknown>(guild: GuildResolvable): Queue<T> | undefined {
         guild = this.client.guilds.resolve(guild);
         if (!guild) throw new PlayerError("Unknown Guild", ErrorStatusCode.UNKNOWN_GUILD);
         return this.queues.get(guild.id) as Queue<T>;
@@ -359,10 +386,11 @@ class Player extends EventEmitter<PlayerEvents> {
                     author: spotifyData.artists[0]?.name ?? "Unknown Artist",
                     url: spotifyData.external_urls?.spotify ?? query,
                     thumbnail:
-                        spotifyData.album?.images[0]?.url ?? spotifyData.preview_url?.length
-                            ? `https://i.scdn.co/image/${spotifyData.preview_url?.split("?cid=")[1]}`
-                            : "https://www.scdn.co/i/_global/twitter_card-default.jpg",
-                    duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms)),
+                        (spotifyData.coverArt?.sources?.[0]?.url ??
+                            spotifyData.album?.images[0]?.url ??
+                            (spotifyData.preview_url?.length && `https://i.scdn.co/image/${spotifyData.preview_url?.split("?cid=")[1]}`)) ||
+                        "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                    duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms ?? spotifyData.duration ?? spotifyData.maxDuration)),
                     views: 0,
                     requestedBy: options.requestedBy,
                     source: "spotify"
@@ -380,7 +408,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 const playlist = new Playlist(this, {
                     title: spotifyPlaylist.name ?? spotifyPlaylist.title,
                     description: spotifyPlaylist.description ?? "",
-                    thumbnail: spotifyPlaylist.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                    thumbnail: spotifyPlaylist.coverArt?.sources?.[0]?.url ?? spotifyPlaylist.images[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
                     type: spotifyPlaylist.type,
                     source: "spotify",
                     author:

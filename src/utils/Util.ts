@@ -1,5 +1,6 @@
 import { StageChannel, VoiceChannel } from "discord.js";
 import { TimeData } from "../types/types";
+import { setTimeout } from "timers/promises";
 
 class Util {
     /**
@@ -24,6 +25,7 @@ class Util {
      * @returns {TimeData}
      */
     static parseMS(milliseconds: number) {
+        if (isNaN(milliseconds)) milliseconds = 0;
         const round = milliseconds > 0 ? Math.floor : Math.ceil;
 
         return {
@@ -91,14 +93,14 @@ class Util {
      * @returns {Promise<unknown>}
      */
     static wait(time: number) {
-        return new Promise((r) => setTimeout(r, time).unref());
+        return setTimeout(time, undefined, { ref: false });
     }
 
     static noop() {} // eslint-disable-line @typescript-eslint/no-empty-function
 
     static async getFetch() {
         if ("fetch" in globalThis) return globalThis.fetch;
-        for (const lib of ["undici", "node-fetch"]) {
+        for (const lib of ["node-fetch", "undici"]) {
             try {
                 return await import(lib).then((res) => res.fetch || res.default?.fetch || res.default);
             } catch {

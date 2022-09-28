@@ -130,6 +130,7 @@ export interface PlayerProgressbarOptions {
  * @property {boolean} [leaveOnStop=true] If it should leave on stop
  * @property {boolean} [leaveOnEmpty=true] If it should leave on empty
  * @property {number} [leaveOnEmptyCooldown=1000] The cooldown in ms
+ * @property {number} [leaveOnEndCooldown=1000] The cooldown in ms
  * @property {boolean} [autoSelfDeaf=true] If it should set the bot in deaf mode
  * @property {YTDLDownloadOptions} [ytdlOptions] The youtube download options
  * @property {number} [initialVolume=100] The initial player volume
@@ -142,6 +143,7 @@ export interface PlayerProgressbarOptions {
  */
 export interface PlayerOptions {
     leaveOnEnd?: boolean;
+    leaveOnEndCooldown?: number;
     leaveOnStop?: boolean;
     leaveOnEmpty?: boolean;
     leaveOnEmptyCooldown?: number;
@@ -479,9 +481,13 @@ export interface PlaylistJSON {
  * @property {boolean} [autoRegisterExtractor=true] If it should automatically register `@discord-player/extractor`
  * @property {YTDLDownloadOptions} [ytdlOptions] The options passed to `ytdl-core`
  * @property {number} [connectionTimeout=20000] The voice connection timeout
+ * @property {boolean} [smoothVolume=true] Toggle smooth volume transition
+ * @property {boolean} [lagMonitor=30000] Time in ms to re-monitor event loop lag
  */
 export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
     ytdlOptions?: downloadOptions;
     connectionTimeout?: number;
+    smoothVolume?: boolean;
+    lagMonitor?: number;
 }

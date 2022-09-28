@@ -12,6 +12,8 @@ import { PlayerError, ErrorStatusCode } from "./PlayerError";
 import type { Readable } from "stream";
 import { VolumeTransformer } from "../VoiceInterface/VolumeTransformer";
 import { createFFmpegStream } from "../utils/FFmpegStream";
+import os from "os";
+import { parentPort } from "worker_threads";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -28,7 +30,6 @@ class Queue<T = unknown> {
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
     private _filtersUpdate = false;
-    #lastVolume = 0;
     #destroyed = false;
     public onBeforeCreateStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable | undefined> = null;
 
@@ -101,6 +102,7 @@ class Queue<T = unknown> {
                 leaveOnEnd: true,
                 leaveOnStop: true,
                 leaveOnEmpty: true,
+                leaveOnEndCooldown: 1000,
                 leaveOnEmptyCooldown: 1000,
                 autoSelfDeaf: true,
                 ytdlOptions: {
@@ -117,6 +119,18 @@ class Queue<T = unknown> {
         if ("onBeforeCreateStream" in this.options) this.onBeforeCreateStream = this.options.onBeforeCreateStream;
 
         this.player.emit("debug", this, `Queue initialized:\n\n${this.player.scanDeps()}`);
+    }
+
+    /**
+     * Forces next play
+     * @returns {Promise<void>}
+     */
+    public async forceNext() {
+        if (this.connection.audioResource) {
+            this.connection.emit("finish", this.connection.audioResource);
+        } else if (this.tracks.length) {
+            await this.play();
+        }
     }
 
     /**
@@ -194,8 +208,7 @@ class Queue<T = unknown> {
             this.player.emit("trackEnd", this, resource.metadata);
 
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
-                if (this.options.leaveOnEnd) this.destroy();
-                this.player.emit("queueEnd", this);
+                this.emitEnd();
             } else if (!this.tracks.length && this.repeatMode === QueueRepeatMode.AUTOPLAY) {
                 this._handleAutoplay(Util.last(this.previousTracks));
             } else {
@@ -208,6 +221,25 @@ class Queue<T = unknown> {
         });
 
         return this;
+    }
+
+    private emitEnd() {
+        const timeout = setTimeout(() => {
+            if (!this.player.queues.has(this.guild.id)) return;
+            if (this.tracks.length || this.current) return;
+            if (this.options.leaveOnEnd) this.destroy();
+            this.player.emit("queueEnd", this);
+        }, this.options.leaveOnEndCooldown || 0).unref();
+
+        this._cooldownsTimeout.set(`queueEnd_${this.guild.id}`, timeout);
+    }
+
+    private refreshEndCooldown() {
+        const existingTimeout = this._cooldownsTimeout.get(`queueEnd_${this.guild.id}`);
+        if (this.tracks.length || this.current) {
+            clearTimeout(existingTimeout);
+            this._cooldownsTimeout.delete(`queueEnd_${this.guild.id}`);
+        }
     }
 
     /**
@@ -245,6 +277,7 @@ class Queue<T = unknown> {
         if (this.#watchDestroyed()) return;
         if (!(track instanceof Track)) throw new PlayerError("invalid track", ErrorStatusCode.INVALID_TRACK);
         this.tracks.push(track);
+        this.refreshEndCooldown();
         this.player.emit("trackAdd", this, track);
     }
 
@@ -256,6 +289,7 @@ class Queue<T = unknown> {
         if (this.#watchDestroyed()) return;
         if (!tracks.every((y) => y instanceof Track)) throw new PlayerError("invalid track", ErrorStatusCode.INVALID_TRACK);
         this.tracks.push(...tracks);
+        this.refreshEndCooldown();
         this.player.emit("tracksAdd", this, tracks);
     }
 
@@ -290,7 +324,6 @@ class Queue<T = unknown> {
     setVolume(amount: number) {
         if (this.#watchDestroyed()) return;
         if (!this.connection) return false;
-        this.#lastVolume = amount;
         this.options.initialVolume = amount;
         return this.connection.setVolume(amount);
     }
@@ -613,6 +646,41 @@ class Queue<T = unknown> {
     }
 
     /**
+     * Generates statistics
+     */
+    generateStatistics() {
+        return {
+            guild: this.guild.id,
+            memory: process.memoryUsage(),
+            tracks: this.tracks.length,
+            os: {
+                cpuCount: os.cpus().length,
+                totalMem: os.totalmem(),
+                freeMem: os.freemem(),
+                platform: process.platform
+            },
+            isShard: typeof process.send === "function" || parentPort != null,
+            latency: {
+                client: this.player.client.ws.ping,
+                udp: this.connection.voiceConnection.ping.udp,
+                ws: this.connection.voiceConnection.ping.ws,
+                eventLoop: this.player.eventLoopLag
+            },
+            subscribers: this.player.queues.size,
+            connections: this.player.queues.filter((x) => x.connection?.voiceConnection != null).size,
+            extractors: this.player.extractors.size
+        };
+    }
+
+    /**
+     * Voice connection latency in ms
+     * @type {number}
+     */
+    public get ping() {
+        return this.connection.voiceConnection.ping.udp;
+    }
+
+    /**
      * Play stream in a voice/stage channel
      * @param {Track} [src] The track to play (if empty, uses first track from the queue)
      * @param {PlayOptions} [options] The options
@@ -640,7 +708,9 @@ class Queue<T = unknown> {
             if (this.options.spotifyBridge && track.raw.source === "spotify" && !track.raw.engine) {
                 track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: "video" })
                     .then((res) => res[0].url)
-                    .catch(() => null);
+                    .catch(() => {
+                        /* void */
+                    });
                 spotifyResolved = true;
             }
 
@@ -682,7 +752,7 @@ class Queue<T = unknown> {
         this._filtersUpdate = options.filtersUpdate;
 
         const volumeTransformer = resource.volume as VolumeTransformer;
-        if (volumeTransformer && typeof this.options.initialVolume === "number") Reflect.set(volumeTransformer, "volume", Math.pow(this.options.initialVolume / 100, 1.660964));
+        if (volumeTransformer && typeof this.options.initialVolume === "number") volumeTransformer.setVolume(Math.pow(this.options.initialVolume / 100, 1.660964));
         if (volumeTransformer?.hasSmoothness && typeof this.options.volumeSmoothness === "number") {
             if (typeof volumeTransformer.setSmoothness === "function") volumeTransformer.setSmoothness(this.options.volumeSmoothness || 0);
         }
@@ -701,8 +771,7 @@ class Queue<T = unknown> {
     private async _handleAutoplay(track: Track): Promise<void> {
         if (this.#watchDestroyed()) return;
         if (!track || ![track.source, track.raw?.source].includes("youtube")) {
-            if (this.options.leaveOnEnd) this.destroy();
-            return void this.player.emit("queueEnd", this);
+            return this.emitEnd();
         }
         let info = await YouTube.getVideo(track.url)
             .then((x) => x.videos[0])
@@ -713,8 +782,7 @@ class Queue<T = unknown> {
                 .then((x) => x[0])
                 .catch(Util.noop);
         if (!info) {
-            if (this.options.leaveOnEnd) this.destroy();
-            return void this.player.emit("queueEnd", this);
+            return this.emitEnd();
         }
 
         const nextTrack = new Track(this.player, {
