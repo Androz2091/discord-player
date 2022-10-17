@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@babel/code-frame@^7.16.7":
+"@babel/code-frame@^7.18.6":
   version "7.18.6"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.18.6.tgz#3b25d38c89600baa2dcc219edfa88a74eb2c427a"
   integrity sha512-TDCmlK5eOvH+eH7cdAFlNXeVJqWIQ7gW9tY1GJIpUtFb6CmjVyq2VM3u71bOyR8CRihcCgMUYoDNyLXao3+70Q==
@@ -93,18 +93,18 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@favware/rollup-type-bundler@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/@favware/rollup-type-bundler/-/rollup-type-bundler-1.0.10.tgz#3b71310ff76cd5d5b3d162b393cac5a49a9adf63"
-  integrity sha512-7UDim5gncFBA58XLlXUR6jTmuwZCEQ/wATIALGfxf3jklXA/gnWlpfww3uaFEv5Oy5GUsOvqIcHk0bCMGWklDw==
+"@favware/rollup-type-bundler@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@favware/rollup-type-bundler/-/rollup-type-bundler-2.0.0.tgz#5594ee64b40dc64eb02eb68a30943ff4255d25dd"
+  integrity sha512-RTMvx6v3b4D9V9iXHTogYjHa5fCmcUR3Bu0pFreo+80v2tD+7MSJm24nR1P/SkeTCy+zHKC1JOFQa04fcWZozg==
   dependencies:
-    "@sapphire/utilities" "^3.8.0"
+    "@sapphire/utilities" "^3.11.0"
     colorette "^2.0.19"
-    commander "^9.4.0"
+    commander "^9.4.1"
     js-yaml "^4.1.0"
-    rollup "^2.77.2"
-    rollup-plugin-dts "^4.2.2"
-    typescript "^4.7.4"
+    rollup "^3.2.1"
+    rollup-plugin-dts "^5.0.0"
+    typescript "^4.8.4"
 
 "@humanwhocodes/config-array@^0.10.4":
   version "0.10.4"
@@ -182,10 +182,10 @@
   resolved "https://registry.yarnpkg.com/@sapphire/snowflake/-/snowflake-3.2.2.tgz#faacdc1b5f7c43145a71eddba917de2b707ef780"
   integrity sha512-ula2O0kpSZtX9rKXNeQMrHwNd7E4jPDJYUXmEGTFdMRfyfMw+FPyh04oKMjAiDuOi64bYgVkOV3MjK+loImFhQ==
 
-"@sapphire/utilities@^3.8.0":
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/@sapphire/utilities/-/utilities-3.8.0.tgz#a75b0ed7107d769a453973b4e609ec031319ca65"
-  integrity sha512-y33Uuk11z07qjUCuDOHihFF/dF1pq4YfSrgNNRQk6Y0yy5buxfoA8OPTGr4YTIdGq9359ncfIty+HT9htMbygQ==
+"@sapphire/utilities@^3.11.0":
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/@sapphire/utilities/-/utilities-3.11.0.tgz#2dccfb332dc5c119e1425cce6b2c64160b770bad"
+  integrity sha512-ich7J+329UTEgWxgk8b871rMhbFW/hvXdabdiKaUKd6g10eIMkIakWf+EGkDQsiDSiebIXll9TIPPmWtN3cVSw==
 
 "@tokenizer/token@^0.3.0":
   version "0.3.0"
@@ -499,10 +499,10 @@ colorette@^2.0.19:
   resolved "https://registry.yarnpkg.com/colorette/-/colorette-2.0.19.tgz#cdf044f47ad41a0f4b56b3a0d5b4e6e1a2d5a798"
   integrity sha512-3tlv/dIP7FWvj3BsbHrGLJ6l/oKh1O3TcgBqMn+yyCagOxc23fyzDS6HypQbgxWbkpDnf52p1LuR4eWDQ/K9WQ==
 
-commander@^9.4.0:
-  version "9.4.0"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-9.4.0.tgz#bc4a40918fefe52e22450c111ecd6b7acce6f11c"
-  integrity sha512-sRPT+umqkz90UA8M1yqYfnHlZA7fF6nSphDtxeywPZ49ysjxDQybzk13CL+mXekDRG92skbcqCLVovuCusNmFw==
+commander@^9.4.1:
+  version "9.4.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-9.4.1.tgz#d1dd8f2ce6faf93147295c0df13c7c21141cfbdd"
+  integrity sha512-5EEkTNyHNGFPD2H+c/dXXfQZYa/scCKasxWcXJaWnNJ99pnQN9Vnmqow+p+PlFPE63Q6mThaZws1T+HxfpgtPw==
 
 concat-map@0.0.1:
   version "0.0.1"
@@ -1128,10 +1128,10 @@ m3u8stream@^0.8.4, m3u8stream@^0.8.6:
     miniget "^4.2.2"
     sax "^1.2.4"
 
-magic-string@^0.26.1:
-  version "0.26.2"
-  resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.26.2.tgz#5331700e4158cd6befda738bb6b0c7b93c0d4432"
-  integrity sha512-NzzlXpclt5zAbmo6h6jNc8zl2gNRGHvmsZW4IvZhTC4W7k4OlLP+S5YLussa/r3ixNT66KOQfNORlXHSOy/X4A==
+magic-string@^0.26.7:
+  version "0.26.7"
+  resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.26.7.tgz#caf7daf61b34e9982f8228c4527474dac8981d6f"
+  integrity sha512-hX9XH3ziStPoPhJxLq1syWuZMxbDvGNbVchfrdCtanC7D13888bMFow61x8axrx+GfHLtVeAx2kxL7tTGRl+Ow==
   dependencies:
     sourcemap-codec "^1.4.8"
 
@@ -1371,19 +1371,19 @@ rimraf@^3.0.2:
   dependencies:
     glob "^7.1.3"
 
-rollup-plugin-dts@^4.2.2:
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-dts/-/rollup-plugin-dts-4.2.2.tgz#82876b8784213af29b02cf260b45e404ff835ce1"
-  integrity sha512-A3g6Rogyko/PXeKoUlkjxkP++8UDVpgA7C+Tdl77Xj4fgEaIjPSnxRmR53EzvoYy97VMVwLAOcWJudaVAuxneQ==
+rollup-plugin-dts@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-dts/-/rollup-plugin-dts-5.0.0.tgz#d645f222ea6f7d6b7ddb7ea98c45a0e5a3a569ec"
+  integrity sha512-OO8ayCvuJCKaQSShyVTARxGurVVk4ulzbuvz+0zFd1f93vlnWFU5pBMT7HFeS6uj7MvvZLx4kUAarGATSU1+Ng==
   dependencies:
-    magic-string "^0.26.1"
+    magic-string "^0.26.7"
   optionalDependencies:
-    "@babel/code-frame" "^7.16.7"
+    "@babel/code-frame" "^7.18.6"
 
-rollup@^2.77.2:
-  version "2.77.2"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.77.2.tgz#6b6075c55f9cc2040a5912e6e062151e42e2c4e3"
-  integrity sha512-m/4YzYgLcpMQbxX3NmAqDvwLATZzxt8bIegO78FZLl+lAgKJBd1DRAOeEiZcKOIOPjxE6ewHWHNgGEalFXuz1g==
+rollup@^3.2.1:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.2.2.tgz#603fc8939104599c472e5830635f63d344f173b6"
+  integrity sha512-tw8NITEB/A8aa8F+mmIJ7fQ7Abej0R9ugR1ZzsCqb7P8HWVIVdneN69BMTDjhk0qbUsewDSJSDTcVuCTogs8JA==
   optionalDependencies:
     fsevents "~2.3.2"
 
@@ -1609,10 +1609,10 @@ typedoc@^0.23.10:
     minimatch "^5.1.0"
     shiki "^0.10.1"
 
-typescript@^4.7.4:
-  version "4.7.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.7.4.tgz#1a88596d1cf47d59507a1bcdfb5b9dfe4d488235"
-  integrity sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==
+typescript@^4.7.4, typescript@^4.8.4:
+  version "4.8.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.8.4.tgz#c464abca159669597be5f96b8943500b238e60e6"
+  integrity sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==
 
 undici@^5.8.0:
   version "5.8.0"
