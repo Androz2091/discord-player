@@ -613,7 +613,7 @@ class Queue<T = unknown> {
         if (this.#watchDestroyed()) return;
         const length = typeof options.length === "number" ? (options.length <= 0 || options.length === Infinity ? 15 : options.length) : 15;
 
-        const index = Math.round((this.streamTime / this.current.durationMS) * length);
+        const index = Math.floor((this.streamTime / this.current.durationMS) * length);
         const indicator = typeof options.indicator === "string" && options.indicator.length > 0 ? options.indicator : "🔘";
         const line = typeof options.line === "string" && options.line.length > 0 ? options.line : "▬";
 
