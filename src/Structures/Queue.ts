@@ -210,10 +210,10 @@ class Queue<T = unknown> {
             if (!this.tracks.length && this.repeatMode === QueueRepeatMode.OFF) {
                 this.emitEnd();
             } else if (!this.tracks.length && this.repeatMode === QueueRepeatMode.AUTOPLAY) {
-                this._handleAutoplay(Util.last(this.previousTracks));
+                this._handleAutoplay(this.current);
             } else {
-                if (this.repeatMode === QueueRepeatMode.TRACK) return void this.play(Util.last(this.previousTracks), { immediate: true });
-                if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.push(Util.last(this.previousTracks));
+                if (this.repeatMode === QueueRepeatMode.TRACK) return void this.play(this.current, { immediate: true });
+                if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.push(this.current);
                 const nextTrack = this.tracks.shift();
                 this.play(nextTrack, { immediate: true });
                 return;
@@ -458,7 +458,7 @@ class Queue<T = unknown> {
      */
     async back() {
         if (this.#watchDestroyed()) return;
-        const prev = this.previousTracks[this.previousTracks.length - 2]; // because last item is the current track
+        const prev = this.previousTracks[this.previousTracks.length - 1];
         if (!prev) throw new PlayerError("Could not find previous track", ErrorStatusCode.TRACK_NOT_FOUND);
 
         return await this.play(prev, { immediate: true });
@@ -695,10 +695,7 @@ class Queue<T = unknown> {
 
         this.player.emit("debug", this, "Received play request");
 
-        if (!options.filtersUpdate) {
-            this.previousTracks = this.previousTracks.filter((x) => x.id !== track.id);
-            this.previousTracks.push(track);
-        }
+        if (!options.filtersUpdate) this.previousTracks = this.previousTracks.filter((x) => x.id !== track.id);
 
         let stream = null;
         const hasCustomDownloader = typeof this.onBeforeCreateStream === "function";
