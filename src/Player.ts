@@ -434,20 +434,19 @@ class Player extends EventEmitter<PlayerEvents> {
                     }) as Track[];
                 } else {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    playlist.tracks = spotifyPlaylist.tracks.items.map((m: any) => {
+                    playlist.tracks = spotifyPlaylist.trackList.map((m: any) => {
                         const data = new Track(this, {
-                            title: m.track.name ?? "",
-                            description: m.track.description ?? "",
-                            author: m.track.artists?.[0]?.name ?? "Unknown Artist",
-                            url: m.track.external_urls?.spotify ?? query,
-                            thumbnail: m.track.album?.images?.[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
-                            duration: Util.buildTimeCode(Util.parseMS(m.track.duration_ms)),
+                            title: m.title ?? "",
+                            description: m.description ?? "",
+                            author: m.subtitle ?? "Unknown Artist",
+                            url: m.external_urls?.spotify ?? query,
+                            thumbnail: m.album?.images?.[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
+                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
                             views: 0,
-                            requestedBy: options.requestedBy as User,
+                            requestedBy: options.requestedBy,
                             playlist,
-                            source: "spotify"
+                            source: "spotify" 
                         });
-
                         return data;
                     }) as Track[];
                 }
