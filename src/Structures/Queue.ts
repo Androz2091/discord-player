@@ -119,7 +119,7 @@ class Queue<T = unknown> {
             } as PlayerOptions,
             options
         );
-        
+
         if (Array.isArray(options.equalizerBands)) this._lastEQBands = options.equalizerBands;
         if ("onBeforeCreateStream" in this.options) this.onBeforeCreateStream = this.options.onBeforeCreateStream;
 
