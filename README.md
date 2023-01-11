@@ -32,6 +32,7 @@ $ npm install --save @discordjs/opus
 - Simple & easy to use 🤘
 - Beginner friendly 😱
 - Audio filters 🎸
+- Lavalink compatible 15 band equalizer 🎚️
 - Lightweight ☁️
 - Custom extractors support 🌌
 - Multiple sources support ✌

@@ -5,6 +5,7 @@ import Track from "../Structures/Track";
 import { Playlist } from "../Structures/Playlist";
 import { StreamDispatcher } from "../VoiceInterface/StreamDispatcher";
 import { downloadOptions } from "ytdl-core";
+import { EqualizerBand } from "@discord-player/equalizer";
 
 export type FiltersName = keyof QueueFilters;
 
@@ -140,6 +141,7 @@ export interface PlayerProgressbarOptions {
  * @property {boolean} [disableEqualizer=false] If player should disable equalizer
  * @property {number} [volumeSmoothness=0] The volume transition smoothness between volume changes (lower the value to get better result)
  * Setting this or leaving this empty will disable this effect. Example: `volumeSmoothness: 0.1`
+ * @property {EqualizerBand[]} [equalizerBands] The equalizer bands array for 15 band equalizer.
  * @property {Function} [onBeforeCreateStream] Runs before creating stream
  */
 export interface PlayerOptions {
@@ -156,6 +158,7 @@ export interface PlayerOptions {
     disableVolume?: boolean;
     disableEqualizer?: boolean;
     volumeSmoothness?: number;
+    equalizerBands?: EqualizerBand[];
     onBeforeCreateStream?: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable>;
 }
 

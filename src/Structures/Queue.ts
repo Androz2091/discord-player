@@ -14,7 +14,7 @@ import { VolumeTransformer } from "../VoiceInterface/VolumeTransformer";
 import { createFFmpegStream } from "../utils/FFmpegStream";
 import os from "os";
 import { parentPort } from "worker_threads";
-import type { EqualizerStream } from "@discord-player/equalizer";
+import type { EqualizerBand } from "@discord-player/equalizer";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -31,6 +31,7 @@ class Queue<T = unknown> {
     public _cooldownsTimeout = new Collection<string, NodeJS.Timeout>();
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
     private _filtersUpdate = false;
+    private _lastEQBands: EqualizerBand[] = [];
     #destroyed = false;
     public onBeforeCreateStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable | undefined> = null;
 
@@ -112,22 +113,101 @@ class Queue<T = unknown> {
                 initialVolume: 100,
                 bufferingTimeout: 3000,
                 spotifyBridge: true,
-                disableVolume: false
+                disableVolume: false,
+                disableEqualizer: false,
+                equalizerBands: []
             } as PlayerOptions,
             options
         );
-
+        
+        if (Array.isArray(options.equalizerBands)) this._lastEQBands = options.equalizerBands;
         if ("onBeforeCreateStream" in this.options) this.onBeforeCreateStream = this.options.onBeforeCreateStream;
 
         this.player.emit("debug", this, `Queue initialized:\n\n${this.player.scanDeps()}`);
     }
 
     /**
-     * Equalizer for this player
-     * @type {EqualizerStream}
+     * Set equalizer bands
+     * @param bands Equalizer band multiplier array
      */
-    public get equalizer(): EqualizerStream | null {
-        return this.connection.equalizer;
+    public setEqualizer(bands?: EqualizerBand[]) {
+        if (!this.connection.equalizer) return false;
+
+        if (!Array.isArray(bands) || !bands.length) {
+            this.connection.equalizer.resetEQ();
+            this._lastEQBands = this.getEqualizer();
+        } else {
+            this.connection.equalizer.setEQ(bands);
+            this._lastEQBands = this.getEqualizer();
+        }
+
+        return true;
+    }
+
+    /**
+     * Set particular equalizer band multiplier
+     * @param band The band to update
+     * @param gain The gain
+     */
+    public setEqualizerBand(band: number, gain: number) {
+        if (!this.connection.equalizer) return null;
+        this.connection.equalizer.equalizer.setGain(band, gain);
+        this._lastEQBands = this.getEqualizer();
+        return true;
+    }
+
+    /**
+     * Returns gain value of specific equalizer band
+     * @param band The band to get value of
+     */
+    public getEqualizerBand(band: number) {
+        if (!this.connection.equalizer) return null;
+        return this.connection.equalizer.equalizer.getGain(band);
+    }
+
+    /**
+     * Returns entire equalizer bands
+     */
+    public getEqualizer() {
+        if (!this.connection.equalizer) return [];
+        return this.connection.equalizer.getEQ();
+    }
+
+    /**
+     * Check if equalizer is enabled
+     */
+    public isEqualizerEnabled() {
+        return !this.connection.equalizer?.disabled;
+    }
+
+    /**
+     * Toggles equalizer on/off
+     */
+    public toggleEqualizer() {
+        const eq = this.connection.equalizer;
+        if (!eq) return false;
+        eq.toggle();
+        return !eq.disabled;
+    }
+
+    /**
+     * Enables equalizer
+     */
+    public enableEqualizer() {
+        const eq = this.connection.equalizer;
+        if (!eq) return false;
+        eq.enable();
+        return !eq.disabled;
+    }
+
+    /**
+     * Disables equalizer
+     */
+    public disableEqualizer() {
+        const eq = this.connection.equalizer;
+        if (!eq) return false;
+        eq.disable();
+        return eq.disabled;
     }
 
     /**
@@ -755,7 +835,8 @@ class Queue<T = unknown> {
             type: StreamType.Raw,
             data: track,
             disableVolume: Boolean(this.options.disableVolume),
-            disableEqualizer: Boolean(this.options.disableEqualizer)
+            disableEqualizer: Boolean(this.options.disableEqualizer),
+            eq: this._lastEQBands
         });
 
         if (options.seek) this._streamTime = options.seek;
