@@ -14,6 +14,7 @@ import { VolumeTransformer } from "../VoiceInterface/VolumeTransformer";
 import { createFFmpegStream } from "../utils/FFmpegStream";
 import os from "os";
 import { parentPort } from "worker_threads";
+import type { EqualizerFilter } from "@discord-player/equalizer";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -119,6 +120,14 @@ class Queue<T = unknown> {
         if ("onBeforeCreateStream" in this.options) this.onBeforeCreateStream = this.options.onBeforeCreateStream;
 
         this.player.emit("debug", this, `Queue initialized:\n\n${this.player.scanDeps()}`);
+    }
+
+    /**
+     * Equalizer for this player
+     * @type {EqualizerFilter.EqualizerStream}
+     */
+    public get equalizer() {
+        return this.connection.equalizer;
     }
 
     /**

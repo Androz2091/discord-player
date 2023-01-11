@@ -17,6 +17,7 @@ import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import Track from "../Structures/Track";
 import { Util } from "../utils/Util";
 import { PlayerError, ErrorStatusCode } from "../Structures/PlayerError";
+import { EqualizerFilter } from "@discord-player/equalizer";
 
 export interface VoiceEvents {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -34,6 +35,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public audioResource?: AudioResource<Track>;
     private readyLock = false;
     public paused: boolean;
+    public equalizer = new EqualizerFilter.EqualizerStream();
 
     /**
      * Creates new connection object
@@ -134,11 +136,15 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createStream(src: Readable | Duplex | string, ops?: { type?: StreamType; data?: any; disableVolume?: boolean }) {
-        this.audioResource = createAudioResource(src, {
+        // eslint-disable-next-line no-extra-boolean-cast
+        const vol = !Boolean(ops?.disableVolume);
+
+        const stream = vol && typeof src !== "string" ? src.pipe(this.equalizer) : src;
+
+        this.audioResource = createAudioResource(stream, {
             inputType: ops?.type ?? StreamType.Arbitrary,
             metadata: ops?.data,
-            // eslint-disable-next-line no-extra-boolean-cast
-            inlineVolume: !Boolean(ops?.disableVolume)
+            inlineVolume: vol
         });
 
         return this.audioResource;
