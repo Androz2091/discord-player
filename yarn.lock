@@ -30,10 +30,10 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@discord-player/equalizer@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@discord-player/equalizer/-/equalizer-0.1.0.tgz#113629b41a5704be7b1f0c5e9f1b113e6c2d1616"
-  integrity sha512-udlW5UUcrDf5IOEjiK4u9uGeCvAcuz6XiuEKfTwvmMBzjbScr/4eMoE6sbvSDIcUqLUmjG90OZJ/jj9SBMcCZA==
+"@discord-player/equalizer@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@discord-player/equalizer/-/equalizer-0.1.1.tgz#432336b5093afed3a53d8ed6429864c75bbd5145"
+  integrity sha512-mBWixcE3mjmEjgszQ431cJB6IbgMZ7lXvS3BQrvtw/GKfD7a4M6WFiVl1AVrz/nt+bXp5JNcqYu5VRYmB80Uvg==
 
 "@discordjs/builders@^1.1.0":
   version "1.1.0"
