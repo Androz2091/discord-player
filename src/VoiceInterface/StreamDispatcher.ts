@@ -17,7 +17,7 @@ import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import Track from "../Structures/Track";
 import { Util } from "../utils/Util";
 import { PlayerError, ErrorStatusCode } from "../Structures/PlayerError";
-import { EqualizerFilter } from "@discord-player/equalizer";
+import { EqualizerStream } from "@discord-player/equalizer";
 
 export interface VoiceEvents {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -35,7 +35,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public audioResource?: AudioResource<Track>;
     private readyLock = false;
     public paused: boolean;
-    public equalizer = new EqualizerFilter.EqualizerStream();
+    public equalizer: EqualizerStream | null = null;
 
     /**
      * Creates new connection object
@@ -118,6 +118,10 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
                 if (!this.paused) {
                     void this.emit("finish", this.audioResource);
+                    if (this.equalizer) {
+                        this.equalizer.destroy();
+                        this.equalizer = null;
+                    }
                     this.audioResource = null;
                 }
             }
@@ -135,16 +139,19 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {AudioResource}
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createStream(src: Readable | Duplex | string, ops?: { type?: StreamType; data?: any; disableVolume?: boolean }) {
-        // eslint-disable-next-line no-extra-boolean-cast
-        const vol = !Boolean(ops?.disableVolume);
-
-        const stream = vol && typeof src !== "string" ? src.pipe(this.equalizer) : src;
+    createStream(src: Readable | Duplex | string, ops?: { type?: StreamType; data?: any; disableVolume?: boolean; disableEqualizer?: boolean }) {
+        if (!ops.disableEqualizer)
+            this.equalizer = new EqualizerStream({
+                channels: 1,
+                disabled: false,
+                bandMultiplier: []
+            });
+        const stream = this.equalizer && typeof src !== "string" ? src.pipe(this.equalizer) : src;
 
         this.audioResource = createAudioResource(stream, {
             inputType: ops?.type ?? StreamType.Arbitrary,
             metadata: ops?.data,
-            inlineVolume: vol
+            inlineVolume: !!ops?.disableVolume
         });
 
         return this.audioResource;

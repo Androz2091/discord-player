@@ -14,7 +14,7 @@ import { VolumeTransformer } from "../VoiceInterface/VolumeTransformer";
 import { createFFmpegStream } from "../utils/FFmpegStream";
 import os from "os";
 import { parentPort } from "worker_threads";
-import type { EqualizerFilter } from "@discord-player/equalizer";
+import type { EqualizerStream } from "@discord-player/equalizer";
 
 class Queue<T = unknown> {
     public readonly guild: Guild;
@@ -124,9 +124,9 @@ class Queue<T = unknown> {
 
     /**
      * Equalizer for this player
-     * @type {EqualizerFilter.EqualizerStream}
+     * @type {EqualizerStream}
      */
-    public get equalizer() {
+    public get equalizer(): EqualizerStream | null {
         return this.connection.equalizer;
     }
 
@@ -754,7 +754,8 @@ class Queue<T = unknown> {
         const resource: AudioResource<Track> = this.connection.createStream(ffmpegStream, {
             type: StreamType.Raw,
             data: track,
-            disableVolume: Boolean(this.options.disableVolume)
+            disableVolume: Boolean(this.options.disableVolume),
+            disableEqualizer: Boolean(this.options.disableEqualizer)
         });
 
         if (options.seek) this._streamTime = options.seek;
