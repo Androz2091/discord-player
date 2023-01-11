@@ -443,7 +443,7 @@ class Player extends EventEmitter<PlayerEvents> {
                             thumbnail: m.album?.images?.[0]?.url ?? "https://www.scdn.co/i/_global/twitter_card-default.jpg",
                             duration: Util.buildTimeCode(Util.parseMS(m.duration)),
                             views: 0,
-                            requestedBy: options.requestedBy,
+                            requestedBy: options.requestedBy as User,
                             playlist,
                             source: "spotify" 
                         });
