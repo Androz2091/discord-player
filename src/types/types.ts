@@ -1,4 +1,4 @@
-import { Snowflake, User, UserResolvable } from "discord.js";
+import { Snowflake, User, UserResolvable, VoiceState } from "discord.js";
 import { Readable, Duplex } from "stream";
 import { Queue } from "../Structures/Queue";
 import Track from "../Structures/Track";
@@ -336,6 +336,14 @@ export enum QueryType {
  * @param {Track} track The track
  */
 
+/**
+ * Emitted when a track ends
+ * @event Player#voiceStateUpdate
+ * @param {Queue} queue The queue that this update belongs to
+ * @param {VoiceState} oldState The old voice state
+ * @param {VoiceState} newState The new voice state
+ */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface PlayerEvents {
     botDisconnect: (queue: Queue) => any;
@@ -349,6 +357,7 @@ export interface PlayerEvents {
     tracksAdd: (queue: Queue, track: Track[]) => any;
     trackStart: (queue: Queue, track: Track) => any;
     trackEnd: (queue: Queue, track: Track) => any;
+    voiceStateUpdate: (queue: Queue, oldState: VoiceState, newState: VoiceState) => any;
 }
 
 /* eslint-enable @typescript-eslint/no-explicit-any */

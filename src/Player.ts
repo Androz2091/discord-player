@@ -104,6 +104,8 @@ class Player extends EventEmitter<PlayerEvents> {
         const queue = this.getQueue(oldState.guild.id);
         if (!queue || !queue.connection) return;
 
+        this.emit("voiceStateUpdate", queue, oldState, newState);
+
         if (oldState.channelId && !newState.channelId && newState.member.id === newState.guild.members.me.id) {
             try {
                 queue.destroy();
@@ -126,7 +128,7 @@ class Player extends EventEmitter<PlayerEvents> {
             }
         }
 
-        if (queue.connection && !newState.channelId && oldState.channelId === queue.connection.channel.id) {
+        if (!newState.channelId && oldState.channelId === queue.connection.channel.id) {
             if (!Util.isVoiceEmpty(queue.connection.channel)) return;
             const timeout = setTimeout(() => {
                 if (!Util.isVoiceEmpty(queue.connection.channel)) return;
@@ -137,7 +139,7 @@ class Player extends EventEmitter<PlayerEvents> {
             queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
         }
 
-        if (queue.connection && newState.channelId && newState.channelId === queue.connection.channel.id) {
+        if (newState.channelId && newState.channelId === queue.connection.channel.id) {
             const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
             const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
             if (!channelEmpty && emptyTimeout) {
@@ -146,21 +148,42 @@ class Player extends EventEmitter<PlayerEvents> {
             }
         }
 
-        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId && newState.member.id === newState.guild.members.me.id) {
-            if (queue.connection && newState.member.id === newState.guild.members.me.id) queue.connection.channel = newState.channel;
-            const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-            const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
-            if (!channelEmpty && emptyTimeout) {
-                clearTimeout(emptyTimeout);
-                queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
+            if (newState.member.id === newState.guild.members.me.id) {
+                if (queue.connection && newState.member.id === newState.guild.members.me.id) queue.connection.channel = newState.channel;
+                const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
+                const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
+                if (!channelEmpty && emptyTimeout) {
+                    clearTimeout(emptyTimeout);
+                    queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+                } else {
+                    const timeout = setTimeout(() => {
+                        if (queue.connection && !Util.isVoiceEmpty(queue.connection.channel)) return;
+                        if (!this.queues.has(queue.guild.id)) return;
+                        if (queue.options.leaveOnEmpty) queue.destroy(true);
+                        this.emit("channelEmpty", queue);
+                    }, queue.options.leaveOnEmptyCooldown || 0).unref();
+                    queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+                }
             } else {
-                const timeout = setTimeout(() => {
-                    if (queue.connection && !Util.isVoiceEmpty(queue.connection.channel)) return;
-                    if (!this.queues.has(queue.guild.id)) return;
-                    if (queue.options.leaveOnEmpty) queue.destroy(true);
-                    this.emit("channelEmpty", queue);
-                }, queue.options.leaveOnEmptyCooldown || 0).unref();
-                queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+                if (newState.channelId !== queue.connection.channel.id) {
+                    if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                    if (queue._cooldownsTimeout.has(`empty_${oldState.guild.id}`)) return;
+                    const timeout = setTimeout(() => {
+                        if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+                        if (!this.queues.has(queue.guild.id)) return;
+                        if (queue.options.leaveOnEmpty) queue.destroy(true);
+                        this.emit("channelEmpty", queue);
+                    }, queue.options.leaveOnEmptyCooldown || 0).unref();
+                    queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+                } else {
+                    const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
+                    const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
+                    if (!channelEmpty && emptyTimeout) {
+                        clearTimeout(emptyTimeout);
+                        queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+                    }
+                }
             }
         }
     }
@@ -445,7 +468,7 @@ class Player extends EventEmitter<PlayerEvents> {
                             views: 0,
                             requestedBy: options.requestedBy as User,
                             playlist,
-                            source: "spotify" 
+                            source: "spotify"
                         });
                         return data;
                     }) as Track[];
