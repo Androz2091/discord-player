@@ -1,6 +1,14 @@
-import { ChannelProcessor } from './ChannelProcessor';
+import { ChannelProcessor, ReadIntCallback, WriteIntCallback } from './ChannelProcessor';
 import { EqualizerCoefficients } from './Coefficients';
 import { EqualizerConfiguration } from './EqualizerConfiguration';
+
+export interface ChannelProcessorInput {
+    data: Buffer;
+    readInt?: ReadIntCallback;
+    writeInt?: WriteIntCallback;
+    extremum?: number;
+    bytes?: number;
+}
 
 export class Equalizer extends EqualizerConfiguration {
     public static BAND_COUNT = 15 as const;
@@ -37,10 +45,11 @@ export class Equalizer extends EqualizerConfiguration {
         });
     }
 
-    public process(input: Buffer[]) {
+    public process(input: ChannelProcessorInput[]) {
         return this.channels.map((c, i) => {
-            const inp = input[i];
-            return c.process(inp);
+            const { data, extremum, readInt, writeInt, bytes } = input[i];
+
+            return c.process(data, extremum, bytes, readInt, writeInt);
         });
     }
 }

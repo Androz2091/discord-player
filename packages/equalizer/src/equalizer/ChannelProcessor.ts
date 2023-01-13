@@ -1,12 +1,14 @@
 import { Equalizer } from './Equalizer';
 
+export type ReadIntCallback = (buffer: Buffer, index: number) => number;
+export type WriteIntCallback = (buffer: Buffer, int: number, index: number) => number;
+
 export class ChannelProcessor {
     public history: number[];
     public bandMultipliers: number[];
     public current: number;
     public m1: number;
     public m2: number;
-    public _extremum = Math.pow(2, 16 - 1);
 
     public constructor(bandMultipliers: number[]) {
         this.history = new Array(Equalizer.BAND_COUNT * 6).fill(0);
@@ -16,10 +18,10 @@ export class ChannelProcessor {
         this.m2 = 1;
     }
 
-    public process(samples: Buffer) {
+    public process(samples: Buffer, extremum = 131072, bytes = 2, readInt?: ReadIntCallback, writeInt?: WriteIntCallback) {
         const endIndex = Math.floor(samples.length / 2) * 2;
-        for (let sampleIndex = 0; sampleIndex < endIndex; sampleIndex += 2) {
-            const sample = samples.readInt16LE(sampleIndex);
+        for (let sampleIndex = 0; sampleIndex < endIndex; sampleIndex += bytes) {
+            const sample = readInt?.(samples, sampleIndex) ?? samples.readInt16LE(sampleIndex);
             let result = sample * 0.25;
 
             for (let bandIndex = 0; bandIndex < Equalizer.BAND_COUNT; bandIndex++) {
@@ -36,8 +38,8 @@ export class ChannelProcessor {
                 result += bandResult * this.bandMultipliers[bandIndex];
             }
 
-            const val = Math.min(this._extremum - 1, Math.max(-this._extremum, result * 4.0));
-            samples.writeInt16LE(val, sampleIndex);
+            const val = Math.min(extremum - 1, Math.max(-extremum, result * 4.0));
+            writeInt?.(samples, val, sampleIndex) ?? samples.writeInt16LE(val, sampleIndex);
 
             if (++this.current === 3) {
                 this.current = 0;

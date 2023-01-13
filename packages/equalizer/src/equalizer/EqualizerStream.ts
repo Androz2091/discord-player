@@ -1,7 +1,8 @@
-import { Transform, TransformCallback, TransformOptions } from 'stream';
+import { TransformCallback } from 'stream';
+import { PCMTransformer, PCMTransformerOptions } from '../utils';
 import { Equalizer } from './Equalizer';
 
-interface EqualizerStreamOptions extends TransformOptions {
+interface EqualizerStreamOptions extends PCMTransformerOptions {
     bandMultiplier?: EqualizerBand[];
     disabled?: boolean;
     channels?: number;
@@ -12,7 +13,7 @@ export interface EqualizerBand {
     gain: number;
 }
 
-export class EqualizerStream extends Transform {
+export class EqualizerStream extends PCMTransformer {
     public disabled = false;
     public bandMultipliers: number[] = new Array(Equalizer.BAND_COUNT).fill(0);
     public equalizer: Equalizer;
@@ -59,7 +60,16 @@ export class EqualizerStream extends Transform {
             return callback();
         }
 
-        this.equalizer.process([chunk]);
+        this.equalizer.process([
+            {
+                data: chunk,
+                extremum: this.extremum,
+                readInt: (b, idx) => this._readInt(b, idx),
+                writeInt: (b, i, idx) => this._writeInt(b, i, idx),
+                bytes: this.bytes
+            }
+        ]);
+
         this.push(chunk);
 
         return callback();

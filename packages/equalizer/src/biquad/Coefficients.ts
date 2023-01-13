@@ -23,13 +23,13 @@ export const Q_BUTTERWORTH = Math.SQRT1_2;
 
 export class Coefficients {
     // Denominator coefficients
-    public a1: number = 0;
-    public a2: number = 0;
+    public a1 = 0;
+    public a2 = 0;
 
     // Nominator coefficients
-    public b0: number = 0;
-    public b1: number = 0;
-    public b2: number = 0;
+    public b0 = 0;
+    public b1 = 0;
+    public b2 = 0;
 
     public constructor(data?: CoefficientsInit) {
         if (data) {
@@ -147,14 +147,14 @@ export class Coefficients {
                 const omega_c = Math.cos(omega);
                 const alpha = omega_s / (2.0 * Q);
 
-                let b0 = omega_s / 2.0;
-                let b1 = 0;
-                let b2 = -(omega_s / 2.0);
-                let a0 = 1.0 + alpha;
-                let a1 = -2.0 * omega_c;
-                let a2 = 1.0 - alpha;
+                const b0 = omega_s / 2.0;
+                const b1 = 0;
+                const b2 = -(omega_s / 2.0);
+                const a0 = 1.0 + alpha;
+                const a1 = -2.0 * omega_c;
+                const a2 = 1.0 - alpha;
 
-                let div = 1.0 / a0;
+                const div = 1.0 / a0;
 
                 return new Coefficients({
                     a1: a1 * div,
@@ -169,12 +169,12 @@ export class Coefficients {
                 const omega_c = Math.cos(omega);
                 const alpha = omega_s / (2.0 * Q);
 
-                let b0 = 1.0 - alpha;
-                let b1 = -2.0 * omega_c;
-                let b2 = 1.0 + alpha;
-                let a0 = 1.0 + alpha;
-                let a1 = -2.0 * omega_c;
-                let a2 = 1.0 - alpha;
+                const b0 = 1.0 - alpha;
+                const b1 = -2.0 * omega_c;
+                const b2 = 1.0 + alpha;
+                const a0 = 1.0 + alpha;
+                const a1 = -2.0 * omega_c;
+                const a2 = 1.0 - alpha;
 
                 return new Coefficients({
                     a1: a1 / a0,
@@ -185,17 +185,17 @@ export class Coefficients {
                 });
             }
             case FilterType.LowShelf: {
-                let a = Math.pow(10.0, dbGain / 40.0);
+                const a = Math.pow(10.0, dbGain / 40.0);
                 const omega_s = Math.sin(omega);
                 const omega_c = Math.cos(omega);
                 const alpha = omega_s / (2.0 * Q);
 
-                let b0 = a * (a + 1.0 - (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a));
-                let b1 = 2.0 * a * (a - 1.0 - (a + 1.0) * omega_c);
-                let b2 = a * (a + 1.0 - (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a));
-                let a0 = a + 1.0 + (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a);
-                let a1 = -2.0 * (a - 1.0 + (a + 1.0) * omega_c);
-                let a2 = a + 1.0 + (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a);
+                const b0 = a * (a + 1.0 - (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a));
+                const b1 = 2.0 * a * (a - 1.0 - (a + 1.0) * omega_c);
+                const b2 = a * (a + 1.0 - (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a));
+                const a0 = a + 1.0 + (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a);
+                const a1 = -2.0 * (a - 1.0 + (a + 1.0) * omega_c);
+                const a2 = a + 1.0 + (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a);
 
                 return new Coefficients({
                     a1: a1 / a0,
@@ -206,17 +206,17 @@ export class Coefficients {
                 });
             }
             case FilterType.HighShelf: {
-                let a = Math.pow(10.0, dbGain / 40.0);
+                const a = Math.pow(10.0, dbGain / 40.0);
                 const omega_s = Math.sin(omega);
                 const omega_c = Math.cos(omega);
                 const alpha = omega_s / (2.0 * Q);
 
-                let b0 = a * (a + 1.0 + (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a));
-                let b1 = -2.0 * a * (a - 1.0 + (a + 1.0) * omega_c);
-                let b2 = a * (a + 1.0 + (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a));
-                let a0 = a + 1.0 - (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a);
-                let a1 = 2.0 * (a - 1.0 - (a + 1.0) * omega_c);
-                let a2 = a + 1.0 - (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a);
+                const b0 = a * (a + 1.0 + (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a));
+                const b1 = -2.0 * a * (a - 1.0 + (a + 1.0) * omega_c);
+                const b2 = a * (a + 1.0 + (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a));
+                const a0 = a + 1.0 - (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a);
+                const a1 = 2.0 * (a - 1.0 - (a + 1.0) * omega_c);
+                const a2 = a + 1.0 - (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a);
 
                 return new Coefficients({
                     a1: a1 / a0,
@@ -227,17 +227,17 @@ export class Coefficients {
                 });
             }
             case FilterType.PeakingEQ: {
-                let a = Math.pow(10.0, dbGain / 40.0);
+                const a = Math.pow(10.0, dbGain / 40.0);
                 const omega_s = Math.sin(omega);
                 const omega_c = Math.cos(omega);
                 const alpha = omega_s / (2.0 * Q);
 
-                let b0 = 1.0 + alpha * a;
-                let b1 = -2.0 * omega_c;
-                let b2 = 1.0 - alpha * a;
-                let a0 = 1.0 + alpha / a;
-                let a1 = -2.0 * omega_c;
-                let a2 = 1.0 - alpha / a;
+                const b0 = 1.0 + alpha * a;
+                const b1 = -2.0 * omega_c;
+                const b2 = 1.0 - alpha * a;
+                const a0 = 1.0 + alpha / a;
+                const a1 = -2.0 * omega_c;
+                const a2 = 1.0 - alpha / a;
 
                 return new Coefficients({
                     a1: a1 / a0,
