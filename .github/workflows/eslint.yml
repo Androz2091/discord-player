@@ -6,8 +6,6 @@ on:
         branches:
             - '*'
             - '!docs'
-            - '!develop'
-            - '!master'
             - '!gh-pages'
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
