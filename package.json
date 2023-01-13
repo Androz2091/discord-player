@@ -90,7 +90,7 @@
     "husky": "^8.0.1",
     "opusscript": "^0.0.8",
     "prettier": "^2.7.1",
-    "rimraf": "^3.0.2",
+    "rimraf": "^4.0.4",
     "soundcloud-scraper": "^5.0.3",
     "spotify-url-info": "^3.1.7",
     "ts-node": "^10.9.1",
