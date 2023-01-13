@@ -45,4 +45,8 @@ export class PCMTransformer extends Transform {
         const method = `writeInt${this.type.substring(1).toUpperCase()}` as `writeInt${16 | 32}${'L' | 'B'}E`;
         return buffer[method](int, index);
     }
+
+    public clamp(val: number, max = this.extremum - 1, min = -this.extremum) {
+        return Math.min(max, Math.max(min, val));
+    }
 }
