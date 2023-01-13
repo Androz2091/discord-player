@@ -1,0 +1,31 @@
+{
+  "name": "@discord-player/adapter-local",
+  "version": "0.1.0",
+  "description": "Discord Player local adapter",
+  "keywords": [
+    "discord-player"
+  ],
+  "author": "skdhg",
+  "homepage": "https://discord-player.js.org",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "scripts": {
+    "build:check": "tsc --noEmit",
+    "build": "tsup"
+  },
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@discord-player/tsconfig": "*",
+    "tsup": "^6.2.2"
+  }
+}

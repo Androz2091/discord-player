@@ -1,0 +1,36 @@
+{
+  "name": "@discord-player/utils",
+  "version": "0.1.0",
+  "description": "Discord Player Utilities",
+  "keywords": [
+    "discord-player"
+  ],
+  "author": "skdhg",
+  "homepage": "https://discord-player.js.org",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "directories": {
+    "src": "src"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "scripts": {
+    "build:check": "tsc --noEmit",
+    "build": "tsup"
+  },
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "dependencies": {
+    "@discordjs/collection": "^1.1.0"
+  },
+  "devDependencies": {
+    "@discord-player/tsconfig": "*",
+    "tsup": "^6.2.2"
+  }
+}

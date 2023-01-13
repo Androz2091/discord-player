@@ -1,0 +1,45 @@
+{
+  "name": "@discord-player/equalizer",
+  "version": "0.1.2",
+  "description": "PCM Equalizer implementation for Discord Player",
+  "keywords": [
+    "discord-player",
+    "pcm",
+    "equalizer",
+    "music",
+    "bot",
+    "discord.js",
+    "javascript",
+    "voip",
+    "lavalink",
+    "lavaplayer"
+  ],
+  "author": "Androz2091 <androz2091@gmail.com>",
+  "homepage": "https://discord-player.js.org",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "directories": {
+    "dist": "dist",
+    "src": "src"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:check": "tsc --noEmit"
+  },
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "devDependencies": {
+    "@discord-player/tsconfig": "*",
+    "tsup": "^6.2.2"
+  }
+}
