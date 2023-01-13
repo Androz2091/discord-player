@@ -37,16 +37,38 @@ const output = input.pipe(equalizer);
 #### Biquad
 
 ```js
-import { BiquadFilter, Coefficients, FilterType, Q_BUTTERWORTH, Frequency } from '@discord-player/equalizer';
+import { BiquadStream, FilterType } from '@discord-player/equalizer';
 
-const f0 = new Frequency(10).hz();
-const fs = new Frequency(1).khz();
+// initialize biquad stream
+const biquad = new BiquadStream();
 
-const coeffs = Coefficients.from(FilterType.LowPass, fs, f0, Q_BUTTERWORTH);
-const biquad = new BiquadFilter(coeffs);
+// initialize with filter
+const biquad = new BiquadStream({
+    filter: FilterType.LowPass
+});
 
-const input = [0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+// set filter
+biquad.setFilter(FilterType.HighPass);
 
-const out1 = input.map((i) => biquad.run(i));
-const out2 = input.map((i) => biquad.runTransposed(i));
+// set gain (Gain is only applicable to LowShelf, HighShelf and PeakingEQ)
+biquad.setGain(5);
+
+// input stream
+const input = getPCMAudioSomehow();
+
+// pipe input stream to biquad
+const output = input.pipe(biquad);
 ```
+
+#### Supported Biquad Filters
+
+* SinglePoleLowPassApprox
+* SinglePoleLowPass
+* LowPass
+* HighPass
+* BandPass
+* Notch
+* AllPass
+* LowShelf
+* HighShelf
+* PeakingEQ

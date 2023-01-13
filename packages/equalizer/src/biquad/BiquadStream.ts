@@ -97,7 +97,7 @@ export class BiquadStream extends PCMTransformer {
         for (let sampleIndex = 0; sampleIndex < endIndex; sampleIndex += bytes) {
             const int = this._readInt(chunk, sampleIndex);
             const result = this.biquad.run(int);
-            const val = Math.min(extremum - 1, Math.max(-extremum, result * 4.0));
+            const val = Math.min(extremum - 1, Math.max(-extremum, result));
             this._writeInt(chunk, val, sampleIndex);
         }
 
