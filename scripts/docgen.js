@@ -1,8 +1,8 @@
 /* eslint-disable */
-const { runGenerator } = require("@discordjs/ts-docgen");
+const { runGenerator } = require('@discordjs/ts-docgen');
 
 runGenerator({
-    existingOutput: "docs/typedoc.json",
-    custom: "docs/config.yml",
-    output: "docs/docs.json"
+    existingOutput: `${__dirname}/../docs/typedoc.json`,
+    custom: `${__dirname}/../docs/config.yml`,
+    output: `${__dirname}/../docs/docs.json`
 });

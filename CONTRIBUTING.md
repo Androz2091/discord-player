@@ -1,6 +1,18 @@
 # Hello
 This document is for people who want to contribute to this project!
 
+# Creating a new package
+
+Run `yarn bootstrap <packageName>` to create new package.
+
+Example:
+
+```sh
+$ yarn bootstrap example-lib
+```
+
+This will create a package `@discord-player/example-lib` under `packages` dir.
+
 # Code Style
 
 ## Formatting

@@ -1,0 +1,27 @@
+{
+  "name": "@discord-player/tsconfig",
+  "version": "0.0.0",
+  "description": "TSConfig",
+  "author": "skdhg",
+  "homepage": "https://discord-player.js.org",
+  "license": "MIT",
+  "main": "index.js",
+  "private": true,
+  "files": [
+    "index.js",
+    "base.json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "dependencies": {
+    "typescript": "^4.7.4"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.5"
+  }
+}

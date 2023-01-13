@@ -1,0 +1,41 @@
+{
+  "name": "@discord-player/core",
+  "version": "0.1.0",
+  "description": "Discord Player core components",
+  "keywords": [
+    "discord-player"
+  ],
+  "author": "Androz2091 <androz2091@gmail.com>",
+  "homepage": "https://discord-player.js.org",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "directories": {
+    "dist": "dist",
+    "src": "src"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:check": "tsc --noEmit"
+  },
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "dependencies": {
+    "@discord-player/utils": "*",
+    "@discordjs/voice": "^0.11.0",
+    "discord-api-types": "^0.37.2"
+  },
+  "devDependencies": {
+    "@discord-player/tsconfig": "*",
+    "tsup": "^6.2.2"
+  }
+}
