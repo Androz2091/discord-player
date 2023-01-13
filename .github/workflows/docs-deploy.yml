@@ -1,29 +1,33 @@
-name: Deployment
+name: Docs Deployment
 on:
-  push:
-    branches:
-      - '*'
-      - '!docs'
-      - '!gh-pages'
-    tags:
-      - '*'
+    workflow_dispatch:
+    push:
+        branches:
+            - '*'
+            - '!docs'
+            - '!gh-pages'
+        tags:
+            - '*'
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
 jobs:
-  docs:
-    name: Documentation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@master
+    docs:
+        name: Documentation
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@master
 
-      - name: Install Node v18
-        uses: actions/setup-node@master
-        with:
-          node-version: 18
+            - name: Install Node v18
+              uses: actions/setup-node@master
+              with:
+                  node-version: 18
 
-      - name: Install dependencies
-        run: yarn install --immutable
+            - name: Install dependencies
+              run: yarn install --immutable
 
-      - name: Build and deploy documentation
-        uses: discordjs/action-docs@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Build and deploy documentation
+              uses: discordjs/action-docs@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

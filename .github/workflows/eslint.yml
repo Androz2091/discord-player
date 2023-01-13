@@ -1,5 +1,7 @@
 name: ESLint
 on:
+    workflow_dispatch:
+    pull_request:
     push:
         branches:
             - '*'
@@ -7,13 +9,9 @@ on:
             - '!develop'
             - '!master'
             - '!gh-pages'
-    pull_request:
-        branches:
-            - '*'
-            - '!docs'
-            - '!develop'
-            - '!master'
-            - '!gh-pages'
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
 jobs:
     test:
         name: ESLint (Node v16)
