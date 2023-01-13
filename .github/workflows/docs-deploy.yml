@@ -27,6 +27,9 @@ jobs:
             - name: Install dependencies
               run: yarn install --immutable
 
+            - name: Build packages
+              run: yarn build
+
             - name: Build and deploy documentation
               uses: discordjs/action-docs@v1
               env:
