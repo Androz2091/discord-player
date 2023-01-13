@@ -20,7 +20,7 @@
   "scripts": {
     "dev": "cd examples/test && ts-node index.ts",
     "build": "tsup",
-    "build:check": "tsc --noEmit --incremental false",
+    "build:check": "tsc --noEmit",
     "docs": "typedoc --json ../../docs/typedoc.json ./src/index.ts",
     "postdocs": "node ../../scripts/docgen.js",
     "lint": "eslint src --ext .ts --fix"

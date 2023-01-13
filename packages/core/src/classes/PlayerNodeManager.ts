@@ -61,7 +61,9 @@ export class PlayerNodeManager extends EventEmitter<PlayerNodeEvents> {
     }
 
     // TODO
-    public getLeastBusy() {}
+    public getLeastBusy() {
+        return;
+    }
 
     public send(workerRes: WorkerResolvable, data: ServicePayload) {
         const worker = this.resolveWorker(workerRes);

@@ -14,19 +14,22 @@ concurrency:
     cancel-in-progress: true
 jobs:
     test:
-        name: ESLint (Node v16)
+        name: ESLint
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
 
-            - name: Install Node v16
+            - name: Install Node v18
               uses: actions/setup-node@v1
               with:
                   node-version: 18
 
             - name: Install dependencies
               run: yarn install --immutable
+
+            - name: Build
+              run: yarn build
 
             - name: Run ESLint
               run: yarn lint
