@@ -1,11 +1,9 @@
 {
-  "name": "@discord-player/equalizer",
-  "version": "0.1.2",
-  "description": "PCM Equalizer implementation for Discord Player",
+  "name": "@discord-player/extractor",
+  "version": "3.0.2",
+  "description": "Extractors for discord-player",
   "keywords": [
     "discord-player",
-    "pcm",
-    "equalizer",
     "music",
     "bot",
     "discord.js",
@@ -20,10 +18,6 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "directories": {
-    "dist": "dist",
-    "src": "src"
-  },
   "files": [
     "dist"
   ],
@@ -33,12 +27,22 @@
   },
   "scripts": {
     "build": "tsup",
-    "build:check": "tsc --noEmit"
+    "build:check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts --fix"
   },
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "devDependencies": {
-    "@discord-player/tsconfig": "*"
+    "@discord-player/tsconfig": "*",
+    "@types/jsdom": "^20.0.1",
+    "@types/node": "^18.11.18",
+    "@types/node-fetch": "^2.6.2"
+  },
+  "dependencies": {
+    "genius-lyrics": "^4.4.2",
+    "jsdom": "^21.0.0",
+    "node-fetch": "^2.6.7",
+    "reverbnation-scraper": "^2.0.0"
   }
 }

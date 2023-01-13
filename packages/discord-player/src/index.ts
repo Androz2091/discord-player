@@ -17,8 +17,8 @@ export { Util } from './utils/Util';
 export * from './types/types';
 export * from './utils/FFmpegStream';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-export const version: string = require(`${__dirname}/../package.json`).version;
+// eslint-disable-next-line @typescript-eslint/no-inferrable-types
+export const version: string = '[VI]{{inject}}[/VI]';
 
 if (!djsVersion.startsWith('14')) {
     process.emitWarning(`Discord.js v${djsVersion} is incompatible with Discord Player v${version}! Please use >=v14.x of Discord.js`);

@@ -25,7 +25,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@discord-player/tsconfig": "*",
-    "tsup": "^6.2.2"
+    "@discord-player/tsconfig": "*"
   }
 }

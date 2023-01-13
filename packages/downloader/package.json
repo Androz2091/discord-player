@@ -1,11 +1,9 @@
 {
-  "name": "@discord-player/equalizer",
-  "version": "0.1.2",
-  "description": "PCM Equalizer implementation for Discord Player",
+  "name": "@discord-player/downloader",
+  "version": "3.0.1",
+  "description": "Stream extractor for discord-player via youtube-dl",
   "keywords": [
     "discord-player",
-    "pcm",
-    "equalizer",
     "music",
     "bot",
     "discord.js",
@@ -20,10 +18,6 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "directories": {
-    "dist": "dist",
-    "src": "src"
-  },
   "files": [
     "dist"
   ],
@@ -33,12 +27,16 @@
   },
   "scripts": {
     "build": "tsup",
-    "build:check": "tsc --noEmit"
+    "build:check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts --fix"
   },
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "devDependencies": {
     "@discord-player/tsconfig": "*"
+  },
+  "dependencies": {
+    "youtube-dl-exec": "^2.1.11"
   }
 }

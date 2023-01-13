@@ -67,8 +67,7 @@ function getPackageJSON(name) {
                 url: 'https://github.com/Androz2091/discord-player/issues'
             },
             devDependencies: {
-                '@discord-player/tsconfig': '*',
-                tsup: '^6.2.2'
+                '@discord-player/tsconfig': '*'
             }
         },
         null,
