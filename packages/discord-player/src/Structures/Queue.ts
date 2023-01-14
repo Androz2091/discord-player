@@ -120,7 +120,8 @@ class Queue<T = unknown> {
                 spotifyBridge: true,
                 disableVolume: false,
                 disableEqualizer: false,
-                equalizerBands: []
+                equalizerBands: [],
+                disableBiquad: false
             } as PlayerOptions,
             options
         );
@@ -904,7 +905,9 @@ class Queue<T = unknown> {
             data: track,
             disableVolume: Boolean(this.options.disableVolume),
             disableEqualizer: Boolean(this.options.disableEqualizer),
-            eq: this._lastEQBands
+            eq: this._lastEQBands,
+            disableBiquad: Boolean(this.options.disableBiquad),
+            biquadFilter: this._lastBiquadFilter
         });
 
         if (options.seek) this._streamTime = options.seek;

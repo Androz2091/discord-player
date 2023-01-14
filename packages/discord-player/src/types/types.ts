@@ -139,6 +139,7 @@ export interface PlayerProgressbarOptions {
  * @property {boolean} [spotifyBridge=true] If player should bridge spotify source to youtube
  * @property {boolean} [disableVolume=false] If player should disable inline volume
  * @property {boolean} [disableEqualizer=false] If player should disable equalizer
+ * @property {boolean} [disableBiquad=false] If player should disable biquad
  * @property {number} [volumeSmoothness=0] The volume transition smoothness between volume changes (lower the value to get better result)
  * Setting this or leaving this empty will disable this effect. Example: `volumeSmoothness: 0.1`
  * @property {EqualizerBand[]} [equalizerBands] The equalizer bands array for 15 band equalizer.
@@ -158,6 +159,7 @@ export interface PlayerOptions {
     spotifyBridge?: boolean;
     disableVolume?: boolean;
     disableEqualizer?: boolean;
+    disableBiquad?: boolean;
     volumeSmoothness?: number;
     equalizerBands?: EqualizerBand[];
     biquadFilter?: BiquadFilters;
