@@ -1,4 +1,4 @@
-import { Coefficients, FilterType } from './Coefficients';
+import { BiquadFilters, Coefficients } from './Coefficients';
 
 export interface BiquadSetFilterProps {
     f0: number;
@@ -17,7 +17,7 @@ export class BiquadFilter {
 
     public constructor(public coefficients: Coefficients) {}
 
-    public setFilter(filter: FilterType, options: BiquadSetFilterProps) {
+    public setFilter(filter: BiquadFilters, options: BiquadSetFilterProps) {
         const coefficients = Coefficients.from(filter, options.fs, options.f0, options.Q, options.gain);
 
         this.update(coefficients);

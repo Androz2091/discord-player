@@ -14,7 +14,7 @@ import { VolumeTransformer } from '../VoiceInterface/VolumeTransformer';
 import { createFFmpegStream } from '../utils/FFmpegStream';
 import os from 'os';
 import { parentPort } from 'worker_threads';
-import type { EqualizerBand } from '@discord-player/equalizer';
+import type { BiquadFilters, EqualizerBand } from '@discord-player/equalizer';
 
 const OBCS_DEFAULT = async () => {
     return undefined;
@@ -36,6 +36,7 @@ class Queue<T = unknown> {
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
     private _filtersUpdate = false;
     private _lastEQBands: EqualizerBand[] = [];
+    private _lastBiquadFilter!: BiquadFilters;
     #destroyed = false;
     public onBeforeCreateStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable | undefined> = OBCS_DEFAULT;
 
@@ -125,10 +126,73 @@ class Queue<T = unknown> {
         );
 
         if (Array.isArray(options.equalizerBands)) this._lastEQBands = options.equalizerBands;
+        if (options.biquadFilter != null) this._lastBiquadFilter = options.biquadFilter;
         // eslint-disable-next-line
         if ('onBeforeCreateStream' in this.options) this.onBeforeCreateStream = this.options.onBeforeCreateStream!;
 
         this.player.emit('debug', this, `Queue initialized:\n\n${this.player.scanDeps()}`);
+    }
+
+    /**
+     * Check if biquad filter is available
+     */
+    public isBiquadEnabled() {
+        return this.connection.biquad && !this.connection.biquad.disabled;
+    }
+
+    /**
+     * Biquad filter setter
+     */
+    public setBiquadFilter(filter: BiquadFilters) {
+        if (!this.isBiquadEnabled()) return;
+        this.connection.biquad!.setFilter(filter);
+        this._lastBiquadFilter = filter;
+    }
+
+    /**
+     * Get active biquad filter name
+     */
+    public getBiquadFilterName() {
+        return this.connection.biquad?.getFilterName();
+    }
+
+    /**
+     * Returns current biquad filter
+     */
+    public getBiquadFilter() {
+        return this.connection.biquad?.filter;
+    }
+
+    /**
+     * Set biquad filter gain value
+     * @param gain The gain to set
+     */
+    public setBiquadGain(gain: number) {
+        return this.connection.biquad?.setGain(gain);
+    }
+
+    /**
+     * Set biquad cutoff frequency value
+     * @param val The value to set
+     */
+    public setBiquadCutoff(val: number) {
+        return this.connection.biquad?.setCutoff(val);
+    }
+
+    /**
+     * Set biquad sample rate value
+     * @param val The value to set
+     */
+    public setBiquadSampleRate(val: number) {
+        return this.connection.biquad?.setSample(val);
+    }
+
+    /**
+     * Set biquad Q value
+     * @param val The value to set
+     */
+    public setBiquadQ(val: number) {
+        return this.connection.biquad?.setQ(val);
     }
 
     /**
@@ -182,7 +246,7 @@ class Queue<T = unknown> {
      * Check if equalizer is enabled
      */
     public isEqualizerEnabled() {
-        return !this.connection.equalizer?.disabled;
+        return this.connection.equalizer && !this.connection.equalizer.disabled;
     }
 
     /**

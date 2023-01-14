@@ -1,15 +1,17 @@
-export enum FilterType {
-    SinglePoleLowPassApprox,
-    SinglePoleLowPass,
-    LowPass,
-    HighPass,
-    BandPass,
-    Notch,
-    AllPass,
-    LowShelf,
-    HighShelf,
-    PeakingEQ
-}
+export const FilterType = {
+    SinglePoleLowPassApprox: 0,
+    SinglePoleLowPass: 1,
+    LowPass: 2,
+    HighPass: 3,
+    BandPass: 4,
+    Notch: 5,
+    AllPass: 6,
+    LowShelf: 7,
+    HighShelf: 8,
+    PeakingEQ: 9
+} as const;
+
+export type BiquadFilters = keyof typeof FilterType | (typeof FilterType)[keyof typeof FilterType];
 
 interface CoefficientsInit {
     a1: number;
@@ -41,7 +43,7 @@ export class Coefficients {
         }
     }
 
-    public static from(filter: FilterType, samplingFreq: number, cutoffFreq: number, Q: number, dbGain = 0) {
+    public static from(filter: BiquadFilters, samplingFreq: number, cutoffFreq: number, Q: number, dbGain = 0) {
         if (2.0 * cutoffFreq > samplingFreq) {
             throw new Error(`Cutoff frequency is too big!`);
         }
@@ -51,6 +53,8 @@ export class Coefficients {
         }
 
         const omega = (2.0 * Math.PI * cutoffFreq) / samplingFreq;
+
+        if (typeof filter === 'string') filter = FilterType[filter];
 
         switch (filter) {
             case FilterType.SinglePoleLowPassApprox: {
