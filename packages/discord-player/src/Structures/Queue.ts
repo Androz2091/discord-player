@@ -138,7 +138,44 @@ class Queue<T = unknown> {
      * Check if biquad filter is available
      */
     public isBiquadEnabled() {
-        return this.connection.biquad && !this.connection.biquad.disabled;
+        return this.connection.biquad != null;
+    }
+
+    /**
+     * Check if the equalizer is turned off
+     */
+    public isBiquadOff() {
+        return this.isBiquadEnabled() && !this.connection.biquad!.disabled;
+    }
+
+    /**
+     * Toggles biquad on/off
+     */
+    public toggleBiquad() {
+        const eq = this.connection.biquad;
+        if (!eq) return false;
+        eq.toggle();
+        return !eq.disabled;
+    }
+
+    /**
+     * Enables biquad
+     */
+    public enableBiquad() {
+        const eq = this.connection.biquad;
+        if (!eq) return false;
+        eq.enable();
+        return !eq.disabled;
+    }
+
+    /**
+     * Disables biquad
+     */
+    public disableBiquad() {
+        const eq = this.connection.biquad;
+        if (!eq) return false;
+        eq.disable();
+        return eq.disabled;
     }
 
     /**
@@ -247,7 +284,14 @@ class Queue<T = unknown> {
      * Check if equalizer is enabled
      */
     public isEqualizerEnabled() {
-        return this.connection.equalizer && !this.connection.equalizer.disabled;
+        return this.connection.equalizer != null;
+    }
+
+    /**
+     * Check if the equalizer is turned off
+     */
+    public isEqualizerOff() {
+        return this.isEqualizerEnabled() && !this.connection.equalizer!.disabled;
     }
 
     /**

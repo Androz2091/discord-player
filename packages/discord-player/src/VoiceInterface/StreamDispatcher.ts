@@ -134,6 +134,10 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                         this.equalizer.destroy();
                         this.equalizer = null;
                     }
+                    if (this.biquad) {
+                        this.biquad.destroy();
+                        this.biquad = null;
+                    }
                     this.audioResource = null;
                 }
             }
