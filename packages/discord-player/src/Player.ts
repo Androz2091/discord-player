@@ -1,21 +1,18 @@
-import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, IntentsBitField } from 'discord.js';
+import { Client, GuildResolvable, Snowflake, VoiceState, IntentsBitField, User } from 'discord.js';
 import { TypedEmitter as EventEmitter } from 'tiny-typed-emitter';
 import { Queue } from './Structures/Queue';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
-import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlayerSearchResult, PlaylistInitData } from './types/types';
+import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
 import Track from './Structures/Track';
 import { QueryResolver } from './utils/QueryResolver';
-import YouTube from 'youtube-sr';
 import { Util } from './utils/Util';
-import Spotify from 'spotify-url-info';
 import { PlayerError, ErrorStatusCode } from './Structures/PlayerError';
-import { getInfo as ytdlGetInfo } from 'ytdl-core';
-import { SearchResult, Client as SoundCloud, SearchResult as SoundCloudSearchResult } from 'soundcloud-scraper';
 import { Playlist } from './Structures/Playlist';
-import { ExtractorModel } from './Structures/ExtractorModel';
 import { generateDependencyReport } from '@discordjs/voice';
-
-const soundcloud = new SoundCloud();
+import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
+import { Collection } from '@discord-player/utils';
+import { BaseExtractor } from './extractors/BaseExtractor';
+import { SearchResult } from './Structures/SearchResult';
 
 class Player extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
@@ -30,8 +27,8 @@ class Player extends EventEmitter<PlayerEvents> {
     };
     public readonly queues = new Collection<Snowflake, Queue>();
     public readonly voiceUtils = new VoiceUtils();
-    public readonly extractors = new Collection<string, ExtractorModel>();
     public requiredEvents = ['error', 'connectionError'] as string[];
+    public extractors = new ExtractorExecutionContext(this);
     #lastLatency = -1;
 
     /**
@@ -64,7 +61,7 @@ class Player extends EventEmitter<PlayerEvents> {
             let nv: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
             if ((nv = Util.require('@discord-player/extractor'))) {
-                ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => void this.use(ext, nv[ext]));
+                ['YouTubeExtractor', 'SoundCloudExtractor', 'ReverbnationExtractor', 'VimeoExtractor', 'AttachmentExtractor'].forEach((ext) => void this.extractors.register(nv[ext]));
             }
         }
 
@@ -248,356 +245,75 @@ class Player extends EventEmitter<PlayerEvents> {
      * Search tracks
      * @param {string|Track} query The search query
      * @param {SearchOptions} options The search options
-     * @returns {Promise<PlayerSearchResult>}
+     * @returns {Promise<SearchResult>}
      */
-    async search(query: string | Track, options: SearchOptions): Promise<PlayerSearchResult> {
-        if (query instanceof Track) return { playlist: query.playlist || null, tracks: [query] };
+    async search(query: string | Track, options: SearchOptions): Promise<SearchResult> {
+        if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
+        if (query instanceof Track)
+            return new SearchResult(this, {
+                playlist: query.playlist || null,
+                tracks: [query],
+                query: query.toString(),
+                extractor: null,
+                queryType: QueryType.AUTO,
+                requestedBy: options.requestedBy
+            });
         if (!options) throw new PlayerError('DiscordPlayer#search needs search options!', ErrorStatusCode.INVALID_ARG_TYPE);
-        options.requestedBy = this.client.users.resolve(options.requestedBy)!;
-        if (!('searchEngine' in options)) options.searchEngine = QueryType.AUTO;
-        if (typeof options.searchEngine === 'string' && this.extractors.has(options.searchEngine)) {
-            const extractor = this.extractors.get(options.searchEngine)!;
-            if (!extractor.validate(query)) return { playlist: null, tracks: [] };
-            const data = await extractor.handle(query);
-            if (data && data.data.length) {
-                const playlist = !data.playlist
-                    ? null
-                    : new Playlist(this, {
-                          ...data.playlist,
-                          tracks: []
-                      });
 
-                const tracks = data.data.map(
-                    (m) =>
-                        new Track(this, {
-                            ...m,
-                            requestedBy: options.requestedBy as User,
-                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
-                            playlist: playlist!
-                        })
-                );
+        let extractor: BaseExtractor | null = null;
 
-                if (playlist) playlist.tracks = tracks;
+        options.searchEngine ??= QueryType.AUTO;
 
-                return { playlist: playlist, tracks: tracks };
-            }
+        const queryType = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
+
+        if (options.searchEngine.startsWith('ext:')) {
+            extractor = this.extractors.get(options.searchEngine.substring(4))!;
+            if (!extractor) return new SearchResult(this, { query, queryType });
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const [_, extractor] of this.extractors) {
-            if (options.blockExtractor) break;
-            if (!extractor.validate(query)) continue;
-            const data = await extractor.handle(query);
-            if (data && data.data.length) {
-                const playlist = !data.playlist
-                    ? null
-                    : new Playlist(this, {
-                          ...data.playlist,
-                          tracks: []
-                      });
-
-                const tracks = data.data.map(
-                    (m) =>
-                        new Track(this, {
-                            ...m,
-                            requestedBy: options.requestedBy as User,
-                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
-                            playlist: playlist!
-                        })
-                );
-
-                if (playlist) playlist.tracks = tracks;
-
-                return { playlist: playlist, tracks: tracks };
-            }
+        if (!extractor) {
+            extractor = (await this.extractors.run((ext) => ext.validate(query, queryType as SearchQueryType)))?.extractor || null;
         }
 
-        const qt = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
-        switch (qt) {
-            case QueryType.YOUTUBE_VIDEO: {
-                const info = await ytdlGetInfo(query, this.options.ytdlOptions).catch(Util.noop);
-                if (!info) return { playlist: null, tracks: [] };
-
-                const track = new Track(this, {
-                    title: info.videoDetails.title,
-                    description: info.videoDetails.description!,
-                    author: info.videoDetails.author?.name,
-                    url: info.videoDetails.video_url,
-                    requestedBy: options.requestedBy as User,
-                    thumbnail: Util.last(info.videoDetails.thumbnails)?.url,
-                    views: parseInt(info.videoDetails.viewCount.replace(/[^0-9]/g, '')) || 0,
-                    duration: Util.buildTimeCode(Util.parseMS(parseInt(info.videoDetails.lengthSeconds) * 1000)),
-                    source: 'youtube',
-                    raw: info
-                });
-
-                return { playlist: null, tracks: [track] };
-            }
-            case QueryType.YOUTUBE_SEARCH: {
-                const videos = await YouTube.search(query, {
-                    type: 'video'
-                }).catch(Util.noop);
-                if (!videos) return { playlist: null, tracks: [] };
-
-                const tracks = videos.map((m) => {
-                    (m as any).source = 'youtube'; // eslint-disable-line @typescript-eslint/no-explicit-any
-                    return new Track(this, {
-                        title: m.title!,
-                        description: m.description!,
-                        author: m.channel?.name as string,
-                        url: m.url,
-                        requestedBy: options.requestedBy as User,
-                        thumbnail: m.thumbnail?.displayThumbnailURL('maxresdefault') as string,
-                        views: m.views,
-                        duration: m.durationFormatted,
-                        source: 'youtube',
-                        raw: m
-                    });
-                });
-
-                return { playlist: null, tracks };
-            }
-            case QueryType.SOUNDCLOUD_TRACK:
-            case QueryType.SOUNDCLOUD_SEARCH: {
-                const result: SoundCloudSearchResult[] =
-                    QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? ([{ url: query }] as SearchResult[]) : await soundcloud.search(query, 'track').catch(() => []);
-                if (!result || !result.length) return { playlist: null, tracks: [] };
-                const res: Track[] = [];
-
-                for (const r of result) {
-                    const trackInfo = await soundcloud.getSongInfo(r.url).catch(Util.noop);
-                    if (!trackInfo) continue;
-
-                    const track = new Track(this, {
-                        title: trackInfo.title,
-                        url: trackInfo.url,
-                        duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
-                        description: trackInfo.description,
-                        thumbnail: trackInfo.thumbnail,
-                        views: trackInfo.playCount,
-                        author: trackInfo.author.name,
-                        requestedBy: options.requestedBy,
-                        source: 'soundcloud',
-                        engine: trackInfo
-                    });
-
-                    res.push(track);
-                }
-
-                return { playlist: null, tracks: res };
-            }
-            case QueryType.SPOTIFY_SONG: {
-                const spotifyData = await Spotify(await Util.getFetch())
-                    .getData(query)
-                    .catch(Util.noop);
-                if (!spotifyData) return { playlist: null, tracks: [] };
-                const spotifyTrack = new Track(this, {
-                    title: spotifyData.name,
-                    description: spotifyData.description ?? '',
-                    author: spotifyData.artists[0]?.name ?? 'Unknown Artist',
-                    url: spotifyData.external_urls?.spotify ?? query,
-                    thumbnail:
-                        (spotifyData.coverArt?.sources?.[0]?.url ??
-                            spotifyData.album?.images[0]?.url ??
-                            (spotifyData.preview_url?.length && `https://i.scdn.co/image/${spotifyData.preview_url?.split('?cid=')[1]}`)) ||
-                        'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                    duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms ?? spotifyData.duration ?? spotifyData.maxDuration)),
-                    views: 0,
-                    requestedBy: options.requestedBy,
-                    source: 'spotify'
-                });
-
-                return { playlist: null, tracks: [spotifyTrack] };
-            }
-            case QueryType.SPOTIFY_PLAYLIST:
-            case QueryType.SPOTIFY_ALBUM: {
-                const spotifyPlaylist = await Spotify(await Util.getFetch())
-                    .getData(query)
-                    .catch(Util.noop);
-                if (!spotifyPlaylist) return { playlist: null, tracks: [] };
-
-                const playlist = new Playlist(this, {
-                    title: spotifyPlaylist.name ?? spotifyPlaylist.title,
-                    description: spotifyPlaylist.description ?? '',
-                    thumbnail: spotifyPlaylist.coverArt?.sources?.[0]?.url ?? spotifyPlaylist.images[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                    type: spotifyPlaylist.type,
-                    source: 'spotify',
-                    author:
-                        spotifyPlaylist.type !== 'playlist'
-                            ? {
-                                  name: spotifyPlaylist.artists[0]?.name ?? 'Unknown Artist',
-                                  url: spotifyPlaylist.artists[0]?.external_urls?.spotify ?? null
-                              }
-                            : {
-                                  name: spotifyPlaylist.owner?.display_name ?? spotifyPlaylist.owner?.id ?? 'Unknown Artist',
-                                  url: spotifyPlaylist.owner?.external_urls?.spotify ?? null
-                              },
-                    tracks: [],
-                    id: spotifyPlaylist.id,
-                    url: spotifyPlaylist.external_urls?.spotify ?? query,
-                    rawPlaylist: spotifyPlaylist
-                });
-
-                if (spotifyPlaylist.type !== 'playlist') {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    playlist.tracks = spotifyPlaylist.tracks.items.map((m: any) => {
-                        const data = new Track(this, {
-                            title: m.name ?? '',
-                            description: m.description ?? '',
-                            author: m.artists[0]?.name ?? 'Unknown Artist',
-                            url: m.external_urls?.spotify ?? query,
-                            thumbnail: spotifyPlaylist.images[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                            duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
-                            views: 0,
-                            requestedBy: options.requestedBy as User,
-                            playlist,
-                            source: 'spotify'
-                        });
-
-                        return data;
-                    }) as Track[];
-                } else {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    playlist.tracks = spotifyPlaylist.trackList.map((m: any) => {
-                        const data = new Track(this, {
-                            title: m.title ?? '',
-                            description: m.description ?? '',
-                            author: m.subtitle ?? 'Unknown Artist',
-                            url: m.external_urls?.spotify ?? query,
-                            thumbnail: m.album?.images?.[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
-                            views: 0,
-                            requestedBy: options.requestedBy as User,
-                            playlist,
-                            source: 'spotify'
-                        });
-                        return data;
-                    }) as Track[];
-                }
-
-                return { playlist: playlist, tracks: playlist.tracks };
-            }
-            case QueryType.SOUNDCLOUD_PLAYLIST: {
-                const data = await soundcloud.getPlaylist(query).catch(Util.noop);
-                if (!data) return { playlist: null, tracks: [] };
-
-                const res = new Playlist(this, {
-                    title: data.title,
-                    description: data.description ?? '',
-                    thumbnail: data.thumbnail ?? 'https://soundcloud.com/pwa-icon-192.png',
-                    type: 'playlist',
-                    source: 'soundcloud',
-                    author: {
-                        name: data.author?.name ?? data.author?.username ?? 'Unknown Artist',
-                        url: data.author?.profile
-                    },
-                    tracks: [],
-                    id: `${data.id}`, // stringified
-                    url: data.url,
-                    rawPlaylist: data
-                });
-
-                for (const song of data.tracks) {
-                    const track = new Track(this, {
-                        title: song.title,
-                        description: song.description ?? '',
-                        author: song.author?.username ?? song.author?.name ?? 'Unknown Artist',
-                        url: song.url,
-                        thumbnail: song.thumbnail,
-                        duration: Util.buildTimeCode(Util.parseMS(song.duration)),
-                        views: song.playCount ?? 0,
-                        requestedBy: options.requestedBy,
-                        playlist: res,
-                        source: 'soundcloud',
-                        engine: song
-                    });
-                    res.tracks.push(track);
-                }
-
-                return { playlist: res, tracks: res.tracks };
-            }
-            case QueryType.YOUTUBE_PLAYLIST: {
-                const ytpl = await YouTube.getPlaylist(query).catch(Util.noop);
-                if (!ytpl) return { playlist: null, tracks: [] };
-
-                await ytpl.fetch().catch(Util.noop);
-
-                const playlist: Playlist = new Playlist(this, {
-                    title: ytpl.title!,
-                    thumbnail: ytpl.thumbnail as unknown as string,
-                    description: '',
-                    type: 'playlist',
-                    source: 'youtube',
-                    author: {
-                        name: ytpl.channel!.name as string,
-                        url: ytpl.channel!.url as string
-                    },
-                    tracks: [],
-                    id: ytpl.id as string,
-                    url: ytpl.url as string,
-                    rawPlaylist: ytpl
-                });
-
-                playlist.tracks = ytpl.videos.map(
-                    (video) =>
-                        new Track(this, {
-                            title: video.title as string,
-                            description: video.description as string,
-                            author: video.channel?.name as string,
-                            url: video.url,
-                            requestedBy: options.requestedBy as User,
-                            thumbnail: video.thumbnail!.url as string,
-                            views: video.views,
-                            duration: video.durationFormatted,
-                            raw: video,
-                            playlist: playlist,
-                            source: 'youtube'
-                        })
-                );
-
-                return { playlist: playlist, tracks: playlist.tracks };
-            }
-            default:
-                return { playlist: null, tracks: [] };
-        }
-    }
-
-    /**
-     * Registers extractor
-     * @param {string} extractorName The extractor name
-     * @param {ExtractorModel|any} extractor The extractor object
-     * @param {boolean} [force=false] Overwrite existing extractor with this name (if available)
-     * @returns {ExtractorModel}
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    use(extractorName: string, extractor: ExtractorModel | any, force = false): ExtractorModel {
-        if (!extractorName) throw new PlayerError('Cannot use unknown extractor!', ErrorStatusCode.UNKNOWN_EXTRACTOR);
-        if (this.extractors.has(extractorName) && !force) return this.extractors.get(extractorName)!;
-        if (extractor instanceof ExtractorModel) {
-            this.extractors.set(extractorName, extractor);
-            return extractor;
+        // no extractors available
+        if (!extractor) {
+            return new SearchResult(this, { query, queryType });
         }
 
-        for (const method of ['validate', 'getInfo']) {
-            if (typeof extractor[method] !== 'function') throw new PlayerError('Invalid extractor data!', ErrorStatusCode.INVALID_EXTRACTOR);
+        const res = await extractor
+            .handle(query, {
+                type: queryType as SearchQueryType,
+                requestedBy: options.requestedBy as User
+            })
+            .catch(() => null);
+
+        if (res) {
+            return new SearchResult(this, {
+                query,
+                queryType,
+                playlist: res.playlist,
+                tracks: res.tracks,
+                extractor
+            });
         }
 
-        const model = new ExtractorModel(extractorName, extractor);
-        this.extractors.set(model.name, model);
+        const result = await this.extractors.run(
+            async (ext) =>
+                (await ext.validate(query)) &&
+                ext.handle(query, {
+                    type: queryType as SearchQueryType,
+                    requestedBy: options.requestedBy as User
+                })
+        );
+        if (!result?.result) return new SearchResult(this, { query, queryType });
 
-        return model;
-    }
-
-    /**
-     * Removes registered extractor
-     * @param {string} extractorName The extractor name
-     * @returns {ExtractorModel}
-     */
-    unuse(extractorName: string) {
-        if (!this.extractors.has(extractorName)) throw new PlayerError(`Cannot find extractor "${extractorName}"`, ErrorStatusCode.UNKNOWN_EXTRACTOR);
-        const prev = this.extractors.get(extractorName);
-        this.extractors.delete(extractorName);
-        return prev;
+        return new SearchResult(this, {
+            query,
+            queryType,
+            playlist: result.result.playlist,
+            tracks: result.result.tracks,
+            extractor: result.extractor
+        });
     }
 
     /**
@@ -607,9 +323,9 @@ class Player extends EventEmitter<PlayerEvents> {
     scanDeps() {
         const line = '-'.repeat(50);
         const depsReport = generateDependencyReport();
-        const extractorReport = this.extractors
+        const extractorReport = this.extractors.store
             .map((m) => {
-                return `${m.name} :: ${m.version || '0.1.0'}`;
+                return m.identifier;
             })
             .join('\n');
         return `${depsReport}\n${line}\nLoaded Extractors:\n${extractorReport || 'None'}`;

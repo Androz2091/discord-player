@@ -58,10 +58,11 @@ export interface QueueFilters {
  * - soundcloud
  * - youtube
  * - spotify
+ * - apple_music
  * - arbitrary
  * @typedef {string} TrackSource
  */
-export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'arbitrary';
+export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'apple_music' | 'arbitrary';
 
 /**
  * @typedef {object} RawTrackData
@@ -87,12 +88,13 @@ export interface RawTrackData {
     thumbnail: string;
     duration: string;
     views: number;
-    requestedBy: User;
+    requestedBy?: User | null;
     playlist?: Playlist;
     source?: TrackSource;
     engine?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     live?: boolean;
     raw?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    queryType?: SearchQueryType;
 }
 
 /**
@@ -163,7 +165,7 @@ export interface PlayerOptions {
     volumeSmoothness?: number;
     equalizerBands?: EqualizerBand[];
     biquadFilter?: BiquadFilters;
-    onBeforeCreateStream?: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable>;
+    onBeforeCreateStream?: (track: Track, source: SearchQueryType, queue: Queue) => Promise<Readable>;
 }
 
 /**
@@ -244,26 +246,36 @@ export interface ExtractorModelData {
  * - YOUTUBE_SEARCH
  * - YOUTUBE_VIDEO
  * - SOUNDCLOUD_SEARCH
+ * - APPLE_MUSIC_SONG
+ * - APPLE_MUSIC_ALBUM
+ * - APPLE_MUSIC_PLAYLIST
+ * - FILE
  * @typedef {number} QueryType
  */
-export enum QueryType {
-    AUTO,
-    YOUTUBE,
-    YOUTUBE_PLAYLIST,
-    SOUNDCLOUD_TRACK,
-    SOUNDCLOUD_PLAYLIST,
-    SOUNDCLOUD,
-    SPOTIFY_SONG,
-    SPOTIFY_ALBUM,
-    SPOTIFY_PLAYLIST,
-    FACEBOOK,
-    VIMEO,
-    ARBITRARY,
-    REVERBNATION,
-    YOUTUBE_SEARCH,
-    YOUTUBE_VIDEO,
-    SOUNDCLOUD_SEARCH
-}
+export const QueryType = {
+    AUTO: 'auto',
+    YOUTUBE: 'youtube',
+    YOUTUBE_PLAYLIST: 'youtubePlaylist',
+    SOUNDCLOUD_TRACK: 'soundcloudTrack',
+    SOUNDCLOUD_PLAYLIST: 'soundcloudPlaylist',
+    SOUNDCLOUD: 'soundcloud',
+    SPOTIFY_SONG: 'spotifySong',
+    SPOTIFY_ALBUM: 'spotifyAlbum',
+    SPOTIFY_PLAYLIST: 'spotifyPlaylist',
+    FACEBOOK: 'facebook',
+    VIMEO: 'vimeo',
+    ARBITRARY: 'arbitrary',
+    REVERBNATION: 'reverbnation',
+    YOUTUBE_SEARCH: 'youtubeSearch',
+    YOUTUBE_VIDEO: 'youtubeVideo',
+    SOUNDCLOUD_SEARCH: 'soundcloudSearch',
+    APPLE_MUSIC_SONG: 'appleMusicSong',
+    APPLE_MUSIC_ALBUM: 'appleMusicAlbum',
+    APPLE_MUSIC_PLAYLIST: 'appleMusicPlaylist',
+    FILE: 'file'
+} as const;
+
+export type SearchQueryType = keyof typeof QueryType | (typeof QueryType)[keyof typeof QueryType];
 
 /**
  * Emitted when bot gets disconnected from a voice channel
@@ -380,15 +392,17 @@ export interface PlayOptions {
     immediate?: boolean;
 }
 
+export type QueryExtractorSearch = `ext:${string}`;
+
 /**
  * @typedef {object} SearchOptions
  * @property {UserResolvable} requestedBy The user who requested this search
- * @property {QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
+ * @property {typeof QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
  * @property {boolean} [blockExtractor=false] If it should block custom extractors
  */
 export interface SearchOptions {
-    requestedBy: UserResolvable;
-    searchEngine?: QueryType | string;
+    requestedBy?: UserResolvable;
+    searchEngine?: SearchQueryType | QueryExtractorSearch;
     blockExtractor?: boolean;
 }
 

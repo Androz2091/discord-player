@@ -9,6 +9,10 @@ dist
 # Yarn logs
 yarn*.log
 
+# .yarn
+.yarn/cache
+.yarn/*.gz
+
 dev/
 
 .DS_Store

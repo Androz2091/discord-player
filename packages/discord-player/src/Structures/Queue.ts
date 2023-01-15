@@ -1,12 +1,10 @@
-import { Collection, Guild, StageChannel, VoiceChannel, SnowflakeUtil, GuildChannelResolvable, ChannelType } from 'discord.js';
+import { Guild, StageChannel, VoiceChannel, SnowflakeUtil, GuildChannelResolvable, ChannelType } from 'discord.js';
 import { Player } from '../Player';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import Track from './Track';
-import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode, TrackSource } from '../types/types';
-import ytdl from 'ytdl-core';
+import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode, SearchQueryType } from '../types/types';
 import { AudioResource, StreamType } from '@discordjs/voice';
 import { Util } from '../utils/Util';
-import YouTube from 'youtube-sr';
 import AudioFilters from '../utils/AudioFilters';
 import { PlayerError, ErrorStatusCode } from './PlayerError';
 import type { Readable } from 'stream';
@@ -15,6 +13,9 @@ import { createFFmpegStream } from '../utils/FFmpegStream';
 import os from 'os';
 import { parentPort } from 'worker_threads';
 import type { BiquadFilters, EqualizerBand } from '@discord-player/equalizer';
+import { Collection } from '@discord-player/utils';
+import { QueryResolver } from '../utils/QueryResolver';
+import { YouTube } from 'youtube-sr';
 
 const OBCS_DEFAULT = async () => {
     return undefined;
@@ -38,7 +39,7 @@ class Queue<T = unknown> {
     private _lastEQBands: EqualizerBand[] = [];
     private _lastBiquadFilter!: BiquadFilters;
     #destroyed = false;
-    public onBeforeCreateStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable | undefined> = OBCS_DEFAULT;
+    public onBeforeCreateStream: (track: Track, source: SearchQueryType, queue: Queue) => Promise<Readable | undefined> = OBCS_DEFAULT;
 
     /**
      * Queue constructor
@@ -902,38 +903,25 @@ class Queue<T = unknown> {
             this.previousTracks.push(track);
         }
 
-        let stream = null;
+        let stream: string | Readable | null = null;
         const hasCustomDownloader = typeof this.onBeforeCreateStream === 'function';
+        if (hasCustomDownloader) {
+            const qt: SearchQueryType = track.queryType || (track.raw.source === 'spotify' ? 'spotifySong' : track.raw.source === 'apple_music' ? 'appleMusicSong' : track.raw.source) || 'arbitrary';
+            stream = (await this.onBeforeCreateStream(track, qt, this)) || null;
+        }
 
-        if (['youtube', 'spotify'].includes(track.raw.source!)) {
-            let spotifyResolved = false;
-            if (this.options.spotifyBridge && track.raw.source === 'spotify' && !track.raw.engine) {
-                track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: 'video' })
-                    .then((res) => res[0].url)
-                    .catch(() => {
-                        /* void */
-                    });
-                spotifyResolved = true;
+        if (!stream) {
+            const streamInfo = await this.player.extractors.run(async (extractor) => {
+                const canStream = await extractor.validate(track.url, track.queryType || QueryResolver.resolve(track.url));
+                if (!canStream) return false;
+                return await extractor.stream(track);
+            });
+            if (!streamInfo || !streamInfo.result) {
+                this.player.emit('error', this, new Error('No stream extractors are available for this track'));
+                return void this.play(this.tracks.shift(), { immediate: true });
             }
 
-            const url = track.raw.source === 'spotify' ? track.raw.engine : track.url;
-            if (!url) return void this.play(this.tracks.shift(), { immediate: true });
-
-            if (hasCustomDownloader) {
-                stream = (await this.onBeforeCreateStream(track, spotifyResolved ? 'youtube' : track.raw.source!, this)) || null;
-            }
-
-            if (!stream) {
-                stream = ytdl(url, this.options.ytdlOptions);
-            }
-        } else {
-            const arbitraryStream = (hasCustomDownloader && (await this.onBeforeCreateStream(track, track.raw.source || track.raw.engine, this))) || null;
-            stream =
-                arbitraryStream || (track.raw.source === 'soundcloud' && typeof track.raw.engine?.downloadProgressive === 'function')
-                    ? await track.raw.engine.downloadProgressive()
-                    : typeof track.raw.engine === 'function'
-                    ? await track.raw.engine()
-                    : track.raw.engine;
+            stream = streamInfo.result;
         }
 
         const ffmpegStream = createFFmpegStream(stream, {
@@ -994,13 +982,14 @@ class Queue<T = unknown> {
         const nextTrack = new Track(this.player, {
             title: info.title!,
             url: `https://www.youtube.com/watch?v=${info.id}`,
-            duration: info.durationFormatted ? Util.buildTimeCode(Util.parseMS(info.duration * 1000)) : '0:00',
+            duration: info.durationFormatted || Util.buildTimeCode(Util.parseMS(info.duration * 1000)),
             description: '',
             thumbnail: typeof info.thumbnail === 'string' ? info.thumbnail! : info.thumbnail!.url!,
             views: info.views,
             author: info.channel!.name!,
             requestedBy: track.requestedBy,
-            source: 'youtube'
+            source: 'youtube',
+            queryType: 'youtubeVideo'
         });
 
         this.play(nextTrack, { immediate: true });

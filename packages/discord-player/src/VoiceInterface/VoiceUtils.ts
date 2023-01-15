@@ -1,6 +1,7 @@
-import { VoiceChannel, StageChannel, Collection, Snowflake } from 'discord.js';
+import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
 import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection } from '@discordjs/voice';
 import { StreamDispatcher } from './StreamDispatcher';
+import { Collection } from '@discord-player/utils';
 
 class VoiceUtils {
     public cache: Collection<Snowflake, StreamDispatcher>;

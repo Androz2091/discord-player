@@ -1,6 +1,6 @@
 import { User, escapeMarkdown, SnowflakeUtil } from 'discord.js';
 import { Player } from '../Player';
-import { RawTrackData, TrackJSON } from '../types/types';
+import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
 import { Playlist } from './Playlist';
 import { Queue } from './Queue';
 
@@ -13,8 +13,9 @@ class Track {
     public thumbnail!: string;
     public duration!: string;
     public views!: number;
-    public requestedBy!: User;
+    public requestedBy: User | null = null;
     public playlist?: Playlist;
+    public queryType: SearchQueryType | null | undefined = null;
     public readonly raw: RawTrackData = {} as RawTrackData;
     public readonly id = SnowflakeUtil.generate().toString();
 
@@ -115,7 +116,8 @@ class Track {
         this.thumbnail = data.thumbnail ?? '';
         this.duration = data.duration ?? '';
         this.views = data.views ?? 0;
-        this.requestedBy = data.requestedBy;
+        this.queryType = data.queryType;
+        this.requestedBy = data.requestedBy || null;
         this.playlist = data.playlist;
 
         // raw
@@ -179,7 +181,7 @@ class Track {
             duration: this.duration,
             durationMS: this.durationMS,
             views: this.views,
-            requestedBy: this.requestedBy?.id,
+            requestedBy: this.requestedBy?.id || null,
             playlist: hidePlaylist ? null : this.playlist?.toJSON() ?? null
         } as TrackJSON;
     }

@@ -3,7 +3,8 @@ import './smoothVolume';
 import { version as djsVersion } from 'discord.js';
 
 export { AudioFilters } from './utils/AudioFilters';
-export { ExtractorModel } from './Structures/ExtractorModel';
+export * from './extractors/BaseExtractor';
+export * from './extractors/ExtractorExecutionContext';
 export { Playlist } from './Structures/Playlist';
 export { Player } from './Player';
 export { PlayerError, ErrorStatusCode } from './Structures/PlayerError';

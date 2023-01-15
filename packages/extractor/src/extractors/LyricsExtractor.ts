@@ -3,9 +3,8 @@ import { Client as GeniusClient } from 'genius-lyrics';
 // lazy load client
 let client: GeniusClient;
 
-export function init(apiKey?: string, force?: boolean) {
+export function lyricsExtractor(apiKey?: string, force?: boolean) {
     if (!client && !force) client = new GeniusClient(apiKey);
-
     return { search, client };
 }
 
@@ -34,7 +33,7 @@ function search(query: string) {
                 resolve(data);
             })
             .catch(() => {
-                resolve(null);
+                reject(new Error('Could not parse lyrics'));
             });
     });
 }
@@ -51,5 +50,5 @@ export interface LyricsData {
         url: string;
         image: string;
     };
-    lyrics?: string;
+    lyrics: string;
 }
