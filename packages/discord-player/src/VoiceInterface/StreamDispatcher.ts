@@ -45,7 +45,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public channel: VoiceChannel | StageChannel;
     public audioResource?: AudioResource<Track> | null;
     private readyLock = false;
-    public paused: boolean;
     public equalizer: EqualizerStream | null = null;
     public biquad: BiquadStream | null = null;
 
@@ -75,12 +74,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
          * @type {VoiceChannel|StageChannel}
          */
         this.channel = channel;
-
-        /**
-         * The paused state
-         * @type {boolean}
-         */
-        this.paused = false;
 
         this.voiceConnection.on('stateChange', async (_, newState) => {
             if (newState.status === VoiceConnectionStatus.Disconnected) {
@@ -149,6 +142,45 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     }
 
     /**
+     * Check if the player has been paused manually
+     */
+    get paused() {
+        return this.audioPlayer.state.status === AudioPlayerStatus.Paused;
+    }
+
+    set paused(val: boolean) {
+        val ? this.pause(true) : this.resume();
+    }
+
+    /**
+     * Whether or not the player is currently paused automatically or manually.
+     */
+    isPaused() {
+        return this.paused || this.audioPlayer.state.status === AudioPlayerStatus.AutoPaused;
+    }
+
+    /**
+     * Whether or not the player is currently buffering
+     */
+    isBuffering() {
+        return this.audioPlayer.state.status === AudioPlayerStatus.Buffering;
+    }
+
+    /**
+     * Whether or not the player is currently playing
+     */
+    isPlaying() {
+        return this.audioPlayer.state.status === AudioPlayerStatus.Playing;
+    }
+
+    /**
+     * Whether or not the player is currently idle
+     */
+    isIdle() {
+        return this.audioPlayer.state.status === AudioPlayerStatus.Idle;
+    }
+
+    /**
      * Creates stream
      * @param {Readable|Duplex|string} src The stream source
      * @param {object} [ops] Options
@@ -214,7 +246,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     pause(interpolateSilence?: boolean) {
         const success = this.audioPlayer.pause(interpolateSilence);
-        this.paused = success;
         return success;
     }
 
@@ -224,7 +255,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     resume() {
         const success = this.audioPlayer.unpause();
-        this.paused = !success;
         return success;
     }
 
