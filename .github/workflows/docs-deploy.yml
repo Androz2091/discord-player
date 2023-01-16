@@ -24,6 +24,12 @@ jobs:
               with:
                   node-version: 18
 
+            - name: Cache yarn
+              uses: actions/cache@v3
+              with:
+                path: .yarn/cache
+                key: docs-yarn-cache-node-18
+
             - name: Install dependencies
               run: yarn install --immutable
 
