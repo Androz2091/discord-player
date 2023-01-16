@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 declare module 'spotify-url-info' {
     export interface Spotify {
         getPreview(url: string, opts?: RequestInit): Promise<any>;
