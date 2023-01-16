@@ -5,7 +5,7 @@ import Track from '../Structures/Track';
 import { Playlist } from '../Structures/Playlist';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { downloadOptions } from 'ytdl-core';
-import { BiquadFilters, EqualizerBand } from '@discord-player/equalizer';
+import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 
 export type FiltersName = keyof QueueFilters;
 
@@ -146,6 +146,8 @@ export interface PlayerProgressbarOptions {
  * Setting this or leaving this empty will disable this effect. Example: `volumeSmoothness: 0.1`
  * @property {EqualizerBand[]} [equalizerBands] The equalizer bands array for 15 band equalizer.
  * @property {BiquadFilters} [biquadFilter] The biquad filter initializer value
+ * @property {boolean} [disableFilters] Disable/enable PCM filter
+ * @property {PCMFilters[]} [defaultFilters] The PCM filters initializer
  * @property {Function} [onBeforeCreateStream] Runs before creating stream
  */
 export interface PlayerOptions {
@@ -165,6 +167,8 @@ export interface PlayerOptions {
     volumeSmoothness?: number;
     equalizerBands?: EqualizerBand[];
     biquadFilter?: BiquadFilters;
+    disableFilters?: boolean;
+    defaultFilters?: PCMFilters[];
     onBeforeCreateStream?: (track: Track, source: SearchQueryType, queue: Queue) => Promise<Readable>;
 }
 

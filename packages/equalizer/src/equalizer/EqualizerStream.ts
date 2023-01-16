@@ -4,7 +4,6 @@ import { Equalizer } from './Equalizer';
 
 interface EqualizerStreamOptions extends PCMTransformerOptions {
     bandMultiplier?: EqualizerBand[];
-    disabled?: boolean;
     channels?: number;
 }
 
@@ -14,7 +13,6 @@ export interface EqualizerBand {
 }
 
 export class EqualizerStream extends PCMTransformer {
-    public disabled = false;
     public bandMultipliers: number[] = new Array(Equalizer.BAND_COUNT).fill(0);
     public equalizer: Equalizer;
     public constructor(options?: EqualizerStreamOptions) {
@@ -24,13 +22,11 @@ export class EqualizerStream extends PCMTransformer {
             {},
             {
                 bandMultiplier: [],
-                channels: 1,
-                disabled: false
+                channels: 1
             },
             options || {}
         );
 
-        if (options.disabled) this.disabled = !!options.disabled;
         this.equalizer = new Equalizer(options.channels || 1, this.bandMultipliers);
         if (Array.isArray(options.bandMultiplier)) this._processBands(options.bandMultiplier);
     }
@@ -40,18 +36,8 @@ export class EqualizerStream extends PCMTransformer {
             if (mul.band > Equalizer.BAND_COUNT - 1 || mul.band < 0) throw new RangeError(`Band value out of range. Expected >0 & <${Equalizer.BAND_COUNT - 1}, received "${mul.band}"`);
             this.equalizer.setGain(mul.band, mul.gain);
         }
-    }
 
-    public disable() {
-        this.disabled = true;
-    }
-
-    public enable() {
-        this.disabled = false;
-    }
-
-    public toggle() {
-        this.disabled = !this.disabled;
+        this.onUpdate?.();
     }
 
     public _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {

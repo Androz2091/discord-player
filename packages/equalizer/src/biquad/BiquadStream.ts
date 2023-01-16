@@ -4,7 +4,6 @@ import { BiquadFilter } from './Biquad';
 import { BiquadFilters, Coefficients, FilterType, Q_BUTTERWORTH } from './Coefficients';
 
 export interface BiquadStreamOptions extends PCMTransformerOptions {
-    disabled?: boolean;
     filter?: BiquadFilters;
     Q?: number;
     sample?: number;
@@ -21,7 +20,6 @@ export interface BiquadFilterUpdateData {
 }
 
 export class BiquadStream extends PCMTransformer {
-    public disabled = false;
     public biquad!: BiquadFilter;
     public sample = 48000;
     public cutoff = 80;
@@ -30,8 +28,6 @@ export class BiquadStream extends PCMTransformer {
     public Q = Q_BUTTERWORTH;
     public constructor(options: BiquadStreamOptions = {}) {
         super(options);
-
-        this.disabled = !!options.disabled;
 
         if ('sample' in options) this.sample = options.sample!;
         if ('cutoff' in options) this.cutoff = options.cutoff!;
@@ -43,18 +39,6 @@ export class BiquadStream extends PCMTransformer {
                 this.biquad = new BiquadFilter(Coefficients.from(this.filter, this.sample, this.cutoff, this.Q, this.gain));
             }
         }
-    }
-
-    public disable() {
-        this.disabled = true;
-    }
-
-    public enable() {
-        this.disabled = false;
-    }
-
-    public toggle() {
-        this.disabled = !this.disabled;
     }
 
     public getFilterName() {
@@ -73,6 +57,8 @@ export class BiquadStream extends PCMTransformer {
         if (this.filter != null) {
             this.biquad = new BiquadFilter(Coefficients.from(this.filter, this.sample, this.cutoff, this.Q, this.gain));
         }
+
+        this.onUpdate?.();
     }
 
     public setFilter(filter: BiquadFilters) {
@@ -102,13 +88,12 @@ export class BiquadStream extends PCMTransformer {
         }
 
         const endIndex = Math.floor(chunk.length / 2) * 2;
-        const { bytes, extremum } = this;
+        const { bytes } = this;
 
         for (let sampleIndex = 0; sampleIndex < endIndex; sampleIndex += bytes) {
             const int = this._readInt(chunk, sampleIndex);
             const result = this.biquad.run(int);
-            const val = Math.min(extremum - 1, Math.max(-extremum, result));
-            this._writeInt(chunk, val, sampleIndex);
+            this._writeInt(chunk, this.clamp(result), sampleIndex);
         }
 
         this.push(chunk);

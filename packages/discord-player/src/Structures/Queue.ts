@@ -12,7 +12,7 @@ import { VolumeTransformer } from '../VoiceInterface/VolumeTransformer';
 import { createFFmpegStream } from '../utils/FFmpegStream';
 import os from 'os';
 import { parentPort } from 'worker_threads';
-import type { BiquadFilters, EqualizerBand } from '@discord-player/equalizer';
+import type { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Collection } from '@discord-player/utils';
 import { QueryResolver } from '../utils/QueryResolver';
 import { YouTube } from 'youtube-sr';
@@ -37,6 +37,7 @@ class Queue<T = unknown> {
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
     private _filtersUpdate = false;
     private _lastEQBands: EqualizerBand[] = [];
+    private _lastAudioFilters: PCMFilters[] = [];
     private _lastBiquadFilter!: BiquadFilters;
     #destroyed = false;
     public onBeforeCreateStream: (track: Track, source: SearchQueryType, queue: Queue) => Promise<Readable | undefined> = OBCS_DEFAULT;
@@ -122,17 +123,34 @@ class Queue<T = unknown> {
                 disableVolume: false,
                 disableEqualizer: false,
                 equalizerBands: [],
-                disableBiquad: false
+                disableBiquad: false,
+                disableFilters: false,
+                defaultFilters: []
             } as PlayerOptions,
             options
         );
 
         if (Array.isArray(options.equalizerBands)) this._lastEQBands = options.equalizerBands;
+        if (Array.isArray(options.defaultFilters)) this._lastAudioFilters = options.defaultFilters;
         if (options.biquadFilter != null) this._lastBiquadFilter = options.biquadFilter;
         // eslint-disable-next-line
         if ('onBeforeCreateStream' in this.options) this.onBeforeCreateStream = this.options.onBeforeCreateStream!;
 
         this.player.emit('debug', this, `Queue initialized:\n\n${this.player.scanDeps()}`);
+    }
+
+    /**
+     * Whether or not the PCM filterer is available
+     */
+    public isFiltersAvailable() {
+        return this.connection.audioFilters != null;
+    }
+
+    /**
+     * The PCM filterer
+     */
+    public get filters() {
+        return this.connection.audioFilters;
     }
 
     /**
@@ -383,6 +401,10 @@ class Queue<T = unknown> {
                 return await _channel.guild.members.me!.voice.setRequestToSpeak(true).catch(Util.noop);
             });
         }
+
+        this.connection.on('audioFilters', (filters) => {
+            this._lastAudioFilters = filters;
+        });
 
         this.connection.on('error', (err) => {
             if (this.#watchDestroyed(false)) return;
@@ -939,7 +961,9 @@ class Queue<T = unknown> {
             disableEqualizer: Boolean(this.options.disableEqualizer),
             eq: this._lastEQBands,
             disableBiquad: Boolean(this.options.disableBiquad),
-            biquadFilter: this._lastBiquadFilter
+            biquadFilter: this._lastBiquadFilter,
+            defaultFilters: this._lastAudioFilters,
+            disableFilters: Boolean(this.options.disableFilters)
         });
 
         if (options.seek) this._streamTime = options.seek;

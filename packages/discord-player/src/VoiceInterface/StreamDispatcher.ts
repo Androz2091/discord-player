@@ -17,7 +17,7 @@ import { TypedEmitter as EventEmitter } from 'tiny-typed-emitter';
 import Track from '../Structures/Track';
 import { Util } from '../utils/Util';
 import { PlayerError, ErrorStatusCode } from '../Structures/PlayerError';
-import { EqualizerBand, EqualizerStream, BiquadStream, BiquadFilters } from '@discord-player/equalizer';
+import { EqualizerBand, EqualizerStream, BiquadStream, BiquadFilters, AudioFilter, PCMFilters } from '@discord-player/equalizer';
 
 interface CreateStreamOps {
     type?: StreamType;
@@ -28,6 +28,8 @@ interface CreateStreamOps {
     disableBiquad?: boolean;
     eq?: EqualizerBand[];
     biquadFilter?: BiquadFilters;
+    disableFilters?: boolean;
+    defaultFilters?: PCMFilters[];
 }
 
 export interface VoiceEvents {
@@ -36,6 +38,7 @@ export interface VoiceEvents {
     debug: (message: string) => any;
     start: (resource: AudioResource<Track>) => any;
     finish: (resource: AudioResource<Track>) => any;
+    audioFilters: (filters: PCMFilters[]) => any;
     /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
@@ -48,6 +51,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public paused: boolean;
     public equalizer: EqualizerStream | null = null;
     public biquad: BiquadStream | null = null;
+    public audioFilters: AudioFilter | null = null;
 
     /**
      * Creates new connection object
@@ -138,6 +142,10 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                         this.biquad.destroy();
                         this.biquad = null;
                     }
+                    if (this.audioFilters) {
+                        this.audioFilters.destroy();
+                        this.audioFilters = null;
+                    }
                     this.audioResource = null;
                 }
             }
@@ -168,8 +176,19 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                 filter: ops?.biquadFilter
             });
         }
+
+        if (!ops?.disableFilters) {
+            this.audioFilters = new AudioFilter({
+                filters: ops?.defaultFilters
+            });
+            this.audioFilters.onUpdate = () => {
+                if (this.audioFilters) this.emit('audioFilters', this.audioFilters.filters);
+            };
+        }
+
         let stream = this.equalizer && typeof src !== 'string' ? src.pipe(this.equalizer) : src;
         if (this.biquad && typeof stream !== 'string') stream = stream.pipe(this.biquad);
+        if (this.audioFilters && typeof stream !== 'string') stream = stream.pipe(this.audioFilters);
 
         this.audioResource = createAudioResource(stream, {
             inputType: ops?.type ?? StreamType.Arbitrary,
