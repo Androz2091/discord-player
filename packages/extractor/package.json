@@ -46,7 +46,7 @@
     "ytdl-core": "4.x"
   },
   "dependencies": {
-    "file-type": "^16.5.4",
+    "file-type": "^17.1.6",
     "genius-lyrics": "^4.4.2",
     "node-fetch": "cjs",
     "reverbnation-scraper": "^2.0.0",
