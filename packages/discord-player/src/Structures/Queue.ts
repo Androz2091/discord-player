@@ -524,9 +524,34 @@ class Queue<T = unknown> {
      * @returns {boolean}
      */
     setPaused(paused?: boolean) {
-        if (this.#watchDestroyed()) return;
+        if (this.#watchDestroyed()) return false;
         if (!this.connection) return false;
         return paused ? this.connection.pause(true) : this.connection.resume();
+    }
+
+    /**
+     * If the player is currently paused
+     */
+    get paused() {
+        return this.connection.paused;
+    }
+
+    set paused(val: boolean) {
+        this.setPaused(val);
+    }
+
+    /**
+     * Pause the playback
+     */
+    pause() {
+        return this.setPaused(true);
+    }
+
+    /**
+     * Resume the playback
+     */
+    resume() {
+        return this.setPaused(false);
     }
 
     /**

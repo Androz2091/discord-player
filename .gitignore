@@ -1,19 +1,10 @@
-# Node
 node_modules
-package-lock.json
-yarn.lock
-
-# Compiled files
 dist
-
-# Yarn logs
 yarn*.log
-
-# .yarn
 .yarn/cache
 .yarn/*.gz
-
 dev/
-
 .DS_Store
 .turbo/
+.env
+.turbo
