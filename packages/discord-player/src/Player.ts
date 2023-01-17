@@ -249,7 +249,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @param {SearchOptions} options The search options
      * @returns {Promise<SearchResult>}
      */
-    async search(query: string | Track, options: SearchOptions): Promise<SearchResult> {
+    async search(query: string | Track, options: SearchOptions = {}): Promise<SearchResult> {
         if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
         if (query instanceof Track)
             return new SearchResult(this, {
@@ -257,10 +257,9 @@ class Player extends EventEmitter<PlayerEvents> {
                 tracks: [query],
                 query: query.toString(),
                 extractor: null,
-                queryType: QueryType.AUTO,
+                queryType: query.queryType,
                 requestedBy: options.requestedBy
             });
-        if (!options) throw new PlayerError('DiscordPlayer#search needs search options!', ErrorStatusCode.INVALID_ARG_TYPE);
 
         let extractor: BaseExtractor | null = null;
 
