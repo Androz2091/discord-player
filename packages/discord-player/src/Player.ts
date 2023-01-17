@@ -18,6 +18,7 @@ class Player extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
     public readonly options: PlayerInitOptions = {
         autoRegisterExtractor: true,
+        lockVoiceStateHandler: false,
         ytdlOptions: {
             highWaterMark: 1 << 25
         },
@@ -101,7 +102,10 @@ class Player extends EventEmitter<PlayerEvents> {
         const queue = this.getQueue(oldState.guild.id);
         if (!queue || !queue.connection) return;
 
-        this.emit('voiceStateUpdate', queue, oldState, newState);
+        // dispatch voice state update
+        const wasHandled = this.emit('voiceStateUpdate', queue, oldState, newState);
+        // if the event was handled, return assuming the listener implemented all of the logic below
+        if (wasHandled && !this.options.lockVoiceStateHandler) return;
 
         if (oldState.channelId && !newState.channelId && newState.member!.id === newState.guild.members.me!.id) {
             try {

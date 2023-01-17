@@ -357,7 +357,7 @@ export type SearchQueryType = keyof typeof QueryType | (typeof QueryType)[keyof 
  */
 
 /**
- * Emitted when a track ends
+ * Emitted when voice state updates. Listen to this event to modify internal voice state update handler.
  * @event Player#voiceStateUpdate
  * @param {Queue} queue The queue that this update belongs to
  * @param {VoiceState} oldState The old voice state
@@ -519,6 +519,7 @@ export interface PlaylistJSON {
  * @property {number} [connectionTimeout=20000] The voice connection timeout
  * @property {boolean} [smoothVolume=true] Toggle smooth volume transition
  * @property {boolean} [lagMonitor=30000] Time in ms to re-monitor event loop lag
+ * @property {boolean} [lockVoiceStateHandler] Prevent voice state handler from being overridden
  */
 export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
@@ -526,4 +527,5 @@ export interface PlayerInitOptions {
     connectionTimeout?: number;
     smoothVolume?: boolean;
     lagMonitor?: number;
+    lockVoiceStateHandler?: boolean;
 }
