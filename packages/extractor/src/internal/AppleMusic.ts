@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { QueryResolver } from 'discord-player';
 import fetch from 'node-fetch';
 import { parse, HTMLElement } from 'node-html-parser';

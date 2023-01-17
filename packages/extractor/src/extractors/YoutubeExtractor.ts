@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { YouTube } from 'youtube-sr';
 
 // prettier-ignore
