@@ -12,7 +12,7 @@ import reverbnation from 'reverbnation-scraper';
 import { downloadStream } from '../internal/downloader';
 
 export class ReverbnationExtractor extends BaseExtractor {
-    public static identifier = 'com.discord-player.rbextractor' as const;
+    public static identifier = 'com.discord-player.reverbnationextractor' as const;
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
         if (typeof query !== 'string') return false;

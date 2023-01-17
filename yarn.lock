@@ -86,6 +86,7 @@ __metadata:
     file-type: ^16.5.4
     genius-lyrics: ^4.4.2
     node-fetch: cjs
+    node-html-parser: ^6.1.4
     play-dl: ^1.9.6
     reverbnation-scraper: ^2.0.0
     soundcloud-scraper: ^5.0.3
@@ -1999,6 +2000,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"he@npm:1.2.0":
+  version: 1.2.0
+  resolution: "he@npm:1.2.0"
+  bin:
+    he: bin/he
+  checksum: 3d4d6babccccd79c5c5a3f929a68af33360d6445587d628087f39a965079d84f18ce9c3d3f917ee1e3978916fc833bb8b29377c3b403f919426f91bc6965e7a7
+  languageName: node
+  linkType: hard
+
 "himalaya@npm:~1.1.0":
   version: 1.1.0
   resolution: "himalaya@npm:1.1.0"
@@ -2685,6 +2695,16 @@ __metadata:
   bin:
     node-gyp: bin/node-gyp.js
   checksum: b860e9976fa645ca0789c69e25387401b4396b93c8375489b5151a6c55cf2640a3b6183c212b38625ef7c508994930b72198338e3d09b9d7ade5acc4aaf51ea7
+  languageName: node
+  linkType: hard
+
+"node-html-parser@npm:^6.1.4":
+  version: 6.1.4
+  resolution: "node-html-parser@npm:6.1.4"
+  dependencies:
+    css-select: ^5.1.0
+    he: 1.2.0
+  checksum: fadf622c6b3b2eea621b2f46091ea0478466d32f6636d08b53670a75ef14934d18ffa3c7f04e50995d521146773621a121a339b0c9eef27911b0b7c1d0ef530d
   languageName: node
   linkType: hard
 

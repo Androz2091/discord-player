@@ -1,23 +1,54 @@
 import { QueryResolver } from 'discord-player';
 import fetch from 'node-fetch';
+import { parse, HTMLElement } from 'node-html-parser';
 
-// eslint-disable-next-line
-function getData<T = unknown>(link: string, json: false): Promise<string>;
-function getData<T = unknown>(link: string, json: true): Promise<T>;
-function getData<T = unknown>(link: string, json = false): Promise<T | string> {
+function getHTML(link: string): Promise<HTMLElement | null> {
     return fetch(link, {
         headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${process.env.APPLE_MUSIC_EMBED_JWT}`,
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49'
         }
     })
-        .then((r) => (json ? r.json() : r.text()))
-        .catch(() => null);
+        .then((r) => r.text())
+        .then(
+            (txt) => parse(txt),
+            () => null
+        );
 }
 
-function makeImage({ height, url, width }: { url: string; width: number; height: number }) {
-    return url.replace('{w}', `${width}`).replace('{h}', `${height}`);
+function makeImage({ height, url, width, ext = 'jpg' }: { url: string; width: number; height: number; ext?: string }) {
+    return url.replace('{w}', `${width}`).replace('{h}', `${height}`).replace('{f}', ext);
+}
+
+function parseDuration(d: string) {
+    const r = (name: string, unit: string) => `((?<${name}>-?\\d*[\\.,]?\\d+)${unit})?`;
+    const regex = new RegExp(
+        [
+            '(?<negative>-)?P',
+            r('years', 'Y'),
+            r('months', 'M'),
+            r('weeks', 'W'),
+            r('days', 'D'),
+            '(T',
+            r('hours', 'H'),
+            r('minutes', 'M'),
+            r('seconds', 'S'),
+            ')?' // end optional time
+        ].join('')
+    );
+    const test = regex.exec(d);
+    if (!test || !test.groups) return '0:00';
+
+    const dur = [test.groups.years, test.groups.months, test.groups.weeks, test.groups.days, test.groups.hours, test.groups.minutes, test.groups.seconds];
+
+    return (
+        dur
+            .filter((r, i, a) => !!r || i > a.length - 2)
+            .map((m, i) => {
+                if (!m) m = '0';
+                return i < 1 ? m : m.padStart(2, '0');
+            })
+            .join(':') || '0:00'
+    );
 }
 
 export class AppleMusic {
@@ -25,32 +56,86 @@ export class AppleMusic {
         return AppleMusic;
     }
 
+    public static async getSongInfoFallback(res: HTMLElement, name: string, id: string, link: string) {
+        try {
+            const metaTags = res.getElementsByTagName('meta');
+            if (!metaTags.length) return null;
+
+            const title = metaTags.find((r) => r.getAttribute('name') === 'apple:title')?.getAttribute('content') || res.querySelector('title')?.innerText || name;
+            const contentId = metaTags.find((r) => r.getAttribute('name') === 'apple:content_id')?.getAttribute('content') || id;
+            const durationRaw = metaTags.find((r) => r.getAttribute('property') === 'music:song:duration')?.getAttribute('content');
+
+            const song = {
+                id: contentId,
+                duration: durationRaw
+                    ? parseDuration(durationRaw)
+                    : metaTags
+                          .find((m) => m.getAttribute('name') === 'apple:description')
+                          ?.textContent.split('Duration: ')?.[1]
+                          .split('"')?.[0] || '0:00',
+                title,
+                url: link,
+                thumbnail:
+                    metaTags.find((r) => ['og:image:secure_url', 'og:image'].includes(r.getAttribute('property')!))?.getAttribute('content') ||
+                    'https://music.apple.com/assets/favicon/favicon-180.png',
+                artist: {
+                    name: res.querySelector('.song-subtitles__artists>a')?.textContent?.trim() || 'Apple Music'
+                }
+            };
+
+            return song;
+        } catch {
+            return null;
+        }
+    }
+
     public static async getSongInfo(link: string) {
         if (!QueryResolver.regex.appleMusicSongRegex.test(link)) {
             return null;
         }
 
-        const id = new URL(link).searchParams.get('i');
+        const url = new URL(link);
+        const id = url.searchParams.get('i');
+        const name = url.pathname.split('album/')[1]?.split('/')[0];
 
-        if (!id) return null;
+        if (!id || !name) return null;
 
-        const embedURL = `https://amp-api.music.apple.com/v1/catalog/us/songs/${id}`;
+        const res = await getHTML(`https://music.apple.com/us/song/${name}/${id}`);
+        if (!res) return null;
 
-        const res = await getData<AppleMusicSongEmbed>(embedURL, true);
-        if (!res || !res.data.length) return null;
+        try {
+            const datasrc =
+                res.getElementById('serialized-server-data')?.innerText || res.innerText.split('<script type="application/json" id="serialized-server-data">')?.[1]?.split('</script>')?.[0];
+            if (!datasrc) throw 'not found';
+            const data = JSON.parse(datasrc)[0].data.seoData;
+            const song = data.ogSongs[0]?.attributes;
 
-        const song = res.data[0];
-
-        return {
-            id: song.id,
-            duration: song.attributes.durationInMillis,
-            title: song.attributes.name,
-            thumbnail: makeImage(song.attributes.artwork),
-            url: song.attributes.url,
-            artist: {
-                name: song.attributes.artistName
-            }
-        };
+            return {
+                id: data.ogSongs[0]?.id || data.appleContentId || id,
+                duration: song?.durationInMillis || '0:00',
+                title: song?.name || data.appleTitle,
+                url: song?.url || data.url || link,
+                thumbnail: song?.artwork
+                    ? makeImage({
+                          url: song.artwork.url,
+                          height: song.artwork.height,
+                          width: song.artwork.width
+                      })
+                    : data.artworkUrl
+                    ? makeImage({
+                          height: data.height,
+                          width: data.width,
+                          url: data.artworkUrl,
+                          ext: data.fileType || 'jpg'
+                      })
+                    : 'https://music.apple.com/assets/favicon/favicon-180.png',
+                artist: {
+                    name: song?.artistName || data.socialTitle || 'Apple Music'
+                }
+            };
+        } catch {
+            return this.getSongInfoFallback(res, name, id, link);
+        }
     }
 
     public static async getPlaylistInfo(link: string) {
@@ -58,35 +143,55 @@ export class AppleMusic {
             return null;
         }
 
-        const id = new URL(link).searchParams.get('i');
+        const res = await getHTML(link);
+        if (!res) return null;
 
-        if (!id) return null;
-
-        const embedURL = `https://amp-api.music.apple.com/v1/catalog/us/albums/${link.split('/').pop()}`;
-        const res = await getData<AppleMusicPlaylistEmbed>(embedURL, true);
-        if (!res || !res.data.length) return null;
-
-        const pl = res.data[0];
-
-        return {
-            id: pl.id,
-            title: pl.attributes.name,
-            thumbnail: makeImage(pl.attributes.artwork),
-            artist: {
-                name: pl.attributes.curatorName
-            },
-            url: pl.attributes.url,
-            tracks: pl.relationships.tracks.data.map((song) => ({
-                id: song.id,
-                duration: song.attributes.durationInMillis,
-                title: song.attributes.name,
-                thumbnail: makeImage(song.attributes.artwork),
-                url: song.attributes.url,
+        try {
+            const datasrc =
+                res.getElementById('serialized-server-data')?.innerText || res.innerText.split('<script type="application/json" id="serialized-server-data">')?.[1]?.split('</script>')?.[0];
+            if (!datasrc) throw 'not found';
+            const pl = JSON.parse(datasrc)[0].data.seoData;
+            const thumbnail = pl.artworkUrl
+                ? makeImage({
+                      height: pl.height,
+                      width: pl.width,
+                      url: pl.artworkUrl,
+                      ext: pl.fileType || 'jpg'
+                  })
+                : 'https://music.apple.com/assets/favicon/favicon-180.png';
+            return {
+                id: pl.appleContentId,
+                title: pl.appleTitle,
+                thumbnail,
                 artist: {
-                    name: song.attributes.artistName
-                }
-            }))
-        };
+                    name: pl.ogSongs?.[0]?.attributes?.artistName || 'Apple Music'
+                },
+                url: pl.url,
+                tracks:
+                    // eslint-disable-next-line
+                    pl.ogSongs?.map((m: any) => {
+                        const song = m.attributes;
+                        return {
+                            id: m.id,
+                            duration: song.durationInMillis || '0:00',
+                            title: song.name,
+                            url: song.url,
+                            thumbnail: song.artwork
+                                ? makeImage({
+                                      url: song.artwork.url,
+                                      height: song.artwork.height,
+                                      width: song.artwork.width
+                                  })
+                                : thumbnail,
+                            artist: {
+                                name: song.artistName || 'Apple Music'
+                            }
+                        };
+                    }) || []
+            };
+        } catch {
+            return null;
+        }
     }
 
     public static async getAlbumInfo(link: string) {
@@ -94,285 +199,54 @@ export class AppleMusic {
             return null;
         }
 
-        const embedURL = `https://amp-api.music.apple.com/v1/catalog/us/albums/${link.split('/').pop()}`;
-        const res = await getData<AppleMusicAlbumEmbed>(embedURL, true);
-        if (!res || !res.data.length) return null;
+        const res = await getHTML(link);
+        if (!res) return null;
 
-        const pl = res.data[0];
-
-        return {
-            id: pl.id,
-            title: pl.attributes.name,
-            thumbnail: makeImage(pl.attributes.artwork),
-            artist: {
-                name: pl.attributes.artistName
-            },
-            url: pl.attributes.url,
-            tracks: pl.relationships.tracks.data.map((song) => ({
-                id: song.id,
-                duration: song.attributes.durationInMillis,
-                title: song.attributes.name,
-                thumbnail: makeImage(song.attributes.artwork),
-                url: song.attributes.url,
+        try {
+            const datasrc =
+                res.getElementById('serialized-server-data')?.innerText || res.innerText.split('<script type="application/json" id="serialized-server-data">')?.[1]?.split('</script>')?.[0];
+            if (!datasrc) throw 'not found';
+            const pl = JSON.parse(datasrc)[0].data.seoData;
+            const thumbnail = pl.artworkUrl
+                ? makeImage({
+                      height: pl.height,
+                      width: pl.width,
+                      url: pl.artworkUrl,
+                      ext: pl.fileType || 'jpg'
+                  })
+                : 'https://music.apple.com/assets/favicon/favicon-180.png';
+            return {
+                id: pl.appleContentId,
+                title: pl.appleTitle,
+                thumbnail,
                 artist: {
-                    name: song.attributes.artistName
-                }
-            }))
-        };
+                    name: pl.ogSongs?.[0]?.attributes?.artistName || 'Apple Music'
+                },
+                url: pl.url,
+                tracks:
+                    // eslint-disable-next-line
+                    pl.ogSongs?.map((m: any) => {
+                        const song = m.attributes;
+                        return {
+                            id: m.id,
+                            duration: song.durationInMillis || '0:00',
+                            title: song.name,
+                            url: song.url,
+                            thumbnail: song.artwork
+                                ? makeImage({
+                                      url: song.artwork.url,
+                                      height: song.artwork.height,
+                                      width: song.artwork.width
+                                  })
+                                : thumbnail,
+                            artist: {
+                                name: song.artistName || 'Apple Music'
+                            }
+                        };
+                    }) || []
+            };
+        } catch {
+            return null;
+        }
     }
-}
-
-export interface AppleMusicSongEmbed {
-    data: {
-        id: string;
-        type: string;
-        href: string;
-        attributes: {
-            hasTimeSyncedLyrics: boolean;
-            albumName: string;
-            genreNames: string[];
-            trackNumber: number;
-            releaseDate: string;
-            durationInMillis: number;
-            isVocalAttenuationAllowed: boolean;
-            isMasteredForItunes: boolean;
-            isrc: string;
-            artwork: {
-                width: number;
-                url: string;
-                height: number;
-                textColor3: string;
-                textColor2: string;
-                textColor4: string;
-                textColor1: string;
-                bgColor: string;
-                hasP3: boolean;
-            };
-            audioLocale: string;
-            composerName: string;
-            url: string;
-            playParams: {
-                id: string;
-                kind: string;
-            };
-            discNumber: number;
-            hasLyrics: boolean;
-            isAppleDigitalMaster: boolean;
-            audioTraits: string[];
-            name: string;
-            previews: {
-                url: string;
-            }[];
-            artistName: string;
-        };
-        relationships: {
-            artists: {
-                href: string;
-                data: {
-                    id: string;
-                    type: string;
-                    href: string;
-                }[];
-            };
-            albums: {
-                href: string;
-                data: {
-                    id: string;
-                    type: string;
-                    href: string;
-                }[];
-            };
-        };
-    }[];
-}
-
-export interface AppleMusicAlbumEmbed {
-    data: [
-        {
-            id: string;
-            type: string;
-            href: string;
-            attributes: {
-                copyright: string;
-                genreNames: string[];
-                releaseDate: string;
-                upc: string;
-                isMasteredForItunes: boolean;
-                artwork: {
-                    width: number;
-                    url: string;
-                    height: number;
-                    textColor3: string;
-                    textColor2: string;
-                    textColor4: string;
-                    textColor1: string;
-                    bgColor: string;
-                    hasP3: boolean;
-                };
-                playParams: { id: string; kind: string };
-                url: string;
-                recordLabel: string;
-                isCompilation: boolean;
-                trackCount: number;
-                isPrerelease: boolean;
-                audioTraits: string[];
-                isSingle: boolean;
-                name: string;
-                artistName: string;
-                contentRating: string;
-                editorialNotes: {
-                    standard: string;
-                    short: string;
-                };
-                isComplete: boolean;
-            };
-            relationships: {
-                artists: {
-                    href: string;
-                    data: [{ id: string; type: string; href: string }, { id: string; type: string; href: string }, { id: string; type: string; href: string }];
-                };
-                tracks: {
-                    href: string;
-                    data: {
-                        id: string;
-                        type: string;
-                        href: string;
-                        attributes: {
-                            albumName: string;
-                            hasTimeSyncedLyrics: boolean;
-                            genreNames: string[];
-                            trackNumber: number;
-                            durationInMillis: number;
-                            releaseDate: string;
-                            isVocalAttenuationAllowed: boolean;
-                            isMasteredForItunes: boolean;
-                            isrc: string;
-                            artwork: {
-                                width: number;
-                                url: string;
-                                height: number;
-                                textColor3: string;
-                                textColor2: string;
-                                textColor4: string;
-                                textColor1: string;
-                                bgColor: string;
-                                hasP3: boolean;
-                            };
-                            audioLocale: string;
-                            composerName: string;
-                            url: string;
-                            playParams: { id: string; kind: string };
-                            discNumber: number;
-                            isAppleDigitalMaster: boolean;
-                            hasLyrics: boolean;
-                            audioTraits: string[];
-                            name: string;
-                            previews: [{ url: string }];
-                            artistName: string;
-                        };
-                    }[];
-                };
-            };
-        }
-    ];
-}
-
-export interface AppleMusicPlaylistEmbed {
-    data: [
-        {
-            id: string;
-            type: string;
-            href: string;
-            attributes: {
-                curatorName: string;
-                audioTraits: string[];
-                lastModifiedDate: string;
-                name: string;
-                isChart: boolean;
-                playlistType: string;
-                description: {
-                    standard: string;
-                    short: string;
-                };
-                artwork: {
-                    width: number;
-                    url: string;
-                    height: number;
-                    textColor3: string;
-                    textColor2: string;
-                    textColor4: string;
-                    textColor1: string;
-                    bgColor: string;
-                    hasP3: boolean;
-                };
-                editorialNotes: {
-                    name: string;
-                    standard: string;
-                    short: string;
-                };
-                playParams: {
-                    id: string;
-                    kind: string;
-                    versionHash: string;
-                };
-                url: string;
-            };
-            relationships: {
-                tracks: {
-                    href: string;
-                    data: {
-                        id: string;
-                        type: string;
-                        href: string;
-                        attributes: {
-                            hasTimeSyncedLyrics: boolean;
-                            albumName: string;
-                            genreNames: string[];
-                            trackNumber: number;
-                            releaseDate: string;
-                            durationInMillis: number;
-                            isVocalAttenuationAllowed: boolean;
-                            isMasteredForItunes: boolean;
-                            isrc: string;
-                            artwork: {
-                                width: number;
-                                url: string;
-                                height: number;
-                                textColor3: string;
-                                textColor2: string;
-                                textColor4: string;
-                                textColor1: string;
-                                bgColor: string;
-                                hasP3: boolean;
-                            };
-                            audioLocale: string;
-                            composerName: string;
-                            url: string;
-                            playParams: {
-                                id: string;
-                                kind: string;
-                            };
-                            discNumber: number;
-                            isAppleDigitalMaster: boolean;
-                            hasLyrics: boolean;
-                            audioTraits: string[];
-                            name: string;
-                            previews: {
-                                url: string;
-                            }[];
-                            artistName: string;
-                        };
-                    }[];
-                };
-                curator: {
-                    href: string;
-                    data: {
-                        id: string;
-                        type: string;
-                        href: string;
-                    }[];
-                };
-            };
-        }
-    ];
 }

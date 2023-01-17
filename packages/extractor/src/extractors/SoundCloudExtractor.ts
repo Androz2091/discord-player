@@ -17,7 +17,7 @@ const soundcloud = new Client(undefined, {
 });
 
 export class SoundCloudExtractor extends BaseExtractor {
-    public static identifier = 'com.discord-player.scextractor' as const;
+    public static identifier = 'com.discord-player.soundcloudextractor' as const;
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
         if (typeof query !== 'string') return false;

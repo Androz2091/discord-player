@@ -11,9 +11,9 @@ const spotifyAlbumRegex = /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:al
 const vimeoRegex = /^(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)$/;
 const reverbnationRegex = /^https:\/\/(www.)?reverbnation.com\/(.+)\/song\/(.+)$/;
 const attachmentRegex = /^https?:\/\/.+$/;
-const appleMusicSongRegex = /^https?:\/\/music\.apple\.com\/.+?\/album\/.+?\/.+?\?i=([0-9]+)$/;
-const appleMusicPlaylistRegex = /^https?:\/\/music\.apple\.com\/.+?\/playlist\/$/;
-const appleMusicAlbumRegex = /^https?:\/\/music\.apple\.com\/.+?\/album\/$/;
+const appleMusicSongRegex = /^https?:\/\/music\.apple\.com\/.+?\/(song|album)\/.+?(\/.+?\?i=|\/)([0-9]+)$/;
+const appleMusicPlaylistRegex = /^https?:\/\/music\.apple\.com\/.+?\/playlist\/.+\/pl\.[a-f0-9]+$/;
+const appleMusicAlbumRegex = /^https?:\/\/music\.apple\.com\/.+?\/album\/.+\/([0-9]+)$/;
 // #endregion scary things above *sigh*
 
 class QueryResolver {
@@ -52,9 +52,9 @@ class QueryResolver {
         if (spotifyAlbumRegex.test(query)) return QueryType.SPOTIFY_ALBUM;
         if (vimeoRegex.test(query)) return QueryType.VIMEO;
         if (reverbnationRegex.test(query)) return QueryType.REVERBNATION;
-        if (appleMusicSongRegex.test(query)) return QueryType.APPLE_MUSIC_SONG;
         if (appleMusicAlbumRegex.test(query)) return QueryType.APPLE_MUSIC_ALBUM;
         if (appleMusicPlaylistRegex.test(query)) return QueryType.APPLE_MUSIC_PLAYLIST;
+        if (appleMusicSongRegex.test(query)) return QueryType.APPLE_MUSIC_SONG;
         if (attachmentRegex.test(query)) return QueryType.ARBITRARY;
 
         return QueryType.YOUTUBE_SEARCH;

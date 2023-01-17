@@ -26,7 +26,7 @@ const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|
 const idRegex = /^[a-zA-Z0-9-_]{11}$/;
 
 export class YoutubeExtractor extends BaseExtractor {
-    public static identifier = 'com.discord-player.ytextractor' as const;
+    public static identifier = 'com.discord-player.ysaextractor' as const;
     private _stream!: StreamFN;
     private _spotify!: Spotify;
 
@@ -268,11 +268,13 @@ export class YoutubeExtractor extends BaseExtractor {
                 });
 
                 playlist.tracks = info.tracks.map(
-                    (m) =>
+                    (
+                        m: any // eslint-disable-line
+                    ) =>
                         new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
-                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
+                            duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
                             thumbnail: m.thumbnail,
                             title: m.title,
                             url: m.url,
@@ -306,11 +308,13 @@ export class YoutubeExtractor extends BaseExtractor {
                 });
 
                 playlist.tracks = info.tracks.map(
-                    (m) =>
+                    (
+                        m: any // eslint-disable-line
+                    ) =>
                         new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
-                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
+                            duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
                             thumbnail: m.thumbnail,
                             title: m.title,
                             url: m.url,
@@ -330,7 +334,7 @@ export class YoutubeExtractor extends BaseExtractor {
                 const track = new Track(this.context.player, {
                     author: info.artist.name,
                     description: info.title,
-                    duration: Util.buildTimeCode(Util.parseMS(info.duration)),
+                    duration: typeof info.duration === 'number' ? Util.buildTimeCode(Util.parseMS(info.duration)) : info.duration,
                     thumbnail: info.thumbnail,
                     title: info.title,
                     url: info.url,

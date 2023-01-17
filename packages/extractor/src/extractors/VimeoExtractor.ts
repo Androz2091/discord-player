@@ -12,7 +12,7 @@ import { downloadStream } from '../internal/downloader';
 import { Vimeo } from '../internal/Vimeo';
 
 export class VimeoExtractor extends BaseExtractor {
-    public static identifier = 'com.discord-player.vmextractor' as const;
+    public static identifier = 'com.discord-player.vimeoextractor' as const;
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
         if (typeof query !== 'string') return false;
@@ -34,14 +34,14 @@ export class VimeoExtractor extends BaseExtractor {
                 const track = new Track(this.context.player, {
                     title: trackInfo.title,
                     url: trackInfo.url,
-                    duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration * 1000 || 0)),
+                    duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration || 0)),
                     description: `${trackInfo.title} by ${trackInfo.author.name}`,
                     thumbnail: trackInfo.thumbnail,
                     views: 0,
                     author: trackInfo.author.name,
                     requestedBy: context.requestedBy,
                     source: 'arbitrary',
-                    engine: trackInfo.stream.url,
+                    engine: trackInfo.stream,
                     queryType: context.type
                 });
 
@@ -63,12 +63,12 @@ export class VimeoExtractor extends BaseExtractor {
         }
 
         const track = await Vimeo.getInfo(info.url).catch(Util.noop);
-        if (!track || !track.stream.url) throw new Error('Could not extract stream from this source');
+        if (!track || !track.stream) throw new Error('Could not extract stream from this source');
 
         info.raw.engine = {
-            streamURL: track.stream.url
+            streamURL: track.stream
         };
 
-        return await downloadStream(track.stream.url);
+        return await downloadStream(track.stream);
     }
 }

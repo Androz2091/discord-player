@@ -49,6 +49,7 @@
     "file-type": "^16.5.4",
     "genius-lyrics": "^4.4.2",
     "node-fetch": "cjs",
+    "node-html-parser": "^6.1.4",
     "reverbnation-scraper": "^2.0.0",
     "soundcloud-scraper": "^5.0.3",
     "spotify-url-info": "^3.2.3",
