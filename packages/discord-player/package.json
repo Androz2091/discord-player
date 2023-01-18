@@ -21,8 +21,7 @@
     "dev": "cd examples/test && ts-node index.ts",
     "build": "tsup",
     "build:check": "tsc --noEmit",
-    "docs": "typedoc --json ../../docs/typedoc.json ./src/index.ts",
-    "postdocs": "node ../../scripts/docgen.js",
+    "docs": "typedoc --json ../../docs/typedoc.json ./src/index.ts && node ../../scripts/docgen.js",
     "lint": "eslint src --ext .ts --fix"
   },
   "funding": "https://github.com/Androz2091/discord-player?sponsor=1",
