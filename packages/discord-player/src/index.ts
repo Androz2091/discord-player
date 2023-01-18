@@ -17,6 +17,7 @@ export * from './VoiceInterface/VolumeTransformer';
 export { Util } from './utils/Util';
 export * from './types/types';
 export * from './utils/FFmpegStream';
+export * from './Structures/GuildQueue';
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
 export const version: string = '[VI]{{inject}}[/VI]';

@@ -4,6 +4,8 @@ import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
 import { Playlist } from './Playlist';
 import { Queue } from './Queue';
 
+export type TrackResolvable = Track | string | number;
+
 class Track {
     public player!: Player;
     public title!: string;

@@ -9,6 +9,9 @@ concurrency:
 jobs:
     publish-npm:
         runs-on: ubuntu-latest
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
         steps:
             - uses: actions/checkout@v2
             - uses: actions/setup-node@v1
@@ -19,7 +22,7 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: .yarn/cache
-                key: publish-yarn-cache-node-18
+                key: yarn-cache-node-18
             - run: yarn install --immutable
             - run: yarn build
             - run: cd packages/discord-player

@@ -1,5 +1,5 @@
 import { Client, GuildResolvable, Snowflake, VoiceState, IntentsBitField, User, ChannelType } from 'discord.js';
-import { TypedEmitter as EventEmitter } from 'tiny-typed-emitter';
+import { EventEmitter } from '@discord-player/utils';
 import { Queue } from './Structures/Queue';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
@@ -13,6 +13,7 @@ import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContex
 import { Collection } from '@discord-player/utils';
 import { BaseExtractor } from './extractors/BaseExtractor';
 import { SearchResult } from './Structures/SearchResult';
+import { GuildNodeManager } from './Structures/GuildQueue/GuildNodeManager';
 
 class Player extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
@@ -27,6 +28,7 @@ class Player extends EventEmitter<PlayerEvents> {
         lagMonitor: 30000
     };
     public readonly queues = new Collection<Snowflake, Queue>();
+    public nodes = new GuildNodeManager(this);
     public readonly voiceUtils = new VoiceUtils();
     public requiredEvents = ['error', 'connectionError'] as string[];
     public extractors = new ExtractorExecutionContext(this);
@@ -194,6 +196,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @returns {Queue}
      */
     createQueue<T = unknown>(guild: GuildResolvable, queueInitOptions: PlayerOptions & { metadata?: T } = {}): Queue<T> {
+        Util.warn('<Player.createQueue> is deprecated and will be removed in the future. Use <Player.nodes.create> instead!');
         guild = this.client.guilds.resolve(guild)!;
         if (!guild) throw new PlayerError('Unknown Guild', ErrorStatusCode.UNKNOWN_GUILD);
         if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
@@ -215,6 +218,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @returns {Queue | undefined}
      */
     getQueue<T = unknown>(guild: GuildResolvable): Queue<T> | undefined {
+        Util.warn('<Player.getQueue> is deprecated and will be removed in the future. Use <Player.nodes.get> instead!');
         guild = this.client.guilds.resolve(guild)!;
         if (!guild) throw new PlayerError('Unknown Guild', ErrorStatusCode.UNKNOWN_GUILD);
         return this.queues.get(guild.id) as Queue<T>;
@@ -226,6 +230,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @returns {Queue}
      */
     deleteQueue<T = unknown>(guild: GuildResolvable) {
+        Util.warn('<Player.deleteQueue> is deprecated and will be removed in the future. Use <Player.nodes.delete> instead!');
         guild = this.client.guilds.resolve(guild)!;
         if (!guild) throw new PlayerError('Unknown Guild', ErrorStatusCode.UNKNOWN_GUILD);
         const prev = this.getQueue<T>(guild)!;
@@ -267,11 +272,13 @@ class Player extends EventEmitter<PlayerEvents> {
 
         const queryType = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
 
+        // force particular extractor
         if (options.searchEngine.startsWith('ext:')) {
             extractor = this.extractors.get(options.searchEngine.substring(4))!;
             if (!extractor) return new SearchResult(this, { query, queryType });
         }
 
+        // query all extractors
         if (!extractor) {
             extractor = (await this.extractors.run((ext) => ext.validate(query, queryType as SearchQueryType)))?.extractor || null;
         }
@@ -336,7 +343,7 @@ class Player extends EventEmitter<PlayerEvents> {
         if (this.requiredEvents.includes(eventName) && !super.eventNames().includes(eventName)) {
             // eslint-disable-next-line no-console
             console.error(...args);
-            process.emitWarning(`[DiscordPlayerWarning] Unhandled "${eventName}" event! Events ${this.requiredEvents.map((m) => `"${m}"`).join(', ')} must have event listeners!`);
+            Util.warn(`Unhandled "${eventName}" event! Events ${this.requiredEvents.map((m) => `"${m}"`).join(', ')} must have event listeners!`, 'UnhandledEventWarning');
             return false;
         } else {
             return super.emit(eventName, ...args);
@@ -349,11 +356,12 @@ class Player extends EventEmitter<PlayerEvents> {
      * @returns {Queue}
      */
     resolveQueue<T>(queueLike: GuildResolvable | Queue): Queue<T> {
+        Util.warn('<Player.resolveQueue> is deprecated and will be removed in the future. Use <Player.nodes.resolve> instead!');
         return this.getQueue(queueLike instanceof Queue ? queueLike.guild : queueLike)!;
     }
 
     *[Symbol.iterator]() {
-        yield* Array.from(this.queues.values());
+        yield* this.nodes.cache.size ? this.nodes.cache.values() : this.queues.values();
     }
 
     /**
