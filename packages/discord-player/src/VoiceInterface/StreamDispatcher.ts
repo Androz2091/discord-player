@@ -13,7 +13,7 @@ import {
 } from '@discordjs/voice';
 import { StageChannel, VoiceChannel } from 'discord.js';
 import { Duplex, Readable } from 'stream';
-import { TypedEmitter as EventEmitter } from 'tiny-typed-emitter';
+import { EventEmitter } from '@discord-player/utils';
 import Track from '../Structures/Track';
 import { Util } from '../utils/Util';
 import { PlayerError, ErrorStatusCode } from '../Structures/PlayerError';
