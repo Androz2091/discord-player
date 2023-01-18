@@ -39,6 +39,9 @@ jobs:
             - name: Build packages
               run: yarn build
 
+            - name: Build docs
+              run: yarn docs
+
             - name: Build and deploy documentation
               uses: discordjs/action-docs@v1
               env:
