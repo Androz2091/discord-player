@@ -23,7 +23,7 @@
   "scripts": {
     "bootstrap": "node ./scripts/bootstrap.js",
     "build": "turbo run build --color",
-    "docs": "turbo run docs --color",
+    "docs": "turbo run docs --color --force",
     "build:check": "turbo run build:check --color",
     "lint": "turbo run lint --color",
     "format": "prettier --write \"{packages,scripts}/**/*.{js,ts,mjs,mts}\""
