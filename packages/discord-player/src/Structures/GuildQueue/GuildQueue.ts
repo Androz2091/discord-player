@@ -13,6 +13,7 @@ import { GuildQueueAudioFilters } from './GuildQueueAudioFilters';
 import { Readable } from 'stream';
 import { QueueRepeatMode, SearchQueryType } from '../../types/types';
 import { setTimeout } from 'timers';
+import { YouTube } from 'youtube-sr';
 
 export interface GuildNodeInit<Meta = unknown> {
     guild: Guild;
@@ -46,59 +47,50 @@ export interface GuildQueueEvents<Meta = unknown> {
      * Emitted when audio track is added to the queue
      * @param queue The queue where this event occurred
      * @param track The track
-     * @event GuildQueue#audioTrackAdd
      */
     audioTrackAdd: (queue: GuildQueue<Meta>, track: Track) => unknown;
     /**
      * Emitted when audio tracks were added to the queue
      * @param queue The queue where this event occurred
      * @param tracks The tracks array
-     * @event GuildQueue#audioTracksAdd
      */
     audioTracksAdd: (queue: GuildQueue<Meta>, track: Track[]) => unknown;
     /**
      * Emitted when a connection is created
      * @param queue The queue where this event occurred
-     * @event GuildQueue#connection
      */
     connection: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when the bot is disconnected from the channel
      * @param queue The queue where this event occurred
-     * @event GuildQueue#disconnect
      */
     disconnect: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when the queue sends a debug info
      * @param queue The queue where this event occurred
      * @param message The debug message
-     * @event GuildQueue#debug
      */
     debug: (queue: GuildQueue<Meta>, message: string) => unknown;
     /**
      * Emitted when the queue encounters error
      * @param queue The queue where this event occurred
      * @param error The error
-     * @event GuildQueue#error
      */
     error: (queue: GuildQueue<Meta>, error: Error) => unknown;
     /**
      * Emitted when the voice channel is empty
      * @param queue The queue where this event occurred
-     * @event GuildQueue#emptyChannel
      */
     emptyChannel: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when the queue is empty
      * @param queue The queue where this event occurred
-     * @event GuildQueue#emptyQueue
      */
     emptyQueue: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when the audio player starts streaming audio track
      * @param queue The queue where this event occurred
      * @param track The track that is being streamed
-     * @event GuildQueue#playerStart
      */
     playerStart: (queue: GuildQueue<Meta>, track: Track) => unknown;
     /**
@@ -106,21 +98,18 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param queue The queue where this event occurred
      * @param error The error
      * @param track The track that is being streamed
-     * @event GuildQueue#playerError
      */
     playerError: (queue: GuildQueue<Meta>, error: Error, track: Track) => unknown;
     /**
      * Emitted when the audio player finishes streaming audio track
      * @param queue The queue where this event occurred
      * @param track The track that was being streamed
-     * @event GuildQueue#playerFinish
      */
     playerFinish: (queue: GuildQueue<Meta>, track: Track) => unknown;
     /**
      * Emitted when the audio player skips current track
      * @param queue The queue where this event occurred
      * @param track The track that was skipped
-     * @event GuildQueue#playerSkip
      */
     playerSkip: (queue: GuildQueue<Meta>, track: Track) => unknown;
     /**
@@ -129,7 +118,6 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param queue The queue where this event occurred
      * @param oldState The old voice state
      * @param newState The new voice state
-     * @event GuildQueue#voiceStateUpdate
      */
     voiceStateUpdate: (queue: GuildQueue<Meta>, oldState: VoiceState, newState: VoiceState) => unknown;
 }
@@ -137,6 +125,7 @@ export interface GuildQueueEvents<Meta = unknown> {
 export class GuildQueue<Meta = unknown> {
     #transitioning = false;
     #initializing = false;
+    #deleted = false;
     #initializingPromises: Array<(value: boolean | PromiseLike<boolean>) => void> = [];
     private __current: Track | null = null;
     public tracks: Queue<Track>;
@@ -178,6 +167,7 @@ export class GuildQueue<Meta = unknown> {
     }
 
     public setMetadata(m: Meta | undefined | null) {
+        this.#warnIfDeleted();
         this.options.metadata = m;
     }
 
@@ -192,6 +182,10 @@ export class GuildQueue<Meta = unknown> {
 
     public get currentTrack() {
         return this.dispatcher?.audioResource?.metadata || this.__current;
+    }
+
+    public get deleted() {
+        return this.#deleted;
     }
 
     public get channel() {
@@ -221,6 +215,7 @@ export class GuildQueue<Meta = unknown> {
     }
 
     public setTransitioning(state: boolean) {
+        this.#warnIfDeleted();
         this.#transitioning = state;
     }
 
@@ -228,15 +223,23 @@ export class GuildQueue<Meta = unknown> {
         return this.#transitioning;
     }
 
+    public setRepeatMode(mode: QueueRepeatMode) {
+        this.#warnIfDeleted();
+        this.repeatMode = mode;
+    }
+
     public isEmpty() {
+        this.#warnIfDeleted();
         return this.tracks.size < 1;
     }
 
     public isPlaying() {
+        this.#warnIfDeleted();
         return this.dispatcher?.audioResource != null;
     }
 
     public addTrack(track: Track | Track[] | Playlist) {
+        this.#warnIfDeleted();
         const toAdd = track instanceof Playlist ? track.tracks : track;
         this.tracks.add(toAdd);
         const isMulti = Array.isArray(toAdd);
@@ -249,6 +252,7 @@ export class GuildQueue<Meta = unknown> {
     }
 
     public async connect(channelResolvable: GuildVoiceChannelResolvable, options?: VoiceConnectConfig) {
+        this.#warnIfDeleted();
         const channel = this.player.client.channels.resolve(channelResolvable);
         if (!channel || !channel.isVoiceBased()) {
             throw new Error(`Expected a voice based channel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice}), received ${channel?.type}`);
@@ -285,7 +289,9 @@ export class GuildQueue<Meta = unknown> {
     }
 
     public delete() {
-        this.player.nodes.delete(this.id);
+        if (this.player.nodes.delete(this.id)) {
+            this.#deleted = true;
+        }
     }
 
     public awaitInitialization() {
@@ -329,15 +335,12 @@ export class GuildQueue<Meta = unknown> {
             this.node.resetProgress();
             this.player.events.emit('playerFinish', this, track);
             if (this.tracks.size < 1 && this.repeatMode === QueueRepeatMode.OFF) {
-                this.__current = null;
-                this.player.events.emit('emptyQueue', this);
-                if (this.options.leaveOnEnd) {
-                    const tm: NodeJS.Timeout = setTimeout(() => {
-                        if (this.tracks.size) return clearTimeout(tm);
-                        this.dispatcher?.disconnect();
-                    }, this.options.leaveOnEndCooldown).unref();
-                }
+                this.#emitEnd();
             } else {
+                if (this.repeatMode === QueueRepeatMode.AUTOPLAY) {
+                    this.#handleAutoplay(track);
+                    return;
+                }
                 if (this.repeatMode === QueueRepeatMode.TRACK) {
                     this.__current = this.history.tracks.dispatch() || track;
                     return this.node.play(this.__current);
@@ -351,11 +354,62 @@ export class GuildQueue<Meta = unknown> {
         }
     }
 
+    #emitEnd() {
+        this.__current = null;
+        this.player.events.emit('emptyQueue', this);
+        if (this.options.leaveOnEnd) {
+            const tm: NodeJS.Timeout = setTimeout(() => {
+                if (this.tracks.size) return clearTimeout(tm);
+                this.dispatcher?.disconnect();
+            }, this.options.leaveOnEndCooldown).unref();
+        }
+    }
+
+    async #handleAutoplay(track: Track) {
+        let info = await YouTube.getVideo(track.url)
+            .then((x) => x.videos![0])
+            .catch(Util.noop);
+
+        // fallback
+        if (!info)
+            info = await YouTube.search(track.author)
+                .then((x) => x[0])
+                .catch(Util.noop);
+
+        if (!info) {
+            return this.#emitEnd();
+        }
+
+        const nextTrack = new Track(this.player, {
+            title: info.title!,
+            url: `https://www.youtube.com/watch?v=${info.id}`,
+            duration: info.durationFormatted || Util.buildTimeCode(Util.parseMS(info.duration * 1000)),
+            description: info.title!,
+            thumbnail: typeof info.thumbnail === 'string' ? info.thumbnail! : info.thumbnail!.url!,
+            views: info.views,
+            author: info.channel!.name!,
+            requestedBy: track.requestedBy,
+            source: 'youtube',
+            queryType: 'youtubeVideo'
+        });
+
+        this.node.play(nextTrack, {
+            queue: false,
+            seek: 0,
+            transitionMode: false
+        });
+    }
+
     #resolveInitializerAwaiters() {
         this.#initializingPromises.forEach((p) => {
             p(!this.#initializing);
         });
 
         this.#initializingPromises = [];
+    }
+
+    #warnIfDeleted() {
+        if (!this.deleted) return;
+        Util.warn('Deleted queue usage detected! Please remove references to deleted queues in order to prevent memory leaks.', 'DiscordPlayerWarning');
     }
 }
