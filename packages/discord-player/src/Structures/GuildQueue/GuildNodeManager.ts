@@ -5,7 +5,7 @@ import { Player } from '../../Player';
 import { GuildQueue, OnBeforeCreateStreamHandler } from './GuildQueue';
 import { QueueRepeatMode } from '../../types/types';
 
-export interface GuildNodeCreateOptions {
+export interface GuildNodeCreateOptions<T = unknown> {
     strategy?: QueueStrategy;
     volume?: number | boolean;
     equalizer?: EqualizerBand[] | boolean;
@@ -21,15 +21,16 @@ export interface GuildNodeCreateOptions {
     leaveOnEndCooldown?: number;
     leaveOnStop?: boolean;
     leaveOnStopCooldown?: number;
+    metadata?: T | null;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
 
-export class GuildNodeManager {
+export class GuildNodeManager<Meta = unknown> {
     public cache = new Collection<string, GuildQueue>();
     public constructor(public player: Player) {}
 
-    public create(guild: GuildResolvable, options: GuildNodeCreateOptions = {}) {
+    public create<T = Meta>(guild: GuildResolvable, options: GuildNodeCreateOptions<T> = {}) {
         const server = this.player.client.guilds.resolve(guild);
         if (!server) {
             throw new Error('Invalid or unknown guild');
@@ -52,7 +53,7 @@ export class GuildNodeManager {
         options.leaveOnStop ??= true;
         options.leaveOnStopCooldown ??= 0;
 
-        const queue = new GuildQueue(this.player, {
+        const queue = new GuildQueue<T>(this.player, {
             guild: server,
             queueStrategy: options.strategy,
             volume: options.volume,
@@ -68,7 +69,8 @@ export class GuildNodeManager {
             leaveOnEnd: options.leaveOnEnd,
             leaveOnEndCooldown: options.leaveOnEndCooldown,
             leaveOnStop: options.leaveOnStop,
-            leaveOnStopCooldown: options.leaveOnStopCooldown
+            leaveOnStopCooldown: options.leaveOnStopCooldown,
+            metadata: options.metadata
         });
 
         this.cache.set(server.id, queue);
@@ -76,11 +78,16 @@ export class GuildNodeManager {
         return queue;
     }
 
-    public get(node: NodeResolvable) {
+    public get<T = Meta>(node: NodeResolvable) {
         const queue = this.resolve(node);
         if (!queue) return null;
 
-        return this.cache.get(queue.id) || null;
+        return (this.cache.get(queue.id) as GuildQueue<T>) || null;
+    }
+
+    public has(node: NodeResolvable) {
+        const id = node instanceof GuildQueue ? node.id : this.player.client.guilds.resolveId(node)!;
+        return this.cache.has(id);
     }
 
     public delete(node: NodeResolvable) {
@@ -92,12 +99,12 @@ export class GuildNodeManager {
         return this.cache.delete(queue.id);
     }
 
-    public resolve(node: NodeResolvable) {
+    public resolve<T = Meta>(node: NodeResolvable) {
         if (node instanceof GuildQueue) {
             return node;
         }
 
-        return this.cache.get(this.player.client.guilds.resolveId(node)!);
+        return this.cache.get(this.player.client.guilds.resolveId(node)!) as GuildQueue<T> | undefined;
     }
 
     public resolveId(node: NodeResolvable) {

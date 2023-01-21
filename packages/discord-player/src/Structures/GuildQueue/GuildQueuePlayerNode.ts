@@ -26,9 +26,9 @@ export interface PlayerTimestamp {
     progress: number;
 }
 
-export class GuildQueuePlayerNode {
+export class GuildQueuePlayerNode<Meta = unknown> {
     #progress = 0;
-    public constructor(public queue: GuildQueue) {}
+    public constructor(public queue: GuildQueue<Meta>) {}
 
     public isIdle() {
         return !!this.queue.dispatcher?.isIdle();
@@ -98,7 +98,7 @@ export class GuildQueuePlayerNode {
             }
         } else {
             if (timecodes) {
-                return `${timestamp.current.label} ┃ ${indicator}${line.repeat(length - 1)} ┃ ${timestamp.current.label}`;
+                return `${timestamp.current.label} ┃ ${indicator}${line.repeat(length - 1)} ┃ ${timestamp.total.label}`;
             } else {
                 return `${indicator}${line.repeat(length - 1)}`;
             }
@@ -127,12 +127,17 @@ export class GuildQueuePlayerNode {
         this.queue.dispatcher?.audioResource?.encoder?.setBitrate(rate === 'auto' ? this.queue.channel?.bitrate ?? 64000 : rate);
     }
 
+    public setPaused(state: boolean) {
+        if (state) return this.queue.dispatcher?.pause(true) || false;
+        return this.queue.dispatcher?.resume() || false;
+    }
+
     public pause() {
-        return this.queue.dispatcher?.pause(true) || false;
+        return this.setPaused(true);
     }
 
     public resume() {
-        return this.queue.dispatcher?.resume() || false;
+        return this.setPaused(false);
     }
 
     public skip() {
@@ -208,66 +213,76 @@ export class GuildQueuePlayerNode {
         if (!this.queue.dispatcher?.voiceConnection) {
             throw new Error('No voice connection available');
         }
+
         options = Object.assign(
             {},
             {
-                queue: true,
+                queue: this.queue.currentTrack != null,
                 transitionMode: false,
                 seek: 0
             } as ResourcePlayOptions,
             options
         )!;
 
+        if (res && options.queue) {
+            return this.queue.tracks.add(res);
+        }
+
+        this.queue.debug(`Received play request from guild ${this.queue.guild.name} (ID: ${this.queue.guild.id})`);
+
         const track = res || this.queue.tracks.dispatch();
         if (!track) {
             throw new Error('Play request received but track was not provided');
         }
 
-        if (res && options.queue) {
-            return this.queue.tracks.add(res);
-        }
+        this.queue.initializing = true;
 
-        const qt: SearchQueryType = track.queryType || (track.raw.source === 'spotify' ? 'spotifySong' : track.raw.source === 'apple_music' ? 'appleMusicSong' : track.raw.source) || 'arbitrary';
-        const stream = (await this.queue.onBeforeCreateStream?.(track, qt, this.queue).catch(() => null)) || (await this.#createGenericStream(track).catch(() => null));
-        if (!stream) {
-            const error = new Error('Could not extract stream for this track');
+        try {
+            const qt: SearchQueryType = track.queryType || (track.raw.source === 'spotify' ? 'spotifySong' : track.raw.source === 'apple_music' ? 'appleMusicSong' : track.raw.source) || 'arbitrary';
+            const stream = (await this.queue.onBeforeCreateStream?.(track, qt, this.queue).catch(() => null)) || (await this.#createGenericStream(track).catch(() => null));
+            if (!stream) {
+                const error = new Error('Could not extract stream for this track');
+                this.queue.initializing = false;
+                if (this.queue.options.skipOnNoStream) {
+                    this.queue.player.events.emit('playerSkip', this.queue, track);
+                    this.queue.player.events.emit('playerError', this.queue, error, track);
+                    this.play(this.queue.tracks.dispatch());
+                    return;
+                }
 
-            if (this.queue.options.skipOnNoStream) {
-                this.queue.emit('playerSkip', track);
-                this.queue.emit('playerError', error, track);
-                this.play(this.queue.tracks.dispatch());
-                return;
+                throw error;
             }
 
-            throw error;
+            if (typeof options.seek === 'number' && options.seek >= 0) {
+                this.#progress = options.seek;
+            } else {
+                this.#progress = 0;
+            }
+
+            const pcmStream = this.#createFFmpegStream(stream, track, options.seek ?? 0);
+            const resource = this.queue.dispatcher.createStream(pcmStream, {
+                disableBiquad: this.queue.options.biquad === false,
+                disableEqualizer: this.queue.options.equalizer === false,
+                disableVolume: this.queue.options.volume === false,
+                disableFilters: this.queue.options.filterer === false,
+                biquadFilter: this.queue.filters._lastFiltersCache.biquad || undefined,
+                eq: this.queue.filters._lastFiltersCache.equalizer,
+                defaultFilters: this.queue.filters._lastFiltersCache.filters,
+                data: track,
+                type: StreamType.Raw
+            });
+
+            if (typeof this.queue.options.volume === 'number' && resource.volume) {
+                resource.volume.setVolume(Math.pow(this.queue.options.volume / 100, 1.660964));
+            }
+
+            this.queue.setTransitioning(!!options.transitionMode);
+
+            await this.queue.dispatcher.playStream(resource);
+        } catch (e) {
+            this.queue.initializing = false;
+            throw e;
         }
-
-        if (typeof options.seek === 'number' && options.seek >= 0) {
-            this.#progress = options.seek;
-        } else {
-            this.#progress = 0;
-        }
-
-        const pcmStream = this.#createFFmpegStream(stream, track, options.seek ?? 0);
-        const resource = this.queue.dispatcher.createStream(pcmStream, {
-            disableBiquad: this.queue.options.biquad === false,
-            disableEqualizer: this.queue.options.equalizer === false,
-            disableVolume: this.queue.options.volume === false,
-            disableFilters: this.queue.options.filterer === false,
-            biquadFilter: typeof this.queue.options.biquad === 'string' ? this.queue.options.biquad : undefined,
-            eq: Array.isArray(this.queue.options.equalizer) ? this.queue.options.equalizer : [],
-            defaultFilters: Array.isArray(this.queue.options.filterer) ? this.queue.options.filterer : [],
-            data: track,
-            type: StreamType.Raw
-        });
-
-        if (typeof this.queue.options.volume === 'number' && resource.volume) {
-            resource.volume.setVolume(Math.pow(this.queue.options.volume / 100, 1.660964));
-        }
-
-        this.queue.setTransitioning(!!options.transitionMode);
-
-        await this.queue.dispatcher.playStream(resource);
     }
 
     async #createGenericStream(track: Track) {
@@ -290,7 +305,7 @@ export class GuildQueuePlayerNode {
             seek: seek / 1000,
             fmt: 's16le'
         }).on('error', (err) => {
-            if (!`${err}`.toLowerCase().includes('premature close')) this.queue.emit('playerError', err, track);
+            if (!`${err}`.toLowerCase().includes('premature close')) this.queue.player.events.emit('playerError', this.queue, err, track);
         });
 
         return ffmpegStream;

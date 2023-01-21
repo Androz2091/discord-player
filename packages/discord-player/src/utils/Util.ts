@@ -71,7 +71,7 @@ class Util {
      * @returns {boolean}
      */
     static isVoiceEmpty(channel: VoiceChannel | StageChannel) {
-        return channel.members.filter((member) => !member.user.bot).size === 0;
+        return channel && channel.members.filter((member) => !member.user.bot).size === 0;
     }
 
     /**

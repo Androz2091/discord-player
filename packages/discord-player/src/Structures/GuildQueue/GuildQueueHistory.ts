@@ -2,9 +2,9 @@ import { Queue } from '@discord-player/utils';
 import Track from '../Track';
 import { GuildQueue } from './GuildQueue';
 
-export class GuildQueueHistory {
+export class GuildQueueHistory<Meta = unknown> {
     public tracks = new Queue<Track>('LIFO');
-    public constructor(public queue: GuildQueue) {}
+    public constructor(public queue: GuildQueue<Meta>) {}
 
     public get currentTrack() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

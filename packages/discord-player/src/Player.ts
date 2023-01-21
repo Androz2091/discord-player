@@ -14,6 +14,7 @@ import { Collection } from '@discord-player/utils';
 import { BaseExtractor } from './extractors/BaseExtractor';
 import { SearchResult } from './Structures/SearchResult';
 import { GuildNodeManager } from './Structures/GuildQueue/GuildNodeManager';
+import { GuildQueueEvents } from './Structures/GuildQueue';
 
 class Player extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
@@ -27,11 +28,15 @@ class Player extends EventEmitter<PlayerEvents> {
         smoothVolume: true,
         lagMonitor: 30000
     };
+    /**
+     * @deprecated
+     */
     public readonly queues = new Collection<Snowflake, Queue>();
     public nodes = new GuildNodeManager(this);
     public readonly voiceUtils = new VoiceUtils();
     public requiredEvents = ['error', 'connectionError'] as string[];
     public extractors = new ExtractorExecutionContext(this);
+    public events = new EventEmitter<GuildQueueEvents>();
     #lastLatency = -1;
 
     /**
@@ -58,7 +63,7 @@ class Player extends EventEmitter<PlayerEvents> {
          */
         this.options = Object.assign(this.options, options);
 
-        this.client.on('voiceStateUpdate', this._handleVoiceState.bind(this));
+        this.client.on('voiceStateUpdate', this.handleVoiceState.bind(this));
 
         if (this.options?.autoRegisterExtractor) {
             let nv: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -93,14 +98,7 @@ class Player extends EventEmitter<PlayerEvents> {
         return this.queues.map((m) => m.generateStatistics());
     }
 
-    /**
-     * Handles voice state update
-     * @param {VoiceState} oldState The old voice state
-     * @param {VoiceState} newState The new voice state
-     * @returns {void}
-     * @private
-     */
-    private _handleVoiceState(oldState: VoiceState, newState: VoiceState): void {
+    private _handleVoiceStateLegacy(oldState: VoiceState, newState: VoiceState) {
         const queue = this.getQueue(oldState.guild.id);
         if (!queue || !queue.connection) return;
 
@@ -189,6 +187,118 @@ class Player extends EventEmitter<PlayerEvents> {
         }
     }
 
+    private _handleVoiceState(oldState: VoiceState, newState: VoiceState) {
+        const queue = this.nodes.get(oldState.guild.id);
+        if (!queue || !queue.connection || !queue.channel) return;
+
+        // dispatch voice state update
+        const wasHandled = this.events.emit('voiceStateUpdate', queue, oldState, newState);
+        // if the event was handled, return assuming the listener implemented all of the logic below
+        if (wasHandled && !this.options.lockVoiceStateHandler) return;
+
+        if (oldState.channelId && !newState.channelId && newState.member!.id === newState.guild.members.me!.id) {
+            try {
+                queue.delete();
+            } catch {
+                /* noop */
+            }
+            return void this.events.emit('disconnect', queue);
+        }
+
+        if (!oldState.channelId && newState.channelId && newState.member!.id === newState.guild.members.me!.id) {
+            if (newState.serverMute != null && oldState.serverMute !== newState.serverMute) {
+                queue.node.setPaused(newState.serverMute);
+            } else if (newState.channel?.type === ChannelType.GuildStageVoice && newState.suppress != null && oldState.suppress !== newState.suppress) {
+                queue.node.setPaused(newState.suppress);
+                if (newState.suppress) {
+                    newState.guild.members.me!.voice.setRequestToSpeak(true).catch(Util.noop);
+                }
+            }
+        }
+
+        if (!newState.channelId && oldState.channelId === queue.channel.id) {
+            if (!Util.isVoiceEmpty(queue.channel)) return;
+            const timeout = setTimeout(() => {
+                if (!Util.isVoiceEmpty(queue.channel!)) return;
+                if (!this.nodes.has(queue.guild.id)) return;
+                if (queue.options.leaveOnEmpty) queue.delete();
+                this.events.emit('emptyChannel', queue);
+            }, queue.options.leaveOnEmptyCooldown || 0).unref();
+            queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
+        }
+
+        if (newState.channelId && newState.channelId === queue.channel.id) {
+            const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
+            const channelEmpty = Util.isVoiceEmpty(queue.channel);
+            if (!channelEmpty && emptyTimeout) {
+                clearTimeout(emptyTimeout);
+                queue.timeouts.delete(`empty_${oldState.guild.id}`);
+            }
+        }
+
+        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
+            if (newState.member!.id === newState.guild.members.me!.id) {
+                if (queue.connection && newState.member!.id === newState.guild.members.me!.id) queue.channel = newState.channel!;
+                const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
+                const channelEmpty = Util.isVoiceEmpty(queue.channel);
+                if (!channelEmpty && emptyTimeout) {
+                    clearTimeout(emptyTimeout);
+                    queue.timeouts.delete(`empty_${oldState.guild.id}`);
+                } else {
+                    const timeout = setTimeout(() => {
+                        if (queue.connection && !Util.isVoiceEmpty(queue.channel!)) return;
+                        if (!this.nodes.has(queue.guild.id)) return;
+                        if (queue.options.leaveOnEmpty) queue.delete();
+                        this.events.emit('emptyChannel', queue);
+                    }, queue.options.leaveOnEmptyCooldown || 0).unref();
+                    queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
+                }
+            } else {
+                if (newState.channelId !== queue.channel.id) {
+                    if (!Util.isVoiceEmpty(queue.channel)) return;
+                    if (queue.timeouts.has(`empty_${oldState.guild.id}`)) return;
+                    const timeout = setTimeout(() => {
+                        if (!Util.isVoiceEmpty(queue.channel!)) return;
+                        if (!this.nodes.has(queue.guild.id)) return;
+                        if (queue.options.leaveOnEmpty) queue.delete();
+                        this.events.emit('emptyChannel', queue);
+                    }, queue.options.leaveOnEmptyCooldown || 0).unref();
+                    queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
+                } else {
+                    const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
+                    const channelEmpty = Util.isVoiceEmpty(queue.channel!);
+                    if (!channelEmpty && emptyTimeout) {
+                        clearTimeout(emptyTimeout);
+                        queue.timeouts.delete(`empty_${oldState.guild.id}`);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles voice state update
+     * @param {VoiceState} oldState The old voice state
+     * @param {VoiceState} newState The new voice state
+     * @returns {void}
+     */
+    public handleVoiceState(oldState: VoiceState, newState: VoiceState): void {
+        this._handleVoiceState(oldState, newState);
+        this._handleVoiceStateLegacy(oldState, newState);
+    }
+
+    public lockVoiceStateHandler() {
+        this.options.lockVoiceStateHandler = true;
+    }
+
+    public unlockVoiceStateHandler() {
+        this.options.lockVoiceStateHandler = false;
+    }
+
+    public isVoiceStateHandlerLocked() {
+        return !!this.options.lockVoiceStateHandler;
+    }
+
     /**
      * Creates a queue for a guild if not available, else returns existing queue
      * @param {GuildResolvable} guild The guild
@@ -196,7 +306,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @returns {Queue}
      */
     createQueue<T = unknown>(guild: GuildResolvable, queueInitOptions: PlayerOptions & { metadata?: T } = {}): Queue<T> {
-        Util.warn('<Player.createQueue> is deprecated and will be removed in the future. Use <Player.nodes.create> instead!');
+        Util.warn('<Player.createQueue> is deprecated and will be removed in the future. Use new <Player.nodes.create> instead!');
         guild = this.client.guilds.resolve(guild)!;
         if (!guild) throw new PlayerError('Unknown Guild', ErrorStatusCode.UNKNOWN_GUILD);
         if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
@@ -218,7 +328,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @returns {Queue | undefined}
      */
     getQueue<T = unknown>(guild: GuildResolvable): Queue<T> | undefined {
-        Util.warn('<Player.getQueue> is deprecated and will be removed in the future. Use <Player.nodes.get> instead!');
+        Util.warn('<Player.getQueue> is deprecated and will be removed in the future. Use new <Player.nodes.get> instead!');
         guild = this.client.guilds.resolve(guild)!;
         if (!guild) throw new PlayerError('Unknown Guild', ErrorStatusCode.UNKNOWN_GUILD);
         return this.queues.get(guild.id) as Queue<T>;
@@ -230,7 +340,7 @@ class Player extends EventEmitter<PlayerEvents> {
      * @returns {Queue}
      */
     deleteQueue<T = unknown>(guild: GuildResolvable) {
-        Util.warn('<Player.deleteQueue> is deprecated and will be removed in the future. Use <Player.nodes.delete> instead!');
+        Util.warn('<Player.deleteQueue> is deprecated and will be removed in the future. Use new <Player.nodes.delete> instead!');
         guild = this.client.guilds.resolve(guild)!;
         if (!guild) throw new PlayerError('Unknown Guild', ErrorStatusCode.UNKNOWN_GUILD);
         const prev = this.getQueue<T>(guild)!;
@@ -354,9 +464,10 @@ class Player extends EventEmitter<PlayerEvents> {
      * Resolves queue
      * @param {GuildResolvable|Queue} queueLike Queue like object
      * @returns {Queue}
+     * @deprecated
      */
     resolveQueue<T>(queueLike: GuildResolvable | Queue): Queue<T> {
-        Util.warn('<Player.resolveQueue> is deprecated and will be removed in the future. Use <Player.nodes.resolve> instead!');
+        Util.warn('<Player.resolveQueue> is deprecated and will be removed in the future. Use new <Player.nodes.resolve> instead!');
         return this.getQueue(queueLike instanceof Queue ? queueLike.guild : queueLike)!;
     }
 

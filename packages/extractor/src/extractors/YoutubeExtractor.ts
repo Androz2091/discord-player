@@ -48,7 +48,7 @@ export class YoutubeExtractor extends BaseExtractor {
             this._stream = async (query) => {
                 if (isYtdl) {
                     const dl = lib as typeof import('ytdl-core');
-                    return dl(query);
+                    return dl(query, this.context.player.options.ytdlOptions);
                 } else {
                     const dl = lib as typeof import('play-dl');
                     return (await dl.stream(query, { discordPlayerCompatibility: true })).stream;

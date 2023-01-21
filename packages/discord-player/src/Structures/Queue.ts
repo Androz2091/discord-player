@@ -21,6 +21,9 @@ const OBCS_DEFAULT = async () => {
     return undefined;
 };
 
+/**
+ * @deprecated use GuildQueue instead
+ */
 class Queue<T = unknown> {
     public readonly guild: Guild;
     public readonly player: Player;

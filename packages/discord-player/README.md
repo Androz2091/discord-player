@@ -18,14 +18,24 @@ $ npm install --save discord-player
 ### Install **[@discordjs/opus](https://npmjs.com/package/@discordjs/opus)**
 
 ```sh
-$ npm install --save @discordjs/opus
+$ npm install --save @discordjs/opus # Native bindings via napi
+
+# or
+$ npm install --save opusscript # WASM bindings
+```
+
+### Install streaming library (if you want to play from youtube)
+
+```sh
+$ npm install --save play-dl # discord-player prefers play-dl over ytdl-core if both of them are installed
+
+# or
+$ npm install --save ytdl-core
 ```
 
 ### Install FFmpeg or Avconv
 - Official FFMPEG Website: **[https://www.ffmpeg.org/download.html](https://www.ffmpeg.org/download.html)**
-
 - Node Module (FFMPEG): **[https://npmjs.com/package/ffmpeg-static](https://npmjs.com/package/ffmpeg-static)**
-
 - Avconv: **[https://libav.org/download](https://libav.org/download)**
 
 # Features
@@ -33,6 +43,7 @@ $ npm install --save @discordjs/opus
 - Beginner friendly 😱
 - Audio filters 🎸
 - Lavalink compatible 15 band equalizer 🎚️
+- Digital biquad filters support
 - Lightweight ☁️
 - Custom extractors support 🌌
 - Multiple sources support ✌
@@ -95,8 +106,9 @@ const { Player } = require("discord-player");
 // Create a new Player (you don't need any API Key)
 const player = new Player(client);
 
-// add the trackStart event so when a song will be played this message will be sent
-player.on("trackStart", (queue, track) => queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`))
+// add the start and finish event so when a song will be played this message will be sent
+player.events.on("playerStart", (queue, track) => queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`));
+player.events.on("playerFinish", (queue, track) => queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`));
 
 client.once("ready", () => {
     console.log("I'm ready !");
@@ -110,8 +122,9 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === "play") {
         if (!interaction.member.voice.channelId) return await interaction.reply({ content: "You are not in a voice channel!", ephemeral: true });
         if (interaction.guild.members.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId) return await interaction.reply({ content: "You are not in my voice channel!", ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
         const query = interaction.options.getString("query");
-        const queue = player.createQueue(interaction.guild, {
+        const queue = player.nodes.create(interaction.guild, {
             metadata: {
                 channel: interaction.channel
             }
@@ -121,17 +134,16 @@ client.on("interactionCreate", async (interaction) => {
         try {
             if (!queue.connection) await queue.connect(interaction.member.voice.channel);
         } catch {
-            queue.destroy();
-            return await interaction.reply({ content: "Could not join your voice channel!", ephemeral: true });
+            queue.delete();
+            return await interaction.followUp({ content: "Could not join your voice channel!", ephemeral: true });
         }
 
-        await interaction.deferReply();
-        const track = await player.search(query, {
-            requestedBy: interaction.user
-        }).then(x => x.tracks[0]);
-        if (!track) return await interaction.followUp({ content: `❌ | Track **${query}** not found!` });
+        const results = await player.search(query);
+        if (!results.hasTracks()) return await interaction.followUp({ content: `❌ | No results were found for **${query}**!` });
 
-        queue.play(track);
+        queue.addTrack(results.tracks[0]);
+
+        if (!queue.isPlaying()) await queue.node.play(track);
 
         return await interaction.followUp({ content: `⏱️ | Loading track **${track.title}**!` });
     }
@@ -140,24 +152,87 @@ client.on("interactionCreate", async (interaction) => {
 client.login("BOT_TOKEN");
 ```
 
-## Supported websites
+## Supported sources
 
-By default, discord-player supports **YouTube**, **Spotify** and **SoundCloud** streams only.
+By default, discord-player supports the following sources:
 
-### Optional dependencies
+* Local file (You must set the search engine to `QueryType.FILE` in order to play local files)
+* Raw attachments
+* Spotify (Streamed from youtube)
+* Apple Music (Streamed from youtube)
+* Vimeo
+* Reverbnation
+* SoundCloud
+
+You can also force a specific extractor to resolve your search query. This is useful in some cases where you don't want to use other sources.
+You can do so by using `ext:<EXTRACTOR_IDENTIFIER>` in `searchEngine` value. Example:
+
+```js
+const result = await player.search(query, {
+    // always use soundcloud extractor
+    searchEngine: 'ext:com.discord-player.soundcloudextractor'
+});
+```
+
+### Adding more sources
 
 Discord Player provides an **Extractor API** that enables you to use your custom stream extractor with it. Some packages have been made by the community to add new features using this API.
 
-#### [@discord-player/extractor](https://github.com/DevAndromeda/discord-player-extractors) (optional)
+## Audio Filters
 
-Optional package that adds support for `vimeo`, `reverbnation`, `facebook`, `attachment links` and `lyrics`.
-You just need to install it using `npm i --save @discord-player/extractor` (discord-player will automatically detect and use it).
+Discord Player supports various audio filters. There are 4 types of audio filters in discord-player.
 
-#### [@discord-player/downloader](https://github.com/DevAndromeda/discord-player-downloader) (optional)
+##### FFmpeg
 
-`@discord-player/downloader` is an optional package that brings support for +700 websites. The documentation is available [here](https://github.com/DevAndromeda/discord-player-downloader).
+The most common and powerful method is FFmpeg. It supports a lot of audio filters. To set ffmpeg filter, you can do:
 
-## Examples of bots made with Discord Player
+```js
+await queue.filters.ffmpeg.setFilters([
+    'bassboost',
+    'nightcore'
+]);
+```
+
+Note that there can be a delay between filters transition in this method.
+
+##### Equalizer
+
+This equalizer is very similar to Lavalink's 15 Band Equalizer. To use this, you can do:
+
+```js
+queue.filters.equalizer.setEQ([
+    { band: 0, gain: 0.25 },
+    { band: 1, gain: 0.25 },
+    { band: 2, gain: 0.25 }
+]);
+```
+
+There is no delay between filter transition when using equalizer.
+
+##### Biquad
+
+This filter provides digital biquad filterer to the player. To use this, you can do:
+
+```js
+import { BiquadFilterType } from 'discord-player';
+
+queue.filters.biquad.setFilter(BiquadFilterType.LowPass);
+// similarly, you can use other filters such as HighPass, BandPass, Notch, PeakEQ, LowShelf, HighShelf, etc.
+```
+
+There is no delay between filter transition when using biquad filters.
+
+#### Mini Audio Filters
+
+This is another type of audio filters provider. It currently supports `Tremolo` and `8D` filters only. To use this, you can do:
+
+```js
+queue.filters.filter.setFilter(['8D']);
+```
+
+There is no delay between filters transition using this filter.
+
+## Example bots made with Discord Player
 
 These bots are made by the community, they can help you build your own!
 
@@ -170,23 +245,8 @@ These bots are made by the community, they can help you build your own!
 * [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
 * [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
 
-## Advanced
 
-### Smooth Volume
-
-Discord Player will by default try to implement this. If smooth volume does not work, you need to add this line at the top of your main file:
-
-```js
-// CJS
-require("discord-player/smoothVolume");
-
-// ESM
-import "discord-player/smoothVolume"
-```
-
-> ⚠️ Make sure that line is situated at the **TOP** of your **main** file.
-
-### Use cookies
+### Use cookies with ytdl-core
 
 ```js
 const player = new Player(client, {
@@ -199,6 +259,8 @@ const player = new Player(client, {
     }
 });
 ```
+
+> Note: the above option is only used when ytdl-core is being used.
 
 ### Use custom proxies
 
@@ -221,26 +283,21 @@ const player = new Player(client, {
 
 ### Custom stream Engine
 
-Discord Player by default uses **[node-ytdl-core](https://github.com/fent/node-ytdl-core)** for youtube and some other extractors for other sources.
-If you need to modify this behavior without touching extractors, you need to use `createStream` functionality of discord player.
-Here's an example on how you can use **[play-dl](https://npmjs.com/package/play-dl)** to download youtube streams instead of using ytdl-core.
+Discord Player by default uses registered extractors to stream audio. If you need to override what needs to be streamed, you can use this hook.
 
 ```js
-const playdl = require("play-dl");
+const fs = require('fs');
 
 // other code
-const queue = player.createQueue(..., {
+const queue = player.nodes.create(..., {
     ...,
     async onBeforeCreateStream(track, source, _queue) {
-        // only trap youtube source
-        if (source === "youtube") {
-            // track here would be youtube track
-            return (await playdl.stream(track.url, { discordPlayerCompatibility : true })).stream;
-            // we must return readable stream or void (returning void means telling discord-player to look for default extractor)
+        if (track.title === 'some title') {
+            return fs.createReadStream('./playThisInstead.mp3');
         }
     }
 });
 ```
 
-`<Queue>.onBeforeCreateStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
-streams. `source` here will be a video source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and finally sent to Discord voice servers.
+`<GuildQueue>.onBeforeCreateStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
+streams. `source` here will be a track source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and finally sent to Discord voice servers.

@@ -39,6 +39,8 @@ export interface VoiceEvents {
     start: (resource: AudioResource<Track>) => any;
     finish: (resource: AudioResource<Track>) => any;
     audioFilters: (filters: PCMFilters[]) => any;
+    eqBands: (filters: EqualizerBand[]) => any;
+    biquad: (filters: BiquadFilters) => any;
     /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
@@ -201,12 +203,18 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                 disabled: false,
                 bandMultiplier: ops?.eq || []
             });
+            this.equalizer.onUpdate = () => {
+                if (this.equalizer) this.emit('eqBands', this.equalizer.getEQ());
+            };
         }
 
         if (!ops?.disableBiquad) {
             this.biquad = new BiquadStream({
                 filter: ops?.biquadFilter
             });
+            this.biquad.onUpdate = () => {
+                if (this.biquad) this.emit('biquad', this.biquad.filter);
+            };
         }
 
         if (!ops?.disableFilters) {

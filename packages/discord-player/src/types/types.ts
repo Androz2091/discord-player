@@ -6,7 +6,6 @@ import { Playlist } from '../Structures/Playlist';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { downloadOptions } from 'ytdl-core';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
-import { GuildQueue } from '../Structures/GuildQueue/GuildQueue';
 
 export type FiltersName = keyof QueueFilters;
 
@@ -379,7 +378,7 @@ export interface PlayerEvents {
     tracksAdd: (queue: Queue, track: Track[]) => any;
     trackStart: (queue: Queue, track: Track) => any;
     trackEnd: (queue: Queue, track: Track) => any;
-    voiceStateUpdate: (queue: GuildQueue | Queue, oldState: VoiceState, newState: VoiceState) => any;
+    voiceStateUpdate: (queue: Queue, oldState: VoiceState, newState: VoiceState) => any;
     //#endregion legacy
 }
 
