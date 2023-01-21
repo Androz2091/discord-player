@@ -1,7 +1,7 @@
 import { User } from 'discord.js';
 import { Readable } from 'stream';
 import { Playlist } from '../Structures/Playlist';
-import Track from '../Structures/Track';
+import { Track } from '../Structures/Track';
 import { PlayerEvents, SearchQueryType } from '../types/types';
 import { ExtractorExecutionContext } from './ExtractorExecutionContext';
 

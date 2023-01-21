@@ -5,7 +5,7 @@ import AudioFilters from '../../utils/AudioFilters';
 import { createFFmpegStream } from '../../utils/FFmpegStream';
 import { QueryResolver } from '../../utils/QueryResolver';
 import { Util } from '../../utils/Util';
-import Track, { TrackResolvable } from '../Track';
+import { Track, TrackResolvable } from '../Track';
 import { GuildQueue } from './GuildQueue';
 
 export interface ResourcePlayOptions {

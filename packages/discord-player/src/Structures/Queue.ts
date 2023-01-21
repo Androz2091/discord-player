@@ -1,7 +1,7 @@
 import { Guild, StageChannel, VoiceChannel, SnowflakeUtil, GuildChannelResolvable, ChannelType } from 'discord.js';
 import { Player } from '../Player';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
-import Track from './Track';
+import { Track } from './Track';
 import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode, SearchQueryType } from '../types/types';
 import { AudioResource, StreamType } from '@discordjs/voice';
 import { Util } from '../utils/Util';

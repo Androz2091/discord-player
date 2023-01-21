@@ -227,7 +227,7 @@ There is no delay between filter transition when using biquad filters.
 This is another type of audio filters provider. It currently supports `Tremolo` and `8D` filters only. To use this, you can do:
 
 ```js
-queue.filters.filter.setFilter(['8D']);
+queue.filters.filters.setFilters(['8D']);
 ```
 
 There is no delay between filters transition using this filter.

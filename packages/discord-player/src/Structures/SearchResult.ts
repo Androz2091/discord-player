@@ -3,7 +3,7 @@ import { BaseExtractor } from '../extractors/BaseExtractor';
 import { Player } from '../Player';
 import { QueryExtractorSearch, QueryType, SearchQueryType } from '../types/types';
 import { Playlist } from './Playlist';
-import Track from './Track';
+import { Track } from './Track';
 
 export interface SearchResultData {
     query: string;

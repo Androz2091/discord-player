@@ -14,7 +14,7 @@ import {
 import { StageChannel, VoiceChannel } from 'discord.js';
 import { Duplex, Readable } from 'stream';
 import { EventEmitter } from '@discord-player/utils';
-import Track from '../Structures/Track';
+import { Track } from '../Structures/Track';
 import { Util } from '../utils/Util';
 import { PlayerError, ErrorStatusCode } from '../Structures/PlayerError';
 import { EqualizerBand, EqualizerStream, BiquadStream, BiquadFilters, AudioFilter, PCMFilters } from '@discord-player/equalizer';

@@ -3,7 +3,7 @@ import { EventEmitter } from '@discord-player/utils';
 import { Queue } from './Structures/Queue';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
-import Track from './Structures/Track';
+import { Track } from './Structures/Track';
 import { QueryResolver } from './utils/QueryResolver';
 import { Util } from './utils/Util';
 import { PlayerError, ErrorStatusCode } from './Structures/PlayerError';

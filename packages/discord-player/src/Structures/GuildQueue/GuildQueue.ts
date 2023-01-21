@@ -2,7 +2,7 @@ import { Player } from '../../Player';
 import { ChannelType, Guild, GuildVoiceChannelResolvable, VoiceBasedChannel, VoiceState } from 'discord.js';
 import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
-import Track from '../Track';
+import { Track } from '../Track';
 import { StreamDispatcher } from '../../VoiceInterface/StreamDispatcher';
 import { AudioResource } from '@discordjs/voice';
 import { Util } from '../../utils/Util';

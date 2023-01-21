@@ -1,5 +1,5 @@
 import { Queue } from '@discord-player/utils';
-import Track from '../Track';
+import { Track } from '../Track';
 import { GuildQueue } from './GuildQueue';
 
 export class GuildQueueHistory<Meta = unknown> {

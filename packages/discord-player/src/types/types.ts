@@ -1,7 +1,7 @@
 import { Snowflake, User, UserResolvable, VoiceState } from 'discord.js';
 import { Readable, Duplex } from 'stream';
 import { Queue } from '../Structures/Queue';
-import Track from '../Structures/Track';
+import { Track } from '../Structures/Track';
 import { Playlist } from '../Structures/Playlist';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { downloadOptions } from 'ytdl-core';

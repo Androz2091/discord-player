@@ -6,7 +6,7 @@ import { Queue } from './Queue';
 
 export type TrackResolvable = Track | string | number;
 
-class Track {
+export class Track {
     public player!: Player;
     public title!: string;
     public description!: string;
@@ -188,7 +188,3 @@ class Track {
         } as TrackJSON;
     }
 }
-
-export default Track;
-
-export { Track };
