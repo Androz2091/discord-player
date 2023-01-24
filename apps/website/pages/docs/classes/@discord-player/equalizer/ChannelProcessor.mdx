@@ -1,0 +1,34 @@
+## ChannelProcessor
+
+```typescript
+new ChannelProcessor(bandMultipliers)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| bandMultipliers | Array\<number> | ❌ | - |
+
+## Properties
+### public  bandMultipliers: Array\<number>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/ChannelProcessor.ts#L8)
+### public  current: number
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/ChannelProcessor.ts#L9)
+### public  history: Array\<number>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/ChannelProcessor.ts#L7)
+### public  m1: number
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/ChannelProcessor.ts#L10)
+### public  m2: number
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/ChannelProcessor.ts#L11)
+## Methods
+### public  process(samples, extremum, bytes, readInt?, writeInt?): Buffer
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| samples | Buffer | ❌ | - |
+| extremum | number | ❌ | - |
+| bytes | number | ❌ | - |
+| readInt | ReadIntCallback | ✅ | - |
+| writeInt | WriteIntCallback | ✅ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/ChannelProcessor.ts#L21)
+### public  reset(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/ChannelProcessor.ts#L60)

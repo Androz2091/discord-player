@@ -54,5 +54,10 @@
     "soundcloud-scraper": "^5.0.3",
     "spotify-url-info": "^3.2.3",
     "youtube-sr": "^4.3.4"
+  },
+  "typedoc": {
+    "entryPoint": "./src/index.ts",
+    "readmeFile": "./README.md",
+    "tsconfig": "./tsconfig.json"
   }
 }

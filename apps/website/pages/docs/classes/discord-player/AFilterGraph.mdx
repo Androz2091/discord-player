@@ -1,0 +1,25 @@
+## AFilterGraph
+
+```typescript
+new AFilterGraph(af)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| af | GuildQueueAudioFilters\<Meta> | ❌ | - |
+
+## Properties
+### public  af: GuildQueueAudioFilters\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L121)
+### public  biquad: null \| 'SinglePoleLowPassApprox' \| 'SinglePoleLowPass' \| 'LowPass' \| 'HighPass' \| 'BandPass' \| 'Notch' \| 'AllPass' \| 'LowShelf' \| 'HighShelf' \| 'PeakingEQ'
+
+### public  equalizer: Array\<EqualizerBand>
+
+### public  ffmpeg: Array\<keyof QueueFilters>
+
+### public  filters: Array\<'8D' \| 'Tremolo'>
+
+### public  volume: null \| VolumeTransformer
+
+## Methods
+### public  dump(): FilterGraph
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L146)

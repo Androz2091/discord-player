@@ -8,3 +8,4 @@ dev/
 .turbo/
 .env
 .turbo
+.next

@@ -11,6 +11,8 @@
         },
         "docs": {},
         "build:check": {},
-        "lint": {}
+        "lint": {},
+        "dev": {},
+        "start": {}
     }
 }

@@ -1,0 +1,38 @@
+## GuildQueueHistory
+
+```typescript
+new GuildQueueHistory(queue)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| queue | GuildQueue\<Meta> | ❌ | - |
+
+## Properties
+### public  queue: GuildQueue\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueueHistory.ts#L7)
+### public  tracks: Queue\<Track>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueueHistory.ts#L6)
+### public  currentTrack: null \| Track
+
+### public  disabled: boolean
+
+### public  nextTrack: null \| Track
+
+### public  previousTrack: null \| Track
+
+## Methods
+### public  clear(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueueHistory.ts#L36)
+### public  isEmpty(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueueHistory.ts#L26)
+### public  next(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueueHistory.ts#L40)
+### public  previous(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueueHistory.ts#L49)
+### public  push(track): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track \| Array\<Track> | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueueHistory.ts#L30)

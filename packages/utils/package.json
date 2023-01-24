@@ -31,5 +31,10 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "*"
+  },
+  "typedoc": {
+    "entryPoint": "./src/index.ts",
+    "readmeFile": "./README.md",
+    "tsconfig": "./tsconfig.json"
   }
 }
