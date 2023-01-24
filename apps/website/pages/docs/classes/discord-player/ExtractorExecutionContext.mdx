@@ -1,0 +1,54 @@
+## ExtractorExecutionContext
+
+```typescript
+new ExtractorExecutionContext(player)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| player | Player | ❌ | - |
+
+## Properties
+### public  player: Player
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L7)
+### public  store: Collection\<string, BaseExtractor>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L6)
+### public  size: number
+
+## Methods
+### public  get(identifier): undefined \| BaseExtractor
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| identifier | string | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L17)
+### public  isRegistered(identifier): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| identifier | string | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L9)
+### public  register(_extractor): Promise\<void>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| _extractor | (typeof BaseExtractor) | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L21)
+### public  run(fn): Promise\<null \| ExtractorExecutionResult\<T>>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| fn | ExtractorExecutionFN\<T> | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L59)
+### public  unregister(_extractor): Promise\<void>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| _extractor | K | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L33)
+### public  unregisterAll(): Promise\<void>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L46)

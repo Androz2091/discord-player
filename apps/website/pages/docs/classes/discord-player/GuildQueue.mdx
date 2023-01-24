@@ -1,0 +1,154 @@
+## GuildQueue
+
+```typescript
+new GuildQueue(player, options)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| player | Player | ❌ | - |
+| options | GuildNodeInit\<Meta> | ❌ | - |
+
+## Properties
+### private  #deleted: boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L128)
+### private  #initializing: boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L127)
+### private  #initializingPromises: Array\<(value: boolean \| PromiseLike\<boolean>) => void>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L129)
+### private  #transitioning: boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L126)
+### private  __current: null \| Track
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L130)
+### public  dispatcher: null \| StreamDispatcher
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L133)
+### public  filters: GuildQueueAudioFilters\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L135)
+### public  history: GuildQueueHistory\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L132)
+### public  node: GuildQueuePlayerNode\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L134)
+### public  onBeforeCreateStream: OnBeforeCreateStreamHandler
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L136)
+### public  options: GuildNodeInit\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L140)
+### public  player: Player
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L140)
+### public  repeatMode: QueueRepeatMode
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L137)
+### public  timeouts: Collection\<string, Timeout>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L138)
+### public  tracks: Queue\<Track>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L131)
+### public  channel: null \| VoiceBasedChannel
+
+### public  connection: null \| VoiceConnection
+
+### public  currentTrack: null \| Track
+
+### public  deleted: boolean
+
+### public  guild: Guild
+
+### public  id: string
+
+### public  initializing: boolean
+
+### public  metadata: undefined \| null \| Meta
+
+### public  ping: number
+
+## Methods
+### private  #attachListeners(dispatcher): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| dispatcher | StreamDispatcher | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L304)
+### private  #emitEnd(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L357)
+### private  #handleAutoplay(track): Promise\<void>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L368)
+### private  #performFinish(resource?): undefined \| Promise\<void>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| resource | AudioResource\<Track> | ✅ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L331)
+### private  #performStart(resource?): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| resource | AudioResource\<Track> | ✅ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L324)
+### private  #removeListeners(dispatcher): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| dispatcher | StreamDispatcher | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L320)
+### private  #resolveInitializerAwaiters(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L403)
+### private  #warnIfDeleted(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L411)
+### public  addTrack(track): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track \| Array\<Track> \| Playlist | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L241)
+### public  awaitInitialization(): Promise\<boolean>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L297)
+### public  connect(channelResolvable, options?): Promise\<GuildQueue\<Meta>>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| channelResolvable | GuildVoiceChannelResolvable | ❌ | - |
+| options | VoiceConnectConfig | ✅ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L254)
+### public  debug(m): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| m | string | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L157)
+### public  delete(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L291)
+### public  isEmpty(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L231)
+### public  isPlaying(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L236)
+### public  isTransitioning(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L222)
+### public  setMetadata(m): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| m | undefined \| null \| Meta | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L169)
+### public  setRepeatMode(mode): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| mode | QueueRepeatMode | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L226)
+### public  setTransitioning(state): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| state | boolean | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L217)

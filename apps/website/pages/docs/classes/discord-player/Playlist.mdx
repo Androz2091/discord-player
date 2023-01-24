@@ -1,0 +1,48 @@
+## Playlist
+
+```typescript
+new Playlist(player, data)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| player | Player | ❌ | The player |
+| data | PlaylistInitData | ❌ | The data |
+
+## Properties
+### public  author: \{ name: string,url: string }
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L13)
+### public  description: string
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L9)
+### public  id: string
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L17)
+### public  player: Player
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L6)
+### public  rawPlaylist: any
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L19)
+### public  source: TrackSource
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L12)
+### public  thumbnail: string
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L10)
+### public  title: string
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L8)
+### public  tracks: Array\<Track>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L7)
+### public  type: 'album' \| 'playlist'
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L11)
+### public  url: string
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L18)
+## Methods
+### public  \[iterator](): Generator\<Track, void, undefined>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L110)
+### public  toJSON(withTracks?): PlaylistJSON
+JSON representation of this playlist
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| withTracks | boolean | ✅ | If it should build json with tracks |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/Playlist.ts#L119)

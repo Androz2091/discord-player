@@ -1,4 +1,5 @@
 # Discord Player
+
 Complete framework to facilitate music commands using **[discord.js](https://discord.js.org)**.
 
 [![downloadsBadge](https://img.shields.io/npm/dt/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
@@ -34,22 +35,24 @@ $ npm install --save ytdl-core
 ```
 
 ### Install FFmpeg or Avconv
-- Official FFMPEG Website: **[https://www.ffmpeg.org/download.html](https://www.ffmpeg.org/download.html)**
-- Node Module (FFMPEG): **[https://npmjs.com/package/ffmpeg-static](https://npmjs.com/package/ffmpeg-static)**
-- Avconv: **[https://libav.org/download](https://libav.org/download)**
+
+-   Official FFMPEG Website: **[https://www.ffmpeg.org/download.html](https://www.ffmpeg.org/download.html)**
+-   Node Module (FFMPEG): **[https://npmjs.com/package/ffmpeg-static](https://npmjs.com/package/ffmpeg-static)**
+-   Avconv: **[https://libav.org/download](https://libav.org/download)**
 
 # Features
-- Simple & easy to use 🤘
-- Beginner friendly 😱
-- Audio filters 🎸
-- Lavalink compatible 15 band equalizer 🎚️
-- Digital biquad filters support
-- Lightweight ☁️
-- Custom extractors support 🌌
-- Multiple sources support ✌
-- Play in multiple servers at the same time 🚗
-- Does not inject anything to discord.js or your discord.js client 💉
-- Allows you to have full control over what is going to be streamed 👑
+
+-   Simple & easy to use 🤘
+-   Beginner friendly 😱
+-   Audio filters 🎸
+-   Lavalink compatible 15 band equalizer 🎚️
+-   Digital biquad filters support
+-   Lightweight ☁️
+-   Custom extractors support 🌌
+-   Multiple sources support ✌
+-   Play in multiple servers at the same time 🚗
+-   Does not inject anything to discord.js or your discord.js client 💉
+-   Allows you to have full control over what is going to be streamed 👑
 
 ## [Documentation](https://discord-player.js.org)
 
@@ -58,84 +61,82 @@ $ npm install --save ytdl-core
 First of all, you will need to register slash commands:
 
 ```js
-const { REST } = require("@discordjs/rest");
-const { Routes, ApplicationCommandOptionType } = require("discord.js");
+const { REST } = require('@discordjs/rest');
+const { Routes, ApplicationCommandOptionType } = require('discord.js');
 
 const commands = [
-  {
-    name: "play",
-    description: "Plays a song!",
-    options: [
-        {
-            name: "query",
-            type: ApplicationCommandOptionType.String,
-            description: "The song you want to play",
-            required: true
-        }
-    ]
-  }
+    {
+        name: 'play',
+        description: 'Plays a song!',
+        options: [
+            {
+                name: 'query',
+                type: ApplicationCommandOptionType.String,
+                description: 'The song you want to play',
+                required: true
+            }
+        ]
+    }
 ];
 
-const rest = new REST({ version: "10" }).setToken("BOT_TOKEN");
+const rest = new REST({ version: '10' }).setToken('BOT_TOKEN');
 
 (async () => {
-  try {
-    console.log("Started refreshing application [/] commands.");
+    try {
+        console.log('Started refreshing application [/] commands.');
 
-    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: commands });
+        await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: commands });
 
-    console.log("Successfully reloaded application [/] commands.");
-  } catch(error) {
-    console.error(error);
-  }
+        console.log('Successfully reloaded application [/] commands.');
+    } catch (error) {
+        console.error(error);
+    }
 })();
 ```
 
 Now you can implement your bot's logic:
 
 ```js
-const { Client } = require("discord.js");
+const { Client } = require('discord.js');
 const client = new Discord.Client({
-    intents: [
-        "Guilds",
-        "GuildVoiceStates"
-    ]
+    intents: ['Guilds', 'GuildVoiceStates']
 });
-const { Player } = require("discord-player");
+const { Player } = require('discord-player');
 
 // Create a new Player (you don't need any API Key)
 const player = new Player(client);
 
 // add the start and finish event so when a song will be played this message will be sent
-player.events.on("playerStart", (queue, track) => queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`));
-player.events.on("playerFinish", (queue, track) => queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`));
+player.events.on('playerStart', (queue, track) => queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`));
+player.events.on('playerFinish', (queue, track) => queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`));
 
-client.once("ready", () => {
+client.once('ready', () => {
     console.log("I'm ready !");
 });
 
-client.on("interactionCreate", async (interaction) => {
+client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
     // /play track:Despacito
     // will play "Despacito" in the voice channel
-    if (interaction.commandName === "play") {
-        if (!interaction.member.voice.channelId) return await interaction.reply({ content: "You are not in a voice channel!", ephemeral: true });
-        if (interaction.guild.members.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId) return await interaction.reply({ content: "You are not in my voice channel!", ephemeral: true });
+    if (interaction.commandName === 'play') {
+        if (!interaction.member.voice.channelId) return await interaction.reply({ content: 'You are not in a voice channel!', ephemeral: true });
+        if (interaction.guild.members.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId)
+            return await interaction.reply({ content: 'You are not in my voice channel!', ephemeral: true });
         await interaction.deferReply({ ephemeral: true });
-        const query = interaction.options.getString("query");
+        const query = interaction.options.getString('query');
         const queue = player.nodes.create(interaction.guild, {
             metadata: {
                 channel: interaction.channel
             }
         });
-        
+
         // verify vc connection
         try {
             if (!queue.connection) await queue.connect(interaction.member.voice.channel);
         } catch {
             queue.delete();
-            return await interaction.followUp({ content: "Could not join your voice channel!", ephemeral: true });
+            return await interaction.followUp({ content: 'Could not join your voice channel!', ephemeral: true });
         }
 
         const results = await player.search(query);
@@ -149,20 +150,20 @@ client.on("interactionCreate", async (interaction) => {
     }
 });
 
-client.login("BOT_TOKEN");
+client.login('BOT_TOKEN');
 ```
 
 ## Supported sources
 
 By default, discord-player supports the following sources:
 
-* Local file (You must set the search engine to `QueryType.FILE` in order to play local files)
-* Raw attachments
-* Spotify (Streamed from youtube)
-* Apple Music (Streamed from youtube)
-* Vimeo
-* Reverbnation
-* SoundCloud
+-   Local file (You must set the search engine to `QueryType.FILE` in order to play local files)
+-   Raw attachments
+-   Spotify (Streamed from youtube)
+-   Apple Music (Streamed from youtube)
+-   Vimeo
+-   Reverbnation
+-   SoundCloud
 
 You can also force a specific extractor to resolve your search query. This is useful in some cases where you don't want to use other sources.
 You can do so by using `ext:<EXTRACTOR_IDENTIFIER>` in `searchEngine` value. Example:
@@ -187,10 +188,7 @@ Discord Player supports various audio filters. There are 4 types of audio filter
 The most common and powerful method is FFmpeg. It supports a lot of audio filters. To set ffmpeg filter, you can do:
 
 ```js
-await queue.filters.ffmpeg.setFilters([
-    'bassboost',
-    'nightcore'
-]);
+await queue.filters.ffmpeg.setFilters(['bassboost', 'nightcore']);
 ```
 
 Note that there can be a delay between filters transition in this method.
@@ -236,15 +234,14 @@ There is no delay between filters transition using this filter.
 
 These bots are made by the community, they can help you build your own!
 
-* **[Discord Music Bot](https://github.com/Androz2091/discord-music-bot)** by [Androz2091](https://github.com/Androz2091)
-* [Dodong](https://github.com/nizeic/Dodong) by [nizeic](https://github.com/nizeic)
-* [Musico](https://github.com/Whirl21/Musico) by [Whirl21](https://github.com/Whirl21)
-* [Melody](https://github.com/NerdyTechy/Melody) by [NerdyTechy](https://github.com/NerdyTechy)
-* [Eyesense-Music-Bot](https://github.com/naseif/Eyesense-Music-Bot) by [naseif](https://github.com/naseif)
-* [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
-* [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
-* [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
-
+-   **[Discord Music Bot](https://github.com/Androz2091/discord-music-bot)** by [Androz2091](https://github.com/Androz2091)
+-   [Dodong](https://github.com/nizeic/Dodong) by [nizeic](https://github.com/nizeic)
+-   [Musico](https://github.com/Whirl21/Musico) by [Whirl21](https://github.com/Whirl21)
+-   [Melody](https://github.com/NerdyTechy/Melody) by [NerdyTechy](https://github.com/NerdyTechy)
+-   [Eyesense-Music-Bot](https://github.com/naseif/Eyesense-Music-Bot) by [naseif](https://github.com/naseif)
+-   [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
+-   [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
+-   [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
 
 ### Use cookies with ytdl-core
 
@@ -253,7 +250,7 @@ const player = new Player(client, {
     ytdlOptions: {
         requestOptions: {
             headers: {
-                cookie: "YOUR_YOUTUBE_COOKIE"
+                cookie: 'YOUR_YOUTUBE_COOKIE'
             }
         }
     }
@@ -265,10 +262,10 @@ const player = new Player(client, {
 ### Use custom proxies
 
 ```js
-const HttpsProxyAgent = require("https-proxy-agent");
+const HttpsProxyAgent = require('https-proxy-agent');
 
 // Remove "user:pass@" if you don't need to authenticate to your proxy.
-const proxy = "http://user:pass@111.111.111.111:8080";
+const proxy = 'http://user:pass@111.111.111.111:8080';
 const agent = HttpsProxyAgent(proxy);
 
 const player = new Player(client, {
@@ -299,5 +296,5 @@ const queue = player.nodes.create(..., {
 });
 ```
 
-`<GuildQueue>.onBeforeCreateStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
+`\<GuildQueue>.onBeforeCreateStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
 streams. `source` here will be a track source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and finally sent to Discord voice servers.

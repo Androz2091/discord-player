@@ -1,0 +1,58 @@
+## GuildNodeManager
+
+```typescript
+new GuildNodeManager(player)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| player | Player | ❌ | - |
+
+## Properties
+### public  cache: Collection\<string, GuildQueue\<unknown>>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildNodeManager.ts#L30)
+### public  player: Player
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildNodeManager.ts#L31)
+## Methods
+### public  create(guild, options): GuildQueue\<unknown>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| guild | GuildResolvable | ❌ | - |
+| options | GuildNodeCreateOptions\<T> | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildNodeManager.ts#L33)
+### public  delete(node): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| node | NodeResolvable | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildNodeManager.ts#L93)
+### public  get(node): null \| GuildQueue\<T>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| node | NodeResolvable | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildNodeManager.ts#L81)
+### public  has(node): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| node | NodeResolvable | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildNodeManager.ts#L88)
+### public  resolve(node): undefined \| GuildQueue\<unknown>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| node | NodeResolvable | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildNodeManager.ts#L102)
+### public  resolveId(node): null \| string
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| node | NodeResolvable | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildNodeManager.ts#L110)

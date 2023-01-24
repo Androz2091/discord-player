@@ -1,0 +1,28 @@
+{
+  "name": "@discord-player/website",
+  "version": "0.1.0",
+  "description": "Discord Player website",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "author": "skdhg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "homepage": "https://github.com/Androz2091/discord-player#readme",
+  "dependencies": {
+    "next": "^13.1.4",
+    "nextra": "^2.2.10",
+    "nextra-theme-docs": "^2.2.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

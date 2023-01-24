@@ -1,0 +1,681 @@
+## EqualizerStream extends PCMTransformer
+
+```typescript
+new EqualizerStream(options)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| options | EqualizerStreamOptions | ✅ | - |
+
+## Properties
+### public  allowHalfOpen: boolean
+If             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L872`
+### public  bandMultipliers: Array\<number>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/EqualizerStream.ts#L16)
+### public  bits: number
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L13)
+### public  bytes: number
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L14)
+### public  closed: boolean
+- Source: `node_modules/@types/node/stream.d.ts#L861`
+### public  destroyed: boolean
+Is             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L128`
+### public  disabled: boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L16)
+### public  equalizer: Equalizer
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/EqualizerStream.ts#L17)
+### public  errored: null \| Error
+- Source: `node_modules/@types/node/stream.d.ts#L862`
+### public  extremum: number
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L15)
+### public  readable: boolean
+Is             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L84`
+### public  readableAborted: boolean
+Returns whether the stream was destroyed or errored before emitting             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L78`
+### public  readableDidRead: boolean
+Returns whether             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L90`
+### public  readableEncoding: null \| BufferEncoding
+Getter for the property             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L95`
+### public  readableEnded: boolean
+Becomes             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L100`
+### public  readableFlowing: null \| boolean
+This property reflects the current state of a             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L106`
+### public  readableHighWaterMark: number
+Returns the value of             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L111`
+### public  readableLength: number
+This property contains the number of bytes (or objects) in the queue
+ready to be read. The value provides introspection data regarding
+the status of the             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L118`
+### public  readableObjectMode: boolean
+Getter for the property             
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L123`
+### public  sampleRate: number
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L17)
+### public  type: 's16le' \| 's16be' \| 's32le' \| 's32be'
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L12)
+### public  writable: boolean
+- Source: `node_modules/@types/node/stream.d.ts#L853`
+### public  writableCorked: number
+- Source: `node_modules/@types/node/stream.d.ts#L859`
+### public  writableEnded: boolean
+- Source: `node_modules/@types/node/stream.d.ts#L854`
+### public  writableFinished: boolean
+- Source: `node_modules/@types/node/stream.d.ts#L855`
+### public  writableHighWaterMark: number
+- Source: `node_modules/@types/node/stream.d.ts#L856`
+### public  writableLength: number
+- Source: `node_modules/@types/node/stream.d.ts#L857`
+### public  writableNeedDrain: boolean
+- Source: `node_modules/@types/node/stream.d.ts#L860`
+### public  writableObjectMode: boolean
+- Source: `node_modules/@types/node/stream.d.ts#L858`
+### public static captureRejectionSymbol: (typeof captureRejectionSymbol)
+- Source: `node_modules/@types/node/events.d.ts#L291`
+### public static captureRejections: boolean
+Sets or gets the default captureRejection value for all emitters.            
+
+
+- Source: `node_modules/@types/node/events.d.ts#L296`
+### public static defaultMaxListeners: number
+- Source: `node_modules/@types/node/events.d.ts#L297`
+### public static errorMonitor: (typeof errorMonitor)
+This symbol shall be used to install a listener for only monitoring             
+
+
+- Source: `node_modules/@types/node/events.d.ts#L290`
+## Methods
+### public  \[asyncIterator](): AsyncIterableIterator\<any>
+- Source: `node_modules/@types/node/stream.d.ts#L502`
+### public  _construct(callback): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| callback | (error: null \| Error) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L140`
+### public  _destroy(error, callback): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| error | null \| Error | ❌ | - |
+| callback | (error: null \| Error) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L904`
+### public  _final(callback): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| callback | (error: null \| Error) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L905`
+### public  _flush(callback): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| callback | TransformCallback | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L947`
+### public  _processBands(multiplier): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| multiplier | Array\<EqualizerBand> | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/EqualizerStream.ts#L34)
+### public  _read(size): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| size | number | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L141`
+### public  _readInt(buffer, index): number
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| buffer | Buffer | ❌ | - |
+| index | number | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L62)
+### public  _transform(chunk, encoding, callback): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| chunk | Buffer | ❌ | - |
+| encoding | BufferEncoding | ❌ | - |
+| callback | TransformCallback | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/EqualizerStream.ts#L43)
+### public  _write(chunk, encoding, callback): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| chunk | any | ❌ | - |
+| encoding | BufferEncoding | ❌ | - |
+| callback | (error: null \| Error) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L896`
+### public  _writeInt(buffer, int, index): number
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| buffer | Buffer | ❌ | - |
+| int | number | ❌ | - |
+| index | number | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L67)
+### public  _writev(chunks, callback): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| chunks | Array\<\{ chunk: any,encoding: BufferEncoding }> | ❌ | - |
+| callback | (error: null \| Error) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L897`
+### public  addListener(event, listener): EqualizerStream
+Event emitter
+The defined events on documents including:
+1. close
+2. data
+3. end
+4. error
+5. pause
+6. readable
+7. resume
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | 'close' | ❌ | - |
+| listener | (...args: unknown\[]) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L446`
+### public  clamp(val, max, min): number
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| val | number | ❌ | - |
+| max | number | ❌ | - |
+| min | number | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L72)
+### public  cork(): void
+- Source: `node_modules/@types/node/stream.d.ts#L912`
+### public  destroy(error?): EqualizerStream
+Destroy the stream. Optionally emit an 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| error | Error | ✅ | Error which will be passed as payload in |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L434`
+### public  disable(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L50)
+### public  emit(event): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | 'close' | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L454`
+### public  enable(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L54)
+### public  end(cb?): EqualizerStream
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| cb | (...args: unknown\[]) => void | ✅ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L909`
+### public  eventNames(): Array\<string \| symbol>
+Returns an array listing the events for which the emitter has registered
+listeners. The values in the array are strings or 
+
+
+
+
+
+- Source: `node_modules/@types/node/events.d.ts#L632`
+### public  getEQ(): Array\<EqualizerBand>
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/EqualizerStream.ts#L64)
+### public  getMaxListeners(): number
+Returns the current max listener value for the 
+
+
+
+
+
+- Source: `node_modules/@types/node/events.d.ts#L489`
+### public  isPaused(): boolean
+The 
+
+
+
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L301`
+### public  listenerCount(eventName): number
+Returns the number of listeners listening to the event named 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| eventName | string \| symbol | ❌ | The name of the event being listened for |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L579`
+### public  listeners(eventName): Array\<Function>
+Returns a copy of the array of listeners for the event named 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| eventName | string \| symbol | ❌ | - |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L502`
+### public  off(eventName, listener): EqualizerStream
+Alias for 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| eventName | string \| symbol | ❌ | - |
+| listener | (args: Array\<any>) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L462`
+### public  on(event, listener): EqualizerStream
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | 'close' | ❌ | - |
+| listener | (...args: unknown\[]) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L462`
+### public  onUpdate(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L18)
+### public  once(event, listener): EqualizerStream
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | 'close' | ❌ | - |
+| listener | (...args: unknown\[]) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L470`
+### public  pause(): EqualizerStream
+The 
+
+
+
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L265`
+### public  pipe(destination, options?): T
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| destination | T | ❌ | - |
+| options | \{ end: boolean } | ✅ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L25`
+### public  prependListener(event, listener): EqualizerStream
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | 'close' | ❌ | - |
+| listener | (...args: unknown\[]) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L478`
+### public  prependOnceListener(event, listener): EqualizerStream
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | 'close' | ❌ | - |
+| listener | (...args: unknown\[]) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L486`
+### public  push(chunk, encoding?): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| chunk | any | ❌ | - |
+| encoding | BufferEncoding | ✅ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L421`
+### public  rawListeners(eventName): Array\<Function>
+Returns a copy of the array of listeners for the event named 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| eventName | string \| symbol | ❌ | - |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L532`
+### public  read(size?): any
+The 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| size | number | ✅ | Optional argument to specify how much data to read. |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L218`
+### public  removeAllListeners(event?): EqualizerStream
+Removes all listeners, or those of the specified 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | string \| symbol | ✅ | - |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L473`
+### public  removeListener(event, listener): EqualizerStream
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | 'close' | ❌ | - |
+| listener | (...args: unknown\[]) => void | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L494`
+### public  resetEQ(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/EqualizerStream.ts#L75)
+### public  resume(): EqualizerStream
+The 
+
+
+
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L284`
+### public  setDefaultEncoding(encoding): EqualizerStream
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| encoding | BufferEncoding | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L908`
+### public  setEQ(bands): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| bands | Array\<EqualizerBand> | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/equalizer/EqualizerStream.ts#L71)
+### public  setEncoding(encoding): EqualizerStream
+The 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| encoding | BufferEncoding | ❌ | The encoding to use. |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L243`
+### public  setMaxListeners(n): EqualizerStream
+By default 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| n | number | ❌ | - |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L483`
+### public  toggle(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/equalizer/src/utils/PCMTransformer.ts#L58)
+### public  uncork(): void
+- Source: `node_modules/@types/node/stream.d.ts#L913`
+### public  unpipe(destination?): EqualizerStream
+The 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| destination | WritableStream | ✅ | Optional specific stream to unpipe |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L328`
+### public  unshift(chunk, encoding?): void
+Passing 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| chunk | any | ❌ | Chunk of data to unshift onto the read queue. For streams not operating in object mode, |
+| encoding | BufferEncoding | ✅ | Encoding of string chunks. Must be a valid |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L394`
+### public  wrap(stream): EqualizerStream
+Prior to Node.js 0.10, streams did not implement the entire 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| stream | ReadableStream | ❌ | An "old style" readable stream |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L420`
+### public  write(chunk, encoding?, cb?): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| chunk | any | ❌ | - |
+| encoding | BufferEncoding | ✅ | - |
+| cb | (error: undefined \| null \| Error) => void | ✅ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L906`
+### public static from(src): Duplex
+A utility method for creating duplex streams.
+
+- 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| src | string \| Object \| Stream \| Blob \| ArrayBuffer \| Iterable\<any> \| AsyncIterable\<any> \| AsyncGeneratorFunction \| Promise\<any> | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L895`
+### public static fromWeb(readableStream, options?): Readable
+A utility method for creating a 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| readableStream | ReadableStream\<any> | ❌ | - |
+| options | Pick\<ReadableOptions, 'encoding' \| 'highWaterMark' \| 'objectMode' \| 'signal'> | ✅ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L61`
+### public static getEventListeners(emitter, name): Array\<Function>
+Returns a copy of the array of listeners for the event named 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| emitter | DOMEventTarget \| EventEmitter | ❌ | - |
+| name | string \| symbol | ❌ | - |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L262`
+### public static isDisturbed(stream): boolean
+Returns whether the stream has been read from or cancelled.
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| stream | Readable \| ReadableStream | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L66`
+### public static listenerCount(emitter, eventName): number
+A class method that returns the number of listeners for the given 
+
+- **⚠️ Deprecated**
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| emitter | EventEmitter | ❌ | The emitter to query |
+| eventName | string \| symbol | ❌ | The event name |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L234`
+### public static on(emitter, eventName, options?): AsyncIterableIterator\<any>
+```js
+const { on, EventEmitter } = require('events');
+
+(async () => {
+const ee = new EventEmitter();
+
+// Emit later on
+process.nextTick(() => {
+ee.emit('foo', 'bar');
+ee.emit('foo', 42);
+});
+
+for await (const event of on(ee, 'foo')) {
+// The execution of this inner block is synchronous and it
+// processes one event at a time (even with await). Do not use
+// if concurrent execution is required.
+console.log(event); // prints ['bar'] [42]
+}
+// Unreachable here
+})();
+```
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| emitter | EventEmitter | ❌ | - |
+| eventName | string | ❌ | The name of the event being listened for |
+| options | StaticEventEmitterOptions | ✅ | - |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L217`
+### public static once(emitter, eventName, options?): Promise\<Array\<any>>
+Creates a 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| emitter | NodeEventTarget | ❌ | - |
+| eventName | string \| symbol | ❌ | - |
+| options | StaticEventEmitterOptions | ✅ | - |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L157`
+### public static setMaxListeners(n?, eventTargets): void
+```js
+const {
+setMaxListeners,
+EventEmitter
+} = require('events');
+
+const target = new EventTarget();
+const emitter = new EventEmitter();
+
+setMaxListeners(5, target, emitter);
+```
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| n | number | ✅ | A non-negative number. The maximum number of listeners per |
+| eventTargets | Array\<DOMEventTarget \| EventEmitter> | ❌ | - |
+
+
+- Source: `node_modules/@types/node/events.d.ts#L280`
+### public static toWeb(streamReadable): ReadableStream\<any>
+A utility method for creating a web 
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| streamReadable | Readable | ❌ | - |
+
+
+- Source: `node_modules/@types/node/stream.d.ts#L72`

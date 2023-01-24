@@ -38,5 +38,10 @@
   },
   "dependencies": {
     "youtube-dl-exec": "^2.1.11"
+  },
+  "typedoc": {
+    "entryPoint": "./src/index.ts",
+    "readmeFile": "./README.md",
+    "tsconfig": "./tsconfig.json"
   }
 }

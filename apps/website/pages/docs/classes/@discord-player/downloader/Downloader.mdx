@@ -1,0 +1,41 @@
+## Downloader
+
+```typescript
+new Downloader()
+```
+
+## Properties
+### public  important: boolean
+
+## Methods
+### public static download(url): Readable
+Downloads stream through youtube-dl
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| url | string | ❌ | URL to download stream from |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/downloader/src/Downloader.ts#L24)
+### public static getInfo(url): Promise\<\{ info: Array\<Info>,playlist: any }>
+Returns stream info
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| url | string | ❌ | stream url |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/downloader/src/Downloader.ts#L49)
+### public static validate(url): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| url | string | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/downloader/src/Downloader.ts#L83)

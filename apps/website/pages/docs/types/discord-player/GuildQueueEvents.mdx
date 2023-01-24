@@ -1,0 +1,22 @@
+## GuildQueueEvents
+
+
+| Property | Type | Value | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| audioTrackAdd | (queue: GuildQueue\<Meta>, track: Track) => unknown | N/A | Emitted when audio track is added to the queue |
+| audioTracksAdd | (queue: GuildQueue\<Meta>, track: Array\<Track>) => unknown | N/A | Emitted when audio tracks were added to the queue |
+| connection | (queue: GuildQueue\<Meta>) => unknown | N/A | Emitted when a connection is created |
+| debug | (queue: GuildQueue\<Meta>, message: string) => unknown | N/A | Emitted when the queue sends a debug info |
+| disconnect | (queue: GuildQueue\<Meta>) => unknown | N/A | Emitted when the bot is disconnected from the channel |
+| emptyChannel | (queue: GuildQueue\<Meta>) => unknown | N/A | Emitted when the voice channel is empty |
+| emptyQueue | (queue: GuildQueue\<Meta>) => unknown | N/A | Emitted when the queue is empty |
+| error | (queue: GuildQueue\<Meta>, error: Error) => unknown | N/A | Emitted when the queue encounters error |
+| playerError | (queue: GuildQueue\<Meta>, error: Error, track: Track) => unknown | N/A | Emitted when the audio player errors while streaming audio track |
+| playerFinish | (queue: GuildQueue\<Meta>, track: Track) => unknown | N/A | Emitted when the audio player finishes streaming audio track |
+| playerSkip | (queue: GuildQueue\<Meta>, track: Track) => unknown | N/A | Emitted when the audio player skips current track |
+| playerStart | (queue: GuildQueue\<Meta>, track: Track) => unknown | N/A | Emitted when the audio player starts streaming audio track |
+| voiceStateUpdate | (queue: GuildQueue\<Meta>, oldState: VoiceState, newState: VoiceState) => unknown | N/A | Emitted when the voice state is updated.
+Consuming this event may disable default voice state update handler if  |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/discord-player/src/Structures/GuildQueue/GuildQueue.ts#L45)
