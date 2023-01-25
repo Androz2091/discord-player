@@ -20,7 +20,7 @@
   "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
     "next": "^13.1.4",
-    "nextra": "^2.2.10",
+    "nextra": "^2.2.13",
     "nextra-theme-docs": "^2.2.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
