@@ -6014,13 +6014,13 @@ __metadata:
   linkType: hard
 
 "typedoc-nextra@npm:latest":
-  version: 0.1.1
-  resolution: "typedoc-nextra@npm:0.1.1"
+  version: 0.1.2
+  resolution: "typedoc-nextra@npm:0.1.2"
   dependencies:
     common-tags: ^1.8.2
     tmp: ^0.2.1
     typedoc: ^0.23.24
-  checksum: 1a8824b47534567c25520b0634865c09e16059777a0abb0e7b6914231227be15b95ab7bac002b1e129c78a37b2c4365073b56a1fd3f23f00ce95b484a9c4881a
+  checksum: db9f38958b95d3c66471508db29d6b308de50e1923faf48866156f0b9f9f11cf2a909d7db07b20c15a6690eadee0faf436f0b5095a90b29b45e63f3388331d92
   languageName: node
   linkType: hard
 
