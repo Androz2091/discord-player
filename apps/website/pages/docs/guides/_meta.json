@@ -1,0 +1,11 @@
+{
+    "welcome": "Welcome",
+    "v6-migration": "V6 Migration",
+    "extractors-api": "Extractors Api",
+    "stream-hooks": "Stream Hooks",
+    "audio-filters": "Audio Filters",
+    "slash-commands": "Slash Commands",
+    "working-mechanism": "Working Mechanism",
+    "ratelimits": "Ratelimits",
+    "using-proxy": "Using Proxy"
+}

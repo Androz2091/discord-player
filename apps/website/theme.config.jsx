@@ -13,6 +13,10 @@ export default {
         defaultMenuCollapseLevel: 0,
         toggleButton: true
     },
+    darkMode: false,
+    nextThemes: {
+        defaultTheme: 'light'
+    },
     banner: {
         dismissible: false,
         key: "discord-invite-banner",
