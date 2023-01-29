@@ -334,6 +334,13 @@ export enum QueryType {
  */
 
 /**
+ * Emitted when a track is updated
+ * @event Player#trackUpdate
+ * @param {Queue} queue The queue
+ * @param {Track} track The track
+ */
+
+/**
  * Emitted when a track ends
  * @event Player#trackEnd
  * @param {Queue} queue The queue
@@ -360,6 +367,7 @@ export interface PlayerEvents {
     trackAdd: (queue: Queue, track: Track) => any;
     tracksAdd: (queue: Queue, track: Track[]) => any;
     trackStart: (queue: Queue, track: Track) => any;
+    trackUpdate: (queue: Queue, track: Track) => any;
     trackEnd: (queue: Queue, track: Track) => any;
     voiceStateUpdate: (queue: Queue, oldState: VoiceState, newState: VoiceState) => any;
 }

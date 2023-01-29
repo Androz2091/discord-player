@@ -397,7 +397,12 @@ class Queue<T = unknown> {
         this.connection.on('start', (resource) => {
             if (this.#watchDestroyed(false)) return;
             this.playing = true;
-            if (!this._filtersUpdate) this.player.emit('trackStart', this, resource?.metadata ?? this.current);
+
+            if (!this._filtersUpdate) {
+                this.player.emit('trackStart', this, resource?.metadata ?? this.current);
+            } else {
+                this.player.emit('trackUpdate', this, resource?.metadata ?? this.current);
+            }
             this._filtersUpdate = false;
         });
 
