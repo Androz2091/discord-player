@@ -6,7 +6,6 @@ import { BiquadFilters, Coefficients, FilterType, Q_BUTTERWORTH } from './Coeffi
 export interface BiquadStreamOptions extends PCMTransformerOptions {
     filter?: BiquadFilters;
     Q?: number;
-    sample?: number;
     cutoff?: number;
     gain?: number;
 }
@@ -14,14 +13,12 @@ export interface BiquadStreamOptions extends PCMTransformerOptions {
 export interface BiquadFilterUpdateData {
     filter?: BiquadFilters;
     Q?: number;
-    sample?: number;
     cutoff?: number;
     gain?: number;
 }
 
 export class BiquadStream extends PCMTransformer {
     public biquad!: BiquadFilter;
-    public sample = 48000;
     public cutoff = 80;
     public gain = 0;
     public filter!: BiquadFilters;
@@ -29,14 +26,13 @@ export class BiquadStream extends PCMTransformer {
     public constructor(options: BiquadStreamOptions = {}) {
         super(options);
 
-        if ('sample' in options) this.sample = options.sample!;
         if ('cutoff' in options) this.cutoff = options.cutoff!;
         if ('gain' in options) this.gain = options.gain!;
         if ('Q' in options) this.Q = options.Q!;
         if ('filter' in options) {
             this.filter = options.filter!;
             if (this.filter != null) {
-                this.biquad = new BiquadFilter(Coefficients.from(this.filter, this.sample, this.cutoff, this.Q, this.gain));
+                this.biquad = new BiquadFilter(Coefficients.from(this.filter, this.sampleRate, this.cutoff, this.Q, this.gain));
             }
         }
     }
@@ -48,14 +44,13 @@ export class BiquadStream extends PCMTransformer {
     }
 
     public update(options: BiquadFilterUpdateData) {
-        if ('sample' in options) this.sample = options.sample!;
         if ('cutoff' in options) this.cutoff = options.cutoff!;
         if ('gain' in options) this.gain = options.gain!;
         if ('Q' in options) this.Q = options.Q!;
         if ('filter' in options) this.filter = options.filter!;
 
         if (this.filter != null) {
-            this.biquad = new BiquadFilter(Coefficients.from(this.filter, this.sample, this.cutoff, this.Q, this.gain));
+            this.biquad = new BiquadFilter(Coefficients.from(this.filter, this.sampleRate, this.cutoff, this.Q, this.gain));
         }
 
         this.onUpdate?.();
@@ -67,10 +62,6 @@ export class BiquadStream extends PCMTransformer {
 
     public setQ(Q: number) {
         this.update({ Q });
-    }
-
-    public setSample(fs: number) {
-        this.update({ sample: fs });
     }
 
     public setCutoff(f0: number) {

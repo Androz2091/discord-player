@@ -17,7 +17,7 @@ import { EventEmitter } from '@discord-player/utils';
 import { Track } from '../Structures/Track';
 import { Util } from '../utils/Util';
 import { PlayerError, ErrorStatusCode } from '../Structures/PlayerError';
-import { EqualizerBand, EqualizerStream, BiquadStream, BiquadFilters, AudioFilter, PCMFilters } from '@discord-player/equalizer';
+import { EqualizerBand, BiquadFilters, AudioFilter, PCMFilters } from '@discord-player/equalizer';
 
 interface CreateStreamOps {
     type?: StreamType;
@@ -50,8 +50,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public channel: VoiceChannel | StageChannel;
     public audioResource?: AudioResource<Track> | null;
     private readyLock = false;
-    public equalizer: EqualizerStream | null = null;
-    public biquad: BiquadStream | null = null;
     public audioFilters: AudioFilter | null = null;
 
     /**
@@ -129,14 +127,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
                 if (!this.paused) {
                     void this.emit('finish', this.audioResource!);
-                    if (this.equalizer) {
-                        this.equalizer.destroy();
-                        this.equalizer = null;
-                    }
-                    if (this.biquad) {
-                        this.biquad.destroy();
-                        this.biquad = null;
-                    }
                     if (this.audioFilters) {
                         this.audioFilters.destroy();
                         this.audioFilters = null;
@@ -197,46 +187,42 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {AudioResource}
      */
     createStream(src: Readable | Duplex | string, ops?: CreateStreamOps) {
-        if (!ops?.disableEqualizer) {
-            this.equalizer = new EqualizerStream({
-                channels: 1,
-                disabled: false,
-                bandMultiplier: ops?.eq || []
-            });
-            this.equalizer.onUpdate = () => {
-                if (this.equalizer) this.emit('eqBands', this.equalizer.getEQ());
-            };
-        }
-
-        if (!ops?.disableBiquad) {
-            this.biquad = new BiquadStream({
-                filter: ops?.biquadFilter
-            });
-            this.biquad.onUpdate = () => {
-                if (this.biquad) this.emit('biquad', this.biquad.filter);
-            };
-        }
-
         if (!ops?.disableFilters) {
             this.audioFilters = new AudioFilter({
-                filters: ops?.defaultFilters
+                filters: ops?.defaultFilters,
+                biquad: ops?.biquadFilter
+                    ? {
+                          filter: ops.biquadFilter
+                      }
+                    : undefined,
+                equalizer: ops?.eq
             });
             this.audioFilters.onUpdate = () => {
-                if (this.audioFilters) this.emit('audioFilters', this.audioFilters.filters);
+                if (!this.audioFilters) return;
+                this.emit('audioFilters', this.audioFilters.filters);
+                this.emit('biquad', this.audioFilters.biquadConfig.filter);
+                this.emit('eqBands', this.audioFilters.getEQ());
             };
         }
 
-        let stream = this.equalizer && typeof src !== 'string' ? src.pipe(this.equalizer) : src;
-        if (this.biquad && typeof stream !== 'string') stream = stream.pipe(this.biquad);
-        if (this.audioFilters && typeof stream !== 'string') stream = stream.pipe(this.audioFilters);
+        const stream = this.audioFilters && typeof src !== 'string' ? src.pipe(this.audioFilters) : src;
 
         this.audioResource = createAudioResource(stream, {
             inputType: ops?.type ?? StreamType.Arbitrary,
             metadata: ops?.data,
-            inlineVolume: !ops?.disableVolume
+            // volume controls happen from AudioFilter DSP utility
+            inlineVolume: false
         });
 
         return this.audioResource;
+    }
+
+    public get biquad() {
+        return this.audioFilters?.biquadConfig.biquad || null;
+    }
+
+    public get equalizer() {
+        return this.audioFilters?.equalizer || null;
     }
 
     /**
@@ -319,10 +305,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {boolean}
      */
     setVolume(value: number) {
-        if (!this.audioResource?.volume || isNaN(value) || value < 0 || value > Infinity) return false;
-
-        this.audioResource.volume.setVolumeLogarithmic(value / 100);
-        return true;
+        if (!this.audioFilters) return false;
+        return this.audioFilters.setVolume(value / 100);
     }
 
     /**
@@ -330,9 +314,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @type {number}
      */
     get volume() {
-        if (!this.audioResource?.volume) return 100;
-        const currentVol = this.audioResource.volume.volume;
-        return Math.round(Math.pow(currentVol, 1 / 1.660964) * 100);
+        if (!this.audioFilters) return 100;
+        return this.audioFilters.volume;
     }
 
     /**

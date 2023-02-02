@@ -132,7 +132,8 @@ export class AFilterGraph<Meta = unknown> {
     }
 
     public get biquad() {
-        return (this.af.biquad?.getFilterName() as Exclude<BiquadFilters, number> | null) || null;
+        return null;
+        // return (this.af.biquad?.getFilterName() as Exclude<BiquadFilters, number> | null) || null;
     }
 
     public get filters() {

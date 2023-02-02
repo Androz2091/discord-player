@@ -167,14 +167,14 @@ class Queue<T = unknown> {
      * Check if the equalizer is turned off
      */
     public isBiquadOff() {
-        return this.isBiquadEnabled() && !this.connection.biquad!.disabled;
+        return this.isBiquadEnabled() && !this.connection.audioFilters?.biquadConfig.filter;
     }
 
     /**
      * Toggles biquad on/off
      */
     public toggleBiquad() {
-        const eq = this.connection.biquad;
+        const eq = this.connection.audioFilters;
         if (!eq) return false;
         eq.toggle();
         return !eq.disabled;
@@ -184,7 +184,7 @@ class Queue<T = unknown> {
      * Enables biquad
      */
     public enableBiquad() {
-        const eq = this.connection.biquad;
+        const eq = this.connection.audioFilters;
         if (!eq) return false;
         eq.enable();
         return !eq.disabled;
@@ -194,7 +194,7 @@ class Queue<T = unknown> {
      * Disables biquad
      */
     public disableBiquad() {
-        const eq = this.connection.biquad;
+        const eq = this.connection.audioFilters;
         if (!eq) return false;
         eq.disable();
         return eq.disabled;
@@ -204,23 +204,16 @@ class Queue<T = unknown> {
      * Biquad filter setter
      */
     public setBiquadFilter(filter: BiquadFilters) {
-        if (!this.isBiquadEnabled()) return;
-        this.connection.biquad!.setFilter(filter);
+        if (!this.connection.audioFilters) return;
+        this.connection.audioFilters.setBiquad({ filter });
         this._lastBiquadFilter = filter;
-    }
-
-    /**
-     * Get active biquad filter name
-     */
-    public getBiquadFilterName() {
-        return this.connection.biquad?.getFilterName();
     }
 
     /**
      * Returns current biquad filter
      */
     public getBiquadFilter() {
-        return this.connection.biquad?.filter;
+        return this.connection.audioFilters?.biquadConfig.filter;
     }
 
     /**
@@ -228,7 +221,7 @@ class Queue<T = unknown> {
      * @param gain The gain to set
      */
     public setBiquadGain(gain: number) {
-        return this.connection.biquad?.setGain(gain);
+        return this.connection.audioFilters?.setBiquad({ gain });
     }
 
     /**
@@ -236,15 +229,7 @@ class Queue<T = unknown> {
      * @param val The value to set
      */
     public setBiquadCutoff(val: number) {
-        return this.connection.biquad?.setCutoff(val);
-    }
-
-    /**
-     * Set biquad sample rate value
-     * @param val The value to set
-     */
-    public setBiquadSampleRate(val: number) {
-        return this.connection.biquad?.setSample(val);
+        return this.connection.audioFilters?.setBiquad({ cutoff: val });
     }
 
     /**
@@ -252,7 +237,7 @@ class Queue<T = unknown> {
      * @param val The value to set
      */
     public setBiquadQ(val: number) {
-        return this.connection.biquad?.setQ(val);
+        return this.connection.audioFilters?.setBiquad({ Q: val });
     }
 
     /**
@@ -260,13 +245,13 @@ class Queue<T = unknown> {
      * @param bands Equalizer band multiplier array
      */
     public setEqualizer(bands?: EqualizerBand[]) {
-        if (!this.connection.equalizer) return false;
+        if (!this.connection.audioFilters) return false;
 
         if (!Array.isArray(bands) || !bands.length) {
-            this.connection.equalizer.resetEQ();
+            this.connection.audioFilters.resetEQ();
             this._lastEQBands = this.getEqualizer();
         } else {
-            this.connection.equalizer.setEQ(bands);
+            this.connection.audioFilters.setEQ(bands);
             this._lastEQBands = this.getEqualizer();
         }
 
@@ -280,7 +265,7 @@ class Queue<T = unknown> {
      */
     public setEqualizerBand(band: number, gain: number) {
         if (!this.connection.equalizer) return null;
-        this.connection.equalizer.equalizer.setGain(band, gain);
+        this.connection.equalizer.setGain(band, gain);
         this._lastEQBands = this.getEqualizer();
         return true;
     }
@@ -291,15 +276,15 @@ class Queue<T = unknown> {
      */
     public getEqualizerBand(band: number) {
         if (!this.connection.equalizer) return null;
-        return this.connection.equalizer.equalizer.getGain(band);
+        return this.connection.equalizer.getGain(band);
     }
 
     /**
      * Returns entire equalizer bands
      */
     public getEqualizer() {
-        if (!this.connection.equalizer) return [];
-        return this.connection.equalizer.getEQ();
+        if (!this.connection.audioFilters) return [];
+        return this.connection.audioFilters.getEQ();
     }
 
     /**
@@ -313,14 +298,14 @@ class Queue<T = unknown> {
      * Check if the equalizer is turned off
      */
     public isEqualizerOff() {
-        return this.isEqualizerEnabled() && !this.connection.equalizer!.disabled;
+        return this.isEqualizerEnabled() && !this.connection.audioFilters?.equalizer;
     }
 
     /**
      * Toggles equalizer on/off
      */
     public toggleEqualizer() {
-        const eq = this.connection.equalizer;
+        const eq = this.connection.audioFilters;
         if (!eq) return false;
         eq.toggle();
         return !eq.disabled;
@@ -330,7 +315,7 @@ class Queue<T = unknown> {
      * Enables equalizer
      */
     public enableEqualizer() {
-        const eq = this.connection.equalizer;
+        const eq = this.connection.audioFilters;
         if (!eq) return false;
         eq.enable();
         return !eq.disabled;
@@ -340,7 +325,7 @@ class Queue<T = unknown> {
      * Disables equalizer
      */
     public disableEqualizer() {
-        const eq = this.connection.equalizer;
+        const eq = this.connection.audioFilters;
         if (!eq) return false;
         eq.disable();
         return eq.disabled;

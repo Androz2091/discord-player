@@ -72,4 +72,9 @@ export class PCMTransformer extends Transform {
     public clamp(val: number, max = this.extremum - 1, min = -this.extremum) {
         return Math.min(max, Math.max(min, val));
     }
+
+    public setSampleRate(rate: number) {
+        this.sampleRate = rate;
+        return;
+    }
 }
