@@ -3,6 +3,5 @@
         "type": "page"
     },
     "index": "Home",
-    "docs": "Documentation",
-    "packages": "Packages"
+    "docs": "Documentation"
 }

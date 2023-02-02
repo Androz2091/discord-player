@@ -1,10 +1,58 @@
 /* eslint-disable */
 const { createDocumentation } = require('typedoc-nextra');
 const { rimraf } = require('rimraf');
-const { copyFile } = require('fs-extra');
+const { writeFile } = require('fs-extra');
 
 const DOCS = `${__dirname}/../docs`;
 const OUT = `${__dirname}/../apps/website/pages/docs`;
+
+const GuideFiles = [
+    {
+        name: 'welcome',
+        category: 'guides',
+        path: `${__dirname}/../README.md`
+    },
+    {
+        name: 'v6-migration',
+        category: 'guides',
+        path: `${DOCS}/migrating/migrating.md`
+    },
+    {
+        name: 'extractors-api',
+        category: 'guides',
+        path: `${DOCS}/extractors/extractor.md`
+    },
+    {
+        name: 'stream-hooks',
+        category: 'guides',
+        path: `${DOCS}/extractors/create_stream.md`
+    },
+    {
+        name: 'audio-filters',
+        path: `${DOCS}/faq/custom_filters.md`,
+        category: 'guides'
+    },
+    {
+        name: 'slash-commands',
+        path: `${DOCS}/faq/slash_commands.md`,
+        category: 'guides'
+    },
+    {
+        name: 'working-mechanism',
+        path: `${DOCS}/faq/how_does_it_work.md`,
+        category: 'guides'
+    },
+    {
+        name: 'ratelimits',
+        path: `${DOCS}/youtube/cookies.md`,
+        category: 'guides'
+    },
+    {
+        name: 'using-proxy',
+        path: `${DOCS}/youtube/proxy.md`,
+        category: 'guides'
+    }
+];
 
 async function main() {
     await rimraf(OUT);
@@ -12,62 +60,46 @@ async function main() {
     console.log('Generating documentation...');
 
     const res = await createDocumentation({
-        custom: [
-            {
-                name: 'Welcome',
-                category: 'guide',
-                path: `${__dirname}/../README.md`
-            },
-            {
-                name: 'Migrating-to-v5',
-                category: 'guide',
-                path: `${DOCS}/migrating/migrating.md`
-            },
-            {
-                name: 'Extractors-API',
-                category: 'guide',
-                path: `${DOCS}/extractors/extractor.md`
-            },
-            {
-                name: 'Creating-Stream',
-                category: 'guide',
-                path: `${DOCS}/extractors/create_stream.md`
-            },
-            {
-                name: 'Custom-Filters',
-                path: `${DOCS}/faq/custom_filters.md`,
-                category: 'guide'
-            },
-            {
-                name: 'Slash-Commands',
-                path: `${DOCS}/faq/slash_commands.md`,
-                category: 'guide'
-            },
-            {
-                name: 'How-Does-It-Work',
-                path: `${DOCS}/faq/how_does_it_work.md`,
-                category: 'guide'
-            },
-            {
-                name: 'Using-Cookies',
-                path: `${DOCS}/youtube/cookies.md`,
-                category: 'guide'
-            },
-            {
-                name: 'Using-Proxy',
-                path: `${DOCS}/youtube/proxy.md`,
-                category: 'guide'
-            }
-        ],
+        custom: GuideFiles,
         input: `${__dirname}/../`,
         output: OUT,
         extension: 'mdx',
         markdown: true
     });
 
-    await copyFile(`${__dirname}/../README.md`, `${__dirname}/../apps/website/pages/index.mdx`);
+    await writeGuideMeta();
+    await writeDocsMeta();
 
     return res.metadata.generationMs.toFixed(2);
+}
+
+async function writeGuideMeta() {
+    const res = {};
+
+    for (const guide of GuideFiles) {
+        res[guide.name] = getDisplayName(guide.name);
+    }
+
+    await writeFile(`${OUT}/guides/_meta.json`, JSON.stringify(res, null, 4));
+}
+
+async function writeDocsMeta() {
+    const res = {
+        classes: 'Classes',
+        types: 'Interfaces',
+        guides: 'Guides'
+    };
+
+    await writeFile(`${OUT}/_meta.json`, JSON.stringify(res, null, 4));
+}
+
+function getDisplayName(n = '') {
+    return n
+        .split('-')
+        .map((m) => {
+            return m.charAt(0).toUpperCase() + m.slice(1).toLowerCase();
+        })
+        .join(' ');
 }
 
 main().then((r) => {

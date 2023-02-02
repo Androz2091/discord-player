@@ -1,29 +1,57 @@
-## YoutubeExtractor extends unknown
+## YoutubeExtractor extends BaseExtractor
 
 ```typescript
-new YoutubeExtractor()
+new YoutubeExtractor(context)
 ```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| context | ExtractorExecutionContext | ❌ | Context that instantiated this extractor |
 
 ## Properties
 ### private  _spotify: Spotify
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L32)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L32)
 ### private  _stream: StreamFN
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L31)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L31)
+### public  context: ExtractorExecutionContext
+- Source: `packages/discord-player/dist/index.d.ts#L531`
 ### public static identifier: 'com.discord\-player.ysaextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L30)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L30)
+### public  identifier: string
+Identifier of this extractor
 ## Methods
-### private  _makeYTSearch(query, context): Promise\<Array\<any>>
+### private  _makeYTSearch(query, context): Promise\<Array\<Track>>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | query | string | ❌ | - |
 | context | ExtractorSearchContext | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L357)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L357)
 ### public  activate(): Promise\<void>
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L34)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L34)
+### public  deactivate(): Promise\<void>
+This method will be executed when this extractor is deactivated
+
+
+
+
+
+- Source: `packages/discord-player/dist/index.d.ts#L552`
+### public  emit(event, args): boolean
+Dispatch an event to the player
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | K | ❌ | The event to dispatch |
+| args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
+
+
+- Source: `packages/discord-player/dist/index.d.ts#L579`
 ### public  emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L384)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L384)
 ### public  handle(query, context): Promise\<ExtractorInfo>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -31,40 +59,53 @@ new YoutubeExtractor()
 | context | ExtractorSearchContext | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L81)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L81)
+### public  handlePostStream(stream, next): void
+A stream middleware to handle streams before passing it to the player
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| stream | Readable | ❌ | The incoming stream |
+| next | NextFunction | ❌ | The next function |
+
+
+- Source: `packages/discord-player/dist/index.d.ts#L573`
 ### public  stream(info): Promise\<Readable>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | info | Track | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L388)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L388)
 ### public  validate(query, type?): Promise\<boolean>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | query | string | ❌ | - |
-| type | any | ✅ | - |
+| type | null \| SearchQueryType | ✅ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L62)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L62)
 ### public static parseURL(link): string
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | link | string | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L422)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L422)
 ### public static validateId(id): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | id | string | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L418)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L418)
 ### public static validateURL(link): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | link | string | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/0ea7a3e/packages/extractor/src/extractors/YoutubeExtractor.ts#L409)
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/extractor/src/extractors/YoutubeExtractor.ts#L409)
