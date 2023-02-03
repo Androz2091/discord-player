@@ -1,0 +1,17 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPointStrategy": "packages",
+    "entryPoints": [
+        "packages/discord-player",
+        "packages/downloader",
+        "packages/equalizer",
+        "packages/extractor",
+        "packages/utils"
+    ],
+    "githubPages": false,
+    "readme": "none",
+    "skipErrorChecking": true,
+    "cleanOutputDir": true,
+    "name": "Discord Player",
+    "hideGenerator": true
+}

@@ -13,11 +13,11 @@ import {
 } from '@discordjs/voice';
 import { StageChannel, VoiceChannel } from 'discord.js';
 import { Duplex, Readable } from 'stream';
-import { TypedEmitter as EventEmitter } from 'tiny-typed-emitter';
-import Track from '../Structures/Track';
+import { EventEmitter } from '@discord-player/utils';
+import { Track } from '../Structures/Track';
 import { Util } from '../utils/Util';
 import { PlayerError, ErrorStatusCode } from '../Structures/PlayerError';
-import { EqualizerBand, EqualizerStream, BiquadStream, BiquadFilters } from '@discord-player/equalizer';
+import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
 
 interface CreateStreamOps {
     type?: StreamType;
@@ -28,6 +28,9 @@ interface CreateStreamOps {
     disableBiquad?: boolean;
     eq?: EqualizerBand[];
     biquadFilter?: BiquadFilters;
+    disableFilters?: boolean;
+    defaultFilters?: PCMFilters[];
+    volume?: number;
 }
 
 export interface VoiceEvents {
@@ -36,6 +39,10 @@ export interface VoiceEvents {
     debug: (message: string) => any;
     start: (resource: AudioResource<Track>) => any;
     finish: (resource: AudioResource<Track>) => any;
+    dsp: (filters: PCMFilters[]) => any;
+    eqBands: (filters: EqualizerBand[]) => any;
+    biquad: (filters: BiquadFilters) => any;
+    volume: (volume: number) => any;
     /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
@@ -45,9 +52,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public channel: VoiceChannel | StageChannel;
     public audioResource?: AudioResource<Track> | null;
     private readyLock = false;
-    public paused: boolean;
-    public equalizer: EqualizerStream | null = null;
-    public biquad: BiquadStream | null = null;
+    public dsp = new FiltersChain();
 
     /**
      * Creates new connection object
@@ -76,11 +81,15 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
          */
         this.channel = channel;
 
-        /**
-         * The paused state
-         * @type {boolean}
-         */
-        this.paused = false;
+        this.dsp.onUpdate = () => {
+            if (!this.dsp) return;
+            if (this.dsp.filters?.filters) this.emit('dsp', this.dsp.filters?.filters);
+            if (this.dsp.biquad?.filter) this.emit('biquad', this.dsp.biquad?.filter);
+            if (this.dsp.equalizer) this.emit('eqBands', this.dsp.equalizer.getEQ());
+            if (this.dsp.volume) this.emit('volume', this.dsp.volume.volume);
+        };
+
+        this.dsp.onError = (e) => this.emit('error', e as AudioPlayerError);
 
         this.voiceConnection.on('stateChange', async (_, newState) => {
             if (newState.status === VoiceConnectionStatus.Disconnected) {
@@ -130,14 +139,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
                 if (!this.paused) {
                     void this.emit('finish', this.audioResource!);
-                    if (this.equalizer) {
-                        this.equalizer.destroy();
-                        this.equalizer = null;
-                    }
-                    if (this.biquad) {
-                        this.biquad.destroy();
-                        this.biquad = null;
-                    }
+                    this.dsp.destroy();
                     this.audioResource = null;
                 }
             }
@@ -149,35 +151,95 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     }
 
     /**
+     * Check if the player has been paused manually
+     */
+    get paused() {
+        return this.audioPlayer.state.status === AudioPlayerStatus.Paused;
+    }
+
+    set paused(val: boolean) {
+        val ? this.pause(true) : this.resume();
+    }
+
+    /**
+     * Whether or not the player is currently paused automatically or manually.
+     */
+    isPaused() {
+        return this.paused || this.audioPlayer.state.status === AudioPlayerStatus.AutoPaused;
+    }
+
+    /**
+     * Whether or not the player is currently buffering
+     */
+    isBuffering() {
+        return this.audioPlayer.state.status === AudioPlayerStatus.Buffering;
+    }
+
+    /**
+     * Whether or not the player is currently playing
+     */
+    isPlaying() {
+        return this.audioPlayer.state.status === AudioPlayerStatus.Playing;
+    }
+
+    /**
+     * Whether or not the player is currently idle
+     */
+    isIdle() {
+        return this.audioPlayer.state.status === AudioPlayerStatus.Idle;
+    }
+
+    /**
      * Creates stream
      * @param {Readable|Duplex|string} src The stream source
      * @param {object} [ops] Options
      * @returns {AudioResource}
      */
     createStream(src: Readable | Duplex | string, ops?: CreateStreamOps) {
-        if (!ops?.disableEqualizer) {
-            this.equalizer = new EqualizerStream({
-                channels: 1,
-                disabled: false,
-                bandMultiplier: ops?.eq || []
-            });
-        }
-
-        if (!ops?.disableBiquad) {
-            this.biquad = new BiquadStream({
-                filter: ops?.biquadFilter
-            });
-        }
-        let stream = this.equalizer && typeof src !== 'string' ? src.pipe(this.equalizer) : src;
-        if (this.biquad && typeof stream !== 'string') stream = stream.pipe(this.biquad);
+        const stream =
+            !ops?.disableFilters && typeof src !== 'string'
+                ? this.dsp.create(src, {
+                      dsp: {
+                          filters: ops?.defaultFilters,
+                          disabled: ops?.disableFilters
+                      },
+                      biquad: ops?.biquadFilter
+                          ? {
+                                filter: ops.biquadFilter,
+                                disabled: ops?.disableBiquad
+                            }
+                          : undefined,
+                      equalizer: {
+                          bandMultiplier: ops?.eq,
+                          disabled: ops?.disableEqualizer
+                      },
+                      volume: {
+                          volume: ops?.volume,
+                          disabled: ops?.disableVolume
+                      }
+                  })
+                : src;
 
         this.audioResource = createAudioResource(stream, {
             inputType: ops?.type ?? StreamType.Arbitrary,
             metadata: ops?.data,
-            inlineVolume: !ops?.disableVolume
+            // volume controls happen from AudioFilter DSP utility
+            inlineVolume: false
         });
 
         return this.audioResource;
+    }
+
+    public get filters() {
+        return this.dsp?.filters;
+    }
+
+    public get biquad() {
+        return this.dsp?.biquad || null;
+    }
+
+    public get equalizer() {
+        return this.dsp?.equalizer || null;
     }
 
     /**
@@ -214,7 +276,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     pause(interpolateSilence?: boolean) {
         const success = this.audioPlayer.pause(interpolateSilence);
-        this.paused = success;
         return success;
     }
 
@@ -224,7 +285,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     resume() {
         const success = this.audioPlayer.unpause();
-        this.paused = !success;
         return success;
     }
 
@@ -262,10 +322,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {boolean}
      */
     setVolume(value: number) {
-        if (!this.audioResource?.volume || isNaN(value) || value < 0 || value > Infinity) return false;
-
-        this.audioResource.volume.setVolumeLogarithmic(value / 100);
-        return true;
+        if (!this.dsp.volume) return false;
+        return this.dsp.volume.setVolume(value);
     }
 
     /**
@@ -273,9 +331,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @type {number}
      */
     get volume() {
-        if (!this.audioResource?.volume) return 100;
-        const currentVol = this.audioResource.volume.volume;
-        return Math.round(Math.pow(currentVol, 1 / 1.660964) * 100);
+        if (!this.dsp.volume) return 100;
+        return this.dsp.volume.volume;
     }
 
     /**

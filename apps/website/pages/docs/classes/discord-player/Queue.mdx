@@ -1,0 +1,629 @@
+## Queue
+
+```typescript
+new Queue(player, guild, options)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| player | Player | ❌ | The player that instantiated this queue |
+| guild | Guild | ❌ | The guild that instantiated this queue |
+| options | PlayerOptions | ✅ | Player options for the queue |
+
+## Properties
+### private  #destroyed: boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L45)
+### private  _activeFilters: Array\<any>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L40)
+### public  _cooldownsTimeout: Collection\<string, Timeout>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L39)
+### private  _filtersUpdate: boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L41)
+### private  _lastAudioFilters: Array\<'8D' \| 'Tremolo'>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L43)
+### private  _lastBiquadFilter: BiquadFilters
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L44)
+### private  _lastEQBands: Array\<EqualizerBand>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L42)
+### private  _streamTime: number
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L38)
+### public  connection: StreamDispatcher
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L30)
+### public  guild: Guild
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L28)
+### public  id: string
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L37)
+### public  metadata: null \| T
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L35)
+### public  onBeforeCreateStream: (track: Track, source: SearchQueryType, queue: Queue\<unknown>) => Promise\<undefined \| Readable>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L46)
+### public  options: PlayerOptions
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L33)
+### public  player: Player
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L29)
+### public  playing: boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L34)
+### public  previousTracks: Array\<Track>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L32)
+### public  repeatMode: QueueRepeatMode
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L36)
+### public  tracks: Array\<Track>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L31)
+### public  current: undefined \| Track
+Returns current track
+### public  destroyed: boolean
+If this queue is destroyed
+### public  filters: null \| AudioFilter
+The PCM filterer
+### public  paused: boolean
+If the player is currently paused
+### public  ping: undefined \| number
+Voice connection latency in ms
+### public  streamTime: number
+The stream time of this queue
+### public  totalTime: number
+Total duration
+### public  volume: number
+The current volume amount
+## Methods
+### private  #getBufferingTimeout(): number
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L1089)
+### private  #watchDestroyed(emit): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| emit | boolean | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L1080)
+### public  \[iterator](): Generator\<Track, void, undefined>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L1050)
+### private  _handleAutoplay(track): Promise\<void>
+Private method to handle autoplay
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track | ❌ | The source track to find its similar track for autoplay |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L1017)
+### public  addTrack(track): void
+Adds single track to the queue
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track | ❌ | The track to add |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L504)
+### public  addTracks(tracks): void
+Adds multiple tracks to the queue
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| tracks | Array\<Track> | ❌ | Array of tracks to add |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L516)
+### public  back(): Promise\<void>
+Plays previous track
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L712)
+### public  clear(): void
+Clear this queue
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L723)
+### public  connect(channel): Promise\<undefined \| Queue\<T>>
+Connects to a voice channel
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| channel | GuildChannelResolvable | ❌ | The voice/stage channel |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L392)
+### public  createProgressBar(options): undefined \| string
+Creates progress bar string
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| options | PlayerProgressbarOptions | ❌ | The progress bar options |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L865)
+### public  destroy(disconnect?): void
+Destroys this queue
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| disconnect | boolean | ✅ | If it should leave on destroy |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L478)
+### public  disableBiquad(): boolean
+Disables biquad
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L196)
+### public  disableEqualizer(): boolean
+Disables equalizer
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L342)
+### private  emitEnd(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L454)
+### public  enableBiquad(): boolean
+Enables biquad
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L186)
+### public  enableEqualizer(): boolean
+Enables equalizer
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L332)
+### public  forceNext(): Promise\<void>
+Forces next play
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L353)
+### public  generateStatistics(): \{ connections: number,extractors: number,guild: string,isShard: boolean,latency: \{ client: number,eventLoop: number,udp: undefined \| number,ws: undefined \| number },memory: MemoryUsage,os: \{ cpuCount: number,freeMem: number,platform: Platform,totalMem: number },subscribers: number,tracks: number }
+Generates statistics
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L904)
+### public  getBiquadFilter(): undefined \| BiquadFilters
+Returns current biquad filter
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L222)
+### public  getBiquadFilterName(): undefined \| null \| BiquadFilters
+Get active biquad filter name
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L215)
+### public  getEqualizer(): Array\<EqualizerBand>
+Returns entire equalizer bands
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L300)
+### public  getEqualizerBand(band): null \| number
+Returns gain value of specific equalizer band
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| band | number | ❌ | The band to get value of |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L292)
+### public  getFiltersDisabled(): undefined \| Array\<keyof QueueFilters>
+Returns disabled filters
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L644)
+### public  getFiltersEnabled(): undefined \| Array\<keyof QueueFilters>
+Returns enabled filters
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L635)
+### public  getPlayerTimestamp(): undefined \| \{ current: string,end: string,progress: number }
+Returns player stream timestamp
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L845)
+### public  getTrackPosition(track): undefined \| number
+Returns the index of the specified track. If found, returns the track index else returns -1.
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | string \| number \| Track | ❌ | The track |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L782)
+### public  insert(track, index?): void
+Inserts the given track to specified index
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track | ❌ | The track to insert |
+| index | number | ✅ | The index where this track should be |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L824)
+### public  isBiquadEnabled(): boolean
+Check if biquad filter is available
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L162)
+### public  isBiquadOff(): boolean
+Check if the equalizer is turned off
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L169)
+### public  isEqualizerEnabled(): boolean
+Check if equalizer is enabled
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L308)
+### public  isEqualizerOff(): boolean
+Check if the equalizer is turned off
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L315)
+### public  isFiltersAvailable(): boolean
+Whether or not the PCM filterer is available
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L148)
+### public  jump(track): void
+Jumps to particular track
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | number \| Track | ❌ | The track |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L793)
+### public  nowPlaying(): undefined \| Track
+Returns current track
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L382)
+### public  pause(): boolean
+Pause the playback
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L549)
+### public  play(src?, options?): Promise\<void>
+Play stream in a voice/stage channel
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| src | Track | ✅ | The track to play (if empty, uses first track from the queue) |
+| options | PlayOptions | ✅ | The options |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L942)
+### private  refreshEndCooldown(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L465)
+### public  remove(track): undefined \| Track
+Removes a track from the queue
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | string \| number \| Track | ❌ | The track to remove |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L759)
+### public  resume(): boolean
+Resume the playback
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L556)
+### public  seek(position): Promise\<undefined \| boolean>
+Seeks to the given time
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| position | number | ❌ | The position |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L693)
+### public  setBiquadCutoff(val): undefined \| void
+Set biquad cutoff frequency value
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| val | number | ❌ | The value to set |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L238)
+### public  setBiquadFilter(filter): void
+Biquad filter setter
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| filter | BiquadFilters | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L206)
+### public  setBiquadGain(gain): undefined \| void
+Set biquad filter gain value
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| gain | number | ❌ | The gain to set |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L230)
+### public  setBiquadQ(val): undefined \| void
+Set biquad Q value
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| val | number | ❌ | The value to set |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L254)
+### public  setBiquadSampleRate(val): undefined \| void
+Set biquad sample rate value
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| val | number | ❌ | The value to set |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L246)
+### public  setBitrate(bitrate): void
+Sets bitrate
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| bitrate | number \| 'auto' | ❌ | bitrate to set |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L565)
+### public  setEqualizer(bands?): boolean
+Set equalizer bands
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| bands | Array\<EqualizerBand> | ✅ | Equalizer band multiplier array |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L262)
+### public  setEqualizerBand(band, gain): null \| true
+Set particular equalizer band multiplier
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| band | number | ❌ | The band to update |
+| gain | number | ❌ | The gain |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L281)
+### public  setFilters(filters?): Promise\<void>
+Sets filters
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| filters | QueueFilters | ✅ | Queue filters |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L654)
+### public  setPaused(paused?): boolean
+Sets paused state
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| paused | boolean | ✅ | The paused state |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L529)
+### public  setRepeatMode(mode): undefined \| boolean
+Sets repeat mode
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| mode | QueueRepeatMode | ❌ | The repeat mode |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L588)
+### public  setVolume(amount): undefined \| boolean
+Sets volume
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| amount | number | ❌ | The volume amount |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L577)
+### public  shuffle(): undefined \| boolean
+Shuffles this queue
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L742)
+### public  skip(): undefined \| boolean
+Skips current track
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L491)
+### public  skipTo(track): void
+Jumps to particular track, removing other tracks on the way
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | number \| Track | ❌ | The track |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L808)
+### public  stop(): void
+Stops the player
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L733)
+### public  toJSON(): undefined \| \{ guild: string,id: string,options: PlayerOptions,tracks: Array\<TrackJSON>,voiceChannel: string }
+JSON representation of this queue
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L1059)
+### public  toString(): undefined \| string
+String representation of this queue
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L1074)
+### public  toggleBiquad(): boolean
+Toggles biquad on/off
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L176)
+### public  toggleEqualizer(): boolean
+Toggles equalizer on/off
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/Queue.ts#L322)

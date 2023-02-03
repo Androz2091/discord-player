@@ -1,0 +1,139 @@
+## GuildQueuePlayerNode
+
+```typescript
+new GuildQueuePlayerNode(queue)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| queue | GuildQueue\<Meta> | ❌ | - |
+
+## Properties
+### private  #progress: number
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L30)
+### public  queue: GuildQueue\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L31)
+### public  playbackTime: number
+
+### public  volume: number
+
+## Methods
+### private  #createFFmpegStream(stream, track, seek): Readable
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| stream | string \| Readable | ❌ | - |
+| track | Track | ❌ | - |
+| seek | number | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L302)
+### private  #createGenericStream(track): Promise\<null \| string \| Readable>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L288)
+### public  createProgressBar(options?): null \| string
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| options | PlayerProgressbarOptions | ✅ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L82)
+### public  getTimestamp(): null \| PlayerTimestamp
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L63)
+### public  getTrackPosition(track): number
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | TrackResolvable | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L172)
+### public  insert(track, index): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track | ❌ | - |
+| index | number | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L191)
+### public  isBuffering(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L37)
+### public  isIdle(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L33)
+### public  isPaused(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L45)
+### public  isPlaying(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L41)
+### public  jump(track): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | TrackResolvable | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L165)
+### public  pause(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L135)
+### public  play(res?, options?): Promise\<void>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| res | Track | ✅ | - |
+| options | ResourcePlayOptions | ✅ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L212)
+### public  remove(track): null \| Track
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | TrackResolvable | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L150)
+### public  resetProgress(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L49)
+### public  resume(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L139)
+### public  seek(duration): Promise\<boolean>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| duration | number | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L108)
+### public  setBitrate(rate): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| rate | number \| 'auto' | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L126)
+### public  setPaused(state): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| state | boolean | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L130)
+### public  setVolume(vol): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| vol | number | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L121)
+### public  skip(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L143)
+### public  skipTo(track): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | TrackResolvable | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L182)
+### public  stop(force): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| force | boolean | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueuePlayerNode.ts#L196)

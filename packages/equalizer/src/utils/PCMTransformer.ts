@@ -4,6 +4,8 @@ export type PCMType = `s${16 | 32}${'l' | 'b'}e`;
 
 export interface PCMTransformerOptions extends TransformOptions {
     type?: PCMType;
+    disabled?: boolean;
+    sampleRate?: number;
 }
 
 export class PCMTransformer extends Transform {
@@ -11,11 +13,20 @@ export class PCMTransformer extends Transform {
     public bits: number;
     public bytes: number;
     public extremum: number;
+    public disabled = false;
+    public sampleRate = 48000;
+    public onUpdate = (): void => {
+        /* noop */
+    };
 
     public constructor(options: PCMTransformerOptions = {}) {
         super(options);
 
         options.type ??= 's16le';
+        this.disabled = !!options.disabled;
+        if (typeof options.sampleRate === 'number' && options.sampleRate > 0) {
+            this.sampleRate = options.sampleRate;
+        }
 
         switch (options.type) {
             case 's16be':
@@ -36,6 +47,18 @@ export class PCMTransformer extends Transform {
         this.extremum = Math.pow(2, this.bits - 1);
     }
 
+    public disable() {
+        this.disabled = true;
+    }
+
+    public enable() {
+        this.disabled = false;
+    }
+
+    public toggle() {
+        this.disabled = !this.disabled;
+    }
+
     public _readInt(buffer: Buffer, index: number) {
         const method = `readInt${this.type.substring(1).toUpperCase()}` as `readInt${16 | 32}${'L' | 'B'}E`;
         return buffer[method](index);
@@ -48,5 +71,10 @@ export class PCMTransformer extends Transform {
 
     public clamp(val: number, max = this.extremum - 1, min = -this.extremum) {
         return Math.min(max, Math.max(min, val));
+    }
+
+    public setSampleRate(rate: number) {
+        this.sampleRate = rate;
+        return;
     }
 }

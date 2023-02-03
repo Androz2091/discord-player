@@ -13,7 +13,6 @@ export interface MonoStereoTransformerOptions extends PCMTransformerOptions {
 }
 
 export class MonoStereoTransformer extends PCMTransformer {
-    public disabled = false;
     public strategy: MSTStrategy;
 
     public constructor(options?: MonoStereoTransformerOptions) {
@@ -23,18 +22,6 @@ export class MonoStereoTransformer extends PCMTransformer {
         }
 
         this.strategy = options!.strategy;
-    }
-
-    public disable() {
-        this.disabled = true;
-    }
-
-    public enable() {
-        this.disabled = false;
-    }
-
-    public toggle() {
-        this.disabled = !this.disabled;
     }
 
     public setStrategy(strategy: MSTStrategy) {

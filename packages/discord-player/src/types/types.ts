@@ -1,11 +1,11 @@
 import { Snowflake, User, UserResolvable, VoiceState } from 'discord.js';
 import { Readable, Duplex } from 'stream';
 import { Queue } from '../Structures/Queue';
-import Track from '../Structures/Track';
+import { Track } from '../Structures/Track';
 import { Playlist } from '../Structures/Playlist';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { downloadOptions } from 'ytdl-core';
-import { BiquadFilters, EqualizerBand } from '@discord-player/equalizer';
+import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 
 export type FiltersName = keyof QueueFilters;
 
@@ -58,10 +58,11 @@ export interface QueueFilters {
  * - soundcloud
  * - youtube
  * - spotify
+ * - apple_music
  * - arbitrary
  * @typedef {string} TrackSource
  */
-export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'arbitrary';
+export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'apple_music' | 'arbitrary';
 
 /**
  * @typedef {object} RawTrackData
@@ -87,12 +88,13 @@ export interface RawTrackData {
     thumbnail: string;
     duration: string;
     views: number;
-    requestedBy: User;
+    requestedBy?: User | null;
     playlist?: Playlist;
     source?: TrackSource;
     engine?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     live?: boolean;
     raw?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    queryType?: SearchQueryType;
 }
 
 /**
@@ -144,6 +146,8 @@ export interface PlayerProgressbarOptions {
  * Setting this or leaving this empty will disable this effect. Example: `volumeSmoothness: 0.1`
  * @property {EqualizerBand[]} [equalizerBands] The equalizer bands array for 15 band equalizer.
  * @property {BiquadFilters} [biquadFilter] The biquad filter initializer value
+ * @property {boolean} [disableFilters] Disable/enable PCM filter
+ * @property {PCMFilters[]} [defaultFilters] The PCM filters initializer
  * @property {Function} [onBeforeCreateStream] Runs before creating stream
  */
 export interface PlayerOptions {
@@ -163,7 +167,9 @@ export interface PlayerOptions {
     volumeSmoothness?: number;
     equalizerBands?: EqualizerBand[];
     biquadFilter?: BiquadFilters;
-    onBeforeCreateStream?: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable>;
+    disableFilters?: boolean;
+    defaultFilters?: PCMFilters[];
+    onBeforeCreateStream?: (track: Track, source: SearchQueryType, queue: Queue) => Promise<Readable>;
 }
 
 /**
@@ -244,26 +250,36 @@ export interface ExtractorModelData {
  * - YOUTUBE_SEARCH
  * - YOUTUBE_VIDEO
  * - SOUNDCLOUD_SEARCH
+ * - APPLE_MUSIC_SONG
+ * - APPLE_MUSIC_ALBUM
+ * - APPLE_MUSIC_PLAYLIST
+ * - FILE
  * @typedef {number} QueryType
  */
-export enum QueryType {
-    AUTO,
-    YOUTUBE,
-    YOUTUBE_PLAYLIST,
-    SOUNDCLOUD_TRACK,
-    SOUNDCLOUD_PLAYLIST,
-    SOUNDCLOUD,
-    SPOTIFY_SONG,
-    SPOTIFY_ALBUM,
-    SPOTIFY_PLAYLIST,
-    FACEBOOK,
-    VIMEO,
-    ARBITRARY,
-    REVERBNATION,
-    YOUTUBE_SEARCH,
-    YOUTUBE_VIDEO,
-    SOUNDCLOUD_SEARCH
-}
+export const QueryType = {
+    AUTO: 'auto',
+    YOUTUBE: 'youtube',
+    YOUTUBE_PLAYLIST: 'youtubePlaylist',
+    SOUNDCLOUD_TRACK: 'soundcloudTrack',
+    SOUNDCLOUD_PLAYLIST: 'soundcloudPlaylist',
+    SOUNDCLOUD: 'soundcloud',
+    SPOTIFY_SONG: 'spotifySong',
+    SPOTIFY_ALBUM: 'spotifyAlbum',
+    SPOTIFY_PLAYLIST: 'spotifyPlaylist',
+    FACEBOOK: 'facebook',
+    VIMEO: 'vimeo',
+    ARBITRARY: 'arbitrary',
+    REVERBNATION: 'reverbnation',
+    YOUTUBE_SEARCH: 'youtubeSearch',
+    YOUTUBE_VIDEO: 'youtubeVideo',
+    SOUNDCLOUD_SEARCH: 'soundcloudSearch',
+    APPLE_MUSIC_SONG: 'appleMusicSong',
+    APPLE_MUSIC_ALBUM: 'appleMusicAlbum',
+    APPLE_MUSIC_PLAYLIST: 'appleMusicPlaylist',
+    FILE: 'file'
+} as const;
+
+export type SearchQueryType = keyof typeof QueryType | (typeof QueryType)[keyof typeof QueryType];
 
 /**
  * Emitted when bot gets disconnected from a voice channel
@@ -341,7 +357,7 @@ export enum QueryType {
  */
 
 /**
- * Emitted when a track ends
+ * Emitted when voice state updates. Listen to this event to modify internal voice state update handler.
  * @event Player#voiceStateUpdate
  * @param {Queue} queue The queue that this update belongs to
  * @param {VoiceState} oldState The old voice state
@@ -350,6 +366,7 @@ export enum QueryType {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface PlayerEvents {
+    //#region legacy
     botDisconnect: (queue: Queue) => any;
     channelEmpty: (queue: Queue) => any;
     connectionCreate: (queue: Queue, connection: StreamDispatcher) => any;
@@ -362,6 +379,7 @@ export interface PlayerEvents {
     trackStart: (queue: Queue, track: Track) => any;
     trackEnd: (queue: Queue, track: Track) => any;
     voiceStateUpdate: (queue: Queue, oldState: VoiceState, newState: VoiceState) => any;
+    //#endregion legacy
 }
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -380,15 +398,17 @@ export interface PlayOptions {
     immediate?: boolean;
 }
 
+export type QueryExtractorSearch = `ext:${string}`;
+
 /**
  * @typedef {object} SearchOptions
  * @property {UserResolvable} requestedBy The user who requested this search
- * @property {QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
+ * @property {typeof QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
  * @property {boolean} [blockExtractor=false] If it should block custom extractors
  */
 export interface SearchOptions {
-    requestedBy: UserResolvable;
-    searchEngine?: QueryType | string;
+    requestedBy?: UserResolvable;
+    searchEngine?: SearchQueryType | QueryExtractorSearch;
     blockExtractor?: boolean;
 }
 
@@ -501,6 +521,7 @@ export interface PlaylistJSON {
  * @property {number} [connectionTimeout=20000] The voice connection timeout
  * @property {boolean} [smoothVolume=true] Toggle smooth volume transition
  * @property {boolean} [lagMonitor=30000] Time in ms to re-monitor event loop lag
+ * @property {boolean} [lockVoiceStateHandler] Prevent voice state handler from being overridden
  */
 export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
@@ -508,4 +529,5 @@ export interface PlayerInitOptions {
     connectionTimeout?: number;
     smoothVolume?: boolean;
     lagMonitor?: number;
+    lockVoiceStateHandler?: boolean;
 }

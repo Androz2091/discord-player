@@ -1,21 +1,32 @@
-// try applying smooth volume patch on load
-import './smoothVolume';
 import { version as djsVersion } from 'discord.js';
 
-export { AudioFilters } from './utils/AudioFilters';
-export { ExtractorModel } from './Structures/ExtractorModel';
-export { Playlist } from './Structures/Playlist';
-export { Player } from './Player';
-export { PlayerError, ErrorStatusCode } from './Structures/PlayerError';
-export { QueryResolver } from './utils/QueryResolver';
-export { Queue } from './Structures/Queue';
-export { Track } from './Structures/Track';
-export { VoiceUtils } from './VoiceInterface/VoiceUtils';
-export { VoiceEvents, StreamDispatcher } from './VoiceInterface/StreamDispatcher';
-export * from './VoiceInterface/VolumeTransformer';
-export { Util } from './utils/Util';
+export * from './utils/AudioFilters';
+export * from './extractors/BaseExtractor';
+export * from './extractors/ExtractorExecutionContext';
+export * from './Structures/Playlist';
+export * from './Player';
+export * from './Structures/PlayerError';
+export * from './utils/QueryResolver';
+export * from './Structures/Queue';
+export * from './Structures/Track';
+export * from './VoiceInterface/VoiceUtils';
+export * from './VoiceInterface/StreamDispatcher';
+export * from './utils/Util';
 export * from './types/types';
 export * from './utils/FFmpegStream';
+export * from './Structures/GuildQueue';
+export {
+    AudioFilters as PCMAudioFilters,
+    BiquadFilters,
+    FilterType as BiquadFilterType,
+    PCMFilters,
+    Q_BUTTERWORTH,
+    VolumeTransformer,
+    BASS_EQ_BANDS,
+    AF_NIGHTCORE_RATE,
+    AF_VAPORWAVE_RATE,
+    FiltersChain
+} from '@discord-player/equalizer';
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
 export const version: string = '[VI]{{inject}}[/VI]';

@@ -1,25 +1,28 @@
-import { Collection, Guild, StageChannel, VoiceChannel, SnowflakeUtil, GuildChannelResolvable, ChannelType } from 'discord.js';
+import { Guild, StageChannel, VoiceChannel, SnowflakeUtil, GuildChannelResolvable, ChannelType } from 'discord.js';
 import { Player } from '../Player';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
-import Track from './Track';
-import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode, TrackSource } from '../types/types';
-import ytdl from 'ytdl-core';
+import { Track } from './Track';
+import { PlayerOptions, PlayerProgressbarOptions, PlayOptions, QueueFilters, QueueRepeatMode, SearchQueryType } from '../types/types';
 import { AudioResource, StreamType } from '@discordjs/voice';
 import { Util } from '../utils/Util';
-import YouTube from 'youtube-sr';
 import AudioFilters from '../utils/AudioFilters';
 import { PlayerError, ErrorStatusCode } from './PlayerError';
 import type { Readable } from 'stream';
-import { VolumeTransformer } from '../VoiceInterface/VolumeTransformer';
 import { createFFmpegStream } from '../utils/FFmpegStream';
 import os from 'os';
 import { parentPort } from 'worker_threads';
-import type { BiquadFilters, EqualizerBand } from '@discord-player/equalizer';
+import type { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
+import { Collection } from '@discord-player/utils';
+import { QueryResolver } from '../utils/QueryResolver';
+import { YouTube } from 'youtube-sr';
 
 const OBCS_DEFAULT = async () => {
     return undefined;
 };
 
+/**
+ * @deprecated use GuildQueue instead
+ */
 class Queue<T = unknown> {
     public readonly guild: Guild;
     public readonly player: Player;
@@ -36,9 +39,10 @@ class Queue<T = unknown> {
     private _activeFilters: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
     private _filtersUpdate = false;
     private _lastEQBands: EqualizerBand[] = [];
+    private _lastAudioFilters: PCMFilters[] = [];
     private _lastBiquadFilter!: BiquadFilters;
     #destroyed = false;
-    public onBeforeCreateStream: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable | undefined> = OBCS_DEFAULT;
+    public onBeforeCreateStream: (track: Track, source: SearchQueryType, queue: Queue) => Promise<Readable | undefined> = OBCS_DEFAULT;
 
     /**
      * Queue constructor
@@ -121,12 +125,15 @@ class Queue<T = unknown> {
                 disableVolume: false,
                 disableEqualizer: false,
                 equalizerBands: [],
-                disableBiquad: false
+                disableBiquad: false,
+                disableFilters: false,
+                defaultFilters: []
             } as PlayerOptions,
             options
         );
 
         if (Array.isArray(options.equalizerBands)) this._lastEQBands = options.equalizerBands;
+        if (Array.isArray(options.defaultFilters)) this._lastAudioFilters = options.defaultFilters;
         if (options.biquadFilter != null) this._lastBiquadFilter = options.biquadFilter;
         // eslint-disable-next-line
         if ('onBeforeCreateStream' in this.options) this.onBeforeCreateStream = this.options.onBeforeCreateStream!;
@@ -135,193 +142,18 @@ class Queue<T = unknown> {
     }
 
     /**
-     * Check if biquad filter is available
+     * The PCM filterer
      */
-    public isBiquadEnabled() {
-        return this.connection.biquad != null;
+    public get filters() {
+        return this.connection.filters;
     }
 
-    /**
-     * Check if the equalizer is turned off
-     */
-    public isBiquadOff() {
-        return this.isBiquadEnabled() && !this.connection.biquad!.disabled;
+    public get equalizer() {
+        return this.connection.equalizer;
     }
 
-    /**
-     * Toggles biquad on/off
-     */
-    public toggleBiquad() {
-        const eq = this.connection.biquad;
-        if (!eq) return false;
-        eq.toggle();
-        return !eq.disabled;
-    }
-
-    /**
-     * Enables biquad
-     */
-    public enableBiquad() {
-        const eq = this.connection.biquad;
-        if (!eq) return false;
-        eq.enable();
-        return !eq.disabled;
-    }
-
-    /**
-     * Disables biquad
-     */
-    public disableBiquad() {
-        const eq = this.connection.biquad;
-        if (!eq) return false;
-        eq.disable();
-        return eq.disabled;
-    }
-
-    /**
-     * Biquad filter setter
-     */
-    public setBiquadFilter(filter: BiquadFilters) {
-        if (!this.isBiquadEnabled()) return;
-        this.connection.biquad!.setFilter(filter);
-        this._lastBiquadFilter = filter;
-    }
-
-    /**
-     * Get active biquad filter name
-     */
-    public getBiquadFilterName() {
-        return this.connection.biquad?.getFilterName();
-    }
-
-    /**
-     * Returns current biquad filter
-     */
-    public getBiquadFilter() {
-        return this.connection.biquad?.filter;
-    }
-
-    /**
-     * Set biquad filter gain value
-     * @param gain The gain to set
-     */
-    public setBiquadGain(gain: number) {
-        return this.connection.biquad?.setGain(gain);
-    }
-
-    /**
-     * Set biquad cutoff frequency value
-     * @param val The value to set
-     */
-    public setBiquadCutoff(val: number) {
-        return this.connection.biquad?.setCutoff(val);
-    }
-
-    /**
-     * Set biquad sample rate value
-     * @param val The value to set
-     */
-    public setBiquadSampleRate(val: number) {
-        return this.connection.biquad?.setSample(val);
-    }
-
-    /**
-     * Set biquad Q value
-     * @param val The value to set
-     */
-    public setBiquadQ(val: number) {
-        return this.connection.biquad?.setQ(val);
-    }
-
-    /**
-     * Set equalizer bands
-     * @param bands Equalizer band multiplier array
-     */
-    public setEqualizer(bands?: EqualizerBand[]) {
-        if (!this.connection.equalizer) return false;
-
-        if (!Array.isArray(bands) || !bands.length) {
-            this.connection.equalizer.resetEQ();
-            this._lastEQBands = this.getEqualizer();
-        } else {
-            this.connection.equalizer.setEQ(bands);
-            this._lastEQBands = this.getEqualizer();
-        }
-
-        return true;
-    }
-
-    /**
-     * Set particular equalizer band multiplier
-     * @param band The band to update
-     * @param gain The gain
-     */
-    public setEqualizerBand(band: number, gain: number) {
-        if (!this.connection.equalizer) return null;
-        this.connection.equalizer.equalizer.setGain(band, gain);
-        this._lastEQBands = this.getEqualizer();
-        return true;
-    }
-
-    /**
-     * Returns gain value of specific equalizer band
-     * @param band The band to get value of
-     */
-    public getEqualizerBand(band: number) {
-        if (!this.connection.equalizer) return null;
-        return this.connection.equalizer.equalizer.getGain(band);
-    }
-
-    /**
-     * Returns entire equalizer bands
-     */
-    public getEqualizer() {
-        if (!this.connection.equalizer) return [];
-        return this.connection.equalizer.getEQ();
-    }
-
-    /**
-     * Check if equalizer is enabled
-     */
-    public isEqualizerEnabled() {
-        return this.connection.equalizer != null;
-    }
-
-    /**
-     * Check if the equalizer is turned off
-     */
-    public isEqualizerOff() {
-        return this.isEqualizerEnabled() && !this.connection.equalizer!.disabled;
-    }
-
-    /**
-     * Toggles equalizer on/off
-     */
-    public toggleEqualizer() {
-        const eq = this.connection.equalizer;
-        if (!eq) return false;
-        eq.toggle();
-        return !eq.disabled;
-    }
-
-    /**
-     * Enables equalizer
-     */
-    public enableEqualizer() {
-        const eq = this.connection.equalizer;
-        if (!eq) return false;
-        eq.enable();
-        return !eq.disabled;
-    }
-
-    /**
-     * Disables equalizer
-     */
-    public disableEqualizer() {
-        const eq = this.connection.equalizer;
-        if (!eq) return false;
-        eq.disable();
-        return eq.disabled;
+    public get biquad() {
+        return this.connection.biquad;
     }
 
     /**
@@ -382,6 +214,22 @@ class Queue<T = unknown> {
                 return await _channel.guild.members.me!.voice.setRequestToSpeak(true).catch(Util.noop);
             });
         }
+
+        this.connection.on('dsp', (filters) => {
+            this._lastAudioFilters = filters;
+        });
+
+        this.connection.on('eqBands', (filters) => {
+            this._lastEQBands = filters;
+        });
+
+        this.connection.on('biquad', (filters) => {
+            this._lastBiquadFilter = filters;
+        });
+
+        this.connection.on('volume', (vol) => {
+            this.options.initialVolume = vol;
+        });
 
         this.connection.on('error', (err) => {
             if (this.#watchDestroyed(false)) return;
@@ -501,9 +349,34 @@ class Queue<T = unknown> {
      * @returns {boolean}
      */
     setPaused(paused?: boolean) {
-        if (this.#watchDestroyed()) return;
+        if (this.#watchDestroyed()) return false;
         if (!this.connection) return false;
         return paused ? this.connection.pause(true) : this.connection.resume();
+    }
+
+    /**
+     * If the player is currently paused
+     */
+    get paused() {
+        return this.connection.paused;
+    }
+
+    set paused(val: boolean) {
+        this.setPaused(val);
+    }
+
+    /**
+     * Pause the playback
+     */
+    pause() {
+        return this.setPaused(true);
+    }
+
+    /**
+     * Resume the playback
+     */
+    resume() {
+        return this.setPaused(false);
     }
 
     /**
@@ -902,38 +775,25 @@ class Queue<T = unknown> {
             this.previousTracks.push(track);
         }
 
-        let stream = null;
+        let stream: string | Readable | null = null;
         const hasCustomDownloader = typeof this.onBeforeCreateStream === 'function';
+        if (hasCustomDownloader) {
+            const qt: SearchQueryType = track.queryType || (track.raw.source === 'spotify' ? 'spotifySong' : track.raw.source === 'apple_music' ? 'appleMusicSong' : track.raw.source) || 'arbitrary';
+            stream = (await this.onBeforeCreateStream(track, qt, this)) || null;
+        }
 
-        if (['youtube', 'spotify'].includes(track.raw.source!)) {
-            let spotifyResolved = false;
-            if (this.options.spotifyBridge && track.raw.source === 'spotify' && !track.raw.engine) {
-                track.raw.engine = await YouTube.search(`${track.author} ${track.title}`, { type: 'video' })
-                    .then((res) => res[0].url)
-                    .catch(() => {
-                        /* void */
-                    });
-                spotifyResolved = true;
+        if (!stream) {
+            const streamInfo = await this.player.extractors.run(async (extractor) => {
+                const canStream = await extractor.validate(track.url, track.queryType || QueryResolver.resolve(track.url));
+                if (!canStream) return false;
+                return await extractor.stream(track);
+            });
+            if (!streamInfo || !streamInfo.result) {
+                this.player.emit('error', this, new Error('No stream extractors are available for this track'));
+                return void this.play(this.tracks.shift(), { immediate: true });
             }
 
-            const url = track.raw.source === 'spotify' ? track.raw.engine : track.url;
-            if (!url) return void this.play(this.tracks.shift(), { immediate: true });
-
-            if (hasCustomDownloader) {
-                stream = (await this.onBeforeCreateStream(track, spotifyResolved ? 'youtube' : track.raw.source!, this)) || null;
-            }
-
-            if (!stream) {
-                stream = ytdl(url, this.options.ytdlOptions);
-            }
-        } else {
-            const arbitraryStream = (hasCustomDownloader && (await this.onBeforeCreateStream(track, track.raw.source || track.raw.engine, this))) || null;
-            stream =
-                arbitraryStream || (track.raw.source === 'soundcloud' && typeof track.raw.engine?.downloadProgressive === 'function')
-                    ? await track.raw.engine.downloadProgressive()
-                    : typeof track.raw.engine === 'function'
-                    ? await track.raw.engine()
-                    : track.raw.engine;
+            stream = streamInfo.result;
         }
 
         const ffmpegStream = createFFmpegStream(stream, {
@@ -951,17 +811,14 @@ class Queue<T = unknown> {
             disableEqualizer: Boolean(this.options.disableEqualizer),
             eq: this._lastEQBands,
             disableBiquad: Boolean(this.options.disableBiquad),
-            biquadFilter: this._lastBiquadFilter
+            biquadFilter: this._lastBiquadFilter,
+            defaultFilters: this._lastAudioFilters,
+            disableFilters: Boolean(this.options.disableFilters),
+            volume: this.options.initialVolume
         });
 
         if (options.seek) this._streamTime = options.seek;
         this._filtersUpdate = options.filtersUpdate!;
-
-        const volumeTransformer = resource.volume as VolumeTransformer;
-        if (volumeTransformer && typeof this.options.initialVolume === 'number') volumeTransformer.setVolume(Math.pow(this.options.initialVolume / 100, 1.660964));
-        if (volumeTransformer?.hasSmoothness && typeof this.options.volumeSmoothness === 'number') {
-            if (typeof volumeTransformer.setSmoothness === 'function') volumeTransformer.setSmoothness(this.options.volumeSmoothness || 0);
-        }
 
         setTimeout(() => {
             this.connection.playStream(resource);
@@ -994,13 +851,14 @@ class Queue<T = unknown> {
         const nextTrack = new Track(this.player, {
             title: info.title!,
             url: `https://www.youtube.com/watch?v=${info.id}`,
-            duration: info.durationFormatted ? Util.buildTimeCode(Util.parseMS(info.duration * 1000)) : '0:00',
+            duration: info.durationFormatted || Util.buildTimeCode(Util.parseMS(info.duration * 1000)),
             description: '',
             thumbnail: typeof info.thumbnail === 'string' ? info.thumbnail! : info.thumbnail!.url!,
             views: info.views,
             author: info.channel!.name!,
             requestedBy: track.requestedBy,
-            source: 'youtube'
+            source: 'youtube',
+            queryType: 'youtubeVideo'
         });
 
         this.play(nextTrack, { immediate: true });

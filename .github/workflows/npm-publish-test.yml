@@ -7,12 +7,20 @@ concurrency:
 jobs:
     publish-npm:
         runs-on: ubuntu-latest
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
         steps:
             - uses: actions/checkout@v2
             - uses: actions/setup-node@v1
               with:
                   node-version: 18
                   registry-url: https://registry.npmjs.org/
+            - name: Cache yarn
+              uses: actions/cache@v3
+              with:
+                path: .yarn/cache
+                key: yarn-cache-node-18
             - run: yarn install --immutable
             - run: yarn build
             - run: cd packages/discord-player

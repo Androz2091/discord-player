@@ -1,0 +1,34 @@
+## GuildQueueAudioFilters
+
+```typescript
+new GuildQueueAudioFilters(queue)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| queue | GuildQueue\<Meta> | ❌ | - |
+
+## Properties
+### public  _lastFiltersCache: GuildQueueAFiltersCache
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L81)
+### public  ffmpeg: FFmpegFilterer\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L80)
+### public  graph: AFilterGraph\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L79)
+### public  queue: GuildQueue\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L86)
+### public  biquad: null \| BiquadStream
+
+### public  equalizer: null \| EqualizerStream
+
+### public  filters: null \| AudioFilter
+
+### public  volume: null \| VolumeTransformer
+
+## Methods
+### public  triggerReplay(seek): Promise\<boolean>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| seek | number | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L104)

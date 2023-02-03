@@ -1,0 +1,48 @@
+## QueryResolver
+
+```typescript
+new QueryResolver()
+```
+
+## Properties
+### public  regex: \{ appleMusicAlbumRegex: RegExp,appleMusicPlaylistRegex: RegExp,appleMusicSongRegex: RegExp,attachmentRegex: RegExp,reverbnationRegex: RegExp,spotifyAlbumRegex: RegExp,spotifyPlaylistRegex: RegExp,spotifySongRegex: RegExp,vimeoRegex: RegExp }
+
+## Methods
+### public static getVimeoID(query): undefined \| null \| string
+Parses vimeo id from url
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| query | string | ❌ | The query |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/utils/QueryResolver.ts#L68)
+### public static resolve(query): 'auto' \| 'youtube' \| 'youtubePlaylist' \| 'soundcloudTrack' \| 'soundcloudPlaylist' \| 'soundcloud' \| 'spotifySong' \| 'spotifyAlbum' \| 'spotifyPlaylist' \| 'facebook' \| 'vimeo' \| 'arbitrary' \| 'reverbnation' \| 'youtubeSearch' \| 'youtubeVideo' \| 'soundcloudSearch' \| 'appleMusicSong' \| 'appleMusicAlbum' \| 'appleMusicPlaylist' \| 'file'
+Resolves the given search query
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| query | string | ❌ | The query |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/utils/QueryResolver.ts#L44)
+### public static validateId(q): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| q | string | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/utils/QueryResolver.ts#L77)
+### public static validateURL(q): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| q | string | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/utils/QueryResolver.ts#L81)

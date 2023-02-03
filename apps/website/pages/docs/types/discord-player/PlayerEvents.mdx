@@ -1,0 +1,22 @@
+## PlayerEvents
+Emitted when voice state updates. Listen to this event to modify internal voice state update handler.
+Player#voiceStateUpdate
+
+
+| Property | Type | Value | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| botDisconnect | (queue: Queue\<unknown>) => any | N/A | - |
+| channelEmpty | (queue: Queue\<unknown>) => any | N/A | - |
+| connectionCreate | (queue: Queue\<unknown>, connection: StreamDispatcher) => any | N/A | - |
+| connectionError | (queue: Queue\<unknown>, error: Error) => any | N/A | - |
+| debug | (queue: Queue\<unknown>, message: string) => any | N/A | - |
+| error | (queue: Queue\<unknown>, error: Error) => any | N/A | - |
+| queueEnd | (queue: Queue\<unknown>) => any | N/A | - |
+| trackAdd | (queue: Queue\<unknown>, track: Track) => any | N/A | - |
+| trackEnd | (queue: Queue\<unknown>, track: Track) => any | N/A | - |
+| trackStart | (queue: Queue\<unknown>, track: Track) => any | N/A | - |
+| tracksAdd | (queue: Queue\<unknown>, track: Array\<Track>) => any | N/A | - |
+| voiceStateUpdate | (queue: Queue\<unknown>, oldState: VoiceState, newState: VoiceState) => any | N/A | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/types/types.ts#L368)

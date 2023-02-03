@@ -1,6 +1,7 @@
-import { VoiceChannel, StageChannel, Collection, Snowflake } from 'discord.js';
-import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection } from '@discordjs/voice';
+import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
+import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection } from '@discordjs/voice';
 import { StreamDispatcher } from './StreamDispatcher';
+import { Collection } from '@discord-player/utils';
 
 class VoiceUtils {
     public cache: Collection<Snowflake, StreamDispatcher>;
@@ -75,7 +76,7 @@ class VoiceUtils {
      * @returns {StreamDispatcher}
      */
     public getConnection(guild: Snowflake) {
-        return this.cache.get(guild);
+        return this.cache.get(guild) || getVoiceConnection(guild);
     }
 }
 
