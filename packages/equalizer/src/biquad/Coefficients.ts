@@ -43,7 +43,7 @@ export class Coefficients {
         }
     }
 
-    public static from(filter: BiquadFilters, samplingFreq: number, cutoffFreq: number, Q: number, dbGain = 0) {
+    public static from(filter: BiquadFilters, samplingFreq: number, cutoffFreq: number, Q: number, dbGain = -10) {
         if (2.0 * cutoffFreq > samplingFreq) {
             throw new Error(`Cutoff frequency is too big!`);
         }
