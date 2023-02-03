@@ -39,8 +39,6 @@ export function applyVibrato(config: AFVibratoConfig, int: number, sampleRate: n
     return modSignal * int;
 }
 
-// TODO
 export function applyVolume(vol: number, int: number) {
-    return int;
-    // return vol * int;
+    return vol * int;
 }

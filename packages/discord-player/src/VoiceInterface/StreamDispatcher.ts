@@ -17,7 +17,7 @@ import { EventEmitter } from '@discord-player/utils';
 import { Track } from '../Structures/Track';
 import { Util } from '../utils/Util';
 import { PlayerError, ErrorStatusCode } from '../Structures/PlayerError';
-import { EqualizerBand, BiquadFilters, AudioFilter, PCMFilters } from '@discord-player/equalizer';
+import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
 
 interface CreateStreamOps {
     type?: StreamType;
@@ -30,6 +30,7 @@ interface CreateStreamOps {
     biquadFilter?: BiquadFilters;
     disableFilters?: boolean;
     defaultFilters?: PCMFilters[];
+    volume?: number;
 }
 
 export interface VoiceEvents {
@@ -38,9 +39,10 @@ export interface VoiceEvents {
     debug: (message: string) => any;
     start: (resource: AudioResource<Track>) => any;
     finish: (resource: AudioResource<Track>) => any;
-    audioFilters: (filters: PCMFilters[]) => any;
+    dsp: (filters: PCMFilters[]) => any;
     eqBands: (filters: EqualizerBand[]) => any;
     biquad: (filters: BiquadFilters) => any;
+    volume: (volume: number) => any;
     /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
@@ -50,7 +52,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public channel: VoiceChannel | StageChannel;
     public audioResource?: AudioResource<Track> | null;
     private readyLock = false;
-    public audioFilters: AudioFilter | null = null;
+    public dsp = new FiltersChain();
 
     /**
      * Creates new connection object
@@ -78,6 +80,16 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
          * @type {VoiceChannel|StageChannel}
          */
         this.channel = channel;
+
+        this.dsp.onUpdate = () => {
+            if (!this.dsp) return;
+            if (this.dsp.filters?.filters) this.emit('dsp', this.dsp.filters?.filters);
+            if (this.dsp.biquad?.filter) this.emit('biquad', this.dsp.biquad?.filter);
+            if (this.dsp.equalizer) this.emit('eqBands', this.dsp.equalizer.getEQ());
+            if (this.dsp.volume) this.emit('volume', this.dsp.volume.volume);
+        };
+
+        this.dsp.onError = (e) => this.emit('error', e as AudioPlayerError);
 
         this.voiceConnection.on('stateChange', async (_, newState) => {
             if (newState.status === VoiceConnectionStatus.Disconnected) {
@@ -127,10 +139,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
                 if (!this.paused) {
                     void this.emit('finish', this.audioResource!);
-                    if (this.audioFilters) {
-                        this.audioFilters.destroy();
-                        this.audioFilters = null;
-                    }
+                    this.dsp.destroy();
                     this.audioResource = null;
                 }
             }
@@ -187,25 +196,29 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {AudioResource}
      */
     createStream(src: Readable | Duplex | string, ops?: CreateStreamOps) {
-        if (!ops?.disableFilters) {
-            this.audioFilters = new AudioFilter({
-                filters: ops?.defaultFilters,
-                biquad: ops?.biquadFilter
-                    ? {
-                          filter: ops.biquadFilter
+        const stream =
+            !ops?.disableFilters && typeof src !== 'string'
+                ? this.dsp.create(src, {
+                      dsp: {
+                          filters: ops?.defaultFilters,
+                          disabled: ops?.disableFilters
+                      },
+                      biquad: ops?.biquadFilter
+                          ? {
+                                filter: ops.biquadFilter,
+                                disabled: ops?.disableBiquad
+                            }
+                          : undefined,
+                      equalizer: {
+                          bandMultiplier: ops?.eq,
+                          disabled: ops?.disableEqualizer
+                      },
+                      volume: {
+                          volume: ops?.volume,
+                          disabled: ops?.disableVolume
                       }
-                    : undefined,
-                equalizer: ops?.eq
-            });
-            this.audioFilters.onUpdate = () => {
-                if (!this.audioFilters) return;
-                this.emit('audioFilters', this.audioFilters.filters);
-                this.emit('biquad', this.audioFilters.biquadConfig.filter);
-                this.emit('eqBands', this.audioFilters.getEQ());
-            };
-        }
-
-        const stream = this.audioFilters && typeof src !== 'string' ? src.pipe(this.audioFilters) : src;
+                  })
+                : src;
 
         this.audioResource = createAudioResource(stream, {
             inputType: ops?.type ?? StreamType.Arbitrary,
@@ -217,12 +230,16 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
         return this.audioResource;
     }
 
+    public get filters() {
+        return this.dsp?.filters;
+    }
+
     public get biquad() {
-        return this.audioFilters?.biquadConfig.biquad || null;
+        return this.dsp?.biquad || null;
     }
 
     public get equalizer() {
-        return this.audioFilters?.equalizer || null;
+        return this.dsp?.equalizer || null;
     }
 
     /**
@@ -305,8 +322,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {boolean}
      */
     setVolume(value: number) {
-        if (!this.audioFilters) return false;
-        return this.audioFilters.setVolume(value / 100);
+        if (!this.dsp.volume) return false;
+        return this.dsp.volume.setVolume(value);
     }
 
     /**
@@ -314,8 +331,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @type {number}
      */
     get volume() {
-        if (!this.audioFilters) return 100;
-        return this.audioFilters.volume;
+        if (!this.dsp.volume) return 100;
+        return this.dsp.volume.volume;
     }
 
     /**

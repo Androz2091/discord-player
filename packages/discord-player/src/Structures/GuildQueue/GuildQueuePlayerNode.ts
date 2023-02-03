@@ -120,7 +120,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
     public setVolume(vol: number) {
         if (!this.queue.dispatcher) return false;
-        return this.queue.dispatcher.setVolume(vol);
+        const res = this.queue.dispatcher.setVolume(vol);
+        if (res) this.queue.filters._lastFiltersCache.volume = vol;
+        return res;
     }
 
     public setBitrate(rate: number | 'auto') {
@@ -268,13 +270,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 biquadFilter: this.queue.filters._lastFiltersCache.biquad || undefined,
                 eq: this.queue.filters._lastFiltersCache.equalizer,
                 defaultFilters: this.queue.filters._lastFiltersCache.filters,
+                volume: this.queue.filters._lastFiltersCache.volume,
                 data: track,
                 type: StreamType.Raw
             });
-
-            if (typeof this.queue.options.volume === 'number' && resource.volume) {
-                resource.volume.setVolume(Math.pow(this.queue.options.volume / 100, 1.660964));
-            }
 
             this.queue.setTransitioning(!!options.transitionMode);
 

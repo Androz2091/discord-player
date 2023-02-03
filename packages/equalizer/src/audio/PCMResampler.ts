@@ -37,13 +37,12 @@ export class PCMResampler extends PCMTransformer {
             return cb();
         }
 
-        const { samples } = resamplePCM(chunk, {
+        const samples = resamplePCM(chunk, {
             bits: this.bits,
             readInt: this._readInt,
             writeInt: this._writeInt,
             sourceSampleRate: this.sampleRate,
-            targetSampleRate: this.targetSampleRate,
-            volume: 1
+            targetSampleRate: this.targetSampleRate
         });
 
         this.push(samples);

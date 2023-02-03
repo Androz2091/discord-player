@@ -1,7 +1,6 @@
 import { TransformCallback } from 'stream';
 import { PCMTransformer, PCMTransformerOptions } from '../utils';
-import { BiquadFilter, BiquadFilterUpdateData, BiquadFilters, Coefficients, Q_BUTTERWORTH } from '../biquad';
-import { AFBiquadConfig, AFPulsatorConfig, AFTremoloConfig, AFVibratoConfig, LR, applyPulsator, applyTremolo } from './transformers';
+import { AFPulsatorConfig, AFTremoloConfig, AFVibratoConfig, LR, applyEqualization, applyPulsator, applyTremolo, applyVibrato } from './transformers';
 import { Equalizer, EqualizerBand } from '../equalizer';
 import { resamplePCM } from './transformers/resampler';
 
@@ -18,68 +17,50 @@ export type PCMFilters = keyof typeof AudioFilters;
 
 export interface PCMFiltererOptions extends PCMTransformerOptions {
     filters?: PCMFilters[];
-    equalizer?: EqualizerBand[];
-    biquad?: BiquadFilterUpdateData;
-    volume?: number;
 }
 
 export const AF_NIGHTCORE_RATE = 1.3 as const;
 export const AF_VAPORWAVE_RATE = 0.8 as const;
 
+export const BASS_EQ_BANDS: EqualizerBand[] = Array.from({ length: 3 }, (_, i) => ({
+    band: i,
+    gain: 0.25
+}));
+
 // based on lavadsp
 export class AudioFilter extends PCMTransformer {
     public filters: PCMFilters[] = [];
-    public equalizer = new Equalizer(2, []);
-    private _volume = 100;
+    public bassEQ = new Equalizer(
+        2,
+        BASS_EQ_BANDS.map((m) => m.gain)
+    );
     public targetSampleRate = this.sampleRate;
     public totalSamples = 0;
-    private _seekPos = 0;
     private _processedSamples = 0;
+
     public pulsatorConfig: AFPulsatorConfig = {
         hz: 0.02,
         x: 0,
         dI: 0.000003926990816987241
     };
+
     public tremoloConfig: AFTremoloConfig = {
         phase: 0,
         depth: 0.5,
         frequency: 5.0
     };
+
     public vibratoConfig: AFVibratoConfig = {
         phase: 0,
         depth: 0.5,
         frequency: 5.0
     };
-    public biquadConfig: Omit<AFBiquadConfig, 'sample'> = {
-        biquad: null as unknown as BiquadFilter,
-        cutoff: 80,
-        gain: 0,
-        filter: null as unknown as BiquadFilters,
-        coefficient: null as unknown as Coefficients,
-        Q: Q_BUTTERWORTH
-    };
 
     public constructor(options?: PCMFiltererOptions) {
         super(options);
 
-        if (options) {
-            if (typeof options.volume === 'number' && Number.isSafeInteger(options.volume)) {
-                this.setVolume(options.volume);
-            }
-            if (Array.isArray(options.filters)) {
-                this.setFilters(options.filters);
-            }
-            if (Array.isArray(options.equalizer)) {
-                options.equalizer.forEach((eq) => {
-                    this.equalizer.setGain(eq.band, eq.gain);
-                });
-            }
-            Object.assign(this.biquadConfig, options.biquad);
-            if (options.biquad?.filter) {
-                const { Q, cutoff, gain } = this.biquadConfig;
-                const coefficients = Coefficients.from(options.biquad.filter, this.targetSampleRate, cutoff, Q, gain);
-                this.biquadConfig.biquad = new BiquadFilter(coefficients);
-            }
+        if (options && Array.isArray(options.filters)) {
+            this.setFilters(options.filters);
         }
 
         this.onUpdate?.();
@@ -88,21 +69,6 @@ export class AudioFilter extends PCMTransformer {
     public setTargetSampleRate(rate: number) {
         this.targetSampleRate = rate || this.sampleRate;
         return;
-    }
-
-    public setBiquad(update: Partial<BiquadFilterUpdateData>) {
-        if (typeof update.Q === 'number') this.biquadConfig.Q = update.Q;
-        if (typeof update.cutoff === 'number') this.biquadConfig.cutoff = update.cutoff;
-        if (typeof update.filter === 'number') this.biquadConfig.filter = update.filter;
-        if (typeof update.gain === 'number') this.biquadConfig.gain = update.gain;
-
-        if (this.biquadConfig.biquad && typeof this.biquadConfig.filter === 'number') {
-            const { filter, Q, cutoff, gain } = this.biquadConfig;
-            this.biquadConfig.coefficient = Coefficients.from(filter, this.targetSampleRate, cutoff, Q, gain);
-            this.biquadConfig.biquad.update(this.biquadConfig.coefficient);
-        }
-
-        this.onUpdate?.();
     }
 
     public setPulsator(hz: number) {
@@ -138,45 +104,26 @@ export class AudioFilter extends PCMTransformer {
         return this.tremoloConfig;
     }
 
-    public get volume() {
-        if (typeof this._volume !== 'number' || Number.isNaN(this._volume)) return 100;
-        return this._volume * 100;
-    }
-
-    public setVolume(volume: number) {
-        if (typeof volume !== 'number' || Number.isNaN(volume) || !Number.isFinite(volume)) return false;
-        if (volume < 0) volume = 0;
-
-        this._volume = volume / 100;
-
-        this.onUpdate?.();
-
-        return true;
-    }
-
     public setFilters(filters: PCMFilters[]) {
         if (!Array.isArray(filters) || !filters.every((r) => r in AudioFilters)) {
             return false;
         }
 
         if (filters.some((f) => f === 'Vaporwave')) {
-            this.pause();
             this.setTargetSampleRate(this.sampleRate * AF_VAPORWAVE_RATE);
         }
 
         if (filters.some((f) => f === 'Nightcore')) {
-            this.pause();
             this.setTargetSampleRate(this.sampleRate * AF_NIGHTCORE_RATE);
         }
 
         if (!filters.includes('Vaporwave') && !filters.includes('Nightcore')) {
-            this.pause();
             this.setTargetSampleRate(this.sampleRate);
         }
 
-        this.filters = filters;
+        this.bassEQ.bandMultipliers = filters.includes('BassBoost') ? BASS_EQ_BANDS.map((m) => m.gain) : [];
 
-        if (this.isPaused()) this.resume();
+        this.filters = filters;
 
         this.onUpdate?.();
 
@@ -186,8 +133,8 @@ export class AudioFilter extends PCMTransformer {
     // TODO
     public seek(duration: number) {
         // determines the sample to seek to
-        this._seekPos = (duration / 1000) * this.targetSampleRate;
-
+        // this._seekPos = (duration / 1000) * this.targetSampleRate;
+        void duration;
         throw new Error('Not Implemented');
 
         // this method has not been implemented as of right now
@@ -196,37 +143,40 @@ export class AudioFilter extends PCMTransformer {
     }
 
     public _transform(_chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {
-        const { samples, applied } = resamplePCM(_chunk, {
+        const chunk = resamplePCM(_chunk, {
             bits: this.bits,
             readInt: (c, i) => this._readInt(c, i),
             writeInt: (c, d, i) => this._writeInt(c, d, i),
-            volume: this.volume,
             sourceSampleRate: this.sampleRate,
             targetSampleRate: this.targetSampleRate
         });
 
         this._processedSamples++;
-        this.totalSamples += samples.length / this.bits;
+        this.totalSamples += chunk.length / this.bits;
 
         if (this.disabled || !this.filters.length) {
-            return callback(null, samples);
+            return callback(null, chunk);
         }
 
-        const len = Math.floor(samples.length / 2) * 2;
+        const len = Math.floor(chunk.length / 2) * 2;
         const { bytes } = this;
 
         // left-right channel
         let L = false;
 
         for (let i = 0; i < len; i += bytes) {
-            const int = this._readInt(samples, i);
+            const int = this._readInt(chunk, i);
             const value = this.applyFilters(int, +(L = !L) as LR);
-            this._writeInt(samples, this.clamp(!applied ? value : value * this._volume), i);
+            this._writeInt(chunk, this.clamp(value), i);
         }
 
-        this.push(samples);
+        this.push(chunk);
 
         return callback();
+    }
+
+    public get currentSampleRate() {
+        return this.targetSampleRate || this.sampleRate;
     }
 
     public get estimatedDuration() {
@@ -240,47 +190,26 @@ export class AudioFilter extends PCMTransformer {
     }
 
     public applyFilters(byte: number, channel: LR) {
-        if (!this.filters.length) return this.biquadConfig.biquad ? this.biquadConfig.biquad.run(byte) : byte;
+        if (this.filters.length) {
+            for (const filter of this.filters) {
+                if (filter === 'BassBoost' && this.bassEQ) {
+                    byte = applyEqualization(this.bassEQ, byte);
+                }
 
-        for (const filter of this.filters) {
-            if (filter === '8D') {
-                byte = applyPulsator(this.pulsatorConfig, byte, channel);
-            }
-            if (filter === 'Tremolo') {
-                byte = applyTremolo(this.tremoloConfig, byte, this.targetSampleRate);
+                if (filter === '8D') {
+                    byte = applyPulsator(this.pulsatorConfig, byte, channel);
+                }
+
+                if (filter === 'Tremolo') {
+                    byte = applyTremolo(this.tremoloConfig, byte, this.currentSampleRate);
+                }
+
+                if (filter === 'Vibrato') {
+                    byte = applyVibrato(this.vibratoConfig, byte, this.currentSampleRate);
+                }
             }
         }
 
-        return this.biquadConfig.biquad ? this.biquadConfig.biquad.run(byte) : byte;
-    }
-
-    public getEQ() {
-        return this.equalizer.bandMultipliers.map((m, i) => ({
-            band: i,
-            gain: m
-        })) as EqualizerBand[];
-    }
-
-    public setEQ(bands: EqualizerBand[]) {
-        for (const band of bands) {
-            if (band.band > Equalizer.BAND_COUNT - 1 || band.band < 0) throw new RangeError(`Band value out of range. Expected >0 & <${Equalizer.BAND_COUNT - 1}, received "${band.band}"`);
-            this.equalizer.setGain(band.band, band.gain);
-        }
-
-        this.onUpdate?.();
-    }
-
-    public resetEQ() {
-        this.setEQ(
-            Array.from(
-                {
-                    length: Equalizer.BAND_COUNT
-                },
-                (_, i) => ({
-                    band: i,
-                    gain: 0
-                })
-            )
-        );
+        return byte;
     }
 }

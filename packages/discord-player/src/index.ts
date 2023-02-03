@@ -1,5 +1,3 @@
-// try applying smooth volume patch on load
-import './smoothVolume';
 import { version as djsVersion } from 'discord.js';
 
 export * from './utils/AudioFilters';
@@ -13,12 +11,22 @@ export * from './Structures/Queue';
 export * from './Structures/Track';
 export * from './VoiceInterface/VoiceUtils';
 export * from './VoiceInterface/StreamDispatcher';
-export * from './VoiceInterface/VolumeTransformer';
 export * from './utils/Util';
 export * from './types/types';
 export * from './utils/FFmpegStream';
 export * from './Structures/GuildQueue';
-export { AudioFilters as PCMAudioFilters, BiquadFilters, FilterType as BiquadFilterType, PCMFilters, Q_BUTTERWORTH } from '@discord-player/equalizer';
+export {
+    AudioFilters as PCMAudioFilters,
+    BiquadFilters,
+    FilterType as BiquadFilterType,
+    PCMFilters,
+    Q_BUTTERWORTH,
+    VolumeTransformer,
+    BASS_EQ_BANDS,
+    AF_NIGHTCORE_RATE,
+    AF_VAPORWAVE_RATE,
+    FiltersChain
+} from '@discord-player/equalizer';
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
 export const version: string = '[VI]{{inject}}[/VI]';

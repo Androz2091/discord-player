@@ -8,7 +8,6 @@ import { Util } from '../utils/Util';
 import AudioFilters from '../utils/AudioFilters';
 import { PlayerError, ErrorStatusCode } from './PlayerError';
 import type { Readable } from 'stream';
-import { VolumeTransformer } from '../VoiceInterface/VolumeTransformer';
 import { createFFmpegStream } from '../utils/FFmpegStream';
 import os from 'os';
 import { parentPort } from 'worker_threads';
@@ -143,192 +142,18 @@ class Queue<T = unknown> {
     }
 
     /**
-     * Whether or not the PCM filterer is available
-     */
-    public isFiltersAvailable() {
-        return this.connection.audioFilters != null;
-    }
-
-    /**
      * The PCM filterer
      */
     public get filters() {
-        return this.connection.audioFilters;
+        return this.connection.filters;
     }
 
-    /**
-     * Check if biquad filter is available
-     */
-    public isBiquadEnabled() {
-        return this.connection.biquad != null;
+    public get equalizer() {
+        return this.connection.equalizer;
     }
 
-    /**
-     * Check if the equalizer is turned off
-     */
-    public isBiquadOff() {
-        return this.isBiquadEnabled() && !this.connection.audioFilters?.biquadConfig.filter;
-    }
-
-    /**
-     * Toggles biquad on/off
-     */
-    public toggleBiquad() {
-        const eq = this.connection.audioFilters;
-        if (!eq) return false;
-        eq.toggle();
-        return !eq.disabled;
-    }
-
-    /**
-     * Enables biquad
-     */
-    public enableBiquad() {
-        const eq = this.connection.audioFilters;
-        if (!eq) return false;
-        eq.enable();
-        return !eq.disabled;
-    }
-
-    /**
-     * Disables biquad
-     */
-    public disableBiquad() {
-        const eq = this.connection.audioFilters;
-        if (!eq) return false;
-        eq.disable();
-        return eq.disabled;
-    }
-
-    /**
-     * Biquad filter setter
-     */
-    public setBiquadFilter(filter: BiquadFilters) {
-        if (!this.connection.audioFilters) return;
-        this.connection.audioFilters.setBiquad({ filter });
-        this._lastBiquadFilter = filter;
-    }
-
-    /**
-     * Returns current biquad filter
-     */
-    public getBiquadFilter() {
-        return this.connection.audioFilters?.biquadConfig.filter;
-    }
-
-    /**
-     * Set biquad filter gain value
-     * @param gain The gain to set
-     */
-    public setBiquadGain(gain: number) {
-        return this.connection.audioFilters?.setBiquad({ gain });
-    }
-
-    /**
-     * Set biquad cutoff frequency value
-     * @param val The value to set
-     */
-    public setBiquadCutoff(val: number) {
-        return this.connection.audioFilters?.setBiquad({ cutoff: val });
-    }
-
-    /**
-     * Set biquad Q value
-     * @param val The value to set
-     */
-    public setBiquadQ(val: number) {
-        return this.connection.audioFilters?.setBiquad({ Q: val });
-    }
-
-    /**
-     * Set equalizer bands
-     * @param bands Equalizer band multiplier array
-     */
-    public setEqualizer(bands?: EqualizerBand[]) {
-        if (!this.connection.audioFilters) return false;
-
-        if (!Array.isArray(bands) || !bands.length) {
-            this.connection.audioFilters.resetEQ();
-            this._lastEQBands = this.getEqualizer();
-        } else {
-            this.connection.audioFilters.setEQ(bands);
-            this._lastEQBands = this.getEqualizer();
-        }
-
-        return true;
-    }
-
-    /**
-     * Set particular equalizer band multiplier
-     * @param band The band to update
-     * @param gain The gain
-     */
-    public setEqualizerBand(band: number, gain: number) {
-        if (!this.connection.equalizer) return null;
-        this.connection.equalizer.setGain(band, gain);
-        this._lastEQBands = this.getEqualizer();
-        return true;
-    }
-
-    /**
-     * Returns gain value of specific equalizer band
-     * @param band The band to get value of
-     */
-    public getEqualizerBand(band: number) {
-        if (!this.connection.equalizer) return null;
-        return this.connection.equalizer.getGain(band);
-    }
-
-    /**
-     * Returns entire equalizer bands
-     */
-    public getEqualizer() {
-        if (!this.connection.audioFilters) return [];
-        return this.connection.audioFilters.getEQ();
-    }
-
-    /**
-     * Check if equalizer is enabled
-     */
-    public isEqualizerEnabled() {
-        return this.connection.equalizer != null;
-    }
-
-    /**
-     * Check if the equalizer is turned off
-     */
-    public isEqualizerOff() {
-        return this.isEqualizerEnabled() && !this.connection.audioFilters?.equalizer;
-    }
-
-    /**
-     * Toggles equalizer on/off
-     */
-    public toggleEqualizer() {
-        const eq = this.connection.audioFilters;
-        if (!eq) return false;
-        eq.toggle();
-        return !eq.disabled;
-    }
-
-    /**
-     * Enables equalizer
-     */
-    public enableEqualizer() {
-        const eq = this.connection.audioFilters;
-        if (!eq) return false;
-        eq.enable();
-        return !eq.disabled;
-    }
-
-    /**
-     * Disables equalizer
-     */
-    public disableEqualizer() {
-        const eq = this.connection.audioFilters;
-        if (!eq) return false;
-        eq.disable();
-        return eq.disabled;
+    public get biquad() {
+        return this.connection.biquad;
     }
 
     /**
@@ -390,8 +215,20 @@ class Queue<T = unknown> {
             });
         }
 
-        this.connection.on('audioFilters', (filters) => {
+        this.connection.on('dsp', (filters) => {
             this._lastAudioFilters = filters;
+        });
+
+        this.connection.on('eqBands', (filters) => {
+            this._lastEQBands = filters;
+        });
+
+        this.connection.on('biquad', (filters) => {
+            this._lastBiquadFilter = filters;
+        });
+
+        this.connection.on('volume', (vol) => {
+            this.options.initialVolume = vol;
         });
 
         this.connection.on('error', (err) => {
@@ -976,17 +813,12 @@ class Queue<T = unknown> {
             disableBiquad: Boolean(this.options.disableBiquad),
             biquadFilter: this._lastBiquadFilter,
             defaultFilters: this._lastAudioFilters,
-            disableFilters: Boolean(this.options.disableFilters)
+            disableFilters: Boolean(this.options.disableFilters),
+            volume: this.options.initialVolume
         });
 
         if (options.seek) this._streamTime = options.seek;
         this._filtersUpdate = options.filtersUpdate!;
-
-        const volumeTransformer = resource.volume as VolumeTransformer;
-        if (volumeTransformer && typeof this.options.initialVolume === 'number') volumeTransformer.setVolume(Math.pow(this.options.initialVolume / 100, 1.660964));
-        if (volumeTransformer?.hasSmoothness && typeof this.options.volumeSmoothness === 'number') {
-            if (typeof volumeTransformer.setSmoothness === 'function') volumeTransformer.setSmoothness(this.options.volumeSmoothness || 0);
-        }
 
         setTimeout(() => {
             this.connection.playStream(resource);

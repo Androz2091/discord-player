@@ -2,19 +2,14 @@ export interface AFResampleConfig {
     sourceSampleRate: number;
     targetSampleRate: number;
     bits: number;
-    volume: number;
     readInt: (c: Buffer, idx: number) => number;
     writeInt: (c: Buffer, int: number, idx: number) => unknown;
 }
 
 export function resamplePCM(chunk: Buffer, config: AFResampleConfig) {
-    const { bits, readInt, sourceSampleRate, targetSampleRate, writeInt, volume } = config;
+    const { bits, readInt, sourceSampleRate, targetSampleRate, writeInt } = config;
 
-    if (sourceSampleRate === targetSampleRate)
-        return {
-            samples: chunk,
-            applied: true
-        };
+    if (sourceSampleRate === targetSampleRate) return chunk;
 
     const extremum = 2 ** (bits - 1),
         bytes = bits / 8;
@@ -30,7 +25,7 @@ export function resamplePCM(chunk: Buffer, config: AFResampleConfig) {
         const resamplePoint = (sourceSampleRate * j) / targetSampleRate;
         for (let k = -bits; k <= bits; k++) {
             if (i + k >= 0 && i + k < chunkLength) {
-                const sample = readInt(chunk, 2 * (i + k)) * volume;
+                const sample = readInt(chunk, 2 * (i + k));
                 const x = k - resamplePoint + i;
                 sum += sample * (x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x));
             }
@@ -42,8 +37,5 @@ export function resamplePCM(chunk: Buffer, config: AFResampleConfig) {
         i = Math.floor(resamplePoint);
     }
 
-    return {
-        samples: resampledData,
-        applied: true
-    };
+    return resampledData;
 }

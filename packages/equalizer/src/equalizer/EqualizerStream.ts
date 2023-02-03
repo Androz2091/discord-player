@@ -2,7 +2,7 @@ import { TransformCallback } from 'stream';
 import { PCMTransformer, PCMTransformerOptions } from '../utils';
 import { Equalizer } from './Equalizer';
 
-interface EqualizerStreamOptions extends PCMTransformerOptions {
+export interface EqualizerStreamOptions extends PCMTransformerOptions {
     bandMultiplier?: EqualizerBand[];
     channels?: number;
 }

@@ -73,6 +73,7 @@ export interface GuildQueueAFiltersCache {
     equalizer: EqualizerBand[];
     biquad: BiquadFilters | null;
     filters: PCMFilters[];
+    volume: number;
 }
 
 export class GuildQueueAudioFilters<Meta = unknown> {
@@ -81,12 +82,17 @@ export class GuildQueueAudioFilters<Meta = unknown> {
     public _lastFiltersCache: GuildQueueAFiltersCache = {
         biquad: null,
         equalizer: [],
-        filters: []
+        filters: [],
+        volume: 100
     };
-    public constructor(public queue: GuildQueue<Meta>) {}
+    public constructor(public queue: GuildQueue<Meta>) {
+        if (typeof this.queue.options.volume === 'number') {
+            this._lastFiltersCache.volume = this.queue.options.volume;
+        }
+    }
 
     public get volume() {
-        return this.queue.dispatcher?.audioResource?.volume || null;
+        return this.queue.dispatcher?.dsp?.volume || null;
     }
 
     public get equalizer() {
@@ -98,7 +104,7 @@ export class GuildQueueAudioFilters<Meta = unknown> {
     }
 
     public get filters() {
-        return this.queue.dispatcher?.audioFilters || null;
+        return this.queue.dispatcher?.filters || null;
     }
 
     public async triggerReplay(seek = 0) {
@@ -150,7 +156,7 @@ export class AFilterGraph<Meta = unknown> {
             equalizer: this.equalizer,
             biquad: this.biquad,
             filters: this.filters,
-            volume: this.volume ? Math.round(Math.pow(this.volume.volume, 1 / 1.660964) * 100) : 100
+            volume: this.volume?.volume ?? 100
         };
     }
 }

@@ -306,7 +306,7 @@ export class GuildQueue<Meta = unknown> {
         dispatcher.on('debug', (m) => this.player.events.emit('debug', this, m));
         dispatcher.on('finish', (r) => this.#performFinish(r));
         dispatcher.on('start', (r) => this.#performStart(r));
-        dispatcher.on('audioFilters', (f) => {
+        dispatcher.on('dsp', (f) => {
             this.filters._lastFiltersCache.filters = f;
         });
         dispatcher.on('biquad', (f) => {
@@ -314,6 +314,9 @@ export class GuildQueue<Meta = unknown> {
         });
         dispatcher.on('eqBands', (f) => {
             this.filters._lastFiltersCache.equalizer = f;
+        });
+        dispatcher.on('volume', (f) => {
+            this.filters._lastFiltersCache.volume = f;
         });
     }
 
