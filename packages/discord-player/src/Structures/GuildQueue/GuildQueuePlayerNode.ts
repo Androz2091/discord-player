@@ -267,6 +267,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 disableEqualizer: this.queue.options.equalizer === false,
                 disableVolume: this.queue.options.volume === false,
                 disableFilters: this.queue.options.filterer === false,
+                disableResampler: this.queue.options.resampler === false,
+                sampleRate: typeof this.queue.options.resampler === 'number' && this.queue.options.resampler > 0 ? this.queue.options.resampler : undefined,
                 biquadFilter: this.queue.filters._lastFiltersCache.biquad || undefined,
                 eq: this.queue.filters._lastFiltersCache.equalizer,
                 defaultFilters: this.queue.filters._lastFiltersCache.filters,

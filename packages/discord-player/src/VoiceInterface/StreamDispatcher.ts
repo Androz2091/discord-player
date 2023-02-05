@@ -31,6 +31,8 @@ interface CreateStreamOps {
     disableFilters?: boolean;
     defaultFilters?: PCMFilters[];
     volume?: number;
+    disableResampler?: boolean;
+    sampleRate?: number;
 }
 
 export interface VoiceEvents {
@@ -41,6 +43,7 @@ export interface VoiceEvents {
     finish: (resource: AudioResource<Track>) => any;
     dsp: (filters: PCMFilters[]) => any;
     eqBands: (filters: EqualizerBand[]) => any;
+    sampleRate: (filters: number) => any;
     biquad: (filters: BiquadFilters) => any;
     volume: (volume: number) => any;
     /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -87,6 +90,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             if (this.dsp.biquad?.filter) this.emit('biquad', this.dsp.biquad?.filter);
             if (this.dsp.equalizer) this.emit('eqBands', this.dsp.equalizer.getEQ());
             if (this.dsp.volume) this.emit('volume', this.dsp.volume.volume);
+            if (this.dsp.resampler) this.emit('sampleRate', this.dsp.resampler.targetSampleRate);
         };
 
         this.dsp.onError = (e) => this.emit('error', e as AudioPlayerError);
@@ -209,6 +213,10 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                                 disabled: ops?.disableBiquad
                             }
                           : undefined,
+                      resampler: {
+                          targetSampleRate: ops?.sampleRate,
+                          disabled: ops?.disableResampler
+                      },
                       equalizer: {
                           bandMultiplier: ops?.eq,
                           disabled: ops?.disableEqualizer
@@ -228,6 +236,10 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
         });
 
         return this.audioResource;
+    }
+
+    public get resampler() {
+        return this.dsp?.resampler;
     }
 
     public get filters() {

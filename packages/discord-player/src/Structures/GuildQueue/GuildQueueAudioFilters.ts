@@ -74,6 +74,7 @@ export interface GuildQueueAFiltersCache {
     biquad: BiquadFilters | null;
     filters: PCMFilters[];
     volume: number;
+    sampleRate: number;
 }
 
 export class GuildQueueAudioFilters<Meta = unknown> {
@@ -83,7 +84,8 @@ export class GuildQueueAudioFilters<Meta = unknown> {
         biquad: null,
         equalizer: [],
         filters: [],
-        volume: 100
+        volume: 100,
+        sampleRate: -1
     };
     public constructor(public queue: GuildQueue<Meta>) {
         if (typeof this.queue.options.volume === 'number') {
@@ -105,6 +107,10 @@ export class GuildQueueAudioFilters<Meta = unknown> {
 
     public get filters() {
         return this.queue.dispatcher?.filters || null;
+    }
+
+    public get resampler() {
+        return this.queue.dispatcher?.resampler || null;
     }
 
     public async triggerReplay(seek = 0) {
@@ -150,12 +156,17 @@ export class AFilterGraph<Meta = unknown> {
         return this.af.volume;
     }
 
+    public get resampler() {
+        return this.af.resampler;
+    }
+
     public dump(): FilterGraph {
         return {
             ffmpeg: this.ffmpeg,
             equalizer: this.equalizer,
             biquad: this.biquad,
             filters: this.filters,
+            sampleRate: this.resampler?.targetSampleRate || this.resampler?.sampleRate || 48000,
             volume: this.volume?.volume ?? 100
         };
     }
@@ -167,4 +178,5 @@ export interface FilterGraph {
     biquad: Exclude<BiquadFilters, number> | null;
     filters: PCMFilters[];
     volume: number;
+    sampleRate: number;
 }

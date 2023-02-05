@@ -11,6 +11,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
     equalizer?: EqualizerBand[] | boolean;
     a_filter?: PCMFilters[] | boolean;
     biquad?: BiquadFilters | boolean;
+    resampler?: number | boolean;
     disableHistory?: boolean;
     skipOnNoStream?: boolean;
     onBeforeCreateStream?: OnBeforeCreateStreamHandler;
@@ -30,14 +31,14 @@ export class GuildNodeManager<Meta = unknown> {
     public cache = new Collection<string, GuildQueue>();
     public constructor(public player: Player) {}
 
-    public create<T = Meta>(guild: GuildResolvable, options: GuildNodeCreateOptions<T> = {}) {
+    public create<T = Meta>(guild: GuildResolvable, options: GuildNodeCreateOptions<T> = {}): GuildQueue<T> {
         const server = this.player.client.guilds.resolve(guild);
         if (!server) {
             throw new Error('Invalid or unknown guild');
         }
 
         if (this.cache.has(server.id)) {
-            return this.cache.get(server.id)!;
+            return this.cache.get(server.id) as GuildQueue<T>;
         }
 
         options.strategy ??= 'FIFO';
@@ -52,6 +53,7 @@ export class GuildNodeManager<Meta = unknown> {
         options.leaveOnEndCooldown ??= 0;
         options.leaveOnStop ??= true;
         options.leaveOnStopCooldown ??= 0;
+        options.resampler ??= 48000;
 
         const queue = new GuildQueue<T>(this.player, {
             guild: server,
@@ -60,6 +62,7 @@ export class GuildNodeManager<Meta = unknown> {
             equalizer: options.equalizer,
             filterer: options.a_filter,
             biquad: options.biquad,
+            resampler: options.resampler,
             disableHistory: options.disableHistory,
             skipOnNoStream: options.skipOnNoStream,
             onBeforeCreateStream: options.onBeforeCreateStream,

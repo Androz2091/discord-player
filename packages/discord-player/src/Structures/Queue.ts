@@ -814,7 +814,8 @@ class Queue<T = unknown> {
             biquadFilter: this._lastBiquadFilter,
             defaultFilters: this._lastAudioFilters,
             disableFilters: Boolean(this.options.disableFilters),
-            volume: this.options.initialVolume
+            volume: this.options.initialVolume,
+            disableResampler: false
         });
 
         if (options.seek) this._streamTime = options.seek;

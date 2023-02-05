@@ -2,14 +2,11 @@ import { TransformCallback } from 'stream';
 import { PCMTransformer, PCMTransformerOptions } from '../utils';
 import { AFPulsatorConfig, AFTremoloConfig, AFVibratoConfig, LR, applyEqualization, applyPulsator, applyTremolo, applyVibrato } from './transformers';
 import { Equalizer, EqualizerBand } from '../equalizer';
-import { resamplePCM } from './transformers/resampler';
 
 export const AudioFilters = {
     '8D': '8D',
     Tremolo: 'Tremolo',
     Vibrato: 'Vibrato',
-    Nightcore: 'Nightcore',
-    Vaporwave: 'Vaporwave',
     BassBoost: 'BassBoost'
 } as const;
 
@@ -109,18 +106,6 @@ export class AudioFilter extends PCMTransformer {
             return false;
         }
 
-        if (filters.some((f) => f === 'Vaporwave')) {
-            this.setTargetSampleRate(this.sampleRate * AF_VAPORWAVE_RATE);
-        }
-
-        if (filters.some((f) => f === 'Nightcore')) {
-            this.setTargetSampleRate(this.sampleRate * AF_NIGHTCORE_RATE);
-        }
-
-        if (!filters.includes('Vaporwave') && !filters.includes('Nightcore')) {
-            this.setTargetSampleRate(this.sampleRate);
-        }
-
         this.bassEQ.bandMultipliers = filters.includes('BassBoost') ? BASS_EQ_BANDS.map((m) => m.gain) : [];
 
         this.filters = filters;
@@ -142,15 +127,7 @@ export class AudioFilter extends PCMTransformer {
         // we would have to buffer the entire stream in order to implement backwards seek
     }
 
-    public _transform(_chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {
-        const chunk = resamplePCM(_chunk, {
-            bits: this.bits,
-            readInt: (c, i) => this._readInt(c, i),
-            writeInt: (c, d, i) => this._writeInt(c, d, i),
-            sourceSampleRate: this.sampleRate,
-            targetSampleRate: this.targetSampleRate
-        });
-
+    public _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {
         this._processedSamples++;
         this.totalSamples += chunk.length / this.bits;
 

@@ -404,12 +404,12 @@ export type QueryExtractorSearch = `ext:${string}`;
  * @typedef {object} SearchOptions
  * @property {UserResolvable} requestedBy The user who requested this search
  * @property {typeof QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
- * @property {boolean} [blockExtractor=false] If it should block custom extractors
+ * @property {boolean} [blockExtractors[]] List of the extractors to block
  */
 export interface SearchOptions {
     requestedBy?: UserResolvable;
     searchEngine?: SearchQueryType | QueryExtractorSearch;
-    blockExtractor?: boolean;
+    blockExtractors?: string[];
 }
 
 /**
@@ -522,6 +522,7 @@ export interface PlaylistJSON {
  * @property {boolean} [smoothVolume=true] Toggle smooth volume transition
  * @property {boolean} [lagMonitor=30000] Time in ms to re-monitor event loop lag
  * @property {boolean} [lockVoiceStateHandler] Prevent voice state handler from being overridden
+ * @property {string[]} [blockExtractors] List of extractors to block
  */
 export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
@@ -530,4 +531,5 @@ export interface PlayerInitOptions {
     smoothVolume?: boolean;
     lagMonitor?: number;
     lockVoiceStateHandler?: boolean;
+    blockExtractors?: string[];
 }

@@ -21,6 +21,7 @@ export interface GuildNodeInit<Meta = unknown> {
     equalizer: EqualizerBand[] | boolean;
     volume: number | boolean;
     biquad: BiquadFilters | boolean | undefined;
+    resampler: number | boolean;
     filterer: PCMFilters[] | boolean;
     disableHistory: boolean;
     skipOnNoStream: boolean;
@@ -150,6 +151,9 @@ export class GuildQueue<Meta = unknown> {
         }
         if (Array.isArray(this.options.filterer)) {
             this.filters._lastFiltersCache.filters = this.options.filterer;
+        }
+        if (typeof this.options.resampler === 'number') {
+            this.filters._lastFiltersCache.sampleRate = this.options.resampler;
         }
         this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
     }

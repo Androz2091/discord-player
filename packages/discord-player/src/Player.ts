@@ -21,6 +21,7 @@ class Player extends EventEmitter<PlayerEvents> {
     public readonly options: PlayerInitOptions = {
         autoRegisterExtractor: true,
         lockVoiceStateHandler: false,
+        blockExtractors: [],
         ytdlOptions: {
             highWaterMark: 1 << 25
         },
@@ -374,7 +375,7 @@ class Player extends EventEmitter<PlayerEvents> {
      */
     public async play<T = unknown>(
         channel: GuildVoiceChannelResolvable,
-        query: string | Track,
+        query: string | Track | SearchResult,
         options: SearchOptions & {
             nodeOptions?: GuildNodeCreateOptions<T>;
             connectionOptions?: VoiceConnectConfig;
@@ -383,7 +384,7 @@ class Player extends EventEmitter<PlayerEvents> {
         const vc = this.client.channels.resolve(channel);
         if (!vc?.isVoiceBased()) throw new Error('Expected a voice channel');
 
-        const result = await this.search(query, options);
+        const result = query instanceof SearchResult ? query : await this.search(query, options);
         if (!result.isEmpty()) {
             throw new Error(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
         }
@@ -397,6 +398,13 @@ class Player extends EventEmitter<PlayerEvents> {
             queue.addTrack(result.playlist!);
             await queue.node.play();
         }
+
+        return {
+            track: result.tracks[0],
+            extractor: result.extractor,
+            searchResult: result,
+            queue
+        };
     }
 
     /**
@@ -412,6 +420,7 @@ class Player extends EventEmitter<PlayerEvents> {
      */
     async search(query: string | Track, options: SearchOptions = {}): Promise<SearchResult> {
         if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
+        options.blockExtractors ??= this.options.blockExtractors;
         if (query instanceof Track)
             return new SearchResult(this, {
                 playlist: query.playlist || null,
@@ -436,7 +445,13 @@ class Player extends EventEmitter<PlayerEvents> {
 
         // query all extractors
         if (!extractor) {
-            extractor = (await this.extractors.run((ext) => ext.validate(query, queryType as SearchQueryType)))?.extractor || null;
+            extractor =
+                (
+                    await this.extractors.run(async (ext) => {
+                        if (options.blockExtractors?.includes(ext.identifier)) return false;
+                        return ext.validate(query, queryType as SearchQueryType);
+                    })
+                )?.extractor || null;
         }
 
         // no extractors available
@@ -492,7 +507,7 @@ class Player extends EventEmitter<PlayerEvents> {
                 return m.identifier;
             })
             .join('\n');
-        return `${depsReport}\n${line}\nLoaded Extractors:\n${extractorReport || 'None'}`;
+        return `${depsReport}\nLoaded Extractors:\n${extractorReport || 'None'}\n${line}`;
     }
 
     emit<U extends keyof PlayerEvents>(eventName: U, ...args: Parameters<PlayerEvents[U]>): boolean {

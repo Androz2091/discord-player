@@ -30,6 +30,7 @@ export class PCMResampler extends PCMTransformer {
         return true;
     }
 
+    // TODO: enable this
     _transform(chunk: Buffer, _: BufferEncoding, cb: TransformCallback): void {
         // act like pass-through if this transformer is disabled or source sample rate is equal to target sample rate
         if (this.disabled || this.sampleRate === this.targetSampleRate) {
@@ -37,15 +38,17 @@ export class PCMResampler extends PCMTransformer {
             return cb();
         }
 
-        const samples = resamplePCM(chunk, {
-            bits: this.bits,
-            readInt: this._readInt,
-            writeInt: this._writeInt,
-            sourceSampleRate: this.sampleRate,
-            targetSampleRate: this.targetSampleRate
-        });
+        // const samples = resamplePCM(chunk, {
+        //     bits: this.bits,
+        //     readInt: this._readInt.bind(this),
+        //     writeInt: this._writeInt.bind(this),
+        //     sourceSampleRate: this.sampleRate,
+        //     targetSampleRate: this.targetSampleRate
+        // });
 
-        this.push(samples);
+        // this.push(samples);
+
+        this.push(chunk);
         cb();
     }
 }

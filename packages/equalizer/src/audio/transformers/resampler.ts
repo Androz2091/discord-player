@@ -6,7 +6,6 @@ export interface AFResampleConfig {
     writeInt: (c: Buffer, int: number, idx: number) => unknown;
 }
 
-// resample with linear interpolation
 export function resamplePCM(chunk: Buffer, config: AFResampleConfig) {
     const { bits, readInt, sourceSampleRate, targetSampleRate, writeInt } = config;
 
