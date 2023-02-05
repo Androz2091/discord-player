@@ -9,17 +9,19 @@ new AFilterGraph(af)
 
 ## Properties
 ### public  af: GuildQueueAudioFilters\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L121)
-### public  biquad: null \| 'SinglePoleLowPassApprox' \| 'SinglePoleLowPass' \| 'LowPass' \| 'HighPass' \| 'BandPass' \| 'Notch' \| 'AllPass' \| 'LowShelf' \| 'HighShelf' \| 'PeakingEQ'
+- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L133)
+### public  biquad: null
 
 ### public  equalizer: Array\<EqualizerBand>
 
 ### public  ffmpeg: Array\<keyof QueueFilters>
 
-### public  filters: Array\<'8D' \| 'Tremolo'>
+### public  filters: Array\<'8D' \| 'Tremolo' \| 'Vibrato' \| 'BassBoost'>
+
+### public  resampler: null \| PCMResampler
 
 ### public  volume: null \| VolumeTransformer
 
 ## Methods
 ### public  dump(): FilterGraph
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L146)
+- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L163)

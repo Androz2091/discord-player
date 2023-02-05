@@ -1,13 +1,15 @@
-## PCMTransformer extends Transform
+## VolumeTransformer extends PCMTransformer
 
 ```typescript
-new PCMTransformer(options)
+new VolumeTransformer(options)
 ```
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| options | PCMTransformerOptions | ❌ | - |
+| options | VolumeTransformerOptions | ✅ | - |
 
 ## Properties
+### private  _volume: number
+- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/audio/VolumeTransformer.ts#L9)
 ### public  allowHalfOpen: boolean
 If             
 
@@ -111,6 +113,8 @@ This symbol shall be used to install a listener for only monitoring
 
 
 - Source: `node_modules/@types/node/events.d.ts#L290`
+### public  volume: number
+
 ## Methods
 ### public  \[asyncIterator](): AsyncIterableIterator\<any>
 - Source: `node_modules/@types/node/stream.d.ts#L502`
@@ -161,12 +165,12 @@ This symbol shall be used to install a listener for only monitoring
 ### public  _transform(chunk, encoding, callback): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| chunk | any | ❌ | - |
+| chunk | Buffer | ❌ | - |
 | encoding | BufferEncoding | ❌ | - |
 | callback | TransformCallback | ❌ | - |
 
 
-- Source: `node_modules/@types/node/stream.d.ts#L946`
+- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/audio/VolumeTransformer.ts#L38)
 ### public  _write(chunk, encoding, callback): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -193,7 +197,7 @@ This symbol shall be used to install a listener for only monitoring
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L897`
-### public  addListener(event, listener): PCMTransformer
+### public  addListener(event, listener): VolumeTransformer
 Event emitter
 The defined events on documents including:
 1. close
@@ -225,7 +229,7 @@ The defined events on documents including:
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L72)
 ### public  cork(): void
 - Source: `node_modules/@types/node/stream.d.ts#L912`
-### public  destroy(error?): PCMTransformer
+### public  destroy(error?): VolumeTransformer
 Destroy the stream. Optionally emit an 
 
 
@@ -248,7 +252,7 @@ Destroy the stream. Optionally emit an
 - Source: `node_modules/@types/node/stream.d.ts#L454`
 ### public  enable(): void
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L54)
-### public  end(cb?): PCMTransformer
+### public  end(cb?): VolumeTransformer
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | cb | (...args: unknown\[]) => void | ✅ | - |
@@ -304,7 +308,7 @@ Returns a copy of the array of listeners for the event named
 
 
 - Source: `node_modules/@types/node/events.d.ts#L502`
-### public  off(eventName, listener): PCMTransformer
+### public  off(eventName, listener): VolumeTransformer
 Alias for 
 
 
@@ -317,7 +321,7 @@ Alias for
 
 
 - Source: `node_modules/@types/node/events.d.ts#L462`
-### public  on(event, listener): PCMTransformer
+### public  on(event, listener): VolumeTransformer
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ | - |
@@ -327,7 +331,7 @@ Alias for
 - Source: `node_modules/@types/node/stream.d.ts#L462`
 ### public  onUpdate(): void
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L18)
-### public  once(event, listener): PCMTransformer
+### public  once(event, listener): VolumeTransformer
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ | - |
@@ -335,7 +339,7 @@ Alias for
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L470`
-### public  pause(): PCMTransformer
+### public  pause(): VolumeTransformer
 The 
 
 
@@ -351,7 +355,7 @@ The
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L25`
-### public  prependListener(event, listener): PCMTransformer
+### public  prependListener(event, listener): VolumeTransformer
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ | - |
@@ -359,7 +363,7 @@ The
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L478`
-### public  prependOnceListener(event, listener): PCMTransformer
+### public  prependOnceListener(event, listener): VolumeTransformer
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ | - |
@@ -399,7 +403,7 @@ The
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L218`
-### public  removeAllListeners(event?): PCMTransformer
+### public  removeAllListeners(event?): VolumeTransformer
 Removes all listeners, or those of the specified 
 
 
@@ -411,7 +415,7 @@ Removes all listeners, or those of the specified
 
 
 - Source: `node_modules/@types/node/events.d.ts#L473`
-### public  removeListener(event, listener): PCMTransformer
+### public  removeListener(event, listener): VolumeTransformer
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ | - |
@@ -419,7 +423,7 @@ Removes all listeners, or those of the specified
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L494`
-### public  resume(): PCMTransformer
+### public  resume(): VolumeTransformer
 The 
 
 
@@ -427,14 +431,14 @@ The
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L284`
-### public  setDefaultEncoding(encoding): PCMTransformer
+### public  setDefaultEncoding(encoding): VolumeTransformer
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | encoding | BufferEncoding | ❌ | - |
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L908`
-### public  setEncoding(encoding): PCMTransformer
+### public  setEncoding(encoding): VolumeTransformer
 The 
 
 
@@ -446,7 +450,7 @@ The
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L243`
-### public  setMaxListeners(n): PCMTransformer
+### public  setMaxListeners(n): VolumeTransformer
 By default 
 
 
@@ -465,11 +469,20 @@ By default
 
 
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L76)
+### public  setVolume(volume): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| volume | number | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/audio/VolumeTransformer.ts#L26)
+### public  toString(): string
+- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/audio/VolumeTransformer.ts#L58)
 ### public  toggle(): void
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L58)
 ### public  uncork(): void
 - Source: `node_modules/@types/node/stream.d.ts#L913`
-### public  unpipe(destination?): PCMTransformer
+### public  unpipe(destination?): VolumeTransformer
 The 
 
 
@@ -494,7 +507,7 @@ Passing
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L394`
-### public  wrap(stream): PCMTransformer
+### public  wrap(stream): VolumeTransformer
 Prior to Node.js 0.10, streams did not implement the entire 
 
 

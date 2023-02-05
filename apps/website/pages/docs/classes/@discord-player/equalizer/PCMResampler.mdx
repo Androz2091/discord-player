@@ -1,11 +1,11 @@
-## PCMTransformer extends Transform
+## PCMResampler extends PCMTransformer
 
 ```typescript
-new PCMTransformer(options)
+new PCMResampler(options)
 ```
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| options | PCMTransformerOptions | ❌ | - |
+| options | PCMResamplerOptions | ✅ | - |
 
 ## Properties
 ### public  allowHalfOpen: boolean
@@ -79,6 +79,8 @@ Getter for the property
 - Source: `node_modules/@types/node/stream.d.ts#L123`
 ### public  sampleRate: number
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L17)
+### public  targetSampleRate: number
+- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/audio/PCMResampler.ts#L9)
 ### public  type: 's16le' \| 's16be' \| 's32le' \| 's32be'
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L12)
 ### public  writable: boolean
@@ -111,6 +113,10 @@ This symbol shall be used to install a listener for only monitoring
 
 
 - Source: `node_modules/@types/node/events.d.ts#L290`
+### public  AF_NIGHTCORE: number
+
+### public  AF_VAPORWAVE: number
+
 ## Methods
 ### public  \[asyncIterator](): AsyncIterableIterator\<any>
 - Source: `node_modules/@types/node/stream.d.ts#L502`
@@ -158,15 +164,15 @@ This symbol shall be used to install a listener for only monitoring
 
 
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L62)
-### public  _transform(chunk, encoding, callback): void
+### public  _transform(chunk, _, cb): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| chunk | any | ❌ | - |
-| encoding | BufferEncoding | ❌ | - |
-| callback | TransformCallback | ❌ | - |
+| chunk | Buffer | ❌ | - |
+| _ | BufferEncoding | ❌ | - |
+| cb | TransformCallback | ❌ | - |
 
 
-- Source: `node_modules/@types/node/stream.d.ts#L946`
+- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/audio/PCMResampler.ts#L33)
 ### public  _write(chunk, encoding, callback): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -193,7 +199,7 @@ This symbol shall be used to install a listener for only monitoring
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L897`
-### public  addListener(event, listener): PCMTransformer
+### public  addListener(event, listener): PCMResampler
 Event emitter
 The defined events on documents including:
 1. close
@@ -225,7 +231,7 @@ The defined events on documents including:
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L72)
 ### public  cork(): void
 - Source: `node_modules/@types/node/stream.d.ts#L912`
-### public  destroy(error?): PCMTransformer
+### public  destroy(error?): PCMResampler
 Destroy the stream. Optionally emit an 
 
 
@@ -248,7 +254,7 @@ Destroy the stream. Optionally emit an
 - Source: `node_modules/@types/node/stream.d.ts#L454`
 ### public  enable(): void
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L54)
-### public  end(cb?): PCMTransformer
+### public  end(cb?): PCMResampler
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | cb | (...args: unknown\[]) => void | ✅ | - |
@@ -304,7 +310,7 @@ Returns a copy of the array of listeners for the event named
 
 
 - Source: `node_modules/@types/node/events.d.ts#L502`
-### public  off(eventName, listener): PCMTransformer
+### public  off(eventName, listener): PCMResampler
 Alias for 
 
 
@@ -317,7 +323,7 @@ Alias for
 
 
 - Source: `node_modules/@types/node/events.d.ts#L462`
-### public  on(event, listener): PCMTransformer
+### public  on(event, listener): PCMResampler
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ | - |
@@ -327,7 +333,7 @@ Alias for
 - Source: `node_modules/@types/node/stream.d.ts#L462`
 ### public  onUpdate(): void
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L18)
-### public  once(event, listener): PCMTransformer
+### public  once(event, listener): PCMResampler
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ | - |
@@ -335,7 +341,7 @@ Alias for
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L470`
-### public  pause(): PCMTransformer
+### public  pause(): PCMResampler
 The 
 
 
@@ -351,7 +357,7 @@ The
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L25`
-### public  prependListener(event, listener): PCMTransformer
+### public  prependListener(event, listener): PCMResampler
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ | - |
@@ -359,7 +365,7 @@ The
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L478`
-### public  prependOnceListener(event, listener): PCMTransformer
+### public  prependOnceListener(event, listener): PCMResampler
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ | - |
@@ -399,7 +405,7 @@ The
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L218`
-### public  removeAllListeners(event?): PCMTransformer
+### public  removeAllListeners(event?): PCMResampler
 Removes all listeners, or those of the specified 
 
 
@@ -411,7 +417,7 @@ Removes all listeners, or those of the specified
 
 
 - Source: `node_modules/@types/node/events.d.ts#L473`
-### public  removeListener(event, listener): PCMTransformer
+### public  removeListener(event, listener): PCMResampler
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ | - |
@@ -419,7 +425,7 @@ Removes all listeners, or those of the specified
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L494`
-### public  resume(): PCMTransformer
+### public  resume(): PCMResampler
 The 
 
 
@@ -427,14 +433,14 @@ The
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L284`
-### public  setDefaultEncoding(encoding): PCMTransformer
+### public  setDefaultEncoding(encoding): PCMResampler
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | encoding | BufferEncoding | ❌ | - |
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L908`
-### public  setEncoding(encoding): PCMTransformer
+### public  setEncoding(encoding): PCMResampler
 The 
 
 
@@ -446,7 +452,7 @@ The
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L243`
-### public  setMaxListeners(n): PCMTransformer
+### public  setMaxListeners(n): PCMResampler
 By default 
 
 
@@ -465,11 +471,18 @@ By default
 
 
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L76)
+### public  setTargetSampleRate(rate): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| rate | number \| 'NIGHTCORE' \| 'VAPORWAVE' | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/audio/PCMResampler.ts#L24)
 ### public  toggle(): void
 - [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/equalizer/src/utils/PCMTransformer.ts#L58)
 ### public  uncork(): void
 - Source: `node_modules/@types/node/stream.d.ts#L913`
-### public  unpipe(destination?): PCMTransformer
+### public  unpipe(destination?): PCMResampler
 The 
 
 
@@ -494,7 +507,7 @@ Passing
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L394`
-### public  wrap(stream): PCMTransformer
+### public  wrap(stream): PCMResampler
 Prior to Node.js 0.10, streams did not implement the entire 
 
 

@@ -3,13 +3,15 @@
 
 | Property | Type | Value | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| audioFilters | (filters: Array\<'8D' \| 'Tremolo'>) => any | N/A | - |
 | biquad | (filters: BiquadFilters) => any | N/A | - |
 | debug | (message: string) => any | N/A | - |
+| dsp | (filters: Array\<'8D' \| 'Tremolo' \| 'Vibrato' \| 'BassBoost'>) => any | N/A | - |
 | eqBands | (filters: Array\<EqualizerBand>) => any | N/A | - |
 | error | (error: AudioPlayerError) => any | N/A | - |
 | finish | (resource: AudioResource\<Track>) => any | N/A | - |
+| sampleRate | (filters: number) => any | N/A | - |
 | start | (resource: AudioResource\<Track>) => any | N/A | - |
+| volume | (volume: number) => any | N/A | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L35)
+- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L38)

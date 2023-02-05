@@ -132,8 +132,9 @@ client.on('interactionCreate', async (interaction) => {
     // /play track:Despacito
     // will play "Despacito" in the voice channel
     if (interaction.commandName === 'play') {
-        if (!interaction.member.voice.channelId) return await interaction.reply({ content: 'You are not in a voice channel!', ephemeral: true });
-        if (interaction.guild.members.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId)
+        const voiceChannel = interaction.member.voice.channelId;
+        if (!voiceChannel) return await interaction.reply({ content: 'You are not in a voice channel!', ephemeral: true });
+        if (interaction.guild.members.me.voice.channelId && voiceChannel !== interaction.guild.members.me.voice.channelId)
             return await interaction.reply({ content: 'You are not in my voice channel!', ephemeral: true });
         await interaction.deferReply({ ephemeral: true });
         const query = interaction.options.getString('query');
@@ -143,22 +144,19 @@ client.on('interactionCreate', async (interaction) => {
             }
         });
 
-        // verify vc connection
         try {
-            if (!queue.connection) await queue.connect(interaction.member.voice.channel);
-        } catch {
-            queue.delete();
-            return await interaction.followUp({ content: 'Could not join your voice channel!', ephemeral: true });
+            const res = await player.play(voiceChannel, query, {
+                nodeOptions: {
+                    metadata: {
+                        channel: interaction.channel
+                    }
+                }
+            });
+
+            return await interaction.followUp({ content: `⏱️ | Loading track **${res.track.title}**!` });
+        } catch(e) {
+            return await interaction.followUp({ content: `Could not play: ${e.message}`, ephemeral: true });
         }
-
-        const results = await player.search(query);
-        if (!results.hasTracks()) return await interaction.followUp({ content: `❌ | No results were found for **${query}**!` });
-
-        queue.addTrack(results.tracks[0]);
-
-        if (!queue.isPlaying()) await queue.node.play(track);
-
-        return await interaction.followUp({ content: `⏱️ | Loading track **${track.title}**!` });
     }
 });
 
@@ -252,6 +250,7 @@ These bots are made by the community, they can help you build your own!
 -   [Melody](https://github.com/NerdyTechy/Melody) by [NerdyTechy](https://github.com/NerdyTechy)
 -   [Eyesense-Music-Bot](https://github.com/naseif/Eyesense-Music-Bot) by [naseif](https://github.com/naseif)
 -   [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
+-   [Karasu-Music-Bot](https://github.com/ItsAuric/karasu-music-bot) by [ItsAuric](https://github.com/itsauric)
 -   [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
 -   [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
 

@@ -1,30 +1,24 @@
-## VolumeTransformer extends Transform
+## VolumeTransformer extends PCMTransformer
 
 ```typescript
 new VolumeTransformer(options)
 ```
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| options | VolumeTransformerOptions | ❌ | - |
+| options | VolumeTransformerOptions | ✅ | - |
 
 ## Properties
-### private  _bits: number
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L12)
-### private  _bytes: number
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L14)
-### private  _chunk: null \| Buffer
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L16)
-### private  _extremum: number
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L15)
-### private  _smoothing: number
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L13)
-### private  _targetVolume: number
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L18)
+### private  _volume: any
+- Source: `packages/equalizer/dist/index.d.ts#L320`
 ### public  allowHalfOpen: boolean
 If             
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L872`
+### public  bits: number
+- Source: `packages/equalizer/dist/index.d.ts#L77`
+### public  bytes: number
+- Source: `packages/equalizer/dist/index.d.ts#L78`
 ### public  closed: boolean
 - Source: `node_modules/@types/node/stream.d.ts#L861`
 ### public  destroyed: boolean
@@ -32,8 +26,14 @@ Is
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L128`
+### public  disabled: boolean
+- Source: `packages/equalizer/dist/index.d.ts#L80`
 ### public  errored: null \| Error
 - Source: `node_modules/@types/node/stream.d.ts#L862`
+### public  extremum: number
+- Source: `packages/equalizer/dist/index.d.ts#L79`
+### public  onUpdate: (...args: unknown\[]) => void
+- Source: `packages/equalizer/dist/index.d.ts#L82`
 ### public  readable: boolean
 Is             
 
@@ -81,10 +81,10 @@ Getter for the property
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L123`
+### public  sampleRate: number
+- Source: `packages/equalizer/dist/index.d.ts#L81`
 ### public  type: 's16le' \| 's16be' \| 's32le' \| 's32be'
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L19)
-### public  volume: number
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L17)
+- Source: `packages/equalizer/dist/index.d.ts#L76`
 ### public  writable: boolean
 - Source: `node_modules/@types/node/stream.d.ts#L853`
 ### public  writableCorked: number
@@ -115,21 +115,11 @@ This symbol shall be used to install a listener for only monitoring
 
 
 - Source: `node_modules/@types/node/events.d.ts#L290`
-### public  hasSmoothness: boolean
-
-### public  smoothness: number
-
-### public  volumeDecibels: number
-
-### public  volumeLogarithmic: number
-
-### public  hasSmoothing: boolean
+### public  volume: number
 
 ## Methods
 ### public  \[asyncIterator](): AsyncIterableIterator\<any>
 - Source: `node_modules/@types/node/stream.d.ts#L502`
-### public  _applySmoothness(): void
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L63)
 ### public  _construct(callback): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -137,14 +127,14 @@ This symbol shall be used to install a listener for only monitoring
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L140`
-### public  _destroy(err, cb): void
+### public  _destroy(error, callback): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| err | Error | ❌ | - |
-| cb | (error: null \| Error) => void | ❌ | - |
+| error | null \| Error | ❌ | - |
+| callback | (error: null \| Error) => void | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L96)
+- Source: `node_modules/@types/node/stream.d.ts#L904`
 ### public  _final(callback): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -173,16 +163,16 @@ This symbol shall be used to install a listener for only monitoring
 | index | number | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L56)
-### public  _transform(chunk, encoding, done): unknown
+- Source: `packages/equalizer/dist/index.d.ts#L87`
+### public  _transform(chunk, encoding, callback): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | chunk | Buffer | ❌ | - |
 | encoding | BufferEncoding | ❌ | - |
-| done | (...args: unknown\[]) => unknown | ❌ | - |
+| callback | TransformCallback | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L71)
+- Source: `packages/equalizer/dist/index.d.ts#L325`
 ### public  _write(chunk, encoding, callback): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -200,7 +190,7 @@ This symbol shall be used to install a listener for only monitoring
 | index | number | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L59)
+- Source: `packages/equalizer/dist/index.d.ts#L88`
 ### public  _writev(chunks, callback): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -230,6 +220,15 @@ The defined events on documents including:
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L446`
+### public  clamp(val, max?, min?): number
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| val | number | ❌ | - |
+| max | number | ✅ | - |
+| min | number | ✅ | - |
+
+
+- Source: `packages/equalizer/dist/index.d.ts#L89`
 ### public  cork(): void
 - Source: `node_modules/@types/node/stream.d.ts#L912`
 ### public  destroy(error?): VolumeTransformer
@@ -244,6 +243,8 @@ Destroy the stream. Optionally emit an
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L434`
+### public  disable(): void
+- Source: `packages/equalizer/dist/index.d.ts#L84`
 ### public  emit(event): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -251,6 +252,8 @@ Destroy the stream. Optionally emit an
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L454`
+### public  enable(): void
+- Source: `packages/equalizer/dist/index.d.ts#L85`
 ### public  end(cb?): VolumeTransformer
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -459,36 +462,24 @@ By default
 
 
 - Source: `node_modules/@types/node/events.d.ts#L483`
-### public  setSmoothness(smoothness): void
+### public  setSampleRate(rate): void
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| smoothness | number | ❌ | - |
+| rate | number | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L129)
-### public  setVolume(volume): void
+- Source: `packages/equalizer/dist/index.d.ts#L90`
+### public  setVolume(volume): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | volume | number | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L101)
-### public  setVolumeDecibels(db): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| db | number | ❌ | - |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L109)
-### public  setVolumeLogarithmic(value): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| value | number | ❌ | - |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L113)
-### public  smoothingEnabled(): boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/699caa2/packages/discord-player/src/VoiceInterface/VolumeTransformer.ts#L133)
+- Source: `packages/equalizer/dist/index.d.ts#L324`
+### public  toString(): string
+- Source: `packages/equalizer/dist/index.d.ts#L326`
+### public  toggle(): void
+- Source: `packages/equalizer/dist/index.d.ts#L86`
 ### public  uncork(): void
 - Source: `node_modules/@types/node/stream.d.ts#L913`
 ### public  unpipe(destination?): VolumeTransformer
@@ -547,7 +538,7 @@ A utility method for creating duplex streams.
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| src | string \| Object \| Stream \| Promise\<any> \| Blob \| ArrayBuffer \| Iterable\<any> \| AsyncIterable\<any> \| AsyncGeneratorFunction | ❌ | - |
+| src | string \| Object \| Stream \| Blob \| ArrayBuffer \| Iterable\<any> \| AsyncIterable\<any> \| AsyncGeneratorFunction \| Promise\<any> | ❌ | - |
 
 
 - Source: `node_modules/@types/node/stream.d.ts#L895`
@@ -572,7 +563,7 @@ Returns a copy of the array of listeners for the event named
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| emitter | EventEmitter \| DOMEventTarget | ❌ | - |
+| emitter | DOMEventTarget \| EventEmitter | ❌ | - |
 | name | string \| symbol | ❌ | - |
 
 
@@ -670,7 +661,7 @@ setMaxListeners(5, target, emitter);
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | n | number | ✅ | A non-negative number. The maximum number of listeners per |
-| eventTargets | Array\<EventEmitter \| DOMEventTarget> | ❌ | - |
+| eventTargets | Array\<DOMEventTarget \| EventEmitter> | ❌ | - |
 
 
 - Source: `node_modules/@types/node/events.d.ts#L280`
