@@ -1,6 +1,5 @@
 import { TransformCallback } from 'stream';
 import { PCMTransformer, PCMTransformerOptions } from '../utils';
-import { resamplePCM } from './transformers/resampler';
 
 export interface PCMResamplerOptions extends PCMTransformerOptions {
     targetSampleRate?: number;
