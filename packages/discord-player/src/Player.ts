@@ -1,4 +1,4 @@
-import { Client, GuildResolvable, Snowflake, VoiceState, IntentsBitField, User, ChannelType } from 'discord.js';
+import { Client, GuildResolvable, Snowflake, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable } from 'discord.js';
 import { EventEmitter } from '@discord-player/utils';
 import { Queue } from './Structures/Queue';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
@@ -13,8 +13,8 @@ import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContex
 import { Collection } from '@discord-player/utils';
 import { BaseExtractor } from './extractors/BaseExtractor';
 import { SearchResult } from './Structures/SearchResult';
-import { GuildNodeManager } from './Structures/GuildQueue/GuildNodeManager';
-import { GuildQueueEvents } from './Structures/GuildQueue';
+import { GuildNodeCreateOptions, GuildNodeManager } from './Structures/GuildQueue/GuildNodeManager';
+import { GuildQueueEvents, VoiceConnectConfig } from './Structures/GuildQueue';
 
 class Player extends EventEmitter<PlayerEvents> {
     public readonly client: Client;
@@ -351,6 +351,52 @@ class Player extends EventEmitter<PlayerEvents> {
         this.queues.delete(guild.id);
 
         return prev;
+    }
+
+    /**
+     * Initiate audio player
+     * @param channel The voice channel on which the music should be played
+     * @param query The track or source to play
+     * @param options Options for player
+     * @example ```js
+     * const client = new Discord.Client({ intents: ['GuildVoiceStates'] });
+     * const player = new Player(client);
+     *
+     * // play
+     * const query = message.getQuerySomehow();
+     *
+     * await player.play(message.member.voice.channel, query, {
+     *     nodeOptions: {
+     *         metadata: message
+     *     }
+     * });
+     * ```
+     */
+    public async play<T = unknown>(
+        channel: GuildVoiceChannelResolvable,
+        query: string | Track,
+        options: SearchOptions & {
+            nodeOptions?: GuildNodeCreateOptions<T>;
+            connectionOptions?: VoiceConnectConfig;
+        } = {}
+    ) {
+        const vc = this.client.channels.resolve(channel);
+        if (!vc?.isVoiceBased()) throw new Error('Expected a voice channel');
+
+        const result = await this.search(query, options);
+        if (!result.isEmpty()) {
+            throw new Error(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
+        }
+
+        const queue = this.nodes.create(vc.guild, options.nodeOptions);
+        if (!queue.channel) await queue.connect(vc, options.connectionOptions);
+
+        if (!result.hasPlaylist()) {
+            await queue.node.play(result.tracks[0]);
+        } else {
+            queue.addTrack(result.playlist!);
+            await queue.node.play();
+        }
     }
 
     /**
