@@ -138,11 +138,6 @@ client.on('interactionCreate', async (interaction) => {
             return await interaction.reply({ content: 'You are not in my voice channel!', ephemeral: true });
         await interaction.deferReply({ ephemeral: true });
         const query = interaction.options.getString('query');
-        const queue = player.nodes.create(interaction.guild, {
-            metadata: {
-                channel: interaction.channel
-            }
-        });
 
         try {
             const res = await player.play(voiceChannel, query, {

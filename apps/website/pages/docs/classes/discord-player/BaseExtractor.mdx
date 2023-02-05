@@ -12,12 +12,12 @@ new BaseExtractor(context)
 Context that instantiated this extractor            
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/extractors/BaseExtractor.ts#L18)
+- [Source](https://github.com/Androz2091/discord-player/blob/e7a50df/packages/discord-player/src/extractors/BaseExtractor.ts#L18)
 ### public static identifier: string
 Identifier for this extractor            
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/extractors/BaseExtractor.ts#L12)
+- [Source](https://github.com/Androz2091/discord-player/blob/e7a50df/packages/discord-player/src/extractors/BaseExtractor.ts#L12)
 ### public  identifier: string
 Identifier of this extractor
 ## Methods
@@ -28,7 +28,7 @@ This method will be executed when this extractor is activated
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/extractors/BaseExtractor.ts#L30)
+- [Source](https://github.com/Androz2091/discord-player/blob/e7a50df/packages/discord-player/src/extractors/BaseExtractor.ts#L30)
 ### public  deactivate(): Promise\<void>
 This method will be executed when this extractor is deactivated
 
@@ -36,7 +36,7 @@ This method will be executed when this extractor is deactivated
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/extractors/BaseExtractor.ts#L38)
+- [Source](https://github.com/Androz2091/discord-player/blob/e7a50df/packages/discord-player/src/extractors/BaseExtractor.ts#L38)
 ### public  emit(event, args): boolean
 Dispatch an event to the player
 
@@ -49,7 +49,7 @@ Dispatch an event to the player
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/extractors/BaseExtractor.ts#L84)
+- [Source](https://github.com/Androz2091/discord-player/blob/e7a50df/packages/discord-player/src/extractors/BaseExtractor.ts#L84)
 ### public  handle(query, context): Promise\<ExtractorInfo>
 Handle the given query
 
@@ -62,7 +62,7 @@ Handle the given query
 | context | ExtractorSearchContext | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/extractors/BaseExtractor.ts#L65)
+- [Source](https://github.com/Androz2091/discord-player/blob/e7a50df/packages/discord-player/src/extractors/BaseExtractor.ts#L65)
 ### public  handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
 
@@ -75,7 +75,7 @@ A stream middleware to handle streams before passing it to the player
 | next | NextFunction | ❌ | The next function |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/extractors/BaseExtractor.ts#L75)
+- [Source](https://github.com/Androz2091/discord-player/blob/e7a50df/packages/discord-player/src/extractors/BaseExtractor.ts#L75)
 ### public  stream(info): Promise\<string \| Readable>
 Stream the given track
 
@@ -87,7 +87,7 @@ Stream the given track
 | info | Track | ❌ | The track to stream |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/extractors/BaseExtractor.ts#L56)
+- [Source](https://github.com/Androz2091/discord-player/blob/e7a50df/packages/discord-player/src/extractors/BaseExtractor.ts#L56)
 ### public  validate(query, type?): Promise\<boolean>
 Validate incoming query
 
@@ -100,4 +100,4 @@ Validate incoming query
 | type | null \| SearchQueryType | ✅ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/dbbd788/packages/discord-player/src/extractors/BaseExtractor.ts#L47)
+- [Source](https://github.com/Androz2091/discord-player/blob/e7a50df/packages/discord-player/src/extractors/BaseExtractor.ts#L47)
