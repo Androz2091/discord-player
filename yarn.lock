@@ -197,7 +197,7 @@ __metadata:
     "@emotion/server": ^11.10.0
     "@mantine/core": ^5.10.2
     "@mantine/hooks": ^5.10.2
-    "@mantine/next": ^5.10.2
+    "@mantine/next": ^5.10.3
     "@mantine/prism": ^5.10.2
     next: ^13.1.4
     nextra: ^2.2.10
@@ -544,17 +544,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/next@npm:^5.10.2":
-  version: 5.10.2
-  resolution: "@mantine/next@npm:5.10.2"
+"@mantine/next@npm:^5.10.3":
+  version: 5.10.3
+  resolution: "@mantine/next@npm:5.10.3"
   dependencies:
-    "@mantine/ssr": 5.10.2
-    "@mantine/styles": 5.10.2
+    "@mantine/ssr": 5.10.3
+    "@mantine/styles": 5.10.3
   peerDependencies:
     next: "*"
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: 1cbc55b5daeb632d9f0f418eaf41c5213840e95f4d50aaaae895cbe2091cd10685e2af7d97a8d0c9da8d46d3998ac1b2ad5cfc3c9798ba434baf386e8814f61d
+  checksum: 78ee3e7f7565318f40f367c8d53edfb164ae10c4fcc788b8792b27ae3f10fad81be8dbfaecd171fd66c43eafc50cc30ea5ab7f3da5421642b3a8c96d5a03d618
   languageName: node
   linkType: hard
 
@@ -573,18 +573,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/ssr@npm:5.10.2":
-  version: 5.10.2
-  resolution: "@mantine/ssr@npm:5.10.2"
+"@mantine/ssr@npm:5.10.3":
+  version: 5.10.3
+  resolution: "@mantine/ssr@npm:5.10.3"
   dependencies:
-    "@mantine/styles": 5.10.2
+    "@mantine/styles": 5.10.3
     html-react-parser: 1.4.12
   peerDependencies:
     "@emotion/react": ">=11.9.0"
     "@emotion/server": ">=11.4.0"
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: e37f5bafc3700e97ea5b89aa2f974d13a154437eaef2f84a22166739821f1337dd657f9d3771143e30e63077b2b69127a98944beb9cc0a8f25448529fabffea4
+  checksum: 8a6f0140f8fc853e3be8b0ec78908f71378ab76f36efe58ea2b1818139db60658bd12d3b1a56b9e61218262e85e2fbf9488393c3f0a64cb2d24125a27230397f
   languageName: node
   linkType: hard
 
@@ -599,6 +599,20 @@ __metadata:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
   checksum: c7c6b785399b9414bf3933673266bbff205884639639d2e2e44ad0152af4d7e40e82c10d27043aac80d426144fc73876b877146218de8a970e2f729b4fa66276
+  languageName: node
+  linkType: hard
+
+"@mantine/styles@npm:5.10.3":
+  version: 5.10.3
+  resolution: "@mantine/styles@npm:5.10.3"
+  dependencies:
+    clsx: 1.1.1
+    csstype: 3.0.9
+  peerDependencies:
+    "@emotion/react": ">=11.9.0"
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: 60fcfd5ccbfd7e1106a24a13c3f705ac4b995214ae038c2d8e7bf5e795cb7c1f5da9ee5e336caedf2a537e77272a05eb315e76df3edb4a466ec158ae6aeaf8b5
   languageName: node
   linkType: hard
 
