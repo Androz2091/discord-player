@@ -121,7 +121,7 @@ __metadata:
     "@typescript-eslint/parser": ^5.32.0
     ansi-colors: ^4.1.3
     common-tags: ^1.8.2
-    esbuild-plugin-version-injector: ^1.0.2
+    esbuild-plugin-version-injector: ^1.0.3
     eslint: ^8.21.0
     fs-extra: ^11.1.0
     prettier: ^2.8.2
@@ -2520,12 +2520,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-plugin-version-injector@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "esbuild-plugin-version-injector@npm:1.0.2"
+"esbuild-plugin-version-injector@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "esbuild-plugin-version-injector@npm:1.0.3"
   dependencies:
     "@sapphire/result": ^2.6.0
-  checksum: 9972c10a8bed4fb751970aaa36cbc04af1895f770f762f107db9ff15add58bb7e531936a2a21b7e4a88083c896e8846364bdd8a51bdb853bbf67906e7b50e831
+  checksum: 12c9e8bf55fd6dc80979b93a1fc0acfc5e9d94b2fed5a0e645cdac768d73841750edccde2d21641619f7d9e143d248ec3400a11ebcda81dfecd7c36e9acc83d7
   languageName: node
   linkType: hard
 
