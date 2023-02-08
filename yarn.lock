@@ -138,7 +138,7 @@ __metadata:
   resolution: "@discord-player/downloader@workspace:packages/downloader"
   dependencies:
     "@discord-player/tsconfig": "*"
-    youtube-dl-exec: ^2.1.11
+    youtube-dl-exec: ^2.2.3
   languageName: unknown
   linkType: soft
 
@@ -7524,15 +7524,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"youtube-dl-exec@npm:^2.1.11":
-  version: 2.1.11
-  resolution: "youtube-dl-exec@npm:2.1.11"
+"youtube-dl-exec@npm:^2.2.3":
+  version: 2.2.3
+  resolution: "youtube-dl-exec@npm:2.2.3"
   dependencies:
     dargs: ~7.0.0
     execa: ~5.1.0
     is-unix: ~2.0.1
     simple-get: ~4.0.1
-  checksum: a278ea5fa9d1cf06f1864ac84916dec9270ad66bb738fc8b13544c8f6a17c736d378a029e96c93f968210d94675ce4d7a0b5e530da6b72fdda1ffc930eacb8b8
+  checksum: 573017189b70db07aae02f53d4d05b1ec015495bf594956320f5ea32f8284287039c1b69a89caf5c7b28cc03be8c0fdba5ca1e1571304c495423cb6e84caca87
   languageName: node
   linkType: hard
 

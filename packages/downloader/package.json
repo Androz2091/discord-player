@@ -37,7 +37,7 @@
     "@discord-player/tsconfig": "*"
   },
   "dependencies": {
-    "youtube-dl-exec": "^2.1.11"
+    "youtube-dl-exec": "^2.2.3"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts",
