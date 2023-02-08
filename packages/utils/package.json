@@ -9,6 +9,8 @@
   "homepage": "https://discord-player.js.org",
   "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
   "directories": {
     "src": "src"
   },
