@@ -1,8 +1,88 @@
 import AudioFilters from '../../utils/AudioFilters';
 import { GuildQueue } from './GuildQueue';
-import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
+import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 
 type Filters = keyof typeof AudioFilters.filters;
+
+// TODO
+export const EqualizerConfigurationPreset = {
+    Jazz: Array.from({ length: 15 }, (_, i) => ({
+        band: i,
+        gain: i > 2 && i < 6 ? 0.5 : i > 6 && i < 14 ? -0.75 : 0
+    })),
+    EDM: Array.from(
+        {
+            length: Equalizer.BAND_COUNT
+        },
+        (_, i) => ({
+            band: i,
+            gain: i > 3 && i < 7 ? 0.75 : i > 9 && i < 13 ? -0.75 : 0
+        })
+    ),
+    HipHop: Array.from(
+        {
+            length: Equalizer.BAND_COUNT
+        },
+        (_, i) => ({
+            band: i,
+            gain: i > 4 && i < 8 ? 0.75 : i > 10 && i < 14 ? -0.5 : 0
+        })
+    ),
+    Rock: Array.from(
+        {
+            length: Equalizer.BAND_COUNT
+        },
+        (_, i) => ({
+            band: i,
+            gain: i > 2 && i < 6 ? 0.75 : i > 8 && i < 12 ? -0.75 : 0
+        })
+    ),
+    Metal: Array.from(
+        {
+            length: Equalizer.BAND_COUNT
+        },
+        (_, i) => ({
+            band: i,
+            gain: i > 4 && i < 8 ? 0.75 : i > 9 && i < 14 ? -0.75 : 0
+        })
+    ),
+    Folk: Array.from(
+        {
+            length: Equalizer.BAND_COUNT
+        },
+        (_, i) => ({
+            band: i,
+            gain: i > 3 && i < 7 ? 0.5 : i > 9 && i < 14 ? -0.5 : 0
+        })
+    ),
+    RnB: Array.from(
+        {
+            length: Equalizer.BAND_COUNT
+        },
+        (_, i) => ({
+            band: i,
+            gain: i > 4 && i < 8 ? 0.5 : i > 9 && i < 14 ? -0.5 : 0
+        })
+    ),
+    Country: Array.from(
+        {
+            length: Equalizer.BAND_COUNT
+        },
+        (_, i) => ({
+            band: i,
+            gain: i > 2 && i < 6 ? 0.5 : i > 9 && i < 13 ? -0.5 : 0
+        })
+    ),
+    Classical: Array.from(
+        {
+            length: Equalizer.BAND_COUNT
+        },
+        (_, i) => ({
+            band: i,
+            gain: i > 4 && i < 8 ? 0.5 : i > 10 && i < 14 ? -0.5 : 0
+        })
+    )
+} as const;
 
 export class FFmpegFilterer<Meta = unknown> {
     #ffmpegFilters: Filters[] = [];
@@ -80,6 +160,7 @@ export interface GuildQueueAFiltersCache {
 export class GuildQueueAudioFilters<Meta = unknown> {
     public graph = new AFilterGraph<Meta>(this);
     public ffmpeg = new FFmpegFilterer<Meta>(this);
+    public equalizerPresets = EqualizerConfigurationPreset;
     public _lastFiltersCache: GuildQueueAFiltersCache = {
         biquad: null,
         equalizer: [],
