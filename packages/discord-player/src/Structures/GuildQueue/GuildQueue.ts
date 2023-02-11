@@ -246,13 +246,9 @@ export class GuildQueue<Meta = unknown> {
         this.#warnIfDeleted();
         const toAdd = track instanceof Playlist ? track.tracks : track;
         this.tracks.add(toAdd);
-        const isMulti = Array.isArray(toAdd);
 
-        if (isMulti) {
-            this.player.events.emit('audioTracksAdd', this, toAdd);
-        } else {
-            this.player.events.emit('audioTrackAdd', this, toAdd);
-        }
+        if (track instanceof Playlist) this.player.events.emit('audioTracksAdd', this, toAdd);
+        this.player.events.emit('audioTrackAdd', this, toAdd); 
     }
 
     public async connect(channelResolvable: GuildVoiceChannelResolvable, options?: VoiceConnectConfig) {
