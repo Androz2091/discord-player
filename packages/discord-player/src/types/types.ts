@@ -522,7 +522,8 @@ export interface PlaylistJSON {
  * @property {boolean} [smoothVolume=true] Toggle smooth volume transition
  * @property {boolean} [lagMonitor=30000] Time in ms to re-monitor event loop lag
  * @property {boolean} [lockVoiceStateHandler] Prevent voice state handler from being overridden
- * @property {string[]} [blockExtractors] List of extractors to block
+ * @property {string[]} [blockExtractors] List of extractors to disable querying metadata from
+ * @property {string[]} [blockStreamFrom] List of extractors to disable streaming from
  */
 export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
@@ -532,4 +533,5 @@ export interface PlayerInitOptions {
     lagMonitor?: number;
     lockVoiceStateHandler?: boolean;
     blockExtractors?: string[];
+    blockStreamFrom?: string[];
 }

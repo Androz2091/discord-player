@@ -84,6 +84,15 @@ export class BaseExtractor {
     public emit<K extends keyof PlayerEvents>(event: K, ...args: Parameters<PlayerEvents[K]>) {
         return this.context.player.emit(event, ...args);
     }
+
+    /**
+     * Create extractor response
+     * @param playlist The playlist
+     * @param tracks The track array
+     */
+    public createResponse(playlist?: Playlist | null, tracks: Track[] = playlist?.tracks || []): ExtractorInfo {
+        return { playlist: playlist || null, tracks };
+    }
 }
 
 export type NextFunction = (error?: Error | null, stream?: Readable) => void;

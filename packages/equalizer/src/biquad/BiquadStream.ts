@@ -21,7 +21,7 @@ export class BiquadStream extends PCMTransformer {
     public biquad!: BiquadFilter;
     public cutoff = 80;
     public gain = 0;
-    public filter!: BiquadFilters;
+    public biquadFilter!: BiquadFilters;
     public Q = Q_BUTTERWORTH;
     public constructor(options: BiquadStreamOptions = {}) {
         super(options);
@@ -29,28 +29,40 @@ export class BiquadStream extends PCMTransformer {
         if ('cutoff' in options) this.cutoff = options.cutoff!;
         if ('gain' in options) this.gain = options.gain!;
         if ('Q' in options) this.Q = options.Q!;
-        if ('filter' in options) {
-            this.filter = options.filter!;
-            if (this.filter != null) {
-                this.biquad = new BiquadFilter(Coefficients.from(this.filter, this.sampleRate, this.cutoff, this.Q, this.gain));
+        if ('biquadFilter' in options) {
+            if (typeof options.biquadFilter === 'string' || typeof options.biquadFilter === 'number') this.biquadFilter = options.filter!;
+            if (this.biquadFilter != null) {
+                this.biquad = new BiquadFilter(Coefficients.from(this.biquadFilter, this.sampleRate, this.cutoff, this.Q, this.gain));
             }
         }
     }
 
+    public get filter() {
+        return this.biquadFilter;
+    }
+
+    public set filter(f: BiquadFilters) {
+        if (f == null || typeof f === 'string' || typeof f === 'number') {
+            this.update({ filter: f });
+        } else {
+            throw new TypeError(`Invalid biquad filter type "${f}"`);
+        }
+    }
+
     public getFilterName() {
-        if (this.filter == null) return null;
-        if (typeof this.filter === 'string') return this.filter;
-        return Object.entries(FilterType).find((r) => r[1] === this.filter)?.[0] as BiquadFilters;
+        if (this.biquadFilter == null) return null;
+        if (typeof this.biquadFilter === 'string') return this.biquadFilter;
+        return Object.entries(FilterType).find((r) => r[1] === this.biquadFilter)?.[0] as BiquadFilters;
     }
 
     public update(options: BiquadFilterUpdateData) {
         if ('cutoff' in options) this.cutoff = options.cutoff!;
         if ('gain' in options) this.gain = options.gain!;
         if ('Q' in options) this.Q = options.Q!;
-        if ('filter' in options) this.filter = options.filter!;
+        if ('filter' in options) this.biquadFilter = options.filter!;
 
-        if (this.filter != null) {
-            this.biquad = new BiquadFilter(Coefficients.from(this.filter, this.sampleRate, this.cutoff, this.Q, this.gain));
+        if (this.biquadFilter != null) {
+            this.biquad = new BiquadFilter(Coefficients.from(this.biquadFilter, this.sampleRate, this.cutoff, this.Q, this.gain));
         }
 
         this.onUpdate?.();

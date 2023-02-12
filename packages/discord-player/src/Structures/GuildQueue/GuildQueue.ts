@@ -33,6 +33,8 @@ export interface GuildNodeInit<Meta = unknown> {
     leaveOnEndCooldown: number;
     leaveOnStop: boolean;
     leaveOnStopCooldown: number;
+    connectionTimeout: number;
+    selfDeaf?: boolean;
     metadata?: Meta | null;
 }
 
@@ -142,6 +144,8 @@ export class GuildQueue<Meta = unknown> {
         this.tracks = new Queue<Track>(options.queueStrategy);
         if (typeof options.onBeforeCreateStream === 'function') this.onBeforeCreateStream = options.onBeforeCreateStream;
         if (options.repeatMode != null) this.repeatMode = options.repeatMode;
+
+        options.selfDeaf ??= true;
 
         if (this.options.biquad != null && typeof this.options.biquad !== 'boolean') {
             this.filters._lastFiltersCache.biquad = this.options.biquad;
@@ -255,7 +259,7 @@ export class GuildQueue<Meta = unknown> {
         }
     }
 
-    public async connect(channelResolvable: GuildVoiceChannelResolvable, options?: VoiceConnectConfig) {
+    public async connect(channelResolvable: GuildVoiceChannelResolvable, options: VoiceConnectConfig = {}) {
         this.#warnIfDeleted();
         const channel = this.player.client.channels.resolve(channelResolvable);
         if (!channel || !channel.isVoiceBased()) {
@@ -271,8 +275,8 @@ export class GuildQueue<Meta = unknown> {
         }
 
         this.dispatcher = await this.player.voiceUtils.connect(channel, {
-            deaf: Boolean(options?.deaf),
-            maxTime: options?.timeout ?? this.player.options.connectionTimeout ?? 120_000
+            deaf: options.deaf ?? this.options.selfDeaf ?? true,
+            maxTime: options?.timeout ?? this.options.connectionTimeout ?? 120_000
         });
 
         this.player.events.emit('connection', this);

@@ -56,8 +56,10 @@ export class ExtractorExecutionContext {
         }
     }
 
-    public async run<T = unknown>(fn: ExtractorExecutionFN<T>) {
+    public async run<T = unknown>(fn: ExtractorExecutionFN<T>, filterBlocked = true) {
+        const blocked = this.player.options.blockExtractors ?? [];
         for (const ext of this.store.values()) {
+            if (filterBlocked && blocked.some((e) => e === ext.identifier)) continue;
             const result = await fn(ext).catch(() => {
                 return false;
             });

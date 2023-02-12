@@ -14,7 +14,7 @@
     "docs": "node ./scripts/docgen.js",
     "build:check": "turbo run build:check --color",
     "lint": "turbo run lint --color",
-    "format": "prettier --write \"{packages,scripts}/**/*.{js,ts,mjs,mts}\"",
+    "format": "prettier --write \"{packages,scripts,examples,apps}/**/*.{js,ts,mjs,mts}\"",
     "dev:web": "turbo run dev --filter=@discord-player/website",
     "build:web": "turbo run build --filter=@discord-player/website",
     "start:web": "turbo run preview --filter=@discord-player/website"

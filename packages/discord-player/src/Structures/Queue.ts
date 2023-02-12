@@ -784,10 +784,11 @@ class Queue<T = unknown> {
 
         if (!stream) {
             const streamInfo = await this.player.extractors.run(async (extractor) => {
+                if (this.player.options.blockStreamFrom?.some((ext) => ext === extractor.identifier)) return false;
                 const canStream = await extractor.validate(track.url, track.queryType || QueryResolver.resolve(track.url));
                 if (!canStream) return false;
                 return await extractor.stream(track);
-            });
+            }, false);
             if (!streamInfo || !streamInfo.result) {
                 this.player.emit('error', this, new Error('No stream extractors are available for this track'));
                 return void this.play(this.tracks.shift(), { immediate: true });

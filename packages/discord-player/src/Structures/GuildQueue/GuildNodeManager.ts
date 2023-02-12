@@ -23,6 +23,8 @@ export interface GuildNodeCreateOptions<T = unknown> {
     leaveOnStop?: boolean;
     leaveOnStopCooldown?: number;
     metadata?: T | null;
+    selfDeaf?: boolean;
+    connectionTimeout?: number;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
@@ -54,6 +56,8 @@ export class GuildNodeManager<Meta = unknown> {
         options.leaveOnStop ??= true;
         options.leaveOnStopCooldown ??= 0;
         options.resampler ??= 48000;
+        options.selfDeaf ??= true;
+        options.connectionTimeout ??= this.player.options.connectionTimeout;
 
         const queue = new GuildQueue<T>(this.player, {
             guild: server,
@@ -73,7 +77,9 @@ export class GuildNodeManager<Meta = unknown> {
             leaveOnEndCooldown: options.leaveOnEndCooldown,
             leaveOnStop: options.leaveOnStop,
             leaveOnStopCooldown: options.leaveOnStopCooldown,
-            metadata: options.metadata
+            metadata: options.metadata,
+            connectionTimeout: options.connectionTimeout ?? 120_000,
+            selfDeaf: options.selfDeaf
         });
 
         this.cache.set(server.id, queue);

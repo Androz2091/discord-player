@@ -288,10 +288,11 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
     async #createGenericStream(track: Track) {
         const streamInfo = await this.queue.player.extractors.run(async (extractor) => {
+            if (this.queue.player.options.blockStreamFrom?.some((ext) => ext === extractor.identifier)) return false;
             const canStream = await extractor.validate(track.url, track.queryType || QueryResolver.resolve(track.url));
             if (!canStream) return false;
             return await extractor.stream(track);
-        });
+        }, false);
         if (!streamInfo || !streamInfo.result) {
             return null;
         }

@@ -22,6 +22,7 @@ class Player extends EventEmitter<PlayerEvents> {
         autoRegisterExtractor: true,
         lockVoiceStateHandler: false,
         blockExtractors: [],
+        blockStreamFrom: [],
         ytdlOptions: {
             highWaterMark: 1 << 25
         },
@@ -448,7 +449,6 @@ class Player extends EventEmitter<PlayerEvents> {
             extractor =
                 (
                     await this.extractors.run(async (ext) => {
-                        if (options.blockExtractors?.includes(ext.identifier)) return false;
                         return ext.validate(query, queryType as SearchQueryType);
                     })
                 )?.extractor || null;

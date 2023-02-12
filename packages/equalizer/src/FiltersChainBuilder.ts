@@ -52,7 +52,7 @@ export class FiltersChain {
         this.destination = pipeline(src, /* resampler,*/ equalizerStream, dspStream, biquadStream, volumeTransformer, (err) => {
             if (err) {
                 this.destroy();
-                this.onError(err);
+                if (!err.message.includes('ERR_STREAM_PREMATURE_CLOSE')) this.onError(err);
             }
         });
 
@@ -70,6 +70,15 @@ export class FiltersChain {
         this.volume?.destroy();
         this.destination?.destroy();
         this.source?.destroy();
+
+        // remove events
+        // this.resampler?.removeAllListeners();
+        this.equalizer?.removeAllListeners();
+        this.biquad?.removeAllListeners();
+        this.filters?.removeAllListeners();
+        this.volume?.removeAllListeners();
+        this.destination?.removeAllListeners();
+        this.source?.removeAllListeners();
 
         // unref
         // this.resampler = null;
