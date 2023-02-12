@@ -253,6 +253,7 @@ export class GuildQueue<Meta = unknown> {
         const isMulti = Array.isArray(toAdd);
 
         if (isMulti) {
+            this.player.events.emit('audioTrackAdd', this, toAdd[0]);
             this.player.events.emit('audioTracksAdd', this, toAdd);
         } else {
             this.player.events.emit('audioTrackAdd', this, toAdd);
