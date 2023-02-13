@@ -534,4 +534,5 @@ export interface PlayerInitOptions {
     lockVoiceStateHandler?: boolean;
     blockExtractors?: string[];
     blockStreamFrom?: string[];
+    useQueryCaching?: boolean;
 }

@@ -301,6 +301,10 @@ class Queue<T = unknown> {
         if (this.#watchDestroyed()) return;
         if (this.connection) this.connection.end();
         if (disconnect) this.connection?.disconnect();
+        this.tracks = [];
+        this.connection.removeAllListeners();
+        this._cooldownsTimeout.forEach((tm) => clearTimeout(tm));
+        this.previousTracks = [];
         this.player.queues.delete(this.guild.id);
         this.player.voiceUtils.cache.delete(this.guild.id);
         this.#destroyed = true;

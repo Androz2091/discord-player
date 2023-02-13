@@ -104,6 +104,12 @@ export class GuildNodeManager<Meta = unknown> {
         if (!queue) throw new Error('Cannot delete non-existing queue');
 
         queue.node.stop(true);
+        queue.connection?.removeAllListeners();
+        queue.dispatcher?.removeAllListeners();
+        queue.connection?.destroy();
+        queue.timeouts.forEach((tm) => clearTimeout(tm));
+        queue.history.clear();
+        queue.tracks.clear();
 
         return this.cache.delete(queue.id);
     }

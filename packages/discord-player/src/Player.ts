@@ -1,4 +1,4 @@
-import { Client, GuildResolvable, Snowflake, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable } from 'discord.js';
+import { Client, GuildResolvable, Snowflake, SnowflakeUtil, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable } from 'discord.js';
 import { EventEmitter } from '@discord-player/utils';
 import { Queue } from './Structures/Queue';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
@@ -15,8 +15,10 @@ import { BaseExtractor } from './extractors/BaseExtractor';
 import { SearchResult } from './Structures/SearchResult';
 import { GuildNodeCreateOptions, GuildNodeManager } from './Structures/GuildQueue/GuildNodeManager';
 import { GuildQueueEvents, VoiceConnectConfig } from './Structures/GuildQueue';
+import { hooks } from './hooks';
 
 class Player extends EventEmitter<PlayerEvents> {
+    public readonly id = SnowflakeUtil.generate().toString();
     public readonly client: Client;
     public readonly options: PlayerInitOptions = {
         autoRegisterExtractor: true,
@@ -40,6 +42,9 @@ class Player extends EventEmitter<PlayerEvents> {
     public extractors = new ExtractorExecutionContext(this);
     public events = new EventEmitter<GuildQueueEvents>();
     #lastLatency = -1;
+    #voiceStateUpdateListener = this.handleVoiceState.bind(this);
+    #lagMonitorTimeout!: NodeJS.Timeout;
+    #lagMonitorInterval!: NodeJS.Timer;
 
     /**
      * Creates new Discord Player
@@ -65,7 +70,7 @@ class Player extends EventEmitter<PlayerEvents> {
          */
         this.options = Object.assign(this.options, options);
 
-        this.client.on('voiceStateUpdate', this.handleVoiceState.bind(this));
+        this.client.on('voiceStateUpdate', this.#voiceStateUpdateListener);
 
         if (this.options?.autoRegisterExtractor) {
             let nv: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -76,13 +81,15 @@ class Player extends EventEmitter<PlayerEvents> {
         }
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
-            setInterval(() => {
+            this.#lagMonitorInterval = setInterval(() => {
                 const start = performance.now();
-                setTimeout(() => {
+                this.#lagMonitorTimeout = setTimeout(() => {
                     this.#lastLatency = performance.now() - start;
                 }, 0).unref();
             }, this.options.lagMonitor).unref();
         }
+
+        hooks.addPlayer(this);
     }
 
     /**
@@ -96,8 +103,20 @@ class Player extends EventEmitter<PlayerEvents> {
     /**
      * Generates statistics
      */
-    generateStatistics() {
+    public generateStatistics() {
         return this.queues.map((m) => m.generateStatistics());
+    }
+
+    public async destroy() {
+        this.nodes.cache.forEach((node) => node.delete());
+        this.queues.forEach((queue) => (!queue.destroyed ? queue.destroy() : null));
+        this.client.off('voiceStateUpdate', this.#voiceStateUpdateListener);
+        this.removeAllListeners();
+        this.events.removeAllListeners();
+        await this.extractors.unregisterAll();
+        if (this.#lagMonitorInterval) clearInterval(this.#lagMonitorInterval);
+        if (this.#lagMonitorTimeout) clearInterval(this.#lagMonitorTimeout);
+        hooks.clearPlayer(this);
     }
 
     private _handleVoiceStateLegacy(oldState: VoiceState, newState: VoiceState) {
