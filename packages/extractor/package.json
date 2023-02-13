@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "file-type": "^16.5.4",
-    "genius-lyrics": "^4.4.2",
+    "genius-lyrics": "^4.4.3",
     "node-fetch": "cjs",
     "node-html-parser": "^6.1.4",
     "reverbnation-scraper": "^2.0.0",

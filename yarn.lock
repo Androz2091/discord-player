@@ -158,7 +158,7 @@ __metadata:
     "@types/node": ^18.11.18
     "@types/node-fetch": ^2.6.2
     file-type: ^16.5.4
-    genius-lyrics: ^4.4.2
+    genius-lyrics: ^4.4.3
     node-fetch: cjs
     node-html-parser: ^6.1.4
     play-dl: ^1.9.6
@@ -3152,13 +3152,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"genius-lyrics@npm:^4.4.2":
-  version: 4.4.2
-  resolution: "genius-lyrics@npm:4.4.2"
+"genius-lyrics@npm:^4.4.3":
+  version: 4.4.3
+  resolution: "genius-lyrics@npm:4.4.3"
   dependencies:
     cheerio: ^1.0.0-rc.9
     undici: ^5.8.2
-  checksum: df7b1963b34f41b39a4274ffed31c72867cb97f84bf9ae8d32824304f7b572669cd8c4bcbc7f54adf419c79e42f0fbb282d93b278c1f2a69ac3737d1b31ac6b6
+  checksum: 5612f4b97503a5e1fab912ccd46c3dfe95495e2f0b90179a718a4454422fbd0370690734dad5d79e0c043e533ee4e3bd90540de0e6ab6668875b3cb0947a0391
   languageName: node
   linkType: hard
 
