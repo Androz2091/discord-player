@@ -44,14 +44,15 @@
     "npm-run-all": "^4.1.5",
     "prettier": "2.8.4",
     "tsc-watch": "6.0.0",
+    "tsup": "^6.6.3",
     "typescript": "4.9.5"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "start": "node --preserve-symlinks dist/index.js",
+    "build": "tsup",
+    "watch": "tsup --watch",
+    "start": "tsup && node --preserve-symlinks dist/index.js",
     "dev": "run-p watch start",
-    "watch:start": "tsc-watch --onSuccess \"node --preserve-symlinks ./dist/index.js\"",
+    "watch:start": "tsup --watch --onSuccess \"node --preserve-symlinks ./dist/index.js\"",
     "format": "eslint \"src/**\" --fix"
   },
   "prettier": "@sapphire/prettier-config",

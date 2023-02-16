@@ -21,19 +21,7 @@ import { DiscordPlayerQueryResultCache, QueryCache } from './utils/QueryCache';
 class Player extends EventEmitter<PlayerEvents> {
     public readonly id = SnowflakeUtil.generate().toString();
     public readonly client: Client;
-    public readonly options: PlayerInitOptions = {
-        autoRegisterExtractor: true,
-        lockVoiceStateHandler: false,
-        blockExtractors: [],
-        blockStreamFrom: [],
-        ytdlOptions: {
-            highWaterMark: 1 << 25
-        },
-        connectionTimeout: 20000,
-        smoothVolume: true,
-        lagMonitor: 30000,
-        queryCache: new QueryCache(this)
-    };
+    public readonly options: PlayerInitOptions;
     /**
      * @deprecated
      */
@@ -70,7 +58,21 @@ class Player extends EventEmitter<PlayerEvents> {
          * The extractors collection
          * @type {ExtractorModel}
          */
-        this.options = Object.assign(this.options, options);
+        this.options = {
+            autoRegisterExtractor: true,
+            lockVoiceStateHandler: false,
+            blockExtractors: [],
+            blockStreamFrom: [],
+            connectionTimeout: 20000,
+            smoothVolume: true,
+            lagMonitor: 30000,
+            queryCache: options.queryCache === null ? null : new QueryCache(this),
+            ...options,
+            ytdlOptions: {
+                highWaterMark: 1 << 25,
+                ...options.ytdlOptions
+            }
+        };
 
         this.client.on('voiceStateUpdate', this.#voiceStateUpdateListener);
 
@@ -489,13 +491,14 @@ class Player extends EventEmitter<PlayerEvents> {
             if (!options.ignoreCache) {
                 const res = await this.queryCache?.resolve(query);
                 // cache hit
-                if (res) return res;
+                if (res?.hasTracks()) return res;
             }
 
             // cache miss
             extractor =
                 (
                     await this.extractors.run(async (ext) => {
+                        if (options.blockExtractors?.includes(ext.identifier)) return false;
                         return ext.validate(query, queryType as SearchQueryType);
                     })
                 )?.extractor || null;
@@ -531,6 +534,7 @@ class Player extends EventEmitter<PlayerEvents> {
 
         const result = await this.extractors.run(
             async (ext) =>
+                !options.blockExtractors?.includes(ext.identifier) &&
                 (await ext.validate(query)) &&
                 ext.handle(query, {
                     type: queryType as SearchQueryType,
