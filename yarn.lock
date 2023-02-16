@@ -198,7 +198,7 @@ __metadata:
     "@mantine/core": ^5.10.2
     "@mantine/hooks": ^5.10.2
     "@mantine/next": ^5.10.2
-    "@mantine/prism": ^5.10.2
+    "@mantine/prism": ^5.10.4
     next: ^13.1.4
     nextra: ^2.2.10
     nextra-theme-docs: ^2.2.10
@@ -558,18 +558,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/prism@npm:^5.10.2":
-  version: 5.10.2
-  resolution: "@mantine/prism@npm:5.10.2"
+"@mantine/prism@npm:^5.10.4":
+  version: 5.10.4
+  resolution: "@mantine/prism@npm:5.10.4"
   dependencies:
-    "@mantine/utils": 5.10.2
+    "@mantine/utils": 5.10.4
     prism-react-renderer: ^1.2.1
   peerDependencies:
-    "@mantine/core": 5.10.2
-    "@mantine/hooks": 5.10.2
+    "@mantine/core": 5.10.4
+    "@mantine/hooks": 5.10.4
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: da6a4711a5a0d2e9d727596176be6ea8a68b7a79ca422df78eabf9a2cad25fbf731233b4db17fdaefcc72e60c2702cf1e9487cde6c6e9883f65440a7b52e0853
+  checksum: 786d8b842d8cd23fd38b0a71ed432083682c55de9b5a75954f59d1f60c0adb136f95121d0de695055b9c0d66dc2732b908cb2538f6899b5def3a290492c2b124
   languageName: node
   linkType: hard
 
@@ -608,6 +608,15 @@ __metadata:
   peerDependencies:
     react: ">=16.8.0"
   checksum: 6d1acdcd58020c26b646adfacd8082a03d17348ab921d741c6dae48312264bfd03afe9b91cb827c48cbc2f0480054a7b3aae808ec39240d0e4067b413cf19ea8
+  languageName: node
+  linkType: hard
+
+"@mantine/utils@npm:5.10.4":
+  version: 5.10.4
+  resolution: "@mantine/utils@npm:5.10.4"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 96e2602f8500c29b5979d4fe0b3456c8de911ff1bd2ef216d960b23a5370ff6828871aa859538a4004ad095fb63d7e0e76cdfb365bdb930f70f8076d730302c1
   languageName: node
   linkType: hard
 
