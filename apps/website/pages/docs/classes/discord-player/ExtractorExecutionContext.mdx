@@ -9,9 +9,9 @@ new ExtractorExecutionContext(player)
 
 ## Properties
 ### public  player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L7)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L7)
 ### public  store: Collection\<string, BaseExtractor>
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L6)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L6)
 ### public  size: number
 
 ## Methods
@@ -21,34 +21,35 @@ new ExtractorExecutionContext(player)
 | identifier | string | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L17)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L17)
 ### public  isRegistered(identifier): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | identifier | string | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L9)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L9)
 ### public  register(_extractor): Promise\<void>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | _extractor | (typeof BaseExtractor) | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L21)
-### public  run(fn): Promise\<null \| ExtractorExecutionResult\<T>>
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L21)
+### public  run(fn, filterBlocked): Promise\<null \| ExtractorExecutionResult\<T>>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | ExtractorExecutionFN\<T> | ❌ | - |
+| filterBlocked | boolean | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L59)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L59)
 ### public  unregister(_extractor): Promise\<void>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | _extractor | K | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L33)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L33)
 ### public  unregisterAll(): Promise\<void>
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L46)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L46)

@@ -9,9 +9,9 @@ new ReverbnationExtractor(context)
 
 ## Properties
 ### public  context: ExtractorExecutionContext
-- Source: `packages/discord-player/dist/index.d.ts#L620`
+- Source: `packages/discord-player/dist/index.d.ts#L624`
 ### public static identifier: 'com.discord\-player.reverbnationextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/extractor/src/extractors/ReverbnationExtractor.ts#L16)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/extractor/src/extractors/ReverbnationExtractor.ts#L16)
 ### public  identifier: string
 Identifier of this extractor
 ## Methods
@@ -22,7 +22,20 @@ This method will be executed when this extractor is activated
 
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L637`
+- Source: `packages/discord-player/dist/index.d.ts#L641`
+### public  createResponse(playlist?, tracks?): ExtractorInfo
+Create extractor response
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| playlist | null \| Playlist | ✅ | The playlist |
+| tracks | Array\<Track> | ✅ | The track array |
+
+
+- Source: `packages/discord-player/dist/index.d.ts#L678`
 ### public  deactivate(): Promise\<void>
 This method will be executed when this extractor is deactivated
 
@@ -30,7 +43,7 @@ This method will be executed when this extractor is deactivated
 
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L641`
+- Source: `packages/discord-player/dist/index.d.ts#L645`
 ### public  emit(event, args): boolean
 Dispatch an event to the player
 
@@ -43,9 +56,9 @@ Dispatch an event to the player
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L668`
+- Source: `packages/discord-player/dist/index.d.ts#L672`
 ### public  emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/extractor/src/extractors/ReverbnationExtractor.ts#L51)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/extractor/src/extractors/ReverbnationExtractor.ts#L51)
 ### public  handle(query, context): Promise\<ExtractorInfo>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -53,7 +66,7 @@ Dispatch an event to the player
 | context | ExtractorSearchContext | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/extractor/src/extractors/ReverbnationExtractor.ts#L23)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/extractor/src/extractors/ReverbnationExtractor.ts#L23)
 ### public  handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
 
@@ -66,14 +79,14 @@ A stream middleware to handle streams before passing it to the player
 | next | NextFunction | ❌ | The next function |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L662`
+- Source: `packages/discord-player/dist/index.d.ts#L666`
 ### public  stream(info): Promise\<Readable>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | info | Track | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/extractor/src/extractors/ReverbnationExtractor.ts#L55)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/extractor/src/extractors/ReverbnationExtractor.ts#L55)
 ### public  validate(query, type?): Promise\<boolean>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -81,4 +94,4 @@ A stream middleware to handle streams before passing it to the player
 | type | null \| SearchQueryType | ✅ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/8b29b68/packages/extractor/src/extractors/ReverbnationExtractor.ts#L18)
+- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/extractor/src/extractors/ReverbnationExtractor.ts#L18)

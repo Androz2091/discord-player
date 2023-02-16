@@ -15,7 +15,8 @@ import { BaseExtractor } from './extractors/BaseExtractor';
 import { SearchResult } from './Structures/SearchResult';
 import { GuildNodeCreateOptions, GuildNodeManager } from './Structures/GuildQueue/GuildNodeManager';
 import { GuildQueueEvents, VoiceConnectConfig } from './Structures/GuildQueue';
-import { hooks } from './hooks';
+import * as _internals from './utils/__internal__';
+import { DiscordPlayerQueryResultCache, QueryCache } from './utils/QueryCache';
 
 class Player extends EventEmitter<PlayerEvents> {
     public readonly id = SnowflakeUtil.generate().toString();
@@ -30,7 +31,8 @@ class Player extends EventEmitter<PlayerEvents> {
         },
         connectionTimeout: 20000,
         smoothVolume: true,
-        lagMonitor: 30000
+        lagMonitor: 30000,
+        queryCache: new QueryCache(this)
     };
     /**
      * @deprecated
@@ -61,7 +63,7 @@ class Player extends EventEmitter<PlayerEvents> {
         this.client = client;
 
         if (this.client?.options?.intents && !new IntentsBitField(this.client?.options?.intents).has(IntentsBitField.Flags.GuildVoiceStates)) {
-            throw new PlayerError('client is missing "GuildVoiceStates" intent');
+            Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
         }
 
         /**
@@ -89,7 +91,25 @@ class Player extends EventEmitter<PlayerEvents> {
             }, this.options.lagMonitor).unref();
         }
 
-        hooks.addPlayer(this);
+        _internals.addPlayer(this);
+    }
+
+    /**
+     * Get all active player instances
+     */
+    public static getAllPlayers() {
+        return _internals.getPlayers();
+    }
+
+    /**
+     * Clear all player instances
+     */
+    public static clearAllPlayers() {
+        return _internals.instances.clear();
+    }
+
+    public get queryCache() {
+        return this.options.queryCache ?? null;
     }
 
     /**
@@ -116,7 +136,7 @@ class Player extends EventEmitter<PlayerEvents> {
         await this.extractors.unregisterAll();
         if (this.#lagMonitorInterval) clearInterval(this.#lagMonitorInterval);
         if (this.#lagMonitorTimeout) clearInterval(this.#lagMonitorTimeout);
-        hooks.clearPlayer(this);
+        _internals.clearPlayer(this);
     }
 
     private _handleVoiceStateLegacy(oldState: VoiceState, newState: VoiceState) {
@@ -465,6 +485,14 @@ class Player extends EventEmitter<PlayerEvents> {
 
         // query all extractors
         if (!extractor) {
+            // cache validation
+            if (!options.ignoreCache) {
+                const res = await this.queryCache?.resolve(query);
+                // cache hit
+                if (res) return res;
+            }
+
+            // cache miss
             extractor =
                 (
                     await this.extractors.run(async (ext) => {
@@ -486,13 +514,19 @@ class Player extends EventEmitter<PlayerEvents> {
             .catch(() => null);
 
         if (res) {
-            return new SearchResult(this, {
+            const result = new SearchResult(this, {
                 query,
                 queryType,
                 playlist: res.playlist,
                 tracks: res.tracks,
                 extractor
             });
+
+            if (!options.ignoreCache) {
+                this.queryCache?.addData(new DiscordPlayerQueryResultCache(result));
+            }
+
+            return result;
         }
 
         const result = await this.extractors.run(
@@ -505,13 +539,19 @@ class Player extends EventEmitter<PlayerEvents> {
         );
         if (!result?.result) return new SearchResult(this, { query, queryType });
 
-        return new SearchResult(this, {
+        const data = new SearchResult(this, {
             query,
             queryType,
             playlist: result.result.playlist,
             tracks: result.result.tracks,
             extractor: result.extractor
         });
+
+        if (!options.ignoreCache) {
+            this.queryCache?.addData(new DiscordPlayerQueryResultCache(data));
+        }
+
+        return data;
     }
 
     /**

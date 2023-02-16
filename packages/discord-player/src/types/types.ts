@@ -6,6 +6,7 @@ import { Playlist } from '../Structures/Playlist';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { downloadOptions } from 'ytdl-core';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
+import { QueryCache } from '../utils/QueryCache';
 
 export type FiltersName = keyof QueueFilters;
 
@@ -404,12 +405,14 @@ export type QueryExtractorSearch = `ext:${string}`;
  * @typedef {object} SearchOptions
  * @property {UserResolvable} requestedBy The user who requested this search
  * @property {typeof QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
- * @property {boolean} [blockExtractors[]] List of the extractors to block
+ * @property {string[]} [blockExtractors[]] List of the extractors to block
+ * @property {boolean} [ignoreCache] If it should ignore query cache lookup
  */
 export interface SearchOptions {
     requestedBy?: UserResolvable;
     searchEngine?: SearchQueryType | QueryExtractorSearch;
     blockExtractors?: string[];
+    ignoreCache?: boolean;
 }
 
 /**
@@ -524,6 +527,7 @@ export interface PlaylistJSON {
  * @property {boolean} [lockVoiceStateHandler] Prevent voice state handler from being overridden
  * @property {string[]} [blockExtractors] List of extractors to disable querying metadata from
  * @property {string[]} [blockStreamFrom] List of extractors to disable streaming from
+ * @property {QueryCache | null} [queryCache] Query cache provider
  */
 export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
@@ -534,5 +538,5 @@ export interface PlayerInitOptions {
     lockVoiceStateHandler?: boolean;
     blockExtractors?: string[];
     blockStreamFrom?: string[];
-    useQueryCaching?: boolean;
+    queryCache?: QueryCache | null;
 }

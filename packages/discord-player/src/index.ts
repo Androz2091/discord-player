@@ -15,6 +15,7 @@ export * from './utils/Util';
 export * from './types/types';
 export * from './utils/FFmpegStream';
 export * from './Structures/GuildQueue';
+export * from './utils/QueryCache';
 export {
     AudioFilters as PCMAudioFilters,
     BiquadFilters,
