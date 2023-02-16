@@ -23,7 +23,7 @@
     "@emotion/server": "^11.10.0",
     "@mantine/core": "^5.10.2",
     "@mantine/hooks": "^5.10.2",
-    "@mantine/next": "^5.10.2",
+    "@mantine/next": "^5.10.4",
     "@mantine/prism": "^5.10.2",
     "next": "^13.1.4",
     "nextra": "^2.2.10",
