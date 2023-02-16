@@ -45,6 +45,8 @@ export interface VoiceConnectConfig {
 
 export type OnBeforeCreateStreamHandler = (track: Track, queryType: SearchQueryType, queue: GuildQueue) => Promise<Readable | null>;
 
+export type PlayerTriggeredReason = 'filters' | 'normal';
+
 export interface GuildQueueEvents<Meta = unknown> {
     /**
      * Emitted when audio track is added to the queue
@@ -115,6 +117,12 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param track The track that was skipped
      */
     playerSkip: (queue: GuildQueue<Meta>, track: Track) => unknown;
+    /**
+     * Emitted when the audio player is triggered
+     * @param queue The queue where this event occurred
+     * @param track The track which was played in this event
+     */
+    playerTrigger: (queue: GuildQueue<Meta>, track: Track, reason: PlayerTriggeredReason) => unknown;
     /**
      * Emitted when the voice state is updated.
      * Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
@@ -335,6 +343,7 @@ export class GuildQueue<Meta = unknown> {
 
     #performStart(resource?: AudioResource<Track>) {
         const track = resource?.metadata || this.currentTrack;
+        this.player.events.emit('playerTrigger', this, track, this.isTransitioning() ? 'filters' : 'normal');
         if (track && !this.isTransitioning()) this.player.events.emit('playerStart', this, track);
         this.setTransitioning(false);
         this.initializing = false;
