@@ -343,7 +343,7 @@ export class GuildQueue<Meta = unknown> {
 
     #performStart(resource?: AudioResource<Track>) {
         const track = resource?.metadata || this.currentTrack;
-        this.player.events.emit('playerTrigger', this, track, this.isTransitioning() ? 'filters' : 'normal');
+        this.player.events.emit('playerTrigger', this, track!, this.isTransitioning() ? 'filters' : 'normal');
         if (track && !this.isTransitioning()) this.player.events.emit('playerStart', this, track);
         this.setTransitioning(false);
         this.initializing = false;
