@@ -62,7 +62,7 @@
     "@discord-player/utils": "*",
     "@discordjs/voice": "^0.11.0",
     "fuse.js": "^6.6.2",
-    "libsodium-wrappers": "^0.7.10"
+    "libsodium-wrappers": "^0.7.11"
   },
   "peerDependencies": {
     "discord.js": "14.x",
