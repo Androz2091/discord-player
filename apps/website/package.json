@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
-    "@emotion/react": "^11.10.5",
+    "@emotion/react": "^11.10.6",
     "@emotion/server": "^11.10.0",
     "@mantine/core": "^5.10.2",
     "@mantine/hooks": "^5.10.2",
