@@ -59,6 +59,7 @@ export class BiquadCommand extends Command {
 			await interaction.deferReply();
 
 			if (filter === 'Off') {
+				queue.filters._lastFiltersCache.biquad = null;
 				queue.filters.biquad.disable();
 			} else {
 				if (typeof dB === 'number') queue.filters.biquad.setGain(dB);

@@ -358,19 +358,22 @@ export class GuildQueue<Meta = unknown> {
             if (this.tracks.size < 1 && this.repeatMode === QueueRepeatMode.OFF) {
                 this.#emitEnd();
             } else {
-                if (this.repeatMode === QueueRepeatMode.AUTOPLAY) {
-                    this.#handleAutoplay(track);
-                    return;
-                }
                 if (this.repeatMode === QueueRepeatMode.TRACK) {
                     this.__current = this.history.tracks.dispatch() || track;
                     return this.node.play(this.__current);
                 }
                 if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.add(this.history.tracks.dispatch() || track);
-                this.__current = this.tracks.dispatch()!;
-                this.node.play(this.__current, {
-                    queue: false
-                });
+                if (!this.tracks.size) {
+                    if (this.repeatMode === QueueRepeatMode.AUTOPLAY) {
+                        this.#handleAutoplay(track);
+                        return;
+                    }
+                } else {
+                    this.__current = this.tracks.dispatch()!;
+                    this.node.play(this.__current, {
+                        queue: false
+                    });
+                }
             }
         }
     }

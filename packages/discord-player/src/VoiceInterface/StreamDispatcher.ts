@@ -139,13 +139,13 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
         this.audioPlayer.on('stateChange', (oldState, newState) => {
             if (newState.status === AudioPlayerStatus.Playing) {
-                if (!this.paused) return void this.emit('start', this.audioResource!);
-            } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
-                if (!this.paused) {
-                    void this.emit('finish', this.audioResource!);
-                    this.dsp.destroy();
-                    this.audioResource = null;
+                if (oldState.status === AudioPlayerStatus.Idle || oldState.status === AudioPlayerStatus.Buffering) {
+                    return this.emit('start', this.audioResource!);
                 }
+            } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
+                this.emit('finish', this.audioResource!);
+                this.dsp.destroy();
+                this.audioResource = null;
             }
         });
 

@@ -48,6 +48,7 @@ export class EqualizerCommand extends Command {
 			await interaction.deferReply();
 
 			if (preset === 'Off') {
+				queue.filters.equalizer.resetEQ();
 				queue.filters.equalizer.disable();
 			} else if (preset === 'Bass') {
 				queue.filters.equalizer.setEQ(BASS_EQ_BANDS);
