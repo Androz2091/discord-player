@@ -72,7 +72,7 @@
     "@discord-player/tsconfig": "*",
     "@types/node": "^18.6.3",
     "@types/ws": "^8.5.3",
-    "discord-api-types": "^0.37.0",
+    "discord-api-types": "^0.37.34",
     "discord.js": "^14.1.2",
     "opusscript": "^0.0.8",
     "typescript": "^4.7.4",

@@ -109,7 +109,7 @@ __metadata:
     "@discord-player/tsconfig": "*"
     "@discord-player/utils": "*"
     "@discordjs/voice": ^0.11.0
-    discord-api-types: ^0.37.2
+    discord-api-types: ^0.37.34
   languageName: unknown
   linkType: soft
 
@@ -2205,17 +2205,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:^0.37.0":
-  version: 0.37.0
-  resolution: "discord-api-types@npm:0.37.0"
-  checksum: a411d1f5a04301507e095af4b311fdf31593f42e57ff5259eaf1b8e6f3a1828b5899c9a5123cae005cad567c765367fcf20d434154ecba3e6fcdd79e53aa9f20
-  languageName: node
-  linkType: hard
-
-"discord-api-types@npm:^0.37.2":
-  version: 0.37.28
-  resolution: "discord-api-types@npm:0.37.28"
-  checksum: c033b9c82d5ecb3f273d563db578e21e982a35d106cc66e7ea42d7ef0a79817ca43badd3aade8a5ddb491bc8679ed08b1bcccc105e64ecd1ea5a53a11c2b1f8b
+"discord-api-types@npm:^0.37.34":
+  version: 0.37.34
+  resolution: "discord-api-types@npm:0.37.34"
+  checksum: eaaa6fafcb6679de296e68ef0923656d63a51523202075e8f6436da2b87a19ad17f1fc0a805720cd9e833b87a97a22a3194958f034558d5a182c8f0ebc2626da
   languageName: node
   linkType: hard
 
@@ -2230,7 +2223,7 @@ __metadata:
     "@discordjs/voice": ^0.11.0
     "@types/node": ^18.6.3
     "@types/ws": ^8.5.3
-    discord-api-types: ^0.37.0
+    discord-api-types: ^0.37.34
     discord.js: ^14.1.2
     fuse.js: ^6.6.2
     libsodium-wrappers: ^0.7.10
