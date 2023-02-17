@@ -1,6 +1,9 @@
 import Fuse from 'fuse.js';
 import { Player } from '../Player';
 import { SearchResult } from '../Structures/SearchResult';
+import { Track } from '../Structures/Track';
+import { User } from 'discord.js';
+import { SearchQueryType } from '../types/types';
 
 export interface QueryCacheOptions {
     checkInterval?: number;
@@ -10,10 +13,13 @@ export interface QueryCacheOptions {
 const DEFAULT_EXPIRY_TIMEOUT = 18_000_000;
 
 export class QueryCache {
-    #defaultCache = new Map<string, DiscordPlayerQueryResultCache>();
+    #defaultCache = new Map<string, DiscordPlayerQueryResultCache<Track>>();
     public timer: NodeJS.Timer;
-    public fuse = new Fuse([] as DiscordPlayerQueryResultCache[], {
-        keys: ['track.title', 'track.url', 'track.author', 'playlist.tracks.title', 'playlist.tracks.url', 'playlist.tracks.author']
+    public fuse = new Fuse([] as Track[], {
+        // prettier-ignore
+        keys: [
+            'url'
+        ]
     });
     public constructor(
         public player: Player,
@@ -44,42 +50,39 @@ export class QueryCache {
         return [...this.#defaultCache.values()];
     }
 
-    public async addData(data: DiscordPlayerQueryResultCache | DiscordPlayerQueryResultCache[]) {
-        if (!Array.isArray(data)) {
-            this.#defaultCache.set(data.data.query, data);
-        } else {
-            data.forEach((d) => this.#defaultCache.set(d.data.query, d));
-        }
+    public async addData(data: SearchResult) {
+        data.tracks.forEach((d) => {
+            if (this.#defaultCache.has(d.url)) return;
+            this.#defaultCache.set(d.url, new DiscordPlayerQueryResultCache(d));
+        });
     }
 
-    public async resolve(query: string) {
-        const result = this.fuse.search(query);
+    public async resolve(context: QueryCacheResolverContext) {
+        const cacheData = await this.getData();
 
+        this.fuse.setCollection(cacheData.map((m) => m.data));
+
+        const result = this.fuse.search(context.query);
         if (!result.length)
             return new SearchResult(this.player, {
-                query
+                query: context.query,
+                requestedBy: context.requestedBy,
+                queryType: context.queryType
             });
 
-        const data = result[0].item.data;
-
-        if (data.hasPlaylist()) {
-            return new SearchResult(this.player, {
-                query: data.query,
-                queryType: data.queryType,
-                extractor: data.extractor,
-                playlist: null,
-                requestedBy: data.requestedBy,
-                tracks: data.tracks
-            });
-        }
-
-        return data;
+        return new SearchResult(this.player, {
+            query: context.query,
+            tracks: result.map((m) => m.item),
+            playlist: null,
+            queryType: context.queryType,
+            requestedBy: context.requestedBy
+        });
     }
 }
 
-export class DiscordPlayerQueryResultCache {
+export class DiscordPlayerQueryResultCache<T = unknown> {
     public expireAfter = DEFAULT_EXPIRY_TIMEOUT;
-    public constructor(public data: SearchResult, expireAfter: number = DEFAULT_EXPIRY_TIMEOUT) {
+    public constructor(public data: T, expireAfter: number = DEFAULT_EXPIRY_TIMEOUT) {
         if (typeof expireAfter === 'number') {
             this.expireAfter = Date.now() + expireAfter;
         }
@@ -89,4 +92,10 @@ export class DiscordPlayerQueryResultCache {
         if (typeof this.expireAfter !== 'number' || isNaN(this.expireAfter) || this.expireAfter < 1) return false;
         return Date.now() <= this.expireAfter;
     }
+}
+
+export interface QueryCacheResolverContext {
+    query: string;
+    requestedBy?: User;
+    queryType?: SearchQueryType | `ext:${string}`;
 }

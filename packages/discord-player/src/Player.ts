@@ -16,7 +16,7 @@ import { SearchResult } from './Structures/SearchResult';
 import { GuildNodeCreateOptions, GuildNodeManager } from './Structures/GuildQueue/GuildNodeManager';
 import { GuildQueueEvents, VoiceConnectConfig } from './Structures/GuildQueue';
 import * as _internals from './utils/__internal__';
-import { DiscordPlayerQueryResultCache, QueryCache } from './utils/QueryCache';
+import { QueryCache } from './utils/QueryCache';
 
 class Player extends EventEmitter<PlayerEvents> {
     public readonly id = SnowflakeUtil.generate().toString();
@@ -489,7 +489,11 @@ class Player extends EventEmitter<PlayerEvents> {
         if (!extractor) {
             // cache validation
             if (!options.ignoreCache) {
-                const res = await this.queryCache?.resolve(query);
+                const res = await this.queryCache?.resolve({
+                    query,
+                    queryType,
+                    requestedBy: options.requestedBy
+                });
                 // cache hit
                 if (res?.hasTracks()) return res;
             }
@@ -526,7 +530,7 @@ class Player extends EventEmitter<PlayerEvents> {
             });
 
             if (!options.ignoreCache) {
-                this.queryCache?.addData(new DiscordPlayerQueryResultCache(result));
+                await this.queryCache?.addData(result);
             }
 
             return result;
@@ -552,7 +556,7 @@ class Player extends EventEmitter<PlayerEvents> {
         });
 
         if (!options.ignoreCache) {
-            this.queryCache?.addData(new DiscordPlayerQueryResultCache(data));
+            await this.queryCache?.addData(data);
         }
 
         return data;
