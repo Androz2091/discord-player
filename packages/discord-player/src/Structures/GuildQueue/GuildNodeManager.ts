@@ -106,7 +106,7 @@ export class GuildNodeManager<Meta = unknown> {
         queue.node.stop(true);
         queue.connection?.removeAllListeners();
         queue.dispatcher?.removeAllListeners();
-        queue.connection?.destroy();
+        queue.dispatcher?.disconnect();
         queue.timeouts.forEach((tm) => clearTimeout(tm));
         queue.history.clear();
         queue.tracks.clear();

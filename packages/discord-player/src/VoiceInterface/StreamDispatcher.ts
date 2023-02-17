@@ -268,7 +268,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     disconnect() {
         try {
-            this.audioPlayer.stop(true);
+            if (this.audioPlayer) this.audioPlayer.stop(true);
             this.voiceConnection.destroy();
         } catch {} // eslint-disable-line no-empty
     }
