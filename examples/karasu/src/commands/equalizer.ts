@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { GuildMember } from 'discord.js';
-import { EqualizerConfigurationPreset, BASS_EQ_BANDS } from 'discord-player';
+import { EqualizerConfigurationPreset } from 'discord-player';
 
 @ApplyOptions<Command.Options>({
 	description: 'Equalizer'

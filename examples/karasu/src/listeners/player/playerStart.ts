@@ -15,8 +15,6 @@ export class PlayerEvent extends Listener {
 		const missingPerms = queue.metadata.channel.permissionsFor(queue.metadata.client).missing(resolved);
 		if (missingPerms.length) return;
 
-		return queue.metadata.channel
-			.send(`▶ | Now playing: **${track.title || 'Unknown Title'}**`)
-			.then((m: { delete: () => void }) => setTimeout(() => m.delete(), 5000));
+		return queue.metadata.channel.send(`🎵 | Now playing: **${track.title || 'Unknown Title'}**`);
 	}
 }

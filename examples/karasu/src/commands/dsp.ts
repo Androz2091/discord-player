@@ -1,16 +1,29 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { GuildMember } from 'discord.js';
+import { PCMAudioFilters, PCMFilters } from 'discord-player';
 
 @ApplyOptions<Command.Options>({
-	description: '8D filter'
+	description: 'DSP filters'
 })
 export class PulsatorCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
 		registry.registerChatInputCommand((builder) => {
 			builder //
 				.setName(this.name)
-				.setDescription(this.description);
+				.setDescription(this.description)
+				.addStringOption((option) =>
+					option
+						.setName('filter')
+						.setDescription('The filter to toggle')
+						.addChoices(
+							...Object.keys(PCMAudioFilters).map((m) => ({
+								name: m,
+								value: m
+							}))
+						)
+						.setRequired(true)
+				);
 		});
 	}
 
@@ -28,20 +41,21 @@ export class PulsatorCommand extends Command {
 					content: `${this.container.client.dev.error} | This filter is not available to this queue`,
 					ephemeral: true
 				});
+			const afName = interaction.options.getString('filter', true) as PCMFilters;
 
 			await interaction.deferReply();
 
 			let ff = queue.filters.filters.filters;
-			if (ff.includes('8D')) {
-				ff = ff.filter((r) => r !== '8D');
+			if (ff.includes(afName)) {
+				ff = ff.filter((r) => r !== afName);
 			} else {
-				ff.push('8D');
+				ff.push(afName);
 			}
 
 			queue.filters.filters.setFilters(ff);
 
 			return interaction.followUp({
-				content: `${this.container.client.dev.success} | **8D** filter ${ff.includes('8D') ? 'enabled' : 'disabled'}!`
+				content: `${this.container.client.dev.success} | **${afName}** filter ${ff.includes(afName) ? 'enabled' : 'disabled'}!`
 			});
 		}
 	}

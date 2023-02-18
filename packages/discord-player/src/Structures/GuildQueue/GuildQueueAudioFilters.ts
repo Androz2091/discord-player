@@ -11,7 +11,7 @@ const makeBands = (arr: number[]) => {
         },
         (_, i) => ({
             band: i,
-            gain: arr[i] ? arr[i] / 10 : 0
+            gain: arr[i] ? arr[i] / 30 : 0
         })
     ) as EqualizerBand[];
 };

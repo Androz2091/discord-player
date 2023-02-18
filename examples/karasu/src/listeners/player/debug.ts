@@ -1,4 +1,5 @@
 import { container, Listener } from '@sapphire/framework';
+import { cyanBright, gray } from 'colorette';
 
 export class PlayerEvent extends Listener {
 	public constructor(context: Listener.Context, options: Listener.Options) {
@@ -10,6 +11,6 @@ export class PlayerEvent extends Listener {
 	}
 
 	public run(_queue, message) {
-		console.log(message);
+		console.log(`[${cyanBright('DEBUG')}] ${gray(message)}\n`);
 	}
 }
