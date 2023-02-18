@@ -144,6 +144,24 @@ client.on('interactionCreate', async (interaction) => {
 client.login('BOT_TOKEN');
 ```
 
+### Accessing player instance
+
+Polluting client like this could be a bad idea:
+
+```js
+client.player = player;
+```
+
+discord-player provides singleton support to avoid this type of pollution:
+
+```diff
+- const player = new Player(client);
++ const player = Player.singleton(client);
+```
+
+`Player.singleton()` creates a single instance of player which is shared in the future. You can simply do `Player.singleton()` to access player instance whenever
+you want without polluting client.
+
 ## Supported sources
 
 By default, discord-player **does not support anything** (including search operation and streaming). Luckily, discord-player supports the following sources with the help of [@discord-player/extractor](https://npm.im/@discord-player/extractor) which comes pre-installed with discord-player:
