@@ -49,6 +49,7 @@ export interface QueueFilters {
     fadein?: boolean;
     dim?: boolean;
     earrape?: boolean;
+    lofi?: boolean;
 }
 
 /**
