@@ -1,9 +1,9 @@
 import { EqualizerBand, PCMFilters, BiquadFilters } from '@discord-player/equalizer';
 import { Collection, QueueStrategy } from '@discord-player/utils';
 import { GuildResolvable } from 'discord.js';
-import { Player } from '../../Player';
+import { Player } from '../Player';
 import { GuildQueue, OnBeforeCreateStreamHandler } from './GuildQueue';
-import { QueueRepeatMode } from '../../types/types';
+import { QueueRepeatMode } from '../types/types';
 
 export interface GuildNodeCreateOptions<T = unknown> {
     strategy?: QueueStrategy;

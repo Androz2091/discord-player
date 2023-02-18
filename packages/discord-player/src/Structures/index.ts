@@ -3,3 +3,7 @@ export * from './GuildQueue';
 export * from './GuildQueueAudioFilters';
 export * from './GuildQueueHistory';
 export * from './GuildQueuePlayerNode';
+export * from './Playlist';
+export * from './Track';
+export * from './SearchResult';
+export * from './PlayerError';

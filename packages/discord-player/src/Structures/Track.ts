@@ -2,7 +2,7 @@ import { User, escapeMarkdown, SnowflakeUtil } from 'discord.js';
 import { Player } from '../Player';
 import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
 import { Playlist } from './Playlist';
-import { Queue } from './Queue';
+import { GuildQueue } from './GuildQueue';
 
 export type TrackResolvable = Track | string | number;
 
@@ -130,8 +130,8 @@ export class Track {
      * The queue in which this track is located
      * @type {Queue}
      */
-    get queue(): Queue {
-        return this.player.queues.find((q) => q.tracks.some((ab) => ab.id === this.id))!;
+    get queue(): GuildQueue {
+        return this.player.nodes.cache.find((q) => q.tracks.some((ab) => ab.id === this.id))!;
     }
 
     /**

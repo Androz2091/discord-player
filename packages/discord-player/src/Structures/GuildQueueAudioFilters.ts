@@ -1,4 +1,4 @@
-import AudioFilters from '../../utils/AudioFilters';
+import AudioFilters from '../utils/AudioFilters';
 import { GuildQueue } from './GuildQueue';
 import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 

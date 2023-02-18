@@ -3,18 +3,12 @@ import { version as djsVersion } from 'discord.js';
 export * from './utils/AudioFilters';
 export * from './extractors/BaseExtractor';
 export * from './extractors/ExtractorExecutionContext';
-export * from './Structures/Playlist';
-export * from './Player';
-export * from './Structures/PlayerError';
-export * from './utils/QueryResolver';
-export * from './Structures/Queue';
-export * from './Structures/Track';
+export * from './Structures';
 export * from './VoiceInterface/VoiceUtils';
 export * from './VoiceInterface/StreamDispatcher';
 export * from './utils/Util';
 export * from './types/types';
 export * from './utils/FFmpegStream';
-export * from './Structures/GuildQueue';
 export * from './utils/QueryCache';
 export {
     AudioFilters as PCMAudioFilters,

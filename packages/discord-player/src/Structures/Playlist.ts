@@ -2,7 +2,7 @@ import { Player } from '../Player';
 import { Track } from './Track';
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';
 
-class Playlist {
+export class Playlist {
     public readonly player: Player;
     public tracks: Track[];
     public title: string;
@@ -134,5 +134,3 @@ class Playlist {
         return payload as PlaylistJSON;
     }
 }
-
-export { Playlist };

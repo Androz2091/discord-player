@@ -1,11 +1,11 @@
 import { StreamType } from '@discordjs/voice';
 import { Readable } from 'stream';
-import { PlayerProgressbarOptions, SearchQueryType } from '../../types/types';
-import AudioFilters from '../../utils/AudioFilters';
-import { createFFmpegStream } from '../../utils/FFmpegStream';
-import { QueryResolver } from '../../utils/QueryResolver';
-import { Util } from '../../utils/Util';
-import { Track, TrackResolvable } from '../Track';
+import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
+import AudioFilters from '../utils/AudioFilters';
+import { createFFmpegStream } from '../utils/FFmpegStream';
+import { QueryResolver } from '../utils/QueryResolver';
+import { Util } from '../utils/Util';
+import { Track, TrackResolvable } from './Track';
 import { GuildQueue } from './GuildQueue';
 
 export interface ResourcePlayOptions {

@@ -1,19 +1,20 @@
-import { Player } from '../../Player';
+import { Player } from '../Player';
 import { ChannelType, Guild, GuildVoiceChannelResolvable, VoiceBasedChannel, VoiceState } from 'discord.js';
 import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
-import { Track } from '../Track';
-import { StreamDispatcher } from '../../VoiceInterface/StreamDispatcher';
+import { Track } from './Track';
+import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { AudioResource } from '@discordjs/voice';
-import { Util } from '../../utils/Util';
-import { Playlist } from '../Playlist';
+import { Util } from '../utils/Util';
+import { Playlist } from './Playlist';
 import { GuildQueueHistory } from './GuildQueueHistory';
 import { GuildQueuePlayerNode } from './GuildQueuePlayerNode';
 import { GuildQueueAudioFilters } from './GuildQueueAudioFilters';
 import { Readable } from 'stream';
-import { QueueRepeatMode, SearchQueryType } from '../../types/types';
+import { QueueRepeatMode, SearchQueryType } from '../types/types';
 import { setTimeout } from 'timers';
 import { YouTube } from 'youtube-sr';
+import { GuildQueueStatistics } from './GuildQueueStatistics';
 
 export interface GuildNodeInit<Meta = unknown> {
     guild: Guild;
@@ -147,6 +148,7 @@ export class GuildQueue<Meta = unknown> {
     public onBeforeCreateStream: OnBeforeCreateStreamHandler = async () => null;
     public repeatMode = QueueRepeatMode.OFF;
     public timeouts = new Collection<string, NodeJS.Timeout>();
+    public stats = new GuildQueueStatistics<Meta>(this);
 
     public constructor(public player: Player, public options: GuildNodeInit<Meta>) {
         this.tracks = new Queue<Track>(options.queueStrategy);
@@ -360,7 +362,7 @@ export class GuildQueue<Meta = unknown> {
             } else {
                 if (this.repeatMode === QueueRepeatMode.TRACK) {
                     this.__current = this.history.tracks.dispatch() || track;
-                    return this.node.play(this.__current);
+                    return this.node.play(this.__current!);
                 }
                 if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.add(this.history.tracks.dispatch() || track);
                 if (!this.tracks.size) {
