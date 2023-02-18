@@ -18,7 +18,10 @@ import { GuildQueueEvents, VoiceConnectConfig } from './Structures/GuildQueue';
 import * as _internals from './utils/__internal__';
 import { QueryCache } from './utils/QueryCache';
 
+const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
+
 class Player extends EventEmitter<PlayerEvents> {
+    public static _singletonKey = kSingleton;
     public readonly id = SnowflakeUtil.generate().toString();
     public readonly client: Client;
     public readonly options: PlayerInitOptions;
@@ -94,6 +97,30 @@ class Player extends EventEmitter<PlayerEvents> {
         }
 
         _internals.addPlayer(this);
+    }
+
+    /**
+     * Creates discord-player singleton instance.
+     * @param client The client that instantiated player
+     * @param options Player initializer options
+     * @example const player1 = Player.singleton(client, options);
+     * const player2 = Player.singleton(client, options);
+     * const player3 = new Player(client, options);
+     * player1.id === player2.id // true
+     * player1.id === player3.id // false
+     */
+    public static singleton(client: Client, options: PlayerInitOptions = {}) {
+        if (!(kSingleton in Player)) {
+            Object.defineProperty(Player, kSingleton, {
+                value: new Player(client, options),
+                writable: true,
+                configurable: true,
+                enumerable: false
+            });
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (Player as any)[kSingleton] as Player;
     }
 
     /**
