@@ -1,4 +1,4 @@
-import { StreamType } from '@discordjs/voice';
+import { AudioResource, StreamType } from '@discordjs/voice';
 import { Readable } from 'stream';
 import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
 import AudioFilters from '../utils/AudioFilters';
@@ -7,6 +7,7 @@ import { QueryResolver } from '../utils/QueryResolver';
 import { Util } from '../utils/Util';
 import { Track, TrackResolvable } from './Track';
 import { GuildQueue } from './GuildQueue';
+import { setTimeout as waitFor } from 'timers/promises';
 
 export interface ResourcePlayOptions {
     queue?: boolean;
@@ -273,6 +274,12 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             const pcmStream = this.#createFFmpegStream(stream, track, options.seek ?? 0);
 
+            if (options.transitionMode) {
+                this.queue.debug(`Transition mode detected, player will wait for buffering timeout to expire (Timeout: ${this.queue.options.bufferingTimeout}ms)`);
+                await waitFor(this.queue.options.bufferingTimeout);
+                this.queue.debug('Buffering timeout has expired!');
+            }
+
             this.queue.debug(
                 `Creating audio resource from processed stream, config: ${JSON.stringify(
                     {
@@ -286,7 +293,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                         eq: this.queue.filters._lastFiltersCache.equalizer,
                         defaultFilters: this.queue.filters._lastFiltersCache.filters,
                         volume: this.queue.filters._lastFiltersCache.volume,
-                        transitionMode: !!options.transitionMode
+                        transitionMode: !!options.transitionMode,
+                        ffmpegFilters: this.queue.filters.ffmpeg.filters,
+                        seek: options.seek
                     },
                     null,
                     2
@@ -310,14 +319,18 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             this.queue.setTransitioning(!!options.transitionMode);
 
-            this.queue.debug('Initializing audio player...');
-            await this.queue.dispatcher.playStream(resource);
-            this.queue.debug('Dispatching audio...');
+            await this.#performPlay(resource);
         } catch (e) {
             this.queue.debug(`Failed to initialize audio player: ${e}`);
             this.queue.initializing = false;
             throw e;
         }
+    }
+
+    async #performPlay(resource: AudioResource<Track>) {
+        this.queue.debug('Initializing audio player...');
+        await this.queue.dispatcher!.playStream(resource);
+        this.queue.debug('Dispatching audio...');
     }
 
     async #createGenericStream(track: Track) {

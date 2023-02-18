@@ -1,11 +1,8 @@
 import { Snowflake, User, UserResolvable, VoiceState } from 'discord.js';
-import { Readable, Duplex } from 'stream';
-import { Queue } from '../Structures/Queue';
+import { GuildQueue } from '../Structures';
 import { Track } from '../Structures/Track';
 import { Playlist } from '../Structures/Playlist';
-import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { downloadOptions } from 'ytdl-core';
-import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { QueryCache } from '../utils/QueryCache';
 
 export type FiltersName = keyof QueueFilters;
@@ -129,110 +126,6 @@ export interface PlayerProgressbarOptions {
 }
 
 /**
- * @typedef {object} PlayerOptions
- * @property {boolean} [leaveOnEnd=true] If it should leave on end
- * @property {boolean} [leaveOnStop=true] If it should leave on stop
- * @property {boolean} [leaveOnEmpty=true] If it should leave on empty
- * @property {number} [leaveOnEmptyCooldown=1000] The cooldown in ms
- * @property {number} [leaveOnEndCooldown=1000] The cooldown in ms
- * @property {boolean} [autoSelfDeaf=true] If it should set the bot in deaf mode
- * @property {YTDLDownloadOptions} [ytdlOptions] The youtube download options
- * @property {number} [initialVolume=100] The initial player volume
- * @property {number} [bufferingTimeout=3000] Buffering timeout for the stream
- * @property {boolean} [spotifyBridge=true] If player should bridge spotify source to youtube
- * @property {boolean} [disableVolume=false] If player should disable inline volume
- * @property {boolean} [disableEqualizer=false] If player should disable equalizer
- * @property {boolean} [disableBiquad=false] If player should disable biquad
- * @property {number} [volumeSmoothness=0] The volume transition smoothness between volume changes (lower the value to get better result)
- * Setting this or leaving this empty will disable this effect. Example: `volumeSmoothness: 0.1`
- * @property {EqualizerBand[]} [equalizerBands] The equalizer bands array for 15 band equalizer.
- * @property {BiquadFilters} [biquadFilter] The biquad filter initializer value
- * @property {boolean} [disableFilters] Disable/enable PCM filter
- * @property {PCMFilters[]} [defaultFilters] The PCM filters initializer
- * @property {Function} [onBeforeCreateStream] Runs before creating stream
- */
-export interface PlayerOptions {
-    leaveOnEnd?: boolean;
-    leaveOnEndCooldown?: number;
-    leaveOnStop?: boolean;
-    leaveOnEmpty?: boolean;
-    leaveOnEmptyCooldown?: number;
-    autoSelfDeaf?: boolean;
-    ytdlOptions?: downloadOptions;
-    initialVolume?: number;
-    bufferingTimeout?: number;
-    spotifyBridge?: boolean;
-    disableVolume?: boolean;
-    disableEqualizer?: boolean;
-    disableBiquad?: boolean;
-    volumeSmoothness?: number;
-    equalizerBands?: EqualizerBand[];
-    biquadFilter?: BiquadFilters;
-    disableFilters?: boolean;
-    defaultFilters?: PCMFilters[];
-    onBeforeCreateStream?: (track: Track, source: SearchQueryType, queue: Queue) => Promise<Readable>;
-}
-
-/**
- * @typedef {object} ExtractorModelData
- * @property {object} [playlist] The playlist info (if any)
- * @property {string} [playlist.title] The playlist title
- * @property {string} [playlist.description] The playlist description
- * @property {string} [playlist.thumbnail] The playlist thumbnail
- * @property {album|playlist} [playlist.type] The playlist type: `album` | `playlist`
- * @property {TrackSource} [playlist.source] The playlist source
- * @property {object} [playlist.author] The playlist author
- * @property {string} [playlist.author.name] The author name
- * @property {string} [playlist.author.url] The author url
- * @property {string} [playlist.id] The playlist id
- * @property {string} [playlist.url] The playlist url
- * @property {any} [playlist.rawPlaylist] The raw data
- * @property {ExtractorData[]} data The data
- */
-
-/**
- * @typedef {object} ExtractorData
- * @property {string} title The title
- * @property {number} duration The duration
- * @property {string} thumbnail The thumbnail
- * @property {string|Readable|Duplex} engine The stream engine
- * @property {number} views The views count
- * @property {string} author The author
- * @property {string} description The description
- * @property {string} url The url
- * @property {string} [version] The extractor version
- * @property {TrackSource} [source="arbitrary"] The source
- */
-export interface ExtractorModelData {
-    playlist?: {
-        title: string;
-        description: string;
-        thumbnail: string;
-        type: 'album' | 'playlist';
-        source: TrackSource;
-        author: {
-            name: string;
-            url: string;
-        };
-        id: string;
-        url: string;
-        rawPlaylist?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    };
-    data: {
-        title: string;
-        duration: number;
-        thumbnail: string;
-        engine: string | Readable | Duplex;
-        views: number;
-        author: string;
-        description: string;
-        url: string;
-        version?: string;
-        source?: TrackSource;
-    }[];
-}
-
-/**
  * The search query type
  * This can be one of:
  * - AUTO
@@ -282,105 +175,11 @@ export const QueryType = {
 
 export type SearchQueryType = keyof typeof QueryType | (typeof QueryType)[keyof typeof QueryType];
 
-/**
- * Emitted when bot gets disconnected from a voice channel
- * @event Player#botDisconnect
- * @param {Queue} queue The queue
- */
-
-/**
- * Emitted when the voice channel is empty
- * @event Player#channelEmpty
- * @param {Queue} queue The queue
- */
-
-/**
- * Emitted when bot connects to a voice channel
- * @event Player#connectionCreate
- * @param {Queue} queue The queue
- * @param {StreamDispatcher} connection The discord player connection object
- */
-
-/**
- * Debug information
- * @event Player#debug
- * @param {Queue} queue The queue
- * @param {string} message The message
- */
-
-/**
- * Emitted on error
- * <warn>This event should handled properly otherwise it may crash your process!</warn>
- * @event Player#error
- * @param {Queue} queue The queue
- * @param {Error} error The error
- */
-
-/**
- * Emitted on connection error. Sometimes stream errors are emitted here as well.
- * @event Player#connectionError
- * @param {Queue} queue The queue
- * @param {Error} error The error
- */
-
-/**
- * Emitted when queue ends
- * @event Player#queueEnd
- * @param {Queue} queue The queue
- */
-
-/**
- * Emitted when a single track is added
- * @event Player#trackAdd
- * @param {Queue} queue The queue
- * @param {Track} track The track
- */
-
-/**
- * Emitted when multiple tracks are added
- * @event Player#tracksAdd
- * @param {Queue} queue The queue
- * @param {Track[]} tracks The tracks
- */
-
-/**
- * Emitted when a track starts playing
- * @event Player#trackStart
- * @param {Queue} queue The queue
- * @param {Track} track The track
- */
-
-/**
- * Emitted when a track ends
- * @event Player#trackEnd
- * @param {Queue} queue The queue
- * @param {Track} track The track
- */
-
-/**
- * Emitted when voice state updates. Listen to this event to modify internal voice state update handler.
- * @event Player#voiceStateUpdate
- * @param {Queue} queue The queue that this update belongs to
- * @param {VoiceState} oldState The old voice state
- * @param {VoiceState} newState The new voice state
- */
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface PlayerEvents {
-    //#region legacy
-    botDisconnect: (queue: Queue) => any;
-    channelEmpty: (queue: Queue) => any;
-    connectionCreate: (queue: Queue, connection: StreamDispatcher) => any;
-    debug: (queue: Queue, message: string) => any;
-    error: (queue: Queue, error: Error) => any;
-    connectionError: (queue: Queue, error: Error) => any;
-    queueEnd: (queue: Queue) => any;
-    trackAdd: (queue: Queue, track: Track) => any;
-    tracksAdd: (queue: Queue, track: Track[]) => any;
-    trackStart: (queue: Queue, track: Track) => any;
-    trackEnd: (queue: Queue, track: Track) => any;
-    voiceStateUpdate: (queue: Queue, oldState: VoiceState, newState: VoiceState) => any;
-    //#endregion legacy
+    debug: (message: string) => any;
+    error: (error: Error) => any;
+    voiceStateUpdate: (queue: GuildQueue, oldState: VoiceState, newState: VoiceState) => any;
 }
 
 /* eslint-enable @typescript-eslint/no-explicit-any */

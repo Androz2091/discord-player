@@ -13,7 +13,7 @@ import { QueryCache } from './utils/QueryCache';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
-class Player extends EventEmitter<PlayerEvents> {
+export class Player extends EventEmitter<PlayerEvents> {
     public static _singletonKey = kSingleton;
     public readonly id = SnowflakeUtil.generate().toString();
     public readonly client: Client;
@@ -480,5 +480,3 @@ class Player extends EventEmitter<PlayerEvents> {
         return new Playlist(this, data);
     }
 }
-
-export { Player };

@@ -11,7 +11,7 @@ import { GuildQueueHistory } from './GuildQueueHistory';
 import { GuildQueuePlayerNode } from './GuildQueuePlayerNode';
 import { GuildQueueAudioFilters } from './GuildQueueAudioFilters';
 import { Readable } from 'stream';
-import { QueueRepeatMode, SearchQueryType } from '../types/types';
+import { FiltersName, QueueRepeatMode, SearchQueryType } from '../types/types';
 import { setTimeout } from 'timers';
 import { YouTube } from 'youtube-sr';
 import { GuildQueueStatistics } from './GuildQueueStatistics';
@@ -24,6 +24,7 @@ export interface GuildNodeInit<Meta = unknown> {
     biquad: BiquadFilters | boolean | undefined;
     resampler: number | boolean;
     filterer: PCMFilters[] | boolean;
+    ffmpegFilters: FiltersName[];
     disableHistory: boolean;
     skipOnNoStream: boolean;
     onBeforeCreateStream?: OnBeforeCreateStreamHandler;
@@ -37,6 +38,7 @@ export interface GuildNodeInit<Meta = unknown> {
     connectionTimeout: number;
     selfDeaf?: boolean;
     metadata?: Meta | null;
+    bufferingTimeout: number;
 }
 
 export interface VoiceConnectConfig {
@@ -168,6 +170,9 @@ export class GuildQueue<Meta = unknown> {
         }
         if (typeof this.options.resampler === 'number') {
             this.filters._lastFiltersCache.sampleRate = this.options.resampler;
+        }
+        if (Array.isArray(this.options.ffmpegFilters)) {
+            this.filters.ffmpeg.setDefaults(this.options.ffmpegFilters);
         }
         this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
     }

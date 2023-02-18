@@ -10,6 +10,7 @@ export * from './utils/Util';
 export * from './types/types';
 export * from './utils/FFmpegStream';
 export * from './utils/QueryCache';
+export * from './Player';
 export {
     AudioFilters as PCMAudioFilters,
     BiquadFilters,

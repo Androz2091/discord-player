@@ -73,12 +73,16 @@ export class FFmpegFilterer<Meta = unknown> {
         if (!Array.isArray(filters)) filters = [filters];
         const fresh: Filters[] = [];
 
-        this.filters.forEach((f) => {
+        filters.forEach((f) => {
             if (this.filters.includes(f)) return;
             fresh.push(f);
         });
 
         return this.#setFilters(this.#ffmpegFilters.filter((r) => !filters.includes(r)).concat(fresh));
+    }
+
+    public setDefaults(ff: Filters[]) {
+        this.#ffmpegFilters = ff;
     }
 
     public getFiltersEnabled() {

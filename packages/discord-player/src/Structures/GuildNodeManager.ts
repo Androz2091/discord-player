@@ -3,7 +3,7 @@ import { Collection, QueueStrategy } from '@discord-player/utils';
 import { GuildResolvable } from 'discord.js';
 import { Player } from '../Player';
 import { GuildQueue, OnBeforeCreateStreamHandler } from './GuildQueue';
-import { QueueRepeatMode } from '../types/types';
+import { FiltersName, QueueRepeatMode } from '../types/types';
 
 export interface GuildNodeCreateOptions<T = unknown> {
     strategy?: QueueStrategy;
@@ -25,6 +25,8 @@ export interface GuildNodeCreateOptions<T = unknown> {
     metadata?: T | null;
     selfDeaf?: boolean;
     connectionTimeout?: number;
+    defaultFFmpegFilters?: FiltersName[];
+    bufferingTimeout?: number;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
@@ -58,6 +60,7 @@ export class GuildNodeManager<Meta = unknown> {
         options.resampler ??= 48000;
         options.selfDeaf ??= true;
         options.connectionTimeout ??= this.player.options.connectionTimeout;
+        options.bufferingTimeout ??= 4000;
 
         const queue = new GuildQueue<T>(this.player, {
             guild: server,
@@ -79,7 +82,9 @@ export class GuildNodeManager<Meta = unknown> {
             leaveOnStopCooldown: options.leaveOnStopCooldown,
             metadata: options.metadata,
             connectionTimeout: options.connectionTimeout ?? 120_000,
-            selfDeaf: options.selfDeaf
+            selfDeaf: options.selfDeaf,
+            ffmpegFilters: options.defaultFFmpegFilters ?? [],
+            bufferingTimeout: options.bufferingTimeout
         });
 
         this.cache.set(server.id, queue);
