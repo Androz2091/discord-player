@@ -2,7 +2,7 @@ import { EqualizerBand, PCMFilters, BiquadFilters } from '@discord-player/equali
 import { Collection, QueueStrategy } from '@discord-player/utils';
 import { GuildResolvable } from 'discord.js';
 import { Player } from '../Player';
-import { GuildQueue, OnBeforeCreateStreamHandler } from './GuildQueue';
+import { GuildQueue, OnAfterCreateStreamHandler, OnBeforeCreateStreamHandler } from './GuildQueue';
 import { FiltersName, QueueRepeatMode } from '../types/types';
 
 export interface GuildNodeCreateOptions<T = unknown> {
@@ -15,6 +15,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
     disableHistory?: boolean;
     skipOnNoStream?: boolean;
     onBeforeCreateStream?: OnBeforeCreateStreamHandler;
+    onAfterCreateStream?: OnAfterCreateStreamHandler;
     repeatMode?: QueueRepeatMode;
     leaveOnEmpty?: boolean;
     leaveOnEmptyCooldown?: number;
@@ -73,6 +74,7 @@ export class GuildNodeManager<Meta = unknown> {
             disableHistory: options.disableHistory,
             skipOnNoStream: options.skipOnNoStream,
             onBeforeCreateStream: options.onBeforeCreateStream,
+            onAfterCreateStream: options.onAfterCreateStream,
             repeatMode: options.repeatMode,
             leaveOnEmpty: options.leaveOnEmpty,
             leaveOnEmptyCooldown: options.leaveOnEmptyCooldown,

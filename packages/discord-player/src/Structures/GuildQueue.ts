@@ -28,6 +28,7 @@ export interface GuildNodeInit<Meta = unknown> {
     disableHistory: boolean;
     skipOnNoStream: boolean;
     onBeforeCreateStream?: OnBeforeCreateStreamHandler;
+    onAfterCreateStream?: OnAfterCreateStreamHandler;
     repeatMode?: QueueRepeatMode;
     leaveOnEmpty: boolean;
     leaveOnEmptyCooldown: number;
@@ -47,6 +48,7 @@ export interface VoiceConnectConfig {
 }
 
 export type OnBeforeCreateStreamHandler = (track: Track, queryType: SearchQueryType, queue: GuildQueue) => Promise<Readable | null>;
+export type OnAfterCreateStreamHandler = (stream: Readable) => Promise<Readable | null>;
 
 export type PlayerTriggeredReason = 'filters' | 'normal';
 
@@ -148,6 +150,7 @@ export class GuildQueue<Meta = unknown> {
     public node = new GuildQueuePlayerNode<Meta>(this);
     public filters = new GuildQueueAudioFilters<Meta>(this);
     public onBeforeCreateStream: OnBeforeCreateStreamHandler = async () => null;
+    public onAfterCreateStream: OnAfterCreateStreamHandler = async (stream) => stream;
     public repeatMode = QueueRepeatMode.OFF;
     public timeouts = new Collection<string, NodeJS.Timeout>();
     public stats = new GuildQueueStatistics<Meta>(this);
@@ -155,6 +158,7 @@ export class GuildQueue<Meta = unknown> {
     public constructor(public player: Player, public options: GuildNodeInit<Meta>) {
         this.tracks = new Queue<Track>(options.queueStrategy);
         if (typeof options.onBeforeCreateStream === 'function') this.onBeforeCreateStream = options.onBeforeCreateStream;
+        if (typeof options.onAfterCreateStream === 'function') this.onAfterCreateStream = options.onAfterCreateStream;
         if (options.repeatMode != null) this.repeatMode = options.repeatMode;
 
         options.selfDeaf ??= true;

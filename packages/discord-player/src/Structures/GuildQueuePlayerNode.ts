@@ -274,6 +274,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             const pcmStream = this.#createFFmpegStream(stream, track, options.seek ?? 0);
 
+            const finalStream = (await this.queue.onAfterCreateStream?.(pcmStream).catch(() => pcmStream)) || pcmStream;
+
             if (options.transitionMode) {
                 this.queue.debug(`Transition mode detected, player will wait for buffering timeout to expire (Timeout: ${this.queue.options.bufferingTimeout}ms)`);
                 await waitFor(this.queue.options.bufferingTimeout);
@@ -302,7 +304,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 )}`
             );
 
-            const resource = this.queue.dispatcher.createStream(pcmStream, {
+            const resource = this.queue.dispatcher.createStream(finalStream, {
                 disableBiquad: this.queue.options.biquad === false,
                 disableEqualizer: this.queue.options.equalizer === false,
                 disableVolume: this.queue.options.volume === false,
