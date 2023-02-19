@@ -189,10 +189,17 @@ export class GuildQueue<Meta = unknown> {
         this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
     }
 
+    /**
+     * Write a debug message to this queue
+     * @param m The message to write
+     */
     public debug(m: string) {
         this.player.events.emit('debug', this, m);
     }
 
+    /**
+     * The metadata of this queue
+     */
     public get metadata() {
         return this.options.metadata;
     }
@@ -201,11 +208,18 @@ export class GuildQueue<Meta = unknown> {
         this.options.metadata = m;
     }
 
+    /**
+     * Set metadata for this queue
+     * @param m Metadata to set
+     */
     public setMetadata(m: Meta | undefined | null) {
         this.#warnIfDeleted();
         this.options.metadata = m;
     }
 
+    /**
+     * Indicates if this queue is currently initializing
+     */
     public get initializing() {
         return this.#initializing;
     }
@@ -215,14 +229,23 @@ export class GuildQueue<Meta = unknown> {
         if (v) this.#resolveInitializerAwaiters();
     }
 
+    /**
+     * Indicates current track of this queue
+     */
     public get currentTrack() {
         return this.dispatcher?.audioResource?.metadata || this.__current;
     }
 
+    /**
+     * Indicates if this queue was deleted previously
+     */
     public get deleted() {
         return this.#deleted;
     }
 
+    /**
+     * The voice channel of this queue
+     */
     public get channel() {
         return this.dispatcher?.channel || null;
     }
@@ -237,42 +260,72 @@ export class GuildQueue<Meta = unknown> {
         }
     }
 
+    /**
+     * The voice connection of this queue
+     */
     public get connection() {
         return this.dispatcher?.voiceConnection || null;
     }
 
+    /**
+     * The guild this queue belongs to
+     */
     public get guild() {
         return this.options.guild;
     }
 
+    /**
+     * The id of this queue
+     */
     public get id() {
         return this.guild.id;
     }
 
+    /**
+     * Set transition mode for this queue
+     * @param state The state to set
+     */
     public setTransitioning(state: boolean) {
         this.#warnIfDeleted();
         this.#transitioning = state;
     }
 
+    /**
+     * if this queue is currently under transition mode
+     */
     public isTransitioning() {
         return this.#transitioning;
     }
 
+    /**
+     * Set repeat mode for this queue
+     * @param mode The repeat mode to apply
+     */
     public setRepeatMode(mode: QueueRepeatMode) {
         this.#warnIfDeleted();
         this.repeatMode = mode;
     }
 
+    /**
+     * Check if this queue has no tracks left in it
+     */
     public isEmpty() {
         this.#warnIfDeleted();
         return this.tracks.size < 1;
     }
 
+    /**
+     * Check if this queue currently holds active audio resource
+     */
     public isPlaying() {
         this.#warnIfDeleted();
         return this.dispatcher?.audioResource != null;
     }
 
+    /**
+     * Add track to the queue
+     * @param track Track or playlist or array of tracks to add
+     */
     public addTrack(track: Track | Track[] | Playlist) {
         this.#warnIfDeleted();
         const toAdd = track instanceof Playlist ? track.tracks : track;
@@ -287,6 +340,11 @@ export class GuildQueue<Meta = unknown> {
         }
     }
 
+    /**
+     * Connect to a voice channel
+     * @param channelResolvable The voice channel to connect to
+     * @param options Join config
+     */
     public async connect(channelResolvable: GuildVoiceChannelResolvable, options: VoiceConnectConfig = {}) {
         this.#warnIfDeleted();
         const channel = this.player.client.channels.resolve(channelResolvable);
@@ -321,16 +379,25 @@ export class GuildQueue<Meta = unknown> {
         return this;
     }
 
+    /**
+     * The voice connection latency of this queue
+     */
     public get ping() {
         return this.connection?.ping.udp ?? -1;
     }
 
+    /**
+     * Delete this queue
+     */
     public delete() {
         if (this.player.nodes.delete(this.id)) {
             this.#deleted = true;
         }
     }
 
+    /**
+     * Wait for this queue to initialize
+     */
     public awaitInitialization() {
         return new Promise<boolean>((r) => {
             if (!this.#initializing) return r(true);

@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { QueueFilters } from '../types/types';
+import { FiltersName, QueueFilters } from '../types/types';
 import AudioFilters from '../utils/AudioFilters';
 import { GuildQueue } from './GuildQueue';
 import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
@@ -51,10 +51,19 @@ export class FFmpegFilterer<Meta = unknown> {
         return this.af.triggerReplay(seekTime);
     }
 
+    /**
+     * Create ffmpeg stream
+     * @param source The stream source
+     * @param options The stream options
+     */
     public createStream(source: string | Readable, options: FFmpegStreamOptions) {
         return createFFmpegStream(source, options);
     }
 
+    /**
+     * Set ffmpeg filters
+     * @param filters The filters
+     */
     public setFilters(filters: Filters[] | Record<Filters, boolean> | boolean) {
         let _filters: Filters[] = [];
         if (typeof filters === 'boolean') {
@@ -70,6 +79,9 @@ export class FFmpegFilterer<Meta = unknown> {
         return this.#setFilters(_filters);
     }
 
+    /**
+     * Currently active ffmpeg filters
+     */
     public get filters() {
         return this.#ffmpegFilters;
     }
@@ -78,6 +90,10 @@ export class FFmpegFilterer<Meta = unknown> {
         this.setFilters(filters);
     }
 
+    /**
+     * Toggle given ffmpeg filter(s)
+     * @param filters The filter(s)
+     */
     public toggle(filters: Filters[] | Filters) {
         if (!Array.isArray(filters)) filters = [filters];
         const fresh: Filters[] = [];
@@ -90,34 +106,62 @@ export class FFmpegFilterer<Meta = unknown> {
         return this.#setFilters(this.#ffmpegFilters.filter((r) => !filters.includes(r)).concat(fresh));
     }
 
+    /**
+     * Set default filters
+     * @param ff Filters list
+     */
     public setDefaults(ff: Filters[]) {
         this.#ffmpegFilters = ff;
     }
 
+    /**
+     * Get list of enabled filters
+     */
     public getFiltersEnabled() {
         return this.#ffmpegFilters;
     }
 
+    /**
+     * Get list of disabled filters
+     */
     public getFiltersDisabled() {
         return AudioFilters.names.filter((f) => !this.#ffmpegFilters.includes(f));
     }
 
+    /**
+     * Check if the given filter is enabled
+     * @param filter The filter
+     */
     public isEnabled<T extends Filters>(filter: T): boolean {
         return this.#ffmpegFilters.includes(filter);
     }
 
+    /**
+     * Check if the given filter is disabled
+     * @param filter The filter
+     */
     public isDisabled<T extends Filters>(filter: T): boolean {
         return !this.isEnabled(filter);
     }
 
-    public isValidFilter(filter: string) {
+    /**
+     * Check if the given filter is a valid filter
+     * @param filter The filter to test
+     */
+    public isValidFilter(filter: string): filter is FiltersName {
         return AudioFilters.has(filter as Filters);
     }
 
+    /**
+     * Convert current filters to array
+     */
     public toArray() {
         return this.filters.map((filter) => AudioFilters.get(filter));
     }
 
+    /**
+     * Convert current filters to JSON object
+     */
     public toJSON() {
         const obj = {} as Record<keyof QueueFilters, string>;
 
@@ -126,6 +170,9 @@ export class FFmpegFilterer<Meta = unknown> {
         return obj;
     }
 
+    /**
+     * String representation of current filters
+     */
     public toString() {
         return AudioFilters.create(this.filters);
     }
@@ -156,26 +203,45 @@ export class GuildQueueAudioFilters<Meta = unknown> {
         }
     }
 
+    /**
+     * Volume transformer
+     */
     public get volume() {
         return this.queue.dispatcher?.dsp?.volume || null;
     }
 
+    /**
+     * 15 Band Equalizer
+     */
     public get equalizer() {
         return this.queue.dispatcher?.equalizer || null;
     }
 
+    /**
+     * Digital biquad filters
+     */
     public get biquad() {
         return this.queue.dispatcher?.biquad || null;
     }
 
+    /**
+     * DSP filters
+     */
     public get filters() {
         return this.queue.dispatcher?.filters || null;
     }
 
+    /**
+     * Audio resampler
+     */
     public get resampler() {
         return this.queue.dispatcher?.resampler || null;
     }
 
+    /**
+     * Replay current track in transition mode
+     * @param seek The duration to seek to
+     */
     public async triggerReplay(seek = 0) {
         if (!this.queue.currentTrack) return false;
         try {

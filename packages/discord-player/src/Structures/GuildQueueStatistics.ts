@@ -25,6 +25,9 @@ export interface GuildQueueStatisticsMetadata {
 export class GuildQueueStatistics<Meta = unknown> {
     public constructor(public queue: GuildQueue<Meta>) {}
 
+    /**
+     * Generate statistics of this queue
+     */
     public generate() {
         return {
             latency: {

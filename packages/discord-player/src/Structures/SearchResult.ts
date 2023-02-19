@@ -17,30 +17,51 @@ export interface SearchResultData {
 export class SearchResult {
     public constructor(public player: Player, private _data: SearchResultData) {}
 
+    /**
+     * The search query
+     */
     public get query() {
         return this._data.query;
     }
 
+    /**
+     * The search query type
+     */
     public get queryType() {
         return this._data.queryType || QueryType.AUTO;
     }
 
+    /**
+     * The extractor
+     */
     public get extractor() {
         return this._data.extractor || null;
     }
 
+    /**
+     * Playlist result
+     */
     public get playlist() {
         return this._data.playlist;
     }
 
+    /**
+     * Tracks result
+     */
     public get tracks() {
         return this._data.tracks || [];
     }
 
+    /**
+     * Requested by
+     */
     public get requestedBy() {
         return this._data.requestedBy || null;
     }
 
+    /**
+     * Re-execute this search
+     */
     public async execute() {
         return this.player.search(this.query, {
             searchEngine: this.queryType,
@@ -48,18 +69,30 @@ export class SearchResult {
         });
     }
 
+    /**
+     * If this search result is empty
+     */
     public isEmpty() {
         return !this.tracks.length;
     }
 
+    /**
+     * If this search result has playlist
+     */
     public hasPlaylist() {
         return this.playlist != null;
     }
 
+    /**
+     * If this search result has tracks
+     */
     public hasTracks() {
         return this.tracks.length > 0;
     }
 
+    /**
+     * JSON representation of this search
+     */
     public toJSON() {
         return {
             query: this.query,

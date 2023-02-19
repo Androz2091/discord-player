@@ -92,11 +92,6 @@ export class Player extends EventEmitter<PlayerEvents> {
      * Creates discord-player singleton instance.
      * @param client The client that instantiated player
      * @param options Player initializer options
-     * @example const player1 = Player.singleton(client, options);
-     * const player2 = Player.singleton(client, options);
-     * const player3 = new Player(client, options);
-     * player1.id === player2.id // true
-     * player1.id === player3.id // false
      */
     public static singleton(client: Client, options: PlayerInitOptions = {}) {
         if (!(kSingleton in Player)) {
@@ -126,10 +121,16 @@ export class Player extends EventEmitter<PlayerEvents> {
         return _internals.instances.clear();
     }
 
+    /**
+     * The current query cache provider
+     */
     public get queryCache() {
         return this.options.queryCache ?? null;
     }
 
+    /**
+     * Alias to `Player.nodes`
+     */
     public get queues() {
         return this.nodes;
     }
@@ -154,6 +155,9 @@ export class Player extends EventEmitter<PlayerEvents> {
         };
     }
 
+    /**
+     * Destroy player
+     */
     public async destroy() {
         this.nodes.cache.forEach((node) => node.delete());
         this.client.off('voiceStateUpdate', this.#voiceStateUpdateListener);
@@ -264,14 +268,23 @@ export class Player extends EventEmitter<PlayerEvents> {
         this._handleVoiceState(oldState, newState);
     }
 
+    /**
+     * Lock voice state handler
+     */
     public lockVoiceStateHandler() {
         this.options.lockVoiceStateHandler = true;
     }
 
+    /**
+     * Unlock voice state handler
+     */
     public unlockVoiceStateHandler() {
         this.options.lockVoiceStateHandler = false;
     }
 
+    /**
+     * Checks if voice state handler is locked
+     */
     public isVoiceStateHandlerLocked() {
         return !!this.options.lockVoiceStateHandler;
     }
@@ -281,19 +294,6 @@ export class Player extends EventEmitter<PlayerEvents> {
      * @param channel The voice channel on which the music should be played
      * @param query The track or source to play
      * @param options Options for player
-     * @example ```js
-     * const client = new Discord.Client({ intents: ['GuildVoiceStates'] });
-     * const player = new Player(client);
-     *
-     * // play
-     * const query = message.getQuerySomehow();
-     *
-     * await player.play(message.member.voice.channel, query, {
-     *     nodeOptions: {
-     *         metadata: message
-     *     }
-     * });
-     * ```
      */
     public async play<T = unknown>(
         channel: GuildVoiceChannelResolvable,

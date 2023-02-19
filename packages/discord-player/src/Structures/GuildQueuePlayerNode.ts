@@ -31,36 +31,60 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     #progress = 0;
     public constructor(public queue: GuildQueue<Meta>) {}
 
+    /**
+     * If the player is currently in idle mode
+     */
     public isIdle() {
         return !!this.queue.dispatcher?.isIdle();
     }
 
+    /**
+     * If the player is currently buffering the track
+     */
     public isBuffering() {
         return !!this.queue.dispatcher?.isBuffering();
     }
 
+    /**
+     * If the player is currently playing a track
+     */
     public isPlaying() {
         return !!this.queue.dispatcher?.isPlaying();
     }
 
+    /**
+     * If the player is currently paused
+     */
     public isPaused() {
         return !!this.queue.dispatcher?.isPaused();
     }
 
+    /**
+     * Reset progress history
+     */
     public resetProgress() {
         this.#progress = 0;
     }
 
+    /**
+     * The stream time for current session
+     */
     public get streamTime() {
         return this.queue.dispatcher?.streamTime ?? 0;
     }
 
+    /**
+     * Current playback duration with history included
+     */
     public get playbackTime() {
         const dur = this.#progress + this.streamTime;
 
         return dur;
     }
 
+    /**
+     * Get duration multiplier
+     */
     public getDurationMultiplier() {
         const srateFilters = this.queue.filters.ffmpeg.toArray().filter((ff) => FFMPEG_SRATE_REGEX.test(ff));
         const multipliers = srateFilters
@@ -72,17 +96,27 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return !multipliers.length ? 1 : multipliers.reduce((accumulator, current) => current + accumulator);
     }
 
+    /**
+     * Estimated progress of the player
+     */
     public get estimatedPlaybackTime() {
         const dur = this.playbackTime;
         return Math.round(this.getDurationMultiplier() * dur);
     }
 
+    /**
+     * Estimated total duration of the player
+     */
     public get estimatedDuration() {
         const dur = this.queue.currentTrack?.durationMS ?? 0;
 
         return Math.round(dur / this.getDurationMultiplier());
     }
 
+    /**
+     * Get stream progress
+     * @param ignoreFilters Ignore filters
+     */
     public getTimestamp(ignoreFilters = false): PlayerTimestamp | null {
         if (!this.queue.currentTrack) return null;
 
@@ -102,6 +136,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         };
     }
 
+    /**
+     * Create progress bar for current progress
+     * @param options Progress bar options
+     */
     public createProgressBar(options?: PlayerProgressbarOptions) {
         const timestamp = this.getTimestamp();
         if (!timestamp) return null;
@@ -128,6 +166,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         }
     }
 
+    /**
+     * Seek the player
+     * @param duration The duration to seek to
+     */
     public async seek(duration: number) {
         if (!this.queue.currentTrack) return false;
         await this.play(this.queue.currentTrack, {
@@ -137,10 +179,17 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return true;
     }
 
+    /**
+     * Current volume
+     */
     public get volume() {
         return this.queue.dispatcher?.volume ?? 100;
     }
 
+    /**
+     * Set volume
+     * @param vol Volume amount to set
+     */
     public setVolume(vol: number) {
         if (!this.queue.dispatcher) return false;
         const res = this.queue.dispatcher.setVolume(vol);
@@ -148,23 +197,40 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return res;
     }
 
+    /**
+     * Set bit rate
+     * @param rate The bit rate to set
+     */
     public setBitrate(rate: number | 'auto') {
         this.queue.dispatcher?.audioResource?.encoder?.setBitrate(rate === 'auto' ? this.queue.channel?.bitrate ?? 64000 : rate);
     }
 
+    /**
+     * Set paused state
+     * @param state The state
+     */
     public setPaused(state: boolean) {
         if (state) return this.queue.dispatcher?.pause(true) || false;
         return this.queue.dispatcher?.resume() || false;
     }
 
+    /**
+     * Pause the playback
+     */
     public pause() {
         return this.setPaused(true);
     }
 
+    /**
+     * Resume the playback
+     */
     public resume() {
         return this.setPaused(false);
     }
 
+    /**
+     * Skip current track
+     */
     public skip() {
         if (!this.queue.dispatcher) return false;
         this.queue.setTransitioning(false);
@@ -172,6 +238,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return true;
     }
 
+    /**
+     * Remove the given track from queue
+     * @param track The track to remove
+     */
     public remove(track: TrackResolvable) {
         const foundTrack = this.queue.tracks.find((t, idx) => {
             if (track instanceof Track || typeof track === 'string') {
@@ -187,6 +257,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return foundTrack;
     }
 
+    /**
+     * Jump to specific track on the queue
+     * @param track The track to jump to without removing other tracks
+     */
     public jump(track: TrackResolvable) {
         const removed = this.remove(track);
         if (!removed) return false;
@@ -194,6 +268,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return this.skip();
     }
 
+    /**
+     * Get track position
+     * @param track The track
+     */
     public getTrackPosition(track: TrackResolvable) {
         return this.queue.tracks.toArray().findIndex((t, idx) => {
             if (track instanceof Track || typeof track === 'string') {
@@ -204,6 +282,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         });
     }
 
+    /**
+     * Skip to the given track, removing others on the way
+     * @param track The track to skip to
+     */
     public skipTo(track: TrackResolvable) {
         const idx = this.getTrackPosition(track);
         if (idx < 0) return false;
@@ -213,11 +295,20 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return this.skip();
     }
 
+    /**
+     * Insert a track on the given position in queue
+     * @param track The track to insert
+     * @param index The position to insert to, defaults to 0.
+     */
     public insert(track: Track, index = 0) {
         if (!(track instanceof Track)) throw new Error('invalid track');
         this.queue.tracks.store.splice(index, 0, track);
     }
 
+    /**
+     * Stop the playback
+     * @param force Whether or not to forcefully stop the playback
+     */
     public stop(force = false) {
         if (!this.queue.dispatcher) return false;
         this.queue.dispatcher.end();
@@ -234,6 +325,11 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return true;
     }
 
+    /**
+     * Play the given track
+     * @param res The track to play
+     * @param options Options for playing the track
+     */
     public async play(res?: Track, options?: ResourcePlayOptions) {
         if (!this.queue.dispatcher?.voiceConnection) {
             throw new Error('No voice connection available');

@@ -36,6 +36,11 @@ export class GuildNodeManager<Meta = unknown> {
     public cache = new Collection<string, GuildQueue>();
     public constructor(public player: Player) {}
 
+    /**
+     * Create guild queue if it does not exist
+     * @param guild The guild which will be the owner of the queue
+     * @param options Queue initializer options
+     */
     public create<T = Meta>(guild: GuildResolvable, options: GuildNodeCreateOptions<T> = {}): GuildQueue<T> {
         const server = this.player.client.guilds.resolve(guild);
         if (!server) {
@@ -94,6 +99,10 @@ export class GuildNodeManager<Meta = unknown> {
         return queue;
     }
 
+    /**
+     * Get existing queue
+     * @param node Queue resolvable
+     */
     public get<T = Meta>(node: NodeResolvable) {
         const queue = this.resolve(node);
         if (!queue) return null;
@@ -101,11 +110,19 @@ export class GuildNodeManager<Meta = unknown> {
         return (this.cache.get(queue.id) as GuildQueue<T>) || null;
     }
 
+    /**
+     * Check if a queue exists
+     * @param node Queue resolvable
+     */
     public has(node: NodeResolvable) {
         const id = node instanceof GuildQueue ? node.id : this.player.client.guilds.resolveId(node)!;
         return this.cache.has(id);
     }
 
+    /**
+     * Delete queue
+     * @param node Queue resolvable
+     */
     public delete(node: NodeResolvable) {
         const queue = this.resolve(node);
         if (!queue) throw new Error('Cannot delete non-existing queue');
@@ -121,6 +138,10 @@ export class GuildNodeManager<Meta = unknown> {
         return this.cache.delete(queue.id);
     }
 
+    /**
+     * Resolve queue
+     * @param node Queue resolvable
+     */
     public resolve<T = Meta>(node: NodeResolvable) {
         if (node instanceof GuildQueue) {
             return node;
@@ -129,6 +150,10 @@ export class GuildNodeManager<Meta = unknown> {
         return this.cache.get(this.player.client.guilds.resolveId(node)!) as GuildQueue<T> | undefined;
     }
 
+    /**
+     * Resolve queue id
+     * @param node Queue resolvable
+     */
     public resolveId(node: NodeResolvable) {
         const q = this.resolve(node);
         return q?.id || null;

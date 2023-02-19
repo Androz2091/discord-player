@@ -6,37 +6,62 @@ export class GuildQueueHistory<Meta = unknown> {
     public tracks = new Queue<Track>('LIFO');
     public constructor(public queue: GuildQueue<Meta>) {}
 
+    /**
+     * Current track in the queue
+     */
     public get currentTrack() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return this.queue.dispatcher?.audioResource?.metadata || ((this.queue as any).__current as Track | null);
     }
 
+    /**
+     * Next track in the queue
+     */
     public get nextTrack() {
         return this.queue.tracks.at(0) || null;
     }
 
+    /**
+     * Previous track in the queue
+     */
     public get previousTrack() {
         return this.tracks.at(0) || null;
     }
 
+    /**
+     * If history is disabled
+     */
     public get disabled() {
         return this.queue.options.disableHistory;
     }
 
+    /**
+     * If history is empty
+     */
     public isEmpty() {
         return this.tracks.size < 1;
     }
 
+    /**
+     * Add track to track history
+     * @param track The track to add
+     */
     public push(track: Track | Track[]) {
         if (this.disabled) return false;
         this.tracks.add(track);
         return true;
     }
 
+    /**
+     * Clear history
+     */
     public clear() {
         this.tracks.clear();
     }
 
+    /**
+     * Play the next track in the queue
+     */
     public next() {
         const track = this.nextTrack;
         if (!track) {
@@ -46,6 +71,9 @@ export class GuildQueueHistory<Meta = unknown> {
         this.queue.node.skip();
     }
 
+    /**
+     * Play the previous track in the queue
+     */
     public previous() {
         const track = this.previousTrack;
         if (!track) {
