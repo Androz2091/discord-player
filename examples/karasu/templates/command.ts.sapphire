@@ -2,13 +2,16 @@
     "category": "commands"
 }
 ---
-import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 
-@ApplyOptions<Command.Options>({
-	description: 'A basic slash command'
-})
 export class {{name}}Command extends Command {
+	public constructor(context: Command.Context, options: Command.Options) {
+		super(context, {
+			...options,
+			description: 'A command'
+		});
+	}
+
 	public override registerApplicationCommands(registry: Command.Registry) {
 		registry.registerChatInputCommand((builder) => {
 			builder //
