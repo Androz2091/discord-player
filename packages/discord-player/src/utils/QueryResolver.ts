@@ -2,7 +2,7 @@ import { YouTube } from 'youtube-sr';
 import { QueryType } from '../types/types';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { validateURL as SoundcloudValidateURL } from 'soundcloud-scraper';
+import * as soundcloud from 'soundcloud-scraper';
 
 // #region scary things below *sigh*
 const spotifySongRegex = /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})(\?si=.+)?$/;
@@ -43,8 +43,10 @@ class QueryResolver {
      */
     static resolve(query: string): (typeof QueryType)[keyof typeof QueryType] {
         query = query.trim();
-        if (SoundcloudValidateURL(query, 'track')) return QueryType.SOUNDCLOUD_TRACK;
-        if (SoundcloudValidateURL(query, 'playlist') || query.includes('/sets/')) return QueryType.SOUNDCLOUD_PLAYLIST;
+        // @ts-expect-error
+        if (soundcloud.validateURL(query, 'track')) return QueryType.SOUNDCLOUD_TRACK;
+        // @ts-expect-error
+        if (soundcloud.validateURL(query, 'playlist') || query.includes('/sets/')) return QueryType.SOUNDCLOUD_PLAYLIST;
         if (YouTube.isPlaylist(query)) return QueryType.YOUTUBE_PLAYLIST;
         if (QueryResolver.validateId(query) || QueryResolver.validateURL(query)) return QueryType.YOUTUBE_VIDEO;
         if (spotifySongRegex.test(query)) return QueryType.SPOTIFY_SONG;

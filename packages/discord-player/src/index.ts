@@ -13,9 +13,9 @@ export * from './utils/QueryCache';
 export * from './Player';
 export {
     AudioFilters as PCMAudioFilters,
-    BiquadFilters,
+    type BiquadFilters,
     FilterType as BiquadFilterType,
-    PCMFilters,
+    type PCMFilters,
     Q_BUTTERWORTH,
     VolumeTransformer,
     BASS_EQ_BANDS,
