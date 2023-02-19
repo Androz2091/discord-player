@@ -1,5 +1,3 @@
-import { quran } from '@quranjs/api';
-import type { ChapterId } from '@quranjs/api/dist/types';
 import { Command } from '@sapphire/framework';
 import { EmbedBuilder } from 'discord.js';
 
