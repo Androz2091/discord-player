@@ -62,7 +62,8 @@ export class PlayCommand extends Command {
 					leaveOnEmpty: true,
 					leaveOnEnd: false,
 					bufferingTimeout: 0
-					// defaultFFmpegFilters: ['lofi', 'bassboost', 'normalizer']
+					// defaultFFmpegFilters: ['lofi', 'bassboost', 'normalizer'],
+					// volume: 120
 				}
 			});
 

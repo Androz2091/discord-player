@@ -25,7 +25,15 @@ export class KarasuClient extends SapphireClient {
 		});
 		this.dev = Emojis;
 		this.perms = Permissions;
-		this.player = new Player(this as any);
+		this.player = new Player(this as any, {
+			ytdlOptions: {
+				requestOptions: {
+					headers: {
+						cookie: process.env.YOUTUBE_COOKIE
+					}
+				}
+			}
+		});
 	}
 }
 

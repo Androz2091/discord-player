@@ -446,7 +446,7 @@ export class GuildQueue<Meta = unknown> {
             } else {
                 if (this.repeatMode === QueueRepeatMode.TRACK) {
                     this.__current = this.history.tracks.dispatch() || track;
-                    return this.node.play(this.__current!);
+                    return this.node.play(this.__current!, { queue: false });
                 }
                 if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.add(this.history.tracks.dispatch() || track);
                 if (!this.tracks.size) {
