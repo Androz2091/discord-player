@@ -9,7 +9,6 @@ import {
     Track,
     Util
 } from 'discord-player';
-import { downloadStream } from '../internal/downloader';
 import { Vimeo } from '../internal/Vimeo';
 
 export class VimeoExtractor extends BaseExtractor {
@@ -60,7 +59,7 @@ export class VimeoExtractor extends BaseExtractor {
     public async stream(info: Track) {
         const engine = info.raw.engine as string;
         if (engine) {
-            return await downloadStream(engine);
+            return engine;
         }
 
         const track = await Vimeo.getInfo(info.url).catch(Util.noop);
@@ -70,6 +69,6 @@ export class VimeoExtractor extends BaseExtractor {
             streamURL: track.stream
         };
 
-        return await downloadStream(track.stream);
+        return track.stream;
     }
 }

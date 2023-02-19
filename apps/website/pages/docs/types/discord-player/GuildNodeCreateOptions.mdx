@@ -5,7 +5,9 @@
 | ----------- | ----------- | ----------- | ----------- |
 | a_filter | boolean \| Array\<'8D' \| 'Tremolo' \| 'Vibrato' \| 'BassBoost'> | N/A | - |
 | biquad | boolean \| BiquadFilters | N/A | - |
+| bufferingTimeout | number | N/A | - |
 | connectionTimeout | number | N/A | - |
+| defaultFFmpegFilters | Array\<keyof QueueFilters> | N/A | - |
 | disableHistory | boolean | N/A | - |
 | equalizer | boolean \| Array\<EqualizerBand> | N/A | - |
 | leaveOnEmpty | boolean | N/A | - |
@@ -15,6 +17,7 @@
 | leaveOnStop | boolean | N/A | - |
 | leaveOnStopCooldown | number | N/A | - |
 | metadata | null \| T | N/A | - |
+| onAfterCreateStream | OnAfterCreateStreamHandler | N/A | - |
 | onBeforeCreateStream | OnBeforeCreateStreamHandler | N/A | - |
 | repeatMode | QueueRepeatMode | N/A | - |
 | resampler | number \| boolean | N/A | - |
@@ -24,4 +27,4 @@
 | volume | number \| boolean | N/A | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildNodeManager.ts#L8)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildNodeManager.ts#L8)

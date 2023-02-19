@@ -12,12 +12,13 @@ import {
     VoiceConnectionDisconnectReason
 } from '@discordjs/voice';
 import { StageChannel, VoiceChannel } from 'discord.js';
-import { Duplex, Readable } from 'stream';
+import type { Readable } from 'stream';
 import { EventEmitter } from '@discord-player/utils';
 import { Track } from '../Structures/Track';
 import { Util } from '../utils/Util';
 import { PlayerError, ErrorStatusCode } from '../Structures/PlayerError';
 import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
+import { GuildQueue, PostProcessedResult } from '../Structures';
 
 interface CreateStreamOps {
     type?: StreamType;
@@ -63,7 +64,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {VoiceChannel|StageChannel} channel The connected channel
      * @private
      */
-    constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel, public readonly connectionTimeout: number = 20000) {
+    constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel, public queue: GuildQueue, public readonly connectionTimeout: number = 20000) {
         super();
 
         /**
@@ -195,41 +196,51 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
     /**
      * Creates stream
-     * @param {Readable|Duplex|string} src The stream source
+     * @param {Readable} src The stream source
      * @param {object} [ops] Options
      * @returns {AudioResource}
      */
-    createStream(src: Readable | Duplex | string, ops?: CreateStreamOps) {
-        const stream =
-            !ops?.disableFilters && typeof src !== 'string'
-                ? this.dsp.create(src, {
-                      dsp: {
-                          filters: ops?.defaultFilters,
-                          disabled: ops?.disableFilters
-                      },
-                      biquad: ops?.biquadFilter
-                          ? {
-                                filter: ops.biquadFilter,
-                                disabled: ops?.disableBiquad
-                            }
-                          : undefined,
-                      resampler: {
-                          targetSampleRate: ops?.sampleRate,
-                          disabled: ops?.disableResampler
-                      },
-                      equalizer: {
-                          bandMultiplier: ops?.eq,
-                          disabled: ops?.disableEqualizer
-                      },
-                      volume: {
-                          volume: ops?.volume,
-                          disabled: ops?.disableVolume
-                      }
-                  })
-                : src;
+    async createStream(src: Readable, ops?: CreateStreamOps) {
+        if (!ops?.disableFilters) this.queue.debug('Initiating DSP filters pipeline...');
+        const stream = !ops?.disableFilters
+            ? this.dsp.create(src, {
+                  dsp: {
+                      filters: ops?.defaultFilters,
+                      disabled: ops?.disableFilters
+                  },
+                  biquad: ops?.biquadFilter
+                      ? {
+                            filter: ops.biquadFilter,
+                            disabled: ops?.disableBiquad
+                        }
+                      : undefined,
+                  resampler: {
+                      targetSampleRate: ops?.sampleRate,
+                      disabled: ops?.disableResampler
+                  },
+                  equalizer: {
+                      bandMultiplier: ops?.eq,
+                      disabled: ops?.disableEqualizer
+                  },
+                  volume: {
+                      volume: ops?.volume,
+                      disabled: ops?.disableVolume
+                  }
+              })
+            : src;
 
-        this.audioResource = createAudioResource(stream, {
-            inputType: ops?.type ?? StreamType.Arbitrary,
+        this.queue.debug('Executing onAfterCreateStream hook...');
+        const postStream = await this.queue.onAfterCreateStream?.(stream, this.queue).catch(
+            () =>
+                ({
+                    stream: stream,
+                    type: ops?.type ?? StreamType.Arbitrary
+                } as PostProcessedResult)
+        );
+
+        this.queue.debug('Preparing AudioResource...');
+        this.audioResource = createAudioResource(postStream?.stream ?? stream, {
+            inputType: postStream?.type ?? ops?.type ?? StreamType.Arbitrary,
             metadata: ops?.data,
             // volume controls happen from AudioFilter DSP utility
             inlineVolume: false

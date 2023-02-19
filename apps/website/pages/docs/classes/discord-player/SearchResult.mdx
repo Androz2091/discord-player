@@ -1,0 +1,38 @@
+## SearchResult
+
+```typescript
+new SearchResult(player, _data)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| player | Player | ❌ | - |
+| _data | SearchResultData | ❌ | - |
+
+## Properties
+### private  _data: SearchResultData
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L18)
+### public  player: Player
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L18)
+### public  extractor: null \| BaseExtractor
+
+### public  playlist: undefined \| null \| Playlist
+
+### public  query: string
+
+### public  queryType: SearchQueryType \| any
+
+### public  requestedBy: null \| User
+
+### public  tracks: Array\<Track>
+
+## Methods
+### public  execute(): Promise\<SearchResult>
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L44)
+### public  hasPlaylist(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L55)
+### public  hasTracks(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L59)
+### public  isEmpty(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L51)
+### public  toJSON(): \{ extractor: null \| string,playlist: null \| PlaylistJSON,query: string,queryType: SearchQueryType \| any,requestedBy: null \| Object,tracks: Array\<TrackJSON> }
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L63)

@@ -2,6 +2,7 @@ import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
 import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection } from '@discordjs/voice';
 import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
+import { GuildQueue } from '../Structures';
 
 class VoiceUtils {
     public cache: Collection<Snowflake, StreamDispatcher>;
@@ -29,10 +30,12 @@ class VoiceUtils {
         options?: {
             deaf?: boolean;
             maxTime?: number;
+            queue: GuildQueue;
         }
     ): Promise<StreamDispatcher> {
+        if (!options?.queue) throw new Error('GuildQueue is required');
         const conn = await this.join(channel, options);
-        const sub = new StreamDispatcher(conn, channel, options?.maxTime);
+        const sub = new StreamDispatcher(conn, channel, options.queue, options.maxTime);
         this.cache.set(channel.guild.id, sub);
         return sub;
     }

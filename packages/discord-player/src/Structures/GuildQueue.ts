@@ -4,7 +4,7 @@ import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Track } from './Track';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
-import { AudioResource } from '@discordjs/voice';
+import { AudioResource, StreamType } from '@discordjs/voice';
 import { Util } from '../utils/Util';
 import { Playlist } from './Playlist';
 import { GuildQueueHistory } from './GuildQueueHistory';
@@ -47,8 +47,13 @@ export interface VoiceConnectConfig {
     timeout?: number;
 }
 
+export interface PostProcessedResult {
+    stream: Readable;
+    type: StreamType;
+}
+
 export type OnBeforeCreateStreamHandler = (track: Track, queryType: SearchQueryType, queue: GuildQueue) => Promise<Readable | null>;
-export type OnAfterCreateStreamHandler = (stream: Readable) => Promise<Readable | null>;
+export type OnAfterCreateStreamHandler = (stream: Readable, queue: GuildQueue) => Promise<PostProcessedResult | null>;
 
 export type PlayerTriggeredReason = 'filters' | 'normal';
 
@@ -150,7 +155,10 @@ export class GuildQueue<Meta = unknown> {
     public node = new GuildQueuePlayerNode<Meta>(this);
     public filters = new GuildQueueAudioFilters<Meta>(this);
     public onBeforeCreateStream: OnBeforeCreateStreamHandler = async () => null;
-    public onAfterCreateStream: OnAfterCreateStreamHandler = async (stream) => stream;
+    public onAfterCreateStream: OnAfterCreateStreamHandler = async (stream) => ({
+        stream,
+        type: StreamType.Raw
+    });
     public repeatMode = QueueRepeatMode.OFF;
     public timeouts = new Collection<string, NodeJS.Timeout>();
     public stats = new GuildQueueStatistics<Meta>(this);
@@ -296,7 +304,8 @@ export class GuildQueue<Meta = unknown> {
 
         this.dispatcher = await this.player.voiceUtils.connect(channel, {
             deaf: options.deaf ?? this.options.selfDeaf ?? true,
-            maxTime: options?.timeout ?? this.options.connectionTimeout ?? 120_000
+            maxTime: options?.timeout ?? this.options.connectionTimeout ?? 120_000,
+            queue: this
         });
 
         this.player.events.emit('connection', this);

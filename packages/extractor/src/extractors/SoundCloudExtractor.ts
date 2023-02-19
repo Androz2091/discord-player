@@ -11,7 +11,6 @@ import {
     Util
 } from 'discord-player';
 import { Client, Song } from 'soundcloud-scraper';
-import { downloadStream } from '../internal/downloader';
 
 const soundcloud = new Client(undefined, {
     fetchAPIKey: true
@@ -143,7 +142,7 @@ export class SoundCloudExtractor extends BaseExtractor {
     public async stream(info: Track) {
         const engine = info.raw.engine as Song;
         if (engine && engine.streamURL) {
-            return await engine.downloadProgressive();
+            return engine.streamURL;
         }
 
         const url = await soundcloud.fetchStreamURL(info.url).catch(Util.noop);
@@ -157,6 +156,6 @@ export class SoundCloudExtractor extends BaseExtractor {
             };
         }
 
-        return downloadStream(url);
+        return url;
     }
 }

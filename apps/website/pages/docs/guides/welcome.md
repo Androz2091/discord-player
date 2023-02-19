@@ -1,64 +1,52 @@
 # Discord Player
 
-Complete framework to facilitate music commands using [discord.js](https://discord.js.org).
+Discord Player is a powerful framework for JavaScript and TypeScript, built on top of **[@discord.js/voice](https://npm.im/@discordjs/voice)** library.
+It provides easy set of customizable tools to develop Discord Music bots.
 
-<div style={{
-    display: "flex",
-    alignItems:"center",
-    gap: "10px"
-}}>
-    <a href="https://npmjs.com/discord-player">
-        <img src="https://img.shields.io/npm/dt/discord-player?style=for-the-badge" alt="downloadsBadge"/>
-    </a>
-    <a href="https://npmjs.com/discord-player">
-        <img src="https://img.shields.io/npm/v/discord-player?style=for-the-badge" alt="versionBadge"/>
-    </a>
-    <a href="https://androz2091.fr/discord">
-        <img src="https://img.shields.io/discord/558328638911545423?style=for-the-badge&amp;color=7289da" alt="discordBadge"/>
-    </a>
-</div>
-
----
+[![downloadsBadge](https://img.shields.io/npm/dt/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
+[![versionBadge](https://img.shields.io/npm/v/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
+[![discordBadge](https://img.shields.io/discord/558328638911545423?style=for-the-badge&color=7289da)](https://androz2091.fr/discord)
 
 ## Installation
 
-### Install [discord-player](https://npmjs.com/package/discord-player)
+### Install **[discord-player](https://npmjs.com/package/discord-player)**
 
 ```sh
 $ npm install --save discord-player
 ```
 
-### Install [@discordjs/opus](https://npmjs.com/package/@discordjs/opus)
+### Install **[@discordjs/opus](https://npmjs.com/package/@discordjs/opus)**
 
 ```sh
-$ npm install --save @discordjs/opus # Native bindings via napi
+$ npm install --save @discordjs/opus # Native (best performance)
 
 # or
-$ npm install --save opusscript # WASM bindings
+$ npm install --save opusscript # WASM (near native performance)
 ```
 
 ### Install streaming library (if you want to play from youtube)
 
 ```sh
-$ npm install --save play-dl # discord-player prefers play-dl over ytdl-core if both of them are installed
+$ npm install --save ytdl-core
 
 # or
-$ npm install --save ytdl-core
+$ npm install --save play-dl
 ```
 
 ### Install FFmpeg or Avconv
 
--   Official FFMPEG Website: [https://www.ffmpeg.org/download.html](https://www.ffmpeg.org/download.html)
--   Node Module (FFMPEG): [https://npmjs.com/package/ffmpeg-static](https://npmjs.com/package/ffmpeg-static)
--   Avconv: *[https://libav.org/download](https://libav.org/download)
+-   Official FFMPEG Website: **[https://www.ffmpeg.org/download.html](https://www.ffmpeg.org/download.html)**
+-   Node Module (FFMPEG): **[https://npmjs.com/package/ffmpeg-static](https://npmjs.com/package/ffmpeg-static)**
+-   Avconv: **[https://libav.org/download](https://libav.org/download)**
 
 # Features
 
 -   Simple & easy to use 🤘
 -   Beginner friendly 😱
--   Audio filters 🎸
+-   **A LOT OF AUDIO FILTERS** (discord-player has total of around 64 built-in filter presets which can be *extended even more!*) 🎸
 -   Lavalink compatible 15 band equalizer 🎚️
 -   Digital biquad filters support
+-   Digital Signal Processing utilities
 -   Lightweight ☁️
 -   Custom extractors support 🌌
 -   Multiple sources support ✌
@@ -66,7 +54,7 @@ $ npm install --save ytdl-core
 -   Does not inject anything to discord.js or your discord.js client 💉
 -   Allows you to have full control over what is going to be streamed 👑
 
-##### [Documentation](https://discord-player.js.org)
+## [Documentation](https://discord-player.js.org)
 
 ## Getting Started
 
@@ -158,25 +146,71 @@ client.on('interactionCreate', async (interaction) => {
 client.login('BOT_TOKEN');
 ```
 
+### Accessing player instance
+
+Polluting client like this could be a bad idea:
+
+```js
+client.player = player;
+```
+
+discord-player provides singleton support to avoid this type of pollution:
+
+```diff
+- const player = new Player(client);
++ const player = Player.singleton(client);
+```
+
+`Player.singleton()` creates a single instance of player which is shared in the future. You can simply do `Player.singleton()` to access player instance whenever
+you want without polluting client.
+
 ## Supported sources
 
-By default, discord-player supports the following sources:
+By default, discord-player **does not support anything** (including search operation and streaming). Luckily, discord-player supports the following sources with the help of [@discord-player/extractor](https://npm.im/@discord-player/extractor) which comes pre-installed with discord-player:
 
--   Local file (You must set the search engine to `QueryType.FILE` in order to play local files)
--   Raw attachments
--   Spotify (Streamed from youtube)
--   Apple Music (Streamed from youtube)
--   Vimeo
--   Reverbnation
--   SoundCloud
+-   Local file (You must set the search engine to `QueryType.FILE` in order to play local files, backed by `attachment extractor`)
+-   Raw attachments (backed by `attachment extractor`)
+-   Spotify (backed by `ysa extractor`)
+-   Apple Music (backed by `ysa extractor`)
+-   YouTube (backed by `ysa extractor`)
+-   Vimeo (backed by `vimeo extractor`)
+-   Reverbnation (backed by `reverbnation extractor`)
+-   SoundCloud (backed by `soundcloud extractor`)
 
-You can also force a specific extractor to resolve your search query. This is useful in some cases where you don't want to use other sources.
+If you dont want to stream from certain extractors, you can block them by passing `blockStreamFrom: [id, id, ...]` to player instantiation options.
+Disabling youtube streaming completely would be as easy as:
+
+```js
+import { Player } from 'discord-player';
+import { YouTubeExtractor } from '@discord-player/extractor';
+
+const player = new Player(client, {
+    blockStreamFrom: [
+        // now your bot will no longer be able to use
+        // youtube extractor to play audio even if the track was
+        // extracted from youtube
+        YouTubeExtractor.identifier
+    ],
+    blockExtractors: [
+        // this will block the listed extractors from being
+        // able to query metadata (aka search results parsing)
+        // This example disables youtube search, spotify bridge
+        // and apple music bridge
+        YouTubeExtractor.identifier
+    ]
+});
+```
+
+Likewise, You can also force a specific extractor to resolve your search query. This is useful in some cases where you don't want to use other sources.
+
 You can do so by using `ext:<EXTRACTOR_IDENTIFIER>` in `searchEngine` value. Example:
 
 ```js
+import { SoundCloudExtractor } from '@discord-player/extractor';
+
 const result = await player.search(query, {
     // always use soundcloud extractor
-    searchEngine: 'ext:com.discord-player.soundcloudextractor'
+    searchEngine: SoundCloudExtractor.identifier
 });
 ```
 
@@ -193,7 +227,7 @@ Discord Player supports various audio filters. There are 4 types of audio filter
 The most common and powerful method is FFmpeg. It supports a lot of audio filters. To set ffmpeg filter, you can do:
 
 ```js
-await queue.filters.ffmpeg.setFilters(['bassboost', 'nightcore']);
+await queue.filters.ffmpeg.toggle(['bassboost', 'nightcore']);
 ```
 
 Note that there can be a delay between filters transition in this method.
@@ -240,16 +274,18 @@ There is no delay between filters transition using this filter.
 These bots are made by the community, they can help you build your own!
 
 -   **[Discord Music Bot](https://github.com/Androz2091/discord-music-bot)** by [Androz2091](https://github.com/Androz2091)
+-   [Karasu-Music-Bot](https://github.com/ItsAuric/karasu-music-bot) by [ItsAuric](https://github.com/itsauric)
 -   [Dodong](https://github.com/nizeic/Dodong) by [nizeic](https://github.com/nizeic)
 -   [Musico](https://github.com/Whirl21/Musico) by [Whirl21](https://github.com/Whirl21)
 -   [Melody](https://github.com/NerdyTechy/Melody) by [NerdyTechy](https://github.com/NerdyTechy)
 -   [Eyesense-Music-Bot](https://github.com/naseif/Eyesense-Music-Bot) by [naseif](https://github.com/naseif)
 -   [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
--   [Karasu-Music-Bot](https://github.com/ItsAuric/karasu-music-bot) by [ItsAuric](https://github.com/itsauric)
 -   [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
 -   [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
 
-### Use cookies with ytdl-core
+### Use youtube cookies
+
+Using youtube cookies helps you to prevent frequent ratelimits.
 
 ```js
 const player = new Player(client, {
@@ -263,7 +299,7 @@ const player = new Player(client, {
 });
 ```
 
-> Note: the above option is only used when ytdl-core is being used.
+> Note: The above option is also passed to `ytdl-core` but not `play-dl`. Follow [this instruction](https://github.com/play-dl/play-dl/blob/1ae7ba8fcea8b93293af5de9e19eca3c2a491804/instructions/README.md) for play-dl config.
 
 ### Use custom proxies
 
@@ -284,7 +320,9 @@ const player = new Player(client, {
 > You may also create a simple proxy server and forward requests through it.
 > See **[https://github.com/http-party/node-http-proxy](https://github.com/http-party/node-http-proxy)** for more info.
 
-### Custom stream Engine
+## Stream Hooks
+
+### onBeforeCreateStream
 
 Discord Player by default uses registered extractors to stream audio. If you need to override what needs to be streamed, you can use this hook.
 
@@ -303,4 +341,22 @@ const queue = player.nodes.create(..., {
 ```
 
 `<GuildQueue>.onBeforeCreateStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
-streams. `source` here will be a track source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and finally sent to Discord voice servers.
+streams. `source` here will be a track source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and sent to `onAfterCreateStream` hook.
+
+### onAfterCreateStream
+
+This hook can be used to post-process pcm stream. This is the final step before creating audio resource. Example:
+
+```js
+const queue = player.nodes.create(..., {
+    ...,
+    async onAfterCreateStream(pcmStream, queue) {
+        // return opus encoded stream
+        const encoder = new OpusEncoder();
+        return {
+            stream: encoder.encode(pcmStream),
+            type: StreamType.Opus
+        };
+    }
+});
+```

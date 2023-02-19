@@ -1,7 +1,6 @@
 import { AudioResource, StreamType } from '@discordjs/voice';
 import { Readable } from 'stream';
 import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
-import { createFFmpegStream } from '../utils/FFmpegStream';
 import { QueryResolver } from '../utils/QueryResolver';
 import { Util } from '../utils/Util';
 import { Track, TrackResolvable } from './Track';
@@ -299,8 +298,6 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             const cookies = track.source === 'youtube' ? (<any>this.queue.player.options.ytdlOptions?.requestOptions)?.headers?.cookie : undefined;
             const pcmStream = this.#createFFmpegStream(stream, track, options.seek ?? 0, cookies);
 
-            const finalStream = (await this.queue.onAfterCreateStream?.(pcmStream).catch(() => pcmStream)) || pcmStream;
-
             if (options.transitionMode) {
                 this.queue.debug(`Transition mode detected, player will wait for buffering timeout to expire (Timeout: ${this.queue.options.bufferingTimeout}ms)`);
                 await waitFor(this.queue.options.bufferingTimeout);
@@ -308,7 +305,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             }
 
             this.queue.debug(
-                `Creating audio resource from processed stream, config: ${JSON.stringify(
+                `Preparing final stream config: ${JSON.stringify(
                     {
                         disableBiquad: this.queue.options.biquad === false,
                         disableEqualizer: this.queue.options.equalizer === false,
@@ -329,7 +326,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 )}`
             );
 
-            const resource = this.queue.dispatcher.createStream(finalStream, {
+            const resource = await this.queue.dispatcher.createStream(pcmStream, {
                 disableBiquad: this.queue.options.biquad === false,
                 disableEqualizer: this.queue.options.equalizer === false,
                 disableVolume: this.queue.options.volume === false,
@@ -380,20 +377,22 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     }
 
     #createFFmpegStream(stream: Readable | string, track: Track, seek = 0, cookies?: string) {
-        const ffmpegStream = createFFmpegStream(stream, {
-            encoderArgs: this.queue.filters.ffmpeg.filters.length ? ['-af', this.queue.filters.ffmpeg.toString()] : [],
-            seek: seek / 1000,
-            fmt: 's16le',
-            cookies
-        }).on('error', (err) => {
-            const m = `${err}`.toLowerCase();
+        const ffmpegStream = this.queue.filters.ffmpeg
+            .createStream(stream, {
+                encoderArgs: this.queue.filters.ffmpeg.filters.length ? ['-af', this.queue.filters.ffmpeg.toString()] : [],
+                seek: seek / 1000,
+                fmt: 's16le',
+                cookies
+            })
+            .on('error', (err) => {
+                const m = `${err}`.toLowerCase();
 
-            this.queue.debug(`Stream closed due to an error from FFmpeg stream: ${err.stack || err.message || err}`);
+                this.queue.debug(`Stream closed due to an error from FFmpeg stream: ${err.stack || err.message || err}`);
 
-            if (m.includes('premature close') || m.includes('epipe')) return;
+                if (m.includes('premature close') || m.includes('epipe')) return;
 
-            this.queue.player.events.emit('playerError', this.queue, err, track);
-        });
+                this.queue.player.events.emit('playerError', this.queue, err, track);
+            });
 
         return ffmpegStream;
     }

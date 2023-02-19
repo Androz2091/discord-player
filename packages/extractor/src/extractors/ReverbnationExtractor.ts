@@ -10,7 +10,6 @@ import {
     Util
 } from 'discord-player';
 import reverbnation from 'reverbnation-scraper';
-import { downloadStream } from '../internal/downloader';
 
 export class ReverbnationExtractor extends BaseExtractor {
     public static identifier = 'com.discord-player.reverbnationextractor' as const;
@@ -55,7 +54,7 @@ export class ReverbnationExtractor extends BaseExtractor {
     public async stream(info: Track) {
         const engine = info.raw.engine as string;
         if (engine) {
-            return await downloadStream(engine);
+            return engine;
         }
 
         const track = await reverbnation.getInfo(info.url).catch(Util.noop);
@@ -65,6 +64,6 @@ export class ReverbnationExtractor extends BaseExtractor {
             streamURL: track.streamURL
         };
 
-        return downloadStream(track.streamURL);
+        return track.streamURL;
     }
 }

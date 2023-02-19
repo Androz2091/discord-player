@@ -19,7 +19,7 @@ import { AppleMusic } from '../internal/AppleMusic';
 
 type StreamFN = (q: string) => Promise<import('stream').Readable | string>;
 
-const YouTubeLibs = ['play-dl', 'ytdl-core'] as const;
+const YouTubeLibs = ['ytdl-core', 'play-dl'] as const;
 
 // taken from ytdl-core
 const validQueryDomains = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'gaming.youtube.com']);
@@ -462,4 +462,4 @@ export class YoutubeExtractor extends BaseExtractor {
     }
 }
 
-export { YoutubeExtractor as YouTubeExtractor };
+export { YoutubeExtractor as YouTubeExtractor, YoutubeExtractor as YSAExtractor };

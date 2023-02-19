@@ -9,9 +9,9 @@ new FFmpegFilterer(af)
 
 ## Properties
 ### private  #ffmpegFilters: Array\<keyof QueueFilters>
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L88)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L44)
 ### public  af: GuildQueueAudioFilters\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L89)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L45)
 ### public  filters: Array\<keyof QueueFilters>
 
 ## Methods
@@ -21,43 +21,64 @@ new FFmpegFilterer(af)
 | filters | Array\<keyof QueueFilters> | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L91)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L47)
+### public  createStream(source, options): Readable
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| source | string \| Readable | ❌ | - |
+| options | FFmpegStreamOptions | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L54)
 ### public  getFiltersDisabled(): Array\<keyof QueueFilters>
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L135)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L101)
 ### public  getFiltersEnabled(): Array\<keyof QueueFilters>
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L131)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L97)
 ### public  isDisabled(filter): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | filter | T | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L143)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L109)
 ### public  isEnabled(filter): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | filter | T | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L139)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L105)
 ### public  isValidFilter(filter): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | filter | string | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L147)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L113)
+### public  setDefaults(ff): void
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| ff | Array\<keyof QueueFilters> | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L93)
 ### public  setFilters(filters): Promise\<boolean>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | filters | boolean \| Array\<keyof QueueFilters> \| Record\<keyof QueueFilters, boolean> | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L96)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L58)
+### public  toArray(): Array\<string>
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L117)
+### public  toJSON(): Record\<keyof QueueFilters, string>
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L121)
+### public  toString(): string
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L129)
 ### public  toggle(filters): Promise\<boolean>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | filters | keyof QueueFilters \| Array\<keyof QueueFilters> | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Structures/GuildQueue/GuildQueueAudioFilters.ts#L119)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L81)

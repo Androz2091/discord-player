@@ -1,0 +1,44 @@
+## QueryCache
+
+```typescript
+new QueryCache(player, options)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| player | Player | ❌ | - |
+| options | QueryCacheOptions | ❌ | - |
+
+## Properties
+### private  #defaultCache: Map\<string, DiscordPlayerQueryResultCache\<Track>>
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/utils/QueryCache.ts#L16)
+### public  fuse: Fuse\<Track>
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/utils/QueryCache.ts#L18)
+### public  options: QueryCacheOptions
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/utils/QueryCache.ts#L26)
+### public  player: Player
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/utils/QueryCache.ts#L25)
+### public  timer: Timer
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/utils/QueryCache.ts#L17)
+### public  checkInterval: number
+
+## Methods
+### public  addData(data): Promise\<void>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| data | SearchResult | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/utils/QueryCache.ts#L53)
+### public  cleanup(): Promise\<void>
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/utils/QueryCache.ts#L37)
+### public  clear(): Promise\<void>
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/utils/QueryCache.ts#L45)
+### public  getData(): Promise\<Array\<DiscordPlayerQueryResultCache\<Track>>>
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/utils/QueryCache.ts#L49)
+### public  resolve(context): Promise\<SearchResult>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| context | QueryCacheResolverContext | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/utils/QueryCache.ts#L60)

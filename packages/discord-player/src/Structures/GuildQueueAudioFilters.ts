@@ -1,7 +1,9 @@
+import { Readable } from 'stream';
 import { QueueFilters } from '../types/types';
 import AudioFilters from '../utils/AudioFilters';
 import { GuildQueue } from './GuildQueue';
 import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
+import { FFmpegStreamOptions, createFFmpegStream } from '../utils/FFmpegStream';
 
 type Filters = keyof typeof AudioFilters.filters;
 
@@ -47,6 +49,10 @@ export class FFmpegFilterer<Meta = unknown> {
         const seekTime = this.af.queue.node.getTimestamp(ignoreFilters)?.current.value || 0;
         this.#ffmpegFilters = [...new Set(filters)];
         return this.af.triggerReplay(seekTime);
+    }
+
+    public createStream(source: string | Readable, options: FFmpegStreamOptions) {
+        return createFFmpegStream(source, options);
     }
 
     public setFilters(filters: Filters[] | Record<Filters, boolean> | boolean) {

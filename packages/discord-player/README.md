@@ -18,17 +18,19 @@ $ npm install --save discord-player
 ### Install **[@discordjs/opus](https://npmjs.com/package/@discordjs/opus)**
 
 ```sh
-$ npm install --save @discordjs/opus # Native bindings via napi
+$ npm install --save @discordjs/opus # Native (best performance)
 
 # or
-$ npm install --save opusscript # WASM bindings
+$ npm install --save opusscript # WASM (near native performance)
 ```
 
 ### Install streaming library (if you want to play from youtube)
 
 ```sh
-$ npm install --save play-dl # discord-player prefers play-dl over ytdl-core if both of them are installed
-$ npm install --save ytdl-core # alternative to play-dl
+$ npm install --save ytdl-core
+
+# or
+$ npm install --save play-dl
 ```
 
 ### Install FFmpeg or Avconv
@@ -41,7 +43,7 @@ $ npm install --save ytdl-core # alternative to play-dl
 
 -   Simple & easy to use 🤘
 -   Beginner friendly 😱
--   Audio filters 🎸
+-   **A LOT OF AUDIO FILTERS** (discord-player has total of around 64 built-in filter presets which can be *extended even more!*) 🎸
 -   Lavalink compatible 15 band equalizer 🎚️
 -   Digital biquad filters support
 -   Digital Signal Processing utilities
@@ -204,9 +206,11 @@ Likewise, You can also force a specific extractor to resolve your search query. 
 You can do so by using `ext:<EXTRACTOR_IDENTIFIER>` in `searchEngine` value. Example:
 
 ```js
+import { SoundCloudExtractor } from '@discord-player/extractor';
+
 const result = await player.search(query, {
     // always use soundcloud extractor
-    searchEngine: 'ext:com.discord-player.soundcloudextractor'
+    searchEngine: SoundCloudExtractor.identifier
 });
 ```
 
@@ -223,7 +227,7 @@ Discord Player supports various audio filters. There are 4 types of audio filter
 The most common and powerful method is FFmpeg. It supports a lot of audio filters. To set ffmpeg filter, you can do:
 
 ```js
-await queue.filters.ffmpeg.setFilters(['bassboost', 'nightcore']);
+await queue.filters.ffmpeg.toggle(['bassboost', 'nightcore']);
 ```
 
 Note that there can be a delay between filters transition in this method.
@@ -279,7 +283,9 @@ These bots are made by the community, they can help you build your own!
 -   [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
 -   [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
 
-### Use cookies with ytdl-core
+### Use youtube cookies
+
+Using youtube cookies helps you to prevent frequent ratelimits.
 
 ```js
 const player = new Player(client, {
@@ -293,7 +299,7 @@ const player = new Player(client, {
 });
 ```
 
-> Note: the above option is only used when ytdl-core is being used. Follow [this instruction](https://github.com/play-dl/play-dl/blob/1ae7ba8fcea8b93293af5de9e19eca3c2a491804/instructions/README.md) for play-dl.
+> Note: The above option is also passed to `ytdl-core` but not `play-dl`. Follow [this instruction](https://github.com/play-dl/play-dl/blob/1ae7ba8fcea8b93293af5de9e19eca3c2a491804/instructions/README.md) for play-dl config.
 
 ### Use custom proxies
 
@@ -314,7 +320,9 @@ const player = new Player(client, {
 > You may also create a simple proxy server and forward requests through it.
 > See **[https://github.com/http-party/node-http-proxy](https://github.com/http-party/node-http-proxy)** for more info.
 
-### Custom stream Engine
+## Stream Hooks
+
+### onBeforeCreateStream
 
 Discord Player by default uses registered extractors to stream audio. If you need to override what needs to be streamed, you can use this hook.
 
@@ -333,4 +341,22 @@ const queue = player.nodes.create(..., {
 ```
 
 `<GuildQueue>.onBeforeCreateStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
-streams. `source` here will be a track source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and finally sent to Discord voice servers.
+streams. `source` here will be a track source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and sent to `onAfterCreateStream` hook.
+
+### onAfterCreateStream
+
+This hook can be used to post-process pcm stream. This is the final step before creating audio resource. Example:
+
+```js
+const queue = player.nodes.create(..., {
+    ...,
+    async onAfterCreateStream(pcmStream, queue) {
+        // return opus encoded stream
+        const encoder = new OpusEncoder();
+        return {
+            stream: encoder.encode(pcmStream),
+            type: StreamType.Opus
+        };
+    }
+});
+```

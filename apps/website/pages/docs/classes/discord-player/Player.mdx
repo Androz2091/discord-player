@@ -10,42 +10,42 @@ new Player(client, options)
 
 ## Properties
 ### private  #lagMonitorInterval: Timer
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L49)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L29)
 ### private  #lagMonitorTimeout: Timeout
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L48)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L28)
 ### private  #lastLatency: number
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L46)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L26)
 ### private  #voiceStateUpdateListener: (oldState: VoiceState, newState: VoiceState) => void
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L47)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L27)
 ### public  client: Client\<boolean>
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L23)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L19)
 ### public  events: EventEmitter\<GuildQueueEvents\<unknown>>
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L45)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L25)
 ### public  extractors: ExtractorExecutionContext
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L44)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L24)
 ### public  id: string
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L22)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L18)
 ### public  nodes: GuildNodeManager\<unknown>
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L41)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L21)
 ### public  options: PlayerInitOptions
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L24)
-### public  queues: Collection\<string, Queue\<unknown>>
-- **⚠️ Deprecated**
-
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L40)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L20)
 ### public  requiredEvents: Array\<string>
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L43)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L23)
 ### public  voiceUtils: VoiceUtils
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L42)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L22)
+### public static _singletonKey: symbol
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L17)
 ### public static defaultMaxListeners: number
 - Source: `packages/utils/dist/index.d.ts#L42`
 ### public  eventLoopLag: number
 Event loop lag
 ### public  queryCache: null \| QueryCache
 
+### public  queues: GuildNodeManager\<unknown>
+
 ## Methods
-### public  \[iterator](): Generator\<Queue\<unknown> \| GuildQueue\<unknown>, void, undefined>
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L594)
+### public  \[iterator](): Generator\<GuildQueue\<unknown>, void, undefined>
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L471)
 ### private  _handleVoiceState(oldState, newState): undefined
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -53,15 +53,7 @@ Event loop lag
 | newState | VoiceState | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L231)
-### private  _handleVoiceStateLegacy(oldState, newState): undefined
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| oldState | VoiceState | ❌ | - |
-| newState | VoiceState | ❌ | - |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L142)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L168)
 ### public  addListener(event, listener): Player
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -81,34 +73,9 @@ Creates
 | data | PlaylistInitData | ❌ | The data to initialize a playlist |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L602)
-### public  createQueue(guild, queueInitOptions): Queue\<T>
-Creates a queue for a guild if not available, else returns existing queue
-
-
-
-
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| guild | GuildResolvable | ❌ | The guild |
-| queueInitOptions | PlayerOptions & \{ metadata: T } | ❌ | Queue init options |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L349)
-### public  deleteQueue(guild): Queue\<T>
-Deletes a queue and returns deleted queue object
-
-
-
-
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| guild | GuildResolvable | ❌ | The guild id to remove |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L383)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L479)
 ### public  destroy(): Promise\<void>
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L130)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L157)
 ### public  emit(eventName, args): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -116,31 +83,19 @@ Deletes a queue and returns deleted queue object
 | args | Parameters\<PlayerEvents\[U]> | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L572)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L460)
 ### public  eventNames(): Array\<U>
 - Source: `packages/utils/dist/index.d.ts#L53`
-### public  generateStatistics(): Array\<\{ connections: number,extractors: number,guild: string,isShard: boolean,latency: \{ client: number,eventLoop: number,udp: undefined \| number,ws: undefined \| number },memory: MemoryUsage,os: \{ cpuCount: number,freeMem: number,platform: Platform,totalMem: number },subscribers: number,tracks: number }>
+### public  generateStatistics(): \{ instances: number,queryCacheEnabled: boolean,queues: Array\<GuildQueueStatisticsMetadata>,queuesCount: number }
 Generates statistics
 
 
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L126)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L148)
 ### public  getMaxListeners(): number
 - Source: `packages/utils/dist/index.d.ts#L57`
-### public  getQueue(guild): undefined \| Queue\<T>
-Returns the queue if available
-
-
-
-
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| guild | GuildResolvable | ❌ | The guild id |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L371)
 ### public  handleVoiceState(oldState, newState): void
 Handles voice state update
 
@@ -153,9 +108,9 @@ Handles voice state update
 | newState | VoiceState | ❌ | The new voice state |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L326)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L263)
 ### public  isVoiceStateHandlerLocked(): boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L339)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L275)
 ### public  listenerCount(type): number
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -171,7 +126,7 @@ Handles voice state update
 
 - Source: `packages/utils/dist/index.d.ts#L55`
 ### public  lockVoiceStateHandler(): void
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L331)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L267)
 ### public  off(event, listener): Player
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -223,7 +178,7 @@ metadata: message
 | options | SearchOptions & \{ connectionOptions: VoiceConnectConfig,nodeOptions: GuildNodeCreateOptions\<T> } | ❌ | Options for player |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L416)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L298)
 ### public  prependListener(event, listener): Player
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -262,19 +217,6 @@ metadata: message
 
 
 - Source: `packages/utils/dist/index.d.ts#L47`
-### public  resolveQueue(queueLike): Queue\<T>
-Resolves queue
-
-- **⚠️ Deprecated**
-
-
-
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| queueLike | Queue\<unknown> \| GuildResolvable | ❌ | Queue like object |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L589)
 ### public  scanDeps(): string
 Generates a report of the dependencies used by the 
 
@@ -282,7 +224,7 @@ Generates a report of the dependencies used by the
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L561)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L449)
 ### public  search(query, options): Promise\<SearchResult>
 Search tracks
 
@@ -295,7 +237,7 @@ Search tracks
 | options | SearchOptions | ❌ | The search options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L461)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L343)
 ### public  setMaxListeners(n): Player
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -304,7 +246,7 @@ Search tracks
 
 - Source: `packages/utils/dist/index.d.ts#L58`
 ### public  unlockVoiceStateHandler(): void
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L335)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L271)
 ### public static clearAllPlayers(): void
 Clear all player instances
 
@@ -312,7 +254,7 @@ Clear all player instances
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L107)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L125)
 ### public static getAllPlayers(): Array\<Player>
 Get all active player instances
 
@@ -320,4 +262,25 @@ Get all active player instances
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e435396/packages/discord-player/src/Player.ts#L100)
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L118)
+### public static singleton(client, options): Player
+Creates discord-player singleton instance.
+
+
+```typescript
+```ts
+const player1 = Player.singleton(client, options);
+const player2 = Player.singleton(client, options);
+const player3 = new Player(client, options);
+player1.id === player2.id // true
+player1.id === player3.id // false
+```
+```
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| client | Client\<boolean> | ❌ | The client that instantiated player |
+| options | PlayerInitOptions | ❌ | Player initializer options |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Player.ts#L101)
