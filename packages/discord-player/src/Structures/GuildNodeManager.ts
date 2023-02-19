@@ -61,7 +61,7 @@ export class GuildNodeManager<Meta = unknown> {
         options.resampler ??= 48000;
         options.selfDeaf ??= true;
         options.connectionTimeout ??= this.player.options.connectionTimeout;
-        options.bufferingTimeout ??= 4000;
+        options.bufferingTimeout ??= 1000;
 
         const queue = new GuildQueue<T>(this.player, {
             guild: server,

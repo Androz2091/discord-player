@@ -19,6 +19,7 @@ export class FiltersCommand extends Command {
 						.addChoices(
 							{ name: 'Off', value: 'Off' },
 							...([
+								{ name: 'lofi', value: 'lofi' },
 								{ name: '8D', value: '8D' },
 								{ name: 'bassboost', value: 'bassboost' },
 								{ name: 'compressor', value: 'compressor' },
@@ -59,7 +60,8 @@ export class FiltersCommand extends Command {
 				});
 			}
 
-			await queue.filters.ffmpeg.toggle(filter);
+			// if the filter is bassboost, then enable audio normalizer to avoid distortion
+			await queue.filters.ffmpeg.toggle(filter.includes('bassboost') ? ['bassboost', 'normalizer'] : filter);
 
 			return interaction.followUp({
 				content: `${this.container.client.dev.success} | **${filter}** filter ${

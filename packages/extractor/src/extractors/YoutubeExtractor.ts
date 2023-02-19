@@ -13,11 +13,11 @@ import {
     Util
 } from 'discord-player';
 
-import spotify, { Spotify } from 'spotify-url-info';
+import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
 import fetch from 'node-fetch';
 import { AppleMusic } from '../internal/AppleMusic';
 
-type StreamFN = (q: string) => Promise<import('stream').Readable>;
+type StreamFN = (q: string) => Promise<import('stream').Readable | string>;
 
 const YouTubeLibs = ['play-dl', 'ytdl-core'] as const;
 
@@ -48,10 +48,33 @@ export class YoutubeExtractor extends BaseExtractor {
             this._stream = async (query) => {
                 if (isYtdl) {
                     const dl = lib as typeof import('ytdl-core');
-                    return dl(query, this.context.player.options.ytdlOptions);
+                    const info = await dl.getInfo(query, this.context.player.options.ytdlOptions);
+
+                    const formats = info.formats
+                        .filter((format) => {
+                            return info.videoDetails.isLiveContent ? format.isHLS && format.hasAudio : format.hasAudio;
+                        })
+                        .sort((a, b) => Number(b.audioBitrate) - Number(a.audioBitrate) || Number(a.bitrate) - Number(b.bitrate));
+
+                    const fmt = formats.find((format) => !format.hasVideo) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
+                    return fmt.url;
+                    // return dl(query, this.context.player.options.ytdlOptions);
                 } else {
                     const dl = lib as typeof import('play-dl');
-                    return (await dl.stream(query, { discordPlayerCompatibility: true })).stream;
+
+                    const info = await dl.video_info(query);
+                    const formats = info.format
+                        .filter((format) => {
+                            const re = /\/manifest\/hls_(variant|playlist)\//;
+                            if (!format.url) return false;
+                            if (info.video_details.live) return re.test(format.url) && typeof format.bitrate === 'number';
+                            return typeof format.bitrate === 'number';
+                        })
+                        .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
+
+                    const fmt = formats.find((format) => !format.qualityLabel) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
+                    return fmt.url!;
+                    // return (await dl.stream(query, { discordPlayerCompatibility: true })).stream;
                 }
             };
         }
@@ -440,125 +463,3 @@ export class YoutubeExtractor extends BaseExtractor {
 }
 
 export { YoutubeExtractor as YouTubeExtractor };
-
-export interface SpotifySong {
-    type: 'track';
-    name: string;
-    uri: string;
-    id: string;
-    title: string;
-    artists: {
-        name: string;
-        uri: string;
-    }[];
-    coverArt: {
-        extractedColors: {
-            colorDark: {
-                hex: string;
-            };
-            colorLight: {
-                hex: string;
-            };
-        };
-        sources: {
-            url: string;
-            width: number;
-            height: number;
-        }[];
-    };
-    releaseDate: {
-        isoString: string;
-    };
-    duration: number;
-    maxDuration: number;
-    isPlayable: boolean;
-    isExplicit: boolean;
-    audioPreview: {
-        url: string;
-        format: string;
-    };
-    hasVideo: boolean;
-    relatedEntityUri: string;
-}
-
-export interface SpotifyAlbum {
-    type: 'album';
-    name: string;
-    uri: string;
-    id: string;
-    title: string;
-    subtitle: string;
-    coverArt: {
-        extractedColors: {
-            colorDark: {
-                hex: string;
-            };
-        };
-        sources: {
-            height: number;
-            width: number;
-            url: string;
-        }[];
-    };
-    releaseDate: string;
-    duration: number;
-    maxDuration: number;
-    isPlayable: boolean;
-    isExplicit: boolean;
-    hasVideo: boolean;
-    relatedEntityUri: string;
-    trackList: {
-        uri: string;
-        uid: string;
-        title: string;
-        subtitle: string;
-        isExplicit: boolean;
-        duration: number;
-        isPlayable: boolean;
-        audioPreview: {
-            format: string;
-            url: string;
-        };
-    }[];
-}
-
-export interface SpotifyPlaylist {
-    type: 'playlist';
-    name: string;
-    uri: string;
-    id: string;
-    title: string;
-    subtitle: string;
-    coverArt: {
-        extractedColors: {
-            colorDark: {
-                hex: string;
-            };
-        };
-        sources: {
-            height: number;
-            width: number;
-            url: string;
-        }[];
-    };
-    releaseDate: string;
-    duration: number;
-    maxDuration: number;
-    isPlayable: boolean;
-    isExplicit: boolean;
-    hasVideo: boolean;
-    relatedEntityUri: string;
-    trackList: {
-        uri: string;
-        uid: string;
-        title: string;
-        subtitle: string;
-        isExplicit: boolean;
-        duration: number;
-        isPlayable: boolean;
-        audioPreview: {
-            format: string;
-            url: string;
-        };
-    }[];
-}

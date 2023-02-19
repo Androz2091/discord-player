@@ -1,13 +1,14 @@
 import { AudioResource, StreamType } from '@discordjs/voice';
 import { Readable } from 'stream';
 import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
-import AudioFilters from '../utils/AudioFilters';
 import { createFFmpegStream } from '../utils/FFmpegStream';
 import { QueryResolver } from '../utils/QueryResolver';
 import { Util } from '../utils/Util';
 import { Track, TrackResolvable } from './Track';
 import { GuildQueue } from './GuildQueue';
 import { setTimeout as waitFor } from 'timers/promises';
+
+export const FFMPEG_SRATE_REGEX = /asetrate=\d+\*(\d(\.\d)?)/;
 
 export interface ResourcePlayOptions {
     queue?: boolean;
@@ -51,21 +52,43 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         this.#progress = 0;
     }
 
-    public get playbackTime() {
-        if (this.queue.dispatcher?.streamTime == null) return 0;
-        const dur = this.#progress + this.queue.dispatcher.streamTime;
-        const hasNightcore = this.queue.filters.ffmpeg.filters.includes('nightcore');
-        const hasVwave = this.queue.filters.ffmpeg.filters.includes('vaporwave');
-
-        if (hasNightcore && hasVwave) return dur * (1.25 + 0.8);
-        return hasNightcore ? dur * 1.25 : hasVwave ? dur * 0.8 : dur;
+    public get streamTime() {
+        return this.queue.dispatcher?.streamTime ?? 0;
     }
 
-    public getTimestamp(): PlayerTimestamp | null {
+    public get playbackTime() {
+        const dur = this.#progress + this.streamTime;
+
+        return dur;
+    }
+
+    public getDurationMultiplier() {
+        const srateFilters = this.queue.filters.ffmpeg.toArray().filter((ff) => FFMPEG_SRATE_REGEX.test(ff));
+        const multipliers = srateFilters
+            .map((m) => {
+                return parseFloat(FFMPEG_SRATE_REGEX.exec(m)?.[1] as string);
+            })
+            .filter((f) => !isNaN(f));
+
+        return !multipliers.length ? 1 : multipliers.reduce((accumulator, current) => current + accumulator);
+    }
+
+    public get estimatedPlaybackTime() {
+        const dur = this.playbackTime;
+        return Math.round(this.getDurationMultiplier() * dur);
+    }
+
+    public get estimatedDuration() {
+        const dur = this.queue.currentTrack?.durationMS ?? 0;
+
+        return Math.round(dur / this.getDurationMultiplier());
+    }
+
+    public getTimestamp(ignoreFilters = false): PlayerTimestamp | null {
         if (!this.queue.currentTrack) return null;
 
-        const current = this.playbackTime;
-        const total = this.queue.currentTrack.durationMS;
+        const current = ignoreFilters ? this.playbackTime : this.estimatedPlaybackTime;
+        const total = ignoreFilters ? this.queue.currentTrack.durationMS : this.estimatedDuration;
 
         return {
             current: {
@@ -272,7 +295,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 this.#progress = 0;
             }
 
-            const pcmStream = this.#createFFmpegStream(stream, track, options.seek ?? 0);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const cookies = track.source === 'youtube' ? (<any>this.queue.player.options.ytdlOptions?.requestOptions)?.headers?.cookie : undefined;
+            const pcmStream = this.#createFFmpegStream(stream, track, options.seek ?? 0, cookies);
 
             const finalStream = (await this.queue.onAfterCreateStream?.(pcmStream).catch(() => pcmStream)) || pcmStream;
 
@@ -296,7 +321,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                         defaultFilters: this.queue.filters._lastFiltersCache.filters,
                         volume: this.queue.filters._lastFiltersCache.volume,
                         transitionMode: !!options.transitionMode,
-                        ffmpegFilters: this.queue.filters.ffmpeg.filters,
+                        ffmpegFilters: this.queue.filters.ffmpeg.toString(),
                         seek: options.seek
                     },
                     null,
@@ -354,11 +379,12 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return stream;
     }
 
-    #createFFmpegStream(stream: Readable | string, track: Track, seek = 0) {
+    #createFFmpegStream(stream: Readable | string, track: Track, seek = 0, cookies?: string) {
         const ffmpegStream = createFFmpegStream(stream, {
-            encoderArgs: this.queue.filters.ffmpeg.filters.length ? ['-af', AudioFilters.create(this.queue.filters.ffmpeg.filters)] : [],
+            encoderArgs: this.queue.filters.ffmpeg.filters.length ? ['-af', this.queue.filters.ffmpeg.toString()] : [],
             seek: seek / 1000,
-            fmt: 's16le'
+            fmt: 's16le',
+            cookies
         }).on('error', (err) => {
             const m = `${err}`.toLowerCase();
 

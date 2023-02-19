@@ -1,3 +1,4 @@
+import { QueueFilters } from '../types/types';
 import AudioFilters from '../utils/AudioFilters';
 import { GuildQueue } from './GuildQueue';
 import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
@@ -42,8 +43,10 @@ export class FFmpegFilterer<Meta = unknown> {
     public constructor(public af: GuildQueueAudioFilters<Meta>) {}
 
     #setFilters(filters: Filters[]) {
+        const ignoreFilters = this.filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave') && !filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave');
+        const seekTime = this.af.queue.node.getTimestamp(ignoreFilters)?.current.value || 0;
         this.#ffmpegFilters = [...new Set(filters)];
-        return this.af.triggerReplay(this.af.queue.node.getTimestamp()?.current.value || 0);
+        return this.af.triggerReplay(seekTime);
     }
 
     public setFilters(filters: Filters[] | Record<Filters, boolean> | boolean) {
@@ -103,6 +106,22 @@ export class FFmpegFilterer<Meta = unknown> {
 
     public isValidFilter(filter: string) {
         return AudioFilters.has(filter as Filters);
+    }
+
+    public toArray() {
+        return this.filters.map((filter) => AudioFilters.get(filter));
+    }
+
+    public toJSON() {
+        const obj = {} as Record<keyof QueueFilters, string>;
+
+        this.filters.forEach((filter) => (obj[filter] = AudioFilters.get(filter)));
+
+        return obj;
+    }
+
+    public toString() {
+        return AudioFilters.create(this.filters);
     }
 }
 
