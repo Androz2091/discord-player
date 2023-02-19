@@ -1,4 +1,3 @@
-import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { QueueRepeatMode } from 'discord-player';
 import { GuildMember } from 'discord.js';
@@ -10,10 +9,14 @@ const repeatModes = [
 	{ name: 'Autoplay', value: QueueRepeatMode.AUTOPLAY }
 ];
 
-@ApplyOptions<Command.Options>({
-	description: 'Loops the current playing song or queue'
-})
 export class LoopCommand extends Command {
+	public constructor(context: Command.Context, options: Command.Options) {
+		super(context, {
+			...options,
+			description: 'Loops the current playing track or the entire queue'
+		});
+	}
+
 	public override registerApplicationCommands(registry: Command.Registry) {
 		registry.registerChatInputCommand((builder) => {
 			builder //
@@ -31,7 +34,7 @@ export class LoopCommand extends Command {
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		if (interaction.member instanceof GuildMember) {
-			const queue = this.container.client.player.nodes.get(interaction.guild?.id!);
+			const queue = this.container.client.player.nodes.get(interaction.guild!.id);
 			const permissions = this.container.client.perms.voice(interaction, this.container.client);
 
 			if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am not in a voice channel`, ephemeral: true });
@@ -39,7 +42,7 @@ export class LoopCommand extends Command {
 
 			if (!queue.currentTrack)
 				return interaction.reply({
-					content: `${this.container.client.dev.error} | There is no song currently playing`,
+					content: `${this.container.client.dev.error} | There is no track **currently** playing`,
 					ephemeral: true
 				});
 
