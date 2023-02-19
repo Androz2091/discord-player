@@ -1,36 +1,64 @@
-# Migrating to Discord Player v5
+# Migrating to Discord Player v6
 
-We have introduced some breaking changes in Discord Player v5. Which means, your old code will no longer work with v5.
-The new update brings new features as well as better management of different things. This also uses the new **[@discordjs/voice](https://github.com/discordjs/voice)** library!
+We have introduced some breaking changes in Discord Player v6. Which means, your old code will no longer work with v6.
+The new update brings new queue system and removes old one.
 
-## Basic Example
+## Basic Example of new queue
 
 ```diff
-- player.play(message, query);
-+ const queue = player.createQueue(message.guild);
-+ const song = await player.search(query, {
-+   requestedBy: message.author
-});
-+
-+ try {
-+   await queue.connect(message.member.voice.channel);
-+ } catch {
-+   message.reply("Could not join your voice channel");
-+ }
-+
-+ queue.addTrack(song.tracks[0]);
-+ queue.play();
+- queue.play()
++ queue.node.play()
+
+- queue.pause()
++ queue.node.pause()
+
+- queue.setFilters({ bassboost: !queue.getFiltersEnabled().includes('bassboost') })
++ queue.filters.ffmpeg.toggle('bassboost')
+
+- queue.back()
++ queue.history.back()
+
+- player.createQueue(...)
++ player.nodes.create(...)
+
+- player.on('...')
++ player.events.on('...')
+
+- player.createQueue()...queue.play()
++ player.play()
+^ Discord Player will handle queue creation, search results, tracks queuing, playing
+
+some new filters
++ player.filters.biquad.setFilter(BiquadFilterType.LowPass)
+^ Filters like LowPass, HighPass, LowShelf, HighShelf, AllPass, etc.
+
+equalizer
++ player.filters.equalizer.setEQ(EqualizerConfigurationPreset.Jazz)
+
++ player.filters.equalizer.setEQ([{ band: 0, gain: 0.25 }])
+^ looks pretty similar to lavalink huh?
+
+Some DSP Filters
++ player.filters.filters.setFilters(['8D'])
+^ 8D also works in FFmpeg, but this one does not use FFmpeg and you will see it applying immediately unlike FFmepg ones
+
+- onBeforeCreateStream() (just to use play-dl?)
++ You dont need anything, just make sure play-dl is installed ;)
+
++ onAfterCreateStream()
+^ Post processing PCM stream
 ```
 
-> Everything related to music player is moved to `Queue`.
+## Events
 
-## How do I reply to the event like v4?
+Events are now emitted from `player.events` object. [Here are the list of possible events](https://discord-player.netlify.app/docs/types/discord-player/GuildQueueEvents).
 
-Since we got rid of `message` parameter in every method of the Discord Player, you no longer have access to the `message` object in events.
-Instead, we have added `\<Queue>.metadata` prop as an alternative. This `metadata` can be anything, declared while creating queue:
+## How do I reply to the event like v5?
+
+v6 still supports v5's `metadata` object:
 
 ```js
-const queue = player.createQueue(message.guild, {
+const queue = player.nodes.create(message.guild, {
     metadata: message
 });
 ```
@@ -38,7 +66,7 @@ const queue = player.createQueue(message.guild, {
 The metadata `message` will always be available in every event emitted for that specific `Queue`. You can access it via `queue.metadata`:
 
 ```js
-player.on('trackStart', (queue, track) => {
+player.events.on('playerStart', (queue, track) => {
     const channel = queue.metadata.channel; // queue.metadata is your "message" object
     channel.send(`🎶 | Started playing **${track.title}**`);
 });
@@ -46,14 +74,9 @@ player.on('trackStart', (queue, track) => {
 
 ## How do I stop the player
 
-You have to use `\<Queue>.destroy()` to destroy the queue. It will also stop the player.
+You have to use `<Queue>.delete()` to destroy the queue. It will also stop the player.
 
 ```js
-const queue = player.getQueue(message.guild.id);
-if (queue) queue.destroy();
+const queue = player.nodes.get(message.guild.id);
+if (!queue.deleted) queue.delete();
 ```
-
-## Updating filters
-
-Discord Player v5.x has new option `bufferingTimeout` in queue init options which allows you to set stream buffering timeout before playing.
-This might be useful if you want to have smooth filters update. By default, it is set to 3 seconds.

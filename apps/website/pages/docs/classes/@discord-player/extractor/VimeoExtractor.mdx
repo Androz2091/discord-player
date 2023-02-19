@@ -9,9 +9,9 @@ new VimeoExtractor(context)
 
 ## Properties
 ### public  context: ExtractorExecutionContext
-- Source: `packages/discord-player/dist/index.d.ts#L623`
+- Source: `packages/discord-player/dist/index.d.ts#L627`
 ### public static identifier: 'com.discord\-player.vimeoextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/extractor/src/extractors/VimeoExtractor.ts#L15)
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/extractor/src/extractors/VimeoExtractor.ts#L15)
 ### public  identifier: string
 Identifier of this extractor
 ## Methods
@@ -22,7 +22,7 @@ This method will be executed when this extractor is activated
 
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L640`
+- Source: `packages/discord-player/dist/index.d.ts#L644`
 ### public  createResponse(playlist?, tracks?): ExtractorInfo
 Create extractor response
 
@@ -35,7 +35,7 @@ Create extractor response
 | tracks | Array\<Track> | ✅ | The track array |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L677`
+- Source: `packages/discord-player/dist/index.d.ts#L681`
 ### public  deactivate(): Promise\<void>
 This method will be executed when this extractor is deactivated
 
@@ -43,7 +43,7 @@ This method will be executed when this extractor is deactivated
 
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L644`
+- Source: `packages/discord-player/dist/index.d.ts#L648`
 ### public  emit(event, args): boolean
 Dispatch an event to the player
 
@@ -56,9 +56,9 @@ Dispatch an event to the player
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L671`
+- Source: `packages/discord-player/dist/index.d.ts#L675`
 ### public  emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/extractor/src/extractors/VimeoExtractor.ts#L55)
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/extractor/src/extractors/VimeoExtractor.ts#L55)
 ### public  handle(query, context): Promise\<ExtractorInfo>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -66,7 +66,7 @@ Dispatch an event to the player
 | context | ExtractorSearchContext | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/extractor/src/extractors/VimeoExtractor.ts#L22)
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/extractor/src/extractors/VimeoExtractor.ts#L22)
 ### public  handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
 
@@ -79,14 +79,14 @@ A stream middleware to handle streams before passing it to the player
 | next | NextFunction | ❌ | The next function |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L665`
+- Source: `packages/discord-player/dist/index.d.ts#L669`
 ### public  stream(info): Promise\<string>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | info | Track | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/extractor/src/extractors/VimeoExtractor.ts#L59)
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/extractor/src/extractors/VimeoExtractor.ts#L59)
 ### public  validate(query, type?): Promise\<boolean>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -94,4 +94,4 @@ A stream middleware to handle streams before passing it to the player
 | type | null \| SearchQueryType | ✅ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/extractor/src/extractors/VimeoExtractor.ts#L17)
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/extractor/src/extractors/VimeoExtractor.ts#L17)

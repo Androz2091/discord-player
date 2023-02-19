@@ -134,8 +134,7 @@ export interface GuildQueueEvents<Meta = unknown> {
      */
     playerTrigger: (queue: GuildQueue<Meta>, track: Track, reason: PlayerTriggeredReason) => unknown;
     /**
-     * Emitted when the voice state is updated.
-     * Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
+     * Emitted when the voice state is updated. Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
      * @param queue The queue where this event occurred
      * @param oldState The old voice state
      * @param newState The new voice state

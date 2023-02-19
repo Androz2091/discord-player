@@ -10,29 +10,59 @@ new SearchResult(player, _data)
 
 ## Properties
 ### private  _data: SearchResultData
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L18)
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/SearchResult.ts#L18)
 ### public  player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L18)
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/SearchResult.ts#L18)
 ### public  extractor: null \| BaseExtractor
-
+The extractor
 ### public  playlist: undefined \| null \| Playlist
-
+Playlist result
 ### public  query: string
-
+The search query
 ### public  queryType: SearchQueryType \| any
-
+The search query type
 ### public  requestedBy: null \| User
-
+Requested by
 ### public  tracks: Array\<Track>
-
+Tracks result
 ## Methods
 ### public  execute(): Promise\<SearchResult>
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L44)
+Re-execute this search
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/SearchResult.ts#L65)
 ### public  hasPlaylist(): boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L55)
+If this search result has playlist
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/SearchResult.ts#L82)
 ### public  hasTracks(): boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L59)
+If this search result has tracks
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/SearchResult.ts#L89)
 ### public  isEmpty(): boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L51)
+If this search result is empty
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/SearchResult.ts#L75)
 ### public  toJSON(): \{ extractor: null \| string,playlist: null \| PlaylistJSON,query: string,queryType: SearchQueryType \| any,requestedBy: null \| Object,tracks: Array\<TrackJSON> }
-- [Source](https://github.com/Androz2091/discord-player/blob/99052a9/packages/discord-player/src/Structures/SearchResult.ts#L63)
+JSON representation of this search
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/SearchResult.ts#L96)

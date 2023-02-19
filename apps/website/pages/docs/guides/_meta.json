@@ -1,11 +1,12 @@
 {
     "welcome": "Welcome",
     "v6-migration": "V6 Migration",
-    "extractors-api": "Extractors Api",
+    "supported-sources": "Supported Sources",
     "stream-hooks": "Stream Hooks",
+    "common-problems": "Common Problems",
+    "accessing-player": "Accessing Player",
     "audio-filters": "Audio Filters",
-    "slash-commands": "Slash Commands",
-    "working-mechanism": "Working Mechanism",
-    "ratelimits": "Ratelimits",
+    "custom-audio-filters": "Custom Audio Filters",
+    "preventing-ratelimits": "Preventing Ratelimits",
     "using-proxy": "Using Proxy"
 }

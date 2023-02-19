@@ -18,32 +18,37 @@ const GuideFiles = [
         path: `${DOCS}/migrating/migrating.md`
     },
     {
-        name: 'extractors-api',
+        name: 'supported-sources',
         category: 'guides',
-        path: `${DOCS}/extractors/extractor.md`
+        path: `${DOCS}/extractors/sources.md`
     },
     {
         name: 'stream-hooks',
         category: 'guides',
-        path: `${DOCS}/extractors/create_stream.md`
+        path: `${DOCS}/extractors/stream_hooks.md`
+    },
+    {
+        name: 'common-problems',
+        category: 'guides',
+        path: `${DOCS}/faq/common_errors.md`
+    },
+    {
+        name: 'accessing-player',
+        category: 'guides',
+        path: `${DOCS}/faq/how_to_access_player.md`
     },
     {
         name: 'audio-filters',
-        path: `${DOCS}/faq/custom_filters.md`,
+        path: `${DOCS}/filters/audio_filters.md`,
         category: 'guides'
     },
     {
-        name: 'slash-commands',
-        path: `${DOCS}/faq/slash_commands.md`,
+        name: 'custom-audio-filters',
+        path: `${DOCS}/filters/custom_filters.md`,
         category: 'guides'
     },
     {
-        name: 'working-mechanism',
-        path: `${DOCS}/faq/how_does_it_work.md`,
-        category: 'guides'
-    },
-    {
-        name: 'ratelimits',
+        name: 'preventing-ratelimits',
         path: `${DOCS}/youtube/cookies.md`,
         category: 'guides'
     },
