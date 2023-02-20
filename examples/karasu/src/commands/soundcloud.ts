@@ -21,7 +21,6 @@ export class SoundcloudCommand extends Command {
 		});
 	}
 
-
 	public override async autocompleteRun(interaction: Command.AutocompleteInteraction) {
 		const query = interaction.options.getString('query');
 		const results = await this.container.client.player.search(query!, {

@@ -6,7 +6,7 @@ export class EqualizerCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
 		super(context, {
 			...options,
-			description: 'The equaliser filter that can be applied to tracks'
+			description: 'The equalizer filter that can be applied to tracks'
 		});
 	}
 
@@ -18,7 +18,7 @@ export class EqualizerCommand extends Command {
 				.addStringOption((option) =>
 					option
 						.setName('preset')
-						.setDescription('The equaliser filter to use')
+						.setDescription('The equalizer filter to use')
 						.addChoices(
 							...Object.keys(EqualizerConfigurationPreset).map((m) => ({
 								name: m,
@@ -45,7 +45,7 @@ export class EqualizerCommand extends Command {
 				});
 			if (!queue.filters.equalizer)
 				return interaction.reply({
-					content: `${this.container.client.dev.error} | The equaliser filter is not **available** to be used in this queue`,
+					content: `${this.container.client.dev.error} | The equalizer filter is not **available** to be used in this queue`,
 					ephemeral: true
 				});
 
@@ -55,7 +55,7 @@ export class EqualizerCommand extends Command {
 			queue.filters.equalizer.enable();
 
 			return interaction.followUp({
-				content: `${this.container.client.dev.success} | **Equaliser filter** set to: \`${preset}\``
+				content: `${this.container.client.dev.success} | **Equalizer filter** set to: \`${preset}\``
 			});
 		}
 	}

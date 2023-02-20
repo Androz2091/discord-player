@@ -74,6 +74,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 } else {
                     this.debug('Default extractors loaded!');
                 }
+
+                this.debug(`[Dependencies Report]\n${this.scanDeps()}`);
             });
         }
 
