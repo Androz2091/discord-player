@@ -1,5 +1,4 @@
 import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable } from 'discord.js';
-import { EventEmitter } from '@discord-player/utils';
 import { Playlist, Track, GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, SearchResult } from './Structures';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
@@ -10,23 +9,23 @@ import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContex
 import { BaseExtractor } from './extractors/BaseExtractor';
 import * as _internals from './utils/__internal__';
 import { QueryCache } from './utils/QueryCache';
+import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
-export class Player extends EventEmitter<PlayerEvents> {
+export class Player extends PlayerEventsEmitter<PlayerEvents> {
+    #lastLatency = -1;
+    #voiceStateUpdateListener = this.handleVoiceState.bind(this);
+    #lagMonitorTimeout!: NodeJS.Timeout;
+    #lagMonitorInterval!: NodeJS.Timer;
     public static _singletonKey = kSingleton;
     public readonly id = SnowflakeUtil.generate().toString();
     public readonly client: Client;
     public readonly options: PlayerInitOptions;
     public nodes = new GuildNodeManager(this);
     public readonly voiceUtils = new VoiceUtils();
-    public requiredEvents = ['error', 'connectionError'] as string[];
     public extractors = new ExtractorExecutionContext(this);
-    public events = new EventEmitter<GuildQueueEvents>();
-    #lastLatency = -1;
-    #voiceStateUpdateListener = this.handleVoiceState.bind(this);
-    #lagMonitorTimeout!: NodeJS.Timeout;
-    #lagMonitorInterval!: NodeJS.Timer;
+    public events = new PlayerEventsEmitter<GuildQueueEvents>(['error', 'playerError']);
 
     /**
      * Creates new Discord Player
@@ -34,7 +33,7 @@ export class Player extends EventEmitter<PlayerEvents> {
      * @param {PlayerInitOptions} [options] The player init options
      */
     public constructor(client: Client, options: PlayerInitOptions = {}) {
-        super();
+        super(['error']);
 
         /**
          * The discord.js client
@@ -462,17 +461,6 @@ export class Player extends EventEmitter<PlayerEvents> {
             })
             .join('\n');
         return `${depsReport}\nLoaded Extractors:\n${extractorReport || 'None'}\n${line}`;
-    }
-
-    public emit<U extends keyof PlayerEvents>(eventName: U, ...args: Parameters<PlayerEvents[U]>): boolean {
-        if (this.requiredEvents.includes(eventName) && !super.eventNames().includes(eventName)) {
-            // eslint-disable-next-line no-console
-            console.error(...args);
-            Util.warn(`Unhandled "${eventName}" event! Events ${this.requiredEvents.map((m) => `"${m}"`).join(', ')} must have event listeners!`, 'UnhandledEventWarning');
-            return false;
-        } else {
-            return super.emit(eventName, ...args);
-        }
     }
 
     public *[Symbol.iterator]() {
