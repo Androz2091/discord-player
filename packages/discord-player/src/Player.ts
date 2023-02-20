@@ -69,11 +69,13 @@ export class Player extends EventEmitter<PlayerEvents> {
         this.client.on('voiceStateUpdate', this.#voiceStateUpdateListener);
 
         if (this.options?.autoRegisterExtractor) {
-            let nv: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-            if ((nv = Util.require('@discord-player/extractor'))) {
-                ['YouTubeExtractor', 'SoundCloudExtractor', 'ReverbnationExtractor', 'VimeoExtractor', 'AttachmentExtractor'].forEach((ext) => void this.extractors.register(nv[ext]));
-            }
+            this.extractors.loadDefault().then((r) => {
+                if (r.error) {
+                    this.emit('error', new Error(`Failed to load default extractors: ${r.error?.stack ?? r.error}`));
+                } else {
+                    this.debug('Default extractors loaded!');
+                }
+            });
         }
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
@@ -81,11 +83,16 @@ export class Player extends EventEmitter<PlayerEvents> {
                 const start = performance.now();
                 this.#lagMonitorTimeout = setTimeout(() => {
                     this.#lastLatency = performance.now() - start;
+                    this.debug(`[Lag Monitor] Event loop latency: ${this.#lastLatency}ms`);
                 }, 0).unref();
             }, this.options.lagMonitor).unref();
         }
 
         _internals.addPlayer(this);
+    }
+
+    public debug(m: string) {
+        return this.emit('debug', m);
     }
 
     /**

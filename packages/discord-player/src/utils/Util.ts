@@ -81,9 +81,18 @@ class Util {
      */
     static require(id: string) {
         try {
-            return require(id);
-        } catch {
-            return null;
+            return { module: require(id), error: null };
+        } catch (error) {
+            return { module: null, error };
+        }
+    }
+
+    static async import(id: string) {
+        try {
+            const mod = await import(id);
+            return { module: mod, error: null };
+        } catch (error) {
+            return { module: null, error };
         }
     }
 

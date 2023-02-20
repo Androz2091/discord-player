@@ -357,14 +357,20 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             throw new Error('Play request received but track was not provided');
         }
 
+        if (this.queue.initializing) {
+            this.queue.debug('Queue is currently initializing another track, waiting...');
+            await this.queue.awaitInitialization();
+            this.queue.debug('Queue has finished initialization...');
+        }
+
         this.queue.debug('Requested option requires to play the track, initializing...');
         this.queue.initializing = true;
 
         try {
             this.queue.debug(`Initiating stream extraction process...`);
-            const qt: SearchQueryType = track.queryType || (track.raw.source === 'spotify' ? 'spotifySong' : track.raw.source === 'apple_music' ? 'appleMusicSong' : track.raw.source) || 'arbitrary';
+            const qt: SearchQueryType = track.queryType || (track.source === 'spotify' ? 'spotifySong' : track.source === 'apple_music' ? 'appleMusicSong' : track.source);
             this.queue.debug(`Executing onBeforeCreateStream hook (QueryType: ${qt})...`);
-            let stream = await this.queue.onBeforeCreateStream?.(track, qt, this.queue).catch(() => null);
+            let stream = await this.queue.onBeforeCreateStream?.(track, qt || 'arbitrary', this.queue).catch(() => null);
 
             if (!stream) {
                 this.queue.debug('Failed to get stream from onBeforeCreateStream!');
@@ -373,10 +379,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             if (!stream) {
                 const error = new Error('Could not extract stream for this track');
-                this.queue.initializing = false;
                 if (this.queue.options.skipOnNoStream) {
                     this.queue.player.events.emit('playerSkip', this.queue, track);
                     this.queue.player.events.emit('playerError', this.queue, error, track);
+                    this.queue.initializing = false;
                     this.play(this.queue.tracks.dispatch());
                     return;
                 }
@@ -440,6 +446,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             this.queue.setTransitioning(!!options.transitionMode);
 
             await this.#performPlay(resource);
+            this.queue.initializing = false;
         } catch (e) {
             this.queue.debug(`Failed to initialize audio player: ${e}`);
             this.queue.initializing = false;

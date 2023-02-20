@@ -1,10 +1,26 @@
 import { Player } from '../Player';
 import { Collection } from '@discord-player/utils';
 import { BaseExtractor } from './BaseExtractor';
+import { Util } from '../utils/Util';
+
+const knownExtractorKeys = ['YouTubeExtractor', 'SoundCloudExtractor', 'ReverbnationExtractor', 'VimeoExtractor', 'AttachmentExtractor'];
+const knownExtractorLib = '@discord-player/extractor';
 
 export class ExtractorExecutionContext {
     public store = new Collection<string, BaseExtractor>();
     public constructor(public player: Player) {}
+
+    public async loadDefault() {
+        const mod = await Util.import(knownExtractorLib);
+        if (mod.error) return { success: false, error: mod.error as Error };
+
+        knownExtractorKeys.forEach((key) => {
+            if (!mod.module[key]) return;
+            this.register(mod.module[key]);
+        });
+
+        return { success: true, error: null };
+    }
 
     public isRegistered(identifier: string) {
         return this.store.has(identifier);

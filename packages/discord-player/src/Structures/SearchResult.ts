@@ -15,7 +15,11 @@ export interface SearchResultData {
 }
 
 export class SearchResult {
-    public constructor(public player: Player, private _data: SearchResultData) {}
+    public constructor(public player: Player, private _data: SearchResultData) {
+        this._data.tracks?.forEach((track) => {
+            track.extractor = this._data.extractor || null;
+        });
+    }
 
     /**
      * The search query

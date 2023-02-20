@@ -3,6 +3,7 @@ import { Player } from '../Player';
 import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
 import { Playlist } from './Playlist';
 import { GuildQueue } from './GuildQueue';
+import { BaseExtractor } from '../extractors/BaseExtractor';
 
 export type TrackResolvable = Track | string | number;
 
@@ -18,7 +19,10 @@ export class Track {
     public requestedBy: User | null = null;
     public playlist?: Playlist;
     public queryType: SearchQueryType | null | undefined = null;
-    public readonly raw: RawTrackData = {} as RawTrackData;
+    public raw: RawTrackData = {
+        source: 'arbitrary'
+    } as RawTrackData;
+    public extractor: BaseExtractor | null = null;
     public readonly id = SnowflakeUtil.generate().toString();
 
     /**
@@ -121,9 +125,7 @@ export class Track {
         this.queryType = data.queryType;
         this.requestedBy = data.requestedBy || null;
         this.playlist = data.playlist;
-
-        // raw
-        Object.defineProperty(this, 'raw', { value: Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data), enumerable: false });
+        this.raw = Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data);
     }
 
     /**
@@ -157,7 +159,7 @@ export class Track {
      * @type {TrackSource}
      */
     get source() {
-        return this.raw.source ?? 'arbitrary';
+        return this.raw?.source ?? 'arbitrary';
     }
 
     /**
