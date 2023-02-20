@@ -189,6 +189,13 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * The voice receiver for this queue
+     */
+    public get voiceReceiver() {
+        return this.dispatcher?.receiver ?? null;
+    }
+
+    /**
      * Write a debug message to this queue
      * @param m The message to write
      */
@@ -402,6 +409,24 @@ export class GuildQueue<Meta = unknown> {
             if (!this.#initializing) return r(true);
             this.#initializingPromises.push(r);
         });
+    }
+
+    /**
+     * Set self deaf
+     * @param mode On/Off state
+     * @param reason Reason
+     */
+    public setSelfDeaf(mode?: boolean, reason?: string) {
+        return this.guild.members.me!.voice.setDeaf(mode, reason);
+    }
+
+    /**
+     * Set self mute
+     * @param mode On/Off state
+     * @param reason Reason
+     */
+    public setSelfMute(mode?: boolean, reason?: string) {
+        return this.guild.members.me!.voice.setMute(mode, reason);
     }
 
     #attachListeners(dispatcher: StreamDispatcher) {

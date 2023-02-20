@@ -1,5 +1,5 @@
 import { version as djsVersion } from 'discord.js';
-
+export * from './utils/PlayerEventsEmitter';
 export * from './utils/AudioFilters';
 export * from './extractors/BaseExtractor';
 export * from './extractors/ExtractorExecutionContext';

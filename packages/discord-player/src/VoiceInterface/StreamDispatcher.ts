@@ -19,6 +19,7 @@ import { Util } from '../utils/Util';
 import { PlayerError, ErrorStatusCode } from '../Structures/PlayerError';
 import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
 import { GuildQueue, PostProcessedResult } from '../Structures';
+import { VoiceReceiverNode } from '../Structures/VoiceReceiverNode';
 
 interface CreateStreamOps {
     type?: StreamType;
@@ -53,6 +54,7 @@ export interface VoiceEvents {
 class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public readonly voiceConnection: VoiceConnection;
     public readonly audioPlayer: AudioPlayer;
+    public receiver = new VoiceReceiverNode(this);
     public channel: VoiceChannel | StageChannel;
     public audioResource?: AudioResource<Track> | null;
     private readyLock = false;
