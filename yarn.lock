@@ -201,7 +201,7 @@ __metadata:
     "@mantine/prism": ^5.10.2
     next: ^13.1.4
     nextra: ^2.2.10
-    nextra-theme-docs: ^2.2.10
+    nextra-theme-docs: ^2.2.15
     react: ^18.2.0
     react-dom: ^18.2.0
   languageName: unknown
@@ -481,15 +481,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@headlessui/react@npm:^1.7.7":
-  version: 1.7.7
-  resolution: "@headlessui/react@npm:1.7.7"
+"@headlessui/react@npm:^1.7.10":
+  version: 1.7.11
+  resolution: "@headlessui/react@npm:1.7.11"
   dependencies:
     client-only: ^0.0.1
   peerDependencies:
     react: ^16 || ^17 || ^18
     react-dom: ^16 || ^17 || ^18
-  checksum: 049d7ee46056fe96067f7b2f4f962672dfc824e68044ae38561a457278c8e38c0fd17592ab648ba5648e7e82bef9890eddbf329c9a00d11acf85700c7072a0bf
+  checksum: 3c9abbc5eaf039fccd309b34269aad761f518c4863e482afddf47579384243ecc0d7b69ecd2f05997e4e079237efa8846c568f5ed8d32df358814a239600de1f
   languageName: node
   linkType: hard
 
@@ -5264,11 +5264,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nextra-theme-docs@npm:^2.2.10":
-  version: 2.2.10
-  resolution: "nextra-theme-docs@npm:2.2.10"
+"nextra-theme-docs@npm:^2.2.15":
+  version: 2.2.15
+  resolution: "nextra-theme-docs@npm:2.2.15"
   dependencies:
-    "@headlessui/react": ^1.7.7
+    "@headlessui/react": ^1.7.10
     "@popperjs/core": ^2.11.6
     clsx: ^1.2.1
     flexsearch: ^0.7.21
@@ -5282,9 +5282,10 @@ __metadata:
     zod: ^3.20.2
   peerDependencies:
     next: ">=9.5.3"
+    nextra: 2.2.15
     react: ">=16.13.1"
     react-dom: ">=16.13.1"
-  checksum: dcbebc83164e54cab950d2e7ac6fc5da6cc77d3d1c12de87a6e195ec275c29af0959c6aafdb839faaa2f5836da95a98b37af79b4c405bc26280fe2cf06358836
+  checksum: 31882cd571fcfc6fb622960a73d93b7095f337155a787b9e70c7dcc5726f1450e830c8cda4ddf51d755db9fd5d39112af1126a1fbd78f4a169ead445818d418f
   languageName: node
   linkType: hard
 
