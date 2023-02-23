@@ -150,7 +150,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@discord-player/extractor@*, @discord-player/extractor@workspace:packages/extractor":
+"@discord-player/extractor@npm:*":
+  version: 4.0.0
+  resolution: "@discord-player/extractor@npm:4.0.0"
+  dependencies:
+    file-type: ^16.5.4
+    genius-lyrics: ^4.4.2
+    node-fetch: cjs
+    node-html-parser: ^6.1.4
+    reverbnation-scraper: ^2.0.0
+    soundcloud-scraper: ^5.0.3
+    spotify-url-info: ^3.2.3
+    youtube-sr: ^4.3.4
+  peerDependencies:
+    discord-player: "*"
+    play-dl: 1.x
+    ytdl-core: 4.x
+  checksum: 28fe284f2a8ca4aedef903bd6ec58dcaf4577dfd948bee344a04e09535c6db28707760f652d0ea74fe82e12f7f699275eef371b7b909851d44ca174b8f06b44a
+  languageName: node
+  linkType: hard
+
+"@discord-player/extractor@workspace:packages/extractor":
   version: 0.0.0-use.local
   resolution: "@discord-player/extractor@workspace:packages/extractor"
   dependencies:
@@ -180,7 +200,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@discord-player/utils@*, @discord-player/utils@workspace:packages/utils":
+"@discord-player/utils@npm:*":
+  version: 0.1.0
+  resolution: "@discord-player/utils@npm:0.1.0"
+  dependencies:
+    "@discordjs/collection": ^1.1.0
+  checksum: 5d740ec2d8a5607ea1b1b73a3db93bec4260340b409510e6e1398bc629ab2146311c80fd5a65d3dab2bdc20fcaf76554d9e6df904847bceacc060d265953799d
+  languageName: node
+  linkType: hard
+
+"@discord-player/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@discord-player/utils@workspace:packages/utils"
   dependencies:
