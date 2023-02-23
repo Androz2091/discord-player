@@ -87,7 +87,7 @@ export class GuildQueueHistory<Meta = unknown> {
     }
 
     /**
-     * Alias to <GuildQueueHistory>.previous()
+     * Alias to [GuildQueueHistory].previous()
      */
     public back() {
         return this.previous();
