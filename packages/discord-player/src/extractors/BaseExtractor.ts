@@ -4,6 +4,7 @@ import { Playlist } from '../Structures/Playlist';
 import { Track } from '../Structures/Track';
 import { PlayerEvents, SearchQueryType } from '../types/types';
 import { ExtractorExecutionContext } from './ExtractorExecutionContext';
+import type { RequestOptions } from 'http';
 
 export class BaseExtractor {
     /**
@@ -113,4 +114,5 @@ export interface ExtractorInfo {
 export interface ExtractorSearchContext {
     type?: SearchQueryType | null;
     requestedBy?: User | null;
+    requestOptions?: RequestOptions;
 }

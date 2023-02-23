@@ -27,7 +27,7 @@ export class AttachmentExtractor extends BaseExtractor {
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         switch (context.type) {
             case QueryType.ARBITRARY: {
-                const data = (await downloadStream(query)) as IncomingMessage;
+                const data = (await downloadStream(query, context.requestOptions)) as IncomingMessage;
                 if (!['audio/', 'video/'].some((r) => !!data.headers['content-type']?.startsWith(r))) return this.emptyResponse();
                 const trackInfo = {
                     title: (
@@ -119,7 +119,8 @@ export class AttachmentExtractor extends BaseExtractor {
         if (!engine) throw new Error('Could not find stream source');
 
         if (!isFile) {
-            return await downloadStream(engine);
+            return engine;
+            // return await downloadStream(engine);
         }
 
         return createReadStream(engine);

@@ -139,7 +139,8 @@ export class YoutubeExtractor extends BaseExtractor {
         switch (context.type) {
             case QueryType.YOUTUBE_PLAYLIST: {
                 const ytpl = await YouTube.getPlaylist(query, {
-                    fetchAll: true
+                    fetchAll: true,
+                    requestOptions: context.requestOptions
                 }).catch(Util.noop);
                 if (!ytpl) return this.emptyResponse();
 
@@ -182,7 +183,7 @@ export class YoutubeExtractor extends BaseExtractor {
             case QueryType.YOUTUBE_VIDEO: {
                 const id = /[a-zA-Z0-9-_]{11}/.exec(query);
                 if (!id?.[0]) return this.emptyResponse();
-                const video = await YouTube.getVideo(`https://www.youtube.com/watch?v=${id}`).catch(Util.noop);
+                const video = await YouTube.getVideo(`https://www.youtube.com/watch?v=${id}`, context.requestOptions as unknown as RequestInit).catch(Util.noop);
                 if (!video) return this.emptyResponse();
 
                 // @ts-expect-error
@@ -208,7 +209,7 @@ export class YoutubeExtractor extends BaseExtractor {
                 };
             }
             case QueryType.SPOTIFY_SONG: {
-                const spotifyData: SpotifySong | void = await this._spotify.getData(query).catch(Util.noop);
+                const spotifyData: SpotifySong | void = await this._spotify.getData(query, context.requestOptions as unknown as RequestInit).catch(Util.noop);
                 if (!spotifyData) return { playlist: null, tracks: [] };
                 const spotifyTrack = new Track(this.context.player, {
                     title: spotifyData.title,
@@ -226,7 +227,7 @@ export class YoutubeExtractor extends BaseExtractor {
                 return { playlist: null, tracks: [spotifyTrack] };
             }
             case QueryType.SPOTIFY_PLAYLIST: {
-                const spotifyPlaylist: SpotifyPlaylist | void = await this._spotify.getData(query).catch(Util.noop);
+                const spotifyPlaylist: SpotifyPlaylist | void = await this._spotify.getData(query, context.requestOptions as unknown as RequestInit).catch(Util.noop);
                 if (!spotifyPlaylist) return { playlist: null, tracks: [] };
 
                 const playlist = new Playlist(this.context.player, {
@@ -265,7 +266,7 @@ export class YoutubeExtractor extends BaseExtractor {
                 return { playlist, tracks: playlist.tracks };
             }
             case QueryType.SPOTIFY_ALBUM: {
-                const album: SpotifyAlbum | void = await this._spotify.getData(query).catch(Util.noop);
+                const album: SpotifyAlbum | void = await this._spotify.getData(query, context.requestOptions as unknown as RequestInit).catch(Util.noop);
                 if (!album) return { playlist: null, tracks: [] };
 
                 const playlist = new Playlist(this.context.player, {
@@ -411,7 +412,8 @@ export class YoutubeExtractor extends BaseExtractor {
 
     private async _makeYTSearch(query: string, context: ExtractorSearchContext) {
         const res = await YouTube.search(query, {
-            type: 'video'
+            type: 'video',
+            requestOptions: context.requestOptions
         }).catch(Util.noop);
 
         if (!res || !res.length) return [];
