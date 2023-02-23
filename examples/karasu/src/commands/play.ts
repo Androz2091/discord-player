@@ -64,9 +64,9 @@ export class PlayCommand extends Command {
 					leaveOnEmptyCooldown: 300000,
 					leaveOnEmpty: true,
 					leaveOnEnd: false,
-					bufferingTimeout: 0
+					bufferingTimeout: 0,
+					volume: 120
 					// defaultFFmpegFilters: ['lofi', 'bassboost', 'normalizer'],
-					// volume: 120
 				}
 			});
 

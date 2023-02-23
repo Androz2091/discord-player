@@ -1,28 +1,22 @@
 import { UserResolvable } from 'discord.js';
-import { PlayerEventsEmitter } from '../utils/PlayerEventsEmitter';
 import { PassThrough, type Readable } from 'stream';
 import { EndBehaviorType } from '@discordjs/voice';
-import prism from 'prism-media';
+import * as prism from 'prism-media';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { Track } from './Track';
 import { RawTrackData } from '../types/types';
 
 export interface VoiceReceiverOptions {
     mode?: 'opus' | 'pcm';
-    end?: 'silence' | 'manual';
+    end?: EndBehaviorType;
     silenceDuration?: number;
-}
-
-export interface VoiceReceiverNodeEvents {
-    debug: (message: string) => unknown;
+    crc?: boolean;
 }
 
 export type RawTrackInit = Partial<Omit<RawTrackData, 'author' | 'playlist' | 'source' | 'engine' | 'raw' | 'queryType' | 'description' | 'views'>>;
 
-export class VoiceReceiverNode extends PlayerEventsEmitter<VoiceReceiverNodeEvents> {
-    public constructor(public dispatcher: StreamDispatcher) {
-        super();
-    }
+export class VoiceReceiverNode {
+    public constructor(public dispatcher: StreamDispatcher) {}
 
     public createRawTrack(stream: Readable, data: RawTrackInit = {}) {
         data.title ??= `Recording ${Date.now()}`;
@@ -62,7 +56,7 @@ export class VoiceReceiverNode extends PlayerEventsEmitter<VoiceReceiverNodeEven
     public recordUser(
         user: UserResolvable,
         options: VoiceReceiverOptions = {
-            end: 'silence',
+            end: EndBehaviorType.AfterSilence,
             mode: 'pcm',
             silenceDuration: 1000
         }
@@ -74,33 +68,25 @@ export class VoiceReceiverNode extends PlayerEventsEmitter<VoiceReceiverNodeEven
 
         if (!receiver) throw new Error('Voice receiver is not available, maybe connect to a voice channel first?');
 
-        if (!receiver.speaking.eventNames().includes('end'))
-            receiver.speaking.on('end', (userId) => {
-                this.emit('debug', `${userId} stopped speaking!`);
-            });
-
         receiver.speaking.on('start', (userId) => {
-            this.emit('debug', `${userId} started speaking!`);
             if (userId === _user) {
-                this.emit('debug', `Recording ${userId}!`);
                 const receiveStream = receiver.subscribe(_user, {
                     end: {
-                        behavior: options.end === 'silence' ? EndBehaviorType.AfterSilence : EndBehaviorType.Manual,
+                        behavior: options.end || EndBehaviorType.AfterSilence,
                         duration: options.silenceDuration ?? 1000
                     }
                 });
 
-                setImmediate(() => {
+                setImmediate(async () => {
                     if (options.mode === 'pcm') {
-                        return receiveStream
-                            .pipe(
-                                new prism.opus.Decoder({
-                                    channels: 2,
-                                    frameSize: 960,
-                                    rate: 48000
-                                })
-                            )
-                            .pipe(passThrough);
+                        const pcm = receiveStream.pipe(
+                            new prism.opus.Decoder({
+                                channels: 2,
+                                frameSize: 960,
+                                rate: 48000
+                            })
+                        );
+                        return pcm.pipe(passThrough);
                     } else {
                         return receiveStream.pipe(passThrough);
                     }

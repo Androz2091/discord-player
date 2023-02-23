@@ -368,7 +368,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
         try {
             this.queue.debug(`Initiating stream extraction process...`);
-            const qt: SearchQueryType = track.queryType || (track.source === 'spotify' ? 'spotifySong' : track.source === 'apple_music' ? 'appleMusicSong' : track.source);
+            const src = track.raw?.source || track.source;
+            const qt: SearchQueryType = track.queryType || (src === 'spotify' ? 'spotifySong' : src === 'apple_music' ? 'appleMusicSong' : src);
             this.queue.debug(`Executing onBeforeCreateStream hook (QueryType: ${qt})...`);
             let stream = await this.queue.onBeforeCreateStream?.(track, qt || 'arbitrary', this.queue).catch(() => null);
 
@@ -397,7 +398,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             }
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const cookies = track.source === 'youtube' ? (<any>this.queue.player.options.ytdlOptions?.requestOptions)?.headers?.cookie : undefined;
+            const cookies = track.raw?.source === 'youtube' ? (<any>this.queue.player.options.ytdlOptions?.requestOptions)?.headers?.cookie : undefined;
             const pcmStream = this.#createFFmpegStream(stream, track, options.seek ?? 0, cookies);
 
             if (options.transitionMode) {

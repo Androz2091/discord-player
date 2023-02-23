@@ -249,6 +249,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@discordjs/voice@npm:0.14.0":
+  version: 0.14.0
+  resolution: "@discordjs/voice@npm:0.14.0"
+  dependencies:
+    "@types/ws": ^8.5.3
+    discord-api-types: ^0.37.20
+    prism-media: ^1.3.4
+    tslib: ^2.4.1
+    ws: ^8.11.0
+  checksum: baa68a324f8c7b4a7863a966e7d10a01a4df93aa68800f867e7a6fef016fcd16306ff5a562674884192b0e6538e53e8404d114a7c9781f0637c8e0dea3bca368
+  languageName: node
+  linkType: hard
+
 "@discordjs/voice@npm:^0.11.0":
   version: 0.11.0
   resolution: "@discordjs/voice@npm:0.11.0"
@@ -2219,6 +2232,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"discord-api-types@npm:^0.37.20":
+  version: 0.37.35
+  resolution: "discord-api-types@npm:0.37.35"
+  checksum: 0a65234eefb9675c6faf82f42be6b0a4ee75bf8b2c901eecefea6ca539cd4e2a501b7fc195415884912fdb5040c98727dbd0c5a1f6bc15951948be37d1be162b
+  languageName: node
+  linkType: hard
+
 "discord-player@workspace:packages/discord-player":
   version: 0.0.0-use.local
   resolution: "discord-player@workspace:packages/discord-player"
@@ -2227,7 +2247,7 @@ __metadata:
     "@discord-player/extractor": "*"
     "@discord-player/tsconfig": "*"
     "@discord-player/utils": "*"
-    "@discordjs/voice": ^0.11.0
+    "@discordjs/voice": 0.14.0
     "@types/node": ^18.6.3
     "@types/ws": ^8.5.3
     discord-api-types: ^0.37.0
@@ -6874,7 +6894,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.0":
+"tslib@npm:^2.0.0, tslib@npm:^2.4.1":
   version: 2.5.0
   resolution: "tslib@npm:2.5.0"
   checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
@@ -7477,6 +7497,21 @@ __metadata:
   version: 1.0.2
   resolution: "wrappy@npm:1.0.2"
   checksum: 159da4805f7e84a3d003d8841557196034155008f817172d4e986bd591f74aa82aa7db55929a54222309e01079a65a92a9e6414da5a6aa4b01ee44a511ac3ee5
+  languageName: node
+  linkType: hard
+
+"ws@npm:^8.11.0":
+  version: 8.12.1
+  resolution: "ws@npm:8.12.1"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 97301c1c4d838fc81bd413f370f75c12aabe44527b31323b761eab3043a9ecb7e32ffd668548382c9a6a5ad3a1c3a9249608e8338e6b939f2f9540f1e21970b5
   languageName: node
   linkType: hard
 

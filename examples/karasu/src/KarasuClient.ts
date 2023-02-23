@@ -4,11 +4,14 @@ import { GatewayIntentBits } from 'discord.js';
 import Emojis from './emojis';
 import { envParseArray } from './lib/env-parser';
 import * as Permissions from './lib/perms';
+import path from 'path';
+import { mkdirSync, existsSync } from 'fs';
 
 export class KarasuClient extends SapphireClient {
 	public player: Player;
 	public dev: typeof Emojis;
 	public perms: typeof Permissions;
+	public recordingPath = path.resolve(`${__dirname}/recordings`);
 	public constructor() {
 		super({
 			disableMentionPrefix: true,
@@ -34,6 +37,11 @@ export class KarasuClient extends SapphireClient {
 				}
 			}
 		});
+
+		if (!existsSync(this.recordingPath))
+			mkdirSync(this.recordingPath, {
+				recursive: true
+			});
 	}
 }
 
@@ -42,5 +50,6 @@ declare module 'discord.js' {
 		readonly player: Player;
 		readonly perms: typeof Permissions;
 		readonly dev: typeof Emojis;
+		readonly recordingPath: string;
 	}
 }

@@ -40,9 +40,12 @@ export class ExtractorExecutionContext {
 
         try {
             this.store.set(_extractor.identifier, extractor);
+            this.player.debug(`${_extractor.identifier} extractor loaded!`);
             await extractor.activate();
-        } catch {
+            this.player.debug(`${_extractor.identifier} extractor activated!`);
+        } catch (e) {
             this.store.delete(_extractor.identifier);
+            this.player.debug(`${_extractor.identifier} extractor failed to activate! Error: ${e}`);
         }
     }
 
@@ -53,9 +56,11 @@ export class ExtractorExecutionContext {
         try {
             const key = extractor.identifier || this.store.findKey((e) => e === extractor)!;
             this.store.delete(key);
+            this.player.debug(`${extractor.identifier} extractor disabled!`);
             await extractor.deactivate();
+            this.player.debug(`${extractor.identifier} extractor deactivated!`);
         } catch {
-            // do nothing
+            this.player.debug(`${extractor.identifier} extractor failed to deactivate!`);
         }
     }
 

@@ -14,37 +14,67 @@ import {
 } from 'discord-player';
 
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
-import fetch from 'node-fetch';
 import { AppleMusic } from '../internal/AppleMusic';
 
 type StreamFN = (q: string) => Promise<import('stream').Readable | string>;
 
-const YouTubeLibs = ['ytdl-core', 'play-dl'] as const;
+const YouTubeLibs = [
+    'ytdl-core',
+    'play-dl',
+    '@distube/ytdl-core'
+    // add more to the list if you have any
+];
+
+// forced lib
+const forcedLib = process.env.DP_FORCE_YTDL_MOD;
+if (forcedLib) YouTubeLibs.unshift(forcedLib);
 
 // taken from ytdl-core
 const validQueryDomains = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'gaming.youtube.com']);
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
 const idRegex = /^[a-zA-Z0-9-_]{11}$/;
+const getFetch =
+    typeof fetch !== 'undefined'
+        ? fetch
+        : typeof require !== 'undefined'
+        ? Util.require('undici')?.fetch || Util.require('node-fetch')
+        : async (...params: unknown[]) => {
+              // eslint-disable-next-line
+              let dy: any;
+
+              /* eslint-disable no-cond-assign */
+              if ((dy = await Util.import('undici').module)) {
+                  return (dy.fetch || dy.default.fetch)(...params);
+              } else if ((dy = await Util.import('node-fetch').module)) {
+                  return (dy.fetch || dy.default)(...params);
+              } else {
+                  throw new Error('No fetch lib found');
+              }
+
+              /* eslint-enable no-cond-assign */
+          };
 
 export class YoutubeExtractor extends BaseExtractor {
     public static identifier = 'com.discord-player.ysaextractor' as const;
     private _stream!: StreamFN;
     private _spotify!: Spotify;
+    private _ytLibName!: string;
 
     public async activate() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let lib: any,
-            isYtdl = false;
+        let lib: any;
 
         for (const ytlib of YouTubeLibs) {
-            // eslint-disable-next-line no-cond-assign
-            if ((lib = Util.require(ytlib))) {
-                isYtdl = ytlib === 'ytdl-core';
-                break;
-            }
+            lib = (await Util.import(ytlib)).module;
+            if (!lib) continue;
+            lib = lib.default || lib;
+            this._ytLibName = ytlib;
+            break;
         }
 
         if (lib) {
+            const isYtdl = ['ytdl-core', '@distube/ytdl-core'].some((lib) => lib === this._ytLibName);
+
             this._stream = async (query) => {
                 if (isYtdl) {
                     const dl = lib as typeof import('ytdl-core');
@@ -77,9 +107,11 @@ export class YoutubeExtractor extends BaseExtractor {
                     // return (await dl.stream(query, { discordPlayerCompatibility: true })).stream;
                 }
             };
+        } else {
+            throw new Error(`Could not load youtube library. Install one of ${YouTubeLibs.map((lib) => `"${lib}"`).join(', ')}`);
         }
 
-        this._spotify = spotify(fetch);
+        this._spotify = spotify(getFetch);
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {

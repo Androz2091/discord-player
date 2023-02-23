@@ -93,6 +93,14 @@ export class BaseExtractor {
     public createResponse(playlist?: Playlist | null, tracks: Track[] = playlist?.tracks || []): ExtractorInfo {
         return { playlist: playlist || null, tracks };
     }
+
+    /**
+     * Write debug message
+     * @param message The debug message
+     */
+    public debug(message: string) {
+        return this.context.player.debug(message);
+    }
 }
 
 export type NextFunction = (error?: Error | null, stream?: Readable) => void;
