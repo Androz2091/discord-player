@@ -9,9 +9,9 @@ new GuildQueueHistory(queue)
 
 ## Properties
 ### public  queue: GuildQueue\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/GuildQueueHistory.ts#L7)
+- [Source](https://github.com/Androz2091/discord-player/blob/4177c53/packages/discord-player/src/Structures/GuildQueueHistory.ts#L7)
 ### public  tracks: Queue\<Track>
-- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/GuildQueueHistory.ts#L6)
+- [Source](https://github.com/Androz2091/discord-player/blob/4177c53/packages/discord-player/src/Structures/GuildQueueHistory.ts#L6)
 ### public  currentTrack: null \| Track
 Current track in the queue
 ### public  disabled: boolean
@@ -21,6 +21,14 @@ Next track in the queue
 ### public  previousTrack: null \| Track
 Previous track in the queue
 ## Methods
+### public  back(): Promise\<void>
+Alias to <GuildQueueHistory>.previous()
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/4177c53/packages/discord-player/src/Structures/GuildQueueHistory.ts#L92)
 ### public  clear(): void
 Clear history
 
@@ -28,7 +36,7 @@ Clear history
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/GuildQueueHistory.ts#L58)
+- [Source](https://github.com/Androz2091/discord-player/blob/4177c53/packages/discord-player/src/Structures/GuildQueueHistory.ts#L58)
 ### public  isEmpty(): boolean
 If history is empty
 
@@ -36,23 +44,23 @@ If history is empty
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/GuildQueueHistory.ts#L41)
-### public  next(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/4177c53/packages/discord-player/src/Structures/GuildQueueHistory.ts#L41)
+### public  next(): Promise\<void>
 Play the next track in the queue
 
 
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/GuildQueueHistory.ts#L65)
-### public  previous(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/4177c53/packages/discord-player/src/Structures/GuildQueueHistory.ts#L65)
+### public  previous(): Promise\<void>
 Play the previous track in the queue
 
 
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/GuildQueueHistory.ts#L77)
+- [Source](https://github.com/Androz2091/discord-player/blob/4177c53/packages/discord-player/src/Structures/GuildQueueHistory.ts#L77)
 ### public  push(track): boolean
 Add track to track history
 
@@ -64,4 +72,4 @@ Add track to track history
 | track | Track \| Array\<Track> | ❌ | The track to add |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3222e4d/packages/discord-player/src/Structures/GuildQueueHistory.ts#L49)
+- [Source](https://github.com/Androz2091/discord-player/blob/4177c53/packages/discord-player/src/Structures/GuildQueueHistory.ts#L49)
