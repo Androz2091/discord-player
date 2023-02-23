@@ -45,8 +45,8 @@ export class QueueHistoryCommand extends Command {
 			paginatedMessage.addPageEmbed((embed) =>
 				embed
 					.setColor('Red')
-					.setTitle('Tracks Queue')
-					.setDescription(list || '**No more queued songs**')
+					.setTitle('Tracks Queue History')
+					.setDescription(list || '**No more songs in history**')
 					.addFields([{ name: '💿 Now Playing', value: `[${queue.currentTrack?.title}](${queue.currentTrack?.url})` }])
 					.setFooter({
 						text: `Page ${i + 1} of ${pagesNum} | Total ${queue.tracks.size} tracks`
