@@ -326,6 +326,14 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     }
 
     /**
+     * Play raw audio resource
+     * @param resource The audio resource to play
+     */
+    public async playRaw(resource: AudioResource) {
+        await this.queue.dispatcher?.playStream(resource as AudioResource<Track>);
+    }
+
+    /**
      * Play the given track
      * @param res The track to play
      * @param options Options for playing the track

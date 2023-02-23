@@ -51,6 +51,7 @@
     "build": "tsup",
     "watch": "tsup --watch",
     "start": "tsup && node --preserve-symlinks dist/index.js",
+    "start:gc": "tsup && node --preserve-symlinks --expose-gc dist/index.js",
     "debug": "tsup && node --preserve-symlinks --inspect dist/index.js",
     "dev": "run-p watch start",
     "watch:start": "tsup --watch --onSuccess \"node --preserve-symlinks ./dist/index.js\"",

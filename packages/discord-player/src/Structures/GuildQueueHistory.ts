@@ -62,7 +62,7 @@ export class GuildQueueHistory<Meta = unknown> {
     /**
      * Play the next track in the queue
      */
-    public next() {
+    public async next() {
         const track = this.nextTrack;
         if (!track) {
             throw new Error('No next track in the queue');
@@ -74,13 +74,22 @@ export class GuildQueueHistory<Meta = unknown> {
     /**
      * Play the previous track in the queue
      */
-    public previous() {
-        const track = this.previousTrack;
+    public async previous() {
+        const track = this.tracks.dispatch();
         if (!track) {
             throw new Error('No previous track in the queue');
         }
 
-        this.queue.node.play(track, { queue: true });
-        this.queue.node.skip();
+        const current = this.currentTrack;
+
+        await this.queue.node.play(track, { queue: false });
+        if (current) this.queue.node.insert(current, 0);
+    }
+
+    /**
+     * Alias to <GuildQueueHistory>.previous()
+     */
+    public back() {
+        return this.previous();
     }
 }

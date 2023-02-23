@@ -91,8 +91,7 @@ export class Queue<T = unknown> {
     }
 
     public dispatch() {
-        const dispatchBeginning = this.strategy === 'FIFO';
-        return dispatchBeginning ? this.store.shift() : this.store.pop();
+        return this.store.shift();
     }
 
     public clone() {
@@ -108,7 +107,7 @@ export class Queue<T = unknown> {
     }
 
     public toArray() {
-        return this.strategy === 'FIFO' ? this.store.slice() : this.store.slice().reverse();
+        return this.store.slice();
     }
 
     public toJSON() {

@@ -2,7 +2,7 @@ import { Player } from '../Player';
 import { ChannelType, Guild, GuildVoiceChannelResolvable, VoiceBasedChannel, VoiceState } from 'discord.js';
 import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
-import { Track } from './Track';
+import { Track, TrackResolvable } from './Track';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { AudioResource, StreamType } from '@discordjs/voice';
 import { Util } from '../utils/Util';
@@ -219,7 +219,6 @@ export class GuildQueue<Meta = unknown> {
      * @param m Metadata to set
      */
     public setMetadata(m: Meta | undefined | null) {
-        this.#warnIfDeleted();
         this.options.metadata = m;
     }
 
@@ -292,7 +291,6 @@ export class GuildQueue<Meta = unknown> {
      * @param state The state to set
      */
     public setTransitioning(state: boolean) {
-        this.#warnIfDeleted();
         this.#transitioning = state;
     }
 
@@ -308,7 +306,6 @@ export class GuildQueue<Meta = unknown> {
      * @param mode The repeat mode to apply
      */
     public setRepeatMode(mode: QueueRepeatMode) {
-        this.#warnIfDeleted();
         this.repeatMode = mode;
     }
 
@@ -316,7 +313,6 @@ export class GuildQueue<Meta = unknown> {
      * Check if this queue has no tracks left in it
      */
     public isEmpty() {
-        this.#warnIfDeleted();
         return this.tracks.size < 1;
     }
 
@@ -324,7 +320,6 @@ export class GuildQueue<Meta = unknown> {
      * Check if this queue currently holds active audio resource
      */
     public isPlaying() {
-        this.#warnIfDeleted();
         return this.dispatcher?.audioResource != null;
     }
 
@@ -333,7 +328,6 @@ export class GuildQueue<Meta = unknown> {
      * @param track Track or playlist or array of tracks to add
      */
     public addTrack(track: Track | Track[] | Playlist) {
-        this.#warnIfDeleted();
         const toAdd = track instanceof Playlist ? track.tracks : track;
         this.tracks.add(toAdd);
         const isMulti = Array.isArray(toAdd);
@@ -347,12 +341,28 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * Remove a track from queue
+     * @param track The track to remove
+     */
+    public removeTrack(track: TrackResolvable) {
+        return this.node.remove(track);
+    }
+
+    /**
+     * Inserts the track to the given index
+     * @param track The track to insert
+     * @param index The index to insert the track at (defaults to 0)
+     */
+    public insertTrack(track: Track, index = 0): void {
+        return this.node.insert(track, index);
+    }
+
+    /**
      * Connect to a voice channel
      * @param channelResolvable The voice channel to connect to
      * @param options Join config
      */
     public async connect(channelResolvable: GuildVoiceChannelResolvable, options: VoiceConnectConfig = {}) {
-        this.#warnIfDeleted();
         const channel = this.player.client.channels.resolve(channelResolvable);
         if (!channel || !channel.isVoiceBased()) {
             throw new Error(`Expected a voice based channel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice}), received ${channel?.type}`);
@@ -399,6 +409,16 @@ export class GuildQueue<Meta = unknown> {
         if (this.player.nodes.delete(this.id)) {
             this.#deleted = true;
         }
+    }
+
+    /**
+     * Revives this queue
+     * @returns
+     */
+    public revive() {
+        if (!this.deleted || this.player.nodes.has(this.id)) return;
+        this.#deleted = false;
+        this.player.nodes.cache.set(this.id, this);
     }
 
     /**
@@ -541,10 +561,5 @@ export class GuildQueue<Meta = unknown> {
         });
 
         this.#initializingPromises = [];
-    }
-
-    #warnIfDeleted() {
-        if (!this.deleted) return;
-        Util.warn('Deleted queue usage detected! Please remove references to deleted queues in order to prevent memory leaks.', 'DiscordPlayerWarning');
     }
 }
