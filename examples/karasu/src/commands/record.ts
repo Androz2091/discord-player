@@ -1,7 +1,7 @@
+import { EndBehaviorType } from '@discordjs/voice';
 import { Command } from '@sapphire/framework';
 import type { GuildMember } from 'discord.js';
 import { createWriteStream } from 'fs';
-import { EndBehaviorType } from '@discordjs/voice';
 
 export class RecordCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
@@ -24,31 +24,13 @@ export class RecordCommand extends Command {
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		const member = interaction.member as GuildMember;
-		const permissions = this.container.client.perms.voice(interaction, this.container.client);
-		if (permissions.member()) return interaction.reply({ content: permissions.member(), ephemeral: true });
-		if (permissions.client()) return interaction.reply({ content: permissions.client(), ephemeral: true });
-
 		const user = interaction.options.getUser('user');
-		const target = user ? interaction.guild!.members.resolve(user) : interaction.guild!.members.resolve(member)
+		const target = user ? interaction.guild!.members.resolve(user) : interaction.guild!.members.resolve(member);
+		const permissions = this.container.client.perms.voice(interaction, this.container.client);
 
-		if (!member.voice.channelId)
-			return interaction.reply({
-				content: 'You are not in voice channel',
-				ephemeral: true
-			});
-
-		if (!target.voice.channelId)
-			return interaction.reply({
-				content: `${target.displayName} is not in voice channel`,
-				ephemeral: true
-			});
-
-		if (target.voice.channelId !== member.voice.channelId)
-			return interaction.reply({
-				content: 'You are not in same voice channel as target user',
-				ephemeral: true
-			});
-
+		if (permissions.member(target)) return interaction.reply({ content: permissions.member(target), ephemeral: true });
+		if (permissions.client()) return interaction.reply({ content: permissions.client(), ephemeral: true });
+		if (permissions.memberToMember(target)) return interaction.reply({ content: permissions.memberToMember(target), ephemeral: true})
 		if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
 
 		await interaction.deferReply();
