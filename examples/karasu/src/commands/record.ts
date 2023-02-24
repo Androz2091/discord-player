@@ -28,7 +28,8 @@ export class RecordCommand extends Command {
 		if (permissions.member()) return interaction.reply({ content: permissions.member(), ephemeral: true });
 		if (permissions.client()) return interaction.reply({ content: permissions.client(), ephemeral: true });
 
-		const target = interaction.guild!.members.resolve(interaction.options.getUser('user') || member) || member;
+		const user = interaction.options.getUser('user');
+		const target = user ? interaction.guild!.members.resolve(user) : interaction.guild!.members.resolve(member)
 
 		if (!member.voice.channelId)
 			return interaction.reply({
