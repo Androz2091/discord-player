@@ -25,7 +25,7 @@
     "colorette": "^2.0.19",
     "discord-player": "latest",
     "discord.js": "^14.7.1",
-    "play-dl": "^1.9.6"
+    "ytdl-core": "^4.11.2"
   },
   "devDependencies": {
     "@sapphire/eslint-config": "4.3.8",
