@@ -291,7 +291,11 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {void}
      */
     end() {
-        this.audioPlayer.stop();
+        try {
+            this.audioPlayer.stop();
+        } catch {
+            //
+        }
     }
 
     /**

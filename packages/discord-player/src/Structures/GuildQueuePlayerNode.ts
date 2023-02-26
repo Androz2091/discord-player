@@ -310,6 +310,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      * @param force Whether or not to forcefully stop the playback
      */
     public stop(force = false) {
+        this.queue.tracks.clear();
+        this.queue.history.clear();
         if (!this.queue.dispatcher) return false;
         this.queue.dispatcher.end();
         if (force) {
@@ -392,7 +394,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                     this.queue.player.events.emit('playerSkip', this.queue, track);
                     this.queue.player.events.emit('playerError', this.queue, error, track);
                     this.queue.initializing = false;
-                    this.play(this.queue.tracks.dispatch());
+                    this.play(this.queue.tracks.dispatch(), { queue: false });
                     return;
                 }
 

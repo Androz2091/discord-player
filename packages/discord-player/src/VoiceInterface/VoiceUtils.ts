@@ -69,8 +69,13 @@ class VoiceUtils {
      * @returns {void}
      */
     public disconnect(connection: VoiceConnection | StreamDispatcher) {
-        if (connection instanceof StreamDispatcher) return connection.voiceConnection.destroy();
-        return connection.destroy();
+        if (connection instanceof StreamDispatcher) connection = connection.voiceConnection;
+
+        try {
+            return connection.destroy();
+        } catch {
+            //
+        }
     }
 
     /**
