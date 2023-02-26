@@ -20,8 +20,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     #lagMonitorInterval!: NodeJS.Timer;
     public static _singletonKey = kSingleton;
     public readonly id = SnowflakeUtil.generate().toString();
-    public readonly client: Client;
-    public readonly options: PlayerInitOptions;
+    public readonly client!: Client;
+    public readonly options!: PlayerInitOptions;
     public nodes = new GuildNodeManager(this);
     public readonly voiceUtils = new VoiceUtils();
     public extractors = new ExtractorExecutionContext(this);
@@ -33,6 +33,9 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param {PlayerInitOptions} [options] The player init options
      */
     public constructor(client: Client, options: PlayerInitOptions = {}) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (!options.ignoreInstance && kSingleton in Player) return (<any>Player)[kSingleton] as Player;
+
         super(['error']);
 
         /**
@@ -90,6 +93,15 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         }
 
         _internals.addPlayer(this);
+
+        if (!(kSingleton in Player)) {
+            Object.defineProperty(Player, kSingleton, {
+                value: this,
+                writable: true,
+                configurable: true,
+                enumerable: false
+            });
+        }
     }
 
     public debug(m: string) {
@@ -102,17 +114,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param options Player initializer options
      */
     public static singleton(client: Client, options: PlayerInitOptions = {}) {
-        if (!(kSingleton in Player)) {
-            Object.defineProperty(Player, kSingleton, {
-                value: new Player(client, options),
-                writable: true,
-                configurable: true,
-                enumerable: false
-            });
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return (Player as any)[kSingleton] as Player;
+        return new Player(client, {
+            ...options,
+            ignoreInstance: false
+        });
     }
 
     /**

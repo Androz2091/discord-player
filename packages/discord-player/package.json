@@ -13,7 +13,6 @@
       "require": "./dist/index.js",
       "import": "./dist/index.mjs"
     },
-    "./smoothVolume": "./dist/smoothVolume.js",
     "./src/*": "./dist/*",
     "./dist/*": "./dist/*"
   },

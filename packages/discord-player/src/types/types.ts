@@ -328,6 +328,7 @@ export interface PlaylistJSON {
  * @property {string[]} [blockExtractors] List of extractors to disable querying metadata from
  * @property {string[]} [blockStreamFrom] List of extractors to disable streaming from
  * @property {QueryCache | null} [queryCache] Query cache provider
+ * @property {boolean} [ignoreInstance] Ignore player instance
  */
 export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
@@ -339,4 +340,5 @@ export interface PlayerInitOptions {
     blockExtractors?: string[];
     blockStreamFrom?: string[];
     queryCache?: QueryCache | null;
+    ignoreInstance?: boolean;
 }
