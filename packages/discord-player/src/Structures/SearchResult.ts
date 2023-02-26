@@ -21,6 +21,36 @@ export class SearchResult {
         });
     }
 
+    public setQueryType(type: SearchQueryType | QueryExtractorSearch) {
+        this._data.queryType = type;
+        return this;
+    }
+
+    public setRequestedBy(user: User) {
+        this._data.requestedBy = user;
+        return this;
+    }
+
+    public setExtractor(extractor: BaseExtractor) {
+        this._data.extractor = extractor;
+        return this;
+    }
+
+    public setTracks(tracks: Track[]) {
+        this._data.tracks = tracks;
+        return this;
+    }
+
+    public setQuery(query: string) {
+        this._data.query = query;
+        return this;
+    }
+
+    public setPlaylist(playlist: Playlist) {
+        this._data.playlist = playlist;
+        return this;
+    }
+
     /**
      * The search query
      */
