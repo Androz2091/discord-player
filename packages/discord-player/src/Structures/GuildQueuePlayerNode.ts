@@ -357,7 +357,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
         if (res && options.queue) {
             this.queue.debug('Requested option requires to queue the track, adding the given track to queue instead...');
-            return this.queue.tracks.add(res);
+            return this.queue.addTrack(res);
         }
 
         const track = res || this.queue.tracks.dispatch();

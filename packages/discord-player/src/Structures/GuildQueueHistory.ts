@@ -35,16 +35,16 @@ export class GuildQueueHistory<Meta = unknown> {
         return this.queue.options.disableHistory;
     }
 
-	/**
-	 * Gets the size of the queue
-	 */
-	public get size() {
-		return this.tracks.size;
-	}
-		
-	public getSize() {
-		return this.size;
-	}
+    /**
+     * Gets the size of the queue
+     */
+    public get size() {
+        return this.tracks.size;
+    }
+
+    public getSize() {
+        return this.size;
+    }
 
     /**
      * If history is empty

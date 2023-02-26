@@ -309,16 +309,16 @@ export class GuildQueue<Meta = unknown> {
         this.repeatMode = mode;
     }
 
-	/**
-	 * Gets the size of the queue
-	 */
-	public get size() {
-		return this.tracks.size;
-	}
-	
-	public getSize() {
-		return this.size;
-	}
+    /**
+     * Gets the size of the queue
+     */
+    public get size() {
+        return this.tracks.size;
+    }
+
+    public getSize() {
+        return this.size;
+    }
 
     /**
      * Check if this queue has no tracks left in it
