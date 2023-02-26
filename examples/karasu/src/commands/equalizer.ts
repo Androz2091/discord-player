@@ -1,5 +1,5 @@
 import { Command } from '@sapphire/framework';
-import { EqualizerConfigurationPreset } from 'discord-player';
+import { EqualizerConfigurationPreset, useQueue } from 'discord-player';
 import { GuildMember } from 'discord.js';
 
 export class EqualizerCommand extends Command {
@@ -32,7 +32,7 @@ export class EqualizerCommand extends Command {
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		if (interaction.member instanceof GuildMember) {
-			const queue = this.container.client.player.nodes.get(interaction.guild!.id);
+			const queue = useQueue(interaction.guild!.id);
 			const permissions = this.container.client.perms.voice(interaction, this.container.client);
 			const preset = interaction.options.getString('preset') as string;
 

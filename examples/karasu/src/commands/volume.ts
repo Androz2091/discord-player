@@ -1,5 +1,6 @@
 import { Command } from '@sapphire/framework';
 import { GuildMember } from 'discord.js';
+import { usePlayer } from 'discord-player';
 
 export class VolumeCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
@@ -27,13 +28,13 @@ export class VolumeCommand extends Command {
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		if (interaction.member instanceof GuildMember) {
-			const queue = this.container.client.player.nodes.get(interaction.guild!.id);
+			const player = usePlayer(interaction.guildId!);
 			const permissions = this.container.client.perms.voice(interaction, this.container.client);
 			const volume = interaction.options.getInteger('amount');
 
-			if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am not in a voice channel`, ephemeral: true });
+			if (!player) return interaction.reply({ content: `${this.container.client.dev.error} | I am not in a voice channel`, ephemeral: true });
 			if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
-			if (!queue.currentTrack)
+			if (!player.queue.currentTrack)
 				return interaction.reply({
 					content: `${this.container.client.dev.error} | There is no track **currently** playing`,
 					ephemeral: true
@@ -43,12 +44,12 @@ export class VolumeCommand extends Command {
 
 			if (typeof volume !== 'number') {
 				return interaction.followUp({
-					content: `🔊 | **Current** volume is **${queue.node.volume}%**`
+					content: `🔊 | **Current** volume is **${player.volume}%**`
 				});
 			}
-			queue.node.setVolume(volume!);
+			player.setVolume(volume!);
 			return interaction.followUp({
-				content: `${this.container.client.dev.success} | I **changed** the volume to: **${queue.node.volume}%**`
+				content: `${this.container.client.dev.success} | I **changed** the volume to: **${player.volume}%**`
 			});
 		}
 	}

@@ -11,7 +11,7 @@ export * from './types/types';
 export * from './utils/FFmpegStream';
 export * from './utils/QueryCache';
 export * from './Player';
-export * as hooks from './hooks';
+export * from './hooks';
 export {
     AudioFilters as PCMAudioFilters,
     type BiquadFilters,

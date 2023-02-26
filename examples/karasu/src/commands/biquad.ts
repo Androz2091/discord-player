@@ -1,6 +1,6 @@
 import { Command } from '@sapphire/framework';
-import { BiquadFilterType } from 'discord-player';
-import { APIApplicationCommandOptionChoice, GuildMember } from 'discord.js';
+import { BiquadFilterType, useQueue } from 'discord-player';
+import { GuildMember } from 'discord.js';
 
 type SupportedBiquadFilters = keyof typeof BiquadFilterType | 'Off';
 
@@ -18,7 +18,7 @@ export class BiquadCommand extends Command {
 			.map((m) => ({
 				name: m,
 				value: m
-			})) as APIApplicationCommandOptionChoice<SupportedBiquadFilters>[];
+			}));
 
 		biquadFilters.unshift({
 			name: 'Disable',
@@ -44,7 +44,7 @@ export class BiquadCommand extends Command {
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		if (interaction.member instanceof GuildMember) {
-			const queue = this.container.client.player.nodes.get(interaction.guild!.id);
+			const queue = useQueue(interaction.guild!.id);
 			const permissions = this.container.client.perms.voice(interaction, this.container.client);
 			const filter = interaction.options.getString('filter', true) as SupportedBiquadFilters;
 			const dB = interaction.options.getNumber('gain');
@@ -73,7 +73,7 @@ export class BiquadCommand extends Command {
 			}
 
 			return interaction.followUp({
-				content: `${this.container.client.dev.success} | **Biquad filter** set to: \`${filter}\``
+				content: `${this.container.client.dev.success} | **Biquad filter** set to: \`${String(filter)}\``
 			});
 		}
 	}

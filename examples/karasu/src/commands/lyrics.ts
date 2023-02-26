@@ -1,6 +1,7 @@
 import { lyricsExtractor } from '@discord-player/extractor';
 import { Command } from '@sapphire/framework';
 import { EmbedBuilder } from 'discord.js';
+import { useQueue } from 'discord-player';
 
 const genius = lyricsExtractor();
 
@@ -24,7 +25,7 @@ export class LyricsCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		const queue = this.container.client.player.nodes.get(interaction.guild!.id);
+		const queue = useQueue(interaction.guild!.id);
 		const track = interaction.options.getString('track') || (queue?.currentTrack?.title as string);
 
 		await interaction.deferReply();

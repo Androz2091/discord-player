@@ -1,5 +1,5 @@
 import { Command } from '@sapphire/framework';
-import type { FiltersName } from 'discord-player';
+import { type FiltersName, useQueue } from 'discord-player';
 import { GuildMember } from 'discord.js';
 
 export class FiltersCommand extends Command {
@@ -40,7 +40,7 @@ export class FiltersCommand extends Command {
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		if (interaction.member instanceof GuildMember) {
-			const queue = this.container.client.player.nodes.get(interaction.guild!.id);
+			const queue = useQueue(interaction.guild!.id);
 			const permissions = this.container.client.perms.voice(interaction, this.container.client);
 			const filter = interaction.options.getString('filter') as FiltersName | 'Off';
 
