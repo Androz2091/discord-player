@@ -30,7 +30,7 @@ export class RecordCommand extends Command {
 
 		if (permissions.member(target)) return interaction.reply({ content: permissions.member(target), ephemeral: true });
 		if (permissions.client()) return interaction.reply({ content: permissions.client(), ephemeral: true });
-		if (permissions.memberToMember(target)) return interaction.reply({ content: permissions.memberToMember(target), ephemeral: true})
+		if (permissions.memberToMember(target)) return interaction.reply({ content: permissions.memberToMember(target), ephemeral: true });
 		if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
 
 		await interaction.deferReply();

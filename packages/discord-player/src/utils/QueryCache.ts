@@ -1,4 +1,3 @@
-import Fuse from 'fuse.js';
 import { Player } from '../Player';
 import { SearchResult } from '../Structures/SearchResult';
 import { Track } from '../Structures/Track';
@@ -15,12 +14,6 @@ const DEFAULT_EXPIRY_TIMEOUT = 18_000_000;
 export class QueryCache {
     #defaultCache = new Map<string, DiscordPlayerQueryResultCache<Track>>();
     public timer: NodeJS.Timer;
-    public fuse = new Fuse([] as Track[], {
-        // prettier-ignore
-        keys: [
-            'url'
-        ]
-    });
     public constructor(
         public player: Player,
         public options: QueryCacheOptions = {
@@ -58,12 +51,8 @@ export class QueryCache {
     }
 
     public async resolve(context: QueryCacheResolverContext) {
-        const cacheData = await this.getData();
-
-        this.fuse.setCollection(cacheData.map((m) => m.data));
-
-        const result = this.fuse.search(context.query);
-        if (!result.length)
+        const result = this.#defaultCache.get(context.query);
+        if (!result)
             return new SearchResult(this.player, {
                 query: context.query,
                 requestedBy: context.requestedBy,
@@ -72,7 +61,7 @@ export class QueryCache {
 
         return new SearchResult(this.player, {
             query: context.query,
-            tracks: result.map((m) => m.item),
+            tracks: [result.data],
             playlist: null,
             queryType: context.queryType,
             requestedBy: context.requestedBy
