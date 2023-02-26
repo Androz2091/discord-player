@@ -327,12 +327,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         const queue = this.nodes.create(vc.guild, options.nodeOptions);
         if (!queue.channel) await queue.connect(vc, options.connectionOptions);
 
-        if (!result.hasPlaylist()) {
-            await queue.node.play(result.tracks[0]);
+        if (!result.playlist) {
+            queue.addTrack(result.tracks[0]);
         } else {
-            queue.addTrack(result.playlist!);
-            await queue.node.play();
+            queue.addTrack(result.playlist);
         }
+
+        if (!queue.node.isPlaying()) await queue.node.play();
 
         return {
             track: result.tracks[0],
