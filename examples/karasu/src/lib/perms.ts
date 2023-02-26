@@ -14,8 +14,13 @@ export function voice(interaction, container: KarasuClient) {
 			return `${container.dev.error} | I am missing the required voice channel permissions: \`${missingPerms.join(', ')}\``;
 	}
 
-	function member() {
+	function member(target?) {
+		if (target && !target.member.voice.channel) return `${container.dev.error} | ${target.displayName} is not in a voice channel.`
 		if (!interaction.member.voice.channel) return `${container.dev.error} | You need to be in a voice channel.`;
+	}
+	
+	function memberToMember(target) {
+		if (interaction.member.voice.channelId !== target.member.voice.channelId) return `${container.dev.error} | You are not in the same voice channel as the **target user**.`
 	}
 
 	function clientToMember() {
@@ -23,5 +28,5 @@ export function voice(interaction, container: KarasuClient) {
 			return `${container.dev.error} | You are not in my voice channel`;
 	}
 
-	return { client, member, clientToMember };
+	return { client, member, memberToMember, clientToMember };
 }

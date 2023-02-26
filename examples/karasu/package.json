@@ -1,6 +1,6 @@
 {
   "name": "karasu-music-bot",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "main": "dist/index.js",
   "author": "username",
   "license": "UNLICENSE",
@@ -9,7 +9,6 @@
     "@discord-player/extractor": "latest",
     "@discord-player/utils": "latest",
     "@discordjs/opus": "^0.9.0",
-    "@quranjs/api": "^1.6.0",
     "@sapphire/decorators": "^6.0.0",
     "@sapphire/discord-utilities": "^3.0.0",
     "@sapphire/discord.js-utilities": "^6.0.1",
@@ -22,11 +21,10 @@
     "@sapphire/plugin-logger": "^3.0.1",
     "@sapphire/plugin-subcommands": "^4.0.0",
     "@sapphire/utilities": "^3.11.0",
+    "@skyra/env-utilities": "^1.1.0",
     "colorette": "^2.0.19",
     "discord-player": "latest",
     "discord.js": "^14.7.1",
-    "dotenv-cra": "^3.0.3",
-    "reflect-metadata": "^0.1.13",
     "ytdl-core": "^4.11.2"
   },
   "devDependencies": {
@@ -55,7 +53,7 @@
     "debug": "tsup && node --preserve-symlinks --inspect dist/index.js",
     "dev": "run-p watch start",
     "watch:start": "tsup --watch --onSuccess \"node --preserve-symlinks ./dist/index.js\"",
-    "format": "eslint \"src/**\" --fix"
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "prettier": "@sapphire/prettier-config",
   "packageManager": "yarn@3.4.1",
