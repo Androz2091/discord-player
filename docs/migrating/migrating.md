@@ -129,7 +129,7 @@ Note: although this was removed, queue.addTrack() now works with both single tra
 ### Event Changes
 Events are now emitted from `player.events` object. [Here are the list of possible events](https://discord-player.netlify.app/docs/types/discord-player/GuildQueueEvents).
 
-<!-- TODO: add diff if there are any changes -->
+// TODO: add diff if there are any changes
 
 ## New Additions
 
