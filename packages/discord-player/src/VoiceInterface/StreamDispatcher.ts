@@ -105,7 +105,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                         await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, this.connectionTimeout);
                     } catch {
                         try {
-                            this.voiceConnection.destroy();
+                            if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
                         } catch (err) {
                             this.emit('error', err as AudioPlayerError);
                         }
@@ -115,7 +115,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                     this.voiceConnection.rejoin();
                 } else {
                     try {
-                        this.voiceConnection.destroy();
+                        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
                     } catch (err) {
                         this.emit('error', err as AudioPlayerError);
                     }
@@ -282,7 +282,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     disconnect() {
         try {
             if (this.audioPlayer) this.audioPlayer.stop(true);
-            this.voiceConnection.destroy();
+            if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
         } catch {} // eslint-disable-line no-empty
     }
 
