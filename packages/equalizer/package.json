@@ -33,7 +33,9 @@
   },
   "scripts": {
     "build": "tsup",
-    "build:check": "tsc --noEmit"
+    "build:check": "tsc --noEmit",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"

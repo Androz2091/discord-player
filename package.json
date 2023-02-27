@@ -18,7 +18,7 @@
     "dev:web": "turbo run dev --filter=@discord-player/website",
     "build:web": "turbo run build --filter=@discord-player/website",
     "start:web": "turbo run preview --filter=@discord-player/website",
-    "test": "turbo run test"
+    "test": "turbo run test --color"
   },
   "repository": {
     "type": "git",
