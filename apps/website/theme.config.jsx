@@ -13,9 +13,9 @@ export default {
         defaultMenuCollapseLevel: 0,
         toggleButton: true
     },
-    darkMode: false,
+    darkMode: true,
     nextThemes: {
-        defaultTheme: 'light'
+        defaultTheme: 'dark'
     },
     banner: {
         dismissible: false,
