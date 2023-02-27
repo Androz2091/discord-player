@@ -1,6 +1,7 @@
 import { Player } from '../Player';
 import { Track } from './Track';
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';
+import { Util } from '../utils/Util';
 
 export class Playlist {
     public readonly player: Player;
@@ -109,6 +110,20 @@ export class Playlist {
 
     *[Symbol.iterator]() {
         yield* this.tracks;
+    }
+
+    /**
+     * Estimated duration of this playlist
+     */
+    public get estimatedDuration() {
+        return this.tracks.reduce((p, c) => p + c.durationMS, 0);
+    }
+
+    /**
+     * Formatted estimated duration of this playlist
+     */
+    public get durationFormatted() {
+        return Util.buildTimeCode(Util.parseMS(this.estimatedDuration));
     }
 
     /**

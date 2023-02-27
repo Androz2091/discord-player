@@ -85,7 +85,7 @@ export class GuildQueueHistory<Meta = unknown> {
     /**
      * Play the previous track in the queue
      */
-    public async previous() {
+    public async previous(preserveCurrent = true) {
         const track = this.tracks.dispatch();
         if (!track) {
             throw new Error('No previous track in the queue');
@@ -94,7 +94,7 @@ export class GuildQueueHistory<Meta = unknown> {
         const current = this.currentTrack;
 
         await this.queue.node.play(track, { queue: false });
-        if (current) this.queue.node.insert(current, 0);
+        if (current && preserveCurrent) this.queue.node.insert(current, 0);
     }
 
     /**

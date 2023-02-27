@@ -201,6 +201,20 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * Estimated duration of this queue in ms
+     */
+    public get estimatedDuration() {
+        return this.tracks.store.reduce((a, c) => a + c.durationMS, 0);
+    }
+
+    /**
+     * Formatted duration of this queue
+     */
+    public get durationFormatted() {
+        return Util.buildTimeCode(Util.parseMS(this.estimatedDuration));
+    }
+
+    /**
      * The voice receiver for this queue
      */
     public get voiceReceiver() {
@@ -328,8 +342,19 @@ export class GuildQueue<Meta = unknown> {
         return this.tracks.size;
     }
 
+    /**
+     * The size of this queue
+     */
     public getSize() {
         return this.size;
+    }
+
+    /**
+     * Clear this queue
+     */
+    public clear() {
+        this.tracks.clear();
+        this.history.clear();
     }
 
     /**
