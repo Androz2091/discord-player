@@ -191,7 +191,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         // if the event was handled, return assuming the listener implemented all of the logic below
         if (wasHandled && !this.options.lockVoiceStateHandler) return;
 
-        if (oldState.channelId && !newState.channelId && newState.member!.id === newState.guild.members.me!.id) {
+        if (oldState.channelId && !newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
             try {
                 queue.delete();
             } catch {
@@ -200,13 +200,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             return void this.events.emit('disconnect', queue);
         }
 
-        if (!oldState.channelId && newState.channelId && newState.member!.id === newState.guild.members.me!.id) {
+        if (!oldState.channelId && newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
             if (newState.serverMute != null && oldState.serverMute !== newState.serverMute) {
                 queue.node.setPaused(newState.serverMute);
             } else if (newState.channel?.type === ChannelType.GuildStageVoice && newState.suppress != null && oldState.suppress !== newState.suppress) {
                 queue.node.setPaused(newState.suppress);
                 if (newState.suppress) {
-                    newState.guild.members.me!.voice.setRequestToSpeak(true).catch(Util.noop);
+                    newState.guild.members.me?.voice.setRequestToSpeak(true).catch(Util.noop);
                 }
             }
         }
@@ -232,8 +232,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         }
 
         if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-            if (newState.member!.id === newState.guild.members.me!.id) {
-                if (queue.connection && newState.member!.id === newState.guild.members.me!.id) queue.channel = newState.channel!;
+            if (newState.member?.id === newState.guild.members.me?.id) {
+                if (queue.connection && newState.member?.id === newState.guild.members.me?.id) queue.channel = newState.channel!;
                 const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
                 const channelEmpty = Util.isVoiceEmpty(queue.channel);
                 if (!channelEmpty && emptyTimeout) {
