@@ -1,3 +1,6 @@
+import { useRouter } from 'next/router';
+import { useConfig } from 'nextra-theme-docs';
+
 /**
  * @type {import('nextra').ThemeConfig}
  */
@@ -13,7 +16,8 @@ export default {
         defaultMenuCollapseLevel: 0,
         toggleButton: true
     },
-    darkMode: true,
+    primaryHue: 10,
+    darkMode: false,
     nextThemes: {
         defaultTheme: 'dark'
     },
@@ -33,13 +37,24 @@ export default {
             }}>TypeDoc Nextra</a>.
         </span>,
     },
-    head: (
-        <>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <meta property="og:title" content="Discord Player" />
-            <meta property="og:description" content="Discord Player documentation" />
-        </>
-    ),
+    head: () => {
+        const { frontMatter } = useConfig();
+
+        return <>
+            <meta property="og:url" content="https://discord-player.js.org" />
+            <meta property="og:title" content={frontMatter.title || 'Discord Player'} />
+            <meta property="og:description" content={frontMatter.description || 'A complete framework to build your discord music bot in JavaScript/TypeScript.'} />
+        </>;
+    },
+    useNextSeoProps() {
+        const { asPath } = useRouter();
+
+        if (asPath !== '/') {
+            return {
+                titleTemplate: '%s – Discord Player'
+            };
+        }
+    },
     feedback: {
         useLink: () => `https://github.com/Androz2091/discord-player/issues/new?title=${encodeURIComponent('Feedback for Documentation')}&labels=documentation`
     }
