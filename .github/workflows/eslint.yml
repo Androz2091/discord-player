@@ -43,3 +43,6 @@ jobs:
 
             - name: Run TSC
               run: yarn build:check
+
+            - name: Run Unit Tests
+              run: yarn test
