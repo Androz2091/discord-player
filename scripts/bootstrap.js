@@ -61,7 +61,9 @@ function getPackageJSON(name) {
             scripts: {
                 build: 'tsup',
                 'build:check': 'tsc --noEmit',
-                lint: 'eslint src --ext .ts --fix'
+                lint: 'eslint src --ext .ts --fix',
+                test: 'vitest',
+                coverage: 'vitest run --coverage'
             },
             bugs: {
                 url: 'https://github.com/Androz2091/discord-player/issues'

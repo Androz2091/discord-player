@@ -10,6 +10,7 @@ export * from './utils/Util';
 export * from './types/types';
 export * from './utils/FFmpegStream';
 export * from './utils/QueryCache';
+export * from './utils/QueryResolver';
 export * from './Player';
 export * from './hooks';
 export {

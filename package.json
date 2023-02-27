@@ -17,7 +17,8 @@
     "format": "prettier --write \"{packages,scripts,examples,apps}/**/*.{js,ts,mjs,mts}\"",
     "dev:web": "turbo run dev --filter=@discord-player/website",
     "build:web": "turbo run build --filter=@discord-player/website",
-    "start:web": "turbo run preview --filter=@discord-player/website"
+    "start:web": "turbo run preview --filter=@discord-player/website",
+    "test": "turbo run test"
   },
   "repository": {
     "type": "git",
@@ -51,5 +52,8 @@
     "turbo": "latest",
     "typedoc-nextra": "latest",
     "typescript": "^4.9.4"
+  },
+  "devDependencies": {
+    "vitest": "^0.29.1"
   }
 }
