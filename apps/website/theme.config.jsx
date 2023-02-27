@@ -54,6 +54,8 @@ export default {
                 titleTemplate: '%s – Discord Player'
             };
         }
+
+        return { titleTemplate: 'Discord Player' };
     },
     feedback: {
         useLink: () => `https://github.com/Androz2091/discord-player/issues/new?title=${encodeURIComponent('Feedback for Documentation')}&labels=documentation`
