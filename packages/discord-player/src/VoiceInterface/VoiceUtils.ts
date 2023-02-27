@@ -1,5 +1,5 @@
 import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
-import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection } from '@discordjs/voice';
+import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus } from '@discordjs/voice';
 import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
 import { GuildQueue } from '../Structures';
@@ -72,7 +72,7 @@ class VoiceUtils {
         if (connection instanceof StreamDispatcher) connection = connection.voiceConnection;
 
         try {
-            return connection.destroy();
+            if (connection.state.status !== VoiceConnectionStatus.Destroyed) return connection.destroy();
         } catch {
             //
         }

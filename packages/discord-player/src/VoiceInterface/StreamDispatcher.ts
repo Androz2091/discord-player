@@ -154,6 +154,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
         this.audioPlayer.on('debug', (m) => void this.emit('debug', m));
         this.audioPlayer.on('error', (error) => void this.emit('error', error));
+        this.voiceConnection.on('debug', (m) => void this.emit('debug', m));
+        this.voiceConnection.on('error', (error) => void this.emit('error', error as AudioPlayerError));
         this.voiceConnection.subscribe(this.audioPlayer);
     }
 
@@ -194,6 +196,41 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     isIdle() {
         return this.audioPlayer.state.status === AudioPlayerStatus.Idle;
+    }
+
+    /**
+     * Whether or not the voice connection has been destroyed
+     */
+    isDestroyed() {
+        return this.voiceConnection.state.status === VoiceConnectionStatus.Destroyed;
+    }
+
+    /**
+     * Whether or not the voice connection has been destroyed
+     */
+    isDisconnected() {
+        return this.voiceConnection.state.status === VoiceConnectionStatus.Disconnected;
+    }
+
+    /**
+     * Whether or not the voice connection is ready to play
+     */
+    isReady() {
+        return this.voiceConnection.state.status === VoiceConnectionStatus.Ready;
+    }
+
+    /**
+     * Whether or not the voice connection is signalling
+     */
+    isSignalling() {
+        return this.voiceConnection.state.status === VoiceConnectionStatus.Signalling;
+    }
+
+    /**
+     * Whether or not the voice connection is connecting
+     */
+    isConnecting() {
+        return this.voiceConnection.state.status === VoiceConnectionStatus.Connecting;
     }
 
     /**

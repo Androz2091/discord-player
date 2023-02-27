@@ -254,6 +254,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
         this.queue.tracks.removeOne((t) => t.id === foundTrack.id);
 
+        this.queue.player.events.emit('audioTrackRemove', this.queue, foundTrack);
+
         return foundTrack;
     }
 
@@ -291,7 +293,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         if (idx < 0) return false;
         const removed = this.remove(idx);
         if (!removed) return false;
+        const toRemove = this.queue.tracks.store.filter((_, i) => i <= idx);
         this.queue.tracks.store.splice(0, idx, removed);
+        this.queue.player.events.emit('audioTracksRemove', this.queue, toRemove);
         return this.skip();
     }
 
@@ -303,6 +307,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     public insert(track: Track, index = 0) {
         if (!(track instanceof Track)) throw new Error('invalid track');
         this.queue.tracks.store.splice(index, 0, track);
+        this.queue.player.events.emit('audioTrackAdd', this.queue, track);
     }
 
     /**

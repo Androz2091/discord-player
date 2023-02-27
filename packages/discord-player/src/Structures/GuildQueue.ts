@@ -71,6 +71,18 @@ export interface GuildQueueEvents<Meta = unknown> {
      */
     audioTracksAdd: (queue: GuildQueue<Meta>, track: Track[]) => unknown;
     /**
+     * Emitted when audio track is removed from the queue
+     * @param queue The queue where this event occurred
+     * @param track The track
+     */
+    audioTrackRemove: (queue: GuildQueue<Meta>, track: Track) => unknown;
+    /**
+     * Emitted when audio tracks are removed from the queue
+     * @param queue The queue where this event occurred
+     * @param track The track
+     */
+    audioTracksRemove: (queue: GuildQueue<Meta>, track: Track[]) => unknown;
+    /**
      * Emitted when a connection is created
      * @param queue The queue where this event occurred
      */
@@ -335,7 +347,7 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
-     * Add track to the queue
+     * Add track to the queue. This will emit `audioTracksAdd` when multiple tracks are added, otherwise `audioTrackAdd`.
      * @param track Track or playlist or array of tracks to add
      */
     public addTrack(track: Track | Track[] | Playlist) {
@@ -344,7 +356,6 @@ export class GuildQueue<Meta = unknown> {
         const isMulti = Array.isArray(toAdd);
 
         if (isMulti) {
-            this.player.events.emit('audioTrackAdd', this, toAdd[0]);
             this.player.events.emit('audioTracksAdd', this, toAdd);
         } else {
             this.player.events.emit('audioTrackAdd', this, toAdd);
