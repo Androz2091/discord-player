@@ -229,7 +229,7 @@ __metadata:
     "@mantine/next": ^5.10.2
     "@mantine/prism": ^5.10.2
     next: ^13.1.4
-    nextra: ^2.2.10
+    nextra: ^2.2.16
     nextra-theme-docs: ^2.2.10
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -653,7 +653,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mdx-js/mdx@npm:^2.1.5, @mdx-js/mdx@npm:^2.2.1":
+"@mdx-js/mdx@npm:^2.2.1":
   version: 2.2.1
   resolution: "@mdx-js/mdx@npm:2.2.1"
   dependencies:
@@ -678,7 +678,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mdx-js/react@npm:^2.1.5, @mdx-js/react@npm:^2.2.1":
+"@mdx-js/react@npm:^2.2.1":
   version: 2.2.1
   resolution: "@mdx-js/react@npm:2.2.1"
   dependencies:
@@ -1527,6 +1527,13 @@ __metadata:
   version: 5.0.1
   resolution: "ansi-regex@npm:5.0.1"
   checksum: 2aa4bb54caf2d622f1afdad09441695af2a83aa3fe8b8afa581d205e57ed4261c183c4d3877cee25794443fde5876417d859c108078ab788d6af7e4fe52eb66b
+  languageName: node
+  linkType: hard
+
+"ansi-sequence-parser@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "ansi-sequence-parser@npm:1.1.0"
+  checksum: 75f4d3a4c555655a698aec05b5763cbddcd16ccccdbfd178fb0aa471ab74fdf98e031b875ef26e64be6a95cf970c89238744b26de6e34af97f316d5186b1df53
   languageName: node
   linkType: hard
 
@@ -5177,15 +5184,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "nanoid@npm:4.0.0"
-  bin:
-    nanoid: bin/nanoid.js
-  checksum: 7d5946df5c6d383694195b781ae7b5067c149d164ec71e910d6b06676309c3459b68af570b944fb5ecd5065d19df464f05700d141d70bb712ff8ca06642fd8df
-  languageName: node
-  linkType: hard
-
 "natural-compare@npm:^1.4.0":
   version: 1.4.0
   resolution: "natural-compare@npm:1.4.0"
@@ -5200,7 +5198,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next-mdx-remote@npm:^4.2.0":
+"next-mdx-remote@npm:^4.2.1":
   version: 4.3.0
   resolution: "next-mdx-remote@npm:4.3.0"
   dependencies:
@@ -5329,34 +5327,35 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nextra@npm:^2.2.10":
-  version: 2.2.10
-  resolution: "nextra@npm:2.2.10"
+"nextra@npm:^2.2.16":
+  version: 2.2.16
+  resolution: "nextra@npm:2.2.16"
   dependencies:
-    "@mdx-js/mdx": ^2.1.5
-    "@mdx-js/react": ^2.1.5
+    "@mdx-js/mdx": ^2.2.1
+    "@mdx-js/react": ^2.2.1
     "@napi-rs/simple-git": ^0.1.8
     github-slugger: ^2.0.0
     graceful-fs: ^4.2.10
     gray-matter: ^4.0.3
     katex: ^0.16.4
     lodash.get: ^4.4.2
-    next-mdx-remote: ^4.2.0
+    next-mdx-remote: ^4.2.1
     p-limit: ^3.1.0
     rehype-katex: ^6.0.2
-    rehype-pretty-code: 0.9.2
+    rehype-pretty-code: 0.9.3
     remark-gfm: ^3.0.1
     remark-math: ^5.1.1
     remark-reading-time: ^2.0.1
-    shiki: ^0.12.1
+    shiki: ^0.14.0
     slash: ^3.0.0
     title: ^3.5.3
+    unist-util-remove: ^3.1.0
     unist-util-visit: ^4.1.1
   peerDependencies:
     next: ">=9.5.3"
     react: ">=16.13.1"
     react-dom: ">=16.13.1"
-  checksum: 0240efc6a5836375bcc3f4ad3b426e561df3f2815f826a61b4c585fae79de12fd9f22c22ab11f1bb2eb89de5c02b48beafff7f453ef981e866c2120a8dbc7ef7
+  checksum: 4a83d2f008ed8e8c3f1f07cd63a82d1bac0976077fededf7ed81d1f98008536aa1602fbd004017d9f87485915ec52b83eca53977cfb2fb6e78b5287ce3ff89d9
   languageName: node
   linkType: hard
 
@@ -6040,16 +6039,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rehype-pretty-code@npm:0.9.2":
-  version: 0.9.2
-  resolution: "rehype-pretty-code@npm:0.9.2"
+"rehype-pretty-code@npm:0.9.3":
+  version: 0.9.3
+  resolution: "rehype-pretty-code@npm:0.9.3"
   dependencies:
     hash-obj: ^4.0.0
-    nanoid: ^4.0.0
     parse-numeric-range: ^1.3.0
   peerDependencies:
     shiki: "*"
-  checksum: 8fb265256da1e04a3b16f7e96599d02b6408ea246b1ad66b042fbadfff3cb94319f1acb3edae75fcb4be308e54d24e22524182a6e330a6834c36839262c37bf9
+  checksum: 5e4c6341467ef37cc08cf90c12c05a10a9bf88015f70b7e6b07270963efb4b456a8d41740fb4a576501bc15860dafd51ba11076e3589aa9839d064b22cf2fcfa
   languageName: node
   linkType: hard
 
@@ -6369,6 +6367,18 @@ __metadata:
     vscode-oniguruma: ^1.7.0
     vscode-textmate: ^8.0.0
   checksum: a5d78a79d282f5c5168786980c66e82f075e91fa015097456486624fc5775688d685ad9b1972b0617d7f1ef50927d21b61dca476247a6f6c6b7042046e89a979
+  languageName: node
+  linkType: hard
+
+"shiki@npm:^0.14.0":
+  version: 0.14.1
+  resolution: "shiki@npm:0.14.1"
+  dependencies:
+    ansi-sequence-parser: ^1.1.0
+    jsonc-parser: ^3.2.0
+    vscode-oniguruma: ^1.7.0
+    vscode-textmate: ^8.0.0
+  checksum: b19ea337cc84da69d99ca39d109f82946e0c56c11cc4c67b3b91cc14a9479203365fd0c9e0dd87e908f493ab409dc6f1849175384b6ca593ce7da884ae1edca2
   languageName: node
   linkType: hard
 
@@ -7244,6 +7254,17 @@ __metadata:
     "@types/unist": ^2.0.0
     unist-util-visit: ^4.0.0
   checksum: 7d2808662ac65f2b2f615822b78060419f738fb3b074b10cec77c596ea966b8f5c47553d2d322822a5975c49d2b21cdd64c198ae9fb02a9d54d1afa6342cdd6a
+  languageName: node
+  linkType: hard
+
+"unist-util-remove@npm:^3.1.0":
+  version: 3.1.1
+  resolution: "unist-util-remove@npm:3.1.1"
+  dependencies:
+    "@types/unist": ^2.0.0
+    unist-util-is: ^5.0.0
+    unist-util-visit-parents: ^5.0.0
+  checksum: ed7c762941e6a9b6db230e9417697c8eb7d36093240b6f6d4ec265c4237d33e332a96a18307c8fb322a1842e3feb2a7564b032b5535fa0634eb1e075a6e344cb
   languageName: node
   linkType: hard
 
