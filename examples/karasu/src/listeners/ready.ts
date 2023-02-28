@@ -13,9 +13,10 @@ export class UserEvent extends Listener {
 		});
 	}
 
-	public run() {
+	public async run() {
 		this.printBanner();
 		this.printStoreDebugInformation();
+		await this.container.client.player.extractors.loadDefault();
 	}
 
 	private printBanner() {

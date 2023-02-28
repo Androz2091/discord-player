@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { QueryResolver } from 'discord-player';
-import fetch from 'node-fetch';
 import { parse, HTMLElement } from 'node-html-parser';
+import { getFetch } from '../extractors/common/helper';
 
 function getHTML(link: string): Promise<HTMLElement | null> {
-    return fetch(link, {
+    return getFetch(link, {
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49'
         }
@@ -55,6 +54,40 @@ function parseDuration(d: string) {
 export class AppleMusic {
     public constructor() {
         return AppleMusic;
+    }
+
+    public static async search(query: string) {
+        try {
+            const url = `https://music.apple.com/us/search?term=${encodeURIComponent(query)}`;
+            const node = await getHTML(url);
+            if (!node) return [];
+
+            const rawData = node.getElementById('serialized-server-data');
+            if (!rawData) return [];
+
+            const data = JSON.parse(rawData.innerText)[0].data.sections;
+            const tracks = data.find((s: any) => s.itemKind === 'trackLockup')?.items;
+            if (!tracks) return [];
+
+            return tracks.map((track: any) => ({
+                id: track.contentDescriptor.identifiers.storeAdamID,
+                duration: track.duration || '0:00',
+                title: track.title,
+                url: track.contentDescriptor.url,
+                thumbnail: track?.artwork?.dictionary
+                    ? makeImage({
+                          url: track.artwork.dictionary.url,
+                          height: track.artwork.dictionary.height,
+                          width: track.artwork.dictionary.width
+                      })
+                    : 'https://music.apple.com/assets/favicon/favicon-180.png',
+                artist: {
+                    name: track.subtitleLinks?.[0]?.title ?? 'Unknown Artist'
+                }
+            }));
+        } catch {
+            return [];
+        }
     }
 
     public static async getSongInfoFallback(res: HTMLElement, name: string, id: string, link: string) {

@@ -3,7 +3,16 @@ import { Collection } from '@discord-player/utils';
 import { BaseExtractor } from './BaseExtractor';
 import { Util } from '../utils/Util';
 
-const knownExtractorKeys = ['YouTubeExtractor', 'SoundCloudExtractor', 'ReverbnationExtractor', 'VimeoExtractor', 'AttachmentExtractor'];
+// prettier-ignore
+const knownExtractorKeys = [
+    'SoundCloudExtractor',
+    'AppleMusicExtractor',
+    'SpotifyExtractor',
+    'VimeoExtractor',
+    'YouTubeExtractor',
+    'ReverbnationExtractor',
+    'AttachmentExtractor'
+];
 const knownExtractorLib = '@discord-player/extractor';
 
 export class ExtractorExecutionContext {

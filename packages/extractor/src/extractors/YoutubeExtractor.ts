@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { YouTube } from 'youtube-sr';
 
 // prettier-ignore
@@ -13,124 +12,27 @@ import {
     Util
 } from 'discord-player';
 
-import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
-import { AppleMusic } from '../internal/AppleMusic';
-
-type StreamFN = (q: string) => Promise<import('stream').Readable | string>;
-
-const YouTubeLibs = [
-    'ytdl-core',
-    'play-dl',
-    '@distube/ytdl-core'
-    // add more to the list if you have any
-];
-
-// forced lib
-const forcedLib = process.env.DP_FORCE_YTDL_MOD;
-if (forcedLib) YouTubeLibs.unshift(forcedLib);
+import { StreamFN, YouTubeLibs, loadYtdl, makeYTSearch } from './common/helper';
 
 // taken from ytdl-core
 const validQueryDomains = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'gaming.youtube.com']);
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
 const idRegex = /^[a-zA-Z0-9-_]{11}$/;
-const getFetch =
-    typeof fetch !== 'undefined'
-        ? fetch
-        : typeof require !== 'undefined'
-        ? Util.require('undici')?.fetch || Util.require('node-fetch')
-        : async (...params: unknown[]) => {
-              // eslint-disable-next-line
-              let dy: any;
-
-              /* eslint-disable no-cond-assign */
-              if ((dy = await Util.import('undici').module)) {
-                  return (dy.fetch || dy.default.fetch)(...params);
-              } else if ((dy = await Util.import('node-fetch').module)) {
-                  return (dy.fetch || dy.default)(...params);
-              } else {
-                  throw new Error('No fetch lib found');
-              }
-
-              /* eslint-enable no-cond-assign */
-          };
 
 export class YoutubeExtractor extends BaseExtractor {
-    public static identifier = 'com.discord-player.ysaextractor' as const;
+    public static identifier = 'com.discord-player.youtubeextractor' as const;
     private _stream!: StreamFN;
-    private _spotify!: Spotify;
-    private _ytLibName!: string;
+    public _ytLibName!: string;
 
     public async activate() {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let lib: any;
-
-        for (const ytlib of YouTubeLibs) {
-            lib = (await Util.import(ytlib)).module;
-            if (!lib) continue;
-            lib = lib.default || lib;
-            this._ytLibName = ytlib;
-            break;
-        }
-
-        if (lib) {
-            const isYtdl = ['ytdl-core', '@distube/ytdl-core'].some((lib) => lib === this._ytLibName);
-
-            this._stream = async (query) => {
-                if (isYtdl) {
-                    const dl = lib as typeof import('ytdl-core');
-                    const info = await dl.getInfo(query, this.context.player.options.ytdlOptions);
-
-                    const formats = info.formats
-                        .filter((format) => {
-                            return info.videoDetails.isLiveContent ? format.isHLS && format.hasAudio : format.hasAudio;
-                        })
-                        .sort((a, b) => Number(b.audioBitrate) - Number(a.audioBitrate) || Number(a.bitrate) - Number(b.bitrate));
-
-                    const fmt = formats.find((format) => !format.hasVideo) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
-                    return fmt.url;
-                    // return dl(query, this.context.player.options.ytdlOptions);
-                } else {
-                    const dl = lib as typeof import('play-dl');
-
-                    const info = await dl.video_info(query);
-                    const formats = info.format
-                        .filter((format) => {
-                            const re = /\/manifest\/hls_(variant|playlist)\//;
-                            if (!format.url) return false;
-                            if (info.video_details.live) return re.test(format.url) && typeof format.bitrate === 'number';
-                            return typeof format.bitrate === 'number';
-                        })
-                        .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
-
-                    const fmt = formats.find((format) => !format.qualityLabel) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
-                    return fmt.url!;
-                    // return (await dl.stream(query, { discordPlayerCompatibility: true })).stream;
-                }
-            };
-        } else {
-            throw new Error(`Could not load youtube library. Install one of ${YouTubeLibs.map((lib) => `"${lib}"`).join(', ')}`);
-        }
-
-        this._spotify = spotify(getFetch);
+        const { stream, name } = await loadYtdl(this.context.player.options.ytdlOptions);
+        this._stream = stream;
+        this._ytLibName = name;
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
         if (typeof query !== 'string') return false;
-        return (
-            [
-                QueryType.YOUTUBE,
-                QueryType.YOUTUBE_PLAYLIST,
-                QueryType.YOUTUBE_SEARCH,
-                QueryType.YOUTUBE_VIDEO,
-                QueryType.SPOTIFY_ALBUM,
-                QueryType.SPOTIFY_PLAYLIST,
-                QueryType.SPOTIFY_SONG,
-                QueryType.APPLE_MUSIC_ALBUM,
-                QueryType.APPLE_MUSIC_PLAYLIST,
-                QueryType.APPLE_MUSIC_SONG,
-                QueryType.AUTO
-            ] as SearchQueryType[]
-        ).some((r) => r === type);
+        return ([QueryType.YOUTUBE, QueryType.YOUTUBE_PLAYLIST, QueryType.YOUTUBE_SEARCH, QueryType.YOUTUBE_VIDEO, QueryType.AUTO] as SearchQueryType[]).some((r) => r === type);
     }
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
@@ -140,7 +42,7 @@ export class YoutubeExtractor extends BaseExtractor {
             case QueryType.YOUTUBE_PLAYLIST: {
                 const ytpl = await YouTube.getPlaylist(query, {
                     fetchAll: true,
-                    requestOptions: context.requestOptions
+                    requestOptions: context.requestOptions as unknown as RequestInit
                 }).catch(Util.noop);
                 if (!ytpl) return this.emptyResponse();
 
@@ -208,201 +110,6 @@ export class YoutubeExtractor extends BaseExtractor {
                     ]
                 };
             }
-            case QueryType.SPOTIFY_SONG: {
-                const spotifyData: SpotifySong | void = await this._spotify.getData(query, context.requestOptions as unknown as RequestInit).catch(Util.noop);
-                if (!spotifyData) return { playlist: null, tracks: [] };
-                const spotifyTrack = new Track(this.context.player, {
-                    title: spotifyData.title,
-                    description: `${spotifyData.name} by ${spotifyData.artists.map((m) => m.name).join(', ')}`,
-                    author: spotifyData.artists[0]?.name ?? 'Unknown Artist',
-                    url: spotifyData.id ? `https://open.spotify.com/track/${spotifyData.id}` : query,
-                    thumbnail: spotifyData.coverArt?.sources?.[0]?.url || 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                    duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration ?? spotifyData.maxDuration ?? 0)),
-                    views: 0,
-                    requestedBy: context.requestedBy,
-                    source: 'spotify',
-                    queryType: context.type
-                });
-
-                return { playlist: null, tracks: [spotifyTrack] };
-            }
-            case QueryType.SPOTIFY_PLAYLIST: {
-                const spotifyPlaylist: SpotifyPlaylist | void = await this._spotify.getData(query, context.requestOptions as unknown as RequestInit).catch(Util.noop);
-                if (!spotifyPlaylist) return { playlist: null, tracks: [] };
-
-                const playlist = new Playlist(this.context.player, {
-                    title: spotifyPlaylist.name ?? spotifyPlaylist.title,
-                    description: spotifyPlaylist.title ?? '',
-                    thumbnail: spotifyPlaylist.coverArt?.sources?.[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                    type: spotifyPlaylist.type,
-                    source: 'spotify',
-                    author: {
-                        name: spotifyPlaylist.subtitle ?? 'Unknown Artist',
-                        url: null as unknown as string
-                    },
-                    tracks: [],
-                    id: spotifyPlaylist.id,
-                    url: spotifyPlaylist.id ? `https://open.spotify.com/playlist/${spotifyPlaylist.id}` : query,
-                    rawPlaylist: spotifyPlaylist
-                });
-
-                playlist.tracks = spotifyPlaylist.trackList.map((m) => {
-                    const data = new Track(this.context.player, {
-                        title: m.title ?? '',
-                        description: m.title ?? '',
-                        author: m.subtitle ?? 'Unknown Artist',
-                        url: m.uid ? `https://open.spotify.com/tracks/${m.uid}` : query,
-                        thumbnail: 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                        duration: Util.buildTimeCode(Util.parseMS(m.duration)),
-                        views: 0,
-                        requestedBy: context.requestedBy,
-                        playlist,
-                        source: 'spotify',
-                        queryType: 'spotifySong'
-                    });
-                    return data;
-                }) as Track[];
-
-                return { playlist, tracks: playlist.tracks };
-            }
-            case QueryType.SPOTIFY_ALBUM: {
-                const album: SpotifyAlbum | void = await this._spotify.getData(query, context.requestOptions as unknown as RequestInit).catch(Util.noop);
-                if (!album) return { playlist: null, tracks: [] };
-
-                const playlist = new Playlist(this.context.player, {
-                    title: album.name ?? album.title,
-                    description: album.title ?? '',
-                    thumbnail: album.coverArt?.sources?.[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                    type: album.type,
-                    source: 'spotify',
-                    author: {
-                        name: album.subtitle ?? 'Unknown Artist',
-                        url: null as unknown as string
-                    },
-                    tracks: [],
-                    id: album.id,
-                    url: album.id ? `https://open.spotify.com/playlist/${album.id}` : query,
-                    rawPlaylist: album
-                });
-
-                playlist.tracks = album.trackList.map((m) => {
-                    const data = new Track(this.context.player, {
-                        title: m.title ?? '',
-                        description: m.title ?? '',
-                        author: m.subtitle ?? 'Unknown Artist',
-                        url: m.uid ? `https://open.spotify.com/tracks/${m.uid}` : query,
-                        thumbnail: 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                        duration: Util.buildTimeCode(Util.parseMS(m.duration)),
-                        views: 0,
-                        requestedBy: context.requestedBy,
-                        playlist,
-                        source: 'spotify',
-                        queryType: 'spotifySong'
-                    });
-                    return data;
-                }) as Track[];
-
-                return { playlist, tracks: playlist.tracks };
-            }
-            case QueryType.APPLE_MUSIC_ALBUM: {
-                const info = await AppleMusic.getAlbumInfo(query);
-                if (!info) return this.emptyResponse();
-
-                const playlist = new Playlist(this.context.player, {
-                    author: {
-                        name: info.artist.name,
-                        url: ''
-                    },
-                    description: info.title,
-                    id: info.id,
-                    source: 'apple_music',
-                    thumbnail: info.thumbnail,
-                    title: info.title,
-                    tracks: [],
-                    type: 'album',
-                    url: info.url,
-                    rawPlaylist: info
-                });
-
-                playlist.tracks = info.tracks.map(
-                    (
-                        m: any // eslint-disable-line
-                    ) =>
-                        new Track(this.context.player, {
-                            author: m.artist.name,
-                            description: m.title,
-                            duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
-                            thumbnail: m.thumbnail,
-                            title: m.title,
-                            url: m.url,
-                            views: 0,
-                            source: 'apple_music',
-                            requestedBy: context.requestedBy,
-                            queryType: 'appleMusicSong'
-                        })
-                );
-
-                return { playlist, tracks: playlist.tracks };
-            }
-            case QueryType.APPLE_MUSIC_PLAYLIST: {
-                const info = await AppleMusic.getPlaylistInfo(query);
-                if (!info) return this.emptyResponse();
-
-                const playlist = new Playlist(this.context.player, {
-                    author: {
-                        name: info.artist.name,
-                        url: ''
-                    },
-                    description: info.title,
-                    id: info.id,
-                    source: 'apple_music',
-                    thumbnail: info.thumbnail,
-                    title: info.title,
-                    tracks: [],
-                    type: 'playlist',
-                    url: info.url,
-                    rawPlaylist: info
-                });
-
-                playlist.tracks = info.tracks.map(
-                    (
-                        m: any // eslint-disable-line
-                    ) =>
-                        new Track(this.context.player, {
-                            author: m.artist.name,
-                            description: m.title,
-                            duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
-                            thumbnail: m.thumbnail,
-                            title: m.title,
-                            url: m.url,
-                            views: 0,
-                            source: 'apple_music',
-                            requestedBy: context.requestedBy,
-                            queryType: 'appleMusicSong'
-                        })
-                );
-
-                return { playlist, tracks: playlist.tracks };
-            }
-            case QueryType.APPLE_MUSIC_SONG: {
-                const info = await AppleMusic.getSongInfo(query);
-                if (!info) return this.emptyResponse();
-
-                const track = new Track(this.context.player, {
-                    author: info.artist.name,
-                    description: info.title,
-                    duration: typeof info.duration === 'number' ? Util.buildTimeCode(Util.parseMS(info.duration)) : info.duration,
-                    thumbnail: info.thumbnail,
-                    title: info.title,
-                    url: info.url,
-                    views: 0,
-                    source: 'apple_music',
-                    requestedBy: context.requestedBy,
-                    queryType: context.type
-                });
-
-                return { playlist: null, tracks: [track] };
-            }
             default: {
                 const tracks = await this._makeYTSearch(query, context);
                 return { playlist: null, tracks };
@@ -411,11 +118,7 @@ export class YoutubeExtractor extends BaseExtractor {
     }
 
     private async _makeYTSearch(query: string, context: ExtractorSearchContext) {
-        const res = await YouTube.search(query, {
-            type: 'video',
-            requestOptions: context.requestOptions
-        }).catch(Util.noop);
-
+        const res = await makeYTSearch(query, context.requestOptions).catch(Util.noop);
         if (!res || !res.length) return [];
 
         return res.map((video) => {
@@ -496,4 +199,4 @@ export class YoutubeExtractor extends BaseExtractor {
     }
 }
 
-export { YoutubeExtractor as YouTubeExtractor, YoutubeExtractor as YSAExtractor };
+export { YoutubeExtractor as YouTubeExtractor };

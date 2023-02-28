@@ -151,26 +151,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@discord-player/extractor@npm:*":
-  version: 4.0.0
-  resolution: "@discord-player/extractor@npm:4.0.0"
-  dependencies:
-    file-type: ^16.5.4
-    genius-lyrics: ^4.4.2
-    node-fetch: cjs
-    node-html-parser: ^6.1.4
-    reverbnation-scraper: ^2.0.0
-    soundcloud-scraper: ^5.0.3
-    spotify-url-info: ^3.2.3
-    youtube-sr: ^4.3.4
-  peerDependencies:
-    discord-player: "*"
-    play-dl: 1.x
-    ytdl-core: 4.x
-  checksum: 28fe284f2a8ca4aedef903bd6ec58dcaf4577dfd948bee344a04e09535c6db28707760f652d0ea74fe82e12f7f699275eef371b7b909851d44ca174b8f06b44a
-  languageName: node
-  linkType: hard
-
 "@discord-player/extractor@workspace:packages/extractor":
   version: 0.0.0-use.local
   resolution: "@discord-player/extractor@workspace:packages/extractor"
@@ -180,7 +160,6 @@ __metadata:
     "@types/node-fetch": ^2.6.2
     file-type: ^16.5.4
     genius-lyrics: ^4.4.2
-    node-fetch: cjs
     node-html-parser: ^6.1.4
     play-dl: ^1.9.6
     reverbnation-scraper: ^2.0.0
@@ -2573,7 +2552,6 @@ __metadata:
   resolution: "discord-player@workspace:packages/discord-player"
   dependencies:
     "@discord-player/equalizer": "*"
-    "@discord-player/extractor": "*"
     "@discord-player/tsconfig": "*"
     "@discord-player/utils": "*"
     "@discordjs/voice": 0.14.0
@@ -2586,6 +2564,7 @@ __metadata:
     typescript: ^4.7.4
     youtube-sr: ^4.3.4
   peerDependencies:
+    "@discord-player/extractor": "*"
     discord.js: 14.x
     youtube-sr: 4.x
   languageName: unknown
@@ -5807,7 +5786,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.1, node-fetch@npm:cjs":
+"node-fetch@npm:^2.6.1":
   version: 2.6.7
   resolution: "node-fetch@npm:2.6.7"
   dependencies:

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // prettier-ignore
 import {
     BaseExtractor,

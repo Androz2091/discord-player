@@ -148,6 +148,7 @@ export interface PlayerProgressbarOptions {
  * - APPLE_MUSIC_SONG
  * - APPLE_MUSIC_ALBUM
  * - APPLE_MUSIC_PLAYLIST
+ * - APPLE_MUSIC_SEARCH
  * - FILE
  * @typedef {number} QueryType
  */
@@ -171,6 +172,7 @@ export const QueryType = {
     APPLE_MUSIC_SONG: 'appleMusicSong',
     APPLE_MUSIC_ALBUM: 'appleMusicAlbum',
     APPLE_MUSIC_PLAYLIST: 'appleMusicPlaylist',
+    APPLE_MUSIC_SEARCH: 'appleMusicSearch',
     FILE: 'file'
 } as const;
 
