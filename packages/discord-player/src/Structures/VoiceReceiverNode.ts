@@ -80,7 +80,8 @@ export class VoiceReceiverNode {
                 setImmediate(async () => {
                     if (options.mode === 'pcm') {
                         const pcm = receiveStream.pipe(
-                            new prism.opus.Decoder({
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            new (prism.opus || (<any>prism).default.opus).Decoder({
                                 channels: 2,
                                 frameSize: 960,
                                 rate: 48000

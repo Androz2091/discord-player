@@ -44,9 +44,9 @@ class QueryResolver {
     static resolve(query: string): (typeof QueryType)[keyof typeof QueryType] {
         query = query.trim();
         // @ts-expect-error
-        if (soundcloud.validateURL(query, 'track')) return QueryType.SOUNDCLOUD_TRACK;
+        if ((soundcloud.validateURL || soundcloud.default.validateURL)(query, 'track')) return QueryType.SOUNDCLOUD_TRACK;
         // @ts-expect-error
-        if (soundcloud.validateURL(query, 'playlist') || query.includes('/sets/')) return QueryType.SOUNDCLOUD_PLAYLIST;
+        if ((soundcloud.validateURL || soundcloud.default.validateURL)(query, 'playlist') || query.includes('/sets/')) return QueryType.SOUNDCLOUD_PLAYLIST;
         if (YouTube.isPlaylist(query)) return QueryType.YOUTUBE_PLAYLIST;
         if (QueryResolver.validateId(query) || QueryResolver.validateURL(query)) return QueryType.YOUTUBE_VIDEO;
         if (spotifySongRegex.test(query)) return QueryType.SPOTIFY_SONG;

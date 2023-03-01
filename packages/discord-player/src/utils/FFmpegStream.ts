@@ -55,7 +55,8 @@ export function createFFmpegStream(stream: Readable | Duplex | string, options?:
     if (!Number.isNaN(options.seek)) args.unshift('-ss', String(options.seek));
     if (Array.isArray(options.encoderArgs)) args.push(...options.encoderArgs);
 
-    const transcoder = new prism.FFmpeg({ shell: false, args });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const transcoder = new (prism.FFmpeg || (<any>prism).default.FFmpeg)({ shell: false, args });
     transcoder.on('close', () => transcoder.destroy());
 
     if (typeof stream !== 'string') {
