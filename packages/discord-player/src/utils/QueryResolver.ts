@@ -42,7 +42,8 @@ class QueryResolver {
      * @returns {QueryType}
      */
     static resolve(query: string): (typeof QueryType)[keyof typeof QueryType] {
-        query = query.trim();
+        query = !query.includes('youtube.com') ? query.trim() : query.replace(/(m(usic)?|gaming)\./, '').trim();
+
         // @ts-expect-error
         if ((soundcloud.validateURL || soundcloud.default.validateURL)(query, 'track')) return QueryType.SOUNDCLOUD_TRACK;
         // @ts-expect-error

@@ -22,8 +22,8 @@ export class AppleMusicExtractor extends BaseExtractor {
             case QueryType.APPLE_MUSIC_SEARCH: {
                 const data = await AppleMusic.search(query);
                 if (!data || !data.length) return this.createResponse();
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const tracks = data.map(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (m: any) =>
                         new Track(this.context.player, {
                             author: m.artist.name,

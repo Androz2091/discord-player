@@ -36,6 +36,7 @@ export class YoutubeExtractor extends BaseExtractor {
     }
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
+        query = query.includes('youtube.com') ? query.replace(/(m(usic)?|gaming)\./, '') : query;
         if (YoutubeExtractor.validateURL(query)) context.type = QueryType.YOUTUBE_VIDEO;
 
         switch (context.type) {
@@ -162,6 +163,8 @@ export class YoutubeExtractor extends BaseExtractor {
                 info.raw.url = url = _url;
             }
         }
+
+        if (url) url = url.includes('youtube.com') ? url.replace(/(m(usic)?|gaming)\./, '') : url;
 
         return this._stream(url);
     }

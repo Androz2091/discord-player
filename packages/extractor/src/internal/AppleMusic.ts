@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { QueryResolver } from 'discord-player';
 import { parse, HTMLElement } from 'node-html-parser';
 import { getFetch } from '../extractors/common/helper';
