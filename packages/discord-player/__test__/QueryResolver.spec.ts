@@ -14,6 +14,11 @@ describe('QueryResolver', () => {
         expect(qr.resolve(query)).toBe(QueryType.YOUTUBE_VIDEO);
     });
 
+    it('should resolve youtube music', () => {
+        const query = 'https://music.youtube.com/watch?v=dQw4w9WgXcQ';
+        expect(qr.resolve(query)).toBe(QueryType.YOUTUBE_VIDEO);
+    });
+
     it('should be youtubePlaylist', () => {
         const query = 'https://www.youtube.com/playlist?list=PLu4wnki9NI_8VmJ7Qz_byhKwCquXcy6u9';
         expect(qr.resolve(query)).toBe(QueryType.YOUTUBE_PLAYLIST);
