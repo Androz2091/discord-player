@@ -274,7 +274,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      * Get track position
      * @param track The track
      */
-    public getTrackPosition(track: TrackResolvable) {
+    public getTrackPosition(track: TrackResolvable): number {
         return this.queue.tracks.toArray().findIndex((t, idx) => {
             if (track instanceof Track || typeof track === 'string') {
                 return (typeof track === 'string' ? track : track.id) === t.id;

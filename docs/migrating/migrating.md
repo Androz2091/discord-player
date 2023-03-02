@@ -23,6 +23,8 @@ $ npm install discord-player # main library
 $ npm install @discord-player/extractor # extractors provider
 ```
 
+> Discord Player recognizes `@discord-player/extractor` and loads it automatically by default.
+
 #### Opus Library
 
 Discord Player is a high level framework for Discord VoIP. Discord only accepts opus packets, thus you need to install opus library. You can install any of these:
@@ -230,7 +232,7 @@ but can be retrieved with:
 + queue.node.isPaused();
 
 - queue.addTracks();
-Note: although this was removed, queue.addTrack() now works with both single tracks and playlists
+Note: although this was removed, queue.addTrack() now works with both single track, array of tracks and playlists
 
 - queue.setFilters({ bassboost: !queue.getFiltersEnabled().includes('bassboost') })
 + queue.filters.ffmpeg.toggle('bassboost')
