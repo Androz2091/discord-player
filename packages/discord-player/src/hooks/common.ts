@@ -1,8 +1,8 @@
 import { GuildQueue, NodeResolvable } from '../Structures';
-import { getPlayers } from '../utils/__internal__';
+import { instances } from '../utils/__internal__';
 
 export const getPlayer = () => {
-    return getPlayers()[0];
+    return instances.first() || null;
 };
 
 export const getQueue = <T = unknown>(node: NodeResolvable) => {
