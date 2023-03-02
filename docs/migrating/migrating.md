@@ -5,8 +5,9 @@
 > v6 is currently in development and is actively being worked on. No updates will be made to v5.4.0 going forward. To start using v6 before full release you can install all the necessary components using:  
 > `npm i discord-player@dev @discord-player/utils@dev @discord-player/equalizer@dev @discord-player/extractor@dev`
 
-v6 requires Discord.js 14.0 or higher. PLease make sure you have a compatible version using `npm list discord.js` in your terminal. If you're using an earlier version please update it. There are resources to help with that on the [Discord.JS Guide](https://discordjs.guide/).
-We have introduced some breaking changes in Discord Player v6 so your old code will no longer work without making the necessary changes.
+v6 requires Discord.js 14.0 or higher. PLease make sure you have a compatible version using `npm list discord.js` in your terminal. If you're using an earlier version please update it. The [Discord Js Guide](https://discordjs.guide/) has resources to help with that.
+
+We have introduced some breaking changes in Discord Player v6 so your old code will no longer work without making the necessary changes. Discord Player v6 also prefers play-dl over ytdl-core.
 
 ### New queue system and Player singleton
 
@@ -59,10 +60,10 @@ Note: parameters can be omitted after initial use to get the singleton.
 - player.search(query, options);
 + player.search changes
 
-# TODO somestuff for cache? maybe in additions section
+// TODO somestuff for cache? maybe in additions section
 
 - onBeforeCreateStream();
-Note: it was only used when you wanted to use play-dl. Now you only need play-dl installed.
+Note: it is not removed but is no longer needed when when you want to use play-dl. Now you only need play-dl installed.
 
 + onAfterCreateStream()
 Note: this is used for post processing PCM stream.
@@ -81,7 +82,7 @@ Several aspects of the queue have changed, the most notable one is
 + queue.tracks.clear();
 
 - queue.destroy();
-+ player.nodes.delete(guildId);
++ queue.delete();
 
 - queue.current;
 + queue.currentTrack;
@@ -108,7 +109,7 @@ Several aspects of the queue have changed, the most notable one is
 + queue.node.isPlaying();
 
 - queue.tracks.length; 
-+ queue.tracks.size
++ queue.tracks.size;
 but can be retrieved with:
 + queue.getSize();
 
@@ -124,17 +125,71 @@ Note: although this was removed, queue.addTrack() now works with both single tra
 
 - queue.back()
 + queue.history.back()
+
+- queue.createProgressBar();
++ queue.node.createProgressBar();
+
+- queue.insert(track, position);
++ queue.insertTrack(track, position);
+
+- queue.remove(track);
++ queue.removeTrack(track);
+
++ queue.setMetadata();
 ```
 
 ### Event Changes
-Events are now emitted from `player.events` object. [Here are the list of possible events](https://discord-player.netlify.app/docs/types/discord-player/GuildQueueEvents).
+Player [events](https://discord-player.netlify.app/docs/types/discord-player/GuildQueueEvents) are now emitted from the `player.events` object. (ex. `player.events.on(event.name, (...args) => event.execute(...args));`)
 
-// TODO: add diff if there are any changes
+```diff
+- botDisconnect
++ disconnect
+
+- channelEmpty
++ emptyChannel
+
+- connectionCreate
++ connection
+
+- connectionError
++ playerError
+
+- queueEnd
++ emptyQueue
+
+- trackAdd
++ audioTrackAdd
+
+- tracksAdd
++ audioTracksAdd
+
+- trackEnd
++ playerFinish
+
+- trackStart
++ playerStart
+```
 
 ## New Additions
 
+### Events
+
+In addition to the change in events, there are also new events that have been added, listed below.
+
+```diff
++ playerTrigger
+
++ playerSkip
+
++ audioTrackRemove
+
++ audioTracksRemove
+```
+
 ### Filters
-There are several new filter options shown below. The 8D filter used is **not** the one in FFmpeg and you will see it applied immediately unlike the FFmpeg one.
+There are several new filter options, with some shown below. A full list can be found [here](https://discord-player.netlify.app/docs/types/discord-player/QueueFilters).
+
+The 8D filter used is **not** the one in FFmpeg and you will see it applied immediately unlike the FFmpeg one.
 
 ```diff
 Filters like LowPass, HighPass, LowShelf, HighShelf, AllPass, etc:
@@ -150,6 +205,63 @@ DSP Filters
 + player.filters.filters.setFilters(['8D'])
 ```
 
+### Voice Recording
+
+> **Note**  
+> Recording should not be done without another's permission. In addition, since the voice receiving API is unofficial and is not fully supported by Discord you may not get perfect results.  
+
+With the introduction of v6 there was also the introduction of voice recording. This means that you can record the audio in a voice channel. An example is found below.
+
+```js
+const player = Player.singleton(client);
+const queue = player.nodes.create(interaction.guildId);
+
+try {
+  await queue.connect(interaction.member.voice.channelId, { deaf: false });
+} catch {
+    return interaction.followUp('Failed to connect to your channel');
+}
+
+const stream = queue.voiceReceiver.recordUser(interaction.member.id, {
+  mode: 'pcm', // record in pcm format
+  end: EndBehaviorType.AfterSilence // stop recording once user stops talking
+});
+
+const writer = stream.pipe(createWriteStream(`./recording-${interaction.member.id}.pcm`)); // write the stream to a file
+
+writer.once('finish', () => {
+  if (interaction.isRepliable()) interaction.followUp(`Finished writing audio!`);
+  queue.delete();
+});
+```
+
+You can also convert the recorded audio from PCM to any format you'd like.
+
+```js
+ffmpeg -i "./recording-USER_ID.pcm" -f s16le -ac 2 -ar 48000 "./recording.mp3"
+```
+
+### Hooks
+So what are hooks for? You might have noticed, getting `queue` for basic tasks requires you to write something like:
+
+```js
+const queue = client.player.nodes.get(guildId);
+```
+
+The idea behind queues is for when you don't have access to `client.player`, this is where hooks come in. You will be able to get the queue with just:
+
+```js
+import { useQueue } from 'discord-player';
+
+const queue = useQueue(guildId);
+```
+
+Hooks are currently still an experimental feature that will continue to be worked upon. As of right now, all hooks start with the `use` keyword. The following are the available hooks:
+
+- **useQueue**: Lets you access `GuildQueue` instance from anywhere in your process
+- **useHistory**: Lets you access `GuildQueueHistory` from anywhere in your process
+- **usePlayer**: Lets you access `GuildQueuePlayerNode` from anywhere in your process (Note: this does not return discord-player's main `Player`)
+
 ## Frequently Asked Questions
 
 ### How do I reply to the event like v5?
@@ -161,7 +273,6 @@ const queue = player.nodes.create(message.guild, {
     metadata: message
 });
 ```
-
 The metadata `message` will always be available in every event emitted for that specific `Queue`. You can access it via `queue.metadata`:
 
 ```js
