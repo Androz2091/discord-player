@@ -1,13 +1,109 @@
+# Discord Player
+
+> **Did You Know?** Discord Player has been a part of Discord.js community since **2020/01/12**, authored by **[Androz2091](https://github.com/androz2091)**. Over the years, it went through several updates and releases, which makes it stand at version 6 at the time of writing this.
+
 # Migrating to Discord Player v6
 
 ## Before you start
+
 > **Note**  
 > v6 is currently in development and is actively being worked on. No updates will be made to v5.4.0 going forward. To start using v6 before full release you can install all the necessary components using:  
 > `npm i discord-player@dev @discord-player/utils@dev @discord-player/equalizer@dev @discord-player/extractor@dev`
 
 v6 requires Discord.js 14.0 or higher. PLease make sure you have a compatible version using `npm list discord.js` in your terminal. If you're using an earlier version please update it. The [Discord Js Guide](https://discordjs.guide/) has resources to help with that.
 
-We have introduced some breaking changes in Discord Player v6 so your old code will no longer work without making the necessary changes. Discord Player v6 also prefers play-dl over ytdl-core.
+## Installation
+
+> *Discord Player is a node.js module. Thus, you need to have node.js installed in order to use it.*
+
+#### Main Library
+
+```bash
+$ npm install discord-player # main library
+$ npm install @discord-player/extractor # extractors provider
+```
+
+#### Opus Library
+
+Discord Player is a high level framework for Discord VoIP. Discord only accepts opus packets, thus you need to install opus library. You can install any of these:
+
+```bash
+$ npm install @discordjs/opus
+$ npm install opusscript
+```
+
+#### FFmpeg or Avconv
+
+FFmpeg or Avconv is required for media transcoding. You can get it from [https://ffmpeg.org](https://ffmpeg.org) or by installing it from npm:
+
+```bash
+$ npm install ffmpeg-static
+```
+
+#### Streaming Library
+
+You also need to install streaming library if you want to add support for youtube playback. You can install one of these libraries:
+
+```bash
+$ npm install ytdl-core
+$ npm install play-dl
+$ npm install @distube/ytdl-core
+```
+
+Done with all these? Let's write a simple music bot then.
+
+### Setup
+
+Let's create a master player instance.
+
+```js
+const { Player } = require('discord-player');
+const client = new Discord.Client({
+    // Make sure you have 'GuildVoiceStates' intent enabled
+    intents: ['GuildVoiceStates', /* Other intents */]
+});
+
+// this is the entrypoint for discord-player based application
+const player = new Player(client);
+```
+
+> **Did You Know?** *Discord Player is by default a singleton.*
+
+Now, let's add some event listeners:
+
+```js
+// this event is emitted whenever discord-player starts to play a track
+player.events.on('playerStart', (queue, track) => {
+    // we will later define queue.metadata object while creating the queue
+    queue.metadata.channel.send(`Started playing **${track.title}**!`);
+});
+```
+
+Let's write the command part. You can define the command as you desire. We will only check the command handler part:
+
+```js
+async function execute(interaction) {
+    const channel = interaction.message.member.voice.channel;
+    if (!channel) return interaction.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
+    const query = interaction.options.getString('query', true); // we need input/query to play
+
+    // let's defer the interaction as things can take time to process
+    await interaction.deferReply();
+
+    try {
+        await player.play(channel, query, {
+            nodeOptions: { // nodeOptions are the options for guild node (aka your queue in simple word)
+                metadata: interaction // we can access this metadata object using queue.metadata later on
+            }
+        });
+    } catch(e) {
+        // let's return error if something failed
+        return interaction.followUp(`Something went wrong: ${e}`);
+    }
+}
+```
+
+That's all it takes to build a simple play command.
 
 ### New queue system and Player singleton
 
@@ -30,6 +126,7 @@ Discord Player `player.play` will handle queue creation, search results, tracks 
 - });
 - queue.play();
 
+# Either
 + player.play(channel, result, {
 +  nodeOptions: {
 +   metadata: {
@@ -45,10 +142,26 @@ Discord Player `player.play` will handle queue creation, search results, tracks 
 +   leaveOnEndCooldown: 300000,
 +  },
 + });
+
+# Or
++ const queue = player.nodes.create({
++   metadata: {
++    channel: interaction.channel,
++    client: interaction.guild.members.me,
++    requestedBy: interaction.user,
++   },
++   autoSelfDeaf: true,
++   initialVolume: 80,
++   leaveOnEmpty: true,
++   leaveOnEmptyCooldown: 300000,
++   leaveOnEnd: true,
++   leaveOnEndCooldown: 300000,
++ });
++ queue.node.play()
 ```
 
 ### Player Changes
-The main changes to the Player class are outlined below. The caching is used for . Several [filter additions](#filters) were made as well.
+The main changes to the Player class are outlined below.
 
 ```diff
 - player.on('event')
@@ -66,8 +179,7 @@ Note: parameters can be omitted after initial use to get the singleton.
 Note: it is not removed but is no longer needed when when you want to use play-dl. Now you only need play-dl installed.
 
 + onAfterCreateStream()
-Note: this is used for post processing PCM stream.
-// Maybe move to additions section
+Note: this is used for post processing PCM stream. This hook can return stream type as well.
 ```
 
 ### Queue Changes
@@ -103,7 +215,7 @@ Several aspects of the queue have changed, the most notable one is
 + queue.node.skip();
 
 - queue.skipTo(trackNum);
-+ queue.skipTo(trackNum);
++ queue.node.skipTo(trackNum);
 
 - queue.playing;
 + queue.node.isPlaying();
@@ -135,6 +247,8 @@ Note: although this was removed, queue.addTrack() now works with both single tra
 - queue.remove(track);
 + queue.removeTrack(track);
 
+- queue.metadata = ...
+Note: metadata setter is still functional
 + queue.setMetadata();
 ```
 
@@ -222,6 +336,7 @@ try {
     return interaction.followUp('Failed to connect to your channel');
 }
 
+// initialize receiver stream
 const stream = queue.voiceReceiver.recordUser(interaction.member.id, {
   mode: 'pcm', // record in pcm format
   end: EndBehaviorType.AfterSilence // stop recording once user stops talking
@@ -270,7 +385,7 @@ v6 still supports v5's `metadata` object:
 
 ```js
 const queue = player.nodes.create(message.guild, {
-    metadata: message
+  metadata: message
 });
 ```
 The metadata `message` will always be available in every event emitted for that specific `Queue`. You can access it via `queue.metadata`:
