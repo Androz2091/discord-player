@@ -314,12 +314,15 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         options: SearchOptions & {
             nodeOptions?: GuildNodeCreateOptions<T>;
             connectionOptions?: VoiceConnectConfig;
+            afterSearch?: (result: SearchResult) => Promise<SearchResult>;
         } = {}
     ) {
         const vc = this.client.channels.resolve(channel);
         if (!vc?.isVoiceBased()) throw new Error('Expected a voice channel');
 
-        const result = query instanceof SearchResult ? query : await this.search(query, options);
+        const originalResult = query instanceof SearchResult ? query : await this.search(query, options);
+
+        const result = (await options.afterSearch?.(originalResult)) || originalResult;
         if (result.isEmpty()) {
             throw new Error(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
         }
