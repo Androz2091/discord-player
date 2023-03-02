@@ -87,6 +87,11 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
          */
         this.channel = channel;
 
+        this.voiceConnection.on('debug', (m) => void this.emit('debug', m));
+        this.voiceConnection.on('error', (error) => void this.emit('error', error as AudioPlayerError));
+        this.audioPlayer.on('debug', (m) => void this.emit('debug', m));
+        this.audioPlayer.on('error', (error) => void this.emit('error', error));
+
         this.dsp.onUpdate = () => {
             if (!this.dsp) return;
             if (this.dsp.filters?.filters) this.emit('dsp', this.dsp.filters?.filters);
@@ -152,10 +157,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             }
         });
 
-        this.audioPlayer.on('debug', (m) => void this.emit('debug', m));
-        this.audioPlayer.on('error', (error) => void this.emit('error', error));
-        this.voiceConnection.on('debug', (m) => void this.emit('debug', m));
-        this.voiceConnection.on('error', (error) => void this.emit('error', error as AudioPlayerError));
         this.voiceConnection.subscribe(this.audioPlayer);
     }
 

@@ -258,19 +258,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/voice@npm:0.14.0":
-  version: 0.14.0
-  resolution: "@discordjs/voice@npm:0.14.0"
-  dependencies:
-    "@types/ws": ^8.5.3
-    discord-api-types: ^0.37.20
-    prism-media: ^1.3.4
-    tslib: ^2.4.1
-    ws: ^8.11.0
-  checksum: baa68a324f8c7b4a7863a966e7d10a01a4df93aa68800f867e7a6fef016fcd16306ff5a562674884192b0e6538e53e8404d114a7c9781f0637c8e0dea3bca368
-  languageName: node
-  linkType: hard
-
 "@discordjs/voice@npm:^0.11.0":
   version: 0.11.0
   resolution: "@discordjs/voice@npm:0.11.0"
@@ -281,6 +268,19 @@ __metadata:
     tslib: ^2.4.0
     ws: ^8.8.1
   checksum: f8d2bb597ccc073995aa493bff8889f7e663e072a82943aeb018137dd5e45d9ff515c8e820d257dbe5afa3d9947536ddc2c933a218feac2dbddc8ae37c6968b9
+  languageName: node
+  linkType: hard
+
+"@discordjs/voice@npm:latest":
+  version: 0.14.0
+  resolution: "@discordjs/voice@npm:0.14.0"
+  dependencies:
+    "@types/ws": ^8.5.3
+    discord-api-types: ^0.37.20
+    prism-media: ^1.3.4
+    tslib: ^2.4.1
+    ws: ^8.11.0
+  checksum: baa68a324f8c7b4a7863a966e7d10a01a4df93aa68800f867e7a6fef016fcd16306ff5a562674884192b0e6538e53e8404d114a7c9781f0637c8e0dea3bca368
   languageName: node
   linkType: hard
 
@@ -2554,7 +2554,7 @@ __metadata:
     "@discord-player/equalizer": "*"
     "@discord-player/tsconfig": "*"
     "@discord-player/utils": "*"
-    "@discordjs/voice": 0.14.0
+    "@discordjs/voice": latest
     "@types/node": ^18.6.3
     "@types/ws": ^8.5.3
     discord-api-types: ^0.37.0
