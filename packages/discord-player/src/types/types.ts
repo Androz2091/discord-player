@@ -185,6 +185,12 @@ export interface PlayerEvents {
     voiceStateUpdate: (queue: GuildQueue, oldState: VoiceState, newState: VoiceState) => any;
 }
 
+export enum PlayerEvent {
+    debug = 'debug',
+    error = 'error',
+    voiceStateUpdate = 'voiceStateUpdate'
+}
+
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**

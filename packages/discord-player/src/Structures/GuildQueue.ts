@@ -57,6 +57,73 @@ export type OnAfterCreateStreamHandler = (stream: Readable, queue: GuildQueue) =
 
 export type PlayerTriggeredReason = 'filters' | 'normal';
 
+export enum GuildQueueEvent {
+    /**
+     * Emitted when audio track is added to the queue
+     */
+    audioTrackAdd = 'audioTrackadd',
+    /**
+     * Emitted when audio tracks were added to the queue
+     */
+    audioTracksAdd = 'audioTracksAdd',
+    /**
+     * Emitted when audio track is removed from the queue
+     */
+    audioTrackRemove = 'audioTrackRemove',
+    /**
+     * Emitted when audio tracks are removed from the queue
+     */
+    audioTracksRemove = 'audioTracksRemove',
+    /**
+     * Emitted when a connection is created
+     */
+    connection = 'connection',
+    /**
+     * Emitted when the bot is disconnected from the channel
+     */
+    disconnect = 'disconnect',
+    /**
+     * Emitted when the queue sends a debug info
+     */
+    debug = 'debug',
+    /**
+     * Emitted when the queue encounters error
+     */
+    error = 'error',
+    /**
+     * Emitted when the voice channel is empty
+     */
+    emptyChannel = 'emptyChannel',
+    /**
+     * Emitted when the queue is empty
+     */
+    emptyQueue = 'emptyQueue',
+    /**
+     * Emitted when the audio player starts streaming audio track
+     */
+    playerStart = 'playerStart',
+    /**
+     * Emitted when the audio player errors while streaming audio track
+     */
+    playerError = 'playerError',
+    /**
+     * Emitted when the audio player finishes streaming audio track
+     */
+    playerFinish = 'playerFinish',
+    /**
+     * Emitted when the audio player skips current track
+     */
+    playerSkip = 'playerSkip',
+    /**
+     * Emitted when the audio player is triggered
+     */
+    playerTrigger = 'playerTrigger',
+    /**
+     * Emitted when the voice state is updated. Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
+     */
+    voiceStateUpdate = 'voiceStateUpdate'
+}
+
 export interface GuildQueueEvents<Meta = unknown> {
     /**
      * Emitted when audio track is added to the queue
