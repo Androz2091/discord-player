@@ -4,7 +4,9 @@
 | Property | Type | Value | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | audioTrackAdd | (queue: GuildQueue\<Meta>, track: Track) => unknown | N/A | Emitted when audio track is added to the queue |
+| audioTrackRemove | (queue: GuildQueue\<Meta>, track: Track) => unknown | N/A | Emitted when audio track is removed from the queue |
 | audioTracksAdd | (queue: GuildQueue\<Meta>, track: Array\<Track>) => unknown | N/A | Emitted when audio tracks were added to the queue |
+| audioTracksRemove | (queue: GuildQueue\<Meta>, track: Array\<Track>) => unknown | N/A | Emitted when audio tracks are removed from the queue |
 | connection | (queue: GuildQueue\<Meta>) => unknown | N/A | Emitted when a connection is created |
 | debug | (queue: GuildQueue\<Meta>, message: string) => unknown | N/A | Emitted when the queue sends a debug info |
 | disconnect | (queue: GuildQueue\<Meta>) => unknown | N/A | Emitted when the bot is disconnected from the channel |
@@ -19,4 +21,4 @@
 | voiceStateUpdate | (queue: GuildQueue\<Meta>, oldState: VoiceState, newState: VoiceState) => unknown | N/A | Emitted when the voice state is updated. Consuming this event may disable default voice state update handler if  |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e31bc2a/packages/discord-player/src/Structures/GuildQueue.ts#L60)
+- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/discord-player/src/Structures/GuildQueue.ts#L127)

@@ -1,28 +1,26 @@
-## AttachmentExtractor extends BaseExtractor
+## SpotifyExtractor extends BaseExtractor
 
 ```typescript
-new AttachmentExtractor(context)
+new SpotifyExtractor(context)
 ```
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | context | ExtractorExecutionContext | ❌ | Context that instantiated this extractor |
 
 ## Properties
+### private  _lib: Spotify
+- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/SpotifyExtractor.ts#L10)
+### private  _stream: StreamFN
+- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/SpotifyExtractor.ts#L9)
 ### public  context: ExtractorExecutionContext
 - Source: `packages/discord-player/dist/index.d.ts#L83`
-### public static identifier: 'com.discord\-player.attachmentextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/AttachmentExtractor.ts#L19)
+### public static identifier: 'com.discord\-player.spotifyextractor'
+- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/SpotifyExtractor.ts#L8)
 ### public  identifier: string
 Identifier of this extractor
 ## Methods
 ### public  activate(): Promise\<void>
-This method will be executed when this extractor is activated
-
-
-
-
-
-- Source: `packages/discord-player/dist/index.d.ts#L100`
+- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/SpotifyExtractor.ts#L12)
 ### public  createResponse(playlist?, tracks?): ExtractorInfo
 Create extractor response
 
@@ -69,8 +67,6 @@ Dispatch an event to the player
 
 
 - Source: `packages/discord-player/dist/index.d.ts#L131`
-### public  emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/AttachmentExtractor.ts#L109)
 ### public  handle(query, context): Promise\<ExtractorInfo>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -78,7 +74,7 @@ Dispatch an event to the player
 | context | ExtractorSearchContext | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/AttachmentExtractor.ts#L26)
+- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/SpotifyExtractor.ts#L22)
 ### public  handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
 
@@ -92,13 +88,13 @@ A stream middleware to handle streams before passing it to the player
 
 
 - Source: `packages/discord-player/dist/index.d.ts#L125`
-### public  stream(info): Promise\<string \| ReadStream>
+### public  stream(info): Promise\<string \| Readable>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | info | Track | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/AttachmentExtractor.ts#L113)
+- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/SpotifyExtractor.ts#L125)
 ### public  validate(query, type?): Promise\<boolean>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -106,4 +102,4 @@ A stream middleware to handle streams before passing it to the player
 | type | null \| SearchQueryType | ✅ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/AttachmentExtractor.ts#L21)
+- [Source](https://github.com/Androz2091/discord-player/blob/caddfb3/packages/extractor/src/extractors/SpotifyExtractor.ts#L18)

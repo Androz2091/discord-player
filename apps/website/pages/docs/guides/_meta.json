@@ -8,5 +8,8 @@
     "audio-filters": "Audio Filters",
     "custom-audio-filters": "Custom Audio Filters",
     "preventing-ratelimits": "Preventing Ratelimits",
-    "using-proxy": "Using Proxy"
+    "using-proxy": "Using Proxy",
+    "playing_local_file": "Playing_local_file",
+    "playing_raw_resource": "Playing_raw_resource",
+    "voice_recording": "Voice_recording"
 }
