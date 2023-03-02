@@ -125,7 +125,7 @@ __metadata:
     eslint: ^8.21.0
     fs-extra: ^11.1.0
     prettier: ^2.8.2
-    rimraf: ^4.1.2
+    rimraf: ^4.1.3
     tsup: ^6.5.0
     turbo: latest
     typedoc-nextra: latest
@@ -6678,12 +6678,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rimraf@npm:^4.1.2":
-  version: 4.1.2
-  resolution: "rimraf@npm:4.1.2"
+"rimraf@npm:^4.1.3":
+  version: 4.1.3
+  resolution: "rimraf@npm:4.1.3"
   bin:
     rimraf: dist/cjs/src/bin.js
-  checksum: 480b8147fd9bcbef3ac118f88a7b1169c3872977a3411a0c84df838bfc30e175a394c0db6f9619fc8b8a886a18c6d779d5e74f380a0075ecc710afaf81b3f50c
+  checksum: 12c080cb3784186393a76a538b2ae7b3afbc2f609d9c51451d818295cc79d8dedbb61dd63b8f2aa0ec0f443e9d5247d559665501401fac3a39ffb67f6a58e843
   languageName: node
   linkType: hard
 
