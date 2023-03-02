@@ -23,6 +23,21 @@ const GuideFiles = [
         path: `${DOCS}/extractors/sources.md`
     },
     {
+        name: 'playing-local-file',
+        category: 'guides',
+        path: `${DOCS}/examples/playing_local_file.md`
+    },
+    {
+        name: 'playing-raw-resource',
+        category: 'guides',
+        path: `${DOCS}/examples/playing_raw_resource.md`
+    },
+    {
+        name: 'voice-recording',
+        category: 'guides',
+        path: `${DOCS}/examples/voice_recording.md`
+    },
+    {
         name: 'stream-hooks',
         category: 'guides',
         path: `${DOCS}/extractors/stream_hooks.md`
@@ -56,21 +71,6 @@ const GuideFiles = [
         name: 'using-proxy',
         path: `${DOCS}/youtube/proxy.md`,
         category: 'guides'
-    },
-    {
-        name: 'playing_local_file',
-        category: 'guides',
-        path: `${DOCS}/examples/playing_local_file.md`
-    },
-    {
-        name: 'playing_raw_resource',
-        category: 'guides',
-        path: `${DOCS}/examples/playing_raw_resource.md`
-    },
-    {
-        name: 'voice_recording',
-        category: 'guides',
-        path: `${DOCS}/examples/voice_recording.md`
     }
 ];
 
