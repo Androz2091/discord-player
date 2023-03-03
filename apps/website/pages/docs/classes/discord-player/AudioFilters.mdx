@@ -6,14 +6,14 @@ new AudioFilters()
 
 ## Properties
 ### public static filters: Record\<keyof QueueFilters, string>
-- [Source](https://github.com/Androz2091/discord-player/blob/e52c3ab/packages/discord-player/src/utils/AudioFilters.ts#L10)
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/utils/AudioFilters.ts#L10)
 ### public  length: number
 
 ### public  names: Array\<keyof QueueFilters>
 
 ## Methods
 ### public static \[iterator](): IterableIterator\<\{ name: keyof QueueFilters,value: string }>
-- [Source](https://github.com/Androz2091/discord-player/blob/e52c3ab/packages/discord-player/src/utils/AudioFilters.ts#L55)
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/utils/AudioFilters.ts#L55)
 ### public static create(filters?): string
 Create ffmpeg args from the specified filters name
 
@@ -25,7 +25,7 @@ Create ffmpeg args from the specified filters name
 | filters | Array\<K> | ✅ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e52c3ab/packages/discord-player/src/utils/AudioFilters.ts#L79)
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/utils/AudioFilters.ts#L79)
 ### public static define(filterName, value): void
 Defines audio filter
 
@@ -38,7 +38,7 @@ Defines audio filter
 | value | string | ❌ | The ffmpeg args |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e52c3ab/packages/discord-player/src/utils/AudioFilters.ts#L92)
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/utils/AudioFilters.ts#L92)
 ### public static defineBulk(filtersArray): void
 Defines multiple audio filters
 
@@ -50,20 +50,20 @@ Defines multiple audio filters
 | filtersArray | Array\<\{ name: string,value: string }> | ❌ | Array of filters containing the filter name and ffmpeg args |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e52c3ab/packages/discord-player/src/utils/AudioFilters.ts#L100)
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/utils/AudioFilters.ts#L100)
 ### public static get(name): Record\<keyof QueueFilters, string>\[K]
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | name | K | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e52c3ab/packages/discord-player/src/utils/AudioFilters.ts#L47)
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/utils/AudioFilters.ts#L47)
 ### public static has(name): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | name | K | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e52c3ab/packages/discord-player/src/utils/AudioFilters.ts#L51)
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/utils/AudioFilters.ts#L51)
 ### public static toString(): string
-- [Source](https://github.com/Androz2091/discord-player/blob/e52c3ab/packages/discord-player/src/utils/AudioFilters.ts#L70)
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/utils/AudioFilters.ts#L70)
