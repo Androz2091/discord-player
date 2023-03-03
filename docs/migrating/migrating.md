@@ -136,8 +136,8 @@ Discord Player `player.play` will handle queue creation, search results, tracks 
 +    client: interaction.guild.members.me,
 +    requestedBy: interaction.user,
 +   },
-+   autoSelfDeaf: true,
-+   initialVolume: 80,
++   selfDeaf: true,
++   volume: 80,
 +   leaveOnEmpty: true,
 +   leaveOnEmptyCooldown: 300000,
 +   leaveOnEnd: true,
@@ -152,8 +152,8 @@ Discord Player `player.play` will handle queue creation, search results, tracks 
 +    client: interaction.guild.members.me,
 +    requestedBy: interaction.user,
 +   },
-+   autoSelfDeaf: true,
-+   initialVolume: 80,
++   selfDeaf: true,
++   volume: 80,
 +   leaveOnEmpty: true,
 +   leaveOnEmptyCooldown: 300000,
 +   leaveOnEnd: true,
@@ -255,7 +255,7 @@ Note: metadata setter is still functional
 ```
 
 ### Event Changes
-Player [events](https://discord-player.netlify.app/docs/types/discord-player/GuildQueueEvents) are now emitted from the `player.events` object. (ex. `player.events.on(event.name, (...args) => event.execute(...args));`)
+Player [events](https://discord-player.js.org/docs/types/discord-player/GuildQueueEvents) are now emitted from the `player.events` object. (ex. `player.events.on(event.name, (...args) => event.execute(...args));`)
 
 ```diff
 - botDisconnect
@@ -303,7 +303,7 @@ In addition to the change in events, there are also new events that have been ad
 ```
 
 ### Filters
-There are several new filter options, with some shown below. A full list can be found [here](https://discord-player.netlify.app/docs/types/discord-player/QueueFilters).
+There are several new filter options, with some shown below. A full list can be found [here](https://discord-player.js.org/docs/types/discord-player/QueueFilters).
 
 The 8D filter used is **not** the one in FFmpeg and you will see it applied immediately unlike the FFmpeg one.
 
