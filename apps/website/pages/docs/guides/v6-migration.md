@@ -6,7 +6,7 @@
 
 ## Before you start
 
-Discord Player requires Discord.js 16.0 or higher. PLease make sure you have a compatible version using `npm list discord.js` in your terminal. If you're using an earlier version please update it. The [Discord.JS Guide](https://discordjs.guide/) has resources to help with that.
+Discord Player requires Discord.js 14.0 or higher. PLease make sure you have a compatible version using `npm list discord.js` in your terminal. If you're using an earlier version please update it. The [Discord.JS Guide](https://discordjs.guide/) has resources to help with that.
 
 ## Installation
 
@@ -58,14 +58,14 @@ Let's create a master player instance.
 const { Player } = require('discord-player');
 const client = new Discord.Client({
     // Make sure you have 'GuildVoiceStates' intent enabled
-    intents: ['GuildVoiceStates', /* Other intents */]
+    intents: ['GuildVoiceStates' /* Other intents */]
 });
 
 // this is the entrypoint for discord-player based application
 const player = new Player(client);
 ```
 
-> **Did You Know?** *Discord Player is by default a singleton.*
+> **Did You Know?** _Discord Player is by default a singleton._
 
 Now, let's add some event listeners:
 
@@ -90,11 +90,12 @@ async function execute(interaction) {
 
     try {
         await player.play(channel, query, {
-            nodeOptions: { // nodeOptions are the options for guild node (aka your queue in simple word)
+            nodeOptions: {
+                // nodeOptions are the options for guild node (aka your queue in simple word)
                 metadata: interaction // we can access this metadata object using queue.metadata later on
             }
         });
-    } catch(e) {
+    } catch (e) {
         // let's return error if something failed
         return interaction.followUp(`Something went wrong: ${e}`);
     }
@@ -112,7 +113,9 @@ You can now create a `Player.singleton(client)` to avoid polluting your client a
 ## Commonly used methods that changed
 
 ### Queue Creation Changes
+
 Discord Player `player.play` will handle queue creation, search results, tracks queuing, and the playing functionality for simpler user experience.
+
 ```diff
 - player.createQueue(guild, {
 -  autoSelfDeaf: true,
@@ -159,6 +162,7 @@ Discord Player `player.play` will handle queue creation, search results, tracks 
 ```
 
 ### Player Changes
+
 The main changes to the Player class are outlined below.
 
 ```diff
@@ -181,7 +185,8 @@ Note: this is used for post processing PCM stream. This hook can return stream t
 ```
 
 ### Queue Changes
-Several aspects of the queue have changed, the most notable one is 
+
+Several aspects of the queue have changed, the most notable one is
 `getQueue()` which has been moved into `nodes.get()`. The changes are all listed below and were done as a way to improve the queue system while following a modular approach.
 
 ```diff
@@ -218,7 +223,7 @@ Several aspects of the queue have changed, the most notable one is
 - queue.playing;
 + queue.node.isPlaying();
 
-- queue.tracks.length; 
+- queue.tracks.length;
 + queue.tracks.size;
 but can be retrieved with:
 + queue.getSize();
@@ -251,6 +256,7 @@ Note: metadata setter is still functional
 ```
 
 ### Event Changes
+
 Player [events](https://discord-player.js.org/docs/types/discord-player/GuildQueueEvents) are now emitted from the `player.events` object. (ex. `player.events.on(event.name, (...args) => event.execute(...args));`)
 
 ```diff
@@ -299,6 +305,7 @@ In addition to the change in events, there are also new events that have been ad
 ```
 
 ### Filters
+
 There are several new filter options, with some shown below. A full list can be found [here](https://discord-player.js.org/docs/types/discord-player/QueueFilters).
 
 The 8D filter used is **not** the one in FFmpeg and you will see it applied immediately unlike the FFmpeg one.
@@ -320,7 +327,7 @@ DSP Filters
 ### Voice Recording
 
 > **Note**  
-> Recording should not be done without another's permission. In addition, since the voice receiving API is unofficial and is not fully supported by Discord you may not get perfect results.  
+> Recording should not be done without another's permission. In addition, since the voice receiving API is unofficial and is not fully supported by Discord you may not get perfect results.
 
 With the introduction of v6 there was also the introduction of voice recording. This means that you can record the audio in a voice channel. An example is found below.
 
@@ -329,22 +336,22 @@ const player = Player.singleton(client);
 const queue = player.nodes.create(interaction.guildId);
 
 try {
-  await queue.connect(interaction.member.voice.channelId, { deaf: false });
+    await queue.connect(interaction.member.voice.channelId, { deaf: false });
 } catch {
     return interaction.followUp('Failed to connect to your channel');
 }
 
 // initialize receiver stream
 const stream = queue.voiceReceiver.recordUser(interaction.member.id, {
-  mode: 'pcm', // record in pcm format
-  end: EndBehaviorType.AfterSilence // stop recording once user stops talking
+    mode: 'pcm', // record in pcm format
+    end: EndBehaviorType.AfterSilence // stop recording once user stops talking
 });
 
 const writer = stream.pipe(createWriteStream(`./recording-${interaction.member.id}.pcm`)); // write the stream to a file
 
 writer.once('finish', () => {
-  if (interaction.isRepliable()) interaction.followUp(`Finished writing audio!`);
-  queue.delete();
+    if (interaction.isRepliable()) interaction.followUp(`Finished writing audio!`);
+    queue.delete();
 });
 ```
 
@@ -355,6 +362,7 @@ ffmpeg -i "./recording-USER_ID.pcm" -f s16le -ac 2 -ar 48000 "./recording.mp3"
 ```
 
 ### Hooks
+
 So what are hooks for? You might have noticed, getting `queue` for basic tasks requires you to write something like:
 
 ```js
@@ -371,9 +379,9 @@ const queue = useQueue(guildId);
 
 Hooks are currently still an experimental feature that will continue to be worked upon. As of right now, all hooks start with the `use` keyword. The following are the available hooks:
 
-- **useQueue**: Lets you access `GuildQueue` instance from anywhere in your process
-- **useHistory**: Lets you access `GuildQueueHistory` from anywhere in your process
-- **usePlayer**: Lets you access `GuildQueuePlayerNode` from anywhere in your process (Note: this does not return discord-player's main `Player`)
+-   **useQueue**: Lets you access `GuildQueue` instance from anywhere in your process
+-   **useHistory**: Lets you access `GuildQueueHistory` from anywhere in your process
+-   **usePlayer**: Lets you access `GuildQueuePlayerNode` from anywhere in your process (Note: this does not return discord-player's main `Player`)
 
 ## Frequently Asked Questions
 
@@ -383,9 +391,10 @@ v6 still supports v5's `metadata` object:
 
 ```js
 const queue = player.nodes.create(message.guild, {
-  metadata: message
+    metadata: message
 });
 ```
+
 The metadata `message` will always be available in every event emitted for that specific `Queue`. You can access it via `queue.metadata`:
 
 ```js

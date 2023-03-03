@@ -25,7 +25,7 @@ It provides easy set of customizable tools to develop Discord Music bots.
 
 ## Before you start
 
-Discord Player requires Discord.js 16.0 or higher. PLease make sure you have a compatible version using `npm list discord.js` in your terminal. If you're using an earlier version please update it. The [Discord.JS Guide](https://discordjs.guide/) has resources to help with that.
+Discord Player requires Discord.js 14.0 or higher. PLease make sure you have a compatible version using `npm list discord.js` in your terminal. If you're using an earlier version please update it. The [Discord.JS Guide](https://discordjs.guide/) has resources to help with that.
 
 #### Main Library
 
@@ -75,14 +75,14 @@ Let's create a master player instance.
 const { Player } = require('discord-player');
 const client = new Discord.Client({
     // Make sure you have 'GuildVoiceStates' intent enabled
-    intents: ['GuildVoiceStates', /* Other intents */]
+    intents: ['GuildVoiceStates' /* Other intents */]
 });
 
 // this is the entrypoint for discord-player based application
 const player = new Player(client);
 ```
 
-> **Did You Know?** *Discord Player is by default a singleton.*
+> **Did You Know?** _Discord Player is by default a singleton._
 
 Now, let's add some event listeners:
 
@@ -107,11 +107,12 @@ async function execute(interaction) {
 
     try {
         await player.play(channel, query, {
-            nodeOptions: { // nodeOptions are the options for guild node (aka your queue in simple word)
+            nodeOptions: {
+                // nodeOptions are the options for guild node (aka your queue in simple word)
                 metadata: interaction // we can access this metadata object using queue.metadata later on
             }
         });
-    } catch(e) {
+    } catch (e) {
         // let's return error if something failed
         return interaction.followUp(`Something went wrong: ${e}`);
     }
@@ -119,7 +120,6 @@ async function execute(interaction) {
 ```
 
 That's all it takes to build your own music bot.
-
 
 #### Check out the [Documentation](https://discord-player.js.org) for more info.
 
