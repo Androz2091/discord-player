@@ -1,8 +1,9 @@
 import { Player } from '../Player';
 import { Track } from './Track';
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';
+import { Util } from '../utils/Util';
 
-class Playlist {
+export class Playlist {
     public readonly player: Player;
     public tracks: Track[];
     public title: string;
@@ -112,6 +113,20 @@ class Playlist {
     }
 
     /**
+     * Estimated duration of this playlist
+     */
+    public get estimatedDuration() {
+        return this.tracks.reduce((p, c) => p + c.durationMS, 0);
+    }
+
+    /**
+     * Formatted estimated duration of this playlist
+     */
+    public get durationFormatted() {
+        return Util.buildTimeCode(Util.parseMS(this.estimatedDuration));
+    }
+
+    /**
      * JSON representation of this playlist
      * @param {boolean} [withTracks=true] If it should build json with tracks
      * @returns {PlaylistJSON}
@@ -134,5 +149,3 @@ class Playlist {
         return payload as PlaylistJSON;
     }
 }
-
-export { Playlist };

@@ -1,0 +1,26 @@
+{
+    "category": "commands"
+}
+---
+import { Command } from '@sapphire/framework';
+
+export class {{name}}Command extends Command {
+	public constructor(context: Command.Context, options: Command.Options) {
+		super(context, {
+			...options,
+			description: 'A command'
+		});
+	}
+
+	public override registerApplicationCommands(registry: Command.Registry) {
+		registry.registerChatInputCommand((builder) => {
+			builder //
+				.setName(this.name)
+				.setDescription(this.description);
+		});
+	}
+
+	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+		return interaction.reply({ content: `${interaction.commandName}`, ephemeral: true });
+	}
+}

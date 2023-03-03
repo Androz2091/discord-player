@@ -13,6 +13,14 @@ $ yarn bootstrap example-lib
 
 This will create a package `@discord-player/example-lib` under `packages` dir.
 
+# Testing the changes
+
+* Run `yarn build` to build your changes
+* Run `cd examples/karasu`
+* Run `yarn install`
+* Create `.env.local` inside `examples/karasu/src` and add your bot token to it (see `.env.example` for example)
+* Run `yarn start` to start the test bot
+
 # Code Style
 
 ## Formatting
@@ -30,5 +38,4 @@ We are using **[Prettier](https://prettier.io)** to format the code.
 # Pull Requests
 - Use English language
 - Explain what your update does
-- Run `npm run docs:test` command to make sure documentation is working
 - Format the code properly with `npm run format`

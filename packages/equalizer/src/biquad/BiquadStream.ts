@@ -4,10 +4,8 @@ import { BiquadFilter } from './Biquad';
 import { BiquadFilters, Coefficients, FilterType, Q_BUTTERWORTH } from './Coefficients';
 
 export interface BiquadStreamOptions extends PCMTransformerOptions {
-    disabled?: boolean;
     filter?: BiquadFilters;
     Q?: number;
-    sample?: number;
     cutoff?: number;
     gain?: number;
 }
@@ -15,64 +13,59 @@ export interface BiquadStreamOptions extends PCMTransformerOptions {
 export interface BiquadFilterUpdateData {
     filter?: BiquadFilters;
     Q?: number;
-    sample?: number;
     cutoff?: number;
     gain?: number;
 }
 
 export class BiquadStream extends PCMTransformer {
-    public disabled = false;
     public biquad!: BiquadFilter;
-    public sample = 48000;
     public cutoff = 80;
     public gain = 0;
-    public filter!: BiquadFilters;
+    public biquadFilter!: BiquadFilters;
     public Q = Q_BUTTERWORTH;
     public constructor(options: BiquadStreamOptions = {}) {
         super(options);
 
-        this.disabled = !!options.disabled;
-
-        if ('sample' in options) this.sample = options.sample!;
         if ('cutoff' in options) this.cutoff = options.cutoff!;
         if ('gain' in options) this.gain = options.gain!;
         if ('Q' in options) this.Q = options.Q!;
-        if ('filter' in options) {
-            this.filter = options.filter!;
-            if (this.filter != null) {
-                this.biquad = new BiquadFilter(Coefficients.from(this.filter, this.sample, this.cutoff, this.Q, this.gain));
+        if ('biquadFilter' in options) {
+            if (typeof options.biquadFilter === 'string' || typeof options.biquadFilter === 'number') this.biquadFilter = options.filter!;
+            if (this.biquadFilter != null) {
+                this.biquad = new BiquadFilter(Coefficients.from(this.biquadFilter, this.sampleRate, this.cutoff, this.Q, this.gain));
             }
         }
     }
 
-    public disable() {
-        this.disabled = true;
+    public get filter() {
+        return this.biquadFilter;
     }
 
-    public enable() {
-        this.disabled = false;
-    }
-
-    public toggle() {
-        this.disabled = !this.disabled;
+    public set filter(f: BiquadFilters) {
+        if (f == null || typeof f === 'string' || typeof f === 'number') {
+            this.update({ filter: f });
+        } else {
+            throw new TypeError(`Invalid biquad filter type "${f}"`);
+        }
     }
 
     public getFilterName() {
-        if (this.filter == null) return null;
-        if (typeof this.filter === 'string') return this.filter;
-        return Object.entries(FilterType).find((r) => r[1] === this.filter)?.[0] as BiquadFilters;
+        if (this.biquadFilter == null) return null;
+        if (typeof this.biquadFilter === 'string') return this.biquadFilter;
+        return Object.entries(FilterType).find((r) => r[1] === this.biquadFilter)?.[0] as BiquadFilters;
     }
 
     public update(options: BiquadFilterUpdateData) {
-        if ('sample' in options) this.sample = options.sample!;
         if ('cutoff' in options) this.cutoff = options.cutoff!;
         if ('gain' in options) this.gain = options.gain!;
         if ('Q' in options) this.Q = options.Q!;
-        if ('filter' in options) this.filter = options.filter!;
+        if ('filter' in options) this.biquadFilter = options.filter!;
 
-        if (this.filter != null) {
-            this.biquad = new BiquadFilter(Coefficients.from(this.filter, this.sample, this.cutoff, this.Q, this.gain));
+        if (this.biquadFilter != null) {
+            this.biquad = new BiquadFilter(Coefficients.from(this.biquadFilter, this.sampleRate, this.cutoff, this.Q, this.gain));
         }
+
+        this.onUpdate?.();
     }
 
     public setFilter(filter: BiquadFilters) {
@@ -81,10 +74,6 @@ export class BiquadStream extends PCMTransformer {
 
     public setQ(Q: number) {
         this.update({ Q });
-    }
-
-    public setSample(fs: number) {
-        this.update({ sample: fs });
     }
 
     public setCutoff(f0: number) {
@@ -102,13 +91,12 @@ export class BiquadStream extends PCMTransformer {
         }
 
         const endIndex = Math.floor(chunk.length / 2) * 2;
-        const { bytes, extremum } = this;
+        const { bytes } = this;
 
         for (let sampleIndex = 0; sampleIndex < endIndex; sampleIndex += bytes) {
             const int = this._readInt(chunk, sampleIndex);
             const result = this.biquad.run(int);
-            const val = Math.min(extremum - 1, Math.max(-extremum, result));
-            this._writeInt(chunk, val, sampleIndex);
+            this._writeInt(chunk, this.clamp(result), sampleIndex);
         }
 
         this.push(chunk);

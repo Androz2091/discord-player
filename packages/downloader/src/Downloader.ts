@@ -47,6 +47,7 @@ export class Downloader {
      * @param {string} url stream url
      */
     static getInfo(url: string) {
+        // eslint-disable-next-line
         return new Promise<{ playlist: any; info: Info[] }>(async (resolve, reject) => {
             if (!url || typeof url !== 'string') reject(new Error('Invalid url'));
 

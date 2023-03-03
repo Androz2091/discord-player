@@ -1,7 +1,7 @@
-import fetch from 'node-fetch';
 import { Readable } from 'stream';
 import http from 'http';
 import https from 'https';
+import { getFetch } from '../extractors/common/helper';
 
 class Vimeo {
     constructor() {
@@ -22,9 +22,9 @@ class Vimeo {
             const info = await Vimeo.getInfo(id);
             if (!info) return null;
 
-            const downloader = info.stream.url.startsWith('https://') ? https : http;
+            const downloader = info.stream.startsWith('https://') ? https : http;
 
-            downloader.get(info.stream.url, (res) => {
+            downloader.get(info.stream, (res) => {
                 resolve(res);
             });
         });
@@ -39,21 +39,18 @@ class Vimeo {
         const url = `https://player.vimeo.com/video/${id}`;
 
         try {
-            const res = await fetch(url);
+            const res = await getFetch(url);
             const data = await res.text();
-            const json = JSON.parse(data.split('<script> (function(document, player) { var config = ')[1].split(';')[0]);
+            const json = JSON.parse(data.split('window.playerConfig =')[1].split(';')[0].trim());
 
             const obj = {
                 id: json.video.id,
-                duration: json.video.duration,
+                duration: json.video.duration * 1000,
                 title: json.video.title,
                 url: json.video.url,
                 thumbnail: json.video.thumbs['1280'] || json.video.thumbs.base,
-                width: json.video.width,
-                height: json.video.height,
-                stream: json.request.files.progressive[0],
+                stream: json.request.files.progressive[0].url,
                 author: {
-                    accountType: json.video.owner.account_type,
                     id: json.video.owner.id,
                     name: json.video.owner.name,
                     url: json.video.owner.url,
@@ -74,22 +71,8 @@ export interface VimeoInfo {
     title: string;
     url: string;
     thumbnail: string;
-    width: number;
-    height: number;
-    stream: {
-        profile: number;
-        width: number;
-        mime: string;
-        fps: number;
-        url: string;
-        cdn: string;
-        quality: string;
-        id: number;
-        origin: string;
-        height: number;
-    };
+    stream: string;
     author: {
-        accountType: string;
         id: number;
         name: string;
         url: string;

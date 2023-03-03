@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/equalizer",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "PCM Equalizer implementation for Discord Player",
   "keywords": [
     "discord-player",
@@ -33,12 +33,19 @@
   },
   "scripts": {
     "build": "tsup",
-    "build:check": "tsc --noEmit"
+    "build:check": "tsc --noEmit",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "devDependencies": {
     "@discord-player/tsconfig": "*"
+  },
+  "typedoc": {
+    "entryPoint": "./src/index.ts",
+    "readmeFile": "./README.md",
+    "tsconfig": "./tsconfig.json"
   }
 }

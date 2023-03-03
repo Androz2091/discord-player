@@ -1,0 +1,128 @@
+## BaseExtractor
+
+```typescript
+new BaseExtractor(context)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| context | ExtractorExecutionContext | ❌ | Context that instantiated this extractor |
+
+## Properties
+### public  context: ExtractorExecutionContext
+Context that instantiated this extractor            
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L19)
+### public static identifier: string
+Identifier for this extractor            
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L13)
+### public  identifier: string
+Identifier of this extractor
+## Methods
+### public  activate(): Promise\<void>
+This method will be executed when this extractor is activated
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L31)
+### public  createResponse(playlist?, tracks): ExtractorInfo
+Create extractor response
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| playlist | null \| Playlist | ✅ | The playlist |
+| tracks | Array\<Track> | ❌ | The track array |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L94)
+### public  deactivate(): Promise\<void>
+This method will be executed when this extractor is deactivated
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L39)
+### public  debug(message): boolean
+Write debug message
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| message | string | ❌ | The debug message |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L102)
+### public  emit(event, args): boolean
+Dispatch an event to the player
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | K | ❌ | The event to dispatch |
+| args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L85)
+### public  handle(query, context): Promise\<ExtractorInfo>
+Handle the given query
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| query | string | ❌ | The query to handle |
+| context | ExtractorSearchContext | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L66)
+### public  handlePostStream(stream, next): void
+A stream middleware to handle streams before passing it to the player
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| stream | Readable | ❌ | The incoming stream |
+| next | NextFunction | ❌ | The next function |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L76)
+### public  stream(info): Promise\<string \| Readable>
+Stream the given track
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| info | Track | ❌ | The track to stream |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L57)
+### public  validate(query, type?): Promise\<boolean>
+Validate incoming query
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| query | string | ❌ | The query to validate |
+| type | null \| SearchQueryType | ✅ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/extractors/BaseExtractor.ts#L48)

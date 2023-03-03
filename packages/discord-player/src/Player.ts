@@ -1,46 +1,42 @@
-import { Client, Collection, GuildResolvable, Snowflake, User, VoiceState, IntentsBitField } from 'discord.js';
-import { TypedEmitter as EventEmitter } from 'tiny-typed-emitter';
-import { Queue } from './Structures/Queue';
+import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable } from 'discord.js';
+import { Playlist, Track, GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, SearchResult } from './Structures';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
-import { PlayerEvents, PlayerOptions, QueryType, SearchOptions, PlayerInitOptions, PlayerSearchResult, PlaylistInitData } from './types/types';
-import Track from './Structures/Track';
+import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
 import { QueryResolver } from './utils/QueryResolver';
-import YouTube from 'youtube-sr';
 import { Util } from './utils/Util';
-import Spotify from 'spotify-url-info';
-import { PlayerError, ErrorStatusCode } from './Structures/PlayerError';
-import { getInfo as ytdlGetInfo } from 'ytdl-core';
-import { SearchResult, Client as SoundCloud, SearchResult as SoundCloudSearchResult } from 'soundcloud-scraper';
-import { Playlist } from './Structures/Playlist';
-import { ExtractorModel } from './Structures/ExtractorModel';
 import { generateDependencyReport } from '@discordjs/voice';
+import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
+import { BaseExtractor } from './extractors/BaseExtractor';
+import * as _internals from './utils/__internal__';
+import { QueryCache } from './utils/QueryCache';
+import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
 
-const soundcloud = new SoundCloud();
+const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
-class Player extends EventEmitter<PlayerEvents> {
-    public readonly client: Client;
-    public readonly options: PlayerInitOptions = {
-        autoRegisterExtractor: true,
-        ytdlOptions: {
-            highWaterMark: 1 << 25
-        },
-        connectionTimeout: 20000,
-        smoothVolume: true,
-        lagMonitor: 30000
-    };
-    public readonly queues = new Collection<Snowflake, Queue>();
-    public readonly voiceUtils = new VoiceUtils();
-    public readonly extractors = new Collection<string, ExtractorModel>();
-    public requiredEvents = ['error', 'connectionError'] as string[];
+export class Player extends PlayerEventsEmitter<PlayerEvents> {
     #lastLatency = -1;
+    #voiceStateUpdateListener = this.handleVoiceState.bind(this);
+    #lagMonitorTimeout!: NodeJS.Timeout;
+    #lagMonitorInterval!: NodeJS.Timer;
+    public static _singletonKey = kSingleton;
+    public readonly id = SnowflakeUtil.generate().toString();
+    public readonly client!: Client;
+    public readonly options!: PlayerInitOptions;
+    public nodes = new GuildNodeManager(this);
+    public readonly voiceUtils = new VoiceUtils();
+    public extractors = new ExtractorExecutionContext(this);
+    public events = new PlayerEventsEmitter<GuildQueueEvents>(['error', 'playerError']);
 
     /**
      * Creates new Discord Player
      * @param {Client} client The Discord Client
      * @param {PlayerInitOptions} [options] The player init options
      */
-    constructor(client: Client, options: PlayerInitOptions = {}) {
-        super();
+    public constructor(client: Client, options: PlayerInitOptions = {}) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (!options.ignoreInstance && kSingleton in Player) return (<any>Player)[kSingleton] as Player;
+
+        super(['error']);
 
         /**
          * The discord.js client
@@ -49,139 +45,226 @@ class Player extends EventEmitter<PlayerEvents> {
         this.client = client;
 
         if (this.client?.options?.intents && !new IntentsBitField(this.client?.options?.intents).has(IntentsBitField.Flags.GuildVoiceStates)) {
-            throw new PlayerError('client is missing "GuildVoiceStates" intent');
+            Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
         }
 
         /**
          * The extractors collection
          * @type {ExtractorModel}
          */
-        this.options = Object.assign(this.options, options);
+        this.options = {
+            autoRegisterExtractor: true,
+            lockVoiceStateHandler: false,
+            blockExtractors: [],
+            blockStreamFrom: [],
+            connectionTimeout: 20000,
+            smoothVolume: true,
+            lagMonitor: 30000,
+            queryCache: options.queryCache === null ? null : new QueryCache(this),
+            ...options,
+            ytdlOptions: {
+                highWaterMark: 1 << 25,
+                ...options.ytdlOptions
+            }
+        };
 
-        this.client.on('voiceStateUpdate', this._handleVoiceState.bind(this));
+        this.client.on('voiceStateUpdate', this.#voiceStateUpdateListener);
 
         if (this.options?.autoRegisterExtractor) {
-            let nv: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+            this.extractors.loadDefault().then((r) => {
+                if (r.error) {
+                    this.emit('error', new Error(`Failed to load default extractors: ${r.error?.stack ?? r.error}`));
+                } else {
+                    this.debug('Default extractors loaded!');
+                }
 
-            if ((nv = Util.require('@discord-player/extractor'))) {
-                ['Attachment', 'Facebook', 'Reverbnation', 'Vimeo'].forEach((ext) => void this.use(ext, nv[ext]));
-            }
+                this.debug(`[Dependencies Report]\n${this.scanDeps()}`);
+            });
         }
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
-            setInterval(() => {
+            this.#lagMonitorInterval = setInterval(() => {
                 const start = performance.now();
-                setTimeout(() => {
+                this.#lagMonitorTimeout = setTimeout(() => {
                     this.#lastLatency = performance.now() - start;
+                    this.debug(`[Lag Monitor] Event loop latency: ${this.#lastLatency}ms`);
                 }, 0).unref();
             }, this.options.lagMonitor).unref();
         }
+
+        _internals.addPlayer(this);
+
+        if (!(kSingleton in Player)) {
+            Object.defineProperty(Player, kSingleton, {
+                value: this,
+                writable: true,
+                configurable: true,
+                enumerable: false
+            });
+        }
+    }
+
+    public debug(m: string) {
+        return this.emit('debug', m);
+    }
+
+    /**
+     * Creates discord-player singleton instance.
+     * @param client The client that instantiated player
+     * @param options Player initializer options
+     */
+    public static singleton(client: Client, options: PlayerInitOptions = {}) {
+        return new Player(client, {
+            ...options,
+            ignoreInstance: false
+        });
+    }
+
+    /**
+     * Get all active player instances
+     */
+    public static getAllPlayers() {
+        return _internals.getPlayers();
+    }
+
+    /**
+     * Clear all player instances
+     */
+    public static clearAllPlayers() {
+        return _internals.instances.clear();
+    }
+
+    /**
+     * The current query cache provider
+     */
+    public get queryCache() {
+        return this.options.queryCache ?? null;
+    }
+
+    /**
+     * Alias to `Player.nodes`
+     */
+    public get queues() {
+        return this.nodes;
     }
 
     /**
      * Event loop lag
      * @type {number}
      */
-    get eventLoopLag() {
+    public get eventLoopLag() {
         return this.#lastLatency;
     }
 
     /**
      * Generates statistics
      */
-    generateStatistics() {
-        return this.queues.map((m) => m.generateStatistics());
+    public generateStatistics() {
+        return {
+            instances: _internals.instances.size,
+            queuesCount: this.queues.cache.size,
+            queryCacheEnabled: this.queryCache != null,
+            queues: this.queues.cache.map((m) => m.stats.generate())
+        };
     }
 
     /**
-     * Handles voice state update
-     * @param {VoiceState} oldState The old voice state
-     * @param {VoiceState} newState The new voice state
-     * @returns {void}
-     * @private
+     * Destroy player
      */
-    private _handleVoiceState(oldState: VoiceState, newState: VoiceState): void {
-        const queue = this.getQueue(oldState.guild.id);
-        if (!queue || !queue.connection) return;
+    public async destroy() {
+        this.nodes.cache.forEach((node) => node.delete());
+        this.client.off('voiceStateUpdate', this.#voiceStateUpdateListener);
+        this.removeAllListeners();
+        this.events.removeAllListeners();
+        await this.extractors.unregisterAll();
+        if (this.#lagMonitorInterval) clearInterval(this.#lagMonitorInterval);
+        if (this.#lagMonitorTimeout) clearInterval(this.#lagMonitorTimeout);
+        _internals.clearPlayer(this);
+    }
 
-        this.emit('voiceStateUpdate', queue, oldState, newState);
+    private _handleVoiceState(oldState: VoiceState, newState: VoiceState) {
+        const queue = this.nodes.get(oldState.guild.id);
+        if (!queue || !queue.connection || !queue.channel) return;
 
-        if (oldState.channelId && !newState.channelId && newState.member!.id === newState.guild.members.me!.id) {
+        // dispatch voice state update
+        const wasHandled = this.events.emit('voiceStateUpdate', queue, oldState, newState);
+        // if the event was handled, return assuming the listener implemented all of the logic below
+        if (wasHandled && !this.options.lockVoiceStateHandler) return;
+
+        if (oldState.channelId && !newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
             try {
-                queue.destroy();
+                queue.delete();
             } catch {
                 /* noop */
             }
-            return void this.emit('botDisconnect', queue);
+            return void this.events.emit('disconnect', queue);
         }
 
-        if (!oldState.channelId && newState.channelId && newState.member!.id === newState.guild.members.me!.id) {
-            if (oldState.serverMute !== newState.serverMute) {
-                // state.serverMute can be null
-                queue.setPaused(!!newState.serverMute);
-            } else if (oldState.suppress !== newState.suppress) {
-                // state.suppress can be null
-                queue.setPaused(!!newState.suppress);
+        if (!oldState.channelId && newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
+            if (newState.serverMute != null && oldState.serverMute !== newState.serverMute) {
+                queue.node.setPaused(newState.serverMute);
+            } else if (newState.channel?.type === ChannelType.GuildStageVoice && newState.suppress != null && oldState.suppress !== newState.suppress) {
+                queue.node.setPaused(newState.suppress);
                 if (newState.suppress) {
-                    newState.guild.members.me!.voice.setRequestToSpeak(true).catch(Util.noop);
+                    newState.guild.members.me?.voice.setRequestToSpeak(true).catch(Util.noop);
                 }
             }
         }
 
-        if (!newState.channelId && oldState.channelId === queue.connection.channel.id) {
-            if (!Util.isVoiceEmpty(queue.connection.channel)) return;
+        if (!newState.channelId && oldState.channelId === queue.channel.id) {
+            if (!Util.isVoiceEmpty(queue.channel)) return;
             const timeout = setTimeout(() => {
-                if (!Util.isVoiceEmpty(queue.connection.channel)) return;
-                if (!this.queues.has(queue.guild.id)) return;
-                if (queue.options.leaveOnEmpty) queue.destroy(true);
-                this.emit('channelEmpty', queue);
+                if (!Util.isVoiceEmpty(queue.channel!)) return;
+                if (!this.nodes.has(queue.guild.id)) return;
+                if (queue.options.leaveOnEmpty) queue.delete();
+                this.events.emit('emptyChannel', queue);
             }, queue.options.leaveOnEmptyCooldown || 0).unref();
-            queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+            queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
         }
 
-        if (newState.channelId && newState.channelId === queue.connection.channel.id) {
-            const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-            const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
+        if (newState.channelId && newState.channelId === queue.channel.id) {
+            const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
+            const channelEmpty = Util.isVoiceEmpty(queue.channel);
             if (!channelEmpty && emptyTimeout) {
                 clearTimeout(emptyTimeout);
-                queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+                queue.timeouts.delete(`empty_${oldState.guild.id}`);
             }
         }
 
         if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-            if (newState.member!.id === newState.guild.members.me!.id) {
-                if (queue.connection && newState.member!.id === newState.guild.members.me!.id) queue.connection.channel = newState.channel!;
-                const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-                const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
+            if (newState.member?.id === newState.guild.members.me?.id) {
+                if (queue.connection && newState.member?.id === newState.guild.members.me?.id) queue.channel = newState.channel!;
+                const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
+                const channelEmpty = Util.isVoiceEmpty(queue.channel);
                 if (!channelEmpty && emptyTimeout) {
                     clearTimeout(emptyTimeout);
-                    queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+                    queue.timeouts.delete(`empty_${oldState.guild.id}`);
                 } else {
                     const timeout = setTimeout(() => {
-                        if (queue.connection && !Util.isVoiceEmpty(queue.connection.channel)) return;
-                        if (!this.queues.has(queue.guild.id)) return;
-                        if (queue.options.leaveOnEmpty) queue.destroy(true);
-                        this.emit('channelEmpty', queue);
+                        if (queue.connection && !Util.isVoiceEmpty(queue.channel!)) return;
+                        if (!this.nodes.has(queue.guild.id)) return;
+                        if (queue.options.leaveOnEmpty) queue.delete();
+                        this.events.emit('emptyChannel', queue);
                     }, queue.options.leaveOnEmptyCooldown || 0).unref();
-                    queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+                    queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
                 }
             } else {
-                if (newState.channelId !== queue.connection.channel.id) {
-                    if (!Util.isVoiceEmpty(queue.connection.channel)) return;
-                    if (queue._cooldownsTimeout.has(`empty_${oldState.guild.id}`)) return;
+                if (newState.channelId !== queue.channel.id) {
+                    if (!Util.isVoiceEmpty(queue.channel)) return;
+                    if (queue.timeouts.has(`empty_${oldState.guild.id}`)) return;
                     const timeout = setTimeout(() => {
-                        if (!Util.isVoiceEmpty(queue.connection.channel)) return;
-                        if (!this.queues.has(queue.guild.id)) return;
-                        if (queue.options.leaveOnEmpty) queue.destroy(true);
-                        this.emit('channelEmpty', queue);
+                        if (!Util.isVoiceEmpty(queue.channel!)) return;
+                        if (!this.nodes.has(queue.guild.id)) return;
+                        if (queue.options.leaveOnEmpty) queue.delete();
+                        this.events.emit('emptyChannel', queue);
                     }, queue.options.leaveOnEmptyCooldown || 0).unref();
-                    queue._cooldownsTimeout.set(`empty_${oldState.guild.id}`, timeout);
+                    queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
                 } else {
-                    const emptyTimeout = queue._cooldownsTimeout.get(`empty_${oldState.guild.id}`);
-                    const channelEmpty = Util.isVoiceEmpty(queue.connection.channel);
+                    const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
+                    const channelEmpty = Util.isVoiceEmpty(queue.channel!);
                     if (!channelEmpty && emptyTimeout) {
                         clearTimeout(emptyTimeout);
-                        queue._cooldownsTimeout.delete(`empty_${oldState.guild.id}`);
+                        queue.timeouts.delete(`empty_${oldState.guild.id}`);
                     }
                 }
             }
@@ -189,54 +272,78 @@ class Player extends EventEmitter<PlayerEvents> {
     }
 
     /**
-     * Creates a queue for a guild if not available, else returns existing queue
-     * @param {GuildResolvable} guild The guild
-     * @param {PlayerOptions} queueInitOptions Queue init options
-     * @returns {Queue}
+     * Handles voice state update
+     * @param {VoiceState} oldState The old voice state
+     * @param {VoiceState} newState The new voice state
+     * @returns {void}
      */
-    createQueue<T = unknown>(guild: GuildResolvable, queueInitOptions: PlayerOptions & { metadata?: T } = {}): Queue<T> {
-        guild = this.client.guilds.resolve(guild)!;
-        if (!guild) throw new PlayerError('Unknown Guild', ErrorStatusCode.UNKNOWN_GUILD);
-        if (this.queues.has(guild.id)) return this.queues.get(guild.id) as Queue<T>;
-
-        const _meta = queueInitOptions.metadata;
-        delete queueInitOptions['metadata'];
-        queueInitOptions.volumeSmoothness ??= this.options.smoothVolume ? 0.08 : 0;
-        queueInitOptions.ytdlOptions ??= this.options.ytdlOptions;
-        const queue = new Queue(this, guild, queueInitOptions);
-        queue.metadata = _meta;
-        this.queues.set(guild.id, queue);
-
-        return queue as Queue<T>;
+    public handleVoiceState(oldState: VoiceState, newState: VoiceState): void {
+        this._handleVoiceState(oldState, newState);
     }
 
     /**
-     * Returns the queue if available
-     * @param {GuildResolvable} guild The guild id
-     * @returns {Queue | undefined}
+     * Lock voice state handler
      */
-    getQueue<T = unknown>(guild: GuildResolvable): Queue<T> | undefined {
-        guild = this.client.guilds.resolve(guild)!;
-        if (!guild) throw new PlayerError('Unknown Guild', ErrorStatusCode.UNKNOWN_GUILD);
-        return this.queues.get(guild.id) as Queue<T>;
+    public lockVoiceStateHandler() {
+        this.options.lockVoiceStateHandler = true;
     }
 
     /**
-     * Deletes a queue and returns deleted queue object
-     * @param {GuildResolvable} guild The guild id to remove
-     * @returns {Queue}
+     * Unlock voice state handler
      */
-    deleteQueue<T = unknown>(guild: GuildResolvable) {
-        guild = this.client.guilds.resolve(guild)!;
-        if (!guild) throw new PlayerError('Unknown Guild', ErrorStatusCode.UNKNOWN_GUILD);
-        const prev = this.getQueue<T>(guild)!;
+    public unlockVoiceStateHandler() {
+        this.options.lockVoiceStateHandler = false;
+    }
 
-        try {
-            prev.destroy();
-        } catch {} // eslint-disable-line no-empty
-        this.queues.delete(guild.id);
+    /**
+     * Checks if voice state handler is locked
+     */
+    public isVoiceStateHandlerLocked() {
+        return !!this.options.lockVoiceStateHandler;
+    }
 
-        return prev;
+    /**
+     * Initiate audio player
+     * @param channel The voice channel on which the music should be played
+     * @param query The track or source to play
+     * @param options Options for player
+     */
+    public async play<T = unknown>(
+        channel: GuildVoiceChannelResolvable,
+        query: string | Track | SearchResult,
+        options: SearchOptions & {
+            nodeOptions?: GuildNodeCreateOptions<T>;
+            connectionOptions?: VoiceConnectConfig;
+            afterSearch?: (result: SearchResult) => Promise<SearchResult>;
+        } = {}
+    ) {
+        const vc = this.client.channels.resolve(channel);
+        if (!vc?.isVoiceBased()) throw new Error('Expected a voice channel');
+
+        const originalResult = query instanceof SearchResult ? query : await this.search(query, options);
+
+        const result = (await options.afterSearch?.(originalResult)) || originalResult;
+        if (result.isEmpty()) {
+            throw new Error(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
+        }
+
+        const queue = this.nodes.create(vc.guild, options.nodeOptions);
+        if (!queue.channel) await queue.connect(vc, options.connectionOptions);
+
+        if (!result.playlist) {
+            queue.addTrack(result.tracks[0]);
+        } else {
+            queue.addTrack(result.playlist);
+        }
+
+        if (!queue.node.isPlaying()) await queue.node.play();
+
+        return {
+            track: result.tracks[0],
+            extractor: result.extractor,
+            searchResult: result,
+            queue
+        };
     }
 
     /**
@@ -248,404 +355,161 @@ class Player extends EventEmitter<PlayerEvents> {
      * Search tracks
      * @param {string|Track} query The search query
      * @param {SearchOptions} options The search options
-     * @returns {Promise<PlayerSearchResult>}
+     * @returns {Promise<SearchResult>}
      */
-    async search(query: string | Track, options: SearchOptions): Promise<PlayerSearchResult> {
-        if (query instanceof Track) return { playlist: query.playlist || null, tracks: [query] };
-        if (!options) throw new PlayerError('DiscordPlayer#search needs search options!', ErrorStatusCode.INVALID_ARG_TYPE);
-        options.requestedBy = this.client.users.resolve(options.requestedBy)!;
-        if (!('searchEngine' in options)) options.searchEngine = QueryType.AUTO;
-        if (typeof options.searchEngine === 'string' && this.extractors.has(options.searchEngine)) {
-            const extractor = this.extractors.get(options.searchEngine)!;
-            if (!extractor.validate(query)) return { playlist: null, tracks: [] };
-            const data = await extractor.handle(query);
-            if (data && data.data.length) {
-                const playlist = !data.playlist
-                    ? null
-                    : new Playlist(this, {
-                          ...data.playlist,
-                          tracks: []
-                      });
-
-                const tracks = data.data.map(
-                    (m) =>
-                        new Track(this, {
-                            ...m,
-                            requestedBy: options.requestedBy as User,
-                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
-                            playlist: playlist!
-                        })
-                );
-
-                if (playlist) playlist.tracks = tracks;
-
-                return { playlist: playlist, tracks: tracks };
-            }
+    public async search(query: string | Track, options: SearchOptions = {}): Promise<SearchResult> {
+        if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
+        options.blockExtractors ??= this.options.blockExtractors;
+        if (query instanceof Track) {
+            this.debug(`Searching ${query.title}`);
+            return new SearchResult(this, {
+                playlist: query.playlist || null,
+                tracks: [query],
+                query: query.toString(),
+                extractor: null,
+                queryType: query.queryType,
+                requestedBy: options.requestedBy
+            });
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const [_, extractor] of this.extractors) {
-            if (options.blockExtractor) break;
-            if (!extractor.validate(query)) continue;
-            const data = await extractor.handle(query);
-            if (data && data.data.length) {
-                const playlist = !data.playlist
-                    ? null
-                    : new Playlist(this, {
-                          ...data.playlist,
-                          tracks: []
-                      });
+        this.debug(`Searching ${query}`);
 
-                const tracks = data.data.map(
-                    (m) =>
-                        new Track(this, {
-                            ...m,
-                            requestedBy: options.requestedBy as User,
-                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
-                            playlist: playlist!
-                        })
-                );
+        let extractor: BaseExtractor | null = null;
 
-                if (playlist) playlist.tracks = tracks;
+        options.searchEngine ??= QueryType.AUTO;
 
-                return { playlist: playlist, tracks: tracks };
-            }
+        this.debug(`Search engine set to ${options.searchEngine}`);
+
+        const queryType = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
+
+        this.debug(`Query type identified as ${queryType}`);
+
+        // force particular extractor
+        if (options.searchEngine.startsWith('ext:')) {
+            extractor = this.extractors.get(options.searchEngine.substring(4))!;
+            if (!extractor) return new SearchResult(this, { query, queryType });
         }
 
-        const qt = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
-        switch (qt) {
-            case QueryType.YOUTUBE_VIDEO: {
-                const info = await ytdlGetInfo(query, this.options.ytdlOptions).catch(Util.noop);
-                if (!info) return { playlist: null, tracks: [] };
-
-                const track = new Track(this, {
-                    title: info.videoDetails.title,
-                    description: info.videoDetails.description!,
-                    author: info.videoDetails.author?.name,
-                    url: info.videoDetails.video_url,
-                    requestedBy: options.requestedBy as User,
-                    thumbnail: Util.last(info.videoDetails.thumbnails)?.url,
-                    views: parseInt(info.videoDetails.viewCount.replace(/[^0-9]/g, '')) || 0,
-                    duration: Util.buildTimeCode(Util.parseMS(parseInt(info.videoDetails.lengthSeconds) * 1000)),
-                    source: 'youtube',
-                    raw: info
+        // query all extractors
+        if (!extractor) {
+            // cache validation
+            if (!options.ignoreCache) {
+                this.debug(`Checking cache...`);
+                const res = await this.queryCache?.resolve({
+                    query,
+                    queryType,
+                    requestedBy: options.requestedBy
                 });
-
-                return { playlist: null, tracks: [track] };
-            }
-            case QueryType.YOUTUBE_SEARCH: {
-                const videos = await YouTube.search(query, {
-                    type: 'video'
-                }).catch(Util.noop);
-                if (!videos) return { playlist: null, tracks: [] };
-
-                const tracks = videos.map((m) => {
-                    (m as any).source = 'youtube'; // eslint-disable-line @typescript-eslint/no-explicit-any
-                    return new Track(this, {
-                        title: m.title!,
-                        description: m.description!,
-                        author: m.channel?.name as string,
-                        url: m.url,
-                        requestedBy: options.requestedBy as User,
-                        thumbnail: m.thumbnail?.displayThumbnailURL('maxresdefault') as string,
-                        views: m.views,
-                        duration: m.durationFormatted,
-                        source: 'youtube',
-                        raw: m
-                    });
-                });
-
-                return { playlist: null, tracks };
-            }
-            case QueryType.SOUNDCLOUD_TRACK:
-            case QueryType.SOUNDCLOUD_SEARCH: {
-                const result: SoundCloudSearchResult[] =
-                    QueryResolver.resolve(query) === QueryType.SOUNDCLOUD_TRACK ? ([{ url: query }] as SearchResult[]) : await soundcloud.search(query, 'track').catch(() => []);
-                if (!result || !result.length) return { playlist: null, tracks: [] };
-                const res: Track[] = [];
-
-                for (const r of result) {
-                    const trackInfo = await soundcloud.getSongInfo(r.url).catch(Util.noop);
-                    if (!trackInfo) continue;
-
-                    const track = new Track(this, {
-                        title: trackInfo.title,
-                        url: trackInfo.url,
-                        duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
-                        description: trackInfo.description,
-                        thumbnail: trackInfo.thumbnail,
-                        views: trackInfo.playCount,
-                        author: trackInfo.author.name,
-                        requestedBy: options.requestedBy,
-                        source: 'soundcloud',
-                        engine: trackInfo
-                    });
-
-                    res.push(track);
+                // cache hit
+                if (res?.hasTracks()) {
+                    this.debug(`Cache hit for query ${query}`);
+                    return res;
                 }
 
-                return { playlist: null, tracks: res };
+                this.debug(`Cache miss for query ${query}`);
             }
-            case QueryType.SPOTIFY_SONG: {
-                const spotifyData = await Spotify(await Util.getFetch())
-                    .getData(query)
-                    .catch(Util.noop);
-                if (!spotifyData) return { playlist: null, tracks: [] };
-                const spotifyTrack = new Track(this, {
-                    title: spotifyData.name,
-                    description: spotifyData.description ?? '',
-                    author: spotifyData.artists[0]?.name ?? 'Unknown Artist',
-                    url: spotifyData.external_urls?.spotify ?? query,
-                    thumbnail:
-                        (spotifyData.coverArt?.sources?.[0]?.url ??
-                            spotifyData.album?.images[0]?.url ??
-                            (spotifyData.preview_url?.length && `https://i.scdn.co/image/${spotifyData.preview_url?.split('?cid=')[1]}`)) ||
-                        'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                    duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration_ms ?? spotifyData.duration ?? spotifyData.maxDuration)),
-                    views: 0,
-                    requestedBy: options.requestedBy,
-                    source: 'spotify'
-                });
 
-                return { playlist: null, tracks: [spotifyTrack] };
-            }
-            case QueryType.SPOTIFY_PLAYLIST:
-            case QueryType.SPOTIFY_ALBUM: {
-                const spotifyPlaylist = await Spotify(await Util.getFetch())
-                    .getData(query)
-                    .catch(Util.noop);
-                if (!spotifyPlaylist) return { playlist: null, tracks: [] };
+            this.debug(`Executing extractors...`);
 
-                const playlist = new Playlist(this, {
-                    title: spotifyPlaylist.name ?? spotifyPlaylist.title,
-                    description: spotifyPlaylist.description ?? '',
-                    thumbnail: spotifyPlaylist.coverArt?.sources?.[0]?.url ?? spotifyPlaylist.images[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                    type: spotifyPlaylist.type,
-                    source: 'spotify',
-                    author:
-                        spotifyPlaylist.type !== 'playlist'
-                            ? {
-                                  name: spotifyPlaylist.artists[0]?.name ?? 'Unknown Artist',
-                                  url: spotifyPlaylist.artists[0]?.external_urls?.spotify ?? null
-                              }
-                            : {
-                                  name: spotifyPlaylist.owner?.display_name ?? spotifyPlaylist.owner?.id ?? 'Unknown Artist',
-                                  url: spotifyPlaylist.owner?.external_urls?.spotify ?? null
-                              },
-                    tracks: [],
-                    id: spotifyPlaylist.id,
-                    url: spotifyPlaylist.external_urls?.spotify ?? query,
-                    rawPlaylist: spotifyPlaylist
-                });
-
-                if (spotifyPlaylist.type !== 'playlist') {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    playlist.tracks = spotifyPlaylist.tracks.items.map((m: any) => {
-                        const data = new Track(this, {
-                            title: m.name ?? '',
-                            description: m.description ?? '',
-                            author: m.artists[0]?.name ?? 'Unknown Artist',
-                            url: m.external_urls?.spotify ?? query,
-                            thumbnail: spotifyPlaylist.images[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                            duration: Util.buildTimeCode(Util.parseMS(m.duration_ms)),
-                            views: 0,
-                            requestedBy: options.requestedBy as User,
-                            playlist,
-                            source: 'spotify'
-                        });
-
-                        return data;
-                    }) as Track[];
-                } else {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    playlist.tracks = spotifyPlaylist.trackList.map((m: any) => {
-                        const data = new Track(this, {
-                            title: m.title ?? '',
-                            description: m.description ?? '',
-                            author: m.subtitle ?? 'Unknown Artist',
-                            url: m.external_urls?.spotify ?? query,
-                            thumbnail: m.album?.images?.[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-                            duration: Util.buildTimeCode(Util.parseMS(m.duration)),
-                            views: 0,
-                            requestedBy: options.requestedBy as User,
-                            playlist,
-                            source: 'spotify'
-                        });
-                        return data;
-                    }) as Track[];
-                }
-
-                return { playlist: playlist, tracks: playlist.tracks };
-            }
-            case QueryType.SOUNDCLOUD_PLAYLIST: {
-                const data = await soundcloud.getPlaylist(query).catch(Util.noop);
-                if (!data) return { playlist: null, tracks: [] };
-
-                const res = new Playlist(this, {
-                    title: data.title,
-                    description: data.description ?? '',
-                    thumbnail: data.thumbnail ?? 'https://soundcloud.com/pwa-icon-192.png',
-                    type: 'playlist',
-                    source: 'soundcloud',
-                    author: {
-                        name: data.author?.name ?? data.author?.username ?? 'Unknown Artist',
-                        url: data.author?.profile
-                    },
-                    tracks: [],
-                    id: `${data.id}`, // stringified
-                    url: data.url,
-                    rawPlaylist: data
-                });
-
-                for (const song of data.tracks) {
-                    const track = new Track(this, {
-                        title: song.title,
-                        description: song.description ?? '',
-                        author: song.author?.username ?? song.author?.name ?? 'Unknown Artist',
-                        url: song.url,
-                        thumbnail: song.thumbnail,
-                        duration: Util.buildTimeCode(Util.parseMS(song.duration)),
-                        views: song.playCount ?? 0,
-                        requestedBy: options.requestedBy,
-                        playlist: res,
-                        source: 'soundcloud',
-                        engine: song
-                    });
-                    res.tracks.push(track);
-                }
-
-                return { playlist: res, tracks: res.tracks };
-            }
-            case QueryType.YOUTUBE_PLAYLIST: {
-                const ytpl = await YouTube.getPlaylist(query).catch(Util.noop);
-                if (!ytpl) return { playlist: null, tracks: [] };
-
-                await ytpl.fetch().catch(Util.noop);
-
-                const playlist: Playlist = new Playlist(this, {
-                    title: ytpl.title!,
-                    thumbnail: ytpl.thumbnail as unknown as string,
-                    description: '',
-                    type: 'playlist',
-                    source: 'youtube',
-                    author: {
-                        name: ytpl.channel!.name as string,
-                        url: ytpl.channel!.url as string
-                    },
-                    tracks: [],
-                    id: ytpl.id as string,
-                    url: ytpl.url as string,
-                    rawPlaylist: ytpl
-                });
-
-                playlist.tracks = ytpl.videos.map(
-                    (video) =>
-                        new Track(this, {
-                            title: video.title as string,
-                            description: video.description as string,
-                            author: video.channel?.name as string,
-                            url: video.url,
-                            requestedBy: options.requestedBy as User,
-                            thumbnail: video.thumbnail!.url as string,
-                            views: video.views,
-                            duration: video.durationFormatted,
-                            raw: video,
-                            playlist: playlist,
-                            source: 'youtube'
-                        })
-                );
-
-                return { playlist: playlist, tracks: playlist.tracks };
-            }
-            default:
-                return { playlist: null, tracks: [] };
-        }
-    }
-
-    /**
-     * Registers extractor
-     * @param {string} extractorName The extractor name
-     * @param {ExtractorModel|any} extractor The extractor object
-     * @param {boolean} [force=false] Overwrite existing extractor with this name (if available)
-     * @returns {ExtractorModel}
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    use(extractorName: string, extractor: ExtractorModel | any, force = false): ExtractorModel {
-        if (!extractorName) throw new PlayerError('Cannot use unknown extractor!', ErrorStatusCode.UNKNOWN_EXTRACTOR);
-        if (this.extractors.has(extractorName) && !force) return this.extractors.get(extractorName)!;
-        if (extractor instanceof ExtractorModel) {
-            this.extractors.set(extractorName, extractor);
-            return extractor;
+            // cache miss
+            extractor =
+                (
+                    await this.extractors.run(async (ext) => {
+                        if (options.blockExtractors?.includes(ext.identifier)) return false;
+                        return ext.validate(query, queryType as SearchQueryType);
+                    })
+                )?.extractor || null;
         }
 
-        for (const method of ['validate', 'getInfo']) {
-            if (typeof extractor[method] !== 'function') throw new PlayerError('Invalid extractor data!', ErrorStatusCode.INVALID_EXTRACTOR);
+        // no extractors available
+        if (!extractor) {
+            this.debug('Failed to find appropriate extractor');
+            return new SearchResult(this, { query, queryType });
         }
 
-        const model = new ExtractorModel(extractorName, extractor);
-        this.extractors.set(model.name, model);
+        this.debug(`Executing metadata query using ${extractor.identifier} extractor...`);
+        const res = await extractor
+            .handle(query, {
+                type: queryType as SearchQueryType,
+                requestedBy: options.requestedBy as User
+            })
+            .catch(() => null);
 
-        return model;
-    }
+        if (res) {
+            this.debug('Metadata query was successful!');
+            const result = new SearchResult(this, {
+                query,
+                queryType,
+                playlist: res.playlist,
+                tracks: res.tracks,
+                extractor
+            });
 
-    /**
-     * Removes registered extractor
-     * @param {string} extractorName The extractor name
-     * @returns {ExtractorModel}
-     */
-    unuse(extractorName: string) {
-        if (!this.extractors.has(extractorName)) throw new PlayerError(`Cannot find extractor "${extractorName}"`, ErrorStatusCode.UNKNOWN_EXTRACTOR);
-        const prev = this.extractors.get(extractorName);
-        this.extractors.delete(extractorName);
-        return prev;
+            if (!options.ignoreCache) {
+                this.debug(`Adding data to cache...`);
+                await this.queryCache?.addData(result);
+            }
+
+            return result;
+        }
+
+        this.debug('Failed to find result using appropriate extractor. Querying all extractors...');
+        const result = await this.extractors.run(
+            async (ext) =>
+                !options.blockExtractors?.includes(ext.identifier) &&
+                (await ext.validate(query)) &&
+                ext.handle(query, {
+                    type: queryType as SearchQueryType,
+                    requestedBy: options.requestedBy as User
+                })
+        );
+        if (!result?.result) {
+            this.debug(`Failed to query metadata query using ${result?.extractor.identifier || 'N/A'} extractor.`);
+            return new SearchResult(this, { query, queryType });
+        }
+
+        this.debug(`Metadata query was successful using ${result.extractor.identifier}!`);
+
+        const data = new SearchResult(this, {
+            query,
+            queryType,
+            playlist: result.result.playlist,
+            tracks: result.result.tracks,
+            extractor: result.extractor
+        });
+
+        if (!options.ignoreCache) {
+            this.debug(`Adding data to cache...`);
+            await this.queryCache?.addData(data);
+        }
+
+        return data;
     }
 
     /**
      * Generates a report of the dependencies used by the `@discordjs/voice` module. Useful for debugging.
      * @returns {string}
      */
-    scanDeps() {
+    public scanDeps() {
         const line = '-'.repeat(50);
         const depsReport = generateDependencyReport();
-        const extractorReport = this.extractors
+        const extractorReport = this.extractors.store
             .map((m) => {
-                return `${m.name} :: ${m.version || '0.1.0'}`;
+                return m.identifier;
             })
             .join('\n');
-        return `${depsReport}\n${line}\nLoaded Extractors:\n${extractorReport || 'None'}`;
+        return `${depsReport}\nLoaded Extractors:\n${extractorReport || 'None'}\n${line}`;
     }
 
-    emit<U extends keyof PlayerEvents>(eventName: U, ...args: Parameters<PlayerEvents[U]>): boolean {
-        if (this.requiredEvents.includes(eventName) && !super.eventNames().includes(eventName)) {
-            // eslint-disable-next-line no-console
-            console.error(...args);
-            process.emitWarning(`[DiscordPlayerWarning] Unhandled "${eventName}" event! Events ${this.requiredEvents.map((m) => `"${m}"`).join(', ')} must have event listeners!`);
-            return false;
-        } else {
-            return super.emit(eventName, ...args);
-        }
-    }
-
-    /**
-     * Resolves queue
-     * @param {GuildResolvable|Queue} queueLike Queue like object
-     * @returns {Queue}
-     */
-    resolveQueue<T>(queueLike: GuildResolvable | Queue): Queue<T> {
-        return this.getQueue(queueLike instanceof Queue ? queueLike.guild : queueLike)!;
-    }
-
-    *[Symbol.iterator]() {
-        yield* Array.from(this.queues.values());
+    public *[Symbol.iterator]() {
+        yield* this.nodes.cache.values();
     }
 
     /**
      * Creates `Playlist` instance
      * @param data The data to initialize a playlist
      */
-    createPlaylist(data: PlaylistInitData) {
+    public createPlaylist(data: PlaylistInitData) {
         return new Playlist(this, data);
     }
 }
-
-export { Player };

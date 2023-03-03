@@ -1,11 +1,9 @@
 import { Snowflake, User, UserResolvable, VoiceState } from 'discord.js';
-import { Readable, Duplex } from 'stream';
-import { Queue } from '../Structures/Queue';
-import Track from '../Structures/Track';
+import { GuildQueue } from '../Structures';
+import { Track } from '../Structures/Track';
 import { Playlist } from '../Structures/Playlist';
-import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { downloadOptions } from 'ytdl-core';
-import { BiquadFilters, EqualizerBand } from '@discord-player/equalizer';
+import { QueryCache } from '../utils/QueryCache';
 
 export type FiltersName = keyof QueueFilters;
 
@@ -51,6 +49,7 @@ export interface QueueFilters {
     fadein?: boolean;
     dim?: boolean;
     earrape?: boolean;
+    lofi?: boolean;
 }
 
 /**
@@ -58,10 +57,11 @@ export interface QueueFilters {
  * - soundcloud
  * - youtube
  * - spotify
+ * - apple_music
  * - arbitrary
  * @typedef {string} TrackSource
  */
-export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'arbitrary';
+export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'apple_music' | 'arbitrary';
 
 /**
  * @typedef {object} RawTrackData
@@ -87,12 +87,13 @@ export interface RawTrackData {
     thumbnail: string;
     duration: string;
     views: number;
-    requestedBy: User;
+    requestedBy?: User | null;
     playlist?: Playlist;
     source?: TrackSource;
     engine?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     live?: boolean;
     raw?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    queryType?: SearchQueryType;
 }
 
 /**
@@ -126,106 +127,6 @@ export interface PlayerProgressbarOptions {
 }
 
 /**
- * @typedef {object} PlayerOptions
- * @property {boolean} [leaveOnEnd=true] If it should leave on end
- * @property {boolean} [leaveOnStop=true] If it should leave on stop
- * @property {boolean} [leaveOnEmpty=true] If it should leave on empty
- * @property {number} [leaveOnEmptyCooldown=1000] The cooldown in ms
- * @property {number} [leaveOnEndCooldown=1000] The cooldown in ms
- * @property {boolean} [autoSelfDeaf=true] If it should set the bot in deaf mode
- * @property {YTDLDownloadOptions} [ytdlOptions] The youtube download options
- * @property {number} [initialVolume=100] The initial player volume
- * @property {number} [bufferingTimeout=3000] Buffering timeout for the stream
- * @property {boolean} [spotifyBridge=true] If player should bridge spotify source to youtube
- * @property {boolean} [disableVolume=false] If player should disable inline volume
- * @property {boolean} [disableEqualizer=false] If player should disable equalizer
- * @property {boolean} [disableBiquad=false] If player should disable biquad
- * @property {number} [volumeSmoothness=0] The volume transition smoothness between volume changes (lower the value to get better result)
- * Setting this or leaving this empty will disable this effect. Example: `volumeSmoothness: 0.1`
- * @property {EqualizerBand[]} [equalizerBands] The equalizer bands array for 15 band equalizer.
- * @property {BiquadFilters} [biquadFilter] The biquad filter initializer value
- * @property {Function} [onBeforeCreateStream] Runs before creating stream
- */
-export interface PlayerOptions {
-    leaveOnEnd?: boolean;
-    leaveOnEndCooldown?: number;
-    leaveOnStop?: boolean;
-    leaveOnEmpty?: boolean;
-    leaveOnEmptyCooldown?: number;
-    autoSelfDeaf?: boolean;
-    ytdlOptions?: downloadOptions;
-    initialVolume?: number;
-    bufferingTimeout?: number;
-    spotifyBridge?: boolean;
-    disableVolume?: boolean;
-    disableEqualizer?: boolean;
-    disableBiquad?: boolean;
-    volumeSmoothness?: number;
-    equalizerBands?: EqualizerBand[];
-    biquadFilter?: BiquadFilters;
-    onBeforeCreateStream?: (track: Track, source: TrackSource, queue: Queue) => Promise<Readable>;
-}
-
-/**
- * @typedef {object} ExtractorModelData
- * @property {object} [playlist] The playlist info (if any)
- * @property {string} [playlist.title] The playlist title
- * @property {string} [playlist.description] The playlist description
- * @property {string} [playlist.thumbnail] The playlist thumbnail
- * @property {album|playlist} [playlist.type] The playlist type: `album` | `playlist`
- * @property {TrackSource} [playlist.source] The playlist source
- * @property {object} [playlist.author] The playlist author
- * @property {string} [playlist.author.name] The author name
- * @property {string} [playlist.author.url] The author url
- * @property {string} [playlist.id] The playlist id
- * @property {string} [playlist.url] The playlist url
- * @property {any} [playlist.rawPlaylist] The raw data
- * @property {ExtractorData[]} data The data
- */
-
-/**
- * @typedef {object} ExtractorData
- * @property {string} title The title
- * @property {number} duration The duration
- * @property {string} thumbnail The thumbnail
- * @property {string|Readable|Duplex} engine The stream engine
- * @property {number} views The views count
- * @property {string} author The author
- * @property {string} description The description
- * @property {string} url The url
- * @property {string} [version] The extractor version
- * @property {TrackSource} [source="arbitrary"] The source
- */
-export interface ExtractorModelData {
-    playlist?: {
-        title: string;
-        description: string;
-        thumbnail: string;
-        type: 'album' | 'playlist';
-        source: TrackSource;
-        author: {
-            name: string;
-            url: string;
-        };
-        id: string;
-        url: string;
-        rawPlaylist?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    };
-    data: {
-        title: string;
-        duration: number;
-        thumbnail: string;
-        engine: string | Readable | Duplex;
-        views: number;
-        author: string;
-        description: string;
-        url: string;
-        version?: string;
-        source?: TrackSource;
-    }[];
-}
-
-/**
  * The search query type
  * This can be one of:
  * - AUTO
@@ -244,124 +145,50 @@ export interface ExtractorModelData {
  * - YOUTUBE_SEARCH
  * - YOUTUBE_VIDEO
  * - SOUNDCLOUD_SEARCH
+ * - APPLE_MUSIC_SONG
+ * - APPLE_MUSIC_ALBUM
+ * - APPLE_MUSIC_PLAYLIST
+ * - APPLE_MUSIC_SEARCH
+ * - FILE
  * @typedef {number} QueryType
  */
-export enum QueryType {
-    AUTO,
-    YOUTUBE,
-    YOUTUBE_PLAYLIST,
-    SOUNDCLOUD_TRACK,
-    SOUNDCLOUD_PLAYLIST,
-    SOUNDCLOUD,
-    SPOTIFY_SONG,
-    SPOTIFY_ALBUM,
-    SPOTIFY_PLAYLIST,
-    FACEBOOK,
-    VIMEO,
-    ARBITRARY,
-    REVERBNATION,
-    YOUTUBE_SEARCH,
-    YOUTUBE_VIDEO,
-    SOUNDCLOUD_SEARCH
-}
+export const QueryType = {
+    AUTO: 'auto',
+    YOUTUBE: 'youtube',
+    YOUTUBE_PLAYLIST: 'youtubePlaylist',
+    SOUNDCLOUD_TRACK: 'soundcloudTrack',
+    SOUNDCLOUD_PLAYLIST: 'soundcloudPlaylist',
+    SOUNDCLOUD: 'soundcloud',
+    SPOTIFY_SONG: 'spotifySong',
+    SPOTIFY_ALBUM: 'spotifyAlbum',
+    SPOTIFY_PLAYLIST: 'spotifyPlaylist',
+    FACEBOOK: 'facebook',
+    VIMEO: 'vimeo',
+    ARBITRARY: 'arbitrary',
+    REVERBNATION: 'reverbnation',
+    YOUTUBE_SEARCH: 'youtubeSearch',
+    YOUTUBE_VIDEO: 'youtubeVideo',
+    SOUNDCLOUD_SEARCH: 'soundcloudSearch',
+    APPLE_MUSIC_SONG: 'appleMusicSong',
+    APPLE_MUSIC_ALBUM: 'appleMusicAlbum',
+    APPLE_MUSIC_PLAYLIST: 'appleMusicPlaylist',
+    APPLE_MUSIC_SEARCH: 'appleMusicSearch',
+    FILE: 'file'
+} as const;
 
-/**
- * Emitted when bot gets disconnected from a voice channel
- * @event Player#botDisconnect
- * @param {Queue} queue The queue
- */
-
-/**
- * Emitted when the voice channel is empty
- * @event Player#channelEmpty
- * @param {Queue} queue The queue
- */
-
-/**
- * Emitted when bot connects to a voice channel
- * @event Player#connectionCreate
- * @param {Queue} queue The queue
- * @param {StreamDispatcher} connection The discord player connection object
- */
-
-/**
- * Debug information
- * @event Player#debug
- * @param {Queue} queue The queue
- * @param {string} message The message
- */
-
-/**
- * Emitted on error
- * <warn>This event should handled properly otherwise it may crash your process!</warn>
- * @event Player#error
- * @param {Queue} queue The queue
- * @param {Error} error The error
- */
-
-/**
- * Emitted on connection error. Sometimes stream errors are emitted here as well.
- * @event Player#connectionError
- * @param {Queue} queue The queue
- * @param {Error} error The error
- */
-
-/**
- * Emitted when queue ends
- * @event Player#queueEnd
- * @param {Queue} queue The queue
- */
-
-/**
- * Emitted when a single track is added
- * @event Player#trackAdd
- * @param {Queue} queue The queue
- * @param {Track} track The track
- */
-
-/**
- * Emitted when multiple tracks are added
- * @event Player#tracksAdd
- * @param {Queue} queue The queue
- * @param {Track[]} tracks The tracks
- */
-
-/**
- * Emitted when a track starts playing
- * @event Player#trackStart
- * @param {Queue} queue The queue
- * @param {Track} track The track
- */
-
-/**
- * Emitted when a track ends
- * @event Player#trackEnd
- * @param {Queue} queue The queue
- * @param {Track} track The track
- */
-
-/**
- * Emitted when a track ends
- * @event Player#voiceStateUpdate
- * @param {Queue} queue The queue that this update belongs to
- * @param {VoiceState} oldState The old voice state
- * @param {VoiceState} newState The new voice state
- */
+export type SearchQueryType = keyof typeof QueryType | (typeof QueryType)[keyof typeof QueryType];
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface PlayerEvents {
-    botDisconnect: (queue: Queue) => any;
-    channelEmpty: (queue: Queue) => any;
-    connectionCreate: (queue: Queue, connection: StreamDispatcher) => any;
-    debug: (queue: Queue, message: string) => any;
-    error: (queue: Queue, error: Error) => any;
-    connectionError: (queue: Queue, error: Error) => any;
-    queueEnd: (queue: Queue) => any;
-    trackAdd: (queue: Queue, track: Track) => any;
-    tracksAdd: (queue: Queue, track: Track[]) => any;
-    trackStart: (queue: Queue, track: Track) => any;
-    trackEnd: (queue: Queue, track: Track) => any;
-    voiceStateUpdate: (queue: Queue, oldState: VoiceState, newState: VoiceState) => any;
+    debug: (message: string) => any;
+    error: (error: Error) => any;
+    voiceStateUpdate: (queue: GuildQueue, oldState: VoiceState, newState: VoiceState) => any;
+}
+
+export enum PlayerEvent {
+    debug = 'debug',
+    error = 'error',
+    voiceStateUpdate = 'voiceStateUpdate'
 }
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -380,16 +207,20 @@ export interface PlayOptions {
     immediate?: boolean;
 }
 
+export type QueryExtractorSearch = `ext:${string}`;
+
 /**
  * @typedef {object} SearchOptions
  * @property {UserResolvable} requestedBy The user who requested this search
- * @property {QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
- * @property {boolean} [blockExtractor=false] If it should block custom extractors
+ * @property {typeof QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
+ * @property {string[]} [blockExtractors[]] List of the extractors to block
+ * @property {boolean} [ignoreCache] If it should ignore query cache lookup
  */
 export interface SearchOptions {
-    requestedBy: UserResolvable;
-    searchEngine?: QueryType | string;
-    blockExtractor?: boolean;
+    requestedBy?: UserResolvable;
+    searchEngine?: SearchQueryType | QueryExtractorSearch;
+    blockExtractors?: string[];
+    ignoreCache?: boolean;
 }
 
 /**
@@ -501,6 +332,11 @@ export interface PlaylistJSON {
  * @property {number} [connectionTimeout=20000] The voice connection timeout
  * @property {boolean} [smoothVolume=true] Toggle smooth volume transition
  * @property {boolean} [lagMonitor=30000] Time in ms to re-monitor event loop lag
+ * @property {boolean} [lockVoiceStateHandler] Prevent voice state handler from being overridden
+ * @property {string[]} [blockExtractors] List of extractors to disable querying metadata from
+ * @property {string[]} [blockStreamFrom] List of extractors to disable streaming from
+ * @property {QueryCache | null} [queryCache] Query cache provider
+ * @property {boolean} [ignoreInstance] Ignore player instance
  */
 export interface PlayerInitOptions {
     autoRegisterExtractor?: boolean;
@@ -508,4 +344,9 @@ export interface PlayerInitOptions {
     connectionTimeout?: number;
     smoothVolume?: boolean;
     lagMonitor?: number;
+    lockVoiceStateHandler?: boolean;
+    blockExtractors?: string[];
+    blockStreamFrom?: string[];
+    queryCache?: QueryCache | null;
+    ignoreInstance?: boolean;
 }

@@ -1,10 +1,13 @@
 import { User, escapeMarkdown, SnowflakeUtil } from 'discord.js';
 import { Player } from '../Player';
-import { RawTrackData, TrackJSON } from '../types/types';
+import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
 import { Playlist } from './Playlist';
-import { Queue } from './Queue';
+import { GuildQueue } from './GuildQueue';
+import { BaseExtractor } from '../extractors/BaseExtractor';
 
-class Track {
+export type TrackResolvable = Track | string | number;
+
+export class Track {
     public player!: Player;
     public title!: string;
     public description!: string;
@@ -13,9 +16,13 @@ class Track {
     public thumbnail!: string;
     public duration!: string;
     public views!: number;
-    public requestedBy!: User;
+    public requestedBy: User | null = null;
     public playlist?: Playlist;
-    public readonly raw: RawTrackData = {} as RawTrackData;
+    public queryType: SearchQueryType | null | undefined = null;
+    public raw: RawTrackData = {
+        source: 'arbitrary'
+    } as RawTrackData;
+    public extractor: BaseExtractor | null = null;
     public readonly id = SnowflakeUtil.generate().toString();
 
     /**
@@ -115,19 +122,18 @@ class Track {
         this.thumbnail = data.thumbnail ?? '';
         this.duration = data.duration ?? '';
         this.views = data.views ?? 0;
-        this.requestedBy = data.requestedBy;
+        this.queryType = data.queryType;
+        this.requestedBy = data.requestedBy || null;
         this.playlist = data.playlist;
-
-        // raw
-        Object.defineProperty(this, 'raw', { value: Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data), enumerable: false });
+        this.raw = Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data);
     }
 
     /**
      * The queue in which this track is located
      * @type {Queue}
      */
-    get queue(): Queue {
-        return this.player.queues.find((q) => q.tracks.some((ab) => ab.id === this.id))!;
+    get queue(): GuildQueue {
+        return this.player.nodes.cache.find((q) => q.tracks.some((ab) => ab.id === this.id))!;
     }
 
     /**
@@ -153,7 +159,7 @@ class Track {
      * @type {TrackSource}
      */
     get source() {
-        return this.raw.source ?? 'arbitrary';
+        return this.raw?.source ?? 'arbitrary';
     }
 
     /**
@@ -179,12 +185,8 @@ class Track {
             duration: this.duration,
             durationMS: this.durationMS,
             views: this.views,
-            requestedBy: this.requestedBy?.id,
+            requestedBy: this.requestedBy?.id || null,
             playlist: hidePlaylist ? null : this.playlist?.toJSON() ?? null
         } as TrackJSON;
     }
 }
-
-export default Track;
-
-export { Track };

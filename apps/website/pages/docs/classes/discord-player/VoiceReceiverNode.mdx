@@ -1,0 +1,46 @@
+## VoiceReceiverNode
+
+```typescript
+new VoiceReceiverNode(dispatcher)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| dispatcher | StreamDispatcher | ❌ | - |
+
+## Properties
+### public  dispatcher: StreamDispatcher
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L19)
+## Methods
+### public  createRawTrack(stream, data): Track
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| stream | Readable | ❌ | - |
+| data | Partial\<Omit\<RawTrackData, 'author' \| 'playlist' \| 'source' \| 'engine' \| 'raw' \| 'queryType' \| 'description' \| 'views'>> | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L21)
+### public  mergeRecordings(streams): void
+Merge multiple streams together
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| streams | Array\<Readable> | ❌ | The array of streams to merge |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L45)
+### public  recordUser(user, options): Readable
+Record a user in voice channel
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| user | UserResolvable | ❌ | The user to record |
+| options | VoiceReceiverOptions | ❌ | Recording options |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/827d536/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L56)

@@ -1,6 +1,8 @@
-import { VoiceChannel, StageChannel, Collection, Snowflake } from 'discord.js';
-import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection } from '@discordjs/voice';
+import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
+import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus } from '@discordjs/voice';
 import { StreamDispatcher } from './StreamDispatcher';
+import { Collection } from '@discord-player/utils';
+import { GuildQueue } from '../Structures';
 
 class VoiceUtils {
     public cache: Collection<Snowflake, StreamDispatcher>;
@@ -28,10 +30,12 @@ class VoiceUtils {
         options?: {
             deaf?: boolean;
             maxTime?: number;
+            queue: GuildQueue;
         }
     ): Promise<StreamDispatcher> {
+        if (!options?.queue) throw new Error('GuildQueue is required');
         const conn = await this.join(channel, options);
-        const sub = new StreamDispatcher(conn, channel, options?.maxTime);
+        const sub = new StreamDispatcher(conn, channel, options.queue, options.maxTime);
         this.cache.set(channel.guild.id, sub);
         return sub;
     }
@@ -65,8 +69,13 @@ class VoiceUtils {
      * @returns {void}
      */
     public disconnect(connection: VoiceConnection | StreamDispatcher) {
-        if (connection instanceof StreamDispatcher) return connection.voiceConnection.destroy();
-        return connection.destroy();
+        if (connection instanceof StreamDispatcher) connection = connection.voiceConnection;
+
+        try {
+            if (connection.state.status !== VoiceConnectionStatus.Destroyed) return connection.destroy();
+        } catch {
+            //
+        }
     }
 
     /**
@@ -75,7 +84,7 @@ class VoiceUtils {
      * @returns {StreamDispatcher}
      */
     public getConnection(guild: Snowflake) {
-        return this.cache.get(guild);
+        return this.cache.get(guild) || getVoiceConnection(guild);
     }
 }
 

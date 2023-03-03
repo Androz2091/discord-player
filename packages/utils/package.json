@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/utils",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Discord Player Utilities",
   "keywords": [
     "discord-player"
@@ -9,6 +9,8 @@
   "homepage": "https://discord-player.js.org",
   "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
   "directories": {
     "src": "src"
   },
@@ -21,7 +23,9 @@
   },
   "scripts": {
     "build:check": "tsc --noEmit",
-    "build": "tsup"
+    "build": "tsup",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"
@@ -31,5 +35,10 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "*"
+  },
+  "typedoc": {
+    "entryPoint": "./src/index.ts",
+    "readmeFile": "./README.md",
+    "tsconfig": "./tsconfig.json"
   }
 }

@@ -14,6 +14,7 @@ class AudioFilters {
         '8D': 'apulsator=hz=0.09',
         vaporwave: 'aresample=48000,asetrate=48000*0.8',
         nightcore: 'aresample=48000,asetrate=48000*1.25',
+        lofi: 'aresample=48000,asetrate=48000*0.9,extrastereo=m=2.5:c=disabled',
         phaser: 'aphaser=in_gain=0.4',
         tremolo: 'tremolo',
         vibrato: 'vibrato=f=6.5',

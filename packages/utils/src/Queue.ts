@@ -1,6 +1,6 @@
 export type QueueStrategy = 'LIFO' | 'FIFO';
 
-export type QueueItemFilter<T> = (value: T, idx: number, array: T[]) => boolean;
+export type QueueItemFilter<T, R = boolean> = (value: T, idx: number, array: T[]) => R;
 
 export class Queue<T = unknown> {
     public store: T[];
@@ -80,7 +80,7 @@ export class Queue<T = unknown> {
         return this.store.every(itemFilter);
     }
 
-    public map(itemFilter: QueueItemFilter<T>) {
+    public map<R = T>(itemFilter: QueueItemFilter<T, R>) {
         const arr = this.toArray();
         return arr.map(itemFilter);
     }
@@ -91,8 +91,7 @@ export class Queue<T = unknown> {
     }
 
     public dispatch() {
-        const dispatchBeginning = this.strategy === 'FIFO';
-        return dispatchBeginning ? this.store.shift() : this.store.pop();
+        return this.store.shift();
     }
 
     public clone() {
@@ -108,7 +107,7 @@ export class Queue<T = unknown> {
     }
 
     public toArray() {
-        return this.strategy === 'FIFO' ? this.store.slice() : this.store.slice().reverse();
+        return this.store.slice();
     }
 
     public toJSON() {

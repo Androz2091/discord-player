@@ -1,0 +1,15 @@
+{
+    "welcome": "Welcome",
+    "v6-migration": "V6 Migration",
+    "supported-sources": "Supported Sources",
+    "playing-local-file": "Playing Local File",
+    "playing-raw-resource": "Playing Raw Resource",
+    "voice-recording": "Voice Recording",
+    "stream-hooks": "Stream Hooks",
+    "common-problems": "Common Problems",
+    "accessing-player": "Accessing Player",
+    "audio-filters": "Audio Filters",
+    "custom-audio-filters": "Custom Audio Filters",
+    "preventing-ratelimits": "Preventing Ratelimits",
+    "using-proxy": "Using Proxy"
+}

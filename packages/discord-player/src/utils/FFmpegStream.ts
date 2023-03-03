@@ -1,4 +1,4 @@
-import { FFmpeg } from 'prism-media';
+import * as prism from 'prism-media';
 import type { Duplex, Readable } from 'stream';
 
 export interface FFmpegStreamOptions {
@@ -6,11 +6,12 @@ export interface FFmpegStreamOptions {
     encoderArgs?: string[];
     seek?: number;
     skip?: boolean;
+    cookies?: string;
 }
 
-export function FFMPEG_ARGS_STRING(stream: string, fmt?: string) {
+export function FFMPEG_ARGS_STRING(stream: string, fmt?: string, cookies?: string) {
     // prettier-ignore
-    return [
+    const args = [
         "-reconnect", "1",
         "-reconnect_streamed", "1",
         "-reconnect_delay_max", "5",
@@ -21,6 +22,13 @@ export function FFMPEG_ARGS_STRING(stream: string, fmt?: string) {
         "-ar", "48000",
         "-ac", "2"
     ];
+
+    if (typeof cookies === 'string') {
+        // https://ffmpeg.org/ffmpeg-protocols.html#HTTP-Cookies
+        args.push('-cookies', cookies.startsWith('"') ? cookies : `"${cookies}"`);
+    }
+
+    return args;
 }
 
 export function FFMPEG_ARGS_PIPED(fmt?: string) {
@@ -42,12 +50,13 @@ export function FFMPEG_ARGS_PIPED(fmt?: string) {
 export function createFFmpegStream(stream: Readable | Duplex | string, options?: FFmpegStreamOptions) {
     if (options?.skip && typeof stream !== 'string') return stream;
     options ??= {};
-    const args = typeof stream === 'string' ? FFMPEG_ARGS_STRING(stream, options.fmt) : FFMPEG_ARGS_PIPED(options.fmt);
+    const args = typeof stream === 'string' ? FFMPEG_ARGS_STRING(stream, options.fmt, options.cookies) : FFMPEG_ARGS_PIPED(options.fmt);
 
     if (!Number.isNaN(options.seek)) args.unshift('-ss', String(options.seek));
     if (Array.isArray(options.encoderArgs)) args.push(...options.encoderArgs);
 
-    const transcoder = new FFmpeg({ shell: false, args });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const transcoder = new (prism.FFmpeg || (<any>prism).default.FFmpeg)({ shell: false, args });
     transcoder.on('close', () => transcoder.destroy());
 
     if (typeof stream !== 'string') {

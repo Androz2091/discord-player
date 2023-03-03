@@ -43,7 +43,7 @@ export class Coefficients {
         }
     }
 
-    public static from(filter: BiquadFilters, samplingFreq: number, cutoffFreq: number, Q: number, dbGain = 0) {
+    public static from(filter: BiquadFilters, samplingFreq: number, cutoffFreq: number, Q: number, dbGain = -10) {
         if (2.0 * cutoffFreq > samplingFreq) {
             throw new Error(`Cutoff frequency is too big!`);
         }
@@ -54,9 +54,9 @@ export class Coefficients {
 
         const omega = (2.0 * Math.PI * cutoffFreq) / samplingFreq;
 
-        if (typeof filter === 'string') filter = FilterType[filter];
+        const bqf = typeof filter === 'string' ? FilterType[filter] : filter;
 
-        switch (filter) {
+        switch (bqf) {
             case FilterType.SinglePoleLowPassApprox: {
                 const alpha = omega / (omega + 1.0);
 
@@ -252,7 +252,7 @@ export class Coefficients {
                 });
             }
             default:
-                throw new TypeError('Invalid filter type');
+                throw new TypeError(`Invalid filter type "${filter}"`);
         }
     }
 }

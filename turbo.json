@@ -6,11 +6,15 @@
                 "^build"
             ],
             "outputs": [
-                "dist/**"
+                "dist/**",
+                ".next/**"
             ]
         },
         "docs": {},
         "build:check": {},
-        "lint": {}
+        "lint": {},
+        "dev": {},
+        "start": {},
+        "test": {}
     }
 }

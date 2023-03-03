@@ -71,7 +71,7 @@ class Util {
      * @returns {boolean}
      */
     static isVoiceEmpty(channel: VoiceChannel | StageChannel) {
-        return channel.members.filter((member) => !member.user.bot).size === 0;
+        return channel && channel.members.filter((member) => !member.user.bot).size === 0;
     }
 
     /**
@@ -81,9 +81,18 @@ class Util {
      */
     static require(id: string) {
         try {
-            return require(id);
-        } catch {
-            return null;
+            return { module: require(id), error: null };
+        } catch (error) {
+            return { module: null, error };
+        }
+    }
+
+    static async import(id: string) {
+        try {
+            const mod = await import(id);
+            return { module: mod, error: null };
+        } catch (error) {
+            return { module: null, error };
         }
     }
 
@@ -113,6 +122,13 @@ class Util {
                 }
             }
         }
+    }
+
+    static warn(message: string, code = 'DeprecationWarning', detail?: string) {
+        process.emitWarning(message, {
+            code,
+            detail
+        });
     }
 }
 
