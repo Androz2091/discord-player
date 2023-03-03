@@ -6,15 +6,9 @@
 
 ## Before you start
 
-> **Note**  
-> v6 is currently in development and is actively being worked on. No updates will be made to v5.4.0 going forward. To start using v6 before full release you can install all the necessary components using:  
-> `npm i discord-player@dev @discord-player/utils@dev @discord-player/equalizer@dev @discord-player/extractor@dev`
-
-v6 requires Discord.js 14.0 or higher. PLease make sure you have a compatible version using `npm list discord.js` in your terminal. If you're using an earlier version please update it. The [Discord Js Guide](https://discordjs.guide/) has resources to help with that.
+Discord Player requires Discord.js 16.0 or higher. PLease make sure you have a compatible version using `npm list discord.js` in your terminal. If you're using an earlier version please update it. The [Discord.JS Guide](https://discordjs.guide/) has resources to help with that.
 
 ## Installation
-
-> *Discord Player is a node.js module. Thus, you need to have node.js installed in order to use it.*
 
 #### Main Library
 
@@ -36,11 +30,13 @@ $ npm install opusscript
 
 #### FFmpeg or Avconv
 
-FFmpeg or Avconv is required for media transcoding. You can get it from [https://ffmpeg.org](https://ffmpeg.org) or by installing it from npm:
+FFmpeg or Avconv is required for media transcoding. You can get it from [https://ffmpeg.org](https://www.ffmpeg.org/download.html) or by installing it from npm:
 
 ```bash
 $ npm install ffmpeg-static
 ```
+
+You can get avconv from [https://libav.org/download](https://libav.org/download).
 
 #### Streaming Library
 
@@ -136,8 +132,8 @@ Discord Player `player.play` will handle queue creation, search results, tracks 
 +    client: interaction.guild.members.me,
 +    requestedBy: interaction.user,
 +   },
-+   autoSelfDeaf: true,
-+   initialVolume: 80,
++   selfDeaf: true,
++   volume: 80,
 +   leaveOnEmpty: true,
 +   leaveOnEmptyCooldown: 300000,
 +   leaveOnEnd: true,
@@ -152,8 +148,8 @@ Discord Player `player.play` will handle queue creation, search results, tracks 
 +    client: interaction.guild.members.me,
 +    requestedBy: interaction.user,
 +   },
-+   autoSelfDeaf: true,
-+   initialVolume: 80,
++   selfDeaf: true,
++   volume: 80,
 +   leaveOnEmpty: true,
 +   leaveOnEmptyCooldown: 300000,
 +   leaveOnEnd: true,
@@ -255,7 +251,7 @@ Note: metadata setter is still functional
 ```
 
 ### Event Changes
-Player [events](https://discord-player.netlify.app/docs/types/discord-player/GuildQueueEvents) are now emitted from the `player.events` object. (ex. `player.events.on(event.name, (...args) => event.execute(...args));`)
+Player [events](https://discord-player.js.org/docs/types/discord-player/GuildQueueEvents) are now emitted from the `player.events` object. (ex. `player.events.on(event.name, (...args) => event.execute(...args));`)
 
 ```diff
 - botDisconnect
@@ -303,7 +299,7 @@ In addition to the change in events, there are also new events that have been ad
 ```
 
 ### Filters
-There are several new filter options, with some shown below. A full list can be found [here](https://discord-player.netlify.app/docs/types/discord-player/QueueFilters).
+There are several new filter options, with some shown below. A full list can be found [here](https://discord-player.js.org/docs/types/discord-player/QueueFilters).
 
 The 8D filter used is **not** the one in FFmpeg and you will see it applied immediately unlike the FFmpeg one.
 

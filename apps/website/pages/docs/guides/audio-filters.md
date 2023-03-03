@@ -1,8 +1,6 @@
 ## Audio Filters
 
-Discord Player supports various audio filters. There are 4 types of audio filter providers in discord-player.
-
-> Did you know? **Discord Player has total of more than 64 built-in audio filter presets!**
+Discord Player supports various audio filters. There are 4 types of audio filters in discord-player.
 
 ##### FFmpeg
 
@@ -26,8 +24,6 @@ queue.filters.equalizer.setEQ([
 ]);
 ```
 
-> Discord Player provides some built-in equalizer presets.
-
 There is no delay between filter transition when using equalizer.
 
 ##### Biquad
@@ -43,7 +39,7 @@ queue.filters.biquad.setFilter(BiquadFilterType.LowPass);
 
 There is no delay between filter transition when using biquad filters.
 
-#### DSP Audio Filters
+#### DSP Filters
 
 This is another type of audio filters provider. It currently supports `Tremolo` and `8D` filters only. To use this, you can do:
 

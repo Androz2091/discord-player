@@ -4,9 +4,9 @@ By default, discord-player **does not support anything** (including search opera
 
 -   Local file (You must set the search engine to `QueryType.FILE` in order to play local files, backed by `attachment extractor`)
 -   Raw attachments (backed by `attachment extractor`)
--   Spotify (backed by `ysa extractor`)
--   Apple Music (backed by `ysa extractor`)
--   YouTube (backed by `ysa extractor`)
+-   Spotify (backed by `spotify extractor`)
+-   Apple Music (backed by `appleMusic extractor`)
+-   YouTube (backed by `youtube extractor`)
 -   Vimeo (backed by `vimeo extractor`)
 -   Reverbnation (backed by `reverbnation extractor`)
 -   SoundCloud (backed by `soundcloud extractor`)
