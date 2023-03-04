@@ -310,7 +310,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      */
     public async play<T = unknown>(
         channel: GuildVoiceChannelResolvable,
-        query: string | Track | SearchResult,
+        query: string | Track | SearchResult | Track[] | Playlist,
         options: SearchOptions & {
             nodeOptions?: GuildNodeCreateOptions<T>;
             connectionOptions?: VoiceConnectConfig;
@@ -353,21 +353,46 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      */
     /**
      * Search tracks
-     * @param {string|Track} query The search query
+     * @param {string | Track | Track[] | Playlist | SearchResult} query The search query
      * @param {SearchOptions} options The search options
      * @returns {Promise<SearchResult>}
      */
-    public async search(query: string | Track, options: SearchOptions = {}): Promise<SearchResult> {
+    public async search(query: string | Track | Track[] | Playlist | SearchResult, options: SearchOptions = {}): Promise<SearchResult> {
+        if (query instanceof SearchResult) return query;
+
         if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
         options.blockExtractors ??= this.options.blockExtractors;
+
         if (query instanceof Track) {
-            this.debug(`Searching ${query.title}`);
             return new SearchResult(this, {
                 playlist: query.playlist || null,
                 tracks: [query],
-                query: query.toString(),
+                query: query.title,
                 extractor: null,
                 queryType: query.queryType,
+                requestedBy: options.requestedBy
+            });
+        }
+
+        if (query instanceof Playlist) {
+            return new SearchResult(this, {
+                playlist: query,
+                tracks: query.tracks,
+                query: query.title,
+                extractor: null,
+                queryType: QueryType.AUTO,
+                requestedBy: options.requestedBy
+            });
+        }
+
+        if (Array.isArray(query)) {
+            const tracks = query.filter((t) => t instanceof Track);
+            return new SearchResult(this, {
+                playlist: null,
+                tracks,
+                query: '@@#%{{UserLoadedContent}}%#@@',
+                extractor: null,
+                queryType: QueryType.AUTO,
                 requestedBy: options.requestedBy
             });
         }
