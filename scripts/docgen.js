@@ -23,6 +23,16 @@ const GuideFiles = [
         path: `${DOCS}/extractors/sources.md`
     },
     {
+        name: 'autocomplete-search',
+        category: 'guides',
+        path: `${DOCS}/examples/autocomplete_search.md`
+    },
+    {
+        name: 'getting-lyrics',
+        category: 'guides',
+        path: `${DOCS}/examples/getting_lyrics.md`
+    },
+    {
         name: 'playing-local-file',
         category: 'guides',
         path: `${DOCS}/examples/playing_local_file.md`

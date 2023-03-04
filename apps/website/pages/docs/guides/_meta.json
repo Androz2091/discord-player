@@ -2,6 +2,8 @@
     "welcome": "Welcome",
     "v6-migration": "V6 Migration",
     "supported-sources": "Supported Sources",
+    "autocomplete-search": "Autocomplete Search",
+    "getting-lyrics": "Getting Lyrics",
     "playing-local-file": "Playing Local File",
     "playing-raw-resource": "Playing Raw Resource",
     "voice-recording": "Voice Recording",
