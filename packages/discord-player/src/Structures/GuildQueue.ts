@@ -435,7 +435,7 @@ export class GuildQueue<Meta = unknown> {
      * Check if this queue currently holds active audio resource
      */
     public isPlaying() {
-        return this.dispatcher?.audioResource != null;
+        return this.dispatcher?.audioResource != null && !this.dispatcher.audioResource.ended;
     }
 
     /**
@@ -588,7 +588,16 @@ export class GuildQueue<Meta = unknown> {
 
     #performStart(resource?: AudioResource<Track>) {
         const track = resource?.metadata || this.currentTrack;
-        this.player.events.emit('playerTrigger', this, track!, this.isTransitioning() ? 'filters' : 'normal');
+        const reason = this.isTransitioning() ? 'filters' : 'normal';
+
+        this.debug(
+            `Player triggered for Track ${JSON.stringify({
+                title: track?.title,
+                reason
+            })}`
+        );
+
+        this.player.events.emit('playerTrigger', this, track!, reason);
         if (track && !this.isTransitioning()) this.player.events.emit('playerStart', this, track);
         this.setTransitioning(false);
         this.initializing = false;
@@ -596,24 +605,40 @@ export class GuildQueue<Meta = unknown> {
 
     #performFinish(resource?: AudioResource<Track>) {
         const track = resource?.metadata || this.currentTrack;
+
+        this.debug(
+            `Track ${JSON.stringify({
+                title: track?.title,
+                isTransitionMode: this.isTransitioning()
+            })} was marked as finished`
+        );
+
         if (track && !this.isTransitioning()) {
+            this.debug('Adding track to history and emitting finish event since transition mode is disabled...');
             this.history.push(track);
             this.node.resetProgress();
             this.player.events.emit('playerFinish', this, track);
             if (this.tracks.size < 1 && this.repeatMode === QueueRepeatMode.OFF) {
+                this.debug('No more tracks left in the queue to play and repeat mode is off, initiating #emitEnd()');
                 this.#emitEnd();
             } else {
                 if (this.repeatMode === QueueRepeatMode.TRACK) {
+                    this.debug('Repeat mode is set to track, repeating last track from the history...');
                     this.__current = this.history.tracks.dispatch() || track;
                     return this.node.play(this.__current!, { queue: false });
                 }
-                if (this.repeatMode === QueueRepeatMode.QUEUE) this.tracks.add(this.history.tracks.dispatch() || track);
+                if (this.repeatMode === QueueRepeatMode.QUEUE) {
+                    this.debug('Repeat mode is set to queue, moving last track from the history to current queue...');
+                    this.tracks.add(this.history.tracks.dispatch() || track);
+                }
                 if (!this.tracks.size) {
                     if (this.repeatMode === QueueRepeatMode.AUTOPLAY) {
+                        this.debug('Repeat mode is set to autoplay, initiating autoplay handler...');
                         this.#handleAutoplay(track);
                         return;
                     }
                 } else {
+                    this.debug('Initializing next track of the queue...');
                     this.__current = this.tracks.dispatch()!;
                     this.node.play(this.__current, {
                         queue: false
@@ -636,13 +661,13 @@ export class GuildQueue<Meta = unknown> {
 
     async #handleAutoplay(track: Track) {
         let info = await YouTube.getVideo(track.url)
-            .then((x) => x.videos![0])
+            .then((x) => Util.randomChoice(x.videos!.slice(0, 5)))
             .catch(Util.noop);
 
         // fallback
         if (!info)
-            info = await YouTube.search(track.author)
-                .then((x) => x[0])
+            info = await YouTube.search(track.author, { limit: 5, type: 'video' })
+                .then((x) => Util.randomChoice(x))
                 .catch(Util.noop);
 
         if (!info) {

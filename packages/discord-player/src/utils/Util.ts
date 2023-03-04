@@ -130,6 +130,10 @@ class Util {
             detail
         });
     }
+
+    static randomChoice<T>(src: T[]): T {
+        return src[Math.floor(Math.random() * src.length)];
+    }
 }
 
 export { Util };

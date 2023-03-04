@@ -336,7 +336,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             queue.addTrack(result.playlist);
         }
 
-        if (!queue.node.isPlaying()) await queue.node.play();
+        if (!queue.isPlaying()) await queue.node.play();
 
         return {
             track: result.tracks[0],
