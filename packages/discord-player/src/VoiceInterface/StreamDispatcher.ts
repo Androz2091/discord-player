@@ -9,7 +9,8 @@ import {
     StreamType,
     VoiceConnection,
     VoiceConnectionStatus,
-    VoiceConnectionDisconnectReason
+    VoiceConnectionDisconnectReason,
+    version
 } from '@discordjs/voice';
 import { StageChannel, VoiceChannel } from 'discord.js';
 import type { Readable } from 'stream';
@@ -20,6 +21,17 @@ import { PlayerError, ErrorStatusCode } from '../Structures/PlayerError';
 import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
 import { GuildQueue, PostProcessedResult } from '../Structures';
 import { VoiceReceiverNode } from '../Structures/VoiceReceiverNode';
+
+const needsKeepAlivePatch = (() => {
+    if ('DP_NO_KEEPALIVE_PATCH' in process.env) return false;
+    // we dont care about dev version and semver:major >= 1
+    if (version.includes('-dev') || version.startsWith('1')) return false;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_major, minor, patch] = version.split('.').map((n) => parseInt(n));
+
+    // we need a patch if semver:minor is < 15 and semver:patch < 1
+    return minor > 14 ? false : minor < 15 && patch < 1;
+})();
 
 interface CreateStreamOps {
     type?: StreamType;
@@ -103,7 +115,21 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
         this.dsp.onError = (e) => this.emit('error', e as AudioPlayerError);
 
-        this.voiceConnection.on('stateChange', async (_, newState) => {
+        this.voiceConnection.on('stateChange', async (oldState, newState) => {
+            if (needsKeepAlivePatch) {
+                this.queue.debug(`Detected @discordjs/voice version ${version} which needs keepAlive patch, applying patch...`);
+                const oldNetworking = Reflect.get(oldState, 'networking');
+                const newNetworking = Reflect.get(newState, 'networking');
+
+                const networkStateChangeHandler = (_: object, newNetworkState: object) => {
+                    const newUdp = Reflect.get(newNetworkState, 'udp');
+                    clearInterval(newUdp?.keepAliveInterval);
+                };
+
+                oldNetworking?.off('stateChange', networkStateChangeHandler);
+                newNetworking?.on('stateChange', networkStateChangeHandler);
+            }
+
             if (newState.status === VoiceConnectionStatus.Disconnected) {
                 if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
                     try {

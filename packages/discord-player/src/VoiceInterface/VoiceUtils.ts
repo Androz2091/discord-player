@@ -3,6 +3,7 @@ import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoi
 import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
 import { GuildQueue } from '../Structures';
+import type { Player } from '../Player';
 
 class VoiceUtils {
     public cache: Collection<Snowflake, StreamDispatcher>;
@@ -11,7 +12,7 @@ class VoiceUtils {
      * The voice utils
      * @private
      */
-    constructor() {
+    constructor(public player: Player) {
         /**
          * The cache where voice utils stores stream managers
          * @type {Collection<Snowflake, StreamDispatcher>}
@@ -57,7 +58,8 @@ class VoiceUtils {
             guildId: channel.guild.id,
             channelId: channel.id,
             adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
-            selfDeaf: Boolean(options?.deaf)
+            selfDeaf: Boolean(options?.deaf),
+            debug: this.player.events.eventNames().includes('debug')
         });
 
         return conn;

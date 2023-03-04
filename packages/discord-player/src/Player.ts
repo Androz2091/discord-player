@@ -23,7 +23,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     public readonly client!: Client;
     public readonly options!: PlayerInitOptions;
     public nodes = new GuildNodeManager(this);
-    public readonly voiceUtils = new VoiceUtils();
+    public readonly voiceUtils = new VoiceUtils(this);
     public extractors = new ExtractorExecutionContext(this);
     public events = new PlayerEventsEmitter<GuildQueueEvents>(['error', 'playerError']);
 
