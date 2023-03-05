@@ -13,7 +13,6 @@ import { GuildQueueAudioFilters } from './GuildQueueAudioFilters';
 import { Readable } from 'stream';
 import { FiltersName, QueueRepeatMode, SearchQueryType } from '../types/types';
 import { setTimeout } from 'timers';
-import { YouTube } from 'youtube-sr';
 import { GuildQueueStatistics } from './GuildQueueStatistics';
 
 export interface GuildNodeInit<Meta = unknown> {
@@ -660,38 +659,39 @@ export class GuildQueue<Meta = unknown> {
     }
 
     async #handleAutoplay(track: Track) {
-        let info = await YouTube.getVideo(track.url)
-            .then((x) => Util.randomChoice(x.videos!.slice(0, 5)))
-            .catch(Util.noop);
+        try {
+            this.debug(`Autoplay >> Finding related tracks for Track ${track.title} (${track.url}) [ext:${track.extractor?.identifier || 'N/A'}]`);
+            const tracks =
+                (await track.extractor?.getRelatedTracks(track))?.tracks ||
+                (
+                    await this.player.extractors.run(async (ext) => {
+                        this.debug(`Autoplay >> Querying extractor ${ext.identifier}`);
+                        const res = await ext.getRelatedTracks(track);
+                        if (!res.tracks.length) {
+                            this.debug(`Autoplay >> Extractor ${ext.identifier} failed to provide results.`);
+                            return false;
+                        }
 
-        // fallback
-        if (!info)
-            info = await YouTube.search(track.author, { limit: 5, type: 'video' })
-                .then((x) => Util.randomChoice(x))
-                .catch(Util.noop);
+                        this.debug(`Autoplay >> Extractor ${ext.identifier} successfully returned results.`);
 
-        if (!info) {
+                        return res.tracks;
+                    })
+                )?.result;
+            if (!tracks?.length) {
+                this.debug(`Autoplay >> No related tracks found.`);
+                throw 'no related tracks';
+            }
+
+            this.debug(`Autoplay >> Picking random track from first 5 tracks...`);
+            const nextTrack = Util.randomChoice(tracks.slice(0, 5));
+            await this.node.play(nextTrack, {
+                queue: false,
+                seek: 0,
+                transitionMode: false
+            });
+        } catch {
             return this.#emitEnd();
         }
-
-        const nextTrack = new Track(this.player, {
-            title: info.title!,
-            url: `https://www.youtube.com/watch?v=${info.id}`,
-            duration: info.durationFormatted || Util.buildTimeCode(Util.parseMS(info.duration * 1000)),
-            description: info.title!,
-            thumbnail: typeof info.thumbnail === 'string' ? info.thumbnail! : info.thumbnail!.url!,
-            views: info.views,
-            author: info.channel!.name!,
-            requestedBy: track.requestedBy,
-            source: 'youtube',
-            queryType: 'youtubeVideo'
-        });
-
-        this.node.play(nextTrack, {
-            queue: false,
-            seek: 0,
-            transitionMode: false
-        });
     }
 
     #resolveInitializerAwaiters() {

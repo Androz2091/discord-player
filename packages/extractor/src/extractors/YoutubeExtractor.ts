@@ -1,4 +1,4 @@
-import { YouTube } from 'youtube-sr';
+import { Video, YouTube } from 'youtube-sr';
 
 // prettier-ignore
 import {
@@ -140,6 +140,43 @@ export class YoutubeExtractor extends BaseExtractor {
                 queryType: context.type!
             });
         });
+    }
+
+    public async getRelatedTracks(track: Track) {
+        let info: Video[] | void;
+
+        if (YoutubeExtractor.validateURL(track.url))
+            info = await YouTube.getVideo(track.url)
+                .then((x) => x.videos)
+                .catch(Util.noop);
+
+        // fallback
+        if (!info)
+            info = await YouTube.search(track.author || track.title, { limit: 5, type: 'video' })
+                .then((x) => x)
+                .catch(Util.noop);
+
+        if (!info?.length) {
+            return this.createResponse();
+        }
+
+        const similar = info.map(
+            (video) =>
+                new Track(this.context.player, {
+                    title: video.title!,
+                    url: `https://www.youtube.com/watch?v=${video.id}`,
+                    duration: video.durationFormatted || Util.buildTimeCode(Util.parseMS(video.duration * 1000)),
+                    description: video.title!,
+                    thumbnail: typeof video.thumbnail === 'string' ? video.thumbnail! : video.thumbnail!.url!,
+                    views: video.views,
+                    author: video.channel!.name!,
+                    requestedBy: track.requestedBy,
+                    source: 'youtube',
+                    queryType: 'youtubeVideo'
+                })
+        );
+
+        return this.createResponse(null, similar);
     }
 
     public emptyResponse(): ExtractorInfo {

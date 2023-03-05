@@ -69,6 +69,15 @@ export class BaseExtractor {
     }
 
     /**
+     * Get related tracks for the given track
+     * @param track The track source
+     */
+    public async getRelatedTracks(track: Track): Promise<ExtractorInfo> {
+        void track;
+        throw new Error('Not implemented');
+    }
+
+    /**
      * A stream middleware to handle streams before passing it to the player
      * @param stream The incoming stream
      * @param next The next function

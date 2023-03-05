@@ -18,6 +18,11 @@ export class VimeoExtractor extends BaseExtractor {
         return ([QueryType.VIMEO] as SearchQueryType[]).some((r) => r === type);
     }
 
+    public async getRelatedTracks(track: Track) {
+        void track;
+        return this.createResponse();
+    }
+
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         switch (context.type) {
             case QueryType.VIMEO: {

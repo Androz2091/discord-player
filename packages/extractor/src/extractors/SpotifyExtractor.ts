@@ -19,6 +19,11 @@ export class SpotifyExtractor extends BaseExtractor {
         return (<SearchQueryType[]>[QueryType.SPOTIFY_ALBUM, QueryType.SPOTIFY_PLAYLIST, QueryType.SPOTIFY_SONG]).some((t) => t === type);
     }
 
+    public async getRelatedTracks(track: Track) {
+        void track;
+        return this.createResponse();
+    }
+
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         switch (context.type) {
             case QueryType.SPOTIFY_SONG: {

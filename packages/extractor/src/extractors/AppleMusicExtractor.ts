@@ -14,7 +14,23 @@ export class AppleMusicExtractor extends BaseExtractor {
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
-        return (<SearchQueryType[]>[QueryType.APPLE_MUSIC_ALBUM, QueryType.APPLE_MUSIC_PLAYLIST, QueryType.APPLE_MUSIC_SONG, QueryType.APPLE_MUSIC_SEARCH]).some((t) => t === type);
+        // prettier-ignore
+        return (<SearchQueryType[]>[
+            QueryType.APPLE_MUSIC_ALBUM,
+            QueryType.APPLE_MUSIC_PLAYLIST,
+            QueryType.APPLE_MUSIC_SONG,
+            QueryType.APPLE_MUSIC_SEARCH
+        ]).some((t) => t === type);
+    }
+
+    public async getRelatedTracks(track: Track) {
+        if (track.queryType === QueryType.APPLE_MUSIC_SONG)
+            return this.handle(track.author || track.title, {
+                type: QueryType.APPLE_MUSIC_SEARCH,
+                requestedBy: track.requestedBy
+            });
+
+        return this.createResponse();
     }
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {

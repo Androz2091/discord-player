@@ -23,6 +23,16 @@ export class SoundCloudExtractor extends BaseExtractor {
         return ([QueryType.SOUNDCLOUD, QueryType.SOUNDCLOUD_PLAYLIST, QueryType.SOUNDCLOUD_SEARCH, QueryType.SOUNDCLOUD_TRACK] as SearchQueryType[]).some((r) => r === type);
     }
 
+    public async getRelatedTracks(track: Track) {
+        if (track.queryType === QueryType.SOUNDCLOUD_TRACK)
+            return this.handle(track.author || track.title, {
+                requestedBy: track.requestedBy,
+                type: QueryType.SOUNDCLOUD_SEARCH
+            });
+
+        return this.createResponse();
+    }
+
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         switch (context.type) {
             case QueryType.SOUNDCLOUD_TRACK: {
