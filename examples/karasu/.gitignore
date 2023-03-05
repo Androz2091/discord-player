@@ -24,9 +24,6 @@ config.ts
 *.heapsnapshot
 *.log
 
-# Ignore yarn lockfiles file
-yarn.lock
-
 # Environment variables
 .env
 .env.local
