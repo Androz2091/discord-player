@@ -172,11 +172,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      */
     public async seek(duration: number) {
         if (!this.queue.currentTrack) return false;
-        await this.play(this.queue.currentTrack, {
-            seek: duration,
-            transitionMode: true
-        });
-        return true;
+        return await this.queue.filters.triggerReplay(duration);
     }
 
     /**
