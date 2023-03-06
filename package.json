@@ -47,7 +47,7 @@
     "eslint": "^8.21.0",
     "fs-extra": "^11.1.0",
     "prettier": "^2.8.2",
-    "rimraf": "^4.1.2",
+    "rimraf": "^4.3.0",
     "tsup": "^6.5.0",
     "turbo": "latest",
     "typedoc-nextra": "latest",
