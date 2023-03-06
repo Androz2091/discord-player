@@ -395,7 +395,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                     this.queue.player.events.emit('playerSkip', this.queue, track);
                     this.queue.player.events.emit('playerError', this.queue, error, track);
                     this.queue.initializing = false;
-                    this.play(this.queue.tracks.dispatch(), { queue: false });
+                    const nextTrack = this.queue.tracks.dispatch();
+                    if (nextTrack) this.play({ queue: false });
                     return;
                 }
 
