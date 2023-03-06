@@ -129,7 +129,7 @@ That's all it takes to build your own music bot.
 
 These bots are made by the community, they can help you build your own!
 
--   **[Discord Music Bot](https://github.com/Androz2091/discord-music-bot)** by [Androz2091](https://github.com/Androz2091)
+-   **[Discord Music Bot](https://github.com/Androz2091/discord-music-bot)** by [Androz2091](https://github.com/Androz2091) (**outdated**)
 -   [Karasu-Music-Bot](https://github.com/ItsAuric/karasu-music-bot) by [ItsAuric](https://github.com/itsauric)
 -   [Dodong](https://github.com/nizeic/Dodong) by [nizeic](https://github.com/nizeic)
 -   [Musico](https://github.com/Whirl21/Musico) by [Whirl21](https://github.com/Whirl21)
