@@ -136,5 +136,6 @@ These bots are made by the community, they can help you build your own!
 -   [Melody](https://github.com/NerdyTechy/Melody) by [NerdyTechy](https://github.com/NerdyTechy)
 -   [Eyesense-Music-Bot](https://github.com/naseif/Eyesense-Music-Bot) by [naseif](https://github.com/naseif)
 -   [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
+    [Bhop-Music-Bot](https://github.com/akanora/bhop-music-bot) by [akanora](https://github.com/akanora)
 -   [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
 -   [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
