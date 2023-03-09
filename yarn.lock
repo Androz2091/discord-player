@@ -196,7 +196,7 @@ __metadata:
     "@emotion/react": ^11.10.5
     "@emotion/server": ^11.10.0
     "@mantine/core": ^5.10.2
-    "@mantine/hooks": ^5.10.2
+    "@mantine/hooks": ^6.0.1
     "@mantine/next": ^5.10.2
     "@mantine/prism": ^5.10.2
     next: ^13.1.4
@@ -702,12 +702,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/hooks@npm:^5.10.2":
-  version: 5.10.2
-  resolution: "@mantine/hooks@npm:5.10.2"
+"@mantine/hooks@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "@mantine/hooks@npm:6.0.1"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 247f5cdce90e4ecabc81a899361091d0c9b4da57485d30ca74dccdb99053b7d5a53d2fb57df18907ca3676a8328f9a94d69d72aa38426efd17dd60d1b1f645a9
+  checksum: 94c7563be35ec36a45d62ef183bdbc2e1e65364b011a7b055606546c10a1e988bc421ec36678554a04a79987a7ed9da9a6058e20bfd5632ec7adfe45bf671f74
   languageName: node
   linkType: hard
 
