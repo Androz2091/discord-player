@@ -321,7 +321,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         if (!vc?.isVoiceBased()) throw new Error('Expected a voice channel');
 
         const originalResult = query instanceof SearchResult ? query : await this.search(query, options);
-
         const result = (await options.afterSearch?.(originalResult)) || originalResult;
         if (result.isEmpty()) {
             throw new Error(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
@@ -412,7 +411,12 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         // force particular extractor
         if (options.searchEngine.startsWith('ext:')) {
             extractor = this.extractors.get(options.searchEngine.substring(4))!;
-            if (!extractor) return new SearchResult(this, { query, queryType });
+            if (!extractor)
+                return new SearchResult(this, {
+                    query,
+                    queryType,
+                    requestedBy: options.requestedBy
+                });
         }
 
         // query all extractors
@@ -449,7 +453,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         // no extractors available
         if (!extractor) {
             this.debug('Failed to find appropriate extractor');
-            return new SearchResult(this, { query, queryType });
+            return new SearchResult(this, {
+                query,
+                queryType,
+                requestedBy: options.requestedBy
+            });
         }
 
         this.debug(`Executing metadata query using ${extractor.identifier} extractor...`);
@@ -467,7 +475,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 queryType,
                 playlist: res.playlist,
                 tracks: res.tracks,
-                extractor
+                extractor,
+                requestedBy: options.requestedBy
             });
 
             if (!options.ignoreCache) {
@@ -490,7 +499,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         );
         if (!result?.result) {
             this.debug(`Failed to query metadata query using ${result?.extractor.identifier || 'N/A'} extractor.`);
-            return new SearchResult(this, { query, queryType });
+            return new SearchResult(this, {
+                query,
+                queryType,
+                requestedBy: options.requestedBy
+            });
         }
 
         this.debug(`Metadata query was successful using ${result.extractor.identifier}!`);
@@ -500,7 +513,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             queryType,
             playlist: result.result.playlist,
             tracks: result.result.tracks,
-            extractor: result.extractor
+            extractor: result.extractor,
+            requestedBy: options.requestedBy
         });
 
         if (!options.ignoreCache) {

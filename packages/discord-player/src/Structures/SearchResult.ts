@@ -18,6 +18,7 @@ export class SearchResult {
     public constructor(public player: Player, private _data: SearchResultData) {
         this._data.tracks?.forEach((track) => {
             track.extractor = this._data.extractor || null;
+            track.requestedBy ??= _data.requestedBy || null;
         });
     }
 
@@ -28,11 +29,17 @@ export class SearchResult {
 
     public setRequestedBy(user: User) {
         this._data.requestedBy = user;
+        this._data.tracks?.forEach((track) => {
+            track.requestedBy = user;
+        });
         return this;
     }
 
     public setExtractor(extractor: BaseExtractor) {
         this._data.extractor = extractor;
+        this._data.tracks?.forEach((track) => {
+            track.extractor = extractor;
+        });
         return this;
     }
 
