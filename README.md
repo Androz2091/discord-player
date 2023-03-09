@@ -127,14 +127,4 @@ That's all it takes to build your own music bot.
 
 ## Example bots made with Discord Player
 
-These bots are made by the community, they can help you build your own!
-
--   **[Discord Music Bot](https://github.com/Androz2091/discord-music-bot)** by [Androz2091](https://github.com/Androz2091) (**outdated**)
--   [Karasu-Music-Bot](https://github.com/ItsAuric/karasu-music-bot) by [ItsAuric](https://github.com/itsauric)
--   [Dodong](https://github.com/nizeic/Dodong) by [nizeic](https://github.com/nizeic)
--   [Musico](https://github.com/Whirl21/Musico) by [Whirl21](https://github.com/Whirl21)
--   [Melody](https://github.com/NerdyTechy/Melody) by [NerdyTechy](https://github.com/NerdyTechy)
--   [Eyesense-Music-Bot](https://github.com/naseif/Eyesense-Music-Bot) by [naseif](https://github.com/naseif)
--   [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
--   [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
--   [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
+[You can find community-built example bots that use discord-player here](https://github.com/Androz2091/discord-player/issues/1638)
