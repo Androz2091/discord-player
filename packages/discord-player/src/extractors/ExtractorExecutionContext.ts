@@ -79,9 +79,9 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
         return this.store.get(identifier);
     }
 
-    public async register(_extractor: typeof BaseExtractor) {
+    public async register(_extractor: typeof BaseExtractor, options: Record<string, unknown> = {}) {
         if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return;
-        const extractor = new _extractor(this);
+        const extractor = new _extractor(this, options);
 
         try {
             this.store.set(_extractor.identifier, extractor);

@@ -15,8 +15,9 @@ export class BaseExtractor {
     /**
      * Extractor constructor
      * @param context Context that instantiated this extractor
+     * @param options Initialization options for this extractor
      */
-    public constructor(public context: ExtractorExecutionContext) {}
+    public constructor(public context: ExtractorExecutionContext, public options: Record<string, unknown> = {}) {}
 
     /**
      * Identifier of this extractor
