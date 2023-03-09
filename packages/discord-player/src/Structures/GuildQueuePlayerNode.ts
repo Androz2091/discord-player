@@ -341,7 +341,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      * @param res The track to play
      * @param options Options for playing the track
      */
-    public async play(res?: Track, options?: ResourcePlayOptions) {
+    public async play(res?: Track | null, options?: ResourcePlayOptions) {
         if (!this.queue.dispatcher?.voiceConnection) {
             throw new Error('No voice connection available');
         }
@@ -396,7 +396,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                     this.queue.player.events.emit('playerError', this.queue, error, track);
                     this.queue.initializing = false;
                     const nextTrack = this.queue.tracks.dispatch();
-                    if (nextTrack) this.play({ queue: false });
+                    if (nextTrack) this.play(null, { queue: false });
                     return;
                 }
 
