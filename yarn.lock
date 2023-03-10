@@ -156,7 +156,7 @@ __metadata:
   resolution: "@discord-player/extractor@workspace:packages/extractor"
   dependencies:
     "@discord-player/tsconfig": "*"
-    "@types/node": ^18.11.18
+    "@types/node": ^18.15.0
     "@types/node-fetch": ^2.6.2
     file-type: ^16.5.4
     genius-lyrics: ^4.4.2
@@ -1393,17 +1393,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.11.18":
-  version: 18.11.18
-  resolution: "@types/node@npm:18.11.18"
-  checksum: 03f17f9480f8d775c8a72da5ea7e9383db5f6d85aa5fefde90dd953a1449bd5e4ffde376f139da4f3744b4c83942166d2a7603969a6f8ea826edfb16e6e3b49d
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^18.6.3":
-  version: 18.6.3
-  resolution: "@types/node@npm:18.6.3"
-  checksum: 38495b8fd27200d2b7ab9ccd8c1e2475d2411fba15330f2cba869a85ef79dd42382a2658c8dd298ace8c21ed3bfafcdea408faecd74928b144377d07d00e7c8c
+"@types/node@npm:^18.15.0":
+  version: 18.15.0
+  resolution: "@types/node@npm:18.15.0"
+  checksum: d81372276dd5053b1743338b61a2178ff9722dc609189d01fc7d1c2acd539414039e0e4780678730514390dad3f29c366a28c29e8dbd5b0025651181f6dd6669
   languageName: node
   linkType: hard
 
@@ -2546,7 +2539,7 @@ __metadata:
     "@discord-player/tsconfig": "*"
     "@discord-player/utils": "*"
     "@discordjs/voice": latest
-    "@types/node": ^18.6.3
+    "@types/node": ^18.15.0
     "@types/ws": ^8.5.3
     discord-api-types: ^0.37.0
     discord.js: ^14.1.2
