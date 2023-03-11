@@ -8,7 +8,7 @@ client.on("ready", function (readyClient) {
 
     //Discord Player Initialization
 	const { Player } = require("discord-player");
-	const player = new Player(client);
+	const player = new Player(readyClient);
 
 });
 
