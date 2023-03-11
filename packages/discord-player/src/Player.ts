@@ -1,5 +1,5 @@
 import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable } from 'discord.js';
-import { Playlist, Track, GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, SearchResult } from './Structures';
+import { Playlist, Track, GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, SearchResult, GuildQueue } from './Structures';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
 import { QueryResolver } from './utils/QueryResolver';
@@ -12,6 +12,13 @@ import { QueryCache } from './utils/QueryCache';
 import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
+
+export interface PlayerNodeInitializationResult<T = unknown> {
+    track: Track;
+    extractor: BaseExtractor | null;
+    searchResult: SearchResult;
+    queue: GuildQueue<T>;
+}
 
 export class Player extends PlayerEventsEmitter<PlayerEvents> {
     #lastLatency = -1;
@@ -316,7 +323,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             connectionOptions?: VoiceConnectConfig;
             afterSearch?: (result: SearchResult) => Promise<SearchResult>;
         } = {}
-    ) {
+    ): Promise<PlayerNodeInitializationResult<T>> {
         const vc = this.client.channels.resolve(channel);
         if (!vc?.isVoiceBased()) throw new Error('Expected a voice channel');
 
