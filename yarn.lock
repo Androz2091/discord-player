@@ -158,6 +158,7 @@ __metadata:
     "@discord-player/tsconfig": "*"
     "@types/node": ^18.11.18
     "@types/node-fetch": ^2.6.2
+    discord-player: "*"
     file-type: ^16.5.4
     genius-lyrics: ^4.4.2
     node-html-parser: ^6.1.4
@@ -168,7 +169,6 @@ __metadata:
     youtube-sr: ^4.3.4
     ytdl-core: ^4.11.2
   peerDependencies:
-    discord-player: "*"
     play-dl: 1.x
     ytdl-core: 4.x
   languageName: unknown
@@ -2538,7 +2538,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-player@workspace:packages/discord-player":
+"discord-player@*, discord-player@workspace:packages/discord-player":
   version: 0.0.0-use.local
   resolution: "discord-player@workspace:packages/discord-player"
   dependencies:
