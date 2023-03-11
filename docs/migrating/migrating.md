@@ -36,7 +36,7 @@ FFmpeg or Avconv is required for media transcoding. You can get it from [https:/
 $ npm install ffmpeg-static
 ```
 
-You can get avconv from [https://libav.org/download](https://libav.org/download).
+You can get avconv from [npmjs.org/package/avconv](https://npmjs.org/package/avconv).
 
 #### Streaming Library
 
@@ -50,9 +50,11 @@ $ npm install @distube/ytdl-core
 
 Done with all these? Let's write a simple music bot then.
 
+#
+
 ### Setup
 
-Let's create a master player instance.
+Let's create a master player instance, this should ideally be in your `index.js` or corresponding file.
 
 ```js
 const { Player } = require('discord-player');
@@ -77,30 +79,42 @@ player.events.on('playerStart', (queue, track) => {
 });
 ```
 
-Let's write the command part. You can define the command as you desire. We will only check the command handler part:
+Let's write the command part for `play.js`. You can define the command as you desire. We will only check the command handler part:
 
 ```js
+import { useMasterPlayer } from 'discord-player';
+
 async function execute(interaction) {
+    const player = useMasterPlayer(); //Get the player instance that we created earlier
     const channel = interaction.message.member.voice.channel;
     if (!channel) return interaction.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
     const query = interaction.options.getString('query', true); // we need input/query to play
 
     // let's defer the interaction as things can take time to process
     await interaction.deferReply();
+    const searchResult = await player.search(query, { requestedBy: interaction.user });
 
-    try {
-        await player.play(channel, query, {
-            nodeOptions: {
-                // nodeOptions are the options for guild node (aka your queue in simple word)
-                metadata: interaction // we can access this metadata object using queue.metadata later on
-            }
-        });
-    } catch (e) {
-        // let's return error if something failed
-        return interaction.followUp(`Something went wrong: ${e}`);
+    if (!searchResult.hasTracks()) {
+        //If player didn't find any songs for this query
+        await interaction.editReply(`We found no tracks for ${query}!`);
+        return;
+    } else {
+        try {
+            await player.play(channel, searchResult, {
+                nodeOptions: {
+                    metadata: interaction.channel // we can access this metadata object using queue.metadata later on
+                }
+            });
+            await interaction.editReply(`Loading your track`);
+        } catch (e) {
+            // let's return error if something failed
+            return interaction.followUp(`Something went wrong: ${e}`);
+        }
     }
 }
 ```
+
+_You can find the full list of available nodeOptions over [here](https://discord-player.js.org/docs/types/discord-player/GuildNodeInit)_
 
 That's all it takes to build a simple play command.
 
@@ -109,6 +123,8 @@ That's all it takes to build a simple play command.
 The old `Queue` is deprecated and is replaced with `GuildQueue` which is similar to `Queue` but handles things in a better way.
 
 You can now create a `Player.singleton(client)` to avoid polluting your client and in order to be able to access the player instance anywhere in your code.
+
+#
 
 ## Commonly used methods that changed
 
@@ -171,11 +187,6 @@ The main changes to the Player class are outlined below.
 
 + player.singleton(client, options);
 Note: parameters can be omitted after initial use to get the singleton.
-
-- player.search(query, options);
-+ player.search changes
-
-// TODO somestuff for cache? maybe in additions section
 
 - onBeforeCreateStream();
 Note: it is not removed but is no longer needed when when you want to use play-dl. Now you only need play-dl installed.
@@ -288,6 +299,8 @@ Player [events](https://discord-player.js.org/docs/types/discord-player/GuildQue
 + playerStart
 ```
 
+#
+
 ## New Additions
 
 ### Events
@@ -383,6 +396,8 @@ Hooks are currently still an experimental feature that will continue to be worke
 -   **useHistory**: Lets you access `GuildQueueHistory` from anywhere in your process
 -   **usePlayer**: Lets you access `GuildQueuePlayerNode` from anywhere in your process (Note: this does not return discord-player's main `Player`)
 
+#
+
 ## Frequently Asked Questions
 
 ### How do I reply to the event like v5?
@@ -402,13 +417,4 @@ player.events.on('playerStart', (queue, track) => {
     const channel = queue.metadata.channel; // queue.metadata is your "message" object
     channel.send(`🎶 | Started playing **${track.title}**`);
 });
-```
-
-### How do I stop the player
-
-You have to use `<Queue>.delete()` to destroy the queue. It will also stop the player.
-
-```js
-const queue = player.nodes.get(guildId);
-if (!queue.deleted) queue.delete();
 ```
