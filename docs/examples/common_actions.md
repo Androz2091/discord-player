@@ -9,7 +9,7 @@ Also this does not perform checks on the current status of the queue. Refer to o
 ## Getting the player instance from anywhere
 
 ```js
-import { useMasterPlayer } from 'discord-player';
+const { useMasterPlayer } = require("discord-player");
 ...
 const player = useMasterPlayer();
 ```
@@ -17,7 +17,7 @@ const player = useMasterPlayer();
 ## Playing a new track
 
 ```js
-import { useMasterPlayer } from 'discord-player';
+const { useMasterPlayer } = require("discord-player");
 ...
 const player = useMasterPlayer();
 await player.play(interaction.member.voice.channel, query);
