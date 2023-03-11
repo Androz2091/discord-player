@@ -49,7 +49,7 @@
     "prettier": "^2.8.2",
     "rimraf": "^4.1.2",
     "tsup": "^6.5.0",
-    "turbo": "latest",
+    "turbo": "^1.8.3",
     "typedoc-nextra": "latest",
     "typescript": "^4.9.4"
   },
