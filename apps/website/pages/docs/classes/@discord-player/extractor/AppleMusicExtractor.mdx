@@ -9,16 +9,16 @@ new AppleMusicExtractor(context)
 
 ## Properties
 ### private  _stream: StreamFN
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AppleMusicExtractor.ts#L9)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/extractor/src/extractors/AppleMusicExtractor.ts#L9)
 ### public  context: ExtractorExecutionContext
-- Source: `packages/discord-player/dist/index.d.ts#L83`
+- Source: `packages/discord-player/dist/index.d.ts#L76`
 ### public static identifier: 'com.discord\-player.applemusicextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AppleMusicExtractor.ts#L8)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/extractor/src/extractors/AppleMusicExtractor.ts#L8)
 ### public  identifier: string
 Identifier of this extractor
 ## Methods
 ### public  activate(): Promise\<void>
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AppleMusicExtractor.ts#L11)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/extractor/src/extractors/AppleMusicExtractor.ts#L11)
 ### public  createResponse(playlist?, tracks?): ExtractorInfo
 Create extractor response
 
@@ -31,7 +31,7 @@ Create extractor response
 | tracks | Array\<Track> | ✅ | The track array |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L137`
+- Source: `packages/discord-player/dist/index.d.ts#L130`
 ### public  deactivate(): Promise\<void>
 This method will be executed when this extractor is deactivated
 
@@ -39,7 +39,7 @@ This method will be executed when this extractor is deactivated
 
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L104`
+- Source: `packages/discord-player/dist/index.d.ts#L97`
 ### public  debug(message): boolean
 Write debug message
 
@@ -51,7 +51,7 @@ Write debug message
 | message | string | ❌ | The debug message |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L142`
+- Source: `packages/discord-player/dist/index.d.ts#L135`
 ### public  emit(event, args): boolean
 Dispatch an event to the player
 
@@ -64,7 +64,14 @@ Dispatch an event to the player
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L131`
+- Source: `packages/discord-player/dist/index.d.ts#L124`
+### public  getRelatedTracks(track): Promise\<ExtractorInfo>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/extractor/src/extractors/AppleMusicExtractor.ts#L26)
 ### public  handle(query, context): Promise\<ExtractorInfo>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -72,7 +79,7 @@ Dispatch an event to the player
 | context | ExtractorSearchContext | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AppleMusicExtractor.ts#L20)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/extractor/src/extractors/AppleMusicExtractor.ts#L36)
 ### public  handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
 
@@ -85,14 +92,14 @@ A stream middleware to handle streams before passing it to the player
 | next | NextFunction | ❌ | The next function |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L125`
+- Source: `packages/discord-player/dist/index.d.ts#L118`
 ### public  stream(info): Promise\<string \| Readable>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | info | Track | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AppleMusicExtractor.ts#L148)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/extractor/src/extractors/AppleMusicExtractor.ts#L164)
 ### public  validate(query, type?): Promise\<boolean>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -100,4 +107,4 @@ A stream middleware to handle streams before passing it to the player
 | type | null \| SearchQueryType | ✅ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AppleMusicExtractor.ts#L16)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/extractor/src/extractors/AppleMusicExtractor.ts#L16)

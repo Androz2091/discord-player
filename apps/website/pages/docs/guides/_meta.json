@@ -1,17 +1,17 @@
 {
-    "welcome": "Welcome",
-    "v6-migration": "V6 Migration",
-    "supported-sources": "Supported Sources",
+    "audio-filters": "Audio Filters",
     "autocomplete-search": "Autocomplete Search",
+    "common-errors": "Common Errors",
+    "cookies": "Cookies",
+    "custom-filters": "Custom Filters",
     "getting-lyrics": "Getting Lyrics",
+    "how-to-access-player": "How To Access Player",
+    "migrating": "Migrating",
     "playing-local-file": "Playing Local File",
     "playing-raw-resource": "Playing Raw Resource",
-    "voice-recording": "Voice Recording",
+    "proxy": "Proxy",
     "stream-hooks": "Stream Hooks",
-    "common-problems": "Common Problems",
-    "accessing-player": "Accessing Player",
-    "audio-filters": "Audio Filters",
-    "custom-audio-filters": "Custom Audio Filters",
-    "preventing-ratelimits": "Preventing Ratelimits",
-    "using-proxy": "Using Proxy"
+    "stream-sources": "Stream Sources",
+    "voice-recording": "Voice Recording",
+    "welcome": "Welcome"
 }

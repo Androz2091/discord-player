@@ -1,4 +1,4 @@
-## ExtractorExecutionContext
+## ExtractorExecutionContext extends PlayerEventsEmitter\<ExtractorExecutionEvents>
 
 ```typescript
 new ExtractorExecutionContext(player)
@@ -9,35 +9,136 @@ new ExtractorExecutionContext(player)
 
 ## Properties
 ### public  player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L20)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L54)
+### public  requiredEvents: Array\<keyof ExtractorExecutionEvents>
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L7)
 ### public  store: Collection\<string, BaseExtractor>
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L19)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L53)
+### public static defaultMaxListeners: number
+- Source: `packages/utils/dist/index.d.ts#L42`
 ### public  size: number
 
 ## Methods
+### public  addListener(event, listener): ExtractorExecutionContext
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | U | ❌ | - |
+| listener | ExtractorExecutionEvents\[U] | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L44`
+### public  emit(name, args): boolean
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| name | K | ❌ | - |
+| args | Parameters\<ExtractorExecutionEvents\[K]> | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L11)
+### public  eventNames(): Array\<U>
+- Source: `packages/utils/dist/index.d.ts#L53`
 ### public  get(identifier): undefined \| BaseExtractor
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | identifier | string | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L42)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L78)
+### public  getMaxListeners(): number
+- Source: `packages/utils/dist/index.d.ts#L57`
 ### public  isRegistered(identifier): boolean
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | identifier | string | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L34)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L70)
+### public  listenerCount(type): number
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| type | keyof ExtractorExecutionEvents | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L54`
+### public  listeners(type): Array\<ExtractorExecutionEvents\[U]>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| type | U | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L55`
 ### public  loadDefault(): Promise\<\{ error: Error,success: boolean } \| \{ error: null,success: boolean }>
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L22)
-### public  register(_extractor): Promise\<void>
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L58)
+### public  off(event, listener): ExtractorExecutionContext
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | U | ❌ | - |
+| listener | ExtractorExecutionEvents\[U] | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L51`
+### public  on(event, listener): ExtractorExecutionContext
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | U | ❌ | - |
+| listener | ExtractorExecutionEvents\[U] | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L50`
+### public  once(event, listener): ExtractorExecutionContext
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | U | ❌ | - |
+| listener | ExtractorExecutionEvents\[U] | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L49`
+### public  prependListener(event, listener): ExtractorExecutionContext
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | U | ❌ | - |
+| listener | ExtractorExecutionEvents\[U] | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L45`
+### public  prependOnceListener(event, listener): ExtractorExecutionContext
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | U | ❌ | - |
+| listener | ExtractorExecutionEvents\[U] | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L46`
+### public  rawListeners(type): Array\<ExtractorExecutionEvents\[U]>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| type | U | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L56`
+### public  register(_extractor, options): Promise\<void>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | _extractor | (typeof BaseExtractor) | ❌ | - |
+| options | Record\<string, unknown> | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L46)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L82)
+### public  removeAllListeners(event?): ExtractorExecutionContext
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | keyof ExtractorExecutionEvents | ✅ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L48`
+### public  removeListener(event, listener): ExtractorExecutionContext
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| event | U | ❌ | - |
+| listener | ExtractorExecutionEvents\[U] | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L47`
 ### public  run(fn, filterBlocked): Promise\<null \| ExtractorExecutionResult\<T>>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -45,13 +146,20 @@ new ExtractorExecutionContext(player)
 | filterBlocked | boolean | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L89)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L126)
+### public  setMaxListeners(n): ExtractorExecutionContext
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| n | number | ❌ | - |
+
+
+- Source: `packages/utils/dist/index.d.ts#L58`
 ### public  unregister(_extractor): Promise\<void>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | _extractor | K | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L61)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L100)
 ### public  unregisterAll(): Promise\<void>
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L76)
+- [Source](https://github.com/Androz2091/discord-player/blob/6af3b78/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L118)
