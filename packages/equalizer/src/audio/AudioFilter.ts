@@ -1,13 +1,12 @@
 import { TransformCallback } from 'stream';
 import { PCMTransformer, PCMTransformerOptions } from '../utils';
-import { AFPulsatorConfig, AFTremoloConfig, AFVibratoConfig, LR, applyEqualization, applyPulsator, applyTremolo, applyVibrato } from './transformers';
-import { Equalizer, EqualizerBand } from '../equalizer';
+import { AFPulsatorConfig, AFTremoloConfig, AFVibratoConfig, LR, applyPulsator, applyTremolo, applyVibrato } from './transformers';
+import { EqualizerBand } from '../equalizer';
 
 export const AudioFilters = {
     '8D': '8D',
     Tremolo: 'Tremolo',
-    Vibrato: 'Vibrato',
-    BassBoost: 'BassBoost'
+    Vibrato: 'Vibrato'
 } as const;
 
 export type PCMFilters = keyof typeof AudioFilters;
@@ -27,10 +26,6 @@ export const BASS_EQ_BANDS: EqualizerBand[] = Array.from({ length: 3 }, (_, i) =
 // based on lavadsp
 export class AudioFilter extends PCMTransformer {
     public filters: PCMFilters[] = [];
-    public bassEQ = new Equalizer(
-        2,
-        BASS_EQ_BANDS.map((m) => m.gain)
-    );
     public targetSampleRate = this.sampleRate;
     public totalSamples = 0;
     private _processedSamples = 0;
@@ -106,8 +101,6 @@ export class AudioFilter extends PCMTransformer {
             return false;
         }
 
-        this.bassEQ.bandMultipliers = filters.includes('BassBoost') ? BASS_EQ_BANDS.map((m) => m.gain) : [];
-
         this.filters = filters;
 
         this.onUpdate?.();
@@ -169,10 +162,6 @@ export class AudioFilter extends PCMTransformer {
     public applyFilters(byte: number, channel: LR) {
         if (this.filters.length) {
             for (const filter of this.filters) {
-                if (filter === 'BassBoost' && this.bassEQ) {
-                    byte = applyEqualization(this.bassEQ, byte);
-                }
-
                 if (filter === '8D') {
                     byte = applyPulsator(this.pulsatorConfig, byte, channel);
                 }
