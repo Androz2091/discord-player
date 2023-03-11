@@ -2,13 +2,13 @@ name: Node.js Package
 on:
     workflow_dispatch:
     release:
-        types: [created]
+        types: [published]
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
     cancel-in-progress: true
 jobs:
     publish-npm:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-20.04
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
@@ -24,8 +24,7 @@ jobs:
                 path: .yarn/cache
                 key: yarn-cache-node-18
             - run: yarn install --immutable
-            - run: yarn build
-            - run: cd packages/discord-player
-            - run: npm publish --access public
+            - name: Build and publish
+              uses: ./.github/actions/npm
               env:
-                  NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+                  NPM_AUTH_TOKEN: ${{secrets.npm_token}}
