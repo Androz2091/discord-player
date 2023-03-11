@@ -5,7 +5,6 @@ set -e
 # Parse the package name and version from the release name
 if [[ $GITHUB_REF =~ ^refs/tags/ ]]; then
   RELEASE_NAME=${GITHUB_REF#refs/tags/}
-  COMMIT_MESSAGE="chore($PACKAGE_NAME): release v$PACKAGE_VERSION"
 elif [[ $GITHUB_REF =~ ^refs/heads/ ]]; then
   echo "Skipping action: this action should only be triggered by a tag, not a branch"
   exit 0
@@ -53,5 +52,5 @@ git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
 # Add all changes and commit with the specified commit message
 git add .
-git commit -m "$COMMIT_MESSAGE"
+git commit -m "chore($PACKAGE_NAME): release v$PACKAGE_VERSION"
 git push
