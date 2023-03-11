@@ -1,5 +1,11 @@
 import { YouTube } from 'youtube-sr';
 
+let factory: {
+    name: string;
+    stream: StreamFN;
+    lib: string;
+};
+
 export const createImport = (lib: string) => import(lib).catch(() => null);
 
 export const YouTubeLibs = [
@@ -35,7 +41,9 @@ export const getFetch =
 export type StreamFN = (q: string) => Promise<import('stream').Readable | string>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function loadYtdl(options?: any) {
+export async function loadYtdl(options?: any, force = false) {
+    if (factory && !force) return factory;
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let lib: any, _ytLibName: string, _stream: StreamFN;
 
@@ -89,7 +97,8 @@ export async function loadYtdl(options?: any) {
         throw new Error(`Could not load youtube library. Install one of ${YouTubeLibs.map((lib) => `"${lib}"`).join(', ')}`);
     }
 
-    return { name: _ytLibName!, stream: _stream, lib };
+    factory = { name: _ytLibName!, stream: _stream, lib };
+    return factory;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

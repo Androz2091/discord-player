@@ -55,6 +55,9 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
         super(['error']);
     }
 
+    /**
+     * Load default extractors from `@discord-player/extractor`
+     */
     public async loadDefault() {
         const mod = await Util.import(knownExtractorLib);
         if (mod.error) return { success: false, error: mod.error as Error };
@@ -67,18 +70,34 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
         return { success: true, error: null };
     }
 
+    /**
+     * Validate if the given extractor is registered
+     * @param identifier The extractor identifier
+     */
     public isRegistered(identifier: string) {
         return this.store.has(identifier);
     }
 
+    /**
+     * The size of registered extractors
+     */
     public get size() {
         return this.store.size;
     }
 
+    /**
+     * Get single extractor
+     * @param identifier The extractor to get
+     */
     public get(identifier: string) {
         return this.store.get(identifier);
     }
 
+    /**
+     * Register single extractor
+     * @param _extractor The extractor to register
+     * @param options Options supplied to the extractor
+     */
     public async register(_extractor: typeof BaseExtractor, options: Record<string, unknown> = {}) {
         if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return;
         const extractor = new _extractor(this, options);
@@ -97,6 +116,10 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
         }
     }
 
+    /**
+     * Unregister single extractor
+     * @param _extractor The extractor to unregister
+     */
     public async unregister<K extends string | BaseExtractor>(_extractor: K) {
         const extractor = typeof _extractor === 'string' ? this.store.get(_extractor) : this.store.find((r) => r === _extractor);
         if (!extractor) return;
@@ -115,6 +138,9 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
         }
     }
 
+    /**
+     * Unregister all extractors
+     */
     public async unregisterAll() {
         try {
             await Promise.all(this.store.map((e) => this.unregister(e)));
@@ -123,18 +149,28 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
         }
     }
 
+    /**
+     * Run all the extractors
+     * @param fn The runner function
+     * @param filterBlocked Filter blocked extractors
+     */
     public async run<T = unknown>(fn: ExtractorExecutionFN<T>, filterBlocked = true) {
         const blocked = this.player.options.blockExtractors ?? [];
         for (const ext of this.store.values()) {
             if (filterBlocked && blocked.some((e) => e === ext.identifier)) continue;
-            const result = await fn(ext).catch(() => {
+            this.player.debug(`Executing extractor ${ext.identifier}...`);
+            const result = await fn(ext).catch((e: Error) => {
+                this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
                 return false;
             });
-            if (result)
+            if (result) {
+                this.player.debug(`Extractor ${ext.identifier} executed successfully!`);
+
                 return {
                     extractor: ext,
                     result
                 } as ExtractorExecutionResult<T>;
+            }
         }
 
         return null;
