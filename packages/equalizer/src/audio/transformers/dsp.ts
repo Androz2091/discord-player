@@ -31,10 +31,9 @@ export function applyTremolo(config: AFTremoloConfig, int: number, sampleRate: n
     return modSignal * int;
 }
 
-// TODO
 export function applyVibrato(config: AFVibratoConfig, int: number, sampleRate: number) {
     const fOffset = 1.0 - config.depth;
-    const modSignal = fOffset + config.depth * Math.sin(config.phase);
+    const modSignal = fOffset + config.depth * Math.sin(2 * Math.PI * config.phase);
     config.phase += ((2 * Math.PI) / sampleRate) * config.frequency;
     return modSignal * int;
 }
