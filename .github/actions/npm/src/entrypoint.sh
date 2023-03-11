@@ -38,7 +38,7 @@ if [[ ! -d $PACKAGE_PATH ]]; then
 fi
 
 # Set the package version to the one specified in the tag
-(cd $PACKAGE_PATH && yarn version --new-version $PACKAGE_VERSION)
+(cd $PACKAGE_PATH && yarn version $PACKAGE_VERSION)
 
 # Build the package
 (cd $PACKAGE_PATH && yarn build)
