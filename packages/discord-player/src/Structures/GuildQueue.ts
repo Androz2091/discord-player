@@ -14,6 +14,7 @@ import { Readable } from 'stream';
 import { FiltersName, QueueRepeatMode, SearchQueryType } from '../types/types';
 import { setTimeout } from 'timers';
 import { GuildQueueStatistics } from './GuildQueueStatistics';
+import { TypeUtil } from '../utils/TypeUtil';
 
 export interface GuildNodeInit<Meta = unknown> {
     guild: Guild;
@@ -242,27 +243,32 @@ export class GuildQueue<Meta = unknown> {
 
     public constructor(public player: Player, public options: GuildNodeInit<Meta>) {
         this.tracks = new Queue<Track>(options.queueStrategy);
-        if (typeof options.onBeforeCreateStream === 'function') this.onBeforeCreateStream = options.onBeforeCreateStream;
-        if (typeof options.onAfterCreateStream === 'function') this.onAfterCreateStream = options.onAfterCreateStream;
-        if (options.repeatMode != null) this.repeatMode = options.repeatMode;
+        if (TypeUtil.isFunction(options.onBeforeCreateStream)) this.onBeforeCreateStream = options.onBeforeCreateStream;
+        if (TypeUtil.isFunction(options.onAfterCreateStream)) this.onAfterCreateStream = options.onAfterCreateStream;
+        if (!TypeUtil.isNullish(options.repeatMode)) this.repeatMode = options.repeatMode;
 
         options.selfDeaf ??= true;
 
-        if (this.options.biquad != null && typeof this.options.biquad !== 'boolean') {
+        if (!TypeUtil.isNullish(this.options.biquad) && !TypeUtil.isBoolean(this.options.biquad)) {
             this.filters._lastFiltersCache.biquad = this.options.biquad;
         }
+
         if (Array.isArray(this.options.equalizer)) {
             this.filters._lastFiltersCache.equalizer = this.options.equalizer;
         }
+
         if (Array.isArray(this.options.filterer)) {
             this.filters._lastFiltersCache.filters = this.options.filterer;
         }
-        if (typeof this.options.resampler === 'number') {
+
+        if (TypeUtil.isNumber(this.options.resampler)) {
             this.filters._lastFiltersCache.sampleRate = this.options.resampler;
         }
-        if (Array.isArray(this.options.ffmpegFilters)) {
+
+        if (TypeUtil.isArray(this.options.ffmpegFilters)) {
             this.filters.ffmpeg.setDefaults(this.options.ffmpegFilters);
         }
+
         this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
     }
 
