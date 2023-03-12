@@ -1,0 +1,291 @@
+## GuildQueuePlayerNode
+
+```typescript
+new GuildQueuePlayerNode(queue)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| queue | GuildQueue\<Meta> | ❌ | - |
+
+## Properties
+### private  #progress: number
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L31)
+### public  queue: GuildQueue\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L32)
+### public  estimatedDuration: number
+Estimated total duration of the player
+### public  estimatedPlaybackTime: number
+Estimated progress of the player
+### public  playbackTime: number
+Current playback duration with history included
+### public  streamTime: number
+The stream time for current session
+### public  volume: number
+Current volume
+## Methods
+### private  #createFFmpegStream(stream, track, seek, cookies?): Readable
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| stream | string \| Readable | ❌ | - |
+| track | Track | ❌ | - |
+| seek | number | ❌ | - |
+| cookies | string | ✅ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L495)
+### private  #createGenericStream(track): Promise\<null \| string \| Readable>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L476)
+### private  #performPlay(resource): Promise\<void>
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| resource | AudioResource\<Track> | ❌ | - |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L470)
+### public  createProgressBar(options?): null \| string
+Create progress bar for current progress
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| options | PlayerProgressbarOptions | ✅ | Progress bar options |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L143)
+### public  getDurationMultiplier(): number
+Get duration multiplier
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L88)
+### public  getTimestamp(ignoreFilters): null \| PlayerTimestamp
+Get stream progress
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| ignoreFilters | boolean | ❌ | Ignore filters |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L120)
+### public  getTrackPosition(track): number
+Get track position
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | TrackResolvable | ❌ | The track |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L273)
+### public  insert(track, index): void
+Insert a track on the given position in queue
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | Track | ❌ | The track to insert |
+| index | number | ❌ | The position to insert to, defaults to 0. |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L303)
+### public  isBuffering(): boolean
+If the player is currently buffering the track
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L44)
+### public  isIdle(): boolean
+If the player is currently in idle mode
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L37)
+### public  isPaused(): boolean
+If the player is currently paused
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L58)
+### public  isPlaying(): boolean
+If the player is currently playing a track
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L51)
+### public  jump(track): boolean
+Jump to specific track on the queue
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | TrackResolvable | ❌ | The track to jump to without removing other tracks |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L262)
+### public  pause(): boolean
+Pause the playback
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L216)
+### public  play(res?, options?): Promise\<void>
+Play the given track
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| res | null \| Track | ✅ | The track to play |
+| options | ResourcePlayOptions | ✅ | Options for playing the track |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L344)
+### public  playRaw(resource): Promise\<void>
+Play raw audio resource
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| resource | AudioResource\<unknown> | ❌ | The audio resource to play |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L335)
+### public  remove(track): null \| Track
+Remove the given track from queue
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | TrackResolvable | ❌ | The track to remove |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L241)
+### public  resetProgress(): void
+Reset progress history
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L65)
+### public  resume(): boolean
+Resume the playback
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L223)
+### public  seek(duration): Promise\<boolean>
+Seek the player
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| duration | number | ❌ | The duration to seek to |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L173)
+### public  setBitrate(rate): void
+Set bit rate
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| rate | number \| 'auto' | ❌ | The bit rate to set |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L200)
+### public  setPaused(state): boolean
+Set paused state
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| state | boolean | ❌ | The state |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L208)
+### public  setVolume(vol): boolean
+Set volume
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| vol | number | ❌ | Volume amount to set |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L189)
+### public  skip(): boolean
+Skip current track
+
+
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L230)
+### public  skipTo(track): boolean
+Skip to the given track, removing others on the way
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| track | TrackResolvable | ❌ | The track to skip to |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L287)
+### public  stop(force): boolean
+Stop the playback
+
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| force | boolean | ❌ | Whether or not to forcefully stop the playback |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/discord-player/src/Structures/GuildQueuePlayerNode.ts#L313)
