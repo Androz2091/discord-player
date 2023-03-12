@@ -13,8 +13,8 @@ else
   exit 0
 fi
 
-PACKAGE_NAME=$(echo "$RELEASE_NAME" | cut -d'@' -f1)
-PACKAGE_VERSION=$(echo "$RELEASE_NAME" | cut -d'@' -f2)
+PACKAGE_NAME=$(echo "$RELEASE_NAME" | grep -oE '^@?[^@]+')
+PACKAGE_VERSION=$(echo "$RELEASE_NAME" | grep -oE '@[^@]+$' | cut -d'@' -f2)
 
 if [[ -z $PACKAGE_NAME || -z $PACKAGE_VERSION ]]; then
   echo "Skipping action: failed to parse package name or version from release name"
