@@ -10,20 +10,20 @@ new SpotifyExtractor(context, options)
 
 ## Properties
 ### private  _lib: Spotify
-- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/extractor/src/extractors/SpotifyExtractor.ts#L10)
+- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SpotifyExtractor.ts#L10)
 ### private  _stream: StreamFN
-- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/extractor/src/extractors/SpotifyExtractor.ts#L9)
+- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SpotifyExtractor.ts#L9)
 ### public  context: ExtractorExecutionContext
 - Source: `packages/discord-player/dist/index.d.ts#L115`
 ### public  options: Record\<string, unknown>
 - Source: `packages/discord-player/dist/index.d.ts#L116`
 ### public static identifier: 'com.discord\-player.spotifyextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/extractor/src/extractors/SpotifyExtractor.ts#L8)
+- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SpotifyExtractor.ts#L8)
 ### public  identifier: string
 Identifier of this extractor
 ## Methods
 ### public  activate(): Promise\<void>
-- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/extractor/src/extractors/SpotifyExtractor.ts#L12)
+- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SpotifyExtractor.ts#L12)
 ### public  createResponse(playlist?, tracks?): ExtractorInfo
 Create extractor response
 
@@ -76,7 +76,7 @@ Dispatch an event to the player
 | track | Track | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/extractor/src/extractors/SpotifyExtractor.ts#L22)
+- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SpotifyExtractor.ts#L22)
 ### public  handle(query, context): Promise\<ExtractorInfo>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -84,7 +84,7 @@ Dispatch an event to the player
 | context | ExtractorSearchContext | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/extractor/src/extractors/SpotifyExtractor.ts#L27)
+- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SpotifyExtractor.ts#L27)
 ### public  handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
 
@@ -104,7 +104,7 @@ A stream middleware to handle streams before passing it to the player
 | info | Track | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/extractor/src/extractors/SpotifyExtractor.ts#L130)
+- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SpotifyExtractor.ts#L130)
 ### public  validate(query, type?): Promise\<boolean>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -112,4 +112,4 @@ A stream middleware to handle streams before passing it to the player
 | type | null \| SearchQueryType | ✅ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e6e6eb7/packages/extractor/src/extractors/SpotifyExtractor.ts#L18)
+- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SpotifyExtractor.ts#L18)
