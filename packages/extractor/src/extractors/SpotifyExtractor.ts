@@ -3,29 +3,62 @@ import { Readable } from 'stream';
 import { YoutubeExtractor } from './YoutubeExtractor';
 import { StreamFN, getFetch, loadYtdl, makeYTSearch } from './common/helper';
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
+import { SpotifyAPI } from '../internal';
 
 export class SpotifyExtractor extends BaseExtractor {
     public static identifier = 'com.discord-player.spotifyextractor' as const;
     private _stream!: StreamFN;
     private _lib!: Spotify;
+    public internal = new SpotifyAPI();
 
     public async activate(): Promise<void> {
         const lib = await loadYtdl(this.context.player.options.ytdlOptions);
         this._stream = lib.stream;
         this._lib = spotify(getFetch);
+        if (this.internal.isTokenExpired()) await this.internal.requestAnonymousToken();
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
-        return (<SearchQueryType[]>[QueryType.SPOTIFY_ALBUM, QueryType.SPOTIFY_PLAYLIST, QueryType.SPOTIFY_SONG]).some((t) => t === type);
+        // prettier-ignore
+        return (<SearchQueryType[]>[
+            QueryType.SPOTIFY_ALBUM,
+            QueryType.SPOTIFY_PLAYLIST,
+            QueryType.SPOTIFY_SONG,
+            QueryType.SPOTIFY_SEARCH
+        ]).some((t) => t === type);
     }
 
     public async getRelatedTracks(track: Track) {
-        void track;
-        return this.createResponse();
+        return await this.handle(track.title, {
+            type: QueryType.SPOTIFY_SEARCH
+        });
     }
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         switch (context.type) {
+            case QueryType.SPOTIFY_SEARCH: {
+                const data = await this.internal.search(query);
+                if (!data) return this.createResponse();
+
+                return this.createResponse(
+                    null,
+                    data.map(
+                        (spotifyData) =>
+                            new Track(this.context.player, {
+                                title: spotifyData.title,
+                                description: `${spotifyData.title} by ${spotifyData.artist}`,
+                                author: spotifyData.artist ?? 'Unknown Artist',
+                                url: spotifyData.url,
+                                thumbnail: spotifyData.thumbnail || 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                                duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration ?? 0)),
+                                views: 0,
+                                requestedBy: context.requestedBy,
+                                source: 'spotify',
+                                queryType: QueryType.SPOTIFY_SONG
+                            })
+                    )
+                );
+            }
             case QueryType.SPOTIFY_SONG: {
                 const spotifyData: SpotifySong | void = await this._lib.getData(query, context.requestOptions as unknown as RequestInit).catch(Util.noop);
                 if (!spotifyData) return { playlist: null, tracks: [] };

@@ -162,6 +162,7 @@ export const QueryType = {
     SPOTIFY_SONG: 'spotifySong',
     SPOTIFY_ALBUM: 'spotifyAlbum',
     SPOTIFY_PLAYLIST: 'spotifyPlaylist',
+    SPOTIFY_SEARCH: 'spotifySearch',
     FACEBOOK: 'facebook',
     VIMEO: 'vimeo',
     ARBITRARY: 'arbitrary',

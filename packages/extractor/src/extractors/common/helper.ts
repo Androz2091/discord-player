@@ -7,6 +7,7 @@ let factory: {
 };
 
 export const createImport = (lib: string) => import(lib).catch(() => null);
+export const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49';
 
 export const YouTubeLibs = [
     'ytdl-core',
@@ -22,15 +23,15 @@ if (forcedLib) YouTubeLibs.unshift(forcedLib);
 export const getFetch =
     typeof fetch !== 'undefined'
         ? fetch
-        : async (...params: unknown[]) => {
+        : async (info: RequestInfo, init?: RequestInit): Promise<Response> => {
               // eslint-disable-next-line
               let dy: any;
 
               /* eslint-disable no-cond-assign */
               if ((dy = await createImport('undici'))) {
-                  return (dy.fetch || dy.default.fetch)(...params);
+                  return (dy.fetch || dy.default.fetch)(info, init);
               } else if ((dy = await createImport('node-fetch'))) {
-                  return (dy.fetch || dy.default)(...params);
+                  return (dy.fetch || dy.default)(info, init);
               } else {
                   throw new Error('No fetch lib found');
               }

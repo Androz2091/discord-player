@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { QueryResolver } from 'discord-player';
 import { parse, HTMLElement } from 'node-html-parser';
-import { getFetch } from '../extractors/common/helper';
+import { UA, getFetch } from '../extractors/common/helper';
 
 function getHTML(link: string): Promise<HTMLElement | null> {
     return getFetch(link, {
         headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49'
+            'User-Agent': UA
         }
     })
         .then((r) => r.text())
