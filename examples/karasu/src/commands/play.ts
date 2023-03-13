@@ -32,7 +32,7 @@ export class PlayCommand extends Command {
 				name: t.title,
 				value: t.url
 			}))
-			.slice(0, 5);
+			.slice(0, 10);
 
 		if (results.playlist) {
 			tracks = results!.tracks
@@ -72,13 +72,15 @@ export class PlayCommand extends Command {
 				nodeOptions: {
 					metadata: {
 						channel: interaction.channel,
-						client: interaction.guild?.members.me
+						client: interaction.guild?.members.me,
+						requestedBy: interaction.user.username
 					},
 					leaveOnEmptyCooldown: 300000,
 					leaveOnEmpty: true,
 					leaveOnEnd: false,
 					bufferingTimeout: 0,
-					selfDeaf: true
+					volume: 10,
+					defaultFFmpegFilters: ['lofi', 'bassboost', 'normalizer']
 				}
 			});
 
