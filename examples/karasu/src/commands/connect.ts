@@ -38,7 +38,8 @@ export class DisconnectCommand extends Command {
 				leaveOnEmpty: true,
 				leaveOnEnd: false,
 				bufferingTimeout: 0,
-				selfDeaf: true
+				volume: 10,
+				defaultFFmpegFilters: ['lofi', 'bassboost', 'normalizer']
 			});
 			await newQueue?.connect(interaction.member.voice.channel!.id);
 			return interaction.reply({
