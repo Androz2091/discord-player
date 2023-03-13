@@ -1,4 +1,5 @@
 import { Command } from '@sapphire/framework';
+import { useMasterPlayer } from 'discord-player';
 import type { GuildMember } from 'discord.js';
 
 export class PlayCommand extends Command {
@@ -21,18 +22,32 @@ export class PlayCommand extends Command {
 	}
 
 	public override async autocompleteRun(interaction: Command.AutocompleteInteraction) {
+		const player = useMasterPlayer();
 		const query = interaction.options.getString('query');
-		const results = await this.container.client.player.search(query!);
+		const results = await player!.search(query!);
 
-		return interaction.respond(
-			results.tracks.slice(0, 10).map((t) => ({
+		let tracks;
+		tracks = results!.tracks
+			.map((t) => ({
 				name: t.title,
 				value: t.url
 			}))
-		);
+			.slice(0, 10);
+
+		if (results.playlist) {
+			tracks = results!.tracks
+				.map(() => ({
+					name: `${results.playlist!.title} [playlist]`,
+					value: results.playlist!.url
+				}))
+				.slice(0, 1);
+		}
+
+		return interaction.respond(tracks);
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+		const player = useMasterPlayer();
 		const member = interaction.member as GuildMember;
 		const permissions = this.container.client.perms.voice(interaction, this.container.client);
 		if (permissions.member()) return interaction.reply({ content: permissions.member(), ephemeral: true });
@@ -42,19 +57,18 @@ export class PlayCommand extends Command {
 
 		if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
 
-		const results = await this.container.client.player.search(query!);
+		const results = await player!.search(query!);
 
 		if (!results.hasTracks())
 			return interaction.reply({
-				content: `${this.container.client.dev.error} | No tracks were found for your query`,
+				content: `${this.container.client.dev.error} | **No** tracks were found for your query`,
 				ephemeral: true
 			});
 
 		await interaction.deferReply();
-		await interaction.editReply({ content: `⏳ | Loading ${results.playlist ? 'a playlist...' : 'a track...'}` });
 
 		try {
-			const res = await this.container.client.player.play(member.voice.channel!.id, results, {
+			const res = await player!.play(member.voice.channel!.id, results, {
 				nodeOptions: {
 					metadata: {
 						channel: interaction.channel,
@@ -70,13 +84,13 @@ export class PlayCommand extends Command {
 				}
 			});
 
-			await interaction.editReply({
+			return interaction.editReply({
 				content: `${this.container.client.dev.success} | Successfully enqueued${
-					res.track.playlist ? ` **multiple tracks** from: **${res.track.playlist.title}**` : `: **${res.track.title}**`
+					res.track.playlist ? ` **track(s)** from: **${res.track.playlist.title}**` : `: **${res.track.title}**`
 				}`
 			});
 		} catch (error: any) {
-			await interaction.editReply({ content: `${this.container.client.dev.error} | An error has occurred` });
+			await interaction.editReply({ content: `${this.container.client.dev.error} | An **error** has occurred` });
 			return console.log(error);
 		}
 	}
