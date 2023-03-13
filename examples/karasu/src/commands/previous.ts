@@ -1,12 +1,11 @@
 import { Command } from '@sapphire/framework';
-import { GuildMember } from 'discord.js';
-import { useHistory } from 'discord-player';
+import { useHistory, useQueue } from 'discord-player';
 
 export class PreviousCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
 		super(context, {
 			...options,
-			description: 'Plays previous track'
+			description: 'Plays the previous track'
 		});
 	}
 
@@ -19,22 +18,22 @@ export class PreviousCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		if (interaction.member instanceof GuildMember) {
-			const history = useHistory(interaction.guild!.id);
-			const permissions = this.container.client.perms.voice(interaction, this.container.client);
+		const queue = useQueue(interaction.guild!.id);
+		const history = useHistory(interaction.guild!.id);
+		const permissions = this.container.client.perms.voice(interaction, this.container.client);
 
-			if (!history) return interaction.reply({ content: `${this.container.client.dev.error} | I am not in a voice channel`, ephemeral: true });
-			if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
+		if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am **not** in a voice channel`, ephemeral: true });
+		if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
 
-			if (!history.previousTrack) return interaction.reply({ content: 'No previous track in history!', ephemeral: true });
-
-			await interaction.deferReply();
-
-			await history.previous();
-
-			return interaction.followUp({
-				content: `⏯ | I have skipped to the next track`
+		if (!history?.previousTrack)
+			return interaction.reply({
+				content: `${this.container.client.dev.error} | There is **no** previous track in the **history**`,
+				ephemeral: true
 			});
-		}
+
+		await history.previous();
+		return interaction.reply({
+			content: `🔁 | I am **replaying** the previous track`
+		});
 	}
 }
