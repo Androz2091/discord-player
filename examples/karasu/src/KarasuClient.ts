@@ -23,7 +23,7 @@ export class KarasuClient extends SapphireClient {
 				limit: 2
 			},
 			logger: {
-				level: LogLevel.Error
+				level: LogLevel.Debug
 			}
 		});
 		this.dev = Emojis;
