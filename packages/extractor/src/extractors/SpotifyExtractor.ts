@@ -29,7 +29,7 @@ export class SpotifyExtractor extends BaseExtractor {
     }
 
     public async getRelatedTracks(track: Track) {
-        return await this.handle(track.title, {
+        return await this.handle(track.author || track.title, {
             type: QueryType.SPOTIFY_SEARCH
         });
     }
