@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "*",
-    "@types/node": "^18.11.18",
+    "@types/node": "^18.15.1",
     "@types/node-fetch": "^2.6.2",
     "play-dl": "^1.9.6",
     "ytdl-core": "^4.11.2"
