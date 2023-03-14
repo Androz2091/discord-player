@@ -4,9 +4,9 @@ import { QueryResolver, QueryType } from '..';
 describe('QueryResolver', () => {
     const qr = QueryResolver;
 
-    it('should be youtubeSearch', () => {
+    it('should be autoSearch', () => {
         const query = 'a search query';
-        expect(qr.resolve(query)).toBe(QueryType.YOUTUBE_SEARCH);
+        expect(qr.resolve(query)).toBe(QueryType.AUTO_SEARCH);
     });
 
     it('should be youtubeVideo', () => {
