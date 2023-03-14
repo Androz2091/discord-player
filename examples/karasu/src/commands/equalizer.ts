@@ -1,6 +1,5 @@
 import { Command } from '@sapphire/framework';
 import { EqualizerConfigurationPreset, useQueue } from 'discord-player';
-import { GuildMember } from 'discord.js';
 
 export class EqualizerCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
@@ -31,32 +30,26 @@ export class EqualizerCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		if (interaction.member instanceof GuildMember) {
-			const queue = useQueue(interaction.guild!.id);
-			const permissions = this.container.client.perms.voice(interaction, this.container.client);
-			const preset = interaction.options.getString('preset') as string;
+		const queue = useQueue(interaction.guild!.id);
+		const permissions = this.container.client.perms.voice(interaction, this.container.client);
+		const preset = interaction.options.getString('preset') as string;
 
-			if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am not in a voice channel`, ephemeral: true });
-			if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
-			if (!queue.currentTrack)
-				return interaction.reply({
-					content: `${this.container.client.dev.error} | There is no track **currently** playing`,
-					ephemeral: true
-				});
-			if (!queue.filters.equalizer)
-				return interaction.reply({
-					content: `${this.container.client.dev.error} | The equalizer filter is not **available** to be used in this queue`,
-					ephemeral: true
-				});
+		if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am **not** in a voice channel`, ephemeral: true });
+		if (!queue.currentTrack)
+			return interaction.reply({ content: `${this.container.client.dev.error} | There is no track **currently** playing`, ephemeral: true });
+		if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
 
-			await interaction.deferReply();
-
-			queue.filters.equalizer.setEQ(EqualizerConfigurationPreset[preset]);
-			queue.filters.equalizer.enable();
-
-			return interaction.followUp({
-				content: `${this.container.client.dev.success} | **Equalizer filter** set to: \`${preset}\``
+		if (!queue.filters.equalizer)
+			return interaction.reply({
+				content: `${this.container.client.dev.error} | The equalizer filter is **not available** to be used in this queue`,
+				ephemeral: true
 			});
-		}
+
+		queue.filters.equalizer.setEQ(EqualizerConfigurationPreset[preset]);
+		queue.filters.equalizer.enable();
+
+		return interaction.reply({
+			content: `${this.container.client.dev.success} | **Equalizer** filter has been set to: **\`${preset}\`**`
+		});
 	}
 }
