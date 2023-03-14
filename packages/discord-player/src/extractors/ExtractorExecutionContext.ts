@@ -6,11 +6,11 @@ import { PlayerEventsEmitter } from '../utils/PlayerEventsEmitter';
 
 // prettier-ignore
 const knownExtractorKeys = [
-    'SoundCloudExtractor',
-    'AppleMusicExtractor',
     'SpotifyExtractor',
-    'VimeoExtractor',
+    'AppleMusicExtractor',
+    'SoundCloudExtractor',
     'YouTubeExtractor',
+    'VimeoExtractor',
     'ReverbnationExtractor',
     'AttachmentExtractor'
 ];
