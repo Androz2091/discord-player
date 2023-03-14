@@ -24,7 +24,7 @@ fi
 # Find the appropriate package directory
 if [[ $PACKAGE_NAME =~ ^@[^/]+/ ]]; then
   # Scoped package
-  PACKAGE_DIR=${PACKAGE_NAME/@/}
+  PACKAGE_DIR=$(echo "$PACKAGE_NAME" | sed 's/^@[^/]*\///')
 else
   # Unscoped package
   PACKAGE_DIR=$PACKAGE_NAME
@@ -44,7 +44,7 @@ fi
 (cd $PACKAGE_PATH && yarn build)
 
 # Publish the package
-(cd $PACKAGE_PATH && yarn npm publish --access public)
+(cd $PACKAGE_PATH && npm publish --access public)
 
 # Configure Git
 git config user.name "${GITHUB_ACTOR}"
