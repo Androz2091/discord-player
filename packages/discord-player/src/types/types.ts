@@ -138,6 +138,7 @@ export interface PlayerProgressbarOptions {
  * - SPOTIFY_SONG
  * - SPOTIFY_ALBUM
  * - SPOTIFY_PLAYLIST
+ * - SPOTIFY_SEARCH
  * - FACEBOOK
  * - VIMEO
  * - ARBITRARY
@@ -150,7 +151,8 @@ export interface PlayerProgressbarOptions {
  * - APPLE_MUSIC_PLAYLIST
  * - APPLE_MUSIC_SEARCH
  * - FILE
- * @typedef {number} QueryType
+ * - AUTO_SEARCH
+ * @typedef {string} QueryType
  */
 export const QueryType = {
     AUTO: 'auto',
@@ -174,7 +176,8 @@ export const QueryType = {
     APPLE_MUSIC_ALBUM: 'appleMusicAlbum',
     APPLE_MUSIC_PLAYLIST: 'appleMusicPlaylist',
     APPLE_MUSIC_SEARCH: 'appleMusicSearch',
-    FILE: 'file'
+    FILE: 'file',
+    AUTO_SEARCH: 'autoSearch'
 } as const;
 
 export type SearchQueryType = keyof typeof QueryType | (typeof QueryType)[keyof typeof QueryType];

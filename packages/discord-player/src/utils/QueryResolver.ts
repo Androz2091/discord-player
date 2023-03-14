@@ -60,7 +60,7 @@ class QueryResolver {
         if (appleMusicSongRegex.test(query)) return QueryType.APPLE_MUSIC_SONG;
         if (attachmentRegex.test(query)) return QueryType.ARBITRARY;
 
-        return QueryType.YOUTUBE_SEARCH;
+        return QueryType.AUTO_SEARCH;
     }
 
     /**

@@ -19,7 +19,9 @@ export class AppleMusicExtractor extends BaseExtractor {
             QueryType.APPLE_MUSIC_ALBUM,
             QueryType.APPLE_MUSIC_PLAYLIST,
             QueryType.APPLE_MUSIC_SONG,
-            QueryType.APPLE_MUSIC_SEARCH
+            QueryType.APPLE_MUSIC_SEARCH,
+            QueryType.AUTO,
+            QueryType.AUTO_SEARCH
         ]).some((t) => t === type);
     }
 
@@ -35,6 +37,8 @@ export class AppleMusicExtractor extends BaseExtractor {
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         switch (context.type) {
+            case QueryType.AUTO:
+            case QueryType.AUTO_SEARCH:
             case QueryType.APPLE_MUSIC_SEARCH: {
                 const data = await AppleMusic.search(query);
                 if (!data || !data.length) return this.createResponse();

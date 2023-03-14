@@ -24,7 +24,9 @@ export class SpotifyExtractor extends BaseExtractor {
             QueryType.SPOTIFY_ALBUM,
             QueryType.SPOTIFY_PLAYLIST,
             QueryType.SPOTIFY_SONG,
-            QueryType.SPOTIFY_SEARCH
+            QueryType.SPOTIFY_SEARCH,
+            QueryType.AUTO,
+            QueryType.AUTO_SEARCH
         ]).some((t) => t === type);
     }
 
@@ -36,6 +38,8 @@ export class SpotifyExtractor extends BaseExtractor {
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         switch (context.type) {
+            case QueryType.AUTO:
+            case QueryType.AUTO_SEARCH:
             case QueryType.SPOTIFY_SEARCH: {
                 const data = await this.internal.search(query);
                 if (!data) return this.createResponse();
