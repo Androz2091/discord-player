@@ -1,3 +1,5 @@
+import { inspect } from 'util';
+
 export type QueueStrategy = 'LIFO' | 'FIFO';
 
 export type QueueItemFilter<T, R = boolean> = (value: T, idx: number, array: T[]) => R;
@@ -13,6 +15,10 @@ export class Queue<T = unknown> {
             configurable: true,
             enumerable: false
         });
+    }
+
+    public get data() {
+        return this.toArray();
     }
 
     public static from<T>(data: T[], strategy: QueueStrategy = 'FIFO') {
@@ -112,5 +118,14 @@ export class Queue<T = unknown> {
 
     public toJSON() {
         return this.store;
+    }
+
+    public [inspect.custom]() {
+        return `${this.constructor.name} {\n  strategy: '${this.strategy}',\n  data: ${inspect(this.data, {
+            showHidden: false,
+            colors: true,
+            depth: 1,
+            maxArrayLength: 5
+        })}\n}`;
     }
 }
