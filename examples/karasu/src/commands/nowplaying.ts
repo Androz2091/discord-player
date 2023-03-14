@@ -39,7 +39,8 @@ export class NowPlayingCommand extends Command {
 			.setThumbnail(track.thumbnail ?? interaction.user.displayAvatarURL())
 			.addFields([
 				{ name: 'Author', value: track.author },
-				{ name: 'Progress', value: `${queue.node.createProgressBar()} (${timeline.timestamp?.progress}%)` }
+				{ name: 'Progress', value: `${queue.node.createProgressBar()} (${timeline.timestamp?.progress}%)` },
+				{ name: 'Extractor', value: `\`${track.extractor?.identifier || 'N/A'}\`` }
 			])
 			.setFooter({
 				text: `Ping: ${queue.ping}ms | Event Loop Lag: ${queue.player.eventLoopLag.toFixed(0)}ms`

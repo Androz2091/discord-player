@@ -368,13 +368,14 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
         options.blockExtractors ??= this.options.blockExtractors;
+        options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 
         if (query instanceof Track) {
             return new SearchResult(this, {
                 playlist: query.playlist || null,
                 tracks: [query],
                 query: query.title,
-                extractor: null,
+                extractor: query.extractor,
                 queryType: query.queryType,
                 requestedBy: options.requestedBy
             });
@@ -385,7 +386,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 playlist: query,
                 tracks: query.tracks,
                 query: query.title,
-                extractor: null,
+                extractor: query.tracks[0]?.extractor,
                 queryType: QueryType.AUTO,
                 requestedBy: options.requestedBy
             });
@@ -411,7 +412,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         this.debug(`Search engine set to ${options.searchEngine}`);
 
-        const queryType = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
+        const queryType = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query, options.fallbackSearchEngine) : options.searchEngine;
 
         this.debug(`Query type identified as ${queryType}`);
 
@@ -422,6 +423,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 return new SearchResult(this, {
                     query,
                     queryType,
+                    extractor,
                     requestedBy: options.requestedBy
                 });
         }
@@ -509,7 +511,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             return new SearchResult(this, {
                 query,
                 queryType,
-                requestedBy: options.requestedBy
+                requestedBy: options.requestedBy,
+                extractor: result?.extractor
             });
         }
 

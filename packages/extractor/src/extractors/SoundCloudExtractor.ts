@@ -68,6 +68,8 @@ export class SoundCloudExtractor extends BaseExtractor {
                     queryType: context.type
                 });
 
+                track.extractor = this;
+
                 return { playlist: null, tracks: [track] };
             }
             case QueryType.SOUNDCLOUD_PLAYLIST: {
@@ -109,6 +111,7 @@ export class SoundCloudExtractor extends BaseExtractor {
                         engine: song,
                         queryType: context.type
                     });
+                    track.extractor = this;
                     res.tracks.push(track);
                 }
 
@@ -143,6 +146,8 @@ export class SoundCloudExtractor extends BaseExtractor {
                         engine: trackInfo,
                         queryType: 'soundcloudTrack'
                     });
+
+                    track.extractor = this;
 
                     resolvedTracks.push(track);
                 }

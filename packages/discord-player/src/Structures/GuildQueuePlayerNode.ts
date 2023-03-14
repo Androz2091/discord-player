@@ -303,7 +303,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     public insert(track: Track, index = 0) {
         if (!(track instanceof Track)) throw new Error('invalid track');
         this.queue.tracks.store.splice(index, 0, track);
-        this.queue.player.events.emit('audioTrackAdd', this.queue, track);
+        if (!this.queue.options.noEmitInsert) this.queue.player.events.emit('audioTrackAdd', this.queue, track);
     }
 
     /**

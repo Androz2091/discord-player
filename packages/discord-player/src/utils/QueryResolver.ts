@@ -41,7 +41,7 @@ class QueryResolver {
      * @param {string} query The query
      * @returns {QueryType}
      */
-    static resolve(query: string): (typeof QueryType)[keyof typeof QueryType] {
+    static resolve(query: string, fallbackSearchEngine: (typeof QueryType)[keyof typeof QueryType] = QueryType.AUTO_SEARCH): (typeof QueryType)[keyof typeof QueryType] {
         query = !query.includes('youtube.com') ? query.trim() : query.replace(/(m(usic)?|gaming)\./, '').trim();
 
         // @ts-expect-error
@@ -60,7 +60,7 @@ class QueryResolver {
         if (appleMusicSongRegex.test(query)) return QueryType.APPLE_MUSIC_SONG;
         if (attachmentRegex.test(query)) return QueryType.ARBITRARY;
 
-        return QueryType.AUTO_SEARCH;
+        return fallbackSearchEngine;
     }
 
     /**

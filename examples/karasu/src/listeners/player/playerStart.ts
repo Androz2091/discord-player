@@ -15,6 +15,20 @@ export class PlayerEvent extends Listener {
 		const missingPerms = queue.metadata.channel.permissionsFor(queue.metadata.client).missing(resolved);
 		if (missingPerms.length) return;
 
-		return queue.metadata.channel.send(`🎵 | Now playing: **${track.title || 'Unknown Title'}**`);
+		return queue.metadata.channel.send({
+			embeds: [
+				{
+					title: 'Now Playing',
+					description: `🎵 | **${track.title || 'Unknown Title'}**`,
+					color: 0xaaaaff,
+					footer: {
+						text: `Extractor: ${track.extractor?.identifier || 'N/A'}`
+					},
+					thumbnail: {
+						url: track.thumbnail
+					}
+				}
+			]
+		});
 	}
 }

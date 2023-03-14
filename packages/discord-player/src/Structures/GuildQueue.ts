@@ -40,6 +40,7 @@ export interface GuildNodeInit<Meta = unknown> {
     selfDeaf?: boolean;
     metadata?: Meta | null;
     bufferingTimeout: number;
+    noEmitInsert: boolean;
 }
 
 export interface VoiceConnectConfig {
@@ -305,10 +306,10 @@ export class GuildQueue<Meta = unknown> {
      * The metadata of this queue
      */
     public get metadata() {
-        return this.options.metadata;
+        return this.options.metadata!;
     }
 
-    public set metadata(m: Meta | undefined | null) {
+    public set metadata(m: Meta) {
         this.options.metadata = m;
     }
 
@@ -316,7 +317,7 @@ export class GuildQueue<Meta = unknown> {
      * Set metadata for this queue
      * @param m Metadata to set
      */
-    public setMetadata(m: Meta | undefined | null) {
+    public setMetadata(m: Meta) {
         this.options.metadata = m;
     }
 

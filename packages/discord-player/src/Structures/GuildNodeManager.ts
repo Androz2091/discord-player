@@ -29,6 +29,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
     connectionTimeout?: number;
     defaultFFmpegFilters?: FiltersName[];
     bufferingTimeout?: number;
+    noEmitInsert?: boolean;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
@@ -100,7 +101,8 @@ export class GuildNodeManager<Meta = unknown> {
             connectionTimeout: options.connectionTimeout ?? 120_000,
             selfDeaf: options.selfDeaf,
             ffmpegFilters: options.defaultFFmpegFilters ?? [],
-            bufferingTimeout: options.bufferingTimeout
+            bufferingTimeout: options.bufferingTimeout,
+            noEmitInsert: options.noEmitInsert ?? false
         });
 
         this.cache.set(server.id, queue);

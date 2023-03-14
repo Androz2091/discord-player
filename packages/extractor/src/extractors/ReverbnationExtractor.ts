@@ -44,6 +44,8 @@ export class ReverbnationExtractor extends BaseExtractor {
                     queryType: context.type
                 });
 
+                track.extractor = this;
+
                 return { playlist: null, tracks: [track] };
             }
             default:

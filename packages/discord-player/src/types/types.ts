@@ -216,15 +216,17 @@ export type QueryExtractorSearch = `ext:${string}`;
 /**
  * @typedef {object} SearchOptions
  * @property {UserResolvable} requestedBy The user who requested this search
- * @property {typeof QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
+ * @property {typeof QueryType|string} [searchEngine='auto'] The query search engine, can be extractor name to target specific one (custom)
  * @property {string[]} [blockExtractors[]] List of the extractors to block
  * @property {boolean} [ignoreCache] If it should ignore query cache lookup
+ * @property {SearchQueryType} [fallbackSearchEngine='autoSearch'] Fallback search engine to use
  */
 export interface SearchOptions {
     requestedBy?: UserResolvable;
     searchEngine?: SearchQueryType | QueryExtractorSearch;
     blockExtractors?: string[];
     ignoreCache?: boolean;
+    fallbackSearchEngine?: (typeof QueryType)[keyof typeof QueryType];
 }
 
 /**

@@ -44,8 +44,8 @@ export class AppleMusicExtractor extends BaseExtractor {
                 if (!data || !data.length) return this.createResponse();
                 const tracks = data.map(
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (m: any) =>
-                        new Track(this.context.player, {
+                    (m: any) => {
+                        const track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
                             duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
@@ -56,7 +56,12 @@ export class AppleMusicExtractor extends BaseExtractor {
                             source: 'apple_music',
                             requestedBy: context.requestedBy,
                             queryType: 'appleMusicSong'
-                        })
+                        });
+
+                        track.extractor = this;
+
+                        return track;
+                    }
                 );
 
                 return this.createResponse(null, tracks);
@@ -84,8 +89,8 @@ export class AppleMusicExtractor extends BaseExtractor {
                 playlist.tracks = info.tracks.map(
                     (
                         m: any // eslint-disable-line
-                    ) =>
-                        new Track(this.context.player, {
+                    ) => {
+                        const track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
                             duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
@@ -96,7 +101,10 @@ export class AppleMusicExtractor extends BaseExtractor {
                             source: 'apple_music',
                             requestedBy: context.requestedBy,
                             queryType: 'appleMusicSong'
-                        })
+                        });
+                        track.extractor = this;
+                        return track;
+                    }
                 );
 
                 return { playlist, tracks: playlist.tracks };
@@ -124,8 +132,8 @@ export class AppleMusicExtractor extends BaseExtractor {
                 playlist.tracks = info.tracks.map(
                     (
                         m: any // eslint-disable-line
-                    ) =>
-                        new Track(this.context.player, {
+                    ) => {
+                        const track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
                             duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
@@ -136,7 +144,12 @@ export class AppleMusicExtractor extends BaseExtractor {
                             source: 'apple_music',
                             requestedBy: context.requestedBy,
                             queryType: 'appleMusicSong'
-                        })
+                        });
+
+                        track.extractor = this;
+
+                        return track;
+                    }
                 );
 
                 return { playlist, tracks: playlist.tracks };
@@ -157,6 +170,8 @@ export class AppleMusicExtractor extends BaseExtractor {
                     requestedBy: context.requestedBy,
                     queryType: context.type
                 });
+
+                track.extractor = this;
 
                 return { playlist: null, tracks: [track] };
             }

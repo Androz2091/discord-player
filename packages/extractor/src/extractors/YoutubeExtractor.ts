@@ -71,23 +71,25 @@ export class YoutubeExtractor extends BaseExtractor {
                     rawPlaylist: ytpl
                 });
 
-                playlist.tracks = ytpl.videos.map(
-                    (video) =>
-                        new Track(this.context.player, {
-                            title: video.title as string,
-                            description: video.description as string,
-                            author: video.channel?.name as string,
-                            url: video.url,
-                            requestedBy: context.requestedBy,
-                            thumbnail: video.thumbnail!.url as string,
-                            views: video.views,
-                            duration: video.durationFormatted,
-                            raw: video,
-                            playlist: playlist,
-                            source: 'youtube',
-                            queryType: 'youtubeVideo'
-                        })
-                );
+                playlist.tracks = ytpl.videos.map((video) => {
+                    const track = new Track(this.context.player, {
+                        title: video.title as string,
+                        description: video.description as string,
+                        author: video.channel?.name as string,
+                        url: video.url,
+                        requestedBy: context.requestedBy,
+                        thumbnail: video.thumbnail!.url as string,
+                        views: video.views,
+                        duration: video.durationFormatted,
+                        raw: video,
+                        playlist: playlist,
+                        source: 'youtube',
+                        queryType: 'youtubeVideo'
+                    });
+
+                    track.extractor = this;
+                    return track;
+                });
 
                 return { playlist, tracks: playlist.tracks };
             }
@@ -100,23 +102,25 @@ export class YoutubeExtractor extends BaseExtractor {
                 // @ts-expect-error
                 video.source = 'youtube';
 
+                const track = new Track(this.context.player, {
+                    title: video.title!,
+                    description: video.description!,
+                    author: video.channel?.name as string,
+                    url: video.url,
+                    requestedBy: context.requestedBy,
+                    thumbnail: video.thumbnail?.displayThumbnailURL('maxresdefault') as string,
+                    views: video.views,
+                    duration: video.durationFormatted,
+                    source: 'youtube',
+                    raw: video,
+                    queryType: context.type
+                });
+
+                track.extractor = this;
+
                 return {
                     playlist: null,
-                    tracks: [
-                        new Track(this.context.player, {
-                            title: video.title!,
-                            description: video.description!,
-                            author: video.channel?.name as string,
-                            url: video.url,
-                            requestedBy: context.requestedBy,
-                            thumbnail: video.thumbnail?.displayThumbnailURL('maxresdefault') as string,
-                            views: video.views,
-                            duration: video.durationFormatted,
-                            source: 'youtube',
-                            raw: video,
-                            queryType: context.type
-                        })
-                    ]
+                    tracks: [track]
                 };
             }
             default: {
@@ -134,7 +138,7 @@ export class YoutubeExtractor extends BaseExtractor {
             // @ts-expect-error
             video.source = 'youtube';
 
-            return new Track(this.context.player, {
+            const track = new Track(this.context.player, {
                 title: video.title!,
                 description: video.description!,
                 author: video.channel?.name as string,
@@ -147,6 +151,10 @@ export class YoutubeExtractor extends BaseExtractor {
                 raw: video,
                 queryType: context.type!
             });
+
+            track.extractor = this;
+
+            return track;
         });
     }
 
@@ -168,21 +176,24 @@ export class YoutubeExtractor extends BaseExtractor {
             return this.createResponse();
         }
 
-        const similar = info.map(
-            (video) =>
-                new Track(this.context.player, {
-                    title: video.title!,
-                    url: `https://www.youtube.com/watch?v=${video.id}`,
-                    duration: video.durationFormatted || Util.buildTimeCode(Util.parseMS(video.duration * 1000)),
-                    description: video.title!,
-                    thumbnail: typeof video.thumbnail === 'string' ? video.thumbnail! : video.thumbnail!.url!,
-                    views: video.views,
-                    author: video.channel!.name!,
-                    requestedBy: track.requestedBy,
-                    source: 'youtube',
-                    queryType: 'youtubeVideo'
-                })
-        );
+        const similar = info.map((video) => {
+            const t = new Track(this.context.player, {
+                title: video.title!,
+                url: `https://www.youtube.com/watch?v=${video.id}`,
+                duration: video.durationFormatted || Util.buildTimeCode(Util.parseMS(video.duration * 1000)),
+                description: video.title!,
+                thumbnail: typeof video.thumbnail === 'string' ? video.thumbnail! : video.thumbnail!.url!,
+                views: video.views,
+                author: video.channel!.name!,
+                requestedBy: track.requestedBy,
+                source: 'youtube',
+                queryType: 'youtubeVideo'
+            });
+
+            t.extractor = this;
+
+            return t;
+        });
 
         return this.createResponse(null, similar);
     }
