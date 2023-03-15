@@ -5,9 +5,9 @@ Extractors for `discord-player`.
 
 ```js
 const { YouTubeExtractor } = require("@discord-player/extractor");
-const player = new Player(client);
+const player = useMasterPlayer();
 
-// enables youtube, spotify & apple music extractor
+// enables youtube extractor
 player.extractors.register(YouTubeExtractor);
 ```
 

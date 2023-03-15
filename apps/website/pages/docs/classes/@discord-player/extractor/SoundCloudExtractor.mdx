@@ -10,11 +10,11 @@ new SoundCloudExtractor(context, options)
 
 ## Properties
 ### public  context: ExtractorExecutionContext
-- Source: `packages/discord-player/dist/index.d.ts#L115`
+- Source: `packages/discord-player/dist/index.d.ts#L146`
 ### public  options: Record\<string, unknown>
-- Source: `packages/discord-player/dist/index.d.ts#L116`
+- Source: `packages/discord-player/dist/index.d.ts#L147`
 ### public static identifier: 'com.discord\-player.soundcloudextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SoundCloudExtractor.ts#L19)
+- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/extractor/src/extractors/SoundCloudExtractor.ts#L19)
 ### public  identifier: string
 Identifier of this extractor
 ## Methods
@@ -25,7 +25,7 @@ This method will be executed when this extractor is activated
 
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L134`
+- Source: `packages/discord-player/dist/index.d.ts#L165`
 ### public  createResponse(playlist?, tracks?): ExtractorInfo
 Create extractor response
 
@@ -38,7 +38,7 @@ Create extractor response
 | tracks | Array\<Track> | ✅ | The track array |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L176`
+- Source: `packages/discord-player/dist/index.d.ts#L207`
 ### public  deactivate(): Promise\<void>
 This method will be executed when this extractor is deactivated
 
@@ -46,7 +46,7 @@ This method will be executed when this extractor is deactivated
 
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L138`
+- Source: `packages/discord-player/dist/index.d.ts#L169`
 ### public  debug(message): boolean
 Write debug message
 
@@ -58,7 +58,7 @@ Write debug message
 | message | string | ❌ | The debug message |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L181`
+- Source: `packages/discord-player/dist/index.d.ts#L212`
 ### public  emit(event, args): boolean
 Dispatch an event to the player
 
@@ -71,16 +71,16 @@ Dispatch an event to the player
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L170`
+- Source: `packages/discord-player/dist/index.d.ts#L201`
 ### public  emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SoundCloudExtractor.ts#L147)
+- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/extractor/src/extractors/SoundCloudExtractor.ts#L160)
 ### public  getRelatedTracks(track): Promise\<ExtractorInfo>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | track | Track | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SoundCloudExtractor.ts#L26)
+- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/extractor/src/extractors/SoundCloudExtractor.ts#L34)
 ### public  handle(query, context): Promise\<ExtractorInfo>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -88,7 +88,7 @@ Dispatch an event to the player
 | context | ExtractorSearchContext | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SoundCloudExtractor.ts#L36)
+- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/extractor/src/extractors/SoundCloudExtractor.ts#L44)
 ### public  handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
 
@@ -101,14 +101,14 @@ A stream middleware to handle streams before passing it to the player
 | next | NextFunction | ❌ | The next function |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L164`
+- Source: `packages/discord-player/dist/index.d.ts#L195`
 ### public  stream(info): Promise\<string>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | info | Track | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SoundCloudExtractor.ts#L151)
+- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/extractor/src/extractors/SoundCloudExtractor.ts#L164)
 ### public  validate(query, type?): Promise\<boolean>
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -116,4 +116,4 @@ A stream middleware to handle streams before passing it to the player
 | type | null \| SearchQueryType | ✅ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/258bd80/packages/extractor/src/extractors/SoundCloudExtractor.ts#L21)
+- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/extractor/src/extractors/SoundCloudExtractor.ts#L21)

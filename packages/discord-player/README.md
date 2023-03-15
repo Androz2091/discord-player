@@ -125,6 +125,7 @@ That's all it takes to build your own music bot.
 
 #### Check out the [Documentation](https://discord-player.js.org) for more info.
 
-## Example bots made with Discord Player
+## Community Resources
 
-[You can find community-built example bots that use discord-player here](https://github.com/Androz2091/discord-player/issues/1638)
+A curated list of resources (such as open source music bots, extractors, etc.) built by Discord Player community.
+[https://discord-player.js.org/docs/guides/community-resources](https://discord-player.js.org/docs/guides/community-resources)
