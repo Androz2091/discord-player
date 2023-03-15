@@ -9,9 +9,9 @@ new FFmpegFilterer(af)
 
 ## Properties
 ### private  #ffmpegFilters: Array\<keyof QueueFilters>
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L44)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L44)
 ### public  af: GuildQueueAudioFilters\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L45)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L45)
 ### public  filters: Array\<keyof QueueFilters>
 Currently active ffmpeg filters
 ## Methods
@@ -21,7 +21,7 @@ Currently active ffmpeg filters
 | filters | Array\<keyof QueueFilters> | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L47)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L47)
 ### public  createStream(source, options): Readable
 Create ffmpeg stream
 
@@ -34,7 +34,7 @@ Create ffmpeg stream
 | options | FFmpegStreamOptions | ❌ | The stream options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L59)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L59)
 ### public  getFiltersDisabled(): Array\<keyof QueueFilters>
 Get list of disabled filters
 
@@ -42,7 +42,7 @@ Get list of disabled filters
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L127)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L127)
 ### public  getFiltersEnabled(): Array\<keyof QueueFilters>
 Get list of enabled filters
 
@@ -50,7 +50,7 @@ Get list of enabled filters
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L120)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L120)
 ### public  isDisabled(filter): boolean
 Check if the given filter is disabled
 
@@ -62,7 +62,7 @@ Check if the given filter is disabled
 | filter | T | ❌ | The filter |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L143)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L143)
 ### public  isEnabled(filter): boolean
 Check if the given filter is enabled
 
@@ -74,7 +74,7 @@ Check if the given filter is enabled
 | filter | T | ❌ | The filter |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L135)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L135)
 ### public  isValidFilter(filter): filter is keyof QueueFilters
 Check if the given filter is a valid filter
 
@@ -86,7 +86,7 @@ Check if the given filter is a valid filter
 | filter | string | ❌ | The filter to test |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L151)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L151)
 ### public  setDefaults(ff): void
 Set default filters
 
@@ -98,7 +98,7 @@ Set default filters
 | ff | Array\<keyof QueueFilters> | ❌ | Filters list |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L113)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L113)
 ### public  setFilters(filters): Promise\<boolean>
 Set ffmpeg filters
 
@@ -110,7 +110,7 @@ Set ffmpeg filters
 | filters | boolean \| Array\<keyof QueueFilters> \| Record\<keyof QueueFilters, boolean> | ❌ | The filters |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L67)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L67)
 ### public  toArray(): Array\<string>
 Convert current filters to array
 
@@ -118,7 +118,7 @@ Convert current filters to array
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L158)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L158)
 ### public  toJSON(): Record\<keyof QueueFilters, string>
 Convert current filters to JSON object
 
@@ -126,7 +126,7 @@ Convert current filters to JSON object
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L165)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L165)
 ### public  toString(): string
 String representation of current filters
 
@@ -134,7 +134,7 @@ String representation of current filters
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L176)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L176)
 ### public  toggle(filters): Promise\<boolean>
 Toggle given ffmpeg filter(s)
 
@@ -146,4 +146,4 @@ Toggle given ffmpeg filter(s)
 | filters | keyof QueueFilters \| Array\<keyof QueueFilters> | ❌ | The filter(s) |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/1a12f69/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L97)
+- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L97)

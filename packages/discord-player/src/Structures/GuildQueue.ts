@@ -478,6 +478,33 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * Moves a track in the queue
+     * @param from The track to move
+     * @param to The position to move to
+     */
+    public moveTrack(track: TrackResolvable, index = 0): void {
+        return this.node.move(track, index);
+    }
+
+    /**
+     * Copy a track in the queue
+     * @param from The track to clone
+     * @param to The position to clone at
+     */
+    public copyTrack(track: TrackResolvable, index = 0): void {
+        return this.node.copy(track, index);
+    }
+
+    /**
+     * Swap two tracks in the queue
+     * @param src The first track to swap
+     * @param dest The second track to swap
+     */
+    public swapTracks(src: TrackResolvable, dest: TrackResolvable): void {
+        return this.node.swap(src, dest);
+    }
+
+    /**
      * Connect to a voice channel
      * @param channelResolvable The voice channel to connect to
      * @param options Join config

@@ -307,6 +307,47 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     }
 
     /**
+     * Moves a track in the queue
+     * @param from The track to move
+     * @param to The position to move to
+     */
+    public move(from: TrackResolvable, to: number) {
+        const removed = this.remove(from);
+        if (!removed) throw new Error('invalid track to move');
+        this.insert(removed, to);
+    }
+
+    /**
+     * Copy a track in the queue
+     * @param from The track to clone
+     * @param to The position to clone at
+     */
+    public copy(from: TrackResolvable, to: number) {
+        const src = this.queue.tracks.at(this.getTrackPosition(from));
+        if (!src) throw new Error('invalid track to copy');
+        this.insert(src, to);
+    }
+
+    /**
+     * Swap two tracks in the queue
+     * @param first The first track to swap
+     * @param second The second track to swap
+     */
+    public swap(first: TrackResolvable, second: TrackResolvable) {
+        const src = this.getTrackPosition(first);
+        if (src < 0) throw new Error('invalid src track to swap');
+
+        const dest = this.getTrackPosition(second);
+        if (dest < 0) throw new Error('invalid dest track to swap');
+
+        const srcT = this.queue.tracks.store[src];
+        const destT = this.queue.tracks.store[dest];
+
+        this.queue.tracks.store[src] = destT;
+        this.queue.tracks.store[dest] = srcT;
+    }
+
+    /**
      * Stop the playback
      * @param force Whether or not to forcefully stop the playback
      */
