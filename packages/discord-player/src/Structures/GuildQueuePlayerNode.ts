@@ -67,7 +67,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     }
 
     /**
-     * Sets player progress
+     * Set player progress
      */
     public setProgress(progress: number) {
         this.#progress = progress;
