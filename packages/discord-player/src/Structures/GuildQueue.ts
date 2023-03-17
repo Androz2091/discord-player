@@ -4,7 +4,7 @@ import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Track, TrackResolvable } from './Track';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
-import { AudioResource, StreamType } from '@discordjs/voice';
+import { type AudioPlayer, AudioResource, StreamType } from '@discordjs/voice';
 import { Util } from '../utils/Util';
 import { Playlist } from './Playlist';
 import { GuildQueueHistory } from './GuildQueueHistory';
@@ -46,6 +46,7 @@ export interface GuildNodeInit<Meta = unknown> {
 export interface VoiceConnectConfig {
     deaf?: boolean;
     timeout?: number;
+    audioPlayer?: AudioPlayer;
 }
 
 export interface PostProcessedResult {
@@ -599,7 +600,8 @@ export class GuildQueue<Meta = unknown> {
         this.dispatcher = await this.player.voiceUtils.connect(channel, {
             deaf: options.deaf ?? this.options.selfDeaf ?? true,
             maxTime: options?.timeout ?? this.options.connectionTimeout ?? 120_000,
-            queue: this
+            queue: this,
+            audioPlayer: options?.audioPlayer
         });
 
         this.player.events.emit('connection', this);
