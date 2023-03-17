@@ -45,7 +45,7 @@ class AudioFilters {
     };
 
     public static get<K extends FiltersName>(name: K) {
-        return this.filters[name];
+        return this.filters[name] ?? name;
     }
 
     public static has<K extends FiltersName>(name: K) {

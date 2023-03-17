@@ -122,7 +122,35 @@ export enum GuildQueueEvent {
     /**
      * Emitted when the voice state is updated. Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
      */
-    voiceStateUpdate = 'voiceStateUpdate'
+    voiceStateUpdate = 'voiceStateUpdate',
+    /**
+     * Emitted when volume is updated
+     */
+    volumeChange = 'volumeChange',
+    /**
+     * Emitted when player is paused
+     */
+    playerPause = 'playerPause',
+    /**
+     * Emitted when player is resumed
+     */
+    playerResume = 'playerResume',
+    /**
+     * Biquad Filters Update
+     */
+    biquadFiltersUpdate = 'biquadFiltersUpdate',
+    /**
+     * Equalizer Update
+     */
+    equalizerUpdate = 'equalizerUpdate',
+    /**
+     * DSP update
+     */
+    dspUpdate = 'dspUpdate',
+    /**
+     * Audio Filters Update
+     */
+    audioFiltersUpdate = 'audioFiltersUpdate'
 }
 
 export interface GuildQueueEvents<Meta = unknown> {
@@ -220,6 +248,51 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param newState The new voice state
      */
     voiceStateUpdate: (queue: GuildQueue<Meta>, oldState: VoiceState, newState: VoiceState) => unknown;
+    /**
+     * Emitted when audio player is paused
+     * @param queue The queue where this event occurred
+     */
+    playerPause: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when audio player is resumed
+     * @param queue The queue where this event occurred
+     */
+    playerResume: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when audio player's volume is changed
+     * @param queue The queue where this event occurred
+     * @param oldVolume The old volume
+     * @param newVolume The updated volume
+     */
+    volumeChange: (queue: GuildQueue<Meta>, oldVolume: number, newVolume: number) => unknown;
+    /**
+     * Emitted when equalizer config is updated
+     * @param queue The queue where this event occurred
+     * @param oldFilters Old filters
+     * @param newFilters New filters
+     */
+    equalizerUpdate: (queue: GuildQueue<Meta>, oldFilters: EqualizerBand[], newFilters: EqualizerBand[]) => unknown;
+    /**
+     * Emitted when biquad filters is updated
+     * @param queue The queue where this event occurred
+     * @param oldFilters Old filters
+     * @param newFilters New filters
+     */
+    biquadFiltersUpdate: (queue: GuildQueue<Meta>, oldFilters: BiquadFilters | null, newFilters: BiquadFilters | null) => unknown;
+    /**
+     * Emitted when dsp filters is updated
+     * @param queue The queue where this event occurred
+     * @param oldFilters Old filters
+     * @param newFilters New filters
+     */
+    dspUpdate: (queue: GuildQueue<Meta>, oldFilters: PCMFilters[], newFilters: PCMFilters[]) => unknown;
+    /**
+     * Emitted when ffmpeg audio filters is updated
+     * @param queue The queue where this event occurred
+     * @param oldFilters Old filters
+     * @param newFilters New filters
+     */
+    audioFiltersUpdate: (queue: GuildQueue<Meta>, oldFilters: FiltersName[], newFilters: FiltersName[]) => unknown;
 }
 
 export class GuildQueue<Meta = unknown> {
@@ -602,15 +675,25 @@ export class GuildQueue<Meta = unknown> {
         dispatcher.on('finish', (r) => this.#performFinish(r));
         dispatcher.on('start', (r) => this.#performStart(r));
         dispatcher.on('dsp', (f) => {
+            if (!Object.is(this.filters._lastFiltersCache.filters, f)) {
+                this.player.events.emit('dspUpdate', this, this.filters._lastFiltersCache.filters, f);
+            }
             this.filters._lastFiltersCache.filters = f;
         });
         dispatcher.on('biquad', (f) => {
+            if (this.filters._lastFiltersCache.biquad !== f) {
+                this.player.events.emit('biquadFiltersUpdate', this, this.filters._lastFiltersCache.biquad, f);
+            }
             this.filters._lastFiltersCache.biquad = f;
         });
         dispatcher.on('eqBands', (f) => {
+            if (!Object.is(f, this.filters._lastFiltersCache.equalizer)) {
+                this.player.events.emit('equalizerUpdate', this, this.filters._lastFiltersCache.equalizer, f);
+            }
             this.filters._lastFiltersCache.equalizer = f;
         });
         dispatcher.on('volume', (f) => {
+            if (this.filters._lastFiltersCache.volume !== f) this.player.events.emit('volumeChange', this, this.filters._lastFiltersCache.volume, f);
             this.filters._lastFiltersCache.volume = f;
         });
     }
