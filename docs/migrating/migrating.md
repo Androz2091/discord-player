@@ -163,7 +163,7 @@ Discord Player `player.play` will handle queue creation, search results, tracks 
 + });
 
 # Or
-+ const queue = player.nodes.create({
++ const queue = player.nodes.create(interaction.guild, {
 +   metadata: {
 +    channel: interaction.channel,
 +    client: interaction.guild.members.me,
