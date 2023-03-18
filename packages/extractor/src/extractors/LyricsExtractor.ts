@@ -17,6 +17,7 @@ function search(query: string) {
             .then(async (songs) => {
                 const data = {
                     title: songs[0].title,
+                    fullTitle: songs[0].fullTitle,
                     id: songs[0].id,
                     thumbnail: songs[0].thumbnail,
                     image: songs[0].image,
@@ -40,6 +41,7 @@ function search(query: string) {
 
 export interface LyricsData {
     title: string;
+    fullTitle: string;
     id: number;
     thumbnail: string;
     image: string;
