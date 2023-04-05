@@ -9,11 +9,11 @@ new ExtractorExecutionContext(player)
 
 ## Properties
 ### public  player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L54)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L54)
 ### public  requiredEvents: Array\<keyof ExtractorExecutionEvents>
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L7)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L7)
 ### public  store: Collection\<string, BaseExtractor>
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L53)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L53)
 ### public static defaultMaxListeners: number
 - Source: `packages/utils/dist/index.d.ts#L45`
 ### public  size: number
@@ -34,7 +34,7 @@ The size of registered extractors
 | args | Parameters\<ExtractorExecutionEvents\[K]> | ❌ | - |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L11)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L11)
 ### public  eventNames(): Array\<U>
 - Source: `packages/utils/dist/index.d.ts#L56`
 ### public  get(identifier): undefined \| BaseExtractor
@@ -48,7 +48,7 @@ Get single extractor
 | identifier | string | ❌ | The extractor to get |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L92)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L92)
 ### public  getMaxListeners(): number
 - Source: `packages/utils/dist/index.d.ts#L60`
 ### public  isRegistered(identifier): boolean
@@ -62,7 +62,7 @@ Validate if the given extractor is registered
 | identifier | string | ❌ | The extractor identifier |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L77)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L77)
 ### public  listenerCount(type): number
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -84,7 +84,7 @@ Load default extractors from
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L61)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L61)
 ### public  off(event, listener): ExtractorExecutionContext
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -144,7 +144,7 @@ Register single extractor
 | options | Record\<string, unknown> | ❌ | Options supplied to the extractor |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L101)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L101)
 ### public  removeAllListeners(event?): ExtractorExecutionContext
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -172,7 +172,7 @@ Run all the extractors
 | filterBlocked | boolean | ❌ | Filter blocked extractors |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L157)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L157)
 ### public  setMaxListeners(n): ExtractorExecutionContext
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
@@ -191,7 +191,7 @@ Unregister single extractor
 | _extractor | K | ❌ | The extractor to unregister |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L123)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L123)
 ### public  unregisterAll(): Promise\<void>
 Unregister all extractors
 
@@ -199,4 +199,4 @@ Unregister all extractors
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/28ec2ed/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L144)
+- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L144)
