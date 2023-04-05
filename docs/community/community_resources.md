@@ -27,5 +27,6 @@ An unofficial extractor for discord-player to add support for deezer source.
 | [Flowease](https://github.com/Lutra-Fs/Flowease) | I am using discord-player to play songs from NetEase. | v5.3.2 |
 | [AtlantaBot](https://github.com/Androz2091/AtlantaBot) | We are using discord-player to manager all of our music commands. | v4.1.0 |
 | [Beat-Bot](https://github.com/IslandRhythms/Beat-Bot) | Fun discord bot with helpful util commands and music player using discord-player. | v6.1.1 |
+| [Melody](https://github.com/NerdyTechy/Melody) | Useful Discord music bot with many commands and effects to spice up your music. | v6.1.1 |
 
 > Add your own bot/project by creating a [pull request](https://github.com/Androz2091/discord-player).
