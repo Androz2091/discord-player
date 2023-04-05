@@ -1,419 +1,280 @@
 ## Collection extends Collection\<K, V>
 
+
 ```typescript
 new Collection(entries)
 ```
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| entries | null \| readonly Array\<readonly \[K, V]> | ✅ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| entries | null \| readonly Array\<readonly \[K, V]> | ✅ |
+
 
 ## Properties
-### private  #array: null \| Array\<V>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Collection.ts#L4)
-### public  \[toStringTag]: string
-- Source: `node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts#L135`
-### public  constructor: CollectionConstructor
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L21`
-### public  size: number
-- Source: `node_modules/typescript/lib/lib.es2015.collection.d.ts#L48`
+### private #array: null \| Array\<V>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Collection.ts#L4)
+### public \[toStringTag]: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+### public constructor: CollectionConstructor
+
+### public size: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
 ### public static \[species]: MapConstructor
-- Source: `node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts#L317`
+
+
 ## Methods
-### public  \[iterator](): IterableIterator\<\[K, V]>
+### public \[iterator](): IterableIterator\<\[K, V]>
 Returns an iterable of entries in the map.
-
-
-
-
-
-- Source: `node_modules/typescript/lib/lib.es2015.iterable.d.ts#L121`
-### public  array(): Array\<V>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Collection.ts#L9)
-### public  at(index): undefined \| V
-Identical to 
-
+### public array(): Array\<V>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Collection.ts#L9)
+### public at(index): undefined \| V
+Identical to Array.at().
+Returns the item at a given index, allowing for positive and negative integers.
+Negative integers count back from the last item in the collection.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| index | number | ❌ | The index of the element to obtain |
+| index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ | The index of the element to obtain |
+### public clear(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L98`
-### public  clear(): void
-- Source: `node_modules/typescript/lib/lib.es2015.collection.d.ts#L23`
-### public  clone(): Collection\<K, V>
+### public clone(): Collection\<K, V>
 Creates an identical shallow copy of this collection.
 
-
-```typescript
 ```ts
 const newColl = someColl.clone();
 ```
-```
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L328`
-### public  concat(collections): Collection\<K, V>
+### public concat(collections): Collection\<K, V>
 Combines this collection with others into a new collection. None of the source collections are modified.
 
-
-```typescript
 ```ts
 const newColl = someColl.concat(someOtherColl, anotherColl, ohBoyAColl);
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | collections | Array\<ReadonlyCollection\<K, V>> | ❌ | Collections to merge |
+### public delete(key): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| key | K | ❌ |
 
 
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L338`
-### public  delete(key): boolean
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| key | K | ❌ | - |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Collection.ts#L21)
-### public  difference(other): Collection\<K, V \| T>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Collection.ts#L21)
+### public difference(other): Collection\<K, V \| T>
 The difference method returns a new structure containing items where the key is present in one of the original structures but not the other.
-
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | other | ReadonlyCollection\<K, T> | ❌ | The other Collection to filter against |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L378`
-### public  each(fn): Collection\<K, V>
+### public each(fn): Collection\<K, V>
 Identical to
+Map.forEach(),
+but returns the collection instead of undefined.
 
-
-
-```typescript
 ```ts
 collection
-.each(user => console.log(user.username))
-.filter(user => user.bot)
-.each(user => console.log(user.username));
-```
+ .each(user => console.log(user.username))
+ .filter(user => user.bot)
+ .each(user => console.log(user.username));
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => void | ❌ | Function to execute for each element |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L303`
-### public  ensure(key, defaultValueGenerator): V
+### public ensure(key, defaultValueGenerator): V
 Obtains the value of the given key if it exists, otherwise sets and returns the value provided by the default value generator.
 
-
-```typescript
 ```ts
 collection.ensure(guildId, () => defaultGuildConfig);
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | key | K | ❌ | The key to get if it exists, or set otherwise |
 | defaultValueGenerator | (key: K, collection: Collection\<K, V>) => V | ❌ | A function that generates the default value |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L41`
-### public  entries(): IterableIterator\<\[K, V]>
+### public entries(): IterableIterator\<\[K, V]>
 Returns an iterable of key, value pairs for every entry in the map.
-
-
-
-
-
-- Source: `node_modules/typescript/lib/lib.es2015.iterable.d.ts#L126`
-### public  equals(collection): boolean
+### public equals(collection): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Checks if this collection shares identical items with another.
 This is different to checking for equality using equal-signs, because
 the collections may be different objects, but contain the same data.
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | collection | ReadonlyCollection\<K, V> | ❌ | Collection to compare with |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L347`
-### public  every(fn): this is Collection\<K2, V>
+### public every(fn): this is Collection\<K2, V>
 Checks if all items passes a test. Identical in behavior to
+Array.every().
 
-
-
-```typescript
 ```ts
 collection.every(user => !user.bot);
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => key is K2 | ❌ | Function used to test (should return a boolean) |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L269`
-### public  filter(fn): Collection\<K2, V>
+### public filter(fn): Collection\<K2, V>
 Identical to
+Array.filter(),
+but returns a Collection instead of an Array.
 
-
-
-```typescript
 ```ts
 collection.filter(user => user.username === 'Bob');
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => key is K2 | ❌ | The function to test with (should return boolean) |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L183`
-### public  find(fn): undefined \| V2
+### public find(fn): undefined \| V2
 Searches for a single item where the given function returns a truthy value. This behaves like
+Array.find().
+All collections used in Discord.js are mapped using their `id` property, and if you want to find by id you
+should use the `get` method. See
+MDN for details.
 
-
-
-```typescript
 ```ts
 collection.find(user => user.username === 'Bob');
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => value is V2 | ❌ | The function to test with (should return boolean) |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L142`
-### public  findKey(fn): undefined \| K2
+### public findKey(fn): undefined \| K2
 Searches for the key of a single item where the given function returns a truthy value. This behaves like
+Array.findIndex(),
+but returns the key rather than the positional index.
 
-
-
-```typescript
 ```ts
 collection.findKey(user => user.username === 'Bob');
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => key is K2 | ❌ | The function to test with (should return boolean) |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L158`
-### public  first(): undefined \| V
+### public first(): undefined \| V
 Obtains the first value(s) in this collection.
-
-
-
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L62`
-### public  firstKey(): undefined \| K
+### public firstKey(): undefined \| K
 Obtains the first key(s) in this collection.
-
-
-
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L71`
-### public  flatMap(fn): Collection\<K, T>
+### public flatMap(fn): Collection\<K, T>
 Maps each item into a Collection, then joins the results into a single Collection. Identical in behavior to
+Array.flatMap().
 
-
-
-```typescript
 ```ts
 collection.flatMap(guild => guild.members.cache);
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => Collection\<K, T> | ❌ | Function that produces a new Collection |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L217`
-### public  forEach(callbackfn, thisArg?): void
+### public forEach(callbackfn, thisArg?): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Executes a provided function once per each key/value pair in the Map, in insertion order.
 
 
 
-
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| callbackfn | (value: V, key: K, map: Map\<K, V>) => void | ❌ | - |
-| thisArg | any | ✅ | - |
-
-
-- Source: `node_modules/typescript/lib/lib.es2015.collection.d.ts#L31`
-### public  get(key): undefined \| V
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| callbackfn | (value: V, key: K, map: Map\<K, V>) => void | ❌ |
+| thisArg | [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any) | ✅ |
+### public get(key): undefined \| V
 Returns a specified element from the Map object. If the value that is associated to the provided key is an object, then you will get a reference to that object and any change made to that object will effectively modify it inside the Map.
 
 
 
-
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| key | K | ❌ | - |
-
-
-- Source: `node_modules/typescript/lib/lib.es2015.collection.d.ts#L36`
-### public  has(key): boolean
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| key | K | ❌ | - |
-
-
-- Source: `node_modules/typescript/lib/lib.es2015.collection.d.ts#L40`
-### public  hasAll(keys): boolean
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| key | K | ❌ |
+### public has(key): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| key | K | ❌ |
+### public hasAll(keys): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Checks if all of the elements exist in the collection.
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | keys | Array\<K> | ❌ | The keys of the elements to check for |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L48`
-### public  hasAny(keys): boolean
+### public hasAny(keys): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Checks if any of the elements exist in the collection.
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | keys | Array\<K> | ❌ | The keys of the elements to check for |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L55`
-### public  intersect(other): Collection\<K, T>
+### public intersect(other): Collection\<K, T>
 The intersect method returns a new structure containing items where the keys and values are present in both original structures.
-
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | other | ReadonlyCollection\<K, T> | ❌ | The other Collection to filter against |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L366`
-### public  keyAt(index): undefined \| K
-Identical to 
-
+### public keyAt(index): undefined \| K
+Identical to Array.at().
+Returns the key at a given index, allowing for positive and negative integers.
+Negative integers count back from the last item in the collection.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| index | number | ❌ | The index of the key to obtain |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L106`
-### public  keys(): IterableIterator\<K>
+| index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ | The index of the key to obtain |
+### public keys(): IterableIterator\<K>
 Returns an iterable of keys in the map
-
-
-
-
-
-- Source: `node_modules/typescript/lib/lib.es2015.iterable.d.ts#L131`
-### public  last(): undefined \| V
+### public last(): undefined \| V
 Obtains the last value(s) in this collection.
-
-
-
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L80`
-### public  lastKey(): undefined \| K
+### public lastKey(): undefined \| K
 Obtains the last key(s) in this collection.
-
-
-
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L89`
-### public  map(fn): Array\<T>
+### public map(fn): Array\<T>
 Maps each item to another value into an array. Identical in behavior to
+Array.map().
 
-
-
-```typescript
 ```ts
 collection.map(user => user.tag);
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => T | ❌ | Function that produces an element of the new array, taking three arguments |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L230`
-### public  mapValues(fn): Collection\<K, T>
+### public mapValues(fn): Collection\<K, T>
 Maps each item to another value into a collection. Identical in behavior to
+Array.map().
 
-
-
-```typescript
 ```ts
 collection.mapValues(user => user.tag);
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => T | ❌ | Function that produces an element of the new collection, taking three arguments |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L243`
-### public  merge(other, whenInSelf, whenInOther, whenInBoth): Collection\<K, R>
+### public merge(other, whenInSelf, whenInOther, whenInBoth): Collection\<K, R>
 Merges two Collections together into a new Collection.
 
-
-```typescript
 ```ts
 // Sums up the entries in two collections.
 coll.merge(
-other,
-x => ({ keep: true, value: x }),
-y => ({ keep: true, value: y }),
-(x, y) => ({ keep: true, value: x + y }),
+ other,
+ x => ({ keep: true, value: x }),
+ y => ({ keep: true, value: y }),
+ (x, y) => ({ keep: true, value: x + y }),
 );
 ```
-```
 
-```typescript
 ```ts
 // Intersects two collections in a left-biased manner.
 coll.merge(
-other,
-x => ({ keep: false }),
-y => ({ keep: false }),
-(x, _) => ({ keep: true, value: x }),
+ other,
+ x => ({ keep: false }),
+ y => ({ keep: false }),
+ (x, _) => ({ keep: true, value: x }),
 );
-```
 ```
 
 | Parameter | Type | Optional | Description |
@@ -422,200 +283,121 @@ y => ({ keep: false }),
 | whenInSelf | (value: V, key: K) => Keep\<R> | ❌ | Function getting the result if the entry only exists in this Collection |
 | whenInOther | (valueOther: T, key: K) => Keep\<R> | ❌ | Function getting the result if the entry only exists in the other Collection |
 | whenInBoth | (value: V, valueOther: T, key: K) => Keep\<R> | ❌ | Function getting the result if the entry exists in both Collections |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L407`
-### public  partition(fn): \[Collection\<K2, V>, Collection\<Exclude\<K, K2>, V>]
+### public partition(fn): \[Collection\<K2, V>, Collection\<Exclude\<K, K2>, V>]
 Partitions the collection into two collections where the first collection
 contains the items that passed and the second contains the items that failed.
 
-
-```typescript
 ```ts
 const [big, small] = collection.partition(guild => guild.memberCount > 250);
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => key is K2 | ❌ | Function used to test (should return a boolean) |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L200`
-### public  random(): undefined \| V
+### public random(): undefined \| V
 Obtains unique random value(s) from this collection.
-
-
-
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L113`
-### public  randomKey(): undefined \| K
+### public randomKey(): undefined \| K
 Obtains unique random key(s) from this collection.
-
-
-
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L121`
-### public  reduce(fn, initialValue?): T
+### public reduce(fn, initialValue?): T
 Applies a function to produce a single value. Identical in behavior to
+Array.reduce().
 
-
-
-```typescript
 ```ts
 collection.reduce((acc, guild) => acc + guild.memberCount, 0);
 ```
-```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (accumulator: T, value: V, key: K, collection: Collection\<K, V>) => T | ❌ | Function used to reduce, taking four arguments; |
+| fn | (accumulator: T, value: V, key: K, collection: Collection\<K, V>) => T | ❌ | Function used to reduce, taking four arguments; `accumulator`, `currentValue`, `currentKey`, and `collection` |
 | initialValue | T | ✅ | Starting value for the accumulator |
+### public reverse(): Collection\<K, V>
+Identical to Array.reverse()
+but returns a Collection instead of an Array.
+### public set(key, value): Collection\<K, V>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| key | K | ❌ |
+| value | V | ❌ |
 
 
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L287`
-### public  reverse(): Collection\<K, V>
-Identical to 
-
-
-
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L127`
-### public  set(key, value): Collection\<K, V>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| key | K | ❌ | - |
-| value | V | ❌ | - |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Collection.ts#L15)
-### public  some(fn): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Collection.ts#L15)
+### public some(fn): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Checks if there exists an item that passes a test. Identical in behavior to
+Array.some().
 
-
-
-```typescript
 ```ts
 collection.some(user => user.discriminator === '0000');
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => unknown | ❌ | Function used to test (should return a boolean) |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L256`
-### public  sort(compareFunction?): Collection\<K, V>
+### public sort(compareFunction?): Collection\<K, V>
 The sort method sorts the items of a collection in place and returns it.
 The sort is not necessarily stable in Node 10 or older.
 The default sort order is according to string Unicode code points.
 
-
-```typescript
 ```ts
 collection.sort((userA, userB) => userA.createdTimestamp - userB.createdTimestamp);
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| compareFunction | Comparator\<K, V> | ✅ | Specifies a function that defines the sort order.
-If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element. |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L360`
-### public  sorted(compareFunction?): Collection\<K, V>
+| compareFunction | Comparator\<K, V> | ✅ | Specifies a function that defines the sort order. If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element. |
+### public sorted(compareFunction?): Collection\<K, V>
 The sorted method sorts the items of a collection and returns it.
 The sort is not necessarily stable in Node 10 or older.
 The default sort order is according to string Unicode code points.
 
-
-```typescript
 ```ts
 collection.sorted((userA, userB) => userA.createdTimestamp - userB.createdTimestamp);
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| compareFunction | Comparator\<K, V> | ✅ | Specifies a function that defines the sort order.
-If omitted, the collection is sorted according to each character's Unicode code point value,
-according to the string conversion of each element. |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L421`
-### public  subtract(other): Collection\<K, V>
+| compareFunction | Comparator\<K, V> | ✅ | Specifies a function that defines the sort order. If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element. |
+### public subtract(other): Collection\<K, V>
 The subtract method returns a new structure containing items where the keys and values of the original structure are not present in the other.
-
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | other | ReadonlyCollection\<K, T> | ❌ | The other Collection to filter against |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L372`
-### public  sweep(fn): number
+### public sweep(fn): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 Removes items that satisfy the provided filter function.
-
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (value: V, key: K, collection: Collection\<K, V>) => unknown | ❌ | Function used to test (should return a boolean) |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L169`
-### public  tap(fn): Collection\<K, V>
+### public tap(fn): Collection\<K, V>
 Runs a function on the collection and returns the collection.
 
-
-```typescript
 ```ts
 collection
-.tap(coll => console.log(coll.size))
-.filter(user => user.bot)
-.tap(coll => console.log(coll.size))
-```
+ .tap(coll => console.log(coll.size))
+ .filter(user => user.bot)
+ .tap(coll => console.log(coll.size))
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | fn | (collection: Collection\<K, V>) => void | ❌ | Function to execute |
+### public toJSON(): Array\<V>
 
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L318`
-### public  toJSON(): Array\<V>
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L422`
-### public  values(): IterableIterator\<V>
+### public values(): IterableIterator\<V>
 Returns an iterable of values in the map
-
-
-
-
-
-- Source: `node_modules/typescript/lib/lib.es2015.iterable.d.ts#L136`
 ### public static combineEntries(entries, combine): Collection\<K, V>
 Creates a Collection from a list of entries.
 
-
-```typescript
 ```ts
 Collection.combineEntries([["a", 1], ["b", 2], ["a", 2]], (x, y) => x + y);
 // returns Collection { "a" => 3, "b" => 2 }
-```
 ```
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | entries | Iterable\<\[K, V]> | ❌ | The list of entries |
 | combine | (firstValue: V, secondValue: V, key: K) => V | ❌ | Function to combine an existing entry with a new one |
-
-
-- Source: `packages/utils/node_modules/@discordjs/collection/dist/index.d.ts#L435`

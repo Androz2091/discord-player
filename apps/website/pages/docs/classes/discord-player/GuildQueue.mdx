@@ -1,117 +1,119 @@
 ## GuildQueue
 
+
 ```typescript
 new GuildQueue(player, options)
 ```
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| player | Player | ❌ | - |
-| options | GuildNodeInit\<Meta> | ❌ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| player | Player | ❌ |
+| options | GuildNodeInit\<Meta> | ❌ |
+
 
 ## Properties
-### private  #deleted: boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L301)
-### private  #initializing: boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L300)
-### private  #initializingPromises: Array\<(value: boolean \| PromiseLike\<boolean>) => void>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L302)
-### private  #transitioning: boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L299)
-### private  __current: null \| Track
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L303)
-### public  dispatcher: null \| StreamDispatcher
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L306)
-### public  filters: GuildQueueAudioFilters\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L308)
-### public  history: GuildQueueHistory\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L305)
-### public  node: GuildQueuePlayerNode\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L307)
-### public  onAfterCreateStream: OnAfterCreateStreamHandler
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L310)
-### public  onBeforeCreateStream: OnBeforeCreateStreamHandler
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L309)
-### public  options: GuildNodeInit\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L318)
-### public  player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L318)
-### public  repeatMode: QueueRepeatMode
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L314)
-### public  stats: GuildQueueStatistics\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L316)
-### public  timeouts: Collection\<string, Timeout>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L315)
-### public  tracks: Queue\<Track>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L304)
-### public  channel: null \| VoiceBasedChannel
+### private #deleted: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L302)
+### private #initializing: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L301)
+### private #initializingPromises: Array\<(value: boolean \| PromiseLike\<boolean>) => void>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L303)
+### private #transitioning: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L300)
+### private __current: null \| Track
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L304)
+### public dispatcher: null \| StreamDispatcher
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L307)
+### public filters: GuildQueueAudioFilters\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L309)
+### public history: GuildQueueHistory\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L306)
+### public node: GuildQueuePlayerNode\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L308)
+### public onAfterCreateStream: OnAfterCreateStreamHandler
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L311)
+### public onBeforeCreateStream: OnBeforeCreateStreamHandler
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L310)
+### public options: GuildNodeInit\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L319)
+### public player: Player
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L319)
+### public repeatMode: QueueRepeatMode
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L315)
+### public stats: GuildQueueStatistics\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L317)
+### public timeouts: Collection\<string, Timeout>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L316)
+### public tracks: Queue\<Track>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L305)
+### public channel: null \| VoiceBasedChannel
 The voice channel of this queue
-### public  connection: null \| VoiceConnection
+### public connection: null \| VoiceConnection
 The voice connection of this queue
-### public  currentTrack: null \| Track
+### public currentTrack: null \| Track
 Indicates current track of this queue
-### public  deleted: boolean
+### public deleted: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Indicates if this queue was deleted previously
-### public  durationFormatted: string
+### public durationFormatted: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
 Formatted duration of this queue
-### public  estimatedDuration: number
+### public estimatedDuration: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 Estimated duration of this queue in ms
-### public  guild: Guild
+### public guild: Guild
 The guild this queue belongs to
-### public  id: string
+### public id: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
 The id of this queue
-### public  initializing: boolean
+### public initializing: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Indicates if this queue is currently initializing
-### public  metadata: Meta
+### public metadata: Meta
 The metadata of this queue
-### public  ping: number
+### public ping: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 The voice connection latency of this queue
-### public  size: number
+### public size: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 Gets the size of the queue
-### public  voiceReceiver: null \| VoiceReceiverNode
+### public voiceReceiver: null \| VoiceReceiverNode
 The voice receiver for this queue
+
 ## Methods
-### private  #attachListeners(dispatcher): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| dispatcher | StreamDispatcher | ❌ | - |
+### private #attachListeners(dispatcher): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| dispatcher | StreamDispatcher | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L672)
-### private  #emitEnd(): void
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L767)
-### private  #handleAutoplay(track): Promise\<void>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| track | Track | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L674)
+### private #emitEnd(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L769)
+### private #handleAutoplay(track): Promise\<void>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| track | Track | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L778)
-### private  #performFinish(resource?): undefined \| Promise\<void>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| resource | AudioResource\<Track> | ✅ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L780)
+### private #performFinish(resource?): undefined \| Promise\<void>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| resource | AudioResource\<Track> | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L722)
-### private  #performStart(resource?): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| resource | AudioResource\<Track> | ✅ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L724)
+### private #performStart(resource?): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| resource | AudioResource\<Track> | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L705)
-### private  #removeListeners(dispatcher): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| dispatcher | StreamDispatcher | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L707)
+### private #removeListeners(dispatcher): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| dispatcher | StreamDispatcher | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L701)
-### private  #resolveInitializerAwaiters(): void
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L814)
-### public  addTrack(track): void
-Add track to the queue. This will emit 
-
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L703)
+### private #resolveInitializerAwaiters(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L816)
+### public addTrack(track): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+Add track to the queue. This will emit `audioTracksAdd` when multiple tracks are added, otherwise `audioTrackAdd`.
 
 
 
@@ -120,26 +122,21 @@ Add track to the queue. This will emit
 | track | Track \| Playlist \| Array\<Track> | ❌ | Track or playlist or array of tracks to add |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L524)
-### public  awaitInitialization(): Promise\<boolean>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L525)
+### public awaitInitialization(): Promise\<boolean>
 Wait for this queue to initialize
 
 
 
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L647)
-### public  clear(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L649)
+### public clear(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Clear this queue
 
 
 
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L501)
-### public  connect(channelResolvable, options): Promise\<GuildQueue\<Meta>>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L502)
+### public connect(channelResolvable, options): Promise\<GuildQueue\<Meta>>
 Connect to a voice channel
-
 
 
 
@@ -149,101 +146,86 @@ Connect to a voice channel
 | options | VoiceConnectConfig | ❌ | Join config |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L585)
-### public  copyTrack(track, index): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L586)
+### public copyTrack(track, index): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Copy a track in the queue
 
 
 
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| track | TrackResolvable | ❌ |
+| index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| track | TrackResolvable | ❌ | - |
-| index | number | ❌ | - |
 
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L567)
-### public  debug(m): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L568)
+### public debug(m): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Write a debug message to this queue
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| m | string | ❌ | The message to write |
+| m | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The message to write |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L374)
-### public  delete(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L375)
+### public delete(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Delete this queue
 
 
 
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L628)
-### public  getSize(): number
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L630)
+### public getSize(): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 The size of this queue
 
 
 
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L494)
-### public  insertTrack(track, index): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L495)
+### public insertTrack(track, index): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Inserts the track to the given index
-
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | track | Track | ❌ | The track to insert |
-| index | number | ❌ | The index to insert the track at (defaults to 0) |
+| index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ | The index to insert the track at (defaults to 0) |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L549)
-### public  isEmpty(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L550)
+### public isEmpty(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Check if this queue has no tracks left in it
 
 
 
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L509)
-### public  isPlaying(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L510)
+### public isPlaying(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Check if this queue currently holds active audio resource
 
 
 
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L516)
-### public  isTransitioning(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L517)
+### public isTransitioning(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 if this queue is currently under transition mode
 
 
 
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L472)
-### public  moveTrack(track, index): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L473)
+### public moveTrack(track, index): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Moves a track in the queue
 
 
 
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| track | TrackResolvable | ❌ |
+| index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| track | TrackResolvable | ❌ | - |
-| index | number | ❌ | - |
 
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L558)
-### public  removeTrack(track): null \| Track
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L559)
+### public removeTrack(track): null \| Track
 Remove a track from queue
-
 
 
 
@@ -252,18 +234,15 @@ Remove a track from queue
 | track | TrackResolvable | ❌ | The track to remove |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L540)
-### public  revive(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L541)
+### public revive(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Revives this queue
 
 
 
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L638)
-### public  setMetadata(m): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L640)
+### public setMetadata(m): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Set metadata for this queue
-
 
 
 
@@ -272,10 +251,9 @@ Set metadata for this queue
 | m | Meta | ❌ | Metadata to set |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L393)
-### public  setRepeatMode(mode): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L394)
+### public setRepeatMode(mode): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Set repeat mode for this queue
-
 
 
 
@@ -284,48 +262,44 @@ Set repeat mode for this queue
 | mode | QueueRepeatMode | ❌ | The repeat mode to apply |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L480)
-### public  setSelfDeaf(mode?, reason?): Promise\<GuildMember>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L481)
+### public setSelfDeaf(mode?, reason?): Promise\<GuildMember>
 Set self deaf
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| mode | boolean | ✅ | On/Off state |
-| reason | string | ✅ | Reason |
+| mode | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ✅ | On/Off state |
+| reason | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ✅ | Reason |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L659)
-### public  setSelfMute(mode?, reason?): Promise\<GuildMember>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L661)
+### public setSelfMute(mode?, reason?): Promise\<GuildMember>
 Set self mute
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| mode | boolean | ✅ | On/Off state |
-| reason | string | ✅ | Reason |
+| mode | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ✅ | On/Off state |
+| reason | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ✅ | Reason |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L668)
-### public  setTransitioning(state): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L670)
+### public setTransitioning(state): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Set transition mode for this queue
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| state | boolean | ❌ | The state to set |
+| state | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌ | The state to set |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L465)
-### public  swapTracks(src, dest): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L466)
+### public swapTracks(src, dest): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Swap two tracks in the queue
-
 
 
 
@@ -335,4 +309,4 @@ Swap two tracks in the queue
 | dest | TrackResolvable | ❌ | The second track to swap |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/GuildQueue.ts#L576)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueue.ts#L577)

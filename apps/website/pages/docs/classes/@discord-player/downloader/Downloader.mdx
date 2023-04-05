@@ -1,41 +1,42 @@
 ## Downloader
 
+
 ```typescript
 new Downloader()
 ```
 
+
 ## Properties
-### public  important: boolean
+### public important: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
 
 ## Methods
-### public static download(url): Readable
+### public static download(url): [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)
 Downloads stream through youtube-dl
-
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| url | string | ❌ | URL to download stream from |
+| url | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | URL to download stream from |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/downloader/src/Downloader.ts#L24)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/downloader/src/Downloader.ts#L24)
 ### public static getInfo(url): Promise\<\{ info: Array\<Info>,playlist: any }>
 Returns stream info
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| url | string | ❌ | stream url |
+| url | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | stream url |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/downloader/src/Downloader.ts#L49)
-### public static validate(url): boolean
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| url | string | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/downloader/src/Downloader.ts#L49)
+### public static validate(url): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| url | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/downloader/src/Downloader.ts#L83)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/downloader/src/Downloader.ts#L83)

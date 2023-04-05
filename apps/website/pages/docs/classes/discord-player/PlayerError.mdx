@@ -1,47 +1,46 @@
-## PlayerError extends Error
+## PlayerError extends [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+
 
 ```typescript
 new PlayerError(message, code)
 ```
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| message | string | ❌ | - |
-| code | ErrorStatusCode | ❌ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| message | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
+| code | ErrorStatusCode | ❌ |
+
 
 ## Properties
-### public  createdAt: Date
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/PlayerError.ts#L21)
-### public  message: string
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/PlayerError.ts#L19)
-### public  name: string
-- Source: `node_modules/typescript/lib/lib.es5.d.ts#L1053`
-### public  stack: string
-- Source: `node_modules/typescript/lib/lib.es5.d.ts#L1055`
-### public  statusCode: ErrorStatusCode
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/PlayerError.ts#L20)
+### public createdAt: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/PlayerError.ts#L21)
+### public message: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/PlayerError.ts#L19)
+### public name: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+### public stack: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+### public statusCode: ErrorStatusCode
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/PlayerError.ts#L20)
 ### public static prepareStackTrace: (err: Error, stackTraces: Array\<CallSite>) => any
-- Source: `node_modules/@types/node/globals.d.ts#L11`
-### public static stackTraceLimit: number
-- Source: `node_modules/@types/node/globals.d.ts#L13`
-### public  createdTimestamp: number
+
+### public static stackTraceLimit: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+### public createdTimestamp: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
 
 ## Methods
-### public  toJSON(): \{ code: ErrorStatusCode,created: number,message: string,stack: undefined \| string }
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/PlayerError.ts#L41)
-### public  toString(): undefined \| string
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/PlayerError.ts#L50)
-### public  valueOf(): ErrorStatusCode
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/Structures/PlayerError.ts#L37)
-### public static captureStackTrace(targetObject, constructorOpt?): void
+### public toJSON(): \{ code: ErrorStatusCode,created: number,message: string,stack: undefined \| string }
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/PlayerError.ts#L41)
+### public toString(): undefined \| string
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/PlayerError.ts#L50)
+### public valueOf(): ErrorStatusCode
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/PlayerError.ts#L37)
+### public static captureStackTrace(targetObject, constructorOpt?): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Create .stack property on a target object
 
 
 
-
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| targetObject | object | ❌ | - |
-| constructorOpt | Function | ✅ | - |
-
-
-- Source: `node_modules/@types/node/globals.d.ts#L4`
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| targetObject | [object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) | ❌ |
+| constructorOpt | [Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) | ✅ |

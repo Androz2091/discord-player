@@ -1,34 +1,33 @@
-## PlayerException extends Error
+## PlayerException extends [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+
 
 ```typescript
 new PlayerException(message)
 ```
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| message | PlayerExceptionMessage | ❌ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| message | PlayerExceptionMessage | ❌ |
+
 
 ## Properties
-### public  message: string
-- Source: `node_modules/typescript/lib/lib.es5.d.ts#L1054`
-### public  name: string
-- Source: `node_modules/typescript/lib/lib.es5.d.ts#L1053`
-### public  stack: string
-- Source: `node_modules/typescript/lib/lib.es5.d.ts#L1055`
+### public message: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+### public name: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+### public stack: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
 ### public static prepareStackTrace: (err: Error, stackTraces: Array\<CallSite>) => any
-- Source: `node_modules/@types/node/globals.d.ts#L11`
-### public static stackTraceLimit: number
-- Source: `node_modules/@types/node/globals.d.ts#L13`
+
+### public static stackTraceLimit: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+
 ## Methods
-### public static captureStackTrace(targetObject, constructorOpt?): void
+### public static captureStackTrace(targetObject, constructorOpt?): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Create .stack property on a target object
 
 
 
-
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| targetObject | object | ❌ | - |
-| constructorOpt | Function | ✅ | - |
-
-
-- Source: `node_modules/@types/node/globals.d.ts#L4`
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| targetObject | [object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) | ❌ |
+| constructorOpt | [Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) | ✅ |

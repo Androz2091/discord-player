@@ -1,14 +1,16 @@
 ## Util
 
+
 ```typescript
 new Util()
 ```
 
 
-## Methods
-### public static buildTimeCode(duration): string
-Builds time code
 
+
+## Methods
+### public static buildTimeCode(duration): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+Builds time code
 
 
 
@@ -17,10 +19,9 @@ Builds time code
 | duration | TimeData | ❌ | The duration object |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L44)
-### public static durationString(durObj): string
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L44)
+### public static durationString(durObj): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
 Creates duration string
-
 
 
 
@@ -29,19 +30,18 @@ Creates duration string
 | durObj | Record\<string, number> | ❌ | The duration object |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L16)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L16)
 ### public static getFetch(): Promise\<any>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L110)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L110)
 ### public static import(id): Promise\<\{ error: null,module: any } \| \{ error: unknown,module: null }>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| id | string | ❌ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| id | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L90)
-### public static isVoiceEmpty(channel): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L90)
+### public static isVoiceEmpty(channel): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Checks if the voice channel is empty
-
 
 
 
@@ -50,10 +50,9 @@ Checks if the voice channel is empty
 | channel | StageChannel \| VoiceChannel | ❌ | The voice channel |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L73)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L73)
 ### public static last(arr): T
 Picks last item of the given array
-
 
 
 
@@ -62,58 +61,55 @@ Picks last item of the given array
 | arr | Array\<T> | ❌ | The array |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L63)
-### public static noop(): void
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L108)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L63)
+### public static noop(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L108)
 ### public static parseMS(milliseconds): TimeData
 Parses milliseconds to consumable time object
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| milliseconds | number | ❌ | The time in ms |
+| milliseconds | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ | The time in ms |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L27)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L27)
 ### public static randomChoice(src): T
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| src | Array\<T> | ❌ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| src | Array\<T> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L134)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L134)
 ### public static require(id): \{ error: null,module: any } \| \{ error: unknown,module: null }
 Safer require
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| id | string | ❌ | Node require id |
+| id | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | Node require id |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L82)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L82)
 ### public static wait(time): Promise\<undefined>
 Asynchronous timeout
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| time | number | ❌ | The time in ms to wait |
+| time | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ | The time in ms to wait |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L104)
-### public static warn(message, code, detail?): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| message | string | ❌ | - |
-| code | string | ❌ | - |
-| detail | string | ✅ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L104)
+### public static warn(message, code, detail?): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| message | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
+| code | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
+| detail | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/discord-player/src/utils/Util.ts#L127)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/Util.ts#L127)

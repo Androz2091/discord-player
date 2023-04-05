@@ -1,5 +1,6 @@
 ## ReverbnationExtractor extends BaseExtractor
 
+
 ```typescript
 new ReverbnationExtractor(context, options)
 ```
@@ -8,27 +9,22 @@ new ReverbnationExtractor(context, options)
 | context | ExtractorExecutionContext | ❌ | Context that instantiated this extractor |
 | options | Record\<string, unknown> | ✅ | Initialization options for this extractor |
 
+
 ## Properties
-### public  context: ExtractorExecutionContext
-- Source: `packages/discord-player/dist/index.d.ts#L146`
-### public  options: Record\<string, unknown>
-- Source: `packages/discord-player/dist/index.d.ts#L147`
+### public context: ExtractorExecutionContext
+
+### public options: Record\<string, unknown>
+
 ### public static identifier: 'com.discord\-player.reverbnationextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/extractor/src/extractors/ReverbnationExtractor.ts#L14)
-### public  identifier: string
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/ReverbnationExtractor.ts#L14)
+### public identifier: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
 Identifier of this extractor
+
 ## Methods
-### public  activate(): Promise\<void>
+### public activate(): Promise\<void>
 This method will be executed when this extractor is activated
-
-
-
-
-
-- Source: `packages/discord-player/dist/index.d.ts#L165`
-### public  createResponse(playlist?, tracks?): ExtractorInfo
+### public createResponse(playlist?, tracks?): ExtractorInfo
 Create extractor response
-
 
 
 
@@ -36,32 +32,18 @@ Create extractor response
 | ----------- | ----------- | ----------- | ----------- |
 | playlist | null \| Playlist | ✅ | The playlist |
 | tracks | Array\<Track> | ✅ | The track array |
-
-
-- Source: `packages/discord-player/dist/index.d.ts#L207`
-### public  deactivate(): Promise\<void>
+### public deactivate(): Promise\<void>
 This method will be executed when this extractor is deactivated
-
-
-
-
-
-- Source: `packages/discord-player/dist/index.d.ts#L169`
-### public  debug(message): boolean
+### public debug(message): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Write debug message
-
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| message | string | ❌ | The debug message |
-
-
-- Source: `packages/discord-player/dist/index.d.ts#L212`
-### public  emit(event, args): boolean
+| message | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The debug message |
+### public emit(event, args): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Dispatch an event to the player
-
 
 
 
@@ -69,51 +51,44 @@ Dispatch an event to the player
 | ----------- | ----------- | ----------- | ----------- |
 | event | K | ❌ | The event to dispatch |
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
+### public emptyResponse(): ExtractorInfo
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/ReverbnationExtractor.ts#L56)
+### public getRelatedTracks(track): Promise\<ExtractorInfo>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| track | Track | ❌ |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L201`
-### public  emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/extractor/src/extractors/ReverbnationExtractor.ts#L56)
-### public  getRelatedTracks(track): Promise\<ExtractorInfo>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| track | Track | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/ReverbnationExtractor.ts#L21)
+### public handle(query, context): Promise\<ExtractorInfo>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
+| context | ExtractorSearchContext | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/extractor/src/extractors/ReverbnationExtractor.ts#L21)
-### public  handle(query, context): Promise\<ExtractorInfo>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| query | string | ❌ | - |
-| context | ExtractorSearchContext | ❌ | - |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/extractor/src/extractors/ReverbnationExtractor.ts#L26)
-### public  handlePostStream(stream, next): void
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/ReverbnationExtractor.ts#L26)
+### public handlePostStream(stream, next): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 A stream middleware to handle streams before passing it to the player
 
 
 
-
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| stream | Readable | ❌ | The incoming stream |
+| stream | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌ | The incoming stream |
 | next | NextFunction | ❌ | The next function |
+### public stream(info): Promise\<string>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| info | Track | ❌ |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L195`
-### public  stream(info): Promise\<string>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| info | Track | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/ReverbnationExtractor.ts#L60)
+### public validate(query, type?): Promise\<boolean>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
+| type | null \| SearchQueryType | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/extractor/src/extractors/ReverbnationExtractor.ts#L60)
-### public  validate(query, type?): Promise\<boolean>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| query | string | ❌ | - |
-| type | null \| SearchQueryType | ✅ | - |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/extractor/src/extractors/ReverbnationExtractor.ts#L16)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/ReverbnationExtractor.ts#L16)

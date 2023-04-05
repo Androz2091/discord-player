@@ -1,111 +1,114 @@
 ## Queue
 
+
 ```typescript
 new Queue(strategy, initializer)
 ```
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| strategy | QueueStrategy | ❌ | - |
-| initializer | Array\<T> | ❌ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| strategy | QueueStrategy | ❌ |
+| initializer | Array\<T> | ❌ |
+
 
 ## Properties
-### public  store: Array\<T>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L8)
-### public  strategy: QueueStrategy
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L9)
-### public  data: Array\<T>
+### public store: Array\<T>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L8)
+### public strategy: QueueStrategy
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L9)
+### public data: Array\<T>
 
-### public  size: number
+### public size: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
 
 ## Methods
-### public  \[custom](): string
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L123)
-### public  add(item): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| item | T \| Array\<T> | ❌ | - |
+### public \[custom](): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L123)
+### public add(item): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| item | T \| Array\<T> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L36)
-### public  at(idx): undefined \| T
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| idx | number | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L36)
+### public at(idx): undefined \| T
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| idx | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L94)
-### public  clear(): void
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L52)
-### public  clone(): Queue\<T>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L103)
-### public  dispatch(): undefined \| T
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L99)
-### public  every(itemFilter): boolean
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L94)
+### public clear(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L52)
+### public clone(): Queue\<T>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L103)
+### public dispatch(): undefined \| T
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L99)
+### public every(itemFilter): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L85)
-### public  filter(itemFilter): Array\<T>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L85)
+### public filter(itemFilter): Array\<T>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L77)
-### public  find(itemFilter): undefined \| T
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L77)
+### public find(itemFilter): undefined \| T
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L73)
-### public  isFIFO(): boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L28)
-### public  isLIFO(): boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L32)
-### public  map(itemFilter): Array\<R>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, R> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L73)
+### public isFIFO(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L28)
+### public isLIFO(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L32)
+### public map(itemFilter): Array\<R>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, R> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L89)
-### public  remove(itemFilter): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L89)
+### public remove(itemFilter): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L63)
-### public  removeOne(itemFilter): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L63)
+### public removeOne(itemFilter): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L68)
-### public  shuffle(): void
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L56)
-### public  some(itemFilter): boolean
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L68)
+### public shuffle(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L56)
+### public some(itemFilter): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L81)
-### public  toArray(): Array\<T>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L115)
-### public  toJSON(): Array\<T>
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L119)
-### public  toString(): string
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L111)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L81)
+### public toArray(): Array\<T>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L115)
+### public toJSON(): Array\<T>
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L119)
+### public toString(): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L111)
 ### public static from(data, strategy): Queue\<T>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| data | Array\<T> | ❌ | - |
-| strategy | QueueStrategy | ❌ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| data | Array\<T> | ❌ |
+| strategy | QueueStrategy | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/3861a2c/packages/utils/src/Queue.ts#L24)
+- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/utils/src/Queue.ts#L24)
