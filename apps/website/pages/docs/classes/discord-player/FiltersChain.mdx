@@ -10,31 +10,31 @@ new FiltersChain(presets)
 
 
 ## Properties
-### public biquad: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public biquad: null \| BiquadStream
 
-### public destination: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public destination: null \| Readable
 
-### public equalizer: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public equalizer: null \| EqualizerStream
 
-### public filters: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public filters: null \| AudioFilter
 
-### public onError: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public onError: (err: Error) => unknown
 
-### public onUpdate: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public onUpdate: (...args: unknown\[]) => unknown
 
-### public presets: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public presets: DSPFiltersPreset
 
-### public resampler: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public resampler: null \| PCMResampler
 
-### public source: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public source: null \| Readable
 
-### public volume: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public volume: null \| VolumeTransformer
 
 
 ## Methods
-### public create(src, presets?): [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)
+### public create(src, presets?): Readable
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| src | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌ |
+| src | Readable | ❌ |
 | presets | DSPFiltersPreset | ✅ |
-### public destroy(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public destroy(): void

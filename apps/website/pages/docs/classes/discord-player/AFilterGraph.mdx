@@ -10,21 +10,21 @@ new AFilterGraph(af)
 
 
 ## Properties
-### public af: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L268)
-### public biquad: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public af: GuildQueueAudioFilters\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L268)
+### public biquad: null
 
-### public equalizer: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public equalizer: Array\<EqualizerBand>
 
-### public ffmpeg: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public ffmpeg: Array\<keyof QueueFilters>
 
-### public filters: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public filters: Array\<'8D' \| 'Tremolo' \| 'Vibrato'>
 
-### public resampler: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public resampler: null \| PCMResampler
 
-### public volume: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public volume: null \| VolumeTransformer
 
 
 ## Methods
 ### public dump(): FilterGraph
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L298)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L298)

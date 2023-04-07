@@ -1,4 +1,4 @@
-## EventEmitter extends [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+## EventEmitter extends EventEmitter
 The `EventEmitter` class is defined and exposed by the `events` module:
 
 ```js
@@ -21,13 +21,13 @@ new EventEmitter(options)
 
 
 ## Properties
-### public static captureRejectionSymbol: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static captureRejectionSymbol: (typeof captureRejectionSymbol)
 
-### public static captureRejections: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static captureRejections: boolean
 Sets or gets the default captureRejection value for all emitters.
-### public static defaultMaxListeners: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static defaultMaxListeners: number
 
-### public static errorMonitor: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static errorMonitor: (typeof errorMonitor)
 This symbol shall be used to install a listener for only monitoring `'error'`
 events. Listeners installed using this symbol are called before the regular
 `'error'` listeners are called.
@@ -37,16 +37,16 @@ Installing a listener using this symbol does not change the behavior once an
 regular `'error'` listener is installed.
 
 ## Methods
-### public addListener(eventName, listener): [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+### public addListener(eventName, listener): EventEmitter
 Alias for `emitter.on(eventName, listener)`.
 
 
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
-| listener | (args: Array,\<,any,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
-### public emit(eventName, args): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| eventName | string \| symbol | ❌ |
+| listener | (args: Array\<any>) => void | ❌ |
+### public emit(eventName, args): boolean
 Synchronously calls each of the listeners registered for the event named`eventName`, in the order they were registered, passing the supplied arguments
 to each.
 
@@ -89,9 +89,9 @@ myEmitter.emit('event', 1, 2, 3, 4, 5);
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
-| args | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)> | ❌ |
-### public eventNames(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol)>
+| eventName | string \| symbol | ❌ |
+| args | Array\<any> | ❌ |
+### public eventNames(): Array\<string \| symbol>
 Returns an array listing the events for which the emitter has registered
 listeners. The values in the array are strings or `Symbol`s.
 
@@ -107,18 +107,18 @@ myEE.on(sym, () => {});
 console.log(myEE.eventNames());
 // Prints: [ 'foo', 'bar', Symbol(symbol) ]
 ```
-### public getMaxListeners(): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public getMaxListeners(): number
 Returns the current max listener value for the `EventEmitter` which is either
 set by `emitter.setMaxListeners(n)` or defaults to defaultMaxListeners.
-### public listenerCount(eventName): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public listenerCount(eventName): number
 Returns the number of listeners listening to the event named `eventName`.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ | The name of the event being listened for |
-### public listeners(eventName): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)>
+| eventName | string \| symbol | ❌ | The name of the event being listened for |
+### public listeners(eventName): Array\<Function>
 Returns a copy of the array of listeners for the event named `eventName`.
 
 ```js
@@ -133,17 +133,17 @@ console.log(util.inspect(server.listeners('connection')));
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
-### public off(eventName, listener): [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+| eventName | string \| symbol | ❌ |
+### public off(eventName, listener): EventEmitter
 Alias for `emitter.removeListener()`.
 
 
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
-| listener | (args: Array,\<,any,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
-### public on(eventName, listener): [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+| eventName | string \| symbol | ❌ |
+| listener | (args: Array\<any>) => void | ❌ |
+### public on(eventName, listener): EventEmitter
 Adds the `listener` function to the end of the listeners array for the
 event named `eventName`. No checks are made to see if the `listener` has
 already been added. Multiple calls passing the same combination of `eventName`and `listener` will result in the `listener` being added, and called, multiple
@@ -174,9 +174,9 @@ myEE.emit('foo');
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ | The name of the event. |
-| listener | (args: Array,\<,any,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ | The callback function |
-### public once(eventName, listener): [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+| eventName | string \| symbol | ❌ | The name of the event. |
+| listener | (args: Array\<any>) => void | ❌ | The callback function |
+### public once(eventName, listener): EventEmitter
 Adds a **one-time**`listener` function for the event named `eventName`. The
 next time `eventName` is triggered, this listener is removed and then invoked.
 
@@ -205,9 +205,9 @@ myEE.emit('foo');
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ | The name of the event. |
-| listener | (args: Array,\<,any,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ | The callback function |
-### public prependListener(eventName, listener): [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+| eventName | string \| symbol | ❌ | The name of the event. |
+| listener | (args: Array\<any>) => void | ❌ | The callback function |
+### public prependListener(eventName, listener): EventEmitter
 Adds the `listener` function to the _beginning_ of the listeners array for the
 event named `eventName`. No checks are made to see if the `listener` has
 already been added. Multiple calls passing the same combination of `eventName`and `listener` will result in the `listener` being added, and called, multiple
@@ -225,9 +225,9 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ | The name of the event. |
-| listener | (args: Array,\<,any,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ | The callback function |
-### public prependOnceListener(eventName, listener): [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+| eventName | string \| symbol | ❌ | The name of the event. |
+| listener | (args: Array\<any>) => void | ❌ | The callback function |
+### public prependOnceListener(eventName, listener): EventEmitter
 Adds a **one-time**`listener` function for the event named `eventName` to the_beginning_ of the listeners array. The next time `eventName` is triggered, this
 listener is removed, and then invoked.
 
@@ -243,9 +243,9 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ | The name of the event. |
-| listener | (args: Array,\<,any,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ | The callback function |
-### public rawListeners(eventName): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)>
+| eventName | string \| symbol | ❌ | The name of the event. |
+| listener | (args: Array\<any>) => void | ❌ | The callback function |
+### public rawListeners(eventName): Array\<Function>
 Returns a copy of the array of listeners for the event named `eventName`,
 including any wrappers (such as those created by `.once()`).
 
@@ -277,8 +277,8 @@ emitter.emit('log');
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
-### public removeAllListeners(event?): [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+| eventName | string \| symbol | ❌ |
+### public removeAllListeners(event?): EventEmitter
 Removes all listeners, or those of the specified `eventName`.
 
 It is bad practice to remove listeners added elsewhere in the code,
@@ -291,8 +291,8 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| event | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ✅ |
-### public removeListener(eventName, listener): [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+| event | string \| symbol | ✅ |
+### public removeListener(eventName, listener): EventEmitter
 Removes the specified `listener` from the listener array for the event named`eventName`.
 
 ```js
@@ -374,9 +374,9 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
-| listener | (args: Array,\<,any,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
-### public setMaxListeners(n): [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+| eventName | string \| symbol | ❌ |
+| listener | (args: Array\<any>) => void | ❌ |
+### public setMaxListeners(n): EventEmitter
 By default `EventEmitter`s will print a warning if more than `10` listeners are
 added for a particular event. This is a useful default that helps finding
 memory leaks. The `emitter.setMaxListeners()` method allows the limit to be
@@ -388,8 +388,8 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| n | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-### public static getEventListeners(emitter, name): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)>
+| n | number | ❌ |
+### public static getEventListeners(emitter, name): Array\<Function>
 Returns a copy of the array of listeners for the event named `eventName`.
 
 For `EventEmitter`s this behaves exactly the same as calling `.listeners` on
@@ -419,9 +419,9 @@ const { getEventListeners, EventEmitter } = require('events');
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| emitter | [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)DOMEventTarget | ❌ |
-| name | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
-### public static listenerCount(emitter, eventName): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+| emitter | EventEmitter \| DOMEventTarget | ❌ |
+| name | string \| symbol | ❌ |
+### public static listenerCount(emitter, eventName): number
 A class method that returns the number of listeners for the given `eventName`registered on the given `emitter`.
 
 ```js
@@ -439,9 +439,9 @@ console.log(listenerCount(myEmitter, 'event'));
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| emitter | [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter) | ❌ | The emitter to query |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ | The event name |
-### public static on(emitter, eventName, options?): AsyncIterableIterator\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>
+| emitter | EventEmitter | ❌ | The emitter to query |
+| eventName | string \| symbol | ❌ | The event name |
+### public static on(emitter, eventName, options?): AsyncIterableIterator\<any>
 ```js
 const { on, EventEmitter } = require('events');
 
@@ -500,10 +500,10 @@ process.nextTick(() => ac.abort());
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| emitter | [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter) | ❌ | N/A |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The name of the event being listened for |
+| emitter | EventEmitter | ❌ | N/A |
+| eventName | string | ❌ | The name of the event being listened for |
 | options | StaticEventEmitterOptions | ✅ | N/A |
-### public static once(emitter, eventName, options?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>>
+### public static once(emitter, eventName, options?): Promise\<Array\<any>>
 Creates a `Promise` that is fulfilled when the `EventEmitter` emits the given
 event or that is rejected if the `EventEmitter` emits `'error'` while waiting.
 The `Promise` will resolve with an array of all the arguments emitted to the
@@ -589,9 +589,9 @@ ee.emit('foo'); // Prints: Waiting for the event was canceled!
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | emitter | NodeEventTarget | ❌ |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
+| eventName | string \| symbol | ❌ |
 | options | StaticEventEmitterOptions | ✅ |
-### public static setMaxListeners(n?, eventTargets): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public static setMaxListeners(n?, eventTargets): void
 ```js
 const {
   setMaxListeners,
@@ -608,5 +608,5 @@ setMaxListeners(5, target, emitter);
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| n | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ✅ | A non-negative number. The maximum number of listeners per `EventTarget` event. |
-| eventTargets | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)DOMEventTarget> | ❌ | N/A |
+| n | number | ✅ | A non-negative number. The maximum number of listeners per `EventTarget` event. |
+| eventTargets | Array\<EventEmitter \| DOMEventTarget> | ❌ | N/A |

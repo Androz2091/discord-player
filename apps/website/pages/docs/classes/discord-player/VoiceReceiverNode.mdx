@@ -10,30 +10,30 @@ new VoiceReceiverNode(dispatcher)
 
 
 ## Properties
-### public dispatcher: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L19)
+### public dispatcher: StreamDispatcher
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L19)
 
 ## Methods
 ### public createRawTrack(stream, data): Track
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| stream | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌ |
-| data | Partial\<Omit\<RawTrackData'author''playlist''source''engine''raw''queryType''description''views'>> | ❌ |
+| stream | Readable | ❌ |
+| data | Partial\<Omit\<RawTrackData, 'author' \| 'playlist' \| 'source' \| 'engine' \| 'raw' \| 'queryType' \| 'description' \| 'views'>> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L21)
-### public mergeRecordings(streams): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L21)
+### public mergeRecordings(streams): void
 Merge multiple streams together
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| streams | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)> | ❌ | The array of streams to merge |
+| streams | Array\<Readable> | ❌ | The array of streams to merge |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L45)
-### public recordUser(user, options): [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L45)
+### public recordUser(user, options): Readable
 Record a user in voice channel
 
 
@@ -44,4 +44,4 @@ Record a user in voice channel
 | options | VoiceReceiverOptions | ❌ | Recording options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L56)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/VoiceReceiverNode.ts#L56)

@@ -18,6 +18,7 @@ async function main() {
         input: `${__dirname}/../`,
         output: OUT,
         extension: 'mdx',
+        noLinkTypes: true,
         markdown: true
     });
 

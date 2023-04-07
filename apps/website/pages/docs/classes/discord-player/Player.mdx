@@ -11,44 +11,44 @@ new Player(client, options)
 
 
 ## Properties
-### private #lagMonitorInterval: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L27)
-### private #lagMonitorTimeout: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L26)
-### private #lastLatency: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L24)
-### private #voiceStateUpdateListener: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L25)
-### public client: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L30)
-### public events: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L35)
-### public extractors: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L34)
-### public id: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L29)
-### public nodes: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L32)
-### public options: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L31)
-### public requiredEvents: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L7)
-### public voiceUtils: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L33)
-### public static _singletonKey: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L28)
-### public static defaultMaxListeners: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### private #lagMonitorInterval: Timer
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L27)
+### private #lagMonitorTimeout: Timeout
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L26)
+### private #lastLatency: number
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L24)
+### private #voiceStateUpdateListener: (oldState: VoiceState, newState: VoiceState) => void
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L25)
+### public client: Client\<boolean>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L30)
+### public events: PlayerEventsEmitter\<GuildQueueEvents\<unknown>>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L35)
+### public extractors: ExtractorExecutionContext
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L34)
+### public id: string
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L29)
+### public nodes: GuildNodeManager\<unknown>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L32)
+### public options: PlayerInitOptions
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L31)
+### public requiredEvents: Array\<keyof PlayerEvents>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L7)
+### public voiceUtils: VoiceUtils
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L33)
+### public static _singletonKey: symbol
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L28)
+### public static defaultMaxListeners: number
 
-### public eventLoopLag: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public eventLoopLag: number
 Event loop lag
-### public queryCache: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public queryCache: null \| QueryCache
 The current query cache provider
-### public queues: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public queues: GuildNodeManager\<unknown>
 Alias to `Player.nodes`
 
 ## Methods
-### public \[iterator](): Generator\<GuildQueue\<[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)>[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)undefined>
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L553)
+### public \[iterator](): Generator\<GuildQueue\<unknown>, void, undefined>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L553)
 ### private _handleVoiceState(oldState, newState): undefined
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -56,7 +56,7 @@ Alias to `Player.nodes`
 | newState | VoiceState | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L192)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L192)
 ### public addListener(event, listener): Player
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -72,39 +72,39 @@ Creates `Playlist` instance
 | data | PlaylistInitData | ❌ | The data to initialize a playlist |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L561)
-### public debug(m): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L561)
+### public debug(m): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| m | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
+| m | string | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L114)
-### public destroy(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L114)
+### public destroy(): Promise\<void>
 Destroy player
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L181)
-### public emit(name, args): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L181)
+### public emit(name, args): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | name | K | ❌ |
 | args | Parameters\<PlayerEvents\[K]> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L11)
-### public eventNames(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<U>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L11)
+### public eventNames(): Array\<U>
 
-### public generateStatistics(): \{ instances: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number);queryCacheEnabled: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean);queues: [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<GuildQueueStatisticsMetadata>;queuesCount: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number); }
+### public generateStatistics(): \{ instances: number,queryCacheEnabled: boolean,queues: Array\<GuildQueueStatisticsMetadata>,queuesCount: number }
 Generates statistics
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L169)
-### public getMaxListeners(): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L169)
+### public getMaxListeners(): number
 
-### public handleVoiceState(oldState, newState): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public handleVoiceState(oldState, newState): void
 Handles voice state update
 
 
@@ -115,27 +115,27 @@ Handles voice state update
 | newState | VoiceState | ❌ | The new voice state |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L287)
-### public isVoiceStateHandlerLocked(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L287)
+### public isVoiceStateHandlerLocked(): boolean
 Checks if voice state handler is locked
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L308)
-### public listenerCount(type): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L308)
+### public listenerCount(type): number
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| type | keyofPlayerEvents | ❌ |
-### public listeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<PlayerEvents\[U]>
+| type | keyof PlayerEvents | ❌ |
+### public listeners(type): Array\<PlayerEvents\[U]>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | type | U | ❌ |
-### public lockVoiceStateHandler(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public lockVoiceStateHandler(): void
 Lock voice state handler
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L294)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L294)
 ### public off(event, listener): Player
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -151,7 +151,7 @@ Lock voice state handler
 | ----------- | ----------- | ----------- |
 | event | U | ❌ |
 | listener | PlayerEvents\[U] | ❌ |
-### public play(channel, query, options): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<PlayerNodeInitializationResult\<T>>
+### public play(channel, query, options): Promise\<PlayerNodeInitializationResult\<T>>
 Initiate audio player
 
 
@@ -159,11 +159,11 @@ Initiate audio player
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | channel | GuildVoiceChannelResolvable | ❌ | The voice channel on which the music should be played |
-| query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)TrackPlaylist[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track>SearchResult | ❌ | The track or source to play |
-| options | SearchOptions & \{ afterSearch: (result: SearchResult) => [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<SearchResult>;connectionOptions: VoiceConnectConfig;nodeOptions: GuildNodeCreateOptions\<T>; } | ❌ | Options for player |
+| query | string \| Track \| Playlist \| Array\<Track> \| SearchResult | ❌ | The track or source to play |
+| options | SearchOptions & \{ afterSearch: (result: SearchResult) => Promise\<SearchResult>,connectionOptions: VoiceConnectConfig,nodeOptions: GuildNodeCreateOptions\<T> } | ❌ | Options for player |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L318)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L318)
 ### public prependListener(event, listener): Player
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -174,59 +174,59 @@ Initiate audio player
 | ----------- | ----------- | ----------- |
 | event | U | ❌ |
 | listener | PlayerEvents\[U] | ❌ |
-### public rawListeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<PlayerEvents\[U]>
+### public rawListeners(type): Array\<PlayerEvents\[U]>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | type | U | ❌ |
 ### public removeAllListeners(event?): Player
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| event | keyofPlayerEvents | ✅ |
+| event | keyof PlayerEvents | ✅ |
 ### public removeListener(event, listener): Player
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | U | ❌ |
 | listener | PlayerEvents\[U] | ❌ |
-### public scanDeps(): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+### public scanDeps(): string
 Generates a report of the dependencies used by the `@discordjs/voice` module. Useful for debugging.
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L542)
-### public search(query, options): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<SearchResult>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L542)
+### public search(query, options): Promise\<SearchResult>
 Search tracks
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)TrackPlaylist[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track>SearchResult | ❌ | The search query |
+| query | string \| Track \| Playlist \| Array\<Track> \| SearchResult | ❌ | The search query |
 | options | SearchOptions | ❌ | The search options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L366)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L366)
 ### public setMaxListeners(n): Player
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| n | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-### public unlockVoiceStateHandler(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| n | number | ❌ |
+### public unlockVoiceStateHandler(): void
 Unlock voice state handler
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L301)
-### public static clearAllPlayers(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L301)
+### public static clearAllPlayers(): void
 Clear all player instances
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L140)
-### public static getAllPlayers(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Player>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L140)
+### public static getAllPlayers(): Array\<Player>
 Get all active player instances
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L133)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L133)
 ### public static singleton(client, options): Player
 Creates discord-player singleton instance.
 
@@ -234,8 +234,8 @@ Creates discord-player singleton instance.
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| client | Client\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)> | ❌ | The client that instantiated player |
+| client | Client\<boolean> | ❌ | The client that instantiated player |
 | options | PlayerInitOptions | ❌ | Player initializer options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Player.ts#L123)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Player.ts#L123)

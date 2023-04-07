@@ -10,23 +10,23 @@ new Collection(entries)
 
 
 ## Properties
-### private #array: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/utils/src/Collection.ts#L4)
-### public \[toStringTag]: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### private #array: null \| Array\<V>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Collection.ts#L4)
+### public \[toStringTag]: string
 
-### public constructor: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public constructor: CollectionConstructor
 
-### public size: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public size: number
 
-### public static \[species]: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static \[species]: MapConstructor
 
 
 ## Methods
-### public \[iterator](): IterableIterator\<\[KV]>
+### public \[iterator](): IterableIterator\<\[K, V]>
 Returns an iterable of entries in the map.
-### public array(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<V>
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/utils/src/Collection.ts#L9)
-### public at(index): undefinedV
+### public array(): Array\<V>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Collection.ts#L9)
+### public at(index): undefined \| V
 Identical to Array.at().
 Returns the item at a given index, allowing for positive and negative integers.
 Negative integers count back from the last item in the collection.
@@ -35,16 +35,16 @@ Negative integers count back from the last item in the collection.
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ | The index of the element to obtain |
-### public clear(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| index | number | ❌ | The index of the element to obtain |
+### public clear(): void
 
-### public clone(): Collection\<KV>
+### public clone(): Collection\<K, V>
 Creates an identical shallow copy of this collection.
 
 ```ts
 const newColl = someColl.clone();
 ```
-### public concat(collections): Collection\<KV>
+### public concat(collections): Collection\<K, V>
 Combines this collection with others into a new collection. None of the source collections are modified.
 
 ```ts
@@ -53,23 +53,23 @@ const newColl = someColl.concat(someOtherColl, anotherColl, ohBoyAColl);
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| collections | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<ReadonlyCollection\<KV>> | ❌ | Collections to merge |
-### public delete(key): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| collections | Array\<ReadonlyCollection\<K, V>> | ❌ | Collections to merge |
+### public delete(key): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | key | K | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/utils/src/Collection.ts#L21)
-### public difference(other): Collection\<KVT>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Collection.ts#L21)
+### public difference(other): Collection\<K, V \| T>
 The difference method returns a new structure containing items where the key is present in one of the original structures but not the other.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| other | ReadonlyCollection\<KT> | ❌ | The other Collection to filter against |
-### public each(fn): Collection\<KV>
+| other | ReadonlyCollection\<K, T> | ❌ | The other Collection to filter against |
+### public each(fn): Collection\<K, V>
 Identical to
 Map.forEach(),
 but returns the collection instead of undefined.
@@ -83,7 +83,7 @@ collection
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ | Function to execute for each element |
+| fn | (value: V, key: K, collection: Collection\<K, V>) => void | ❌ | Function to execute for each element |
 ### public ensure(key, defaultValueGenerator): V
 Obtains the value of the given key if it exists, otherwise sets and returns the value provided by the default value generator.
 
@@ -94,10 +94,10 @@ collection.ensure(guildId, () => defaultGuildConfig);
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | key | K | ❌ | The key to get if it exists, or set otherwise |
-| defaultValueGenerator | (key: Kcollection: Collection,\<,K,V,>) => V | ❌ | A function that generates the default value |
-### public entries(): IterableIterator\<\[KV]>
+| defaultValueGenerator | (key: K, collection: Collection\<K, V>) => V | ❌ | A function that generates the default value |
+### public entries(): IterableIterator\<\[K, V]>
 Returns an iterable of key, value pairs for every entry in the map.
-### public equals(collection): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public equals(collection): boolean
 Checks if this collection shares identical items with another.
 This is different to checking for equality using equal-signs, because
 the collections may be different objects, but contain the same data.
@@ -106,8 +106,8 @@ the collections may be different objects, but contain the same data.
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| collection | ReadonlyCollection\<KV> | ❌ | Collection to compare with |
-### public every(fn):  isCollection\<K2V>
+| collection | ReadonlyCollection\<K, V> | ❌ | Collection to compare with |
+### public every(fn): this is Collection\<K2, V>
 Checks if all items passes a test. Identical in behavior to
 Array.every().
 
@@ -117,8 +117,8 @@ collection.every(user => !user.bot);
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) =>  isK2 | ❌ | Function used to test (should return a boolean) |
-### public filter(fn): Collection\<K2V>
+| fn | (value: V, key: K, collection: Collection\<K, V>) => key is K2 | ❌ | Function used to test (should return a boolean) |
+### public filter(fn): Collection\<K2, V>
 Identical to
 Array.filter(),
 but returns a Collection instead of an Array.
@@ -129,8 +129,8 @@ collection.filter(user => user.username === 'Bob');
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) =>  isK2 | ❌ | The function to test with (should return boolean) |
-### public find(fn): undefinedV2
+| fn | (value: V, key: K, collection: Collection\<K, V>) => key is K2 | ❌ | The function to test with (should return boolean) |
+### public find(fn): undefined \| V2
 Searches for a single item where the given function returns a truthy value. This behaves like
 Array.find().
 All collections used in Discord.js are mapped using their `id` property, and if you want to find by id you
@@ -143,8 +143,8 @@ collection.find(user => user.username === 'Bob');
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) =>  isV2 | ❌ | The function to test with (should return boolean) |
-### public findKey(fn): undefinedK2
+| fn | (value: V, key: K, collection: Collection\<K, V>) => value is V2 | ❌ | The function to test with (should return boolean) |
+### public findKey(fn): undefined \| K2
 Searches for the key of a single item where the given function returns a truthy value. This behaves like
 Array.findIndex(),
 but returns the key rather than the positional index.
@@ -155,12 +155,12 @@ collection.findKey(user => user.username === 'Bob');
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) =>  isK2 | ❌ | The function to test with (should return boolean) |
-### public first(): undefinedV
+| fn | (value: V, key: K, collection: Collection\<K, V>) => key is K2 | ❌ | The function to test with (should return boolean) |
+### public first(): undefined \| V
 Obtains the first value(s) in this collection.
-### public firstKey(): undefinedK
+### public firstKey(): undefined \| K
 Obtains the first key(s) in this collection.
-### public flatMap(fn): Collection\<KT>
+### public flatMap(fn): Collection\<K, T>
 Maps each item into a Collection, then joins the results into a single Collection. Identical in behavior to
 Array.flatMap().
 
@@ -170,17 +170,17 @@ collection.flatMap(guild => guild.members.cache);
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) => Collection\<KT> | ❌ | Function that produces a new Collection |
-### public forEach(callbackfn, thisArg?): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| fn | (value: V, key: K, collection: Collection\<K, V>) => Collection\<K, T> | ❌ | Function that produces a new Collection |
+### public forEach(callbackfn, thisArg?): void
 Executes a provided function once per each key/value pair in the Map, in insertion order.
 
 
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| callbackfn | (value: Vkey: Kmap: Map,\<,K,V,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
-| thisArg | [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any) | ✅ |
-### public get(key): undefinedV
+| callbackfn | (value: V, key: K, map: Map\<K, V>) => void | ❌ |
+| thisArg | any | ✅ |
+### public get(key): undefined \| V
 Returns a specified element from the Map object. If the value that is associated to the provided key is an object, then you will get a reference to that object and any change made to that object will effectively modify it inside the Map.
 
 
@@ -188,35 +188,35 @@ Returns a specified element from the Map object. If the value that is associated
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | key | K | ❌ |
-### public has(key): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public has(key): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | key | K | ❌ |
-### public hasAll(keys): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public hasAll(keys): boolean
 Checks if all of the elements exist in the collection.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| keys | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<K> | ❌ | The keys of the elements to check for |
-### public hasAny(keys): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| keys | Array\<K> | ❌ | The keys of the elements to check for |
+### public hasAny(keys): boolean
 Checks if any of the elements exist in the collection.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| keys | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<K> | ❌ | The keys of the elements to check for |
-### public intersect(other): Collection\<KT>
+| keys | Array\<K> | ❌ | The keys of the elements to check for |
+### public intersect(other): Collection\<K, T>
 The intersect method returns a new structure containing items where the keys and values are present in both original structures.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| other | ReadonlyCollection\<KT> | ❌ | The other Collection to filter against |
-### public keyAt(index): undefinedK
+| other | ReadonlyCollection\<K, T> | ❌ | The other Collection to filter against |
+### public keyAt(index): undefined \| K
 Identical to Array.at().
 Returns the key at a given index, allowing for positive and negative integers.
 Negative integers count back from the last item in the collection.
@@ -225,14 +225,14 @@ Negative integers count back from the last item in the collection.
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ | The index of the key to obtain |
+| index | number | ❌ | The index of the key to obtain |
 ### public keys(): IterableIterator\<K>
 Returns an iterable of keys in the map
-### public last(): undefinedV
+### public last(): undefined \| V
 Obtains the last value(s) in this collection.
-### public lastKey(): undefinedK
+### public lastKey(): undefined \| K
 Obtains the last key(s) in this collection.
-### public map(fn): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<T>
+### public map(fn): Array\<T>
 Maps each item to another value into an array. Identical in behavior to
 Array.map().
 
@@ -242,8 +242,8 @@ collection.map(user => user.tag);
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) => T | ❌ | Function that produces an element of the new array, taking three arguments |
-### public mapValues(fn): Collection\<KT>
+| fn | (value: V, key: K, collection: Collection\<K, V>) => T | ❌ | Function that produces an element of the new array, taking three arguments |
+### public mapValues(fn): Collection\<K, T>
 Maps each item to another value into a collection. Identical in behavior to
 Array.map().
 
@@ -253,8 +253,8 @@ collection.mapValues(user => user.tag);
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) => T | ❌ | Function that produces an element of the new collection, taking three arguments |
-### public merge(other, whenInSelf, whenInOther, whenInBoth): Collection\<KR>
+| fn | (value: V, key: K, collection: Collection\<K, V>) => T | ❌ | Function that produces an element of the new collection, taking three arguments |
+### public merge(other, whenInSelf, whenInOther, whenInBoth): Collection\<K, R>
 Merges two Collections together into a new Collection.
 
 ```ts
@@ -279,11 +279,11 @@ coll.merge(
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| other | ReadonlyCollection\<KT> | ❌ | The other Collection to merge with |
-| whenInSelf | (value: Vkey: K) => Keep\<R> | ❌ | Function getting the result if the entry only exists in this Collection |
-| whenInOther | (valueOther: Tkey: K) => Keep\<R> | ❌ | Function getting the result if the entry only exists in the other Collection |
-| whenInBoth | (value: VvalueOther: Tkey: K) => Keep\<R> | ❌ | Function getting the result if the entry exists in both Collections |
-### public partition(fn): \[Collection\<K2V>Collection\<Exclude\<KK2>V>]
+| other | ReadonlyCollection\<K, T> | ❌ | The other Collection to merge with |
+| whenInSelf | (value: V, key: K) => Keep\<R> | ❌ | Function getting the result if the entry only exists in this Collection |
+| whenInOther | (valueOther: T, key: K) => Keep\<R> | ❌ | Function getting the result if the entry only exists in the other Collection |
+| whenInBoth | (value: V, valueOther: T, key: K) => Keep\<R> | ❌ | Function getting the result if the entry exists in both Collections |
+### public partition(fn): \[Collection\<K2, V>, Collection\<Exclude\<K, K2>, V>]
 Partitions the collection into two collections where the first collection
 contains the items that passed and the second contains the items that failed.
 
@@ -293,10 +293,10 @@ const [big, small] = collection.partition(guild => guild.memberCount > 250);
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) =>  isK2 | ❌ | Function used to test (should return a boolean) |
-### public random(): undefinedV
+| fn | (value: V, key: K, collection: Collection\<K, V>) => key is K2 | ❌ | Function used to test (should return a boolean) |
+### public random(): undefined \| V
 Obtains unique random value(s) from this collection.
-### public randomKey(): undefinedK
+### public randomKey(): undefined \| K
 Obtains unique random key(s) from this collection.
 ### public reduce(fn, initialValue?): T
 Applies a function to produce a single value. Identical in behavior to
@@ -308,20 +308,20 @@ collection.reduce((acc, guild) => acc + guild.memberCount, 0);
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (accumulator: Tvalue: Vkey: Kcollection: Collection,\<,K,V,>) => T | ❌ | Function used to reduce, taking four arguments; `accumulator`, `currentValue`, `currentKey`, and `collection` |
+| fn | (accumulator: T, value: V, key: K, collection: Collection\<K, V>) => T | ❌ | Function used to reduce, taking four arguments; `accumulator`, `currentValue`, `currentKey`, and `collection` |
 | initialValue | T | ✅ | Starting value for the accumulator |
-### public reverse(): Collection\<KV>
+### public reverse(): Collection\<K, V>
 Identical to Array.reverse()
 but returns a Collection instead of an Array.
-### public set(key, value): Collection\<KV>
+### public set(key, value): Collection\<K, V>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | key | K | ❌ |
 | value | V | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/utils/src/Collection.ts#L15)
-### public some(fn): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Collection.ts#L15)
+### public some(fn): boolean
 Checks if there exists an item that passes a test. Identical in behavior to
 Array.some().
 
@@ -331,8 +331,8 @@ collection.some(user => user.discriminator === '0000');
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) => [unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type) | ❌ | Function used to test (should return a boolean) |
-### public sort(compareFunction?): Collection\<KV>
+| fn | (value: V, key: K, collection: Collection\<K, V>) => unknown | ❌ | Function used to test (should return a boolean) |
+### public sort(compareFunction?): Collection\<K, V>
 The sort method sorts the items of a collection in place and returns it.
 The sort is not necessarily stable in Node 10 or older.
 The default sort order is according to string Unicode code points.
@@ -343,8 +343,8 @@ collection.sort((userA, userB) => userA.createdTimestamp - userB.createdTimestam
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| compareFunction | Comparator\<KV> | ✅ | Specifies a function that defines the sort order. If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element. |
-### public sorted(compareFunction?): Collection\<KV>
+| compareFunction | Comparator\<K, V> | ✅ | Specifies a function that defines the sort order. If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element. |
+### public sorted(compareFunction?): Collection\<K, V>
 The sorted method sorts the items of a collection and returns it.
 The sort is not necessarily stable in Node 10 or older.
 The default sort order is according to string Unicode code points.
@@ -355,24 +355,24 @@ collection.sorted((userA, userB) => userA.createdTimestamp - userB.createdTimest
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| compareFunction | Comparator\<KV> | ✅ | Specifies a function that defines the sort order. If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element. |
-### public subtract(other): Collection\<KV>
+| compareFunction | Comparator\<K, V> | ✅ | Specifies a function that defines the sort order. If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element. |
+### public subtract(other): Collection\<K, V>
 The subtract method returns a new structure containing items where the keys and values of the original structure are not present in the other.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| other | ReadonlyCollection\<KT> | ❌ | The other Collection to filter against |
-### public sweep(fn): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+| other | ReadonlyCollection\<K, T> | ❌ | The other Collection to filter against |
+### public sweep(fn): number
 Removes items that satisfy the provided filter function.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (value: Vkey: Kcollection: Collection,\<,K,V,>) => [unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type) | ❌ | Function used to test (should return a boolean) |
-### public tap(fn): Collection\<KV>
+| fn | (value: V, key: K, collection: Collection\<K, V>) => unknown | ❌ | Function used to test (should return a boolean) |
+### public tap(fn): Collection\<K, V>
 Runs a function on the collection and returns the collection.
 
 ```ts
@@ -384,12 +384,12 @@ collection
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| fn | (collection: Collection,\<,K,V,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ | Function to execute |
-### public toJSON(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<V>
+| fn | (collection: Collection\<K, V>) => void | ❌ | Function to execute |
+### public toJSON(): Array\<V>
 
 ### public values(): IterableIterator\<V>
 Returns an iterable of values in the map
-### public static combineEntries(entries, combine): Collection\<KV>
+### public static combineEntries(entries, combine): Collection\<K, V>
 Creates a Collection from a list of entries.
 
 ```ts
@@ -399,5 +399,5 @@ Collection.combineEntries([["a", 1], ["b", 2], ["a", 2]], (x, y) => x + y);
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| entries | Iterable\<\[KV]> | ❌ | The list of entries |
-| combine | (firstValue: VsecondValue: Vkey: K) => V | ❌ | Function to combine an existing entry with a new one |
+| entries | Iterable\<\[K, V]> | ❌ | The list of entries |
+| combine | (firstValue: V, secondValue: V, key: K) => V | ❌ | Function to combine an existing entry with a new one |

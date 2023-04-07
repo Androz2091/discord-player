@@ -7,36 +7,36 @@ new Downloader()
 
 
 ## Properties
-### public important: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public important: boolean
 
 
 ## Methods
-### public static download(url): [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)
+### public static download(url): Readable
 Downloads stream through youtube-dl
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| url | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | URL to download stream from |
+| url | string | ❌ | URL to download stream from |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/downloader/src/Downloader.ts#L24)
-### public static getInfo(url): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<\{ info: [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Info>;playlist: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any); }>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/downloader/src/Downloader.ts#L24)
+### public static getInfo(url): Promise\<\{ info: Array\<Info>,playlist: any }>
 Returns stream info
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| url | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | stream url |
+| url | string | ❌ | stream url |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/downloader/src/Downloader.ts#L49)
-### public static validate(url): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/downloader/src/Downloader.ts#L49)
+### public static validate(url): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| url | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
+| url | string | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/downloader/src/Downloader.ts#L83)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/downloader/src/Downloader.ts#L83)

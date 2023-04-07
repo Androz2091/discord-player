@@ -10,80 +10,80 @@ new VolumeTransformer(options)
 
 
 ## Properties
-### private _volume: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### private _volume: any
 
-### public allowHalfOpen: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public allowHalfOpen: boolean
 If `false` then the stream will automatically end the writable side when the
 readable side ends. Set initially by the `allowHalfOpen` constructor option,
 which defaults to `false`.
 
 This can be changed manually to change the half-open behavior of an existing`Duplex` stream instance, but must be changed before the `'end'` event is
 emitted.
-### public bits: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public bits: number
 
-### public bytes: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public bytes: number
 
-### public closed: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public closed: boolean
 
-### public destroyed: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public destroyed: boolean
 Is `true` after `readable.destroy()` has been called.
-### public disabled: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public disabled: boolean
 
-### public errored: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public errored: null \| Error
 
-### public extremum: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public extremum: number
 
-### public onUpdate: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public onUpdate: (...args: unknown\[]) => void
 
-### public readable: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public readable: boolean
 Is `true` if it is safe to call `readable.read()`, which means
 the stream has not been destroyed or emitted `'error'` or `'end'`.
-### public readableAborted: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public readableAborted: boolean
 Returns whether the stream was destroyed or errored before emitting `'end'`.
-### public readableDidRead: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public readableDidRead: boolean
 Returns whether `'data'` has been emitted.
-### public readableEncoding: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public readableEncoding: null \| BufferEncoding
 Getter for the property `encoding` of a given `Readable` stream. The `encoding`property can be set using the `readable.setEncoding()` method.
-### public readableEnded: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public readableEnded: boolean
 Becomes `true` when `'end'` event is emitted.
-### public readableFlowing: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public readableFlowing: null \| boolean
 This property reflects the current state of a `Readable` stream as described
 in the `Three states` section.
-### public readableHighWaterMark: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public readableHighWaterMark: number
 Returns the value of `highWaterMark` passed when creating this `Readable`.
-### public readableLength: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public readableLength: number
 This property contains the number of bytes (or objects) in the queue
 ready to be read. The value provides introspection data regarding
 the status of the `highWaterMark`.
-### public readableObjectMode: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public readableObjectMode: boolean
 Getter for the property `objectMode` of a given `Readable` stream.
-### public sampleRate: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public sampleRate: number
 
-### public type: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public type: 's16le' \| 's16be' \| 's32le' \| 's32be'
 
-### public writable: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public writable: boolean
 
-### public writableCorked: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public writableCorked: number
 
-### public writableEnded: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public writableEnded: boolean
 
-### public writableFinished: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public writableFinished: boolean
 
-### public writableHighWaterMark: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public writableHighWaterMark: number
 
-### public writableLength: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public writableLength: number
 
-### public writableNeedDrain: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public writableNeedDrain: boolean
 
-### public writableObjectMode: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public writableObjectMode: boolean
 
-### public static captureRejectionSymbol: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static captureRejectionSymbol: (typeof captureRejectionSymbol)
 
-### public static captureRejections: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static captureRejections: boolean
 Sets or gets the default captureRejection value for all emitters.
-### public static defaultMaxListeners: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static defaultMaxListeners: number
 
-### public static errorMonitor: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static errorMonitor: (typeof errorMonitor)
 This symbol shall be used to install a listener for only monitoring `'error'`
 events. Listeners installed using this symbol are called before the regular
 `'error'` listeners are called.
@@ -91,61 +91,61 @@ events. Listeners installed using this symbol are called before the regular
 Installing a listener using this symbol does not change the behavior once an
 `'error'` event is emitted, therefore the process will still crash if no
 regular `'error'` listener is installed.
-### public volume: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public volume: number
 
 
 ## Methods
-### public \[asyncIterator](): AsyncIterableIterator\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>
+### public \[asyncIterator](): AsyncIterableIterator\<any>
 
-### public _construct(callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public _construct(callback): void
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| callback | (error: null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
-### public _destroy(error, callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| callback | (error: null \| Error) => void | ❌ |
+### public _destroy(error, callback): void
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| error | null[Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) | ❌ |
-| callback | (error: null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
-### public _final(callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| error | null \| Error | ❌ |
+| callback | (error: null \| Error) => void | ❌ |
+### public _final(callback): void
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| callback | (error: null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
-### public _flush(callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| callback | (error: null \| Error) => void | ❌ |
+### public _flush(callback): void
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | callback | TransformCallback | ❌ |
-### public _read(size): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public _read(size): void
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| size | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-### public _readInt(buffer, index): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+| size | number | ❌ |
+### public _readInt(buffer, index): number
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| buffer | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer) | ❌ |
-| index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-### public _transform(chunk, encoding, callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| buffer | Buffer | ❌ |
+| index | number | ❌ |
+### public _transform(chunk, encoding, callback): void
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| chunk | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer) | ❌ |
+| chunk | Buffer | ❌ |
 | encoding | BufferEncoding | ❌ |
 | callback | TransformCallback | ❌ |
-### public _write(chunk, encoding, callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public _write(chunk, encoding, callback): void
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| chunk | [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any) | ❌ |
+| chunk | any | ❌ |
 | encoding | BufferEncoding | ❌ |
-| callback | (error: null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
-### public _writeInt(buffer, int, index): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+| callback | (error: null \| Error) => void | ❌ |
+### public _writeInt(buffer, int, index): number
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| buffer | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer) | ❌ |
-| int | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-| index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-### public _writev(chunks, callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| buffer | Buffer | ❌ |
+| int | number | ❌ |
+| index | number | ❌ |
+### public _writev(chunks, callback): void
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| chunks | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<\{ chunk: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any);encoding: BufferEncoding; }> | ❌ |
-| callback | (error: null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
+| chunks | Array\<\{ chunk: any,encoding: BufferEncoding }> | ❌ |
+| callback | (error: null \| Error) => void | ❌ |
 ### public addListener(event, listener): VolumeTransformer
 Event emitter
 The defined events on documents including:
@@ -162,14 +162,14 @@ The defined events on documents including:
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
-### public clamp(val, max?, min?): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+| listener | (...args: unknown\[]) => void | ❌ |
+### public clamp(val, max?, min?): number
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| val | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-| max | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ✅ |
-| min | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ✅ |
-### public cork(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| val | number | ❌ |
+| max | number | ✅ |
+| min | number | ✅ |
+### public cork(): void
 
 ### public destroy(error?): VolumeTransformer
 Destroy the stream. Optionally emit an `'error'` event, and emit a `'close'`event (unless `emitClose` is set to `false`). After this call, the readable
@@ -184,20 +184,20 @@ Implementors should not override this method, but instead implement `readable._d
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| error | [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) | ✅ | Error which will be passed as payload in `'error'` event |
-### public disable(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| error | Error | ✅ | Error which will be passed as payload in `'error'` event |
+### public disable(): void
 
-### public emit(event): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public emit(event): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-### public enable(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public enable(): void
 
 ### public end(cb?): VolumeTransformer
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| cb | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ✅ |
-### public eventNames(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol)>
+| cb | (...args: unknown\[]) => void | ✅ |
+### public eventNames(): Array\<string \| symbol>
 Returns an array listing the events for which the emitter has registered
 listeners. The values in the array are strings or `Symbol`s.
 
@@ -213,10 +213,10 @@ myEE.on(sym, () => {});
 console.log(myEE.eventNames());
 // Prints: [ 'foo', 'bar', Symbol(symbol) ]
 ```
-### public getMaxListeners(): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public getMaxListeners(): number
 Returns the current max listener value for the `EventEmitter` which is either
 set by `emitter.setMaxListeners(n)` or defaults to defaultMaxListeners.
-### public isPaused(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public isPaused(): boolean
 The `readable.isPaused()` method returns the current operating state of the`Readable`. This is used primarily by the mechanism that underlies the`readable.pipe()` method. In most
 typical cases, there will be no reason to
 use this method directly.
@@ -230,15 +230,15 @@ readable.isPaused(); // === true
 readable.resume();
 readable.isPaused(); // === false
 ```
-### public listenerCount(eventName): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public listenerCount(eventName): number
 Returns the number of listeners listening to the event named `eventName`.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ | The name of the event being listened for |
-### public listeners(eventName): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)>
+| eventName | string \| symbol | ❌ | The name of the event being listened for |
+### public listeners(eventName): Array\<Function>
 Returns a copy of the array of listeners for the event named `eventName`.
 
 ```js
@@ -253,7 +253,7 @@ console.log(util.inspect(server.listeners('connection')));
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
+| eventName | string \| symbol | ❌ |
 ### public off(eventName, listener): VolumeTransformer
 Alias for `emitter.removeListener()`.
 
@@ -261,18 +261,18 @@ Alias for `emitter.removeListener()`.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
-| listener | (args: Array,\<,any,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
+| eventName | string \| symbol | ❌ |
+| listener | (args: Array\<any>) => void | ❌ |
 ### public on(event, listener): VolumeTransformer
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
+| listener | (...args: unknown\[]) => void | ❌ |
 ### public once(event, listener): VolumeTransformer
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
+| listener | (...args: unknown\[]) => void | ❌ |
 ### public pause(): VolumeTransformer
 The `readable.pause()` method will cause a stream in flowing mode to stop
 emitting `'data'` events, switching out of flowing mode. Any data that
@@ -296,23 +296,23 @@ The `readable.pause()` method has no effect if there is a `'readable'`event list
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | destination | T | ❌ |
-| options | \{ end: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean); } | ✅ |
+| options | \{ end: boolean } | ✅ |
 ### public prependListener(event, listener): VolumeTransformer
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
+| listener | (...args: unknown\[]) => void | ❌ |
 ### public prependOnceListener(event, listener): VolumeTransformer
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
-### public push(chunk, encoding?): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| listener | (...args: unknown\[]) => void | ❌ |
+### public push(chunk, encoding?): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| chunk | [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any) | ❌ |
+| chunk | any | ❌ |
 | encoding | BufferEncoding | ✅ |
-### public rawListeners(eventName): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)>
+### public rawListeners(eventName): Array\<Function>
 Returns a copy of the array of listeners for the event named `eventName`,
 including any wrappers (such as those created by `.once()`).
 
@@ -344,8 +344,8 @@ emitter.emit('log');
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
-### public read(size?): [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+| eventName | string \| symbol | ❌ |
+### public read(size?): any
 The `readable.read()` method reads data out of the internal buffer and
 returns it. If no data is available to be read, `null` is returned. By default,
 the data is returned as a `Buffer` object unless an encoding has been
@@ -423,7 +423,7 @@ been emitted will return `null`. No runtime error will be raised.
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| size | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ✅ | Optional argument to specify how much data to read. |
+| size | number | ✅ | Optional argument to specify how much data to read. |
 ### public removeAllListeners(event?): VolumeTransformer
 Removes all listeners, or those of the specified `eventName`.
 
@@ -437,12 +437,12 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| event | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ✅ |
+| event | string \| symbol | ✅ |
 ### public removeListener(event, listener): VolumeTransformer
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
+| listener | (...args: unknown\[]) => void | ❌ |
 ### public resume(): VolumeTransformer
 The `readable.resume()` method causes an explicitly paused `Readable` stream to
 resume emitting `'data'` events, switching the stream into flowing mode.
@@ -502,20 +502,20 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| n | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-### public setSampleRate(rate): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+| n | number | ❌ |
+### public setSampleRate(rate): void
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| rate | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-### public setVolume(volume): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| rate | number | ❌ |
+### public setVolume(volume): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| volume | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-### public toString(): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+| volume | number | ❌ |
+### public toString(): string
 
-### public toggle(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public toggle(): void
 
-### public uncork(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public uncork(): void
 
 ### public unpipe(destination?): VolumeTransformer
 The `readable.unpipe()` method detaches a `Writable` stream previously attached
@@ -546,7 +546,7 @@ setTimeout(() => {
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | destination | WritableStream | ✅ | Optional specific stream to unpipe |
-### public unshift(chunk, encoding?): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public unshift(chunk, encoding?): void
 Passing `chunk` as `null` signals the end of the stream (EOF) and behaves the
 same as `readable.push(null)`, after which no more data can be written. The EOF
 signal is put at the end of the buffer and any buffered data will still be
@@ -611,7 +611,7 @@ process of performing a read.
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| chunk | [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any) | ❌ | Chunk of data to unshift onto the read queue. For streams not operating in object mode, `chunk` must be a string, `Buffer`, `Uint8Array` or `null`. For object mode streams, `chunk` may be any JavaScript value. |
+| chunk | any | ❌ | Chunk of data to unshift onto the read queue. For streams not operating in object mode, `chunk` must be a string, `Buffer`, `Uint8Array` or `null`. For object mode streams, `chunk` may be any JavaScript value. |
 | encoding | BufferEncoding | ✅ | Encoding of string chunks. Must be a valid `Buffer` encoding, such as `'utf8'` or `'ascii'`. |
 ### public wrap(stream): VolumeTransformer
 Prior to Node.js 0.10, streams did not implement the entire `stream` module API
@@ -640,14 +640,14 @@ myReader.on('readable', () => {
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| stream | [ReadableStream](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌ | An "old style" readable stream |
-### public write(chunk, encoding?, cb?): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| stream | ReadableStream | ❌ | An "old style" readable stream |
+### public write(chunk, encoding?, cb?): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| chunk | [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any) | ❌ |
+| chunk | any | ❌ |
 | encoding | BufferEncoding | ✅ |
-| cb | (error: undefined,null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ✅ |
-### public static from(src): [Duplex](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_duplex)
+| cb | (error: undefined \| null \| Error) => void | ✅ |
+### public static from(src): Duplex
 A utility method for creating duplex streams.
 
 - `Stream` converts writable stream into writable `Duplex` and readable stream
@@ -670,17 +670,17 @@ A utility method for creating duplex streams.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| src | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)StreamBlobArrayBufferIterable\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>AsyncIterable\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>AsyncGeneratorFunction[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)> | ❌ |
-### public static fromWeb(readableStream, options?): [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)
+| src | string \| Object \| Stream \| Blob \| ArrayBuffer \| Iterable\<any> \| AsyncIterable\<any> \| AsyncGeneratorFunction \| Promise\<any> | ❌ |
+### public static fromWeb(readableStream, options?): Readable
 A utility method for creating a `Readable` from a web `ReadableStream`.
 
 
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| readableStream | [ReadableStream](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)> | ❌ |
-| options | Pick\<ReadableOptions'encoding''highWaterMark''objectMode''signal'> | ✅ |
-### public static getEventListeners(emitter, name): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)>
+| readableStream | ReadableStream\<any> | ❌ |
+| options | Pick\<ReadableOptions, 'encoding' \| 'highWaterMark' \| 'objectMode' \| 'signal'> | ✅ |
+### public static getEventListeners(emitter, name): Array\<Function>
 Returns a copy of the array of listeners for the event named `eventName`.
 
 For `EventEmitter`s this behaves exactly the same as calling `.listeners` on
@@ -710,17 +710,17 @@ const { getEventListeners, EventEmitter } = require('events');
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| emitter | DOMEventTarget[EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter) | ❌ |
-| name | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
-### public static isDisturbed(stream): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| emitter | DOMEventTarget \| EventEmitter | ❌ |
+| name | string \| symbol | ❌ |
+### public static isDisturbed(stream): boolean
 Returns whether the stream has been read from or cancelled.
 
 
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| stream | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)[ReadableStream](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌ |
-### public static listenerCount(emitter, eventName): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+| stream | Readable \| ReadableStream | ❌ |
+### public static listenerCount(emitter, eventName): number
 A class method that returns the number of listeners for the given `eventName`registered on the given `emitter`.
 
 ```js
@@ -738,9 +738,9 @@ console.log(listenerCount(myEmitter, 'event'));
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| emitter | [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter) | ❌ | The emitter to query |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ | The event name |
-### public static on(emitter, eventName, options?): AsyncIterableIterator\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>
+| emitter | EventEmitter | ❌ | The emitter to query |
+| eventName | string \| symbol | ❌ | The event name |
+### public static on(emitter, eventName, options?): AsyncIterableIterator\<any>
 ```js
 const { on, EventEmitter } = require('events');
 
@@ -799,10 +799,10 @@ process.nextTick(() => ac.abort());
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| emitter | [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter) | ❌ | N/A |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The name of the event being listened for |
+| emitter | EventEmitter | ❌ | N/A |
+| eventName | string | ❌ | The name of the event being listened for |
 | options | StaticEventEmitterOptions | ✅ | N/A |
-### public static once(emitter, eventName, options?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>>
+### public static once(emitter, eventName, options?): Promise\<Array\<any>>
 Creates a `Promise` that is fulfilled when the `EventEmitter` emits the given
 event or that is rejected if the `EventEmitter` emits `'error'` while waiting.
 The `Promise` will resolve with an array of all the arguments emitted to the
@@ -888,9 +888,9 @@ ee.emit('foo'); // Prints: Waiting for the event was canceled!
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | emitter | NodeEventTarget | ❌ |
-| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
+| eventName | string \| symbol | ❌ |
 | options | StaticEventEmitterOptions | ✅ |
-### public static setMaxListeners(n?, eventTargets): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public static setMaxListeners(n?, eventTargets): void
 ```js
 const {
   setMaxListeners,
@@ -907,13 +907,13 @@ setMaxListeners(5, target, emitter);
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| n | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ✅ | A non-negative number. The maximum number of listeners per `EventTarget` event. |
-| eventTargets | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<DOMEventTarget[EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)> | ❌ | N/A |
-### public static toWeb(streamReadable): [ReadableStream](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>
+| n | number | ✅ | A non-negative number. The maximum number of listeners per `EventTarget` event. |
+| eventTargets | Array\<DOMEventTarget \| EventEmitter> | ❌ | N/A |
+### public static toWeb(streamReadable): ReadableStream\<any>
 A utility method for creating a web `ReadableStream` from a `Readable`.
 
 
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| streamReadable | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌ |
+| streamReadable | Readable | ❌ |

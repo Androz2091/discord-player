@@ -10,36 +10,36 @@ new GuildQueueAudioFilters(queue)
 
 
 ## Properties
-### public _lastFiltersCache: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L199)
-### public equalizerPresets: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L198)
-### public ffmpeg: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L197)
-### public graph: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L196)
-### public queue: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L206)
-### public biquad: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public _lastFiltersCache: GuildQueueAFiltersCache
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L199)
+### public equalizerPresets: \{ Classical: Array\<EqualizerBand>,Club: Array\<EqualizerBand>,Dance: Array\<EqualizerBand>,Flat: Array\<EqualizerBand>,FullBass: Array\<EqualizerBand>,FullBassTreble: Array\<EqualizerBand>,FullTreble: Array\<EqualizerBand>,Headphones: Array\<EqualizerBand>,LargeHall: Array\<EqualizerBand>,Live: Array\<EqualizerBand>,Party: Array\<EqualizerBand>,Pop: Array\<EqualizerBand>,Reggae: Array\<EqualizerBand>,Rock: Array\<EqualizerBand>,Ska: Array\<EqualizerBand>,Soft: Array\<EqualizerBand>,SoftRock: Array\<EqualizerBand>,Techno: Array\<EqualizerBand> }
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L198)
+### public ffmpeg: FFmpegFilterer\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L197)
+### public graph: AFilterGraph\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L196)
+### public queue: GuildQueue\<Meta>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L206)
+### public biquad: null \| BiquadStream
 Digital biquad filters
-### public equalizer: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public equalizer: null \| EqualizerStream
 15 Band Equalizer
-### public filters: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public filters: null \| AudioFilter
 DSP filters
-### public resampler: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public resampler: null \| PCMResampler
 Audio resampler
-### public volume: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public volume: null \| VolumeTransformer
 Volume transformer
 
 ## Methods
-### public triggerReplay(seek): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
+### public triggerReplay(seek): Promise\<boolean>
 Replay current track in transition mode
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| seek | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ | The duration to seek to |
+| seek | number | ❌ | The duration to seek to |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L251)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/Structures/GuildQueueAudioFilters.ts#L251)

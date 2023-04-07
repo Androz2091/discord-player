@@ -1,4 +1,4 @@
-## PlayerException extends [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+## PlayerException extends Error
 
 
 ```typescript
@@ -10,24 +10,24 @@ new PlayerException(message)
 
 
 ## Properties
-### public message: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public message: string
 
-### public name: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public name: string
 
-### public stack: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public stack: string
 
-### public static prepareStackTrace: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static prepareStackTrace: (err: Error, stackTraces: Array\<CallSite>) => any
 
-### public static stackTraceLimit: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static stackTraceLimit: number
 
 
 ## Methods
-### public static captureStackTrace(targetObject, constructorOpt?): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+### public static captureStackTrace(targetObject, constructorOpt?): void
 Create .stack property on a target object
 
 
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| targetObject | [object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) | ❌ |
-| constructorOpt | [Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) | ✅ |
+| targetObject | object | ❌ |
+| constructorOpt | Function | ✅ |

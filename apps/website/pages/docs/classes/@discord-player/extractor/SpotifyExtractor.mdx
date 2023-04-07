@@ -11,26 +11,26 @@ new SpotifyExtractor(context, options)
 
 
 ## Properties
-### private _credentials: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L14)
-### private _lib: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L13)
-### private _stream: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L12)
-### public context: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### private _credentials: \{ clientId: null \| string,clientSecret: null \| string }
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L14)
+### private _lib: Spotify
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L13)
+### private _stream: StreamFN
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L12)
+### public context: ExtractorExecutionContext
 
-### public internal: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L18)
-### public options: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public internal: SpotifyAPI
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L18)
+### public options: Record\<string, unknown>
 
-### public static identifier: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L11)
-### public identifier: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+### public static identifier: 'com.discord\-player.spotifyextractor'
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L11)
+### public identifier: string
 Identifier of this extractor
 
 ## Methods
-### public activate(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L20)
+### public activate(): Promise\<void>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L20)
 ### public createResponse(playlist?, tracks?): ExtractorInfo
 Create extractor response
 
@@ -38,19 +38,19 @@ Create extractor response
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| playlist | nullPlaylist | ✅ | The playlist |
-| tracks | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track> | ✅ | The track array |
-### public deactivate(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+| playlist | null \| Playlist | ✅ | The playlist |
+| tracks | Array\<Track> | ✅ | The track array |
+### public deactivate(): Promise\<void>
 This method will be executed when this extractor is deactivated
-### public debug(message): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public debug(message): boolean
 Write debug message
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| message | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The debug message |
-### public emit(event, args): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+| message | string | ❌ | The debug message |
+### public emit(event, args): boolean
 Dispatch an event to the player
 
 
@@ -59,49 +59,49 @@ Dispatch an event to the player
 | ----------- | ----------- | ----------- | ----------- |
 | event | K | ❌ | The event to dispatch |
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
-### public getRelatedTracks(track): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<ExtractorInfo>
+### public getRelatedTracks(track): Promise\<ExtractorInfo>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | track | Track | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L39)
-### public handle(query, context): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<ExtractorInfo>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L39)
+### public handle(query, context): Promise\<ExtractorInfo>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
+| query | string | ❌ |
 | context | ExtractorSearchContext | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L45)
-### public handlePostStream(stream, next): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L45)
+### public handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| stream | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌ | The incoming stream |
+| stream | Readable | ❌ | The incoming stream |
 | next | NextFunction | ❌ | The next function |
-### public parse(q): \{ id: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String);queryType: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String); }
+### public parse(q): \{ id: string,queryType: string }
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| q | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
+| q | string | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L285)
-### public stream(info): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L285)
+### public stream(info): Promise\<string \| Readable>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | info | Track | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L266)
-### public validate(query, type?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L266)
+### public validate(query, type?): Promise\<boolean>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
-| type | nullSearchQueryType | ✅ |
+| query | string | ❌ |
+| type | null \| SearchQueryType | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/SpotifyExtractor.ts#L27)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/SpotifyExtractor.ts#L27)
