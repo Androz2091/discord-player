@@ -10,15 +10,15 @@ new ExtractorExecutionContext(player)
 
 
 ## Properties
-### public player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L54)
-### public requiredEvents: Array\<keyof ExtractorExecutionEvents>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L7)
-### public store: Collection\<string, BaseExtractor>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L53)
-### public static defaultMaxListeners: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public player: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L54)
+### public requiredEvents: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L7)
+### public store: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L53)
+### public static defaultMaxListeners: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public size: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public size: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 The size of registered extractors
 
 ## Methods
@@ -34,10 +34,10 @@ The size of registered extractors
 | args | Parameters\<ExtractorExecutionEvents\[K]> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L11)
-### public eventNames(): Array\<U>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L11)
+### public eventNames(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<U>
 
-### public get(identifier): undefined \| BaseExtractor
+### public get(identifier): undefinedBaseExtractor
 Get single extractor
 
 
@@ -47,7 +47,7 @@ Get single extractor
 | identifier | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The extractor to get |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L92)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L92)
 ### public getMaxListeners(): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 
 ### public isRegistered(identifier): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
@@ -60,21 +60,21 @@ Validate if the given extractor is registered
 | identifier | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The extractor identifier |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L77)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L77)
 ### public listenerCount(type): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| type | keyof ExtractorExecutionEvents | ❌ |
-### public listeners(type): Array\<ExtractorExecutionEvents\[U]>
+| type | keyofExtractorExecutionEvents | ❌ |
+### public listeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<ExtractorExecutionEvents\[U]>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | type | U | ❌ |
-### public loadDefault(): Promise\<\{ error: Error,success: boolean } \| \{ error: null,success: boolean }>
+### public loadDefault(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<\{ [error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error): [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error);success: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean); }\{ [error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error): null;success: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean); }>
 Load default extractors from `@discord-player/extractor`
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L61)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L61)
 ### public off(event, listener): ExtractorExecutionContext
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -100,11 +100,11 @@ Load default extractors from `@discord-player/extractor`
 | ----------- | ----------- | ----------- |
 | event | U | ❌ |
 | listener | ExtractorExecutionEvents\[U] | ❌ |
-### public rawListeners(type): Array\<ExtractorExecutionEvents\[U]>
+### public rawListeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<ExtractorExecutionEvents\[U]>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | type | U | ❌ |
-### public register(_extractor, options): Promise\<void>
+### public register(_extractor, options): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 Register single extractor
 
 
@@ -112,20 +112,20 @@ Register single extractor
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | _extractor | (typeof BaseExtractor) | ❌ | The extractor to register |
-| options | Record\<string, unknown> | ❌ | Options supplied to the extractor |
+| options | Record\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)> | ❌ | Options supplied to the extractor |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L101)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L101)
 ### public removeAllListeners(event?): ExtractorExecutionContext
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| event | keyof ExtractorExecutionEvents | ✅ |
+| event | keyofExtractorExecutionEvents | ✅ |
 ### public removeListener(event, listener): ExtractorExecutionContext
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | U | ❌ |
 | listener | ExtractorExecutionEvents\[U] | ❌ |
-### public run(fn, filterBlocked): Promise\<null \| ExtractorExecutionResult\<T>>
+### public run(fn, filterBlocked): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<nullExtractorExecutionResult\<T>>
 Run all the extractors
 
 
@@ -136,12 +136,12 @@ Run all the extractors
 | filterBlocked | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌ | Filter blocked extractors |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L157)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L157)
 ### public setMaxListeners(n): ExtractorExecutionContext
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | n | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
-### public unregister(_extractor): Promise\<void>
+### public unregister(_extractor): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 Unregister single extractor
 
 
@@ -151,10 +151,10 @@ Unregister single extractor
 | _extractor | K | ❌ | The extractor to unregister |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L123)
-### public unregisterAll(): Promise\<void>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L123)
+### public unregisterAll(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 Unregister all extractors
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L144)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L144)

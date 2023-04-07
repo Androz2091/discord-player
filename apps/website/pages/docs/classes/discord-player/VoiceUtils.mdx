@@ -10,24 +10,24 @@ new VoiceUtils(player)
 
 
 ## Properties
-### public cache: Collection\<string, StreamDispatcher>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L9)
-### public player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L15)
+### public cache: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L9)
+### public player: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L15)
 
 ## Methods
-### public connect(channel, options?): Promise\<StreamDispatcher>
+### public connect(channel, options?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<StreamDispatcher>
 Joins a voice channel, creating basic stream dispatch manager
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| channel | StageChannel \| VoiceChannel | ❌ | The voice channel |
-| options | \{ audioPlayer: AudioPlayer,deaf: boolean,maxTime: number,queue: GuildQueue\<unknown> } | ✅ | Join options |
+| channel | StageChannelVoiceChannel | ❌ | The voice channel |
+| options | \{ audioPlayer: AudioPlayer;deaf: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean);maxTime: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number);queue: GuildQueue\<[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)>; } | ✅ | Join options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L29)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L29)
 ### public disconnect(connection): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Disconnects voice connection
 
@@ -35,11 +35,11 @@ Disconnects voice connection
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| connection | StreamDispatcher \| VoiceConnection | ❌ | The voice connection |
+| connection | StreamDispatcherVoiceConnection | ❌ | The voice connection |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L74)
-### public getConnection(guild): undefined \| StreamDispatcher \| VoiceConnection
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L74)
+### public getConnection(guild): undefinedStreamDispatcherVoiceConnection
 Returns Discord Player voice connection
 
 
@@ -49,16 +49,16 @@ Returns Discord Player voice connection
 | guild | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The guild id |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L89)
-### public join(channel?, options?): Promise\<VoiceConnection>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L89)
+### public join(channel?, options?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<VoiceConnection>
 Joins a voice channel
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| channel | StageChannel \| VoiceChannel | ✅ | The voice/stage channel to join |
-| options | \{ deaf: boolean,maxTime: number } | ✅ | Join options |
+| channel | StageChannelVoiceChannel | ✅ | The voice/stage channel to join |
+| options | \{ deaf: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean);maxTime: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number); } | ✅ | Join options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L51)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L51)

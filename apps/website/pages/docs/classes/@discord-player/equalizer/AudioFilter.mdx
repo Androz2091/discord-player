@@ -10,90 +10,90 @@ new AudioFilter(options)
 
 
 ## Properties
-### private _processedSamples: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L31)
-### public allowHalfOpen: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### private _processedSamples: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L31)
+### public allowHalfOpen: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 If `false` then the stream will automatically end the writable side when the
 readable side ends. Set initially by the `allowHalfOpen` constructor option,
 which defaults to `false`.
 
 This can be changed manually to change the half-open behavior of an existing`Duplex` stream instance, but must be changed before the `'end'` event is
 emitted.
-### public bits: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L13)
-### public bytes: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L14)
-### public closed: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public bits: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L13)
+### public bytes: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L14)
+### public closed: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public destroyed: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public destroyed: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Is `true` after `readable.destroy()` has been called.
-### public disabled: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L16)
-### public errored: null \| Error
+### public disabled: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L16)
+### public errored: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public extremum: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L15)
-### public filters: Array\<'8D' \| 'Tremolo' \| 'Vibrato'>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L28)
-### public pulsatorConfig: AFPulsatorConfig
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L33)
-### public readable: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public extremum: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L15)
+### public filters: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L28)
+### public pulsatorConfig: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L33)
+### public readable: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Is `true` if it is safe to call `readable.read()`, which means
 the stream has not been destroyed or emitted `'error'` or `'end'`.
-### public readableAborted: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public readableAborted: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Returns whether the stream was destroyed or errored before emitting `'end'`.
-### public readableDidRead: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public readableDidRead: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Returns whether `'data'` has been emitted.
-### public readableEncoding: null \| BufferEncoding
+### public readableEncoding: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Getter for the property `encoding` of a given `Readable` stream. The `encoding`property can be set using the `readable.setEncoding()` method.
-### public readableEnded: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public readableEnded: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Becomes `true` when `'end'` event is emitted.
-### public readableFlowing: null \| boolean
+### public readableFlowing: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 This property reflects the current state of a `Readable` stream as described
 in the `Three states` section.
-### public readableHighWaterMark: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public readableHighWaterMark: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Returns the value of `highWaterMark` passed when creating this `Readable`.
-### public readableLength: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public readableLength: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 This property contains the number of bytes (or objects) in the queue
 ready to be read. The value provides introspection data regarding
 the status of the `highWaterMark`.
-### public readableObjectMode: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public readableObjectMode: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Getter for the property `objectMode` of a given `Readable` stream.
-### public sampleRate: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L17)
-### public targetSampleRate: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L29)
-### public totalSamples: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L30)
-### public tremoloConfig: AFTremoloConfig
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L39)
-### public type: 's16le' \| 's16be' \| 's32le' \| 's32be'
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L12)
-### public vibratoConfig: AFTremoloConfig
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L45)
-### public writable: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public sampleRate: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L17)
+### public targetSampleRate: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L29)
+### public totalSamples: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L30)
+### public tremoloConfig: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L39)
+### public type: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L12)
+### public vibratoConfig: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L45)
+### public writable: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public writableCorked: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public writableCorked: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public writableEnded: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public writableEnded: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public writableFinished: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public writableFinished: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public writableHighWaterMark: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public writableHighWaterMark: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public writableLength: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public writableLength: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public writableNeedDrain: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public writableNeedDrain: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public writableObjectMode: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public writableObjectMode: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public static captureRejectionSymbol: (typeof captureRejectionSymbol)
+### public static captureRejectionSymbol: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public static captureRejections: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public static captureRejections: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Sets or gets the default captureRejection value for all emitters.
-### public static defaultMaxListeners: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public static defaultMaxListeners: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public static errorMonitor: (typeof errorMonitor)
+### public static errorMonitor: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 This symbol shall be used to install a listener for only monitoring `'error'`
 events. Listeners installed using this symbol are called before the regular
 `'error'` listeners are called.
@@ -101,33 +101,33 @@ events. Listeners installed using this symbol are called before the regular
 Installing a listener using this symbol does not change the behavior once an
 `'error'` event is emitted, therefore the process will still crash if no
 regular `'error'` listener is installed.
-### public currentDuration: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public currentDuration: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public currentSampleRate: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public currentSampleRate: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public estimatedDuration: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public estimatedDuration: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public pulsator: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public pulsator: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public tremolo: AFTremoloConfig
+### public tremolo: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
 
 ## Methods
-### public \[asyncIterator](): AsyncIterableIterator\<any>
+### public \[asyncIterator](): AsyncIterableIterator\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>
 
 ### public _construct(callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| callback | (error: null \| Error) => void | ❌ |
+| callback | (error: null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public _destroy(error, callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| error | null \| Error | ❌ |
-| callback | (error: null \| Error) => void | ❌ |
+| error | null[Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) | ❌ |
+| callback | (error: null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public _final(callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| callback | (error: null \| Error) => void | ❌ |
+| callback | (error: null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public _flush(callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -143,7 +143,7 @@ regular `'error'` listener is installed.
 | index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L62)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L62)
 ### public _transform(chunk, encoding, callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -152,13 +152,13 @@ regular `'error'` listener is installed.
 | callback | TransformCallback | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L123)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L123)
 ### public _write(chunk, encoding, callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | chunk | [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any) | ❌ |
 | encoding | BufferEncoding | ❌ |
-| callback | (error: null \| Error) => void | ❌ |
+| callback | (error: null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public _writeInt(buffer, int, index): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -167,12 +167,12 @@ regular `'error'` listener is installed.
 | index | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L67)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L67)
 ### public _writev(chunks, callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| chunks | Array\<\{ chunk: any,encoding: BufferEncoding }> | ❌ |
-| callback | (error: null \| Error) => void | ❌ |
+| chunks | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<\{ chunk: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any);encoding: BufferEncoding; }> | ❌ |
+| callback | (error: null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public addListener(event, listener): AudioFilter
 Event emitter
 The defined events on documents including:
@@ -189,7 +189,7 @@ The defined events on documents including:
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args: unknown\[]) => void | ❌ |
+| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public applyFilters(byte, channel): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -197,7 +197,7 @@ The defined events on documents including:
 | channel | LR | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L162)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L162)
 ### public clamp(val, max, min): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -206,7 +206,7 @@ The defined events on documents including:
 | min | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L72)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L72)
 ### public cork(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 
 ### public destroy(error?): AudioFilter
@@ -224,18 +224,18 @@ Implementors should not override this method, but instead implement `readable._d
 | ----------- | ----------- | ----------- | ----------- |
 | error | [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) | ✅ | Error which will be passed as payload in `'error'` event |
 ### public disable(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L50)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L50)
 ### public emit(event): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
 ### public enable(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L54)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L54)
 ### public end(cb?): AudioFilter
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| cb | (...args: unknown\[]) => void | ✅ |
-### public eventNames(): Array\<string \| symbol>
+| cb | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ✅ |
+### public eventNames(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol)>
 Returns an array listing the events for which the emitter has registered
 listeners. The values in the array are strings or `Symbol`s.
 
@@ -275,8 +275,8 @@ Returns the number of listeners listening to the event named `eventName`.
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| eventName | string \| symbol | ❌ | The name of the event being listened for |
-### public listeners(eventName): Array\<Function>
+| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ | The name of the event being listened for |
+### public listeners(eventName): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)>
 Returns a copy of the array of listeners for the event named `eventName`.
 
 ```js
@@ -291,7 +291,7 @@ console.log(util.inspect(server.listeners('connection')));
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | string \| symbol | ❌ |
+| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
 ### public off(eventName, listener): AudioFilter
 Alias for `emitter.removeListener()`.
 
@@ -299,20 +299,20 @@ Alias for `emitter.removeListener()`.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | string \| symbol | ❌ |
-| listener | (args: Array\<any>) => void | ❌ |
+| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
+| listener | (args: Array,\<,any,>) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public on(event, listener): AudioFilter
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args: unknown\[]) => void | ❌ |
+| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public onUpdate(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L18)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L18)
 ### public once(event, listener): AudioFilter
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args: unknown\[]) => void | ❌ |
+| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public pause(): AudioFilter
 The `readable.pause()` method will cause a stream in flowing mode to stop
 emitting `'data'` events, switching out of flowing mode. Any data that
@@ -336,23 +336,23 @@ The `readable.pause()` method has no effect if there is a `'readable'`event list
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | destination | T | ❌ |
-| options | \{ end: boolean } | ✅ |
+| options | \{ end: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean); } | ✅ |
 ### public prependListener(event, listener): AudioFilter
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args: unknown\[]) => void | ❌ |
+| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public prependOnceListener(event, listener): AudioFilter
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args: unknown\[]) => void | ❌ |
+| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public push(chunk, encoding?): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | chunk | [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any) | ❌ |
 | encoding | BufferEncoding | ✅ |
-### public rawListeners(eventName): Array\<Function>
+### public rawListeners(eventName): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)>
 Returns a copy of the array of listeners for the event named `eventName`,
 including any wrappers (such as those created by `.once()`).
 
@@ -384,7 +384,7 @@ emitter.emit('log');
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| eventName | string \| symbol | ❌ |
+| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
 ### public read(size?): [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 The `readable.read()` method reads data out of the internal buffer and
 returns it. If no data is available to be read, `null` is returned. By default,
@@ -477,12 +477,12 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| event | string \| symbol | ✅ |
+| event | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ✅ |
 ### public removeListener(event, listener): AudioFilter
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | event | 'close' | ❌ |
-| listener | (...args: unknown\[]) => void | ❌ |
+| listener | (...args[unknown](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-0.html#new-unknown-top-type)\[]) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌ |
 ### public resume(): AudioFilter
 The `readable.resume()` method causes an explicitly paused `Readable` stream to
 resume emitting `'data'` events, switching the stream into flowing mode.
@@ -505,7 +505,7 @@ The `readable.resume()` method has no effect if there is a `'readable'`event lis
 | duration | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L112)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L112)
 ### public setDefaultEncoding(encoding): AudioFilter
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -540,10 +540,10 @@ readable.on('data', (chunk) => {
 ### public setFilters(filters): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| filters | Array\<'8D' \| 'Tremolo' \| 'Vibrato'> | ❌ |
+| filters | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<'8D''Tremolo''Vibrato'> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L99)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L99)
 ### public setMaxListeners(n): AudioFilter
 By default `EventEmitter`s will print a warning if more than `10` listeners are
 added for a particular event. This is a useful default that helps finding
@@ -563,37 +563,37 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 | hz | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L66)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L66)
 ### public setSampleRate(rate): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | rate | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L76)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L76)
 ### public setTargetSampleRate(rate): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | rate | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L61)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L61)
 ### public setTremolo(__namedParameters): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | __namedParameters | Partial\<AFTremoloConfig> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L79)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L79)
 ### public setVibrato(__namedParameters): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | __namedParameters | Partial\<AFTremoloConfig> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/audio/AudioFilter.ts#L87)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/audio/AudioFilter.ts#L87)
 ### public toggle(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/utils/PCMTransformer.ts#L58)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/utils/PCMTransformer.ts#L58)
 ### public uncork(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 
 ### public unpipe(destination?): AudioFilter
@@ -725,7 +725,7 @@ myReader.on('readable', () => {
 | ----------- | ----------- | ----------- |
 | chunk | [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any) | ❌ |
 | encoding | BufferEncoding | ✅ |
-| cb | (error: undefined \| null \| Error) => void | ✅ |
+| cb | (error: undefined,null,Error) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ✅ |
 ### public static from(src): [Duplex](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_duplex)
 A utility method for creating duplex streams.
 
@@ -749,7 +749,7 @@ A utility method for creating duplex streams.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| src | string \| Object \| Stream \| Blob \| ArrayBuffer \| Iterable\<any> \| AsyncIterable\<any> \| AsyncGeneratorFunction \| Promise\<any> | ❌ |
+| src | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)StreamBlobArrayBufferIterable\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>AsyncIterable\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>AsyncGeneratorFunction[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)> | ❌ |
 ### public static fromWeb(readableStream, options?): [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)
 A utility method for creating a `Readable` from a web `ReadableStream`.
 
@@ -757,9 +757,9 @@ A utility method for creating a `Readable` from a web `ReadableStream`.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| readableStream | ReadableStream\<any> | ❌ |
-| options | Pick\<ReadableOptions, 'encoding' \| 'highWaterMark' \| 'objectMode' \| 'signal'> | ✅ |
-### public static getEventListeners(emitter, name): Array\<Function>
+| readableStream | [ReadableStream](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)> | ❌ |
+| options | Pick\<ReadableOptions'encoding''highWaterMark''objectMode''signal'> | ✅ |
+### public static getEventListeners(emitter, name): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)>
 Returns a copy of the array of listeners for the event named `eventName`.
 
 For `EventEmitter`s this behaves exactly the same as calling `.listeners` on
@@ -789,8 +789,8 @@ const { getEventListeners, EventEmitter } = require('events');
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| emitter | DOMEventTarget \| EventEmitter | ❌ |
-| name | string \| symbol | ❌ |
+| emitter | DOMEventTarget[EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter) | ❌ |
+| name | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
 ### public static isDisturbed(stream): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Returns whether the stream has been read from or cancelled.
 
@@ -798,7 +798,7 @@ Returns whether the stream has been read from or cancelled.
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| stream | Readable \| ReadableStream | ❌ |
+| stream | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)[ReadableStream](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌ |
 ### public static listenerCount(emitter, eventName): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 A class method that returns the number of listeners for the given `eventName`registered on the given `emitter`.
 
@@ -818,8 +818,8 @@ console.log(listenerCount(myEmitter, 'event'));
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | emitter | [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter) | ❌ | The emitter to query |
-| eventName | string \| symbol | ❌ | The event name |
-### public static on(emitter, eventName, options?): AsyncIterableIterator\<any>
+| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ | The event name |
+### public static on(emitter, eventName, options?): AsyncIterableIterator\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>
 ```js
 const { on, EventEmitter } = require('events');
 
@@ -881,7 +881,7 @@ process.nextTick(() => ac.abort());
 | emitter | [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter) | ❌ | N/A |
 | eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The name of the event being listened for |
 | options | StaticEventEmitterOptions | ✅ | N/A |
-### public static once(emitter, eventName, options?): Promise\<Array\<any>>
+### public static once(emitter, eventName, options?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>>
 Creates a `Promise` that is fulfilled when the `EventEmitter` emits the given
 event or that is rejected if the `EventEmitter` emits `'error'` while waiting.
 The `Promise` will resolve with an array of all the arguments emitted to the
@@ -967,7 +967,7 @@ ee.emit('foo'); // Prints: Waiting for the event was canceled!
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | emitter | NodeEventTarget | ❌ |
-| eventName | string \| symbol | ❌ |
+| eventName | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) | ❌ |
 | options | StaticEventEmitterOptions | ✅ |
 ### public static setMaxListeners(n?, eventTargets): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 ```js
@@ -987,8 +987,8 @@ setMaxListeners(5, target, emitter);
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | n | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ✅ | A non-negative number. The maximum number of listeners per `EventTarget` event. |
-| eventTargets | Array\<DOMEventTarget \| EventEmitter> | ❌ | N/A |
-### public static toWeb(streamReadable): ReadableStream\<any>
+| eventTargets | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<DOMEventTarget[EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)> | ❌ | N/A |
+### public static toWeb(streamReadable): [ReadableStream](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)\<[any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)>
 A utility method for creating a web `ReadableStream` from a `Readable`.
 
 

@@ -10,49 +10,49 @@ new GuildQueueHistory(queue)
 
 
 ## Properties
-### public queue: GuildQueue\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueueHistory.ts#L7)
-### public tracks: Queue\<Track>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueueHistory.ts#L6)
-### public currentTrack: null \| Track
+### public queue: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueHistory.ts#L7)
+### public tracks: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueHistory.ts#L6)
+### public currentTrack: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Current track in the queue
-### public disabled: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+### public disabled: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 If history is disabled
-### public nextTrack: null \| Track
+### public nextTrack: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Next track in the queue
-### public previousTrack: null \| Track
+### public previousTrack: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Previous track in the queue
-### public size: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public size: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Gets the size of the queue
 
 ## Methods
-### public back(): Promise\<void>
+### public back(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 Alias to [GuildQueueHistory].previous()
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueueHistory.ts#L103)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueHistory.ts#L103)
 ### public clear(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Clear history
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueueHistory.ts#L69)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueHistory.ts#L69)
 ### public getSize(): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueueHistory.ts#L45)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueHistory.ts#L45)
 ### public isEmpty(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 If history is empty
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueueHistory.ts#L52)
-### public next(): Promise\<void>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueHistory.ts#L52)
+### public next(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 Play the next track in the queue
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueueHistory.ts#L76)
-### public previous(preserveCurrent): Promise\<void>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueHistory.ts#L76)
+### public previous(preserveCurrent): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 Play the previous track in the queue
 
 
@@ -62,7 +62,7 @@ Play the previous track in the queue
 | preserveCurrent | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueueHistory.ts#L88)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueHistory.ts#L88)
 ### public push(track): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Add track to track history
 
@@ -70,7 +70,7 @@ Add track to track history
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| track | Track \| Array\<Track> | ❌ | The track to add |
+| track | Track[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track> | ❌ | The track to add |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/GuildQueueHistory.ts#L60)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/GuildQueueHistory.ts#L60)

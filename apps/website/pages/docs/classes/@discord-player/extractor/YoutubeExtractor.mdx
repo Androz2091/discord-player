@@ -11,30 +11,30 @@ new YoutubeExtractor(context, options)
 
 
 ## Properties
-### private _stream: StreamFN
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L24)
-### public _ytLibName: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L25)
-### public context: ExtractorExecutionContext
+### private _stream: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L24)
+### public _ytLibName: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L25)
+### public context: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public options: Record\<string, unknown>
+### public options: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public static identifier: 'com.discord\-player.youtubeextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L23)
-### public identifier: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+### public static identifier: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L23)
+### public identifier: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Identifier of this extractor
 
 ## Methods
-### private _makeYTSearch(query, context): Promise\<Array\<Track>>
+### private _makeYTSearch(query, context): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track>>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 | context | ExtractorSearchContext | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L133)
-### public activate(): Promise\<void>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L27)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L133)
+### public activate(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L27)
 ### public createResponse(playlist?, tracks?): ExtractorInfo
 Create extractor response
 
@@ -42,9 +42,9 @@ Create extractor response
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| playlist | null \| Playlist | ✅ | The playlist |
-| tracks | Array\<Track> | ✅ | The track array |
-### public deactivate(): Promise\<void>
+| playlist | nullPlaylist | ✅ | The playlist |
+| tracks | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track> | ✅ | The track array |
+### public deactivate(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 This method will be executed when this extractor is deactivated
 ### public debug(message): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Write debug message
@@ -64,22 +64,22 @@ Dispatch an event to the player
 | event | K | ❌ | The event to dispatch |
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
 ### public emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L201)
-### public getRelatedTracks(track): Promise\<ExtractorInfo>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L201)
+### public getRelatedTracks(track): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<ExtractorInfo>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | track | Track | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L161)
-### public handle(query, context): Promise\<ExtractorInfo>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L161)
+### public handle(query, context): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<ExtractorInfo>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 | context | ExtractorSearchContext | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L46)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L46)
 ### public handlePostStream(stream, next): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 A stream middleware to handle streams before passing it to the player
 
@@ -89,39 +89,39 @@ A stream middleware to handle streams before passing it to the player
 | ----------- | ----------- | ----------- | ----------- |
 | stream | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌ | The incoming stream |
 | next | NextFunction | ❌ | The next function |
-### public stream(info): Promise\<string \| Readable>
+### public stream(info): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | info | Track | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L205)
-### public validate(query, type?): Promise\<boolean>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L205)
+### public validate(query, type?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
-| type | null \| SearchQueryType | ✅ |
+| type | nullSearchQueryType | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L33)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L33)
 ### public static parseURL(link): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | link | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L241)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L241)
 ### public static validateId(id): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | id | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L237)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L237)
 ### public static validateURL(link): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | link | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/YoutubeExtractor.ts#L228)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/YoutubeExtractor.ts#L228)

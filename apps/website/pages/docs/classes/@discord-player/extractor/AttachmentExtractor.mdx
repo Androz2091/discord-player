@@ -11,17 +11,17 @@ new AttachmentExtractor(context, options)
 
 
 ## Properties
-### public context: ExtractorExecutionContext
+### public context: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public options: Record\<string, unknown>
+### public options: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public static identifier: 'com.discord\-player.attachmentextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/AttachmentExtractor.ts#L19)
-### public identifier: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+### public static identifier: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/AttachmentExtractor.ts#L19)
+### public identifier: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Identifier of this extractor
 
 ## Methods
-### public activate(): Promise\<void>
+### public activate(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 This method will be executed when this extractor is activated
 ### public createResponse(playlist?, tracks?): ExtractorInfo
 Create extractor response
@@ -30,9 +30,9 @@ Create extractor response
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| playlist | null \| Playlist | ✅ | The playlist |
-| tracks | Array\<Track> | ✅ | The track array |
-### public deactivate(): Promise\<void>
+| playlist | nullPlaylist | ✅ | The playlist |
+| tracks | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track> | ✅ | The track array |
+### public deactivate(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 This method will be executed when this extractor is deactivated
 ### public debug(message): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Write debug message
@@ -52,22 +52,22 @@ Dispatch an event to the player
 | event | K | ❌ | The event to dispatch |
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
 ### public emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/AttachmentExtractor.ts#L118)
-### public getRelatedTracks(track): Promise\<ExtractorInfo>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/AttachmentExtractor.ts#L118)
+### public getRelatedTracks(track): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<ExtractorInfo>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | track | Track | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/AttachmentExtractor.ts#L26)
-### public handle(query, context): Promise\<ExtractorInfo>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/AttachmentExtractor.ts#L26)
+### public handle(query, context): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<ExtractorInfo>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 | context | ExtractorSearchContext | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/AttachmentExtractor.ts#L31)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/AttachmentExtractor.ts#L31)
 ### public handlePostStream(stream, next): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 A stream middleware to handle streams before passing it to the player
 
@@ -77,18 +77,18 @@ A stream middleware to handle streams before passing it to the player
 | ----------- | ----------- | ----------- | ----------- |
 | stream | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌ | The incoming stream |
 | next | NextFunction | ❌ | The next function |
-### public stream(info): Promise\<string \| ReadStream>
+### public stream(info): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)ReadStream>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | info | Track | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/AttachmentExtractor.ts#L122)
-### public validate(query, type?): Promise\<boolean>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/AttachmentExtractor.ts#L122)
+### public validate(query, type?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
-| type | null \| SearchQueryType | ✅ |
+| type | nullSearchQueryType | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/extractor/src/extractors/AttachmentExtractor.ts#L21)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/extractor/src/extractors/AttachmentExtractor.ts#L21)

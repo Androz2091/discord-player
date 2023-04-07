@@ -7,16 +7,16 @@ new AudioFilters()
 
 
 ## Properties
-### public static filters: Record\<keyof QueueFilters, string>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/AudioFilters.ts#L10)
-### public length: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+### public static filters: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/AudioFilters.ts#L10)
+### public length: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
-### public names: Array\<keyof QueueFilters>
+### public names: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
 
 ## Methods
-### public static \[iterator](): IterableIterator\<\{ name: keyof QueueFilters,value: string }>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/AudioFilters.ts#L55)
+### public static \[iterator](): IterableIterator\<\{ name: keyofQueueFilters;value: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String); }>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/AudioFilters.ts#L55)
 ### public static create(filters?): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
 Create ffmpeg args from the specified filters name
 
@@ -24,10 +24,10 @@ Create ffmpeg args from the specified filters name
 
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| filters | Array\<K> | ✅ |
+| filters | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<K> | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/AudioFilters.ts#L79)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/AudioFilters.ts#L79)
 ### public static define(filterName, value): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Defines audio filter
 
@@ -39,7 +39,7 @@ Defines audio filter
 | value | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The ffmpeg args |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/AudioFilters.ts#L92)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/AudioFilters.ts#L92)
 ### public static defineBulk(filtersArray): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 Defines multiple audio filters
 
@@ -47,23 +47,23 @@ Defines multiple audio filters
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| filtersArray | Array\<\{ name: string,value: string }> | ❌ | Array of filters containing the filter name and ffmpeg args |
+| filtersArray | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<\{ name: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String);value: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String); }> | ❌ | Array of filters containing the filter name and ffmpeg args |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/AudioFilters.ts#L100)
-### public static get(name): Record\<keyof QueueFilters, string>\[K]
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/AudioFilters.ts#L100)
+### public static get(name): Record\<keyofQueueFilters[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)>\[K]
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | name | K | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/AudioFilters.ts#L47)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/AudioFilters.ts#L47)
 ### public static has(name): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | name | K | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/AudioFilters.ts#L51)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/AudioFilters.ts#L51)
 ### public static toString(): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/AudioFilters.ts#L70)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/AudioFilters.ts#L70)

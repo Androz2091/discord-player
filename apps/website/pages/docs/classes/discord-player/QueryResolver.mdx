@@ -7,11 +7,11 @@ new QueryResolver()
 
 
 ## Properties
-### public regex: \{ appleMusicAlbumRegex: RegExp,appleMusicPlaylistRegex: RegExp,appleMusicSongRegex: RegExp,attachmentRegex: RegExp,reverbnationRegex: RegExp,spotifyAlbumRegex: RegExp,spotifyPlaylistRegex: RegExp,spotifySongRegex: RegExp,vimeoRegex: RegExp }
+### public regex: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 
 
 ## Methods
-### public static getVimeoID(query): undefined \| null \| string
+### public static getVimeoID(query): undefinednull[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
 Parses vimeo id from url
 
 
@@ -21,8 +21,8 @@ Parses vimeo id from url
 | query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The query |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/QueryResolver.ts#L73)
-### public static resolve(query, fallbackSearchEngine): 'auto' \| 'youtube' \| 'youtubePlaylist' \| 'soundcloudTrack' \| 'soundcloudPlaylist' \| 'soundcloud' \| 'spotifySong' \| 'spotifyAlbum' \| 'spotifyPlaylist' \| 'spotifySearch' \| 'facebook' \| 'vimeo' \| 'arbitrary' \| 'reverbnation' \| 'youtubeSearch' \| 'youtubeVideo' \| 'soundcloudSearch' \| 'appleMusicSong' \| 'appleMusicAlbum' \| 'appleMusicPlaylist' \| 'appleMusicSearch' \| 'file' \| 'autoSearch'
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/QueryResolver.ts#L73)
+### public static resolve(query, fallbackSearchEngine): 'auto''youtube''youtubePlaylist''soundcloudTrack''soundcloudPlaylist''soundcloud''spotifySong''spotifyAlbum''spotifyPlaylist''spotifySearch''facebook''vimeo''arbitrary''reverbnation''youtubeSearch''youtubeVideo''soundcloudSearch''appleMusicSong''appleMusicAlbum''appleMusicPlaylist''appleMusicSearch''file''autoSearch'
 Resolves the given search query
 
 
@@ -30,21 +30,21 @@ Resolves the given search query
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The query |
-| fallbackSearchEngine | 'auto' \| 'youtube' \| 'youtubePlaylist' \| 'soundcloudTrack' \| 'soundcloudPlaylist' \| 'soundcloud' \| 'spotifySong' \| 'spotifyAlbum' \| 'spotifyPlaylist' \| 'spotifySearch' \| 'facebook' \| 'vimeo' \| 'arbitrary' \| 'reverbnation' \| 'youtubeSearch' \| 'youtubeVideo' \| 'soundcloudSearch' \| 'appleMusicSong' \| 'appleMusicAlbum' \| 'appleMusicPlaylist' \| 'appleMusicSearch' \| 'file' \| 'autoSearch' | ❌ | N/A |
+| fallbackSearchEngine | 'auto''youtube''youtubePlaylist''soundcloudTrack''soundcloudPlaylist''soundcloud''spotifySong''spotifyAlbum''spotifyPlaylist''spotifySearch''facebook''vimeo''arbitrary''reverbnation''youtubeSearch''youtubeVideo''soundcloudSearch''appleMusicSong''appleMusicAlbum''appleMusicPlaylist''appleMusicSearch''file''autoSearch' | ❌ | N/A |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/QueryResolver.ts#L44)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/QueryResolver.ts#L44)
 ### public static validateId(q): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | q | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/QueryResolver.ts#L82)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/QueryResolver.ts#L82)
 ### public static validateURL(q): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | q | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/utils/QueryResolver.ts#L86)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/utils/QueryResolver.ts#L86)

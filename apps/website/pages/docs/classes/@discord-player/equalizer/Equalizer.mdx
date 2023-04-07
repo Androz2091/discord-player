@@ -11,43 +11,43 @@ new Equalizer(channelCount, bandMultipliers)
 
 
 ## Properties
-### public bandMultipliers: Array\<number>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/EqualizerConfiguration.ts#L2)
-### public channelCount: [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/Equalizer.ts#L34)
-### public channels: Array\<ChannelProcessor>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/Equalizer.ts#L33)
-### public static BAND_COUNT: 15
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/Equalizer.ts#L14)
-### public static Coefficients48000: Array\<EqualizerCoefficients>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/Equalizer.ts#L16)
-### public static SAMPLE_RATE: 48000
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/Equalizer.ts#L15)
+### public bandMultipliers: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/EqualizerConfiguration.ts#L2)
+### public channelCount: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/Equalizer.ts#L34)
+### public channels: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/Equalizer.ts#L33)
+### public static BAND_COUNT: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/Equalizer.ts#L14)
+### public static Coefficients48000: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/Equalizer.ts#L16)
+### public static SAMPLE_RATE: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/Equalizer.ts#L15)
 
 ## Methods
-### public createChannelProcessor(): Array\<ChannelProcessor>
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/Equalizer.ts#L42)
+### public createChannelProcessor(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<ChannelProcessor>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/Equalizer.ts#L42)
 ### public getGain(band): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | band | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/EqualizerConfiguration.ts#L10)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/EqualizerConfiguration.ts#L10)
 ### public isValidBand(band): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | band | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/EqualizerConfiguration.ts#L18)
-### public process(input): Array\<Buffer>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/EqualizerConfiguration.ts#L18)
+### public process(input): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer)>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| input | Array\<ChannelProcessorInput> | ❌ |
+| input | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<ChannelProcessorInput> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/Equalizer.ts#L48)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/Equalizer.ts#L48)
 ### public setGain(band, value): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -55,4 +55,4 @@ new Equalizer(channelCount, bandMultipliers)
 | value | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/equalizer/src/equalizer/EqualizerConfiguration.ts#L4)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/equalizer/src/equalizer/EqualizerConfiguration.ts#L4)

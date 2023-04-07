@@ -11,93 +11,93 @@ new SearchResult(player, _data)
 
 
 ## Properties
-### private _data: SearchResultData
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L18)
-### public player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L18)
-### public extractor: null \| BaseExtractor
+### private _data: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L18)
+### public player: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L18)
+### public extractor: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 The extractor
-### public playlist: undefined \| null \| Playlist
+### public playlist: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Playlist result
-### public query: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+### public query: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 The search query
-### public queryType: SearchQueryType \| any
+### public queryType: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 The search query type
-### public requestedBy: null \| User
+### public requestedBy: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Requested by
-### public tracks: Array\<Track>
+### public tracks: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Tracks result
 
 ## Methods
-### public execute(): Promise\<SearchResult>
+### public execute(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<SearchResult>
 Re-execute this search
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L106)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L106)
 ### public hasPlaylist(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 If this search result has playlist
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L123)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L123)
 ### public hasTracks(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 If this search result has tracks
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L130)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L130)
 ### public isEmpty(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 If this search result is empty
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L116)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L116)
 ### public setExtractor(extractor): SearchResult
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | extractor | BaseExtractor | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L38)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L38)
 ### public setPlaylist(playlist): SearchResult
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | playlist | Playlist | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L56)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L56)
 ### public setQuery(query): SearchResult
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L51)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L51)
 ### public setQueryType(type): SearchResult
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| type | SearchQueryType \| any | ❌ |
+| type | SearchQueryType\`ext:\$\{string}\` | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L25)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L25)
 ### public setRequestedBy(user): SearchResult
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | user | User | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L30)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L30)
 ### public setTracks(tracks): SearchResult
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| tracks | Array\<Track> | ❌ |
+| tracks | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L46)
-### public toJSON(): \{ extractor: null \| string,playlist: null \| PlaylistJSON,query: string,queryType: SearchQueryType \| any,requestedBy: null \| Object,tracks: Array\<TrackJSON> }
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L46)
+### public toJSON(): \{ extractor: null[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String);playlist: nullPlaylistJSON;query: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String);queryType: SearchQueryType\`ext:\$\{string}\`;requestedBy: null[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object);tracks: [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<TrackJSON>; }
 JSON representation of this search
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/Structures/SearchResult.ts#L137)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/Structures/SearchResult.ts#L137)

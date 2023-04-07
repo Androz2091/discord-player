@@ -11,28 +11,28 @@ new BaseExtractor(context, options)
 
 
 ## Properties
-### public context: ExtractorExecutionContext
+### public context: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Context that instantiated this extractor
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L20)
-### public options: Record\<string, unknown>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L20)
+### public options: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Initialization options for this extractor
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L20)
-### public static identifier: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L20)
+### public static identifier: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Identifier for this extractor
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L13)
-### public identifier: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L13)
+### public identifier: [any](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any)
 Identifier of this extractor
 
 ## Methods
-### public activate(): Promise\<void>
+### public activate(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 This method will be executed when this extractor is activated
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L32)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L32)
 ### public createResponse(playlist?, tracks): ExtractorInfo
 Create extractor response
 
@@ -40,17 +40,17 @@ Create extractor response
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| playlist | null \| Playlist | ✅ | The playlist |
-| tracks | Array\<Track> | ❌ | The track array |
+| playlist | nullPlaylist | ✅ | The playlist |
+| tracks | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track> | ❌ | The track array |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L104)
-### public deactivate(): Promise\<void>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L104)
+### public deactivate(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
 This method will be executed when this extractor is deactivated
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L40)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L40)
 ### public debug(message): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Write debug message
 
@@ -61,7 +61,7 @@ Write debug message
 | message | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The debug message |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L112)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L112)
 ### public emit(event, args): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 Dispatch an event to the player
 
@@ -73,8 +73,8 @@ Dispatch an event to the player
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L95)
-### public getRelatedTracks(track): Promise\<ExtractorInfo>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L95)
+### public getRelatedTracks(track): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<ExtractorInfo>
 Get related tracks for the given track
 
 
@@ -84,8 +84,8 @@ Get related tracks for the given track
 | track | Track | ❌ | The track source |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L76)
-### public handle(query, context): Promise\<ExtractorInfo>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L76)
+### public handle(query, context): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<ExtractorInfo>
 Handle the given query
 
 
@@ -96,7 +96,7 @@ Handle the given query
 | context | ExtractorSearchContext | ❌ | N/A |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L67)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L67)
 ### public handlePostStream(stream, next): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
 A stream middleware to handle streams before passing it to the player
 
@@ -108,8 +108,8 @@ A stream middleware to handle streams before passing it to the player
 | next | NextFunction | ❌ | The next function |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L86)
-### public stream(info): Promise\<string \| Readable>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L86)
+### public stream(info): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)[Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)>
 Stream the given track
 
 
@@ -119,8 +119,8 @@ Stream the given track
 | info | Track | ❌ | The track to stream |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L58)
-### public validate(query, type?): Promise\<boolean>
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L58)
+### public validate(query, type?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
 Validate incoming query
 
 
@@ -128,7 +128,7 @@ Validate incoming query
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | query | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌ | The query to validate |
-| type | null \| SearchQueryType | ✅ | N/A |
+| type | nullSearchQueryType | ✅ | N/A |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cb6c009/packages/discord-player/src/extractors/BaseExtractor.ts#L49)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd18f37/packages/discord-player/src/extractors/BaseExtractor.ts#L49)

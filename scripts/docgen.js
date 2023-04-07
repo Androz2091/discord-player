@@ -64,6 +64,7 @@ async function writeGuideMeta(guideFiles) {
 async function writeDocsMeta() {
     const res = {
         classes: 'Classes',
+        functions: 'Functions',
         types: 'Interfaces',
         guides: 'Guides'
     };
