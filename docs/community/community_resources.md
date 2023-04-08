@@ -22,7 +22,7 @@ An unofficial extractor for discord-player to add support for deezer source.
 | [Jappan](https://github.com/febkosq8/Jappan) | A simple discord bot made to make someone's life easier. Currently features Music Playback, Fun Commands, Leveling System & Moderation Tools | v6.1.0 |
 | [Botanique](https://git.mylloon.fr/ConfrerieDuKassoulait/Botanique) | A bot I made with [my girlfriend](https://github.com/2-1-1-2), we're using discord-player for the music and for lyrics | v6.1.0 |
 | [Bhop Music Bot](https://github.com/akanora/bhop-music-bot) | There were not many bots made with discord-player 6.0.0 and discord.js 14.7.1, I was bored and made a simple one. We are using discord-player to listen music while bhopping. 🐇| v6.1.0 |
-| [Music Disc](https://github.com/hmes98318/Music-Disc) | I am using discord-player v6 to play music on Discord with friends. It's easy to set up and run yourself. | v6.0.0 |
+| [Music Disc](https://github.com/hmes98318/Music-Disc) | I am using discord-player v6 to play music on Discord with friends. It's easy to set up and run yourself. | v6.1.1 |
 | [Discord Music Bot](https://github.com/ervin-sungkono/Discord-Music-Bot) | I'm using discord-player to make a discord music bot, it does pretty much the same as what a normal music bot does, also has lyrics and filters. | v6.1.0 |
 | [Flowease](https://github.com/Lutra-Fs/Flowease) | I am using discord-player to play songs from NetEase. | v5.3.2 |
 | [AtlantaBot](https://github.com/Androz2091/AtlantaBot) | We are using discord-player to manager all of our music commands. | v4.1.0 |
