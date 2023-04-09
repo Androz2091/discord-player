@@ -30,8 +30,8 @@ Discord Player requires Discord.js 14.0 or higher. PLease make sure you have a c
 #### Main Library
 
 ```bash
-$ npm install discord-player # main library
-$ npm install @discord-player/extractor # extractors provider
+$ yarn add discord-player # main library
+$ yarn add @discord-player/extractor # extractors provider
 ```
 
 > Discord Player recognizes `@discord-player/extractor` and loads it automatically by default.
@@ -41,8 +41,8 @@ $ npm install @discord-player/extractor # extractors provider
 Discord Player is a high level framework for Discord VoIP. Discord only accepts opus packets, thus you need to install opus library. You can install any of these:
 
 ```bash
-$ npm install @discordjs/opus
-$ npm install opusscript
+$ yarn add @discordjs/opus
+$ yarn add opusscript
 ```
 
 #### FFmpeg or Avconv
@@ -50,7 +50,7 @@ $ npm install opusscript
 FFmpeg or Avconv is required for media transcoding. You can get it from [https://ffmpeg.org](https://www.ffmpeg.org/download.html) or by installing it from npm:
 
 ```bash
-$ npm install ffmpeg-static
+$ yarn add ffmpeg-static
 ```
 
 You can get avconv from [https://libav.org/download](https://libav.org/download).
@@ -60,9 +60,9 @@ You can get avconv from [https://libav.org/download](https://libav.org/download)
 You also need to install streaming library if you want to add support for youtube playback. You can install one of these libraries:
 
 ```bash
-$ npm install ytdl-core
-$ npm install play-dl
-$ npm install @distube/ytdl-core
+$ yarn add ytdl-core
+$ yarn add play-dl
+$ yarn add @distube/ytdl-core
 ```
 
 Done with all these? Let's write a simple music bot then.

@@ -5,7 +5,7 @@ Discord Player utilities
 ## Installation
 
 ```sh
-$ npm install @discord-player/utils
+$ yarn add @discord-player/utils
 ```
 
 ## Example

@@ -7,7 +7,7 @@ A high level framework for Discord VoIP client.
 ## Installation
 
 ```sh
-$ npm install --save @discord-player/voice
+$ yarn add --save @discord-player/voice
 ```
 
 ## Example
