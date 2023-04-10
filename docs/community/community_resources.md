@@ -25,6 +25,7 @@ An unofficial extractor for discord-player to add support for deezer source.
 | [Music Disc](https://github.com/hmes98318/Music-Disc) | I am using discord-player v6 to play music on Discord with friends. It's easy to set up and run yourself. | v6.1.1 |
 | [Discord Music Bot](https://github.com/ervin-sungkono/Discord-Music-Bot) | I'm using discord-player to make a discord music bot, it does pretty much the same as what a normal music bot does, also has lyrics and filters. | v6.1.0 |
 | [Flowease](https://github.com/Lutra-Fs/Flowease) | I am using discord-player to play songs from NetEase. | v5.3.2 |
+| [DumBot](https://github.com/Mateo-Wallace/MP2-Discord-DumBot-V2) | Open source bot made using discord.js and discord-player that contains dice rolling and music playing functionality. | v5.4.0 |
 | [AtlantaBot](https://github.com/Androz2091/AtlantaBot) | We are using discord-player to manager all of our music commands. | v4.1.0 |
 | [Beat-Bot](https://github.com/IslandRhythms/Beat-Bot) | Fun discord bot with helpful util commands and music player using discord-player. | v6.1.1 |
 | [Melody](https://github.com/NerdyTechy/Melody) | Useful Discord music bot with many commands and effects to spice up your music. | v6.1.1 |
