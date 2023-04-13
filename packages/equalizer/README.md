@@ -5,7 +5,7 @@ This library implements Lavaplayer's 15 Band PCM Equalizer & biquad utilities.
 ## Installation
 
 ```sh
-$ npm install --save @discord-player/equalizer
+$ yarn add --save @discord-player/equalizer
 ```
 
 ## Example

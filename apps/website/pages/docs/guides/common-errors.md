@@ -3,11 +3,11 @@
 Install opus encoder.
 
 ```sh
-$ npm install @discordjs/opus
+$ yarn add @discordjs/opus
 # or
-$ npm install opusscript
+$ yarn add opusscript
 # or
-$ npm install node-opus
+$ yarn add node-opus
 ```
 
 # FFmpeg/Avconv not found
@@ -26,6 +26,6 @@ Make sure you have `FFmpeg` or `Avconv` available on your system.
 
 -   If you are getting weird errors like something is not a constructor or version.split is not a function or something similar, please try the following:
 
-    Remove `node_modules`, `package-lock.json` or any lockfiles you have, run `npm cache clean --force` or similar command equivalent to your package manager and then run `npm install` (or the install command of your package manager)
+    Remove `node_modules`, `package-lock.json` or any lockfiles you have, run `npm cache clean --force` or similar command equivalent to your package manager and then run `yarn add` (or the install command of your package manager)
 
 -   If you are unable to solve the problem, please join our official support server 👉 [https://androz2091.fr/discord](https://androz2091.fr/discord)

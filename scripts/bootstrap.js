@@ -34,7 +34,7 @@ function getReadMe(name) {
     Discord Player \`${name}\` library\n
     ## Installation\n
     \`\`\`sh
-    $ npm install --save ${name}
+    $ yarn add --save ${name}
     \`\`\`\n
     ## Example\n
     \`\`\`js\nimport pkg from "${name}"\n\`\`\`\n`;
