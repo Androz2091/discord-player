@@ -64,7 +64,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
 
         knownExtractorKeys.forEach((key) => {
             if (!mod.module[key]) return;
-            this.register(mod.module[key]);
+            this.register(<typeof BaseExtractor>mod.module[key], {});
         });
 
         return { success: true, error: null };
@@ -98,7 +98,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      * @param _extractor The extractor to register
      * @param options Options supplied to the extractor
      */
-    public async register<T extends typeof BaseExtractor>(_extractor: T, options?: ConstructorParameters<T>['1']) {
+    public async register<O extends object, T extends typeof BaseExtractor<O>>(_extractor: T, options: ConstructorParameters<T>['1']) {
         if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return;
         const extractor = new _extractor(this, options);
 
