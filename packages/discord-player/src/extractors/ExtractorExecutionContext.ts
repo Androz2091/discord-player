@@ -64,7 +64,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
 
         knownExtractorKeys.forEach((key) => {
             if (!mod.module[key]) return;
-            this.register(mod.module[key]);
+            this.register(<typeof BaseExtractor>mod.module[key], {});
         });
 
         return { success: true, error: null };
@@ -98,7 +98,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      * @param _extractor The extractor to register
      * @param options Options supplied to the extractor
      */
-    public async register(_extractor: typeof BaseExtractor, options: Record<string, unknown> = {}) {
+    public async register<O extends object, T extends typeof BaseExtractor<O>>(_extractor: T, options: ConstructorParameters<T>['1']) {
         if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return;
         const extractor = new _extractor(this, options);
 
@@ -154,12 +154,12 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      * @param fn The runner function
      * @param filterBlocked Filter blocked extractors
      */
-    public async run<T = unknown>(fn: ExtractorExecutionFN<T>, filterBlocked = true) {
+    public async run<T = unknown, E extends Record<string, unknown> = Record<string, unknown>>(fn: ExtractorExecutionFN<T>, filterBlocked = true) {
         const blocked = this.player.options.blockExtractors ?? [];
         for (const ext of this.store.values()) {
             if (filterBlocked && blocked.some((e) => e === ext.identifier)) continue;
             this.player.debug(`Executing extractor ${ext.identifier}...`);
-            const result = await fn(ext).catch((e: Error) => {
+            const result = await fn(ext as BaseExtractor<E>).catch((e: Error) => {
                 this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
                 return false;
             });
@@ -181,4 +181,5 @@ export interface ExtractorExecutionResult<T = unknown> {
     extractor: BaseExtractor;
     result: T;
 }
+
 export type ExtractorExecutionFN<T = unknown> = (extractor: BaseExtractor) => Promise<T | boolean>;

@@ -13,18 +13,33 @@ import {
 } from 'discord-player';
 
 import { StreamFN, YouTubeLibs, loadYtdl, makeYTSearch } from './common/helper';
+import type { Readable } from 'stream';
 
 // taken from ytdl-core
 const validQueryDomains = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'gaming.youtube.com']);
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
 const idRegex = /^[a-zA-Z0-9-_]{11}$/;
 
-export class YoutubeExtractor extends BaseExtractor {
+export interface YoutubeExtractorInit {
+    createStream?: (ext: YoutubeExtractor, url: string) => Promise<Readable | string>;
+}
+
+export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
     public static identifier = 'com.discord-player.youtubeextractor' as const;
     private _stream!: StreamFN;
     public _ytLibName!: string;
 
     public async activate() {
+        const fn = this.options.createStream;
+
+        if (typeof fn === 'function') {
+            this._stream = (q: string) => {
+                return fn(this, q);
+            };
+
+            return;
+        }
+
         const { stream, name } = await loadYtdl(this.context.player.options.ytdlOptions);
         this._stream = stream;
         this._ytLibName = name;
@@ -208,19 +223,7 @@ export class YoutubeExtractor extends BaseExtractor {
         }
 
         let url = info.url;
-
-        if (info.queryType === 'spotifySong' || info.queryType === 'appleMusicSong') {
-            if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
-            else {
-                const _url = await YouTube.searchOne(`${info.title} ${info.author}`, 'video')
-                    .then((r) => r.url)
-                    .catch(Util.noop);
-                if (!_url) throw new Error(`Could not extract stream for this track`);
-                info.raw.url = url = _url;
-            }
-        }
-
-        if (url) url = url.includes('youtube.com') ? url.replace(/(m(usic)?|gaming)\./, '') : url;
+        url = url.includes('youtube.com') ? url.replace(/(m(usic)?|gaming)\./, '') : url;
 
         return this._stream(url);
     }

@@ -6,7 +6,7 @@ import { PlayerEvents, SearchQueryType } from '../types/types';
 import { ExtractorExecutionContext } from './ExtractorExecutionContext';
 import type { RequestOptions } from 'http';
 
-export class BaseExtractor {
+export class BaseExtractor<T extends object = object> {
     /**
      * Identifier for this extractor
      */
@@ -17,7 +17,7 @@ export class BaseExtractor {
      * @param context Context that instantiated this extractor
      * @param options Initialization options for this extractor
      */
-    public constructor(public context: ExtractorExecutionContext, public options: Record<string, unknown> = {}) {}
+    public constructor(public context: ExtractorExecutionContext, public options: T = <T>{}) {}
 
     /**
      * Identifier of this extractor
