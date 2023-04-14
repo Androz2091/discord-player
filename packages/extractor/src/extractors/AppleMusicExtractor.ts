@@ -4,13 +4,30 @@ import { Readable } from 'stream';
 import { YoutubeExtractor } from './YoutubeExtractor';
 import { StreamFN, loadYtdl, makeYTSearch } from './common/helper';
 
-export class AppleMusicExtractor extends BaseExtractor {
+export interface AppleMusicExtractorInit {
+    createStream?: (ext: AppleMusicExtractor, url: string) => Promise<Readable | string>;
+}
+
+export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> {
     public static identifier = 'com.discord-player.applemusicextractor' as const;
     private _stream!: StreamFN;
+    private _isYtdl = false;
 
     public async activate(): Promise<void> {
+        const fn = this.options.createStream;
+
+        if (typeof fn === 'function') {
+            this._isYtdl = false;
+            this._stream = (q: string) => {
+                return fn(this, q);
+            };
+
+            return;
+        }
+
         const lib = await loadYtdl(this.context.player.options.ytdlOptions);
         this._stream = lib.stream;
+        this._isYtdl = true;
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
@@ -187,13 +204,15 @@ export class AppleMusicExtractor extends BaseExtractor {
 
         let url = info.url;
 
-        if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
-        else {
-            const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
-                .then((r) => r[0].url)
-                .catch(Util.noop);
-            if (!_url) throw new Error(`Could not extract stream for this track`);
-            info.raw.url = url = _url;
+        if (this._isYtdl) {
+            if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
+            else {
+                const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
+                    .then((r) => r[0].url)
+                    .catch(Util.noop);
+                if (!_url) throw new Error(`Could not extract stream for this track`);
+                info.raw.url = url = _url;
+            }
         }
 
         return this._stream(url);

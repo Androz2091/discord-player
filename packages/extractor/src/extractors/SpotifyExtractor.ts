@@ -1,5 +1,5 @@
 import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { YoutubeExtractor } from './YoutubeExtractor';
 import { StreamFN, getFetch, loadYtdl, makeYTSearch } from './common/helper';
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
@@ -7,20 +7,39 @@ import { SpotifyAPI } from '../internal';
 
 const re = /^(?:https:\/\/open\.spotify\.com\/(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track)(?:[/:])([A-Za-z0-9]+).*$/;
 
-export class SpotifyExtractor extends BaseExtractor {
+export interface SpotifyExtractorInit {
+    clientId?: string | null;
+    clientSecret?: string | null;
+    createStream?: (ext: SpotifyExtractor, url: string) => Promise<Readable | string>;
+}
+
+export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
     public static identifier = 'com.discord-player.spotifyextractor' as const;
     private _stream!: StreamFN;
+    private _isYtdl = false;
     private _lib!: Spotify;
     private _credentials = {
-        clientId: process.env.DP_SPOTIFY_CLIENT_ID || null,
-        clientSecret: process.env.DP_SPOTIFY_CLIENT_SECRET || null
+        clientId: this.options.clientId || process.env.DP_SPOTIFY_CLIENT_ID || null,
+        clientSecret: this.options.clientSecret || process.env.DP_SPOTIFY_CLIENT_SECRET || null
     };
     public internal = new SpotifyAPI(this._credentials);
 
     public async activate(): Promise<void> {
+        const fn = this.options.createStream;
+
+        if (typeof fn === 'function') {
+            this._isYtdl = false;
+            this._stream = (q: string) => {
+                return fn(this, q);
+            };
+
+            return;
+        }
+
         const lib = await loadYtdl(this.context.player.options.ytdlOptions);
         this._stream = lib.stream;
         this._lib = spotify(getFetch);
+        this._isYtdl = true;
         if (this.internal.isTokenExpired()) await this.internal.requestToken();
     }
 
@@ -270,13 +289,15 @@ export class SpotifyExtractor extends BaseExtractor {
 
         let url = info.url;
 
-        if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
-        else {
-            const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
-                .then((r) => r[0].url)
-                .catch(Util.noop);
-            if (!_url) throw new Error(`Could not extract stream for this track`);
-            info.raw.url = url = _url;
+        if (this._isYtdl) {
+            if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
+            else {
+                const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
+                    .then((r) => r[0].url)
+                    .catch(Util.noop);
+                if (!_url) throw new Error(`Could not extract stream for this track`);
+                info.raw.url = url = _url;
+            }
         }
 
         return this._stream(url);
