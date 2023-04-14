@@ -154,7 +154,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      * @param fn The runner function
      * @param filterBlocked Filter blocked extractors
      */
-    public async run<T = unknown, E extends Record<string, unknown> = Record<string, unknown>>(fn: ExtractorExecutionFN<T, E>, filterBlocked = true) {
+    public async run<T = unknown, E extends Record<string, unknown> = Record<string, unknown>>(fn: ExtractorExecutionFN<T>, filterBlocked = true) {
         const blocked = this.player.options.blockExtractors ?? [];
         for (const ext of this.store.values()) {
             if (filterBlocked && blocked.some((e) => e === ext.identifier)) continue;
@@ -169,7 +169,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
                 return {
                     extractor: ext,
                     result
-                } as ExtractorExecutionResult<T, E>;
+                } as ExtractorExecutionResult<T>;
             }
         }
 
@@ -177,9 +177,9 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
     }
 }
 
-export interface ExtractorExecutionResult<T = unknown, E extends Record<string, unknown> = Record<string, unknown>> {
-    extractor: BaseExtractor<E>;
+export interface ExtractorExecutionResult<T = unknown> {
+    extractor: BaseExtractor;
     result: T;
 }
 
-export type ExtractorExecutionFN<T = unknown, E extends Record<string, unknown> = Record<string, unknown>> = (extractor: BaseExtractor<E>) => Promise<T | boolean>;
+export type ExtractorExecutionFN<T = unknown> = (extractor: BaseExtractor) => Promise<T | boolean>;
