@@ -168,9 +168,6 @@ __metadata:
     spotify-url-info: ^3.2.3
     youtube-sr: ^4.3.4
     ytdl-core: ^4.11.2
-  peerDependencies:
-    play-dl: 1.x
-    ytdl-core: 4.x
   languageName: unknown
   linkType: soft
 

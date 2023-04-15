@@ -22,9 +22,6 @@ __metadata:
     soundcloud-scraper: ^5.0.3
     spotify-url-info: ^3.2.3
     youtube-sr: ^4.3.4
-  peerDependencies:
-    play-dl: 1.x
-    ytdl-core: 4.x
   languageName: node
   linkType: soft
 
