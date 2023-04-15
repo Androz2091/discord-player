@@ -27,6 +27,16 @@ export class BaseExtractor<T extends object = object> {
     }
 
     /**
+     * Reconfigures this extractor
+     * @param options The new options to apply
+     */
+    public async reconfigure(options: T) {
+        this.options = options;
+        await this.deactivate();
+        await this.activate();
+    }
+
+    /**
      * This method will be executed when this extractor is activated
      */
     public async activate() {
