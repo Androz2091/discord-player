@@ -416,14 +416,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             throw new Error('Play request received but track was not provided');
         }
 
-        if (this.queue.initializing) {
-            this.queue.debug('Queue is currently initializing another track, waiting...');
-            await this.queue.awaitInitialization();
-            this.queue.debug('Queue has finished initialization...');
-        }
-
         this.queue.debug('Requested option requires to play the track, initializing...');
-        this.queue.initializing = true;
 
         try {
             this.queue.debug(`Initiating stream extraction process...`);
@@ -442,7 +435,6 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 if (this.queue.options.skipOnNoStream) {
                     this.queue.player.events.emit('playerSkip', this.queue, track);
                     this.queue.player.events.emit('playerError', this.queue, error, track);
-                    this.queue.initializing = false;
                     const nextTrack = this.queue.tracks.dispatch();
                     if (nextTrack) this.play(nextTrack, { queue: false });
                     return;
@@ -507,10 +499,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             this.queue.setTransitioning(!!options.transitionMode);
 
             await this.#performPlay(resource);
-            this.queue.initializing = false;
         } catch (e) {
             this.queue.debug(`Failed to initialize audio player: ${e}`);
-            this.queue.initializing = false;
             throw e;
         }
     }

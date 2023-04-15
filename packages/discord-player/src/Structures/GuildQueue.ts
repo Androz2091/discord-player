@@ -15,6 +15,7 @@ import { FiltersName, QueueRepeatMode, SearchQueryType } from '../types/types';
 import { setTimeout } from 'timers';
 import { GuildQueueStatistics } from './GuildQueueStatistics';
 import { TypeUtil } from '../utils/TypeUtil';
+import { AsyncQueue } from '../utils/AsyncQueue';
 
 export interface GuildNodeInit<Meta = unknown> {
     guild: Guild;
@@ -298,9 +299,7 @@ export interface GuildQueueEvents<Meta = unknown> {
 
 export class GuildQueue<Meta = unknown> {
     #transitioning = false;
-    #initializing = false;
     #deleted = false;
-    #initializingPromises: Array<(value: boolean | PromiseLike<boolean>) => void> = [];
     private __current: Track | null = null;
     public tracks: Queue<Track>;
     public history = new GuildQueueHistory<Meta>(this);
@@ -315,6 +314,7 @@ export class GuildQueue<Meta = unknown> {
     public repeatMode = QueueRepeatMode.OFF;
     public timeouts = new Collection<string, NodeJS.Timeout>();
     public stats = new GuildQueueStatistics<Meta>(this);
+    public tasksQueue = new AsyncQueue();
 
     public constructor(public player: Player, public options: GuildNodeInit<Meta>) {
         this.tracks = new Queue<Track>(options.queueStrategy);
@@ -393,18 +393,6 @@ export class GuildQueue<Meta = unknown> {
      */
     public setMetadata(m: Meta) {
         this.options.metadata = m;
-    }
-
-    /**
-     * Indicates if this queue is currently initializing
-     */
-    public get initializing() {
-        return this.#initializing;
-    }
-
-    public set initializing(v: boolean) {
-        this.#initializing = v;
-        if (v) this.#resolveInitializerAwaiters();
     }
 
     /**
@@ -644,16 +632,6 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
-     * Wait for this queue to initialize
-     */
-    public awaitInitialization() {
-        return new Promise<boolean>((r) => {
-            if (!this.#initializing) return r(true);
-            this.#initializingPromises.push(r);
-        });
-    }
-
-    /**
      * Set self deaf
      * @param mode On/Off state
      * @param reason Reason
@@ -718,7 +696,6 @@ export class GuildQueue<Meta = unknown> {
         this.player.events.emit('playerTrigger', this, track!, reason);
         if (track && !this.isTransitioning()) this.player.events.emit('playerStart', this, track);
         this.setTransitioning(false);
-        this.initializing = false;
     }
 
     #performFinish(resource?: AudioResource<Track>) {
@@ -811,13 +788,5 @@ export class GuildQueue<Meta = unknown> {
         } catch {
             return this.#emitEnd();
         }
-    }
-
-    #resolveInitializerAwaiters() {
-        this.#initializingPromises.forEach((p) => {
-            p(!this.#initializing);
-        });
-
-        this.#initializingPromises = [];
     }
 }

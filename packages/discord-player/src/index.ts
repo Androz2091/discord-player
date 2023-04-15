@@ -8,6 +8,7 @@ export * from './VoiceInterface/VoiceUtils';
 export * from './VoiceInterface/StreamDispatcher';
 export * from './utils/Util';
 export * from './utils/TypeUtil';
+export * from './utils/AsyncQueue';
 export * from './types/types';
 export * from './utils/FFmpegStream';
 export * from './utils/QueryCache';

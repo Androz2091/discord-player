@@ -335,15 +335,28 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         }
 
         const queue = this.nodes.create(vc.guild, options.nodeOptions);
-        if (!queue.channel) await queue.connect(vc, options.connectionOptions);
 
-        if (!result.playlist) {
-            queue.addTrack(result.tracks[0]);
-        } else {
-            queue.addTrack(result.playlist);
+        this.debug(`[AsyncQueue] Acquiring an entry...`);
+        const entry = queue.tasksQueue.acquire();
+        this.debug(`[AsyncQueue] Entry ${entry.id} was acquired successfully!`);
+
+        this.debug(`[AsyncQueue] Waiting for the queue to resolve...`);
+        await entry.getTask();
+        this.debug(`[AsyncQueue] Entry ${entry.id} was resolved!`);
+
+        try {
+            if (!queue.channel) await queue.connect(vc, options.connectionOptions);
+
+            if (!result.playlist) {
+                queue.addTrack(result.tracks[0]);
+            } else {
+                queue.addTrack(result.playlist);
+            }
+            if (!queue.isPlaying()) await queue.node.play();
+        } finally {
+            this.debug(`[AsyncQueue] Releasing an entry from the queue...`);
+            queue.tasksQueue.release();
         }
-
-        if (!queue.isPlaying()) await queue.node.play();
 
         return {
             track: result.tracks[0],
