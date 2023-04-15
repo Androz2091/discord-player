@@ -21,7 +21,36 @@ const { useMasterPlayer } = require("discord-player");
 ...
 const player = useMasterPlayer();
 await player.play(interaction.member.voice.channel, query);
+```
 
+If you are not using `player.play()` and handling queue creation as well as other logic on your own, you may need to use `AsyncQueue` on your command, otherwise you may face [this issue](https://github.com/Androz2091/discord-player/issues/1717):
+
+```js
+const { useMasterPlayer } = require("discord-player");
+...
+const player = useMasterPlayer();
+
+const queue = player.nodes.create(...);
+const result = await player.search(...);
+
+// acquire task entry
+const entry = queue.tasksQueue.acquire();
+
+// wait for previous task to be released and our task to be resolved
+await entry.getTask();
+
+// add track(s) (this will add playlist or single track from the result)
+queue.addTrack(result);
+
+try {
+    // if player node was not previously playing, play a song
+    if (!queue.isPlaying()) await queue.node.play();
+} finally {
+    // release the task we acquired to let other tasks to be executed
+    // make sure you are releasing your entry, otherwise your bot won't
+    // accept new play requests
+    queue.tasksQueue.release();
+}
 ```
 
 ## Inserting a new track to a specific position in queue

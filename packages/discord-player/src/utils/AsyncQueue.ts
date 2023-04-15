@@ -123,6 +123,11 @@ export class AsyncQueueEntry {
         this.resolve();
     }
 
+    public release() {
+        this.consume();
+        this.queue.release();
+    }
+
     public cancel() {
         this.cleanup();
         this.reject(new Error('Cancelled'));

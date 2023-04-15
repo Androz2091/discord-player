@@ -250,15 +250,18 @@ export class GuildQueueAudioFilters<Meta = unknown> {
      */
     public async triggerReplay(seek = 0) {
         if (!this.queue.currentTrack) return false;
+        const entry = this.queue.node.tasksQueue.acquire();
         try {
+            await entry.getTask();
             await this.queue.node.play(this.queue.currentTrack, {
                 queue: false,
                 seek,
                 transitionMode: true
             });
-
+            this.queue.node.tasksQueue.release();
             return true;
         } catch {
+            this.queue.node.tasksQueue.release();
             return false;
         }
     }

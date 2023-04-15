@@ -6,6 +6,7 @@ import { Util } from '../utils/Util';
 import { Track, TrackResolvable } from './Track';
 import { GuildQueue } from './GuildQueue';
 import { setTimeout as waitFor } from 'timers/promises';
+import { AsyncQueue } from '../utils/AsyncQueue';
 
 export const FFMPEG_SRATE_REGEX = /asetrate=\d+\*(\d(\.\d)?)/;
 
@@ -29,6 +30,7 @@ export interface PlayerTimestamp {
 
 export class GuildQueuePlayerNode<Meta = unknown> {
     #progress = 0;
+    public tasksQueue = new AsyncQueue();
     public constructor(public queue: GuildQueue<Meta>) {}
 
     /**
