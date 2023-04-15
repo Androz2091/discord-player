@@ -78,6 +78,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         this.client.on('voiceStateUpdate', this.#voiceStateUpdateListener);
 
         if (this.options?.autoRegisterExtractor) {
+            Util.warn('Use of "<Player>[options.autoRegisterExtractor]" is deprecated, use "await <Player>.extractors.loadDefault()" instead!');
             this.extractors.loadDefault().then((r) => {
                 if (r.error) {
                     this.emit('error', new Error(`Failed to load default extractors: ${r.error?.stack ?? r.error}`));
