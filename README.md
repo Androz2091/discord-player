@@ -11,6 +11,7 @@ It provides easy set of customizable tools to develop Discord Music bots.
 
 -   Beginner friendly, easy to understand
 -   TypeScript support
+-   Supports audio player sharing
 -   Quick and easy to set up
 -   Wide range of player management features
 -   64+ built-in audio filter presets
