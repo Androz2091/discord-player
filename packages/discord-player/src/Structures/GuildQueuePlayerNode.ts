@@ -67,6 +67,13 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     }
 
     /**
+     * Set player progress
+     */
+    public setProgress(progress: number) {
+        this.#progress = progress;
+    }
+
+    /**
      * The stream time for current session
      */
     public get streamTime() {
@@ -172,11 +179,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      */
     public async seek(duration: number) {
         if (!this.queue.currentTrack) return false;
-        await this.play(this.queue.currentTrack, {
-            seek: duration,
-            transitionMode: true
-        });
-        return true;
+        return await this.queue.filters.triggerReplay(duration);
     }
 
     /**
@@ -307,7 +310,48 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     public insert(track: Track, index = 0) {
         if (!(track instanceof Track)) throw new Error('invalid track');
         this.queue.tracks.store.splice(index, 0, track);
-        this.queue.player.events.emit('audioTrackAdd', this.queue, track);
+        if (!this.queue.options.noEmitInsert) this.queue.player.events.emit('audioTrackAdd', this.queue, track);
+    }
+
+    /**
+     * Moves a track in the queue
+     * @param from The track to move
+     * @param to The position to move to
+     */
+    public move(from: TrackResolvable, to: number) {
+        const removed = this.remove(from);
+        if (!removed) throw new Error('invalid track to move');
+        this.insert(removed, to);
+    }
+
+    /**
+     * Copy a track in the queue
+     * @param from The track to clone
+     * @param to The position to clone at
+     */
+    public copy(from: TrackResolvable, to: number) {
+        const src = this.queue.tracks.at(this.getTrackPosition(from));
+        if (!src) throw new Error('invalid track to copy');
+        this.insert(src, to);
+    }
+
+    /**
+     * Swap two tracks in the queue
+     * @param first The first track to swap
+     * @param second The second track to swap
+     */
+    public swap(first: TrackResolvable, second: TrackResolvable) {
+        const src = this.getTrackPosition(first);
+        if (src < 0) throw new Error('invalid src track to swap');
+
+        const dest = this.getTrackPosition(second);
+        if (dest < 0) throw new Error('invalid dest track to swap');
+
+        const srcT = this.queue.tracks.store[src];
+        const destT = this.queue.tracks.store[dest];
+
+        this.queue.tracks.store[src] = destT;
+        this.queue.tracks.store[dest] = srcT;
     }
 
     /**
@@ -345,7 +389,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      * @param res The track to play
      * @param options Options for playing the track
      */
-    public async play(res?: Track, options?: ResourcePlayOptions) {
+    public async play(res?: Track | null, options?: ResourcePlayOptions) {
         if (!this.queue.dispatcher?.voiceConnection) {
             throw new Error('No voice connection available');
         }
@@ -399,7 +443,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                     this.queue.player.events.emit('playerSkip', this.queue, track);
                     this.queue.player.events.emit('playerError', this.queue, error, track);
                     this.queue.initializing = false;
-                    this.play(this.queue.tracks.dispatch(), { queue: false });
+                    const nextTrack = this.queue.tracks.dispatch();
+                    if (nextTrack) this.play(nextTrack, { queue: false });
                     return;
                 }
 

@@ -66,6 +66,8 @@ export class AttachmentExtractor extends BaseExtractor {
                     queryType: context.type
                 });
 
+                track.extractor = this;
+
                 // @ts-expect-error
                 track.raw.isFile = false;
 
@@ -100,6 +102,8 @@ export class AttachmentExtractor extends BaseExtractor {
                     engine: trackInfo.url,
                     queryType: context.type
                 });
+
+                track.extractor = this;
 
                 // @ts-expect-error
                 track.raw.isFile = true;

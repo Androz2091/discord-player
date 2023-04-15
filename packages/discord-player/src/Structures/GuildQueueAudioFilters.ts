@@ -45,10 +45,16 @@ export class FFmpegFilterer<Meta = unknown> {
     public constructor(public af: GuildQueueAudioFilters<Meta>) {}
 
     #setFilters(filters: Filters[]) {
+        const { queue } = this.af;
+        const prev = this.#ffmpegFilters.slice();
         const ignoreFilters = this.filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave') && !filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave');
-        const seekTime = this.af.queue.node.getTimestamp(ignoreFilters)?.current.value || 0;
+        const seekTime = queue.node.getTimestamp(ignoreFilters)?.current.value || 0;
         this.#ffmpegFilters = [...new Set(filters)];
-        return this.af.triggerReplay(seekTime);
+
+        return this.af.triggerReplay(seekTime).then((t) => {
+            queue.player.events.emit('audioFiltersUpdate', queue, prev, this.#ffmpegFilters.slice());
+            return t;
+        });
     }
 
     /**

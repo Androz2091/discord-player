@@ -3,6 +3,7 @@ import { QueryType } from '../types/types';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as soundcloud from 'soundcloud-scraper';
+import { TypeUtil } from './TypeUtil';
 
 // #region scary things below *sigh*
 const spotifySongRegex = /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})(\?si=.+)?$/;
@@ -39,9 +40,10 @@ class QueryResolver {
     /**
      * Resolves the given search query
      * @param {string} query The query
-     * @returns {QueryType}
      */
-    static resolve(query: string): (typeof QueryType)[keyof typeof QueryType] {
+    static resolve(query: string, fallbackSearchEngine: (typeof QueryType)[keyof typeof QueryType] = QueryType.AUTO_SEARCH): (typeof QueryType)[keyof typeof QueryType] {
+        if (!TypeUtil.isString(query)) throw new TypeError(`Invalid query ${typeof query}, expected a string.`);
+        if (!query.length) throw new Error('Query is required!');
         query = !query.includes('youtube.com') ? query.trim() : query.replace(/(m(usic)?|gaming)\./, '').trim();
 
         // @ts-expect-error
@@ -60,7 +62,7 @@ class QueryResolver {
         if (appleMusicSongRegex.test(query)) return QueryType.APPLE_MUSIC_SONG;
         if (attachmentRegex.test(query)) return QueryType.ARBITRARY;
 
-        return QueryType.YOUTUBE_SEARCH;
+        return fallbackSearchEngine;
     }
 
     /**

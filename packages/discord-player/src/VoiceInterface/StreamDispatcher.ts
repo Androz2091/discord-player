@@ -27,7 +27,9 @@ const needsKeepAlivePatch = (() => {
     // we dont care about dev version and semver:major >= 1
     if (version.includes('-dev') || version.startsWith('1')) return false;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_major, minor, patch] = version.split('.').map((n) => parseInt(n));
+    const [, minor, patch] = version.split('.').map((n) => parseInt(n));
+
+    if (isNaN(minor)) return false;
 
     // we need a patch if semver:minor is < 15 and semver:patch < 1
     return minor > 14 ? false : minor < 15 && patch < 1;
@@ -78,7 +80,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {VoiceChannel|StageChannel} channel The connected channel
      * @private
      */
-    constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel, public queue: GuildQueue, public readonly connectionTimeout: number = 20000) {
+    constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel, public queue: GuildQueue, public readonly connectionTimeout: number = 20000, audioPlayer?: AudioPlayer) {
         super();
 
         /**
@@ -91,7 +93,11 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
          * The audio player
          * @type {AudioPlayer}
          */
-        this.audioPlayer = createAudioPlayer();
+        this.audioPlayer =
+            audioPlayer ||
+            createAudioPlayer({
+                debug: this.queue.player.events.eventNames().includes('debug')
+            });
 
         /**
          * The voice channel
@@ -172,6 +178,14 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
         });
 
         this.audioPlayer.on('stateChange', (oldState, newState) => {
+            if (oldState.status !== AudioPlayerStatus.Paused && newState.status === AudioPlayerStatus.Paused) {
+                this.queue.player.events.emit('playerPause', this.queue);
+            }
+
+            if (oldState.status === AudioPlayerStatus.Paused && newState.status !== AudioPlayerStatus.Paused) {
+                this.queue.player.events.emit('playerResume', this.queue);
+            }
+
             if (newState.status === AudioPlayerStatus.Playing) {
                 if (oldState.status === AudioPlayerStatus.Idle || oldState.status === AudioPlayerStatus.Buffering) {
                     return this.emit('start', this.audioResource!);

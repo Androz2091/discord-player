@@ -4,6 +4,7 @@ import { GuildResolvable } from 'discord.js';
 import { Player } from '../Player';
 import { GuildQueue, OnAfterCreateStreamHandler, OnBeforeCreateStreamHandler } from './GuildQueue';
 import { FiltersName, QueueRepeatMode } from '../types/types';
+import { getGlobalRegistry } from '../utils/__internal__';
 
 export interface GuildNodeCreateOptions<T = unknown> {
     strategy?: QueueStrategy;
@@ -28,6 +29,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
     connectionTimeout?: number;
     defaultFFmpegFilters?: FiltersName[];
     bufferingTimeout?: number;
+    noEmitInsert?: boolean;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
@@ -68,6 +70,14 @@ export class GuildNodeManager<Meta = unknown> {
         options.connectionTimeout ??= this.player.options.connectionTimeout;
         options.bufferingTimeout ??= 1000;
 
+        if (getGlobalRegistry().has('@[onBeforeCreateStream]') && !options.onBeforeCreateStream) {
+            options.onBeforeCreateStream = getGlobalRegistry().get('@[onBeforeCreateStream]') as OnBeforeCreateStreamHandler;
+        }
+
+        if (getGlobalRegistry().has('@[onAfterCreateStream]') && !options.onAfterCreateStream) {
+            options.onAfterCreateStream = getGlobalRegistry().get('@[onAfterCreateStream]') as OnAfterCreateStreamHandler;
+        }
+
         const queue = new GuildQueue<T>(this.player, {
             guild: server,
             queueStrategy: options.strategy,
@@ -91,7 +101,8 @@ export class GuildNodeManager<Meta = unknown> {
             connectionTimeout: options.connectionTimeout ?? 120_000,
             selfDeaf: options.selfDeaf,
             ffmpegFilters: options.defaultFFmpegFilters ?? [],
-            bufferingTimeout: options.bufferingTimeout
+            bufferingTimeout: options.bufferingTimeout,
+            noEmitInsert: options.noEmitInsert ?? false
         });
 
         this.cache.set(server.id, queue);

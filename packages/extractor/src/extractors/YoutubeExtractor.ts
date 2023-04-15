@@ -13,18 +13,33 @@ import {
 } from 'discord-player';
 
 import { StreamFN, YouTubeLibs, loadYtdl, makeYTSearch } from './common/helper';
+import type { Readable } from 'stream';
 
 // taken from ytdl-core
 const validQueryDomains = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'gaming.youtube.com']);
 const validPathDomains = /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts)\/)/;
 const idRegex = /^[a-zA-Z0-9-_]{11}$/;
 
-export class YoutubeExtractor extends BaseExtractor {
+export interface YoutubeExtractorInit {
+    createStream?: (ext: YoutubeExtractor, url: string) => Promise<Readable | string>;
+}
+
+export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
     public static identifier = 'com.discord-player.youtubeextractor' as const;
     private _stream!: StreamFN;
     public _ytLibName!: string;
 
     public async activate() {
+        const fn = this.options.createStream;
+
+        if (typeof fn === 'function') {
+            this._stream = (q: string) => {
+                return fn(this, q);
+            };
+
+            return;
+        }
+
         const { stream, name } = await loadYtdl(this.context.player.options.ytdlOptions);
         this._stream = stream;
         this._ytLibName = name;
@@ -32,7 +47,15 @@ export class YoutubeExtractor extends BaseExtractor {
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
         if (typeof query !== 'string') return false;
-        return ([QueryType.YOUTUBE, QueryType.YOUTUBE_PLAYLIST, QueryType.YOUTUBE_SEARCH, QueryType.YOUTUBE_VIDEO, QueryType.AUTO] as SearchQueryType[]).some((r) => r === type);
+        // prettier-ignore
+        return ([
+            QueryType.YOUTUBE,
+            QueryType.YOUTUBE_PLAYLIST,
+            QueryType.YOUTUBE_SEARCH,
+            QueryType.YOUTUBE_VIDEO,
+            QueryType.AUTO,
+            QueryType.AUTO_SEARCH
+        ] as SearchQueryType[]).some((r) => r === type);
     }
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
@@ -63,23 +86,25 @@ export class YoutubeExtractor extends BaseExtractor {
                     rawPlaylist: ytpl
                 });
 
-                playlist.tracks = ytpl.videos.map(
-                    (video) =>
-                        new Track(this.context.player, {
-                            title: video.title as string,
-                            description: video.description as string,
-                            author: video.channel?.name as string,
-                            url: video.url,
-                            requestedBy: context.requestedBy,
-                            thumbnail: video.thumbnail!.url as string,
-                            views: video.views,
-                            duration: video.durationFormatted,
-                            raw: video,
-                            playlist: playlist,
-                            source: 'youtube',
-                            queryType: 'youtubeVideo'
-                        })
-                );
+                playlist.tracks = ytpl.videos.map((video) => {
+                    const track = new Track(this.context.player, {
+                        title: video.title as string,
+                        description: video.description as string,
+                        author: video.channel?.name as string,
+                        url: video.url,
+                        requestedBy: context.requestedBy,
+                        thumbnail: video.thumbnail!.url as string,
+                        views: video.views,
+                        duration: video.durationFormatted,
+                        raw: video,
+                        playlist: playlist,
+                        source: 'youtube',
+                        queryType: 'youtubeVideo'
+                    });
+
+                    track.extractor = this;
+                    return track;
+                });
 
                 return { playlist, tracks: playlist.tracks };
             }
@@ -92,23 +117,25 @@ export class YoutubeExtractor extends BaseExtractor {
                 // @ts-expect-error
                 video.source = 'youtube';
 
+                const track = new Track(this.context.player, {
+                    title: video.title!,
+                    description: video.description!,
+                    author: video.channel?.name as string,
+                    url: video.url,
+                    requestedBy: context.requestedBy,
+                    thumbnail: video.thumbnail?.displayThumbnailURL('maxresdefault') as string,
+                    views: video.views,
+                    duration: video.durationFormatted,
+                    source: 'youtube',
+                    raw: video,
+                    queryType: context.type
+                });
+
+                track.extractor = this;
+
                 return {
                     playlist: null,
-                    tracks: [
-                        new Track(this.context.player, {
-                            title: video.title!,
-                            description: video.description!,
-                            author: video.channel?.name as string,
-                            url: video.url,
-                            requestedBy: context.requestedBy,
-                            thumbnail: video.thumbnail?.displayThumbnailURL('maxresdefault') as string,
-                            views: video.views,
-                            duration: video.durationFormatted,
-                            source: 'youtube',
-                            raw: video,
-                            queryType: context.type
-                        })
-                    ]
+                    tracks: [track]
                 };
             }
             default: {
@@ -126,7 +153,7 @@ export class YoutubeExtractor extends BaseExtractor {
             // @ts-expect-error
             video.source = 'youtube';
 
-            return new Track(this.context.player, {
+            const track = new Track(this.context.player, {
                 title: video.title!,
                 description: video.description!,
                 author: video.channel?.name as string,
@@ -139,6 +166,10 @@ export class YoutubeExtractor extends BaseExtractor {
                 raw: video,
                 queryType: context.type!
             });
+
+            track.extractor = this;
+
+            return track;
         });
     }
 
@@ -160,21 +191,24 @@ export class YoutubeExtractor extends BaseExtractor {
             return this.createResponse();
         }
 
-        const similar = info.map(
-            (video) =>
-                new Track(this.context.player, {
-                    title: video.title!,
-                    url: `https://www.youtube.com/watch?v=${video.id}`,
-                    duration: video.durationFormatted || Util.buildTimeCode(Util.parseMS(video.duration * 1000)),
-                    description: video.title!,
-                    thumbnail: typeof video.thumbnail === 'string' ? video.thumbnail! : video.thumbnail!.url!,
-                    views: video.views,
-                    author: video.channel!.name!,
-                    requestedBy: track.requestedBy,
-                    source: 'youtube',
-                    queryType: 'youtubeVideo'
-                })
-        );
+        const similar = info.map((video) => {
+            const t = new Track(this.context.player, {
+                title: video.title!,
+                url: `https://www.youtube.com/watch?v=${video.id}`,
+                duration: video.durationFormatted || Util.buildTimeCode(Util.parseMS(video.duration * 1000)),
+                description: video.title!,
+                thumbnail: typeof video.thumbnail === 'string' ? video.thumbnail! : video.thumbnail!.url!,
+                views: video.views,
+                author: video.channel!.name!,
+                requestedBy: track.requestedBy,
+                source: 'youtube',
+                queryType: 'youtubeVideo'
+            });
+
+            t.extractor = this;
+
+            return t;
+        });
 
         return this.createResponse(null, similar);
     }
@@ -189,19 +223,7 @@ export class YoutubeExtractor extends BaseExtractor {
         }
 
         let url = info.url;
-
-        if (info.queryType === 'spotifySong' || info.queryType === 'appleMusicSong') {
-            if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
-            else {
-                const _url = await YouTube.searchOne(`${info.title} ${info.author}`, 'video')
-                    .then((r) => r.url)
-                    .catch(Util.noop);
-                if (!_url) throw new Error(`Could not extract stream for this track`);
-                info.raw.url = url = _url;
-            }
-        }
-
-        if (url) url = url.includes('youtube.com') ? url.replace(/(m(usic)?|gaming)\./, '') : url;
+        url = url.includes('youtube.com') ? url.replace(/(m(usic)?|gaming)\./, '') : url;
 
         return this._stream(url);
     }

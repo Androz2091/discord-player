@@ -1,107 +1,114 @@
 ## Queue
 
+
 ```typescript
 new Queue(strategy, initializer)
 ```
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| strategy | QueueStrategy | ❌ | - |
-| initializer | Array\<T> | ❌ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| strategy | QueueStrategy | ❌ |
+| initializer | Array\<T> | ❌ |
+
 
 ## Properties
-### public  store: Array\<T>
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L6)
-### public  strategy: QueueStrategy
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L7)
-### public  size: number
+### public store: Array\<T>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L8)
+### public strategy: QueueStrategy
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L9)
+### public data: Array\<T>
+
+### public size: number
+
 
 ## Methods
-### public  add(item): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| item | T \| Array\<T> | ❌ | - |
+### public \[custom](): string
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L123)
+### public add(item): void
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| item | T \| Array\<T> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L30)
-### public  at(idx): undefined \| T
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| idx | number | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L36)
+### public at(idx): undefined \| T
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| idx | number | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L88)
-### public  clear(): void
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L46)
-### public  clone(): Queue\<T>
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L97)
-### public  dispatch(): undefined \| T
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L93)
-### public  every(itemFilter): boolean
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L94)
+### public clear(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L52)
+### public clone(): Queue\<T>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L103)
+### public dispatch(): undefined \| T
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L99)
+### public every(itemFilter): boolean
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L79)
-### public  filter(itemFilter): Array\<T>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L85)
+### public filter(itemFilter): Array\<T>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L71)
-### public  find(itemFilter): undefined \| T
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L77)
+### public find(itemFilter): undefined \| T
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L67)
-### public  isFIFO(): boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L22)
-### public  isLIFO(): boolean
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L26)
-### public  map(itemFilter): Array\<R>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, R> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L73)
+### public isFIFO(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L28)
+### public isLIFO(): boolean
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L32)
+### public map(itemFilter): Array\<R>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, R> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L83)
-### public  remove(itemFilter): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L89)
+### public remove(itemFilter): void
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L57)
-### public  removeOne(itemFilter): void
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L63)
+### public removeOne(itemFilter): void
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L62)
-### public  shuffle(): void
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L50)
-### public  some(itemFilter): boolean
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| itemFilter | QueueItemFilter\<T, boolean> | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L68)
+### public shuffle(): void
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L56)
+### public some(itemFilter): boolean
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| itemFilter | QueueItemFilter\<T, boolean> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L75)
-### public  toArray(): Array\<T>
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L109)
-### public  toJSON(): Array\<T>
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L113)
-### public  toString(): string
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L105)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L81)
+### public toArray(): Array\<T>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L115)
+### public toJSON(): Array\<T>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L119)
+### public toString(): string
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L111)
 ### public static from(data, strategy): Queue\<T>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| data | Array\<T> | ❌ | - |
-| strategy | QueueStrategy | ❌ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| data | Array\<T> | ❌ |
+| strategy | QueueStrategy | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/utils/src/Queue.ts#L18)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/utils/src/Queue.ts#L24)

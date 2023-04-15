@@ -1,6 +1,6 @@
 import { Command } from '@sapphire/framework';
+import { useQueue, useTimeline } from 'discord-player';
 import { EmbedBuilder } from 'discord.js';
-import { useQueue } from 'discord-player';
 
 export class NowPlayingCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
@@ -20,20 +20,18 @@ export class NowPlayingCommand extends Command {
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		const queue = useQueue(interaction.guild!.id);
+		const timeline = useTimeline(interaction.guild!.id)!;
 
-		if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am not in a voice channel`, ephemeral: true });
+		if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am **not** in a voice channel`, ephemeral: true });
 		if (!queue.currentTrack)
 			return interaction.reply({ content: `${this.container.client.dev.error} | There is no track **currently** playing`, ephemeral: true });
 
-		await interaction.deferReply();
 		const track = queue.currentTrack;
-
-		const ts = queue.node.getTimestamp();
 
 		const embed = new EmbedBuilder()
 			.setAuthor({
-				name: (track.requestedBy ?? interaction.user).username,
-				iconURL: (track.requestedBy ?? interaction.user).displayAvatarURL()
+				name: interaction.user.username,
+				iconURL: interaction.user.displayAvatarURL()
 			})
 			.setColor('Red')
 			.setTitle('💿 Now Playing')
@@ -41,12 +39,13 @@ export class NowPlayingCommand extends Command {
 			.setThumbnail(track.thumbnail ?? interaction.user.displayAvatarURL())
 			.addFields([
 				{ name: 'Author', value: track.author },
-				{ name: 'Progress', value: `${queue.node.createProgressBar()} (${ts?.progress}%)` }
+				{ name: 'Progress', value: `${queue.node.createProgressBar()} (${timeline.timestamp?.progress}%)` },
+				{ name: 'Extractor', value: `\`${track.extractor?.identifier || 'N/A'}\`` }
 			])
 			.setFooter({
 				text: `Ping: ${queue.ping}ms | Event Loop Lag: ${queue.player.eventLoopLag.toFixed(0)}ms`
 			});
 
-		return interaction.followUp({ embeds: [embed] });
+		return interaction.reply({ embeds: [embed] });
 	}
 }

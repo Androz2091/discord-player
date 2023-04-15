@@ -1,6 +1,5 @@
 import { Command } from '@sapphire/framework';
 import { QueueRepeatMode, useQueue } from 'discord-player';
-import { GuildMember } from 'discord.js';
 
 const repeatModes = [
 	{ name: 'Off', value: QueueRepeatMode.OFF },
@@ -33,29 +32,21 @@ export class LoopCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		if (interaction.member instanceof GuildMember) {
-			const queue = useQueue(interaction.guild!.id);
-			const permissions = this.container.client.perms.voice(interaction, this.container.client);
+		const queue = useQueue(interaction.guild!.id);
+		const permissions = this.container.client.perms.voice(interaction, this.container.client);
 
-			if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am not in a voice channel`, ephemeral: true });
-			if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
+		if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am **not** in a voice channel`, ephemeral: true });
+		if (!queue.currentTrack)
+			return interaction.reply({ content: `${this.container.client.dev.error} | There is no track **currently** playing`, ephemeral: true });
+		if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
 
-			if (!queue.currentTrack)
-				return interaction.reply({
-					content: `${this.container.client.dev.error} | There is no track **currently** playing`,
-					ephemeral: true
-				});
+		const mode = interaction.options.getNumber('mode', true);
+		const name = mode === QueueRepeatMode.OFF ? 'Looping' : repeatModes.find((m) => m.value === mode)?.name;
 
-			await interaction.deferReply();
+		queue.setRepeatMode(mode as QueueRepeatMode);
 
-			const mode = interaction.options.getNumber('mode', true);
-			const name = mode === QueueRepeatMode.OFF ? 'Looping' : repeatModes.find((m) => m.value === mode)?.name;
-
-			queue.setRepeatMode(mode as QueueRepeatMode);
-
-			return interaction.followUp({
-				content: `${this.container.client.dev.success} | **${name}** has been **${mode === queue.repeatMode ? 'enabled' : 'disabled'}**`
-			});
-		}
+		return interaction.reply({
+			content: `${this.container.client.dev.success} | **${name}** has been **${mode === queue.repeatMode ? 'enabled' : 'disabled'}**`
+		});
 	}
 }

@@ -1,6 +1,6 @@
 import { Command } from '@sapphire/framework';
 import { BiquadFilterType, useQueue } from 'discord-player';
-import { GuildMember } from 'discord.js';
+import type { APIApplicationCommandOptionChoice } from 'discord.js';
 
 type SupportedBiquadFilters = keyof typeof BiquadFilterType | 'Off';
 
@@ -18,7 +18,7 @@ export class BiquadCommand extends Command {
 			.map((m) => ({
 				name: m,
 				value: m
-			}));
+			})) as APIApplicationCommandOptionChoice<SupportedBiquadFilters>[];
 
 		biquadFilters.unshift({
 			name: 'Disable',
@@ -43,38 +43,32 @@ export class BiquadCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		if (interaction.member instanceof GuildMember) {
-			const queue = useQueue(interaction.guild!.id);
-			const permissions = this.container.client.perms.voice(interaction, this.container.client);
-			const filter = interaction.options.getString('filter', true) as SupportedBiquadFilters;
-			const dB = interaction.options.getNumber('gain');
+		const queue = useQueue(interaction.guild!.id);
+		const permissions = this.container.client.perms.voice(interaction, this.container.client);
+		const filter = interaction.options.getString('filter', true) as SupportedBiquadFilters;
+		const dB = interaction.options.getNumber('gain');
 
-			if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am not in a voice channel`, ephemeral: true });
-			if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
-			if (!queue.currentTrack)
-				return interaction.reply({
-					content: `${this.container.client.dev.error} | There is no track **currently** playing`,
-					ephemeral: true
-				});
-			if (!queue.filters.biquad)
-				return interaction.reply({
-					content: `${this.container.client.dev.error} | The biquad filter is not **available** to be used in this queue`,
-					ephemeral: true
-				});
+		if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am **not** in a voice channel`, ephemeral: true });
+		if (!queue.currentTrack)
+			return interaction.reply({ content: `${this.container.client.dev.error} | There is no track **currently** playing`, ephemeral: true });
+		if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
 
-			await interaction.deferReply();
-
-			if (filter === 'Off') {
-				queue.filters.biquad.disable();
-			} else {
-				if (typeof dB === 'number') queue.filters.biquad.setGain(dB);
-				queue.filters.biquad.enable();
-				queue.filters.biquad.setFilter(BiquadFilterType[filter]);
-			}
-
-			return interaction.followUp({
-				content: `${this.container.client.dev.success} | **Biquad filter** set to: \`${String(filter)}\``
+		if (!queue.filters.biquad)
+			return interaction.reply({
+				content: `${this.container.client.dev.error} | The biquad filter is **not available** to be used in this queue`,
+				ephemeral: true
 			});
+
+		if (filter === 'Off') {
+			queue.filters.biquad.disable();
+		} else {
+			if (typeof dB === 'number') queue.filters.biquad.setGain(dB);
+			queue.filters.biquad.enable();
+			queue.filters.biquad.setFilter(BiquadFilterType[filter]);
 		}
+
+		return interaction.reply({
+			content: `${this.container.client.dev.success} | **Biquad filter** set to: \`${filter}\``
+		});
 	}
 }

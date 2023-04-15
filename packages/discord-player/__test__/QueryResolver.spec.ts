@@ -4,9 +4,14 @@ import { QueryResolver, QueryType } from '..';
 describe('QueryResolver', () => {
     const qr = QueryResolver;
 
-    it('should be youtubeSearch', () => {
+    it('should be autoSearch [default]', () => {
         const query = 'a search query';
-        expect(qr.resolve(query)).toBe(QueryType.YOUTUBE_SEARCH);
+        expect(qr.resolve(query)).toBe(QueryType.AUTO_SEARCH);
+    });
+
+    it('should be appleMusicSearch [custom]', () => {
+        const query = 'a search query';
+        expect(qr.resolve(query, QueryType.APPLE_MUSIC_SEARCH)).toBe(QueryType.APPLE_MUSIC_SEARCH);
     });
 
     it('should be youtubeVideo', () => {

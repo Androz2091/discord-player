@@ -1,112 +1,61 @@
 /* eslint-disable */
 const { createDocumentation } = require('typedoc-nextra');
 const { rimraf } = require('rimraf');
-const { writeFile } = require('fs-extra');
+const { writeFile, readdir } = require('fs-extra');
+const path = require('path');
 
 const DOCS = `${__dirname}/../docs`;
 const OUT = `${__dirname}/../apps/website/pages/docs`;
-
-const GuideFiles = [
-    {
-        name: 'welcome',
-        category: 'guides',
-        path: `${__dirname}/../README.md`
-    },
-    {
-        name: 'v6-migration',
-        category: 'guides',
-        path: `${DOCS}/migrating/migrating.md`
-    },
-    {
-        name: 'supported-sources',
-        category: 'guides',
-        path: `${DOCS}/extractors/sources.md`
-    },
-    {
-        name: 'autocomplete-search',
-        category: 'guides',
-        path: `${DOCS}/examples/autocomplete_search.md`
-    },
-    {
-        name: 'getting-lyrics',
-        category: 'guides',
-        path: `${DOCS}/examples/getting_lyrics.md`
-    },
-    {
-        name: 'playing-local-file',
-        category: 'guides',
-        path: `${DOCS}/examples/playing_local_file.md`
-    },
-    {
-        name: 'playing-raw-resource',
-        category: 'guides',
-        path: `${DOCS}/examples/playing_raw_resource.md`
-    },
-    {
-        name: 'voice-recording',
-        category: 'guides',
-        path: `${DOCS}/examples/voice_recording.md`
-    },
-    {
-        name: 'stream-hooks',
-        category: 'guides',
-        path: `${DOCS}/extractors/stream_hooks.md`
-    },
-    {
-        name: 'common-problems',
-        category: 'guides',
-        path: `${DOCS}/faq/common_errors.md`
-    },
-    {
-        name: 'accessing-player',
-        category: 'guides',
-        path: `${DOCS}/faq/how_to_access_player.md`
-    },
-    {
-        name: 'audio-filters',
-        path: `${DOCS}/filters/audio_filters.md`,
-        category: 'guides'
-    },
-    {
-        name: 'custom-audio-filters',
-        path: `${DOCS}/filters/custom_filters.md`,
-        category: 'guides'
-    },
-    {
-        name: 'preventing-ratelimits',
-        path: `${DOCS}/youtube/cookies.md`,
-        category: 'guides'
-    },
-    {
-        name: 'using-proxy',
-        path: `${DOCS}/youtube/proxy.md`,
-        category: 'guides'
-    }
-];
 
 async function main() {
     await rimraf(OUT);
 
     console.log('Generating documentation...');
 
+    const guideFiles = await parseGuides();
     const res = await createDocumentation({
-        custom: GuideFiles,
+        custom: guideFiles,
         input: `${__dirname}/../`,
         output: OUT,
         extension: 'mdx',
+        noLinkTypes: true,
         markdown: true
     });
 
-    await writeGuideMeta();
+    await writeGuideMeta(guideFiles);
     await writeDocsMeta();
 
     return res.metadata.generationMs.toFixed(2);
 }
 
-async function writeGuideMeta() {
+async function parseGuides() {
+    const root = await readdir(DOCS);
+    const list = (
+        await Promise.all(
+            root.map(async (dir) => {
+                const files = await readdir(`${DOCS}/${dir}`);
+                return files.map((file) => ({
+                    name: file.replace(path.extname(file), '').toLowerCase().replace(/_|\W/g, '-').trim(),
+                    path: `${DOCS}/${dir}/${file}`,
+                    category: 'guides'
+                }));
+            })
+        )
+    ).flat(1);
+
+    list.push({
+        name: 'welcome',
+        category: 'guides',
+        path: `${__dirname}/../README.md`
+    });
+
+    return list.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+async function writeGuideMeta(guideFiles) {
     const res = {};
 
-    for (const guide of GuideFiles) {
+    for (const guide of guideFiles) {
         res[guide.name] = getDisplayName(guide.name);
     }
 
@@ -116,6 +65,7 @@ async function writeGuideMeta() {
 async function writeDocsMeta() {
     const res = {
         classes: 'Classes',
+        functions: 'Functions',
         types: 'Interfaces',
         guides: 'Guides'
     };

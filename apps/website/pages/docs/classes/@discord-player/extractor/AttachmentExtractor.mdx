@@ -1,31 +1,30 @@
 ## AttachmentExtractor extends BaseExtractor
 
+
 ```typescript
-new AttachmentExtractor(context)
+new AttachmentExtractor(context, options)
 ```
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | context | ExtractorExecutionContext | ❌ | Context that instantiated this extractor |
+| options | Record\<string, unknown> | ✅ | Initialization options for this extractor |
+
 
 ## Properties
-### public  context: ExtractorExecutionContext
-- Source: `packages/discord-player/dist/index.d.ts#L83`
+### public context: ExtractorExecutionContext
+
+### public options: Record\<string, unknown>
+
 ### public static identifier: 'com.discord\-player.attachmentextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AttachmentExtractor.ts#L19)
-### public  identifier: string
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/AttachmentExtractor.ts#L19)
+### public identifier: string
 Identifier of this extractor
+
 ## Methods
-### public  activate(): Promise\<void>
+### public activate(): Promise\<void>
 This method will be executed when this extractor is activated
-
-
-
-
-
-- Source: `packages/discord-player/dist/index.d.ts#L100`
-### public  createResponse(playlist?, tracks?): ExtractorInfo
+### public createResponse(playlist?, tracks?): ExtractorInfo
 Create extractor response
-
 
 
 
@@ -33,32 +32,18 @@ Create extractor response
 | ----------- | ----------- | ----------- | ----------- |
 | playlist | null \| Playlist | ✅ | The playlist |
 | tracks | Array\<Track> | ✅ | The track array |
-
-
-- Source: `packages/discord-player/dist/index.d.ts#L137`
-### public  deactivate(): Promise\<void>
+### public deactivate(): Promise\<void>
 This method will be executed when this extractor is deactivated
-
-
-
-
-
-- Source: `packages/discord-player/dist/index.d.ts#L104`
-### public  debug(message): boolean
+### public debug(message): boolean
 Write debug message
-
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | message | string | ❌ | The debug message |
-
-
-- Source: `packages/discord-player/dist/index.d.ts#L142`
-### public  emit(event, args): boolean
+### public emit(event, args): boolean
 Dispatch an event to the player
-
 
 
 
@@ -66,22 +51,25 @@ Dispatch an event to the player
 | ----------- | ----------- | ----------- | ----------- |
 | event | K | ❌ | The event to dispatch |
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
+### public emptyResponse(): ExtractorInfo
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/AttachmentExtractor.ts#L118)
+### public getRelatedTracks(track): Promise\<ExtractorInfo>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| track | Track | ❌ |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L131`
-### public  emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AttachmentExtractor.ts#L109)
-### public  handle(query, context): Promise\<ExtractorInfo>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| query | string | ❌ | - |
-| context | ExtractorSearchContext | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/AttachmentExtractor.ts#L26)
+### public handle(query, context): Promise\<ExtractorInfo>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| query | string | ❌ |
+| context | ExtractorSearchContext | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AttachmentExtractor.ts#L26)
-### public  handlePostStream(stream, next): void
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/AttachmentExtractor.ts#L31)
+### public handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
-
 
 
 
@@ -89,21 +77,18 @@ A stream middleware to handle streams before passing it to the player
 | ----------- | ----------- | ----------- | ----------- |
 | stream | Readable | ❌ | The incoming stream |
 | next | NextFunction | ❌ | The next function |
+### public stream(info): Promise\<string \| ReadStream>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| info | Track | ❌ |
 
 
-- Source: `packages/discord-player/dist/index.d.ts#L125`
-### public  stream(info): Promise\<string \| ReadStream>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| info | Track | ❌ | - |
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/AttachmentExtractor.ts#L122)
+### public validate(query, type?): Promise\<boolean>
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| query | string | ❌ |
+| type | null \| SearchQueryType | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AttachmentExtractor.ts#L113)
-### public  validate(query, type?): Promise\<boolean>
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| query | string | ❌ | - |
-| type | null \| SearchQueryType | ✅ | - |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/extractor/src/extractors/AttachmentExtractor.ts#L21)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/extractor/src/extractors/AttachmentExtractor.ts#L21)

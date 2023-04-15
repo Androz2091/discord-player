@@ -1,12 +1,12 @@
 import { PaginatedMessage } from '@sapphire/discord.js-utilities';
 import { Command } from '@sapphire/framework';
-import { useHistory } from 'discord-player';
+import { useHistory, useQueue } from 'discord-player';
 
-export class QueueHistoryCommand extends Command {
+export class HistoryCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
 		super(context, {
 			...options,
-			description: 'Displays the history history in an embed'
+			description: 'Displays the queue history in an embed'
 		});
 	}
 
@@ -19,21 +19,23 @@ export class QueueHistoryCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		const history = useHistory(interaction.guild?.id!);
+		const queue = useQueue(interaction.guild!.id);
+		const history = useHistory(interaction.guild!.id);
 
-		if (!history) return interaction.reply({ content: `${this.container.client.dev.error} | I am not in a voice channel`, ephemeral: true });
-		if (!history.tracks || !history.currentTrack)
-			return interaction.reply({ content: `${this.container.client.dev.error} | There is no tracks history`, ephemeral: true });
+		if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am **not** in a voice channel`, ephemeral: true });
+		if (!history?.tracks)
+			return interaction.reply({
+				content: `${this.container.client.dev.error} | There is **no** queue history to **display**`,
+				ephemeral: true
+			});
 
-		await interaction.deferReply();
-
-		let pagesNum = Math.ceil(history.tracks.size / 5);
+		let pagesNum = Math.ceil(queue.tracks.size / 5);
 
 		if (pagesNum <= 0) {
 			pagesNum = 1;
 		}
 
-		const tracks = history.tracks.toArray().map((track, idx) => `**${++idx})** [${track.title}](${track.url})`);
+		const tracks = history.tracks.map((track, idx) => `**${++idx})** [${track.title}](${track.url})`);
 
 		const paginatedMessage = new PaginatedMessage();
 
@@ -46,11 +48,14 @@ export class QueueHistoryCommand extends Command {
 			paginatedMessage.addPageEmbed((embed) =>
 				embed
 					.setColor('Red')
-					.setTitle('Tracks Queue History')
-					.setDescription(list || '**No more songs in history**')
-					.addFields([{ name: '💿 Now Playing', value: `[${history.currentTrack?.title}](${history.currentTrack?.url})` }])
+					.setDescription(
+						`**Queue history** for **session** in **${queue.channel?.name}:**\n${
+							list === '' ? '\n*• No more queued tracks*' : `\n${list}`
+						}
+						\n`
+					)
 					.setFooter({
-						text: `Page ${i + 1} of ${pagesNum} | Total ${history.tracks.size} tracks`
+						text: `${queue.tracks.size} track(s) in queue`
 					})
 			);
 		}

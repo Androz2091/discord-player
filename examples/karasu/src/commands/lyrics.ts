@@ -1,7 +1,7 @@
 import { lyricsExtractor } from '@discord-player/extractor';
 import { Command } from '@sapphire/framework';
-import { EmbedBuilder } from 'discord.js';
 import { useQueue } from 'discord-player';
+import { EmbedBuilder } from 'discord.js';
 
 const genius = lyricsExtractor();
 
@@ -27,12 +27,10 @@ export class LyricsCommand extends Command {
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		const queue = useQueue(interaction.guild!.id);
 		const track = interaction.options.getString('track') || (queue?.currentTrack?.title as string);
-
-		await interaction.deferReply();
-
 		const lyrics = await genius.search(track).catch(() => null);
 
-		if (!lyrics) return interaction.followUp({ content: `${this.container.client.dev.error} | There were **no** lyrics found`, ephemeral: true });
+		if (!lyrics)
+			return interaction.reply({ content: `${this.container.client.dev.error} | There are **no** lyrics for this track`, ephemeral: true });
 		const trimmedLyrics = lyrics.lyrics.substring(0, 1997);
 
 		const embed = new EmbedBuilder()
@@ -47,6 +45,6 @@ export class LyricsCommand extends Command {
 			.setDescription(trimmedLyrics.length === 1997 ? `${trimmedLyrics}...` : trimmedLyrics)
 			.setColor('Yellow');
 
-		return interaction.followUp({ embeds: [embed] });
+		return interaction.reply({ embeds: [embed] });
 	}
 }

@@ -6,3 +6,4 @@ export * from './ReverbnationExtractor';
 export * from './AttachmentExtractor';
 export * from './AppleMusicExtractor';
 export * from './SpotifyExtractor';
+export * from './common/helper';

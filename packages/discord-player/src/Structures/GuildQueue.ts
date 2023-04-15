@@ -4,7 +4,7 @@ import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Track, TrackResolvable } from './Track';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
-import { AudioResource, StreamType } from '@discordjs/voice';
+import { type AudioPlayer, AudioResource, StreamType } from '@discordjs/voice';
 import { Util } from '../utils/Util';
 import { Playlist } from './Playlist';
 import { GuildQueueHistory } from './GuildQueueHistory';
@@ -14,6 +14,7 @@ import { Readable } from 'stream';
 import { FiltersName, QueueRepeatMode, SearchQueryType } from '../types/types';
 import { setTimeout } from 'timers';
 import { GuildQueueStatistics } from './GuildQueueStatistics';
+import { TypeUtil } from '../utils/TypeUtil';
 
 export interface GuildNodeInit<Meta = unknown> {
     guild: Guild;
@@ -39,11 +40,13 @@ export interface GuildNodeInit<Meta = unknown> {
     selfDeaf?: boolean;
     metadata?: Meta | null;
     bufferingTimeout: number;
+    noEmitInsert: boolean;
 }
 
 export interface VoiceConnectConfig {
     deaf?: boolean;
     timeout?: number;
+    audioPlayer?: AudioPlayer;
 }
 
 export interface PostProcessedResult {
@@ -120,7 +123,35 @@ export enum GuildQueueEvent {
     /**
      * Emitted when the voice state is updated. Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
      */
-    voiceStateUpdate = 'voiceStateUpdate'
+    voiceStateUpdate = 'voiceStateUpdate',
+    /**
+     * Emitted when volume is updated
+     */
+    volumeChange = 'volumeChange',
+    /**
+     * Emitted when player is paused
+     */
+    playerPause = 'playerPause',
+    /**
+     * Emitted when player is resumed
+     */
+    playerResume = 'playerResume',
+    /**
+     * Biquad Filters Update
+     */
+    biquadFiltersUpdate = 'biquadFiltersUpdate',
+    /**
+     * Equalizer Update
+     */
+    equalizerUpdate = 'equalizerUpdate',
+    /**
+     * DSP update
+     */
+    dspUpdate = 'dspUpdate',
+    /**
+     * Audio Filters Update
+     */
+    audioFiltersUpdate = 'audioFiltersUpdate'
 }
 
 export interface GuildQueueEvents<Meta = unknown> {
@@ -218,6 +249,51 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param newState The new voice state
      */
     voiceStateUpdate: (queue: GuildQueue<Meta>, oldState: VoiceState, newState: VoiceState) => unknown;
+    /**
+     * Emitted when audio player is paused
+     * @param queue The queue where this event occurred
+     */
+    playerPause: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when audio player is resumed
+     * @param queue The queue where this event occurred
+     */
+    playerResume: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when audio player's volume is changed
+     * @param queue The queue where this event occurred
+     * @param oldVolume The old volume
+     * @param newVolume The updated volume
+     */
+    volumeChange: (queue: GuildQueue<Meta>, oldVolume: number, newVolume: number) => unknown;
+    /**
+     * Emitted when equalizer config is updated
+     * @param queue The queue where this event occurred
+     * @param oldFilters Old filters
+     * @param newFilters New filters
+     */
+    equalizerUpdate: (queue: GuildQueue<Meta>, oldFilters: EqualizerBand[], newFilters: EqualizerBand[]) => unknown;
+    /**
+     * Emitted when biquad filters is updated
+     * @param queue The queue where this event occurred
+     * @param oldFilters Old filters
+     * @param newFilters New filters
+     */
+    biquadFiltersUpdate: (queue: GuildQueue<Meta>, oldFilters: BiquadFilters | null, newFilters: BiquadFilters | null) => unknown;
+    /**
+     * Emitted when dsp filters is updated
+     * @param queue The queue where this event occurred
+     * @param oldFilters Old filters
+     * @param newFilters New filters
+     */
+    dspUpdate: (queue: GuildQueue<Meta>, oldFilters: PCMFilters[], newFilters: PCMFilters[]) => unknown;
+    /**
+     * Emitted when ffmpeg audio filters is updated
+     * @param queue The queue where this event occurred
+     * @param oldFilters Old filters
+     * @param newFilters New filters
+     */
+    audioFiltersUpdate: (queue: GuildQueue<Meta>, oldFilters: FiltersName[], newFilters: FiltersName[]) => unknown;
 }
 
 export class GuildQueue<Meta = unknown> {
@@ -242,27 +318,32 @@ export class GuildQueue<Meta = unknown> {
 
     public constructor(public player: Player, public options: GuildNodeInit<Meta>) {
         this.tracks = new Queue<Track>(options.queueStrategy);
-        if (typeof options.onBeforeCreateStream === 'function') this.onBeforeCreateStream = options.onBeforeCreateStream;
-        if (typeof options.onAfterCreateStream === 'function') this.onAfterCreateStream = options.onAfterCreateStream;
-        if (options.repeatMode != null) this.repeatMode = options.repeatMode;
+        if (TypeUtil.isFunction(options.onBeforeCreateStream)) this.onBeforeCreateStream = options.onBeforeCreateStream;
+        if (TypeUtil.isFunction(options.onAfterCreateStream)) this.onAfterCreateStream = options.onAfterCreateStream;
+        if (!TypeUtil.isNullish(options.repeatMode)) this.repeatMode = options.repeatMode;
 
         options.selfDeaf ??= true;
 
-        if (this.options.biquad != null && typeof this.options.biquad !== 'boolean') {
+        if (!TypeUtil.isNullish(this.options.biquad) && !TypeUtil.isBoolean(this.options.biquad)) {
             this.filters._lastFiltersCache.biquad = this.options.biquad;
         }
+
         if (Array.isArray(this.options.equalizer)) {
             this.filters._lastFiltersCache.equalizer = this.options.equalizer;
         }
+
         if (Array.isArray(this.options.filterer)) {
             this.filters._lastFiltersCache.filters = this.options.filterer;
         }
-        if (typeof this.options.resampler === 'number') {
+
+        if (TypeUtil.isNumber(this.options.resampler)) {
             this.filters._lastFiltersCache.sampleRate = this.options.resampler;
         }
-        if (Array.isArray(this.options.ffmpegFilters)) {
+
+        if (TypeUtil.isArray(this.options.ffmpegFilters)) {
             this.filters.ffmpeg.setDefaults(this.options.ffmpegFilters);
         }
+
         this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
     }
 
@@ -299,10 +380,10 @@ export class GuildQueue<Meta = unknown> {
      * The metadata of this queue
      */
     public get metadata() {
-        return this.options.metadata;
+        return this.options.metadata!;
     }
 
-    public set metadata(m: Meta | undefined | null) {
+    public set metadata(m: Meta) {
         this.options.metadata = m;
     }
 
@@ -310,7 +391,7 @@ export class GuildQueue<Meta = unknown> {
      * Set metadata for this queue
      * @param m Metadata to set
      */
-    public setMetadata(m: Meta | undefined | null) {
+    public setMetadata(m: Meta) {
         this.options.metadata = m;
     }
 
@@ -471,6 +552,33 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * Moves a track in the queue
+     * @param from The track to move
+     * @param to The position to move to
+     */
+    public moveTrack(track: TrackResolvable, index = 0): void {
+        return this.node.move(track, index);
+    }
+
+    /**
+     * Copy a track in the queue
+     * @param from The track to clone
+     * @param to The position to clone at
+     */
+    public copyTrack(track: TrackResolvable, index = 0): void {
+        return this.node.copy(track, index);
+    }
+
+    /**
+     * Swap two tracks in the queue
+     * @param src The first track to swap
+     * @param dest The second track to swap
+     */
+    public swapTracks(src: TrackResolvable, dest: TrackResolvable): void {
+        return this.node.swap(src, dest);
+    }
+
+    /**
      * Connect to a voice channel
      * @param channelResolvable The voice channel to connect to
      * @param options Join config
@@ -492,7 +600,8 @@ export class GuildQueue<Meta = unknown> {
         this.dispatcher = await this.player.voiceUtils.connect(channel, {
             deaf: options.deaf ?? this.options.selfDeaf ?? true,
             maxTime: options?.timeout ?? this.options.connectionTimeout ?? 120_000,
-            queue: this
+            queue: this,
+            audioPlayer: options?.audioPlayer
         });
 
         this.player.events.emit('connection', this);
@@ -568,15 +677,25 @@ export class GuildQueue<Meta = unknown> {
         dispatcher.on('finish', (r) => this.#performFinish(r));
         dispatcher.on('start', (r) => this.#performStart(r));
         dispatcher.on('dsp', (f) => {
+            if (!Object.is(this.filters._lastFiltersCache.filters, f)) {
+                this.player.events.emit('dspUpdate', this, this.filters._lastFiltersCache.filters, f);
+            }
             this.filters._lastFiltersCache.filters = f;
         });
         dispatcher.on('biquad', (f) => {
+            if (this.filters._lastFiltersCache.biquad !== f) {
+                this.player.events.emit('biquadFiltersUpdate', this, this.filters._lastFiltersCache.biquad, f);
+            }
             this.filters._lastFiltersCache.biquad = f;
         });
         dispatcher.on('eqBands', (f) => {
+            if (!Object.is(f, this.filters._lastFiltersCache.equalizer)) {
+                this.player.events.emit('equalizerUpdate', this, this.filters._lastFiltersCache.equalizer, f);
+            }
             this.filters._lastFiltersCache.equalizer = f;
         });
         dispatcher.on('volume', (f) => {
+            if (this.filters._lastFiltersCache.volume !== f) this.player.events.emit('volumeChange', this, this.filters._lastFiltersCache.volume, f);
             this.filters._lastFiltersCache.volume = f;
         });
     }

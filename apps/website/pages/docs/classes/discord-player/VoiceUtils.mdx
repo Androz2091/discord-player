@@ -1,34 +1,35 @@
 ## VoiceUtils
 
+
 ```typescript
 new VoiceUtils(player)
 ```
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| player | Player | ❌ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| player | Player | ❌ |
+
 
 ## Properties
-### public  cache: Collection\<string, StreamDispatcher>
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L9)
-### public  player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L15)
-## Methods
-### public  connect(channel, options?): Promise\<StreamDispatcher>
-Joins a voice channel, creating basic stream dispatch manager
+### public cache: Collection\<string, StreamDispatcher>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L9)
+### public player: Player
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L15)
 
+## Methods
+### public connect(channel, options?): Promise\<StreamDispatcher>
+Joins a voice channel, creating basic stream dispatch manager
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | channel | StageChannel \| VoiceChannel | ❌ | The voice channel |
-| options | \{ deaf: boolean,maxTime: number,queue: GuildQueue\<unknown> } | ✅ | Join options |
+| options | \{ audioPlayer: AudioPlayer,deaf: boolean,maxTime: number,queue: GuildQueue\<unknown> } | ✅ | Join options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L29)
-### public  disconnect(connection): void
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L29)
+### public disconnect(connection): void
 Disconnects voice connection
-
 
 
 
@@ -37,10 +38,9 @@ Disconnects voice connection
 | connection | StreamDispatcher \| VoiceConnection | ❌ | The voice connection |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L73)
-### public  getConnection(guild): undefined \| StreamDispatcher \| VoiceConnection
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L74)
+### public getConnection(guild): undefined \| StreamDispatcher \| VoiceConnection
 Returns Discord Player voice connection
-
 
 
 
@@ -49,10 +49,9 @@ Returns Discord Player voice connection
 | guild | string | ❌ | The guild id |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L88)
-### public  join(channel?, options?): Promise\<VoiceConnection>
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L89)
+### public join(channel?, options?): Promise\<VoiceConnection>
 Joins a voice channel
-
 
 
 
@@ -62,4 +61,4 @@ Joins a voice channel
 | options | \{ deaf: boolean,maxTime: number } | ✅ | Join options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/a2c576b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L50)
+- [Source](https://github.com/Androz2091/discord-player/blob/5a3437b/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L51)

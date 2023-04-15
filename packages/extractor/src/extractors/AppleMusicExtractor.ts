@@ -4,13 +4,30 @@ import { Readable } from 'stream';
 import { YoutubeExtractor } from './YoutubeExtractor';
 import { StreamFN, loadYtdl, makeYTSearch } from './common/helper';
 
-export class AppleMusicExtractor extends BaseExtractor {
+export interface AppleMusicExtractorInit {
+    createStream?: (ext: AppleMusicExtractor, url: string) => Promise<Readable | string>;
+}
+
+export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> {
     public static identifier = 'com.discord-player.applemusicextractor' as const;
     private _stream!: StreamFN;
+    private _isYtdl = false;
 
     public async activate(): Promise<void> {
+        const fn = this.options.createStream;
+
+        if (typeof fn === 'function') {
+            this._isYtdl = false;
+            this._stream = (q: string) => {
+                return fn(this, q);
+            };
+
+            return;
+        }
+
         const lib = await loadYtdl(this.context.player.options.ytdlOptions);
         this._stream = lib.stream;
+        this._isYtdl = true;
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
@@ -19,7 +36,9 @@ export class AppleMusicExtractor extends BaseExtractor {
             QueryType.APPLE_MUSIC_ALBUM,
             QueryType.APPLE_MUSIC_PLAYLIST,
             QueryType.APPLE_MUSIC_SONG,
-            QueryType.APPLE_MUSIC_SEARCH
+            QueryType.APPLE_MUSIC_SEARCH,
+            QueryType.AUTO,
+            QueryType.AUTO_SEARCH
         ]).some((t) => t === type);
     }
 
@@ -35,13 +54,15 @@ export class AppleMusicExtractor extends BaseExtractor {
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         switch (context.type) {
+            case QueryType.AUTO:
+            case QueryType.AUTO_SEARCH:
             case QueryType.APPLE_MUSIC_SEARCH: {
                 const data = await AppleMusic.search(query);
                 if (!data || !data.length) return this.createResponse();
                 const tracks = data.map(
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (m: any) =>
-                        new Track(this.context.player, {
+                    (m: any) => {
+                        const track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
                             duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
@@ -52,7 +73,12 @@ export class AppleMusicExtractor extends BaseExtractor {
                             source: 'apple_music',
                             requestedBy: context.requestedBy,
                             queryType: 'appleMusicSong'
-                        })
+                        });
+
+                        track.extractor = this;
+
+                        return track;
+                    }
                 );
 
                 return this.createResponse(null, tracks);
@@ -80,8 +106,8 @@ export class AppleMusicExtractor extends BaseExtractor {
                 playlist.tracks = info.tracks.map(
                     (
                         m: any // eslint-disable-line
-                    ) =>
-                        new Track(this.context.player, {
+                    ) => {
+                        const track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
                             duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
@@ -92,7 +118,10 @@ export class AppleMusicExtractor extends BaseExtractor {
                             source: 'apple_music',
                             requestedBy: context.requestedBy,
                             queryType: 'appleMusicSong'
-                        })
+                        });
+                        track.extractor = this;
+                        return track;
+                    }
                 );
 
                 return { playlist, tracks: playlist.tracks };
@@ -120,8 +149,8 @@ export class AppleMusicExtractor extends BaseExtractor {
                 playlist.tracks = info.tracks.map(
                     (
                         m: any // eslint-disable-line
-                    ) =>
-                        new Track(this.context.player, {
+                    ) => {
+                        const track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
                             duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
@@ -132,7 +161,12 @@ export class AppleMusicExtractor extends BaseExtractor {
                             source: 'apple_music',
                             requestedBy: context.requestedBy,
                             queryType: 'appleMusicSong'
-                        })
+                        });
+
+                        track.extractor = this;
+
+                        return track;
+                    }
                 );
 
                 return { playlist, tracks: playlist.tracks };
@@ -154,6 +188,8 @@ export class AppleMusicExtractor extends BaseExtractor {
                     queryType: context.type
                 });
 
+                track.extractor = this;
+
                 return { playlist: null, tracks: [track] };
             }
             default:
@@ -168,13 +204,15 @@ export class AppleMusicExtractor extends BaseExtractor {
 
         let url = info.url;
 
-        if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
-        else {
-            const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
-                .then((r) => r[0].url)
-                .catch(Util.noop);
-            if (!_url) throw new Error(`Could not extract stream for this track`);
-            info.raw.url = url = _url;
+        if (this._isYtdl) {
+            if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
+            else {
+                const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
+                    .then((r) => r[0].url)
+                    .catch(Util.noop);
+                if (!_url) throw new Error(`Could not extract stream for this track`);
+                info.raw.url = url = _url;
+            }
         }
 
         return this._stream(url);

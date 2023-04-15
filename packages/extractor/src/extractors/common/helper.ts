@@ -1,6 +1,13 @@
 import { YouTube } from 'youtube-sr';
 
+let factory: {
+    name: string;
+    stream: StreamFN;
+    lib: string;
+};
+
 export const createImport = (lib: string) => import(lib).catch(() => null);
+export const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49';
 
 export const YouTubeLibs = [
     'ytdl-core',
@@ -16,15 +23,15 @@ if (forcedLib) YouTubeLibs.unshift(forcedLib);
 export const getFetch =
     typeof fetch !== 'undefined'
         ? fetch
-        : async (...params: unknown[]) => {
+        : async (info: RequestInfo, init?: RequestInit): Promise<Response> => {
               // eslint-disable-next-line
               let dy: any;
 
               /* eslint-disable no-cond-assign */
               if ((dy = await createImport('undici'))) {
-                  return (dy.fetch || dy.default.fetch)(...params);
+                  return (dy.fetch || dy.default.fetch)(info, init);
               } else if ((dy = await createImport('node-fetch'))) {
-                  return (dy.fetch || dy.default)(...params);
+                  return (dy.fetch || dy.default)(info, init);
               } else {
                   throw new Error('No fetch lib found');
               }
@@ -35,7 +42,9 @@ export const getFetch =
 export type StreamFN = (q: string) => Promise<import('stream').Readable | string>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function loadYtdl(options?: any) {
+export async function loadYtdl(options?: any, force = false) {
+    if (factory && !force) return factory;
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let lib: any, _ytLibName: string, _stream: StreamFN;
 
@@ -89,7 +98,8 @@ export async function loadYtdl(options?: any) {
         throw new Error(`Could not load youtube library. Install one of ${YouTubeLibs.map((lib) => `"${lib}"`).join(', ')}`);
     }
 
-    return { name: _ytLibName!, stream: _stream, lib };
+    factory = { name: _ytLibName!, stream: _stream, lib };
+    return factory;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,5 +1,5 @@
 import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable } from 'discord.js';
-import { Playlist, Track, GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, SearchResult } from './Structures';
+import { Playlist, Track, GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, SearchResult, GuildQueue } from './Structures';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
 import { QueryResolver } from './utils/QueryResolver';
@@ -12,6 +12,13 @@ import { QueryCache } from './utils/QueryCache';
 import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
+
+export interface PlayerNodeInitializationResult<T = unknown> {
+    track: Track;
+    extractor: BaseExtractor | null;
+    searchResult: SearchResult;
+    queue: GuildQueue<T>;
+}
 
 export class Player extends PlayerEventsEmitter<PlayerEvents> {
     #lastLatency = -1;
@@ -316,12 +323,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             connectionOptions?: VoiceConnectConfig;
             afterSearch?: (result: SearchResult) => Promise<SearchResult>;
         } = {}
-    ) {
+    ): Promise<PlayerNodeInitializationResult<T>> {
         const vc = this.client.channels.resolve(channel);
         if (!vc?.isVoiceBased()) throw new Error('Expected a voice channel');
 
         const originalResult = query instanceof SearchResult ? query : await this.search(query, options);
-
         const result = (await options.afterSearch?.(originalResult)) || originalResult;
         if (result.isEmpty()) {
             throw new Error(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
@@ -362,13 +368,14 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
         options.blockExtractors ??= this.options.blockExtractors;
+        options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 
         if (query instanceof Track) {
             return new SearchResult(this, {
                 playlist: query.playlist || null,
                 tracks: [query],
                 query: query.title,
-                extractor: null,
+                extractor: query.extractor,
                 queryType: query.queryType,
                 requestedBy: options.requestedBy
             });
@@ -379,7 +386,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 playlist: query,
                 tracks: query.tracks,
                 query: query.title,
-                extractor: null,
+                extractor: query.tracks[0]?.extractor,
                 queryType: QueryType.AUTO,
                 requestedBy: options.requestedBy
             });
@@ -405,14 +412,20 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         this.debug(`Search engine set to ${options.searchEngine}`);
 
-        const queryType = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query) : options.searchEngine;
+        const queryType = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query, options.fallbackSearchEngine) : options.searchEngine;
 
         this.debug(`Query type identified as ${queryType}`);
 
         // force particular extractor
         if (options.searchEngine.startsWith('ext:')) {
             extractor = this.extractors.get(options.searchEngine.substring(4))!;
-            if (!extractor) return new SearchResult(this, { query, queryType });
+            if (!extractor)
+                return new SearchResult(this, {
+                    query,
+                    queryType,
+                    extractor,
+                    requestedBy: options.requestedBy
+                });
         }
 
         // query all extractors
@@ -449,7 +462,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         // no extractors available
         if (!extractor) {
             this.debug('Failed to find appropriate extractor');
-            return new SearchResult(this, { query, queryType });
+            return new SearchResult(this, {
+                query,
+                queryType,
+                requestedBy: options.requestedBy
+            });
         }
 
         this.debug(`Executing metadata query using ${extractor.identifier} extractor...`);
@@ -467,7 +484,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 queryType,
                 playlist: res.playlist,
                 tracks: res.tracks,
-                extractor
+                extractor,
+                requestedBy: options.requestedBy
             });
 
             if (!options.ignoreCache) {
@@ -490,7 +508,12 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         );
         if (!result?.result) {
             this.debug(`Failed to query metadata query using ${result?.extractor.identifier || 'N/A'} extractor.`);
-            return new SearchResult(this, { query, queryType });
+            return new SearchResult(this, {
+                query,
+                queryType,
+                requestedBy: options.requestedBy,
+                extractor: result?.extractor
+            });
         }
 
         this.debug(`Metadata query was successful using ${result.extractor.identifier}!`);
@@ -500,7 +523,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             queryType,
             playlist: result.result.playlist,
             tracks: result.result.tracks,
-            extractor: result.extractor
+            extractor: result.extractor,
+            requestedBy: options.requestedBy
         });
 
         if (!options.ignoreCache) {

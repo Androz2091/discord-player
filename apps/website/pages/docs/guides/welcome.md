@@ -30,8 +30,8 @@ Discord Player requires Discord.js 14.0 or higher. PLease make sure you have a c
 #### Main Library
 
 ```bash
-$ npm install discord-player # main library
-$ npm install @discord-player/extractor # extractors provider
+$ yarn add discord-player # main library
+$ yarn add @discord-player/extractor # extractors provider
 ```
 
 > Discord Player recognizes `@discord-player/extractor` and loads it automatically by default.
@@ -41,8 +41,8 @@ $ npm install @discord-player/extractor # extractors provider
 Discord Player is a high level framework for Discord VoIP. Discord only accepts opus packets, thus you need to install opus library. You can install any of these:
 
 ```bash
-$ npm install @discordjs/opus
-$ npm install opusscript
+$ yarn add @discordjs/opus
+$ yarn add opusscript
 ```
 
 #### FFmpeg or Avconv
@@ -50,7 +50,7 @@ $ npm install opusscript
 FFmpeg or Avconv is required for media transcoding. You can get it from [https://ffmpeg.org](https://www.ffmpeg.org/download.html) or by installing it from npm:
 
 ```bash
-$ npm install ffmpeg-static
+$ yarn add ffmpeg-static
 ```
 
 You can get avconv from [https://libav.org/download](https://libav.org/download).
@@ -60,9 +60,9 @@ You can get avconv from [https://libav.org/download](https://libav.org/download)
 You also need to install streaming library if you want to add support for youtube playback. You can install one of these libraries:
 
 ```bash
-$ npm install ytdl-core
-$ npm install play-dl
-$ npm install @distube/ytdl-core
+$ yarn add ytdl-core
+$ yarn add play-dl
+$ yarn add @distube/ytdl-core
 ```
 
 Done with all these? Let's write a simple music bot then.
@@ -125,16 +125,7 @@ That's all it takes to build your own music bot.
 
 #### Check out the [Documentation](https://discord-player.js.org) for more info.
 
-## Example bots made with Discord Player
+## Community Resources
 
-These bots are made by the community, they can help you build your own!
-
--   **[Discord Music Bot](https://github.com/Androz2091/discord-music-bot)** by [Androz2091](https://github.com/Androz2091)
--   [Karasu-Music-Bot](https://github.com/ItsAuric/karasu-music-bot) by [ItsAuric](https://github.com/itsauric)
--   [Dodong](https://github.com/nizeic/Dodong) by [nizeic](https://github.com/nizeic)
--   [Musico](https://github.com/Whirl21/Musico) by [Whirl21](https://github.com/Whirl21)
--   [Melody](https://github.com/NerdyTechy/Melody) by [NerdyTechy](https://github.com/NerdyTechy)
--   [Eyesense-Music-Bot](https://github.com/naseif/Eyesense-Music-Bot) by [naseif](https://github.com/naseif)
--   [Music-bot](https://github.com/ZerioDev/Music-bot) by [ZerioDev](https://github.com/ZerioDev)
--   [AtlantaBot](https://github.com/Androz2091/AtlantaBot) by [Androz2091](https://github.com/Androz2091) (**outdated**)
--   [Discord-Music](https://github.com/inhydrox/discord-music) by [inhydrox](https://github.com/inhydrox) (**outdated**)
+A curated list of resources (such as open source music bots, extractors, etc.) built by Discord Player community.
+[https://discord-player.js.org/docs/guides/community-resources](https://discord-player.js.org/docs/guides/community-resources)

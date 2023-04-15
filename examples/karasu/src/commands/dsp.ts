@@ -1,6 +1,5 @@
 import { Command } from '@sapphire/framework';
 import { PCMAudioFilters, PCMFilters, useQueue } from 'discord-player';
-import { GuildMember } from 'discord.js';
 
 export class PulsatorCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
@@ -31,38 +30,32 @@ export class PulsatorCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		if (interaction.member instanceof GuildMember) {
-			const queue = useQueue(interaction.guild!.id);
-			const permissions = this.container.client.perms.voice(interaction, this.container.client);
-			const filter = interaction.options.getString('filter') as PCMFilters;
+		const queue = useQueue(interaction.guild!.id);
+		const permissions = this.container.client.perms.voice(interaction, this.container.client);
+		const filter = interaction.options.getString('filter') as PCMFilters;
 
-			if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am not in a voice channel`, ephemeral: true });
-			if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
-			if (!queue.currentTrack)
-				return interaction.reply({
-					content: `${this.container.client.dev.error} | There is no track **currently** playing`,
-					ephemeral: true
-				});
-			if (!queue.filters.filters)
-				return interaction.reply({
-					content: `${this.container.client.dev.error} | The DSP filters are not **available** to be used in this queue`,
-					ephemeral: true
-				});
+		if (!queue) return interaction.reply({ content: `${this.container.client.dev.error} | I am **not** in a voice channel`, ephemeral: true });
+		if (!queue.currentTrack)
+			return interaction.reply({ content: `${this.container.client.dev.error} | There is no track **currently** playing`, ephemeral: true });
+		if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
 
-			await interaction.deferReply();
-
-			let ff = queue.filters.filters.filters;
-			if (ff.includes(filter)) {
-				ff = ff.filter((r) => r !== filter);
-			} else {
-				ff.push(filter);
-			}
-
-			queue.filters.filters.setFilters(ff);
-
-			return interaction.followUp({
-				content: `${this.container.client.dev.success} | **${filter}** filter has been **${ff.includes(filter) ? 'enabled' : 'disabled'}**`
+		if (!queue.filters.filters)
+			return interaction.reply({
+				content: `${this.container.client.dev.error} | The DSP filters are **not available** to be used in this queue`,
+				ephemeral: true
 			});
+
+		let ff = queue.filters.filters.filters;
+		if (ff.includes(filter)) {
+			ff = ff.filter((r) => r !== filter);
+		} else {
+			ff.push(filter);
 		}
+
+		queue.filters.filters.setFilters(ff);
+
+		return interaction.reply({
+			content: `${this.container.client.dev.success} | **${filter}** filter has been **${ff.includes(filter) ? 'enabled' : 'disabled'}**`
+		});
 	}
 }

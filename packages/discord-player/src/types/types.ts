@@ -138,6 +138,7 @@ export interface PlayerProgressbarOptions {
  * - SPOTIFY_SONG
  * - SPOTIFY_ALBUM
  * - SPOTIFY_PLAYLIST
+ * - SPOTIFY_SEARCH
  * - FACEBOOK
  * - VIMEO
  * - ARBITRARY
@@ -150,7 +151,8 @@ export interface PlayerProgressbarOptions {
  * - APPLE_MUSIC_PLAYLIST
  * - APPLE_MUSIC_SEARCH
  * - FILE
- * @typedef {number} QueryType
+ * - AUTO_SEARCH
+ * @typedef {string} QueryType
  */
 export const QueryType = {
     AUTO: 'auto',
@@ -162,6 +164,7 @@ export const QueryType = {
     SPOTIFY_SONG: 'spotifySong',
     SPOTIFY_ALBUM: 'spotifyAlbum',
     SPOTIFY_PLAYLIST: 'spotifyPlaylist',
+    SPOTIFY_SEARCH: 'spotifySearch',
     FACEBOOK: 'facebook',
     VIMEO: 'vimeo',
     ARBITRARY: 'arbitrary',
@@ -173,7 +176,8 @@ export const QueryType = {
     APPLE_MUSIC_ALBUM: 'appleMusicAlbum',
     APPLE_MUSIC_PLAYLIST: 'appleMusicPlaylist',
     APPLE_MUSIC_SEARCH: 'appleMusicSearch',
-    FILE: 'file'
+    FILE: 'file',
+    AUTO_SEARCH: 'autoSearch'
 } as const;
 
 export type SearchQueryType = keyof typeof QueryType | (typeof QueryType)[keyof typeof QueryType];
@@ -212,15 +216,17 @@ export type QueryExtractorSearch = `ext:${string}`;
 /**
  * @typedef {object} SearchOptions
  * @property {UserResolvable} requestedBy The user who requested this search
- * @property {typeof QueryType|string} [searchEngine=QueryType.AUTO] The query search engine, can be extractor name to target specific one (custom)
+ * @property {typeof QueryType|string} [searchEngine='auto'] The query search engine, can be extractor name to target specific one (custom)
  * @property {string[]} [blockExtractors[]] List of the extractors to block
  * @property {boolean} [ignoreCache] If it should ignore query cache lookup
+ * @property {SearchQueryType} [fallbackSearchEngine='autoSearch'] Fallback search engine to use
  */
 export interface SearchOptions {
     requestedBy?: UserResolvable;
     searchEngine?: SearchQueryType | QueryExtractorSearch;
     blockExtractors?: string[];
     ignoreCache?: boolean;
+    fallbackSearchEngine?: (typeof QueryType)[keyof typeof QueryType];
 }
 
 /**

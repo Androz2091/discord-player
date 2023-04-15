@@ -20,7 +20,15 @@ export class SoundCloudExtractor extends BaseExtractor {
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
         if (typeof query !== 'string') return false;
-        return ([QueryType.SOUNDCLOUD, QueryType.SOUNDCLOUD_PLAYLIST, QueryType.SOUNDCLOUD_SEARCH, QueryType.SOUNDCLOUD_TRACK] as SearchQueryType[]).some((r) => r === type);
+        // prettier-ignore
+        return ([
+            QueryType.SOUNDCLOUD,
+            QueryType.SOUNDCLOUD_PLAYLIST,
+            QueryType.SOUNDCLOUD_SEARCH,
+            QueryType.SOUNDCLOUD_TRACK,
+            QueryType.AUTO,
+            QueryType.AUTO_SEARCH
+        ] as SearchQueryType[]).some((r) => r === type);
     }
 
     public async getRelatedTracks(track: Track) {
@@ -59,6 +67,8 @@ export class SoundCloudExtractor extends BaseExtractor {
                     engine: trackInfo,
                     queryType: context.type
                 });
+
+                track.extractor = this;
 
                 return { playlist: null, tracks: [track] };
             }
@@ -101,6 +111,7 @@ export class SoundCloudExtractor extends BaseExtractor {
                         engine: song,
                         queryType: context.type
                     });
+                    track.extractor = this;
                     res.tracks.push(track);
                 }
 
@@ -135,6 +146,8 @@ export class SoundCloudExtractor extends BaseExtractor {
                         engine: trackInfo,
                         queryType: 'soundcloudTrack'
                     });
+
+                    track.extractor = this;
 
                     resolvedTracks.push(track);
                 }

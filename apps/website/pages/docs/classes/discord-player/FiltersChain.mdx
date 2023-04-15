@@ -1,41 +1,40 @@
 ## FiltersChain
 
+
 ```typescript
 new FiltersChain(presets)
 ```
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| presets | DSPFiltersPreset | ✅ | - |
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| presets | DSPFiltersPreset | ✅ |
+
 
 ## Properties
-### public  biquad: null \| BiquadStream
-- Source: `packages/equalizer/dist/index.d.ts#L342`
-### public  destination: null \| Readable
-- Source: `packages/equalizer/dist/index.d.ts#L345`
-### public  equalizer: null \| EqualizerStream
-- Source: `packages/equalizer/dist/index.d.ts#L340`
-### public  filters: null \| AudioFilter
-- Source: `packages/equalizer/dist/index.d.ts#L341`
-### public  onError: (err: Error) => unknown
-- Source: `packages/equalizer/dist/index.d.ts#L348`
-### public  onUpdate: (...args: unknown\[]) => unknown
-- Source: `packages/equalizer/dist/index.d.ts#L347`
-### public  presets: DSPFiltersPreset
-- Source: `packages/equalizer/dist/index.d.ts#L339`
-### public  resampler: null \| PCMResampler
-- Source: `packages/equalizer/dist/index.d.ts#L344`
-### public  source: null \| Readable
-- Source: `packages/equalizer/dist/index.d.ts#L346`
-### public  volume: null \| VolumeTransformer
-- Source: `packages/equalizer/dist/index.d.ts#L343`
+### public biquad: null \| BiquadStream
+
+### public destination: null \| Readable
+
+### public equalizer: null \| EqualizerStream
+
+### public filters: null \| AudioFilter
+
+### public onError: (err: Error) => unknown
+
+### public onUpdate: (...args: unknown\[]) => unknown
+
+### public presets: DSPFiltersPreset
+
+### public resampler: null \| PCMResampler
+
+### public source: null \| Readable
+
+### public volume: null \| VolumeTransformer
+
+
 ## Methods
-### public  create(src, presets?): Readable
-| Parameter | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| src | Readable | ❌ | - |
-| presets | DSPFiltersPreset | ✅ | - |
-
-
-- Source: `packages/equalizer/dist/index.d.ts#L350`
-### public  destroy(): void
-- Source: `packages/equalizer/dist/index.d.ts#L351`
+### public create(src, presets?): Readable
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| src | Readable | ❌ |
+| presets | DSPFiltersPreset | ✅ |
+### public destroy(): void
