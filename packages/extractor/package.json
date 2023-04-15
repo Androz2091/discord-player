@@ -41,10 +41,6 @@
     "play-dl": "^1.9.6",
     "ytdl-core": "^4.11.2"
   },
-  "peerDependencies": {
-    "play-dl": "1.x",
-    "ytdl-core": "4.x"
-  },
   "dependencies": {
     "file-type": "^16.5.4",
     "genius-lyrics": "^4.4.2",
