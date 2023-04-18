@@ -168,7 +168,7 @@ export class SoundCloudExtractor extends BaseExtractor {
         }
 
         const url = await soundcloud.fetchStreamURL(info.url).catch(Util.noop);
-        if (!url) throw new Error('Could not extract stream from this source');
+        if (!url) throw new Error('Could not extract stream from this track source');
 
         if (engine) {
             engine.streamURL = url;

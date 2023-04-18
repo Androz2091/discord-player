@@ -129,35 +129,36 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     }
 
     /**
-     * Get all active player instances
+     * Get all active master player instances
      */
     public static getAllPlayers() {
         return _internals.getPlayers();
     }
 
     /**
-     * Clear all player instances
+     * Clear all master player instances
      */
     public static clearAllPlayers() {
         return _internals.instances.clear();
     }
 
     /**
-     * The current query cache provider
+     * The current query cache provider in use
      */
     public get queryCache() {
         return this.options.queryCache ?? null;
     }
 
     /**
-     * Alias to `Player.nodes`
+     * Alias to `Player.nodes`.
      */
     public get queues() {
         return this.nodes;
     }
 
     /**
-     * Event loop lag
+     * Event loop latency in ms. If your bot is laggy and this returns a number above 20ms for example,
+     * some expensive task is being executed on the current thread which is slowing down the event loop.
      * @type {number}
      */
     public get eventLoopLag() {
@@ -165,7 +166,25 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     }
 
     /**
-     * Generates statistics
+     * Generates statistics that could be useful. Statistics generator is still experimental.
+     * @example ```typescript
+     * const stats = player.generateStatistics();
+     *
+     * console.log(stats);
+     *
+     * // outputs something like
+     * // {
+     * //   instances: number,
+     * //   queuesCount: number,
+     * //   queryCacheEnabled: boolean,
+     * //   queues: [
+     * //      GuildQueueStatisticsMetadata,
+     * //      GuildQueueStatisticsMetadata,
+     * //      GuildQueueStatisticsMetadata,
+     * //      ...
+     * //   ]
+     * // }
+     * ```
      */
     public generateStatistics() {
         return {
@@ -177,7 +196,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     }
 
     /**
-     * Destroy player
+     * Destroy every single queues managed by this master player instance
+     * @example ```typescript
+     * // use me when you want to immediately terminate every single queues in existence 🔪
+     * await player.destroy();
+     * ```
      */
     public async destroy() {
         this.nodes.cache.forEach((node) => node.delete());
@@ -284,27 +307,35 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param {VoiceState} oldState The old voice state
      * @param {VoiceState} newState The new voice state
      * @returns {void}
+     * @example ```typescript
+     * // passing voice state update data to this method will trigger voice state handler
+     *
+     * client.on('voiceStateUpdate', (oldState, newState) => {
+     *   // this is definitely a rocket science, right here
+     *   player.handleVoiceState(oldState, newState);
+     * });
+     * ```
      */
     public handleVoiceState(oldState: VoiceState, newState: VoiceState): void {
         this._handleVoiceState(oldState, newState);
     }
 
     /**
-     * Lock voice state handler
+     * Lock voice state handler. When this method is called, discord-player will keep using the default voice state update handler, even if custom implementation exists.
      */
     public lockVoiceStateHandler() {
         this.options.lockVoiceStateHandler = true;
     }
 
     /**
-     * Unlock voice state handler
+     * Unlock voice state handler. When this method is called, discord-player will stop using the default voice state update handler if custom implementation exists.
      */
     public unlockVoiceStateHandler() {
         this.options.lockVoiceStateHandler = false;
     }
 
     /**
-     * Checks if voice state handler is locked
+     * Checks if voice state handler is locked.
      */
     public isVoiceStateHandlerLocked() {
         return !!this.options.lockVoiceStateHandler;
@@ -315,6 +346,17 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param channel The voice channel on which the music should be played
      * @param query The track or source to play
      * @param options Options for player
+     * @example ```typescript
+     * // no need to worry about queue management, just use this method 😄
+     * const query = 'this is my super cool search query that I want to play';
+     *
+     * try {
+     *    const { track } = await player.play(voiceChannel, query);
+     *   console.log(`🎉 I am playing ${track.title} 🎉`);
+     * } catch(e) {
+     *   console.log(`😭 Failed to play error oh no:\n\n${e}`);
+     * }
+     * ```
      */
     public async play<T = unknown>(
         channel: GuildVoiceChannelResolvable,
@@ -367,15 +409,16 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     }
 
     /**
-     * @typedef {object} PlayerSearchResult
-     * @property {Playlist} [playlist] The playlist (if any)
-     * @property {Track[]} tracks The tracks
-     */
-    /**
      * Search tracks
      * @param {string | Track | Track[] | Playlist | SearchResult} query The search query
      * @param {SearchOptions} options The search options
      * @returns {Promise<SearchResult>}
+     * @example ```typescript
+     * const searchQuery = 'pass url or text or discord-player track constructable objects, we got you covered 😎';
+     * const result = await player.search(searchQuery);
+     *
+     * console.log(result); // Logs `SearchResult` object
+     * ```
      */
     public async search(query: string | Track | Track[] | Playlist | SearchResult, options: SearchOptions = {}): Promise<SearchResult> {
         if (query instanceof SearchResult) return query;
@@ -551,6 +594,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
     /**
      * Generates a report of the dependencies used by the `@discordjs/voice` module. Useful for debugging.
+     * @example ```typescript
+     * console.log(player.scanDeps());
+     * // -> logs dependencies report
+     * ```
      * @returns {string}
      */
     public scanDeps() {

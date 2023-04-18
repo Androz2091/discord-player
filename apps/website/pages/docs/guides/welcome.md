@@ -11,6 +11,7 @@ It provides easy set of customizable tools to develop Discord Music bots.
 
 -   Beginner friendly, easy to understand
 -   TypeScript support
+-   Supports audio player sharing
 -   Quick and easy to set up
 -   Wide range of player management features
 -   64+ built-in audio filter presets
@@ -42,12 +43,13 @@ Discord Player is a high level framework for Discord VoIP. Discord only accepts 
 
 ```bash
 $ yarn add @discordjs/opus
+# or
 $ yarn add opusscript
 ```
 
 #### FFmpeg or Avconv
 
-FFmpeg or Avconv is required for media transcoding. You can get it from [https://ffmpeg.org](https://www.ffmpeg.org/download.html) or by installing it from npm:
+FFmpeg or Avconv is required for media transcoding. You can get it from [https://ffmpeg.org](https://www.ffmpeg.org/download.html) or by installing it from npm (ffmpeg-static is not recommended):
 
 ```bash
 $ yarn add ffmpeg-static
@@ -61,7 +63,9 @@ You also need to install streaming library if you want to add support for youtub
 
 ```bash
 $ yarn add ytdl-core
+# or
 $ yarn add play-dl
+# or
 $ yarn add @distube/ytdl-core
 ```
 

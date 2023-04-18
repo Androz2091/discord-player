@@ -284,7 +284,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
 
     public async stream(info: Track): Promise<string | Readable> {
         if (!this._stream) {
-            throw new Error(`Could not find youtube streaming library.`);
+            throw new Error(`Could not initialize streaming api for '${this.constructor.name}'`);
         }
 
         let url = info.url;
@@ -295,7 +295,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                 const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
                     .then((r) => r[0].url)
                     .catch(Util.noop);
-                if (!_url) throw new Error(`Could not extract stream for this track`);
+                if (!_url) throw new Error('Failed to fetch resources for ytdl streaming');
                 info.raw.url = url = _url;
             }
         }

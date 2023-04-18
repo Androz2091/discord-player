@@ -26,19 +26,23 @@ export class AsyncQueue {
     }
 
     /**
-     * The total number of entries in this queue. Returns `-1` if no entries are available.
+     * The total number of entries in this queue. Returns `0` if no entries are available.
      */
     public get size() {
-        return this.entries.length - 1;
+        return this.entries.length;
     }
 
     /**
      * Acquire an entry.
      *
      * ```typescript
+     * // lock the queue
      * const entry = asyncQueue.acquire();
-     * await entry.promise;
+     * // wait until previous task is completed
+     * await entry.getTask();
+     * // do something expensive
      * await performSomethingExpensive();
+     * // make sure to release the lock once done
      * asyncQueue.release();
      * ```
      */

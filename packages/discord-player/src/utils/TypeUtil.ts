@@ -27,4 +27,8 @@ export class TypeUtil {
     public static isArray(t: unknown): t is unknown[] {
         return Array.isArray(t);
     }
+
+    public static isError(t: unknown): t is Error {
+        return t instanceof Error;
+    }
 }

@@ -3,6 +3,7 @@ import { Collection } from '@discord-player/utils';
 import { BaseExtractor } from './BaseExtractor';
 import { Util } from '../utils/Util';
 import { PlayerEventsEmitter } from '../utils/PlayerEventsEmitter';
+import { TypeUtil } from '../utils/TypeUtil';
 
 // prettier-ignore
 const knownExtractorKeys = [
@@ -156,18 +157,31 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      */
     public async run<T = unknown>(fn: ExtractorExecutionFN<T>, filterBlocked = true) {
         const blocked = this.player.options.blockExtractors ?? [];
+        let err: Error | null = null;
+
         for (const ext of this.store.values()) {
             if (filterBlocked && blocked.some((e) => e === ext.identifier)) continue;
             this.player.debug(`Executing extractor ${ext.identifier}...`);
-            const result = await fn(ext).catch((e: Error) => {
-                this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
-                return false;
-            });
+            const result = await fn(ext).then(
+                (res) => {
+                    err = null;
+                    return res;
+                },
+                (e) => {
+                    this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
+
+                    err = TypeUtil.isError(e) ? e : new Error(`${e}`);
+
+                    return false;
+                }
+            );
+
             if (result) {
                 this.player.debug(`Extractor ${ext.identifier} executed successfully!`);
 
                 return {
                     extractor: ext,
+                    error: err,
                     result
                 } as ExtractorExecutionResult<T>;
             }
@@ -179,6 +193,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
 
 export interface ExtractorExecutionResult<T = unknown> {
     extractor: BaseExtractor;
+    error: Error | null;
     result: T;
 }
 

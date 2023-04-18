@@ -1,0 +1,73 @@
+## AsyncQueue
+
+
+```typescript
+new AsyncQueue()
+```
+
+
+## Properties
+### public entries: Array\<AsyncQueueEntry>
+The queued entries
+
+- [Source](https://github.com/Androz2091/discord-player/blob/074396c/packages/discord-player/src/utils/AsyncQueue.ts#L14)
+### public size: number
+The total number of entries in this queue. Returns `0` if no entries are available.
+
+## Methods
+### public acquire(options?): AsyncQueueEntry
+Acquire an entry.
+
+```typescript
+// lock the queue
+const entry = asyncQueue.acquire();
+// wait until previous task is completed
+await entry.getTask();
+// do something expensive
+await performSomethingExpensive();
+// make sure to release the lock once done
+asyncQueue.release();
+```
+
+
+
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| options | AsyncQueueAcquisitionOptions | ✅ |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/074396c/packages/discord-player/src/utils/AsyncQueue.ts#L49)
+### public cancelAll(): void
+Cancel all entries
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/074396c/packages/discord-player/src/utils/AsyncQueue.ts#L75)
+### public clear(consume): void
+Clear entries queue
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| consume | boolean | ❌ | Whether or not to consume all entries before clearing |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/074396c/packages/discord-player/src/utils/AsyncQueue.ts#L20)
+### public release(): void
+Release the current acquisition and move to next entry.
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/074396c/packages/discord-player/src/utils/AsyncQueue.ts#L65)
+### public removeEntry(entry): boolean
+Remove the given entry from the queue
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| entry | AsyncQueueEntry | ❌ | The entry to remove |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/074396c/packages/discord-player/src/utils/AsyncQueue.ts#L83)
