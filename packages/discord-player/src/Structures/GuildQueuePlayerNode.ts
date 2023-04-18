@@ -415,6 +415,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
         const track = res || this.queue.tracks.dispatch();
         if (!track) {
+            if (this.queue.options.skipOnNoStream) return;
             throw new Error('Play request received but track was not provided');
         }
 
@@ -561,10 +562,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         }, false);
         if (!streamInfo || !streamInfo.result) {
             this.queue.debug(`Failed to extract stream for Track { title: ${track.title}, url: ${track.url} } using registered extractors`);
-            return null;
+            return streamInfo || null;
         }
 
-        this.queue.debug(`Stream extraction was successful for Track { title: ${track.title}, url: ${track.url} } (Extractor: ${streamInfo.extractor.identifier})`);
+        this.queue.debug(`Stream extraction was successful for Track { title: ${track.title}, url: ${track.url} } (Extractor: ${streamInfo.extractor?.identifier || 'N/A'})`);
 
         return streamInfo;
     }

@@ -157,37 +157,45 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      */
     public async run<T = unknown>(fn: ExtractorExecutionFN<T>, filterBlocked = true) {
         const blocked = this.player.options.blockExtractors ?? [];
-        let err: Error | null = null;
+
+        let err: Error | null = null,
+            lastExt: BaseExtractor | null = null;
 
         for (const ext of this.store.values()) {
             if (filterBlocked && blocked.some((e) => e === ext.identifier)) continue;
             this.player.debug(`Executing extractor ${ext.identifier}...`);
             const result = await fn(ext).then(
                 (res) => {
-                    err = null;
                     return res;
                 },
                 (e) => {
                     this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
 
-                    err = TypeUtil.isError(e) ? e : new Error(`${e}`);
-
-                    return false;
+                    return TypeUtil.isError(e) ? e : new Error(`${e}`);
                 }
             );
 
-            if (result) {
+            lastExt = ext;
+
+            if (result && !TypeUtil.isError(result)) {
                 this.player.debug(`Extractor ${ext.identifier} executed successfully!`);
 
                 return {
                     extractor: ext,
-                    error: err,
+                    error: null,
                     result
                 } as ExtractorExecutionResult<T>;
+            } else if (TypeUtil.isError(result)) {
+                err = result;
             }
         }
 
-        return null;
+        if (err)
+            return {
+                extractor: lastExt!,
+                error: err,
+                result: false
+            } as ExtractorExecutionResult<T>;
     }
 }
 
