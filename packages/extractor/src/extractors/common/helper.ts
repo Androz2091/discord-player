@@ -11,8 +11,8 @@ export const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 
 
 export const YouTubeLibs = [
     'ytdl-core',
-    'play-dl',
-    '@distube/ytdl-core'
+    '@distube/ytdl-core',
+    'play-dl'
     // add more to the list if you have any
 ];
 
