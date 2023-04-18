@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/extractor",
-  "version": "4.1.2",
+  "version": "4.2.0",
   "description": "Extractors for discord-player",
   "keywords": [
     "discord-player",
