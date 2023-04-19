@@ -67,7 +67,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             connectionTimeout: 20000,
             smoothVolume: true,
             lagMonitor: 30000,
-            queryCache: options.queryCache === null ? null : new QueryCache(this),
+            queryCache: options.queryCache === null ? null : options.queryCache || new QueryCache(this),
             ...options,
             ytdlOptions: {
                 highWaterMark: 1 << 25,
