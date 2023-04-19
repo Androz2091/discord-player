@@ -10,7 +10,7 @@ export function defineConfig({
     esbuildPlugins = [],
     entry = ['./src/index.ts'],
     skipNodeModulesBundle = true,
-    sourcemap = true,
+    sourcemap = 'inline',
     target = 'ES2020',
     silent = true,
     shims = true

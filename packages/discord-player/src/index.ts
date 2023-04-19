@@ -1,4 +1,5 @@
 import { version as djsVersion } from 'discord.js';
+
 export * from './utils/PlayerEventsEmitter';
 export * from './utils/AudioFilters';
 export * from './extractors/BaseExtractor';
@@ -27,7 +28,7 @@ export {
     AF_VAPORWAVE_RATE,
     FiltersChain
 } from '@discord-player/equalizer';
-export { createAudioPlayer, AudioPlayer, CreateAudioPlayerOptions } from '@discordjs/voice';
+export { createAudioPlayer, AudioPlayer, type CreateAudioPlayerOptions } from '@discordjs/voice';
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
 export const version: string = '[VI]{{inject}}[/VI]';

@@ -11,7 +11,7 @@ import {
 import type { IncomingMessage } from 'http';
 import { createReadStream, existsSync } from 'fs';
 import { downloadStream } from '../internal/downloader';
-import { fromFile } from 'file-type';
+import * as fileType from 'file-type';
 import path from 'path';
 import { stat } from 'fs/promises';
 
@@ -77,7 +77,7 @@ export class AttachmentExtractor extends BaseExtractor {
                 if (!existsSync(query)) return this.emptyResponse();
                 const fstat = await stat(query);
                 if (!fstat.isFile()) return this.emptyResponse();
-                const mime = await fromFile(query).catch(() => null);
+                const mime = await fileType.fromFile(query).catch(() => null);
                 if (!mime || !['audio/', 'video/'].some((r) => !!mime.mime.startsWith(r))) return this.emptyResponse();
                 const trackInfo = {
                     title: path.basename(query) || 'Attachment',
