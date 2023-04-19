@@ -14,7 +14,7 @@ An unofficial extractor for discord-player to add support for deezer source.
 
 | Project Name | Description | Discord Player Version |
 | --- | --- | --- |
-| [Mittelbot](https://github.com/Mittelbots/Mittelbot) | I am using discord-player to let people play their favourite music in their discord servers (No yt ofc) | v6.0.0 |
+| [Mittelbot](https://github.com/Mittelbots/Mittelbot) | I am using discord-player to let people play their favourite music in their discord servers (No yt ofc) | v6.2.0 |
 | [Music Bot](https://github.com/JazzyArmando1234/music-bot/tree/master) | Only a music bot which use discord-player. | v6.0.0 |
 | [Yeci](https://github.com/yeci226/yeci-bot) | I am using discord-player to play music with shards | v6.0.0 |
 | [Lofi Girl bot](https://github.com/Greensky-gs/Lofi-girl) | I made a Lofi music bot with discord-player | v6.0.0 |
