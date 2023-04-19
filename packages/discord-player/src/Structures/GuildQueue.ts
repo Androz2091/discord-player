@@ -772,7 +772,8 @@ export class GuildQueue<Meta = unknown> {
 
                         return res.tracks;
                     })
-                )?.result;
+                )?.result ||
+                [];
             if (!tracks?.length) {
                 this.debug(`Autoplay >> No related tracks found.`);
                 throw 'no related tracks';

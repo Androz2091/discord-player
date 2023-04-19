@@ -195,7 +195,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
                 extractor: lastExt!,
                 error: err,
                 result: false
-            } as ExtractorExecutionResult<T>;
+            } as ExtractorExecutionResult<false>;
     }
 }
 
