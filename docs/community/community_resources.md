@@ -19,7 +19,7 @@ An unofficial extractor for discord-player to add support for deezer source.
 | [Yeci](https://github.com/yeci226/yeci-bot) | I am using discord-player to play music with shards | v6.0.0 |
 | [Lofi Girl bot](https://github.com/Greensky-gs/Lofi-girl) | I made a Lofi music bot with discord-player | v6.0.0 |
 | [Auricle](https://github.com/itsauric/auricle-music-bot) | This is a music bot created by using the [sapphire framework](https://github.com/sapphiredev/framework) & [discord-player](https://github.com/Androz2091/discord-player/tree/master) with this project being written in TypeScript. | v6.1.1 |
-| [Jappan](https://github.com/febkosq8/Jappan) | A simple discord bot made to make someone's life easier. Currently features Music Playback, Fun Commands, Leveling System & Moderation Tools | v6.1.0 |
+| [Jappan](https://github.com/febkosq8/Jappan) | A simple discord bot made to make someone's life easier. Currently features Music Playback, Fun Commands, Leveling System & Moderation Tools | v6.2.1 |
 | [Botanique](https://git.mylloon.fr/ConfrerieDuKassoulait/Botanique) | A bot I made with [my girlfriend](https://github.com/2-1-1-2), we're using discord-player for the music and for lyrics | v6.1.0 |
 | [Bhop Music Bot](https://github.com/akanora/bhop-music-bot) | There were not many bots made with discord-player 6.0.0 and discord.js 14.7.1, I was bored and made a simple one. We are using discord-player to listen music while bhopping. 🐇| v6.1.0 |
 | [Music Disc](https://github.com/hmes98318/Music-Disc) | I am using discord-player v6 to play music on Discord with friends. It's easy to set up and run yourself. | v6.1.1 |
