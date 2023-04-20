@@ -83,7 +83,11 @@ const client = new Discord.Client({
 });
 
 // this is the entrypoint for discord-player based application
-const player = new Player(client);
+const player = new Player(client, {
+    autoRegisterExtractor: false // This is to prevent the Deprecation Warning
+});
+// This is to load the default extractors from the @discord-player/extractor package
+await player.extractors.loadDefault();
 ```
 
 > **Did You Know?** _Discord Player is by default a singleton._
