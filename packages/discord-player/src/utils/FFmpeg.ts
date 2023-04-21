@@ -4,12 +4,14 @@ import { Util } from './Util';
 export interface FFmpegInfo {
     command: string | null;
     metadata: string | null;
+    version: string | null;
     isStatic: boolean;
 }
 
 const ffmpegInfo: FFmpegInfo = {
     command: null,
     metadata: null,
+    version: null,
     isStatic: false
 };
 const FFmpegPossibleLocations = [
@@ -24,6 +26,15 @@ const FFmpegPossibleLocations = [
 ];
 
 export class FFmpeg {
+    /**
+     * FFmpeg version regex
+     */
+    public static VersionRegex = /version (.+) Copyright/im;
+
+    /**
+     * Locate ffmpeg command
+     * @param force Forcefully reload
+     */
     public static async locate(force = false) {
         if (ffmpegInfo.command && !force) return ffmpegInfo;
 
@@ -39,8 +50,9 @@ export class FFmpeg {
                 if (error) continue;
 
                 ffmpegInfo.command = command;
-                ffmpegInfo.metadata = Buffer.concat(output.filter(Boolean) as Buffer[]).toString('utf-8');
+                ffmpegInfo.metadata = Buffer.concat(output.filter(Boolean) as Buffer[]).toString();
                 ffmpegInfo.isStatic = typeof locator === 'function';
+                ffmpegInfo.version = FFmpeg.VersionRegex.exec(ffmpegInfo.metadata || '')?.[1] || null;
 
                 if (ffmpegInfo.isStatic && !('DP_NO_FFMPEG_WARN' in process.env)) {
                     Util.warn('Found ffmpeg-static which is known to be unstable.', 'FFmpegStaticWarning');
@@ -51,7 +63,12 @@ export class FFmpeg {
                 //
             }
 
-            throw new Error(['Could not locate ffmpeg. Tried:\n', ...FFmpegPossibleLocations.filter((f) => typeof f === 'string').map((m) => `- spawn ${m}`), '- ffmpeg-static'].join('\n'));
+            // prettier-ignore
+            throw new Error([
+                'Could not locate ffmpeg. Tried:\n',
+                ...FFmpegPossibleLocations.filter((f) => typeof f === 'string').map((m) => `- spawn ${m}`),
+                '- ffmpeg-static'
+            ].join('\n'));
         }
     }
 }
