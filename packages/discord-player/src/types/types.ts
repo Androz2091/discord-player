@@ -333,10 +333,8 @@ export interface PlaylistJSON {
 
 /**
  * @typedef {object} PlayerInitOptions
- * @property {boolean} [autoRegisterExtractor=true] If it should automatically register `@discord-player/extractor`
  * @property {YTDLDownloadOptions} [ytdlOptions] The options passed to `ytdl-core`
  * @property {number} [connectionTimeout=20000] The voice connection timeout
- * @property {boolean} [smoothVolume=true] Toggle smooth volume transition
  * @property {boolean} [lagMonitor=30000] Time in ms to re-monitor event loop lag
  * @property {boolean} [lockVoiceStateHandler] Prevent voice state handler from being overridden
  * @property {string[]} [blockExtractors] List of extractors to disable querying metadata from
@@ -345,10 +343,8 @@ export interface PlaylistJSON {
  * @property {boolean} [ignoreInstance] Ignore player instance
  */
 export interface PlayerInitOptions {
-    autoRegisterExtractor?: boolean;
     ytdlOptions?: downloadOptions;
     connectionTimeout?: number;
-    smoothVolume?: boolean;
     lagMonitor?: number;
     lockVoiceStateHandler?: boolean;
     blockExtractors?: string[];

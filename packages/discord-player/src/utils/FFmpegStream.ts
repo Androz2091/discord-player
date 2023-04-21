@@ -1,5 +1,5 @@
-import * as prism from 'prism-media';
 import type { Duplex, Readable } from 'stream';
+import { FFmpeg } from './FFmpeg';
 
 export interface FFmpegStreamOptions {
     fmt?: string;
@@ -55,8 +55,7 @@ export function createFFmpegStream(stream: Readable | Duplex | string, options?:
     if (!Number.isNaN(options.seek)) args.unshift('-ss', String(options.seek));
     if (Array.isArray(options.encoderArgs)) args.push(...options.encoderArgs);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const transcoder = new (prism.FFmpeg || (<any>prism).default.FFmpeg)({ shell: false, args });
+    const transcoder = new FFmpeg({ shell: false, args });
     transcoder.on('close', () => transcoder.destroy());
 
     if (typeof stream !== 'string') {
