@@ -1,15 +1,16 @@
-import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable } from 'discord.js';
+import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable, version as djsVersion } from 'discord.js';
 import { Playlist, Track, GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, SearchResult, GuildQueue } from './Structures';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
 import { QueryResolver } from './utils/QueryResolver';
 import { Util } from './utils/Util';
-import { generateDependencyReport } from '@discordjs/voice';
+import { generateDependencyReport, version as dVoiceVersion } from '@discordjs/voice';
 import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
 import { BaseExtractor } from './extractors/BaseExtractor';
 import * as _internals from './utils/__internal__';
 import { QueryCache } from './utils/QueryCache';
 import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
+import { FFmpeg } from './utils/FFmpeg';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -25,6 +26,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     #voiceStateUpdateListener = this.handleVoiceState.bind(this);
     #lagMonitorTimeout!: NodeJS.Timeout;
     #lagMonitorInterval!: NodeJS.Timer;
+    public static readonly version: string = '[VI]{{inject}}[/VI]';
     public static _singletonKey = kSingleton;
     public readonly id = SnowflakeUtil.generate().toString();
     public readonly client!: Client;
@@ -51,7 +53,9 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
          */
         this.client = client;
 
-        if (this.client?.options?.intents && !new IntentsBitField(this.client?.options?.intents).has(IntentsBitField.Flags.GuildVoiceStates)) {
+        const ibf = this.client.options.intents instanceof IntentsBitField ? this.client.options.intents : new IntentsBitField(this.client.options.intents);
+
+        if (!ibf.has(IntentsBitField.Flags.GuildVoiceStates)) {
             Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
         }
 
@@ -60,7 +64,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
          * @type {ExtractorModel}
          */
         this.options = {
-            autoRegisterExtractor: true,
             lockVoiceStateHandler: false,
             blockExtractors: [],
             blockStreamFrom: [],
@@ -73,22 +76,9 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 highWaterMark: 1 << 25,
                 ...options.ytdlOptions
             }
-        };
+        } as PlayerInitOptions;
 
         this.client.on('voiceStateUpdate', this.#voiceStateUpdateListener);
-
-        if (this.options?.autoRegisterExtractor) {
-            Util.warn('Use of "<Player>[options.autoRegisterExtractor]" is deprecated, use "await <Player>.extractors.loadDefault()" instead!');
-            this.extractors.loadDefault().then((r) => {
-                if (r.error) {
-                    this.emit('error', new Error(`Failed to load default extractors: ${r.error?.stack ?? r.error}`));
-                } else {
-                    this.debug('Default extractors loaded!');
-                }
-
-                this.debug(`[Dependencies Report]\n${this.scanDeps()}`);
-            });
-        }
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
             this.#lagMonitorInterval = setInterval(() => {
@@ -602,13 +592,33 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      */
     public scanDeps() {
         const line = '-'.repeat(50);
-        const depsReport = generateDependencyReport();
-        const extractorReport = this.extractors.store
-            .map((m) => {
-                return m.identifier;
-            })
-            .join('\n');
-        return `${depsReport}\nLoaded Extractors:\n${extractorReport || 'None'}\n${line}`;
+        const runtime = 'Bun' in globalThis ? 'bun' : 'Deno' in globalThis ? 'deno' : 'node';
+        const depsReport = [
+            'Discord Player',
+            line,
+            `- discord-player: ${Player.version}`,
+            `- @discordjs/voice: ${dVoiceVersion}`,
+            `- discord.js: ${djsVersion}`,
+            `- ${runtime} version: ${process.version}`,
+            (() => {
+                const info = FFmpeg.locateSafe();
+                if (!info) return 'FFmpeg/Avconv not found';
+
+                return [`- ffmpeg: ${info.version}`, `- command: ${info.command}`, `- libopus: ${info.metadata!.includes('--enable-libopus')}`].join('\n');
+            })(),
+            '\n',
+            'Loaded Extractors:',
+            line,
+            this.extractors.store
+                .map((m) => {
+                    return m.identifier;
+                })
+                .join('\n') || 'N/A',
+            '\n\n@discordjs/voice',
+            generateDependencyReport()
+        ];
+
+        return depsReport.join('\n');
     }
 
     public *[Symbol.iterator]() {

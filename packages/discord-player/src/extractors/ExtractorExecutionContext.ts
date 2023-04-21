@@ -158,6 +158,11 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
     public async run<T = unknown>(fn: ExtractorExecutionFN<T>, filterBlocked = true) {
         const blocked = this.player.options.blockExtractors ?? [];
 
+        if (!this.store.size) {
+            Util.warn('Skipping extractors execution since zero extractors were registered', 'NoExtractors');
+            return;
+        }
+
         let err: Error | null = null,
             lastExt: BaseExtractor | null = null;
 
