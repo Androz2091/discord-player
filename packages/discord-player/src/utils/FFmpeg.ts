@@ -42,7 +42,7 @@ export class FFmpeg {
                 ffmpegInfo.metadata = Buffer.concat(output.filter(Boolean) as Buffer[]).toString('utf-8');
                 ffmpegInfo.isStatic = typeof locator === 'function';
 
-                if (ffmpegInfo.isStatic) {
+                if (ffmpegInfo.isStatic && !('DP_NO_FFMPEG_WARN' in process.env)) {
                     Util.warn('Found ffmpeg-static which is known to be unstable.', 'FFmpegStaticWarning');
                 }
 
