@@ -1,6 +1,6 @@
 {
   "name": "discord-player",
-  "version": "6.2.1",
+  "version": "6.3.0",
   "description": "Complete framework to facilitate music commands using discord.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,17 +8,8 @@
     "dist/"
   ],
   "module": "dist/index.mjs",
-  "exports": {
-    ".": {
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.ts"
-    },
-    "./src/*": "./dist/*",
-    "./dist/*": "./dist/*"
-  },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node ./scripts/esm-shim.cjs",
     "build:check": "tsc --noEmit",
     "lint": "eslint src --ext .ts --fix",
     "test": "vitest",

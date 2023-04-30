@@ -28,17 +28,21 @@ $ yarn add @discordjs/opus
 $ yarn add opusscript
 ```
 
-#### FFmpeg / Avconv
+#### FFmpeg or Avconv
 
-FFmpeg or Avconv is required for media transcoding.
-
-You can get FFmpeg from [ffmpeg.org](https://www.ffmpeg.org/download.html) or by installing it from npm:
+FFmpeg or Avconv is required for media transcoding. You can get it from [https://ffmpeg.org](https://www.ffmpeg.org/download.html) or by installing it from npm (ffmpeg-static or other binaries are not recommended):
 
 ```bash
 $ yarn add ffmpeg-static
+# or
+$ yarn add @ffmpeg-installer/ffmpeg
+# or
+$ yarn add @node-ffmpeg/node-ffmpeg-installer
+# or
+$ yarn add ffmpeg-binaries
 ```
 
-If you want to use Avconv instead of FFmpeg, install it on your system or place Avconv executable at the root of your project.
+> Use `FFMPEG_PATH` environment variable to load ffmpeg from custom path.
 
 #### Streaming Library
 
@@ -67,6 +71,9 @@ const client = new Discord.Client({
 
 // this is the entrypoint for discord-player based application
 const player = new Player(client);
+
+// This is to load the default extractors from the @discord-player/extractor package
+await player.extractors.loadDefault();
 ```
 
 > **Did You Know?** _Discord Player is by default a singleton._
@@ -392,7 +399,7 @@ import { useQueue } from 'discord-player';
 const queue = useQueue(guildId);
 ```
 
-Hooks are currently still an experimental feature that will continue to be worked upon. As of right now, all hooks start with the `use` keyword. The following are the available hooks:
+Hooks are currently still an experimental feature that will continue to be worked upon. As of right now, all hooks start with the `use` keyword. The following are some the available hooks:
 
 -   **useQueue**: Lets you access `GuildQueue` instance from anywhere in your process
 -   **useHistory**: Lets you access `GuildQueueHistory` from anywhere in your process

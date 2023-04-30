@@ -112,7 +112,7 @@ await player.play(channel, query, {
 ```js
 const { useTimeline } = require("discord-player");
 ...
-const { timestamp, volume, paused, pause, resume, setVolume, setPosition } = useTimeline(interaction.guildId);
+const { timestamp, volume, paused, pause, resume, setVolume, setPosition, track } = useTimeline(interaction.guildId);
 
 // `timestamp` returns the progress in %, current time stamp & total time stamp in both mins:secs / ms
 interaction.reply(`Current progress : (${timestamp.current.label} / ${timestamp.total.label}) : ${timestamp.progress}%`)

@@ -1,8 +1,14 @@
 import childProcess from 'child_process';
 import { Duplex, DuplexOptions } from 'stream';
+import { TypeUtil } from './TypeUtil';
 import { Util } from './Util';
 
 type Callback<Args extends Array<unknown>> = (...args: Args) => unknown;
+
+const validatePathParam = (t: unknown) => {
+    if (!TypeUtil.isString(t)) throw new Error('arg is not a string');
+    return t;
+};
 
 export interface FFmpegInfo {
     command: string | null;
@@ -32,12 +38,20 @@ const FFmpegPossibleLocations = [
     './ffmpeg',
     './avconv',
     () => {
+        const mod = require('@ffmpeg-installer/ffmpeg');
+        return validatePathParam(mod.default?.path || mod.path || mod);
+    },
+    () => {
         const mod = require('ffmpeg-static');
-        return <string>(mod.default?.path || mod.path || mod);
+        return validatePathParam(mod.default?.path || mod.path || mod);
+    },
+    () => {
+        const mod = require('@node-ffmpeg/node-ffmpeg-installer');
+        return validatePathParam(mod.default?.path || mod.path || mod);
     },
     () => {
         const mod = require('ffmpeg-binaries');
-        return <string>(mod.default || mod);
+        return validatePathParam(mod.default || mod);
     }
 ];
 /* eslint-enable @typescript-eslint/no-var-requires */
@@ -218,3 +232,5 @@ export class FFmpeg extends Duplex {
         return ffmpegInfo.metadata;
     }
 }
+
+export const findFFmpeg = FFmpeg.locate;

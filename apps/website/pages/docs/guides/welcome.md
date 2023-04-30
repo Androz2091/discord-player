@@ -24,7 +24,7 @@ It provides easy set of customizable tools to develop Discord Music bots.
 
 ## Installation
 
-## Before you start
+### Before you start
 
 Discord Player requires Discord.js 14.0 or higher. PLease make sure you have a compatible version using `npm list discord.js` in your terminal. If you're using an earlier version please update it. The [Discord.JS Guide](https://discordjs.guide/) has resources to help with that.
 
@@ -49,13 +49,19 @@ $ yarn add opusscript
 
 #### FFmpeg or Avconv
 
-FFmpeg or Avconv is required for media transcoding. You can get it from [https://ffmpeg.org](https://www.ffmpeg.org/download.html) or by installing it from npm (ffmpeg-static is not recommended):
+FFmpeg or Avconv is required for media transcoding. You can get it from [https://ffmpeg.org](https://www.ffmpeg.org/download.html) or by installing it from npm (ffmpeg-static or other binaries are not recommended):
 
 ```bash
 $ yarn add ffmpeg-static
+# or
+$ yarn add @ffmpeg-installer/ffmpeg
+# or
+$ yarn add @node-ffmpeg/node-ffmpeg-installer
+# or
+$ yarn add ffmpeg-binaries
 ```
 
-You can get avconv from [https://libav.org/download](https://libav.org/download).
+> Use `FFMPEG_PATH` environment variable to load ffmpeg from custom path.
 
 #### Streaming Library
 
@@ -77,13 +83,25 @@ Let's create a master player instance.
 
 ```js
 const { Player } = require('discord-player');
+
+// get some extractors if you want to handpick sources
+const { SpotifyExtractor, SoundCloudExtractor } = require('@discord-player/extractor');
+
 const client = new Discord.Client({
     // Make sure you have 'GuildVoiceStates' intent enabled
     intents: ['GuildVoiceStates' /* Other intents */]
 });
 
+
 // this is the entrypoint for discord-player based application
 const player = new Player(client);
+
+// This method will load all the extractors from the @discord-player/extractor package
+await player.extractors.loadDefault();
+
+// If you dont want to use all of the extractors and register only the required ones manually, use
+await player.extractors.register(SpotifyExtractor, {});
+await player.extractors.register(SoundCloudExtractor, {});
 ```
 
 > **Did You Know?** _Discord Player is by default a singleton._

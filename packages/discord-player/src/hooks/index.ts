@@ -3,5 +3,5 @@ export * from './usePlayer';
 export * from './useQueue';
 export * from './useMasterPlayer';
 export * from './useMetadata';
-export * from './useTimestamp';
+export * from './useTimeline';
 export * from './stream';

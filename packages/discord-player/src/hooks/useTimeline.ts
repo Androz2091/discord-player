@@ -19,6 +19,9 @@ export function useTimeline(node: NodeResolvable, options?: Partial<TimelineDisp
         get paused() {
             return queue.node.isPaused();
         },
+        get track() {
+            return queue.currentTrack;
+        },
         pause() {
             return queue.node.pause();
         },
