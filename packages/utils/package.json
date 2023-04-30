@@ -34,7 +34,7 @@
     "@discordjs/collection": "^1.1.0"
   },
   "devDependencies": {
-    "@discord-player/tsconfig": "*"
+    "@discord-player/tsconfig": "workspace:^"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts",

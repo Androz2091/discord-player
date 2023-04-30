@@ -30,11 +30,11 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "dependencies": {
-    "@discord-player/utils": "*",
+    "@discord-player/utils": "workspace:^",
     "@discordjs/voice": "^0.11.0",
     "discord-api-types": "^0.37.2"
   },
   "devDependencies": {
-    "@discord-player/tsconfig": "*"
+    "@discord-player/tsconfig": "workspace:^"
   }
 }

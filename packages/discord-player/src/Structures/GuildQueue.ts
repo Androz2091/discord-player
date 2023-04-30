@@ -748,7 +748,7 @@ export class GuildQueue<Meta = unknown> {
         this.player.events.emit('emptyQueue', this);
         if (this.options.leaveOnEnd) {
             const tm: NodeJS.Timeout = setTimeout(() => {
-                if (this.tracks.size) return clearTimeout(tm);
+                if (this.isPlaying()) return clearTimeout(tm);
                 this.dispatcher?.disconnect();
             }, this.options.leaveOnEndCooldown).unref();
         }

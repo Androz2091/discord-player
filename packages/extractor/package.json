@@ -34,10 +34,10 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "devDependencies": {
-    "@discord-player/tsconfig": "*",
+    "@discord-player/tsconfig": "workspace:^",
     "@types/node": "^18.11.18",
     "@types/node-fetch": "^2.6.2",
-    "discord-player": "*",
+    "discord-player": "workspace:^",
     "play-dl": "^1.9.6",
     "ytdl-core": "^4.11.2"
   },
