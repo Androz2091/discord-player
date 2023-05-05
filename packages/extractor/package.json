@@ -39,6 +39,7 @@
     "@types/node-fetch": "^2.6.2",
     "discord-player": "workspace:^",
     "play-dl": "^1.9.6",
+    "yt-stream": "^1.4.5",
     "ytdl-core": "^4.11.2"
   },
   "dependencies": {
