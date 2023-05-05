@@ -73,6 +73,8 @@ $ yarn add ytdl-core
 $ yarn add play-dl
 # or
 $ yarn add @distube/ytdl-core
+# or
+$ yarn add yt-stream
 ```
 
 Done with all these? Let's write a simple music bot then.
