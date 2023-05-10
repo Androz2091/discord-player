@@ -12,7 +12,8 @@ export const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 
 export const YouTubeLibs = [
     'ytdl-core',
     '@distube/ytdl-core',
-    'play-dl'
+    'play-dl',
+    "yt-stream"
     // add more to the list if you have any
 ];
 
@@ -76,7 +77,7 @@ export async function loadYtdl(options?: any, force = false) {
                 const fmt = formats.find((format) => !format.hasVideo) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
                 return fmt.url;
                 // return dl(query, this.context.player.options.ytdlOptions);
-            } else {
+            } else if (_ytLibName === "play-dl") {
                 const dl = lib as typeof import('play-dl');
 
                 const info = await dl.video_info(query);
@@ -92,6 +93,23 @@ export async function loadYtdl(options?: any, force = false) {
                 const fmt = formats.find((format) => !format.qualityLabel) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
                 return fmt.url!;
                 // return (await dl.stream(query, { discordPlayerCompatibility: true })).stream;
+            } else {
+                const dl = lib as typeof import("yt-stream")
+
+                // @ts-ignore Default lib did not provide types for this function
+                const decipher: any = await import('yt-stream/src/stream/decipher.js')
+
+                const info = await dl.getInfo(query)
+
+                info.formats = await decipher?.format_decipher(info.formats, info.html5player)
+
+                // @ts-ignore The lib did not provide ts support
+                const url = info.formats.filter((val) => val.mimeType.startsWith('audio') && val.audioQuality !== "AUDIO_QUALITY_LOW").map((val) => val.url) as Array<string>
+
+                if(url.length !== 0) return url[0]
+
+                // @ts-ignore The lib did not provide ts support
+                return info.formats.filter(val => val.mimeType.startsWith("audio")).map(val => val.url)[0] as string
             }
         };
     } else {
