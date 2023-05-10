@@ -106,7 +106,10 @@ export async function loadYtdl(options?: any, force = false) {
                 // @ts-ignore The lib did not provide ts support
                 const url = info.formats.filter((val) => val.mimeType.startsWith('audio') && val.audioQuality !== "AUDIO_QUALITY_LOW").map((val) => val.url) as Array<string>
 
-                return url[0]
+                if(url.length !== 0) return url[0]
+
+                // @ts-ignore The lib did not provide ts support
+                return info.formats.filter(val => val.mimeType.startsWith("audio")).map(val => val.url)[0] as string
             }
         };
     } else {
