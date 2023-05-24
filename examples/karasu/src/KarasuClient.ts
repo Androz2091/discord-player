@@ -29,7 +29,6 @@ export class KarasuClient extends SapphireClient {
 		this.dev = Emojis;
 		this.perms = Permissions;
 		this.player = new Player(this as any, {
-			autoRegisterExtractor: false,
 			ytdlOptions: {
 				requestOptions: {
 					headers: {

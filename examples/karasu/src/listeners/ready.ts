@@ -15,6 +15,7 @@ export class UserEvent extends Listener {
 		const player = useMasterPlayer();
 		if (player) {
 			await player.extractors.loadDefault();
+			console.log(player.scanDeps());
 		}
 	}
 }
