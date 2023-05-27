@@ -1,10 +1,16 @@
 import { YouTube } from 'youtube-sr';
+import { Client, SearchType } from "soundcloud-scraper"
+import { Util } from 'discord-player';
 
 let factory: {
     name: string;
     stream: StreamFN;
     lib: string;
 };
+
+const client = new Client(undefined, {
+    fetchAPIKey: true
+})
 
 export const createImport = (lib: string) => import(lib).catch(() => null);
 export const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49';
@@ -130,4 +136,19 @@ export async function makeYTSearch(query: string, opt: any) {
     });
 
     return res || [];
+}
+
+export async function createSoundcloudStream(query: string) {
+    try {
+        return await client.fetchStreamURL(query)
+    } catch (error) {
+        Util.noop()
+        return ""
+    }
+}
+
+export async function makeSoundcloudSearch(query: string, type: SearchType) {
+    const res = await client.search(query, type)
+
+    return res ?? []
 }
