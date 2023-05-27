@@ -19,9 +19,15 @@ export const YouTubeLibs = [
     'ytdl-core',
     '@distube/ytdl-core',
     'play-dl',
+<<<<<<< HEAD
     "yt-stream"
+=======
+    'yt-stream'
+>>>>>>> 05774ef6171313e436629a3fc7af959101830234
     // add more to the list if you have any
 ];
+
+const ERR_NO_YT_LIB = new Error(`Could not load youtube library. Install one of ${YouTubeLibs.map((lib) => `"${lib}"`).join(', ')}`);
 
 // forced lib
 const forcedLib = process.env.DP_FORCE_YTDL_MOD;
@@ -81,9 +87,15 @@ export async function loadYtdl(options?: any, force = false) {
                     .sort((a, b) => Number(b.audioBitrate) - Number(a.audioBitrate) || Number(a.bitrate) - Number(b.bitrate));
 
                 const fmt = formats.find((format) => !format.hasVideo) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
-                return fmt.url;
+                const url = fmt?.url;
+                if (!url) throw new Error(`Failed to parse stream url for ${query}`);
+                return url;
                 // return dl(query, this.context.player.options.ytdlOptions);
+<<<<<<< HEAD
             } else if (_ytLibName === "play-dl") {
+=======
+            } else if (_ytLibName === 'play-dl') {
+>>>>>>> 05774ef6171313e436629a3fc7af959101830234
                 const dl = lib as typeof import('play-dl');
 
                 const info = await dl.video_info(query);
@@ -97,8 +109,11 @@ export async function loadYtdl(options?: any, force = false) {
                     .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
 
                 const fmt = formats.find((format) => !format.qualityLabel) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
-                return fmt.url!;
+                const url = fmt?.url;
+                if (!url) throw new Error(`Failed to parse stream url for ${query}`);
+                return url;
                 // return (await dl.stream(query, { discordPlayerCompatibility: true })).stream;
+<<<<<<< HEAD
             } else {
                 const dl = lib as typeof import("yt-stream")
 
@@ -116,10 +131,32 @@ export async function loadYtdl(options?: any, force = false) {
 
                 // @ts-ignore The lib did not provide ts support
                 return info.formats.filter(val => val.mimeType.startsWith("audio")).map(val => val.url)[0] as string
+=======
+            } else if (_ytLibName === 'yt-stream') {
+                const dl = lib as typeof import('yt-stream');
+
+                // @ts-ignore Default lib did not provide types for this function
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const decipher: any = await import('yt-stream/src/stream/decipher.js');
+
+                const info = await dl.getInfo(query);
+
+                info.formats = await decipher?.format_decipher(info.formats, info.html5player);
+
+                // @ts-ignore The lib did not provide ts support
+                const url = info.formats.filter((val) => val.mimeType.startsWith('audio') && val.audioQuality !== 'AUDIO_QUALITY_LOW').map((val) => val.url) as Array<string>;
+
+                if (url.length !== 0) return url[0];
+
+                // @ts-ignore The lib did not provide ts support
+                return info.formats.filter((val) => val.mimeType.startsWith('audio')).map((val) => val.url)[0] as string;
+            } else {
+                throw ERR_NO_YT_LIB;
+>>>>>>> 05774ef6171313e436629a3fc7af959101830234
             }
         };
     } else {
-        throw new Error(`Could not load youtube library. Install one of ${YouTubeLibs.map((lib) => `"${lib}"`).join(', ')}`);
+        throw ERR_NO_YT_LIB;
     }
 
     factory = { name: _ytLibName!, stream: _stream, lib };

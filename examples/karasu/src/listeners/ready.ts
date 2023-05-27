@@ -20,6 +20,7 @@ export class UserEvent extends Listener {
 			})
 			
 			await player.extractors.loadDefault();
+			console.log(player.scanDeps());
 		}
 	}
 }

@@ -12,27 +12,27 @@ new Player(client, options)
 
 ## Properties
 ### public client: Client\<boolean>
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L32)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L32)
 ### public events: PlayerEventsEmitter\<GuildQueueEvents\<unknown>>
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L37)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L37)
 ### public extractors: ExtractorExecutionContext
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L36)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L36)
 ### public id: string
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L31)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L31)
 ### public nodes: GuildNodeManager\<unknown>
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L34)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L34)
 ### public options: PlayerInitOptions
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L33)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L33)
 ### public requiredEvents: Array\<keyof PlayerEvents>
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L7)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L7)
 ### public voiceUtils: VoiceUtils
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L35)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L35)
 ### public static _singletonKey: symbol
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L30)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L30)
 ### public static defaultMaxListeners: number
 
 ### public static version: string
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L29)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L29)
 ### public eventLoopLag: number
 Event loop latency in ms. If your bot is laggy and this returns a number above 20ms for example,
 some expensive task is being executed on the current thread which is slowing down the event loop.
@@ -43,7 +43,7 @@ Alias to `Player.nodes`.
 
 ## Methods
 ### public \[iterator](): Generator\<GuildQueue\<unknown>, void, undefined>
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L624)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L624)
 ### public addListener(event, listener): Player
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -59,14 +59,14 @@ Creates `Playlist` instance
 | data | PlaylistInitData | ❌ | The data to initialize a playlist |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L632)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L632)
 ### public debug(m): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | m | string | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L105)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L105)
 ### public destroy(): Promise\<void>
 Destroy every single queues managed by this master player instance
 
@@ -75,7 +75,7 @@ Destroy every single queues managed by this master player instance
 await player.destroy();
 ```
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L195)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L195)
 ### public emit(name, args): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -83,7 +83,7 @@ await player.destroy();
 | args | Parameters\<PlayerEvents\[K]> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L11)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L11)
 ### public eventNames(): Array\<U>
 
 ### public generateStatistics(): \{ instances: number,queryCacheEnabled: boolean,queues: Array\<GuildQueueStatisticsMetadata>,queuesCount: number }
@@ -108,7 +108,7 @@ console.log(stats);
 // }
 ```
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L179)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L179)
 ### public getMaxListeners(): number
 
 ### public handleVoiceState(oldState, newState): void
@@ -129,13 +129,13 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 | newState | VoiceState | ❌ | The new voice state |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L309)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L309)
 ### public isVoiceStateHandlerLocked(): boolean
 Checks if voice state handler is locked.
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L330)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L330)
 ### public listenerCount(type): number
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -149,7 +149,7 @@ Lock voice state handler. When this method is called, discord-player will keep u
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L316)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L316)
 ### public off(event, listener): Player
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -187,7 +187,7 @@ try {
 | options | SearchOptions & \{ afterSearch: (result: SearchResult) => Promise\<SearchResult>,connectionOptions: VoiceConnectConfig,nodeOptions: GuildNodeCreateOptions\<T> } | ❌ | Options for player |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L351)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L351)
 ### public prependListener(event, listener): Player
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -219,7 +219,7 @@ console.log(player.scanDeps());
 // -> logs dependencies report
 ```
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L593)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L593)
 ### public search(query, options): Promise\<SearchResult>
 Search tracks
 
@@ -236,7 +236,7 @@ console.log(result); // Logs `SearchResult` object
 | options | SearchOptions | ❌ | The search options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L413)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L413)
 ### public setMaxListeners(n): Player
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -246,19 +246,19 @@ Unlock voice state handler. When this method is called, discord-player will stop
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L323)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L323)
 ### public static clearAllPlayers(): void
 Clear all master player instances
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L131)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L131)
 ### public static getAllPlayers(): Array\<Player>
 Get all active master player instances
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L124)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L124)
 ### public static singleton(client, options): Player
 Creates discord-player singleton instance.
 
@@ -270,4 +270,4 @@ Creates discord-player singleton instance.
 | options | PlayerInitOptions | ❌ | Player initializer options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/e5339f1/packages/discord-player/src/Player.ts#L114)
+- [Source](https://github.com/Androz2091/discord-player/blob/451214b/packages/discord-player/src/Player.ts#L114)
