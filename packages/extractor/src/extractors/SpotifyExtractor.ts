@@ -58,7 +58,8 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
 
     public async getRelatedTracks(track: Track) {
         return await this.handle(track.author || track.title, {
-            type: QueryType.SPOTIFY_SEARCH
+            type: QueryType.SPOTIFY_SEARCH,
+            requestedBy: track.requestedBy
         });
     }
 
