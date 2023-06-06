@@ -172,16 +172,16 @@ export class FFmpeg extends Duplex {
             } catch (e) {
                 errStacks.push(e as Error);
             }
-
-            // prettier-ignore
-            throw new Error([
-                'Could not locate ffmpeg. Tried:\n',
-                ...FFmpegPossibleLocations.map((loc, i) => `  ${++i}. ${loc.displayName}`),
-                '\n',
-                `${'='.repeat(5)}Full Stacktrace${'='.repeat(5)}`,
-                ...errStacks.map((e) => e.stack || e.message)
-            ].join('\n'));
         }
+
+        // prettier-ignore
+        throw new Error([
+            'Could not locate ffmpeg. Tried:\n',
+            ...FFmpegPossibleLocations.map((loc, i) => `  ${++i}. ${loc.displayName}`),
+            '\n',
+            `${'='.repeat(5)}Full Stacktrace${'='.repeat(5)}`,
+            ...errStacks.map((e) => e.stack || e.message)
+        ].join('\n'));
     }
 
     /**
