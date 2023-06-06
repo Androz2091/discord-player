@@ -598,6 +598,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             `- discord.js: ${djsVersion}`,
             `- ${runtime} version: ${process.version}`,
             (() => {
+                if (this.options.useLegacyFFmpeg) return '- ffmpeg: N/A (using legacy ffmpeg)';
                 const info = FFmpeg.locateSafe();
                 if (!info) return 'FFmpeg/Avconv not found';
 

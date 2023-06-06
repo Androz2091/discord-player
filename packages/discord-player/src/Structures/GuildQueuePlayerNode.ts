@@ -576,7 +576,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 encoderArgs: this.queue.filters.ffmpeg.filters.length ? ['-af', this.queue.filters.ffmpeg.toString()] : [],
                 seek: seek / 1000,
                 fmt: 's16le',
-                cookies
+                cookies,
+                useLegacyFFmpeg: !!this.queue.player.options.useLegacyFFmpeg
             })
             .on('error', (err) => {
                 const m = `${err}`.toLowerCase();
