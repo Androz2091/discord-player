@@ -91,48 +91,118 @@ export class FFmpeg extends Duplex {
         }
     }
 
-    /**
-     * Locate ffmpeg command. Throws error if ffmpeg is not found.
-     * @param force Forcefully reload
-     */
     public static locate(force = false): FFmpegInfo | undefined {
-        if (ffmpegInfo.command && !force) return ffmpegInfo;
+        if(ffmpegInfo.command && !force) return ffmpegInfo
 
-        for (const locator of FFmpegPossibleLocations) {
-            if (locator == null) continue;
+        const FFMPEG_CHILD_PROCESS = [
+            "avconv",
+            "ffmpeg",
+            "./avconv",
+            "./ffmpeg"
+        ]
+
+        for(let ffmpeg of FFMPEG_CHILD_PROCESS) {
+            if(!ffmpeg) continue;
             try {
-                const command = typeof locator === 'function' ? locator() : locator;
-                if (!command) continue;
-
-                const { error, output } = childProcess.spawnSync(command, ['-h'], {
+                const { error, output } = childProcess.spawnSync(ffmpeg, ["-h"], {
                     windowsHide: true
-                });
+                })
 
-                if (error) continue;
+                if(error) continue;
 
-                ffmpegInfo.command = command;
-                ffmpegInfo.metadata = Buffer.concat(output.filter(Boolean) as Buffer[]).toString();
-                ffmpegInfo.isStatic = typeof locator === 'function';
-                ffmpegInfo.version = FFmpeg.VersionRegex.exec(ffmpegInfo.metadata || '')?.[1] || null;
+                ffmpegInfo.command = ffmpeg
+                ffmpegInfo.metadata = Buffer.concat(output.filter(Boolean) as Buffer[]).toString()
+                ffmpegInfo.isStatic = false
+                ffmpegInfo.version = FFmpeg.VersionRegex.exec(ffmpegInfo.metadata || "")?.[0] || null
 
                 if (ffmpegInfo.isStatic && !('DP_NO_FFMPEG_WARN' in process.env)) {
                     Util.warn('Found ffmpeg-static which is known to be unstable.', 'FFmpegStaticWarning');
                 }
 
-                return ffmpegInfo;
-            } catch {
-                //
+                return ffmpegInfo
+            } catch (error) {
+                continue;
             }
-
-            // prettier-ignore
-            throw new Error([
-                'Could not locate ffmpeg. Tried:\n',
-                ...FFmpegPossibleLocations.filter((f) => typeof f === 'string').map((m) => `- spawn ${m}`),
-                '- ffmpeg-static',
-                '- ffmpeg-binaries'
-            ].join('\n'));
         }
+
+        const POSSIBLE_FFMPEG_PACKAGES = [
+            "ffmpeg-static",
+            "@ffmpeg-installer/ffmpeg",
+            "ffmpeg-binaries",
+            "@node-ffmpeg/node-ffmpeg-installer"
+        ]
+
+        for(let pkg of POSSIBLE_FFMPEG_PACKAGES) {
+            try {
+                const location = require(pkg)
+
+                if(!location) continue;
+
+                const { error, output } = childProcess.spawnSync(location, ["-h"], {
+                    windowsHide: true
+                })
+
+                if(error) continue;
+
+                ffmpegInfo.command = location;
+                ffmpegInfo.metadata = Buffer.concat(output.filter(Boolean) as Buffer[]).toString();
+                ffmpegInfo.isStatic = true;
+                ffmpegInfo.version = FFmpeg.VersionRegex.exec(ffmpegInfo.metadata || '')?.[1] || null;
+
+                return ffmpegInfo
+            } catch (error) {
+                continue;
+            }
+        }
+
+        // prettier-ignore
+        throw new Error(
+            `Error: Could not find FFMPEG. Tried\n${[...FFMPEG_CHILD_PROCESS.map(val => `spawn ${val}`), ...POSSIBLE_FFMPEG_PACKAGES].join("\n")}`,
+        ) 
     }
+
+    /**
+     * Locate ffmpeg command. Throws error if ffmpeg is not found.
+     * @param force Forcefully reload
+     */
+    // public static locate(force = false): FFmpegInfo | undefined {
+    //     if (ffmpegInfo.command && !force) return ffmpegInfo;
+
+    //     for (const locator of FFmpegPossibleLocations) {
+    //         if (locator == null) continue;
+    //         try {
+    //             const command = typeof locator === 'function' ? locator() : locator;
+    //             if (!command) continue;
+
+    //             const { error, output } = childProcess.spawnSync(command, ['-h'], {
+    //                 windowsHide: true
+    //             });
+
+    //             if (error) continue;
+
+    //             ffmpegInfo.command = command;
+    //             ffmpegInfo.metadata = Buffer.concat(output.filter(Boolean) as Buffer[]).toString();
+    //             ffmpegInfo.isStatic = typeof locator === 'function';
+    //             ffmpegInfo.version = FFmpeg.VersionRegex.exec(ffmpegInfo.metadata || '')?.[1] || null;
+
+    //             if (ffmpegInfo.isStatic && !('DP_NO_FFMPEG_WARN' in process.env)) {
+    //                 Util.warn('Found ffmpeg-static which is known to be unstable.', 'FFmpegStaticWarning');
+    //             }
+
+    //             return ffmpegInfo;
+    //         } catch {
+    //             //
+    //         }
+
+    //         // prettier-ignore
+    //         throw new Error([
+    //             'Could not locate ffmpeg. Tried:\n',
+    //             ...FFmpegPossibleLocations.filter((f) => typeof f === 'string').map((m) => `- spawn ${m}`),
+    //             '- ffmpeg-static',
+    //             '- ffmpeg-binaries'
+    //         ].join('\n'));
+    //     }
+    // }
 
     /**
      * Current FFmpeg process

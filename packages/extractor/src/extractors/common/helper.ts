@@ -1,4 +1,9 @@
 import { YouTube } from 'youtube-sr';
+import { Client, SearchType } from 'soundcloud-scraper';
+
+const client = new Client(undefined, {
+    fetchAPIKey: true
+})
 
 let factory: {
     name: string;
@@ -139,4 +144,16 @@ export async function makeYTSearch(query: string, opt: any) {
     });
 
     return res || [];
+}
+
+export async function makeSoundcloudSearch(query: string, type: SearchType) {
+    const res = await client.search(query, type)
+
+    return res
+}
+
+export async function getSoundcloudStreamURL(url: string) {
+    const stream = await client.fetchStreamURL(url)
+
+    return stream
 }

@@ -1,7 +1,7 @@
 import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import type { Readable } from 'stream';
 import { YoutubeExtractor } from './YoutubeExtractor';
-import { StreamFN, getFetch, loadYtdl, makeYTSearch } from './common/helper';
+import { StreamFN, getFetch, getSoundcloudStreamURL, loadYtdl, makeSoundcloudSearch, makeYTSearch } from './common/helper';
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
 import { SpotifyAPI } from '../internal';
 
@@ -11,6 +11,7 @@ export interface SpotifyExtractorInit {
     clientId?: string | null;
     clientSecret?: string | null;
     createStream?: (ext: SpotifyExtractor, url: string) => Promise<Readable | string>;
+    bridgeFrom?: "Soundcloud" | "Youtube"
 }
 
 export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
@@ -57,7 +58,8 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
 
     public async getRelatedTracks(track: Track) {
         return await this.handle(track.author || track.title, {
-            type: QueryType.SPOTIFY_SEARCH
+            type: QueryType.SPOTIFY_SEARCH,
+            requestedBy: track.requestedBy
         });
     }
 
@@ -287,20 +289,36 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
             throw new Error(`Could not initialize streaming api for '${this.constructor.name}'`);
         }
 
-        let url = info.url;
-
-        if (this._isYtdl) {
-            if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
-            else {
-                const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
-                    .then((r) => r[0].url)
-                    .catch(Util.noop);
-                if (!_url) throw new Error('Failed to fetch resources for ytdl streaming');
-                info.raw.url = url = _url;
-            }
+        if (this.options.createStream && typeof this.options.createStream === "function") {
+            return await this.options.createStream(this, info.url)
         }
 
-        return this._stream(url);
+        if (!this.options.bridgeFrom || this.options.bridgeFrom === "Youtube") {
+            let url = info.url;
+
+            if (this._isYtdl) {
+                if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
+                else {
+                    const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
+                        .then((r) => r[0].url)
+                        .catch(Util.noop);
+                    if (!_url) throw new Error('Failed to fetch resources for ytdl streaming');
+                    info.raw.url = url = _url;
+                }
+            }
+
+            return this._stream(url);
+        } else {
+            this.context.player.debug(`bridgeFrom option detected as 'Soundcloud' attempting to stream`)
+
+            const soundcloudData = await makeSoundcloudSearch(`${info.title} ${info.author}`, "track")
+
+            if(soundcloudData.length === 0) throw new Error("Failed to fetch resources for soundcloud streaming")
+
+            const stream = await getSoundcloudStreamURL(soundcloudData[0].url)
+
+            return stream
+        }
     }
 
     public parse(q: string) {
