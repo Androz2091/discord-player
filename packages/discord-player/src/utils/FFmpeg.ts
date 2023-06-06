@@ -6,7 +6,7 @@ import { Util } from './Util';
 type Callback<Args extends Array<unknown>> = (...args: Args) => unknown;
 
 const validatePathParam = (t: unknown) => {
-    if (!TypeUtil.isString(t)) throw new Error('arg is not a string');
+    if (!TypeUtil.isString(t) || !t) throw new Error('failed to parse arg as a valid string');
     return t;
 };
 
@@ -31,7 +31,7 @@ const ffmpegInfo: FFmpegInfo = {
 
 interface FFmpegLocation {
     displayName: string;
-    getPath: () => string | undefined;
+    getPath: () => string;
 }
 
 const isWindows = process.platform === 'win32';
@@ -41,7 +41,7 @@ const isWindows = process.platform === 'win32';
 const FFmpegPossibleLocations: FFmpegLocation[] = [
     {
         getPath() {
-            return process.env.FFMPEG_PATH;
+            return validatePathParam(process.env.FFMPEG_PATH);
         },
         displayName: 'spawn process.env.FFMPEG_PATH'
     },
@@ -152,7 +152,6 @@ export class FFmpeg extends Duplex {
             if (locator == null) continue;
             try {
                 const command = locator.getPath();
-                if (!command) continue;
 
                 const result = childProcess.spawnSync(command, ['-h'], {
                     windowsHide: true
