@@ -341,6 +341,7 @@ export interface PlaylistJSON {
  * @property {string[]} [blockStreamFrom] List of extractors to disable streaming from
  * @property {QueryCache | null} [queryCache] Query cache provider
  * @property {boolean} [ignoreInstance] Ignore player instance
+ * @property {boolean} [useLegacyFFmpeg] Use legacy version of ffmpeg
  */
 export interface PlayerInitOptions {
     ytdlOptions?: downloadOptions;
@@ -351,4 +352,5 @@ export interface PlayerInitOptions {
     blockStreamFrom?: string[];
     queryCache?: QueryCache | null;
     ignoreInstance?: boolean;
+    useLegacyFFmpeg?: boolean;
 }

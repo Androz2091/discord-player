@@ -29,29 +29,77 @@ const ffmpegInfo: FFmpegInfo = {
     isStatic: false
 };
 
+interface FFmpegLocation {
+    displayName: string;
+    getPath: () => string | undefined;
+}
+
+const isWindows = process.platform === 'win32';
+
 /* eslint-disable @typescript-eslint/no-var-requires */
 // prettier-ignore
-const FFmpegPossibleLocations = [
-    process.env.FFMPEG_PATH,
-    'ffmpeg',
-    'avconv',
-    './ffmpeg',
-    './avconv',
-    () => {
-        const mod = require('@ffmpeg-installer/ffmpeg');
-        return validatePathParam(mod.default?.path || mod.path || mod);
+const FFmpegPossibleLocations: FFmpegLocation[] = [
+    {
+        getPath() {
+            return process.env.FFMPEG_PATH;
+        },
+        displayName: 'spawn process.env.FFMPEG_PATH'
     },
-    () => {
-        const mod = require('ffmpeg-static');
-        return validatePathParam(mod.default?.path || mod.path || mod);
+    {
+        getPath() {
+            return 'ffmpeg';
+        },
+        displayName: 'spawn ffmpeg'
     },
-    () => {
-        const mod = require('@node-ffmpeg/node-ffmpeg-installer');
-        return validatePathParam(mod.default?.path || mod.path || mod);
+    {
+        getPath() {
+            return 'avconv';
+        },
+        displayName: 'spawn avconv'
     },
-    () => {
-        const mod = require('ffmpeg-binaries');
-        return validatePathParam(mod.default || mod);
+    {
+        getPath() {
+            const loc = './ffmpeg';
+            if (isWindows) return loc.concat('.exe');
+            return loc;
+        },
+        displayName: 'spawn ./ffmpeg'
+    },
+    {
+        getPath() {
+            const loc = './avconv';
+            if (isWindows) return loc.concat('.exe');
+            return loc;
+        },
+        displayName: 'spawn ./avconv'
+    },
+    {
+        getPath() {
+            const mod = require('@ffmpeg-installer/ffmpeg');
+            return validatePathParam(mod.default?.path || mod.path || mod);
+        },
+        displayName: 'require("@ffmpeg-installer/ffmpeg")'
+    },
+    {
+        getPath() {
+            const mod = require('ffmpeg-static');
+            return validatePathParam(mod.default?.path || mod.path || mod);
+        },
+        displayName: 'require("ffmpeg-static")'
+    },
+    {
+        getPath() {
+            const mod = require('@node-ffmpeg/node-ffmpeg-installer');
+            return validatePathParam(mod.default?.path || mod.path || mod);
+        },
+        displayName: 'require("@node-ffmpeg/node-ffmpeg-installer")'
+    },
+    {
+        getPath() {
+            const mod = require('ffmpeg-binaries');
+            return validatePathParam(mod.default || mod);
+        },
+        displayName: 'require("ffmpeg-binaries")'
     }
 ];
 /* eslint-enable @typescript-eslint/no-var-requires */
@@ -98,21 +146,23 @@ export class FFmpeg extends Duplex {
     public static locate(force = false): FFmpegInfo | undefined {
         if (ffmpegInfo.command && !force) return ffmpegInfo;
 
+        const errStacks: Error[] = new Array(FFmpegPossibleLocations.length);
+
         for (const locator of FFmpegPossibleLocations) {
             if (locator == null) continue;
             try {
-                const command = typeof locator === 'function' ? locator() : locator;
+                const command = locator.getPath();
                 if (!command) continue;
 
-                const { error, output } = childProcess.spawnSync(command, ['-h'], {
+                const result = childProcess.spawnSync(command, ['-h'], {
                     windowsHide: true
                 });
 
-                if (error) continue;
+                if (result.error) throw result.error;
 
                 ffmpegInfo.command = command;
-                ffmpegInfo.metadata = Buffer.concat(output.filter(Boolean) as Buffer[]).toString();
-                ffmpegInfo.isStatic = typeof locator === 'function';
+                ffmpegInfo.metadata = Buffer.concat(result.output.filter(Boolean) as Buffer[]).toString();
+                ffmpegInfo.isStatic = locator.displayName.startsWith('require("');
                 ffmpegInfo.version = FFmpeg.VersionRegex.exec(ffmpegInfo.metadata || '')?.[1] || null;
 
                 if (ffmpegInfo.isStatic && !('DP_NO_FFMPEG_WARN' in process.env)) {
@@ -120,16 +170,17 @@ export class FFmpeg extends Duplex {
                 }
 
                 return ffmpegInfo;
-            } catch {
-                //
+            } catch (e) {
+                errStacks.push(e as Error);
             }
 
             // prettier-ignore
             throw new Error([
                 'Could not locate ffmpeg. Tried:\n',
-                ...FFmpegPossibleLocations.filter((f) => typeof f === 'string').map((m) => `- spawn ${m}`),
-                '- ffmpeg-static',
-                '- ffmpeg-binaries'
+                ...FFmpegPossibleLocations.map((loc, i) => `  ${++i}. ${loc.displayName}`),
+                '\n',
+                `${'='.repeat(5)}Full Stacktrace${'='.repeat(5)}`,
+                ...errStacks.map((e) => e.stack || e.message)
             ].join('\n'));
         }
     }

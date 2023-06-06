@@ -1,4 +1,5 @@
 import type { Duplex, Readable } from 'stream';
+import * as prism from 'prism-media';
 import { FFmpeg } from './FFmpeg';
 
 export interface FFmpegStreamOptions {
@@ -7,7 +8,10 @@ export interface FFmpegStreamOptions {
     seek?: number;
     skip?: boolean;
     cookies?: string;
+    useLegacyFFmpeg?: boolean;
 }
+
+const getFFmpegProvider = (legacy = false) => (legacy ? (prism as typeof prism & { default: typeof prism }).default?.FFmpeg || prism.FFmpeg : FFmpeg);
 
 export function FFMPEG_ARGS_STRING(stream: string, fmt?: string, cookies?: string) {
     // prettier-ignore
@@ -55,7 +59,10 @@ export function createFFmpegStream(stream: Readable | Duplex | string, options?:
     if (!Number.isNaN(options.seek)) args.unshift('-ss', String(options.seek));
     if (Array.isArray(options.encoderArgs)) args.push(...options.encoderArgs);
 
-    const transcoder = new FFmpeg({ shell: false, args });
+    const FFMPEG = getFFmpegProvider(!!options.useLegacyFFmpeg);
+
+    const transcoder = new FFMPEG({ shell: false, args });
+
     transcoder.on('close', () => transcoder.destroy());
 
     if (typeof stream !== 'string') {

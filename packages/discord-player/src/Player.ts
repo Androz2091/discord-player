@@ -59,10 +59,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
         }
 
-        /**
-         * The extractors collection
-         * @type {ExtractorModel}
-         */
         this.options = {
             lockVoiceStateHandler: false,
             blockExtractors: [],
@@ -71,6 +67,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             smoothVolume: true,
             lagMonitor: 30000,
             queryCache: options.queryCache === null ? null : options.queryCache || new QueryCache(this),
+            useLegacyFFmpeg: false,
             ...options,
             ytdlOptions: {
                 highWaterMark: 1 << 25,
