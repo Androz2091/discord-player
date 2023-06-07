@@ -153,7 +153,9 @@ export async function makeSoundcloudSearch(query: string, type: SearchType) {
 }
 
 export async function getSoundcloudStreamURL(url: string) {
-    const stream = await client.fetchStreamURL(url)
+    const stream = await client.getSongInfo(url, {
+        fetchStreamURL: true
+    })
 
-    return stream
+    return stream.streamURL
 }
