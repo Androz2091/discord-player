@@ -15,12 +15,12 @@ import {
 import { StageChannel, VoiceChannel } from 'discord.js';
 import type { Readable } from 'stream';
 import { EventEmitter } from '@discord-player/utils';
-import { Track } from '../Structures/Track';
+import { Track } from '../fabric/Track';
 import { Util } from '../utils/Util';
-import { PlayerError, ErrorStatusCode } from '../Structures/PlayerError';
 import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
-import { GuildQueue, PostProcessedResult } from '../Structures';
-import { VoiceReceiverNode } from '../Structures/VoiceReceiverNode';
+import { GuildQueue, PostProcessedResult } from '../manager';
+import { VoiceReceiverNode } from '../manager/VoiceReceiverNode';
+import { Exceptions } from '../errors';
 
 const needsKeepAlivePatch = (() => {
     if ('DP_NO_KEEPALIVE_PATCH' in process.env) return false;
@@ -401,7 +401,9 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @returns {Promise<StreamDispatcher>}
      */
     async playStream(resource: AudioResource<Track> = this.audioResource!) {
-        if (!resource) throw new PlayerError('Audio resource is not available!', ErrorStatusCode.NO_AUDIO_RESOURCE);
+        if (!resource) {
+            throw Exceptions.ERR_NO_AUDIO_RESOURCE();
+        }
         if (resource.ended) {
             return void this.emit('finish', resource);
         }

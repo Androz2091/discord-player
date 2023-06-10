@@ -72,7 +72,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
 
                 const playlist = new Playlist(this.context.player, {
                     title: ytpl.title!,
-                    thumbnail: ytpl.thumbnail as unknown as string,
+                    thumbnail: ytpl.thumbnail?.displayThumbnailURL('maxresdefault') as string,
                     description: ytpl.title || '',
                     type: 'playlist',
                     source: 'youtube',
@@ -99,10 +99,15 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
                         raw: video,
                         playlist: playlist,
                         source: 'youtube',
-                        queryType: 'youtubeVideo'
+                        queryType: 'youtubeVideo',
+                        metadata: video,
+                        async requestMetadata() {
+                            return video;
+                        }
                     });
 
                     track.extractor = this;
+                    track.playlist = playlist;
                     return track;
                 });
 
@@ -128,7 +133,11 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
                     duration: video.durationFormatted,
                     source: 'youtube',
                     raw: video,
-                    queryType: context.type
+                    queryType: context.type,
+                    metadata: video,
+                    async requestMetadata() {
+                        return video;
+                    }
                 });
 
                 track.extractor = this;
@@ -164,7 +173,11 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
                 duration: video.durationFormatted,
                 source: 'youtube',
                 raw: video,
-                queryType: context.type!
+                queryType: context.type!,
+                metadata: video,
+                async requestMetadata() {
+                    return video;
+                }
             });
 
             track.extractor = this;
@@ -202,7 +215,11 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
                 author: video.channel!.name!,
                 requestedBy: track.requestedBy,
                 source: 'youtube',
-                queryType: 'youtubeVideo'
+                queryType: 'youtubeVideo',
+                metadata: video,
+                async requestMetadata() {
+                    return video;
+                }
             });
 
             t.extractor = this;
@@ -254,7 +271,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
             throw Error(`No video id found: "${link}"`);
         }
         id = id.substring(0, 11);
-        if (!exports.validateID(id)) {
+        if (!this.validateId(id)) {
             throw TypeError(`Video id (${id}) does not match expected ` + `format (${idRegex.toString()})`);
         }
         return id;

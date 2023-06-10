@@ -2,7 +2,7 @@ import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, Playlist, QueryTy
 import { AppleMusic } from '../internal';
 import { Readable } from 'stream';
 import { YoutubeExtractor } from './YoutubeExtractor';
-import { StreamFN, loadYtdl, makeYTSearch } from './common/helper';
+import { StreamFN, loadYtdl, pullYTMetadata } from './common/helper';
 
 export interface AppleMusicExtractorInit {
     createStream?: (ext: AppleMusicExtractor, url: string) => Promise<Readable | string>;
@@ -62,7 +62,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                 const tracks = data.map(
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (m: any) => {
-                        const track = new Track(this.context.player, {
+                        const track: Track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
                             duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
@@ -72,7 +72,17 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             views: 0,
                             source: 'apple_music',
                             requestedBy: context.requestedBy,
-                            queryType: 'appleMusicSong'
+                            queryType: 'appleMusicSong',
+                            metadata: {
+                                source: m,
+                                bridge: null
+                            },
+                            requestMetadata: async () => {
+                                return {
+                                    source: m,
+                                    bridge: await pullYTMetadata(this, track)
+                                };
+                            }
                         });
 
                         track.extractor = this;
@@ -107,7 +117,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                     (
                         m: any // eslint-disable-line
                     ) => {
-                        const track = new Track(this.context.player, {
+                        const track: Track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
                             duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
@@ -117,8 +127,19 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             views: 0,
                             source: 'apple_music',
                             requestedBy: context.requestedBy,
-                            queryType: 'appleMusicSong'
+                            queryType: 'appleMusicSong',
+                            metadata: {
+                                source: info,
+                                bridge: null
+                            },
+                            requestMetadata: async () => {
+                                return {
+                                    source: info,
+                                    bridge: await pullYTMetadata(this, track)
+                                };
+                            }
                         });
+                        track.playlist = playlist;
                         track.extractor = this;
                         return track;
                     }
@@ -150,7 +171,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                     (
                         m: any // eslint-disable-line
                     ) => {
-                        const track = new Track(this.context.player, {
+                        const track: Track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
                             duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
@@ -160,9 +181,20 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             views: 0,
                             source: 'apple_music',
                             requestedBy: context.requestedBy,
-                            queryType: 'appleMusicSong'
+                            queryType: 'appleMusicSong',
+                            metadata: {
+                                source: m,
+                                bridge: null
+                            },
+                            requestMetadata: async () => {
+                                return {
+                                    source: m,
+                                    bridge: await pullYTMetadata(this, track)
+                                };
+                            }
                         });
 
+                        track.playlist = playlist;
                         track.extractor = this;
 
                         return track;
@@ -175,7 +207,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                 const info = await AppleMusic.getSongInfo(query);
                 if (!info) return this.createResponse();
 
-                const track = new Track(this.context.player, {
+                const track: Track = new Track(this.context.player, {
                     author: info.artist.name,
                     description: info.title,
                     duration: typeof info.duration === 'number' ? Util.buildTimeCode(Util.parseMS(info.duration)) : info.duration,
@@ -185,7 +217,17 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                     views: 0,
                     source: 'apple_music',
                     requestedBy: context.requestedBy,
-                    queryType: context.type
+                    queryType: context.type,
+                    metadata: {
+                        source: info,
+                        bridge: null
+                    },
+                    requestMetadata: async () => {
+                        return {
+                            source: info,
+                            bridge: await pullYTMetadata(this, track)
+                        };
+                    }
                 });
 
                 track.extractor = this;
@@ -207,9 +249,13 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
         if (this._isYtdl) {
             if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
             else {
-                const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
-                    .then((r) => r[0].url)
-                    .catch(Util.noop);
+                const meta = await pullYTMetadata(this, info);
+                if (meta)
+                    info.setMetadata({
+                        ...(info.metadata || {}),
+                        bridge: meta
+                    });
+                const _url = meta?.url;
                 if (!_url) throw new Error('Failed to fetch resources for ytdl streaming');
                 info.raw.url = url = _url;
             }

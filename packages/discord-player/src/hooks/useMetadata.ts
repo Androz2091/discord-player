@@ -1,5 +1,5 @@
 import { TypeUtil } from '../utils/TypeUtil';
-import { NodeResolvable } from '../Structures';
+import { NodeResolvable } from '../manager';
 import { getQueue } from './common';
 
 type SetterFN<T, P> = (previous: P) => T;

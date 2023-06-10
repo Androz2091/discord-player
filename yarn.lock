@@ -160,15 +160,15 @@ __metadata:
     "@types/node-fetch": ^2.6.2
     discord-player: "workspace:^"
     file-type: ^16.5.4
-    genius-lyrics: ^4.4.2
+    genius-lyrics: ^4.4.3
     node-html-parser: ^6.1.4
     play-dl: ^1.9.6
     reverbnation-scraper: ^2.0.0
-    soundcloud-scraper: ^5.0.3
-    spotify-url-info: ^3.2.3
+    soundcloud.ts: ^0.5.0
+    spotify-url-info: ^3.2.5
     youtube-sr: ^4.3.4
-    yt-stream: ^1.4.5
-    ytdl-core: ^4.11.2
+    yt-stream: ^1.4.7
+    ytdl-core: ^4.11.4
   languageName: unknown
   linkType: soft
 
@@ -2140,7 +2140,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cheerio@npm:^1.0.0-rc.10, cheerio@npm:^1.0.0-rc.9":
+"cheerio@npm:^1.0.0-rc.9":
   version: 1.0.0-rc.12
   resolution: "cheerio@npm:1.0.0-rc.12"
   dependencies:
@@ -3579,13 +3579,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"genius-lyrics@npm:^4.4.2":
-  version: 4.4.2
-  resolution: "genius-lyrics@npm:4.4.2"
+"genius-lyrics@npm:^4.4.3":
+  version: 4.4.3
+  resolution: "genius-lyrics@npm:4.4.3"
   dependencies:
     cheerio: ^1.0.0-rc.9
     undici: ^5.8.2
-  checksum: df7b1963b34f41b39a4274ffed31c72867cb97f84bf9ae8d32824304f7b572669cd8c4bcbc7f54adf419c79e42f0fbb282d93b278c1f2a69ac3737d1b31ac6b6
+  checksum: 5612f4b97503a5e1fab912ccd46c3dfe95495e2f0b90179a718a4454422fbd0370690734dad5d79e0c043e533ee4e3bd90540de0e6ab6668875b3cb0947a0391
   languageName: node
   linkType: hard
 
@@ -4597,7 +4597,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"m3u8stream@npm:^0.8.4, m3u8stream@npm:^0.8.6":
+"m3u8stream@npm:^0.8.6":
   version: 0.8.6
   resolution: "m3u8stream@npm:0.8.6"
   dependencies:
@@ -5794,20 +5794,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.1":
-  version: 2.6.7
-  resolution: "node-fetch@npm:2.6.7"
-  dependencies:
-    whatwg-url: ^5.0.0
-  peerDependencies:
-    encoding: ^0.1.0
-  peerDependenciesMeta:
-    encoding:
-      optional: true
-  checksum: 8d816ffd1ee22cab8301c7756ef04f3437f18dace86a1dae22cf81db8ef29c0bf6655f3215cb0cdb22b420b6fe141e64b26905e7f33f9377a7fa59135ea3e10b
-  languageName: node
-  linkType: hard
-
 "node-gyp@npm:latest":
   version: 9.3.1
   resolution: "node-gyp@npm:9.3.1"
@@ -6976,14 +6962,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"soundcloud-scraper@npm:^5.0.3":
-  version: 5.0.3
-  resolution: "soundcloud-scraper@npm:5.0.3"
+"soundcloud.ts@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "soundcloud.ts@npm:0.5.0"
   dependencies:
-    cheerio: ^1.0.0-rc.10
-    m3u8stream: ^0.8.4
-    node-fetch: ^2.6.1
-  checksum: 1acdb5bb3b9d18b1d19ae1f7a5ddd6fc9d676a552570f9bc8023aa12903e97845800db7d13c3fa3f906a56c12c650b1a34fc09e53da054d39f7c6c11b52e8651
+    undici: ^5.21.2
+  checksum: aa2d68f46bd297be96d54f8712d50f260dabce13e43c56af0115c5bcd77c13ddaf50136018dac32cb993c5388a3ea8d5cb2a4c9daf972cecfae2115db4d849f6
   languageName: node
   linkType: hard
 
@@ -7038,13 +7022,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"spotify-url-info@npm:^3.2.3":
-  version: 3.2.3
-  resolution: "spotify-url-info@npm:3.2.3"
+"spotify-url-info@npm:^3.2.5":
+  version: 3.2.5
+  resolution: "spotify-url-info@npm:3.2.5"
   dependencies:
     himalaya: ~1.1.0
     spotify-uri: ~3.0.3
-  checksum: 0421c71f042d79fc1fe84bd2a37d8b8cc16479ac8f245a13b8a19c217ca754929776112d45297c3296f7680c7967b807cd970fab88c08021dd56a078e9166b25
+  checksum: 14da61cbb5d0bf91c3210eefa8853d67ca94d225fd0c6d5c8b3ca5d8112edc72e54b6b5aa0e1faf2918e08129bed78668e060192b707a28f2e9c239e8314e320
   languageName: node
   linkType: hard
 
@@ -7757,6 +7741,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici@npm:^5.21.2":
+  version: 5.22.1
+  resolution: "undici@npm:5.22.1"
+  dependencies:
+    busboy: ^1.6.0
+  checksum: 048a3365f622be44fb319316cedfaa241c59cf7f3368ae7667a12323447e1822e8cc3d00f6956c852d1478a6fde1cbbe753f49e05f2fdaed229693e716ebaf35
+  languageName: node
+  linkType: hard
+
 "undici@npm:^5.8.0":
   version: 5.8.0
   resolution: "undici@npm:5.8.0"
@@ -8351,21 +8344,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yt-stream@npm:^1.4.5":
-  version: 1.4.5
-  resolution: "yt-stream@npm:1.4.5"
-  checksum: 561d9eef3447cbb7f28792112ca44518a5178479db45c8bc2d7488c042fa18c317d5a589baae66aa5c417d24a1030becfe7b2f522153130c61c3eda1f1549eed
+"yt-stream@npm:^1.4.7":
+  version: 1.4.7
+  resolution: "yt-stream@npm:1.4.7"
+  checksum: 27fdefa939591f110ff3bd91812d6daa6719ba4a02c4ff326374a53b2ee05595c202c90b11931be544b241df509b6f13843292e6456683a701cbe6041b0ba5e9
   languageName: node
   linkType: hard
 
-"ytdl-core@npm:^4.11.2":
-  version: 4.11.2
-  resolution: "ytdl-core@npm:4.11.2"
+"ytdl-core@npm:^4.11.4":
+  version: 4.11.4
+  resolution: "ytdl-core@npm:4.11.4"
   dependencies:
     m3u8stream: ^0.8.6
     miniget: ^4.2.2
     sax: ^1.1.3
-  checksum: 57df38b5b1e4955db0e0c0be8d185f34de9eaee102ad1281d69de91628230cc84e8d46d278409eafa68c4aab4085a0f9fe8de30e9ea8644e011e20cae7f37c0e
+  checksum: 62c83baf85b4fc4808a149d2ec9a2afdd86f60597362aa8ceebb3dac5c11d9a54f9de11bb4b3d34e70d4a55679457b879a1e3f079124e2933dac036d086bc378
   languageName: node
   linkType: hard
 

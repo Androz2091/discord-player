@@ -1,6 +1,9 @@
 import { StageChannel, VoiceChannel } from 'discord.js';
 import { TimeData } from '../types/types';
 import { setTimeout } from 'timers/promises';
+import { GuildQueue } from '../manager';
+import { Playlist, Track } from '../fabric';
+import { Exceptions } from '../errors';
 
 class Util {
     /**
@@ -135,5 +138,17 @@ class Util {
         return src[Math.floor(Math.random() * src.length)];
     }
 }
+
+export const VALIDATE_QUEUE_CAP = (queue: GuildQueue, items: Playlist | Track | Track[]) => {
+    const tracks = items instanceof Playlist ? items.tracks : Array.isArray(items) ? items : [items];
+
+    if (queue.maxSize < 1 || queue.maxSize === Infinity) return;
+
+    const maxCap = queue.getCapacity();
+
+    if (maxCap < tracks.length) {
+        throw Exceptions.ERR_OUT_OF_SPACE('tracks queue', maxCap, tracks.length);
+    }
+};
 
 export { Util };

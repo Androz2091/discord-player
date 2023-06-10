@@ -17,7 +17,7 @@ Make sure you have `FFmpeg` or `Avconv` available on your system.
 ### Install FFmpeg or Avconv
 
 -   Download from official FFmpeg website: **[www.ffmpeg.org/download.html](https://www.ffmpeg.org/download.html)**
--   Node Module (ffmpeg-static): **[npmjs.com/package/ffmpeg-static](https://npmjs.com/package/ffmpeg-static) (ffmpeg-static is not recommended)**
+-   Node Module (ffmpeg-static): **[npmjs.com/package/ffmpeg-static](https://npmjs.com/package/ffmpeg-static) (ffmpeg-static or similar static binaries is not recommended)**
 -   Avconv: If you want to use Avconv instead of FFmpeg, install it on your system or place Avconv executable at the root of your project.
 
 # "something" is not working

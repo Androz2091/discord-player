@@ -1,4 +1,4 @@
-## SoundCloudExtractor extends BaseExtractor
+## SoundCloudExtractor extends BaseExtractor\<SoundCloudExtractorInit>
 
 
 ```typescript
@@ -7,16 +7,20 @@ new SoundCloudExtractor(context, options)
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | context | ExtractorExecutionContext | ❌ | Context that instantiated this extractor |
-| options | object | ✅ | Initialization options for this extractor |
+| options | SoundCloudExtractorInit | ✅ | Initialization options for this extractor |
 
 
 ## Properties
 ### public context: ExtractorExecutionContext
 
-### public options: object
+### public createBridgeQuery: (track: Track\<unknown>) => string
+
+### public internal: default
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/extractor/src/extractors/SoundCloudExtractor.ts#L23)
+### public options: SoundCloudExtractorInit
 
 ### public static identifier: 'com.discord\-player.soundcloudextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/extractor/src/extractors/SoundCloudExtractor.ts#L19)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/extractor/src/extractors/SoundCloudExtractor.ts#L21)
 ### public identifier: string
 Identifier of this extractor
 
@@ -31,7 +35,7 @@ Create extractor response
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | playlist | null \| Playlist | ✅ | The playlist |
-| tracks | Array\<Track> | ✅ | The track array |
+| tracks | Array\<Track\<unknown>> | ✅ | The track array |
 ### public deactivate(): Promise\<void>
 This method will be executed when this extractor is deactivated
 ### public debug(message): boolean
@@ -52,14 +56,14 @@ Dispatch an event to the player
 | event | K | ❌ | The event to dispatch |
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
 ### public emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/extractor/src/extractors/SoundCloudExtractor.ts#L160)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/extractor/src/extractors/SoundCloudExtractor.ts#L162)
 ### public getRelatedTracks(track): Promise\<ExtractorInfo>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| track | Track | ❌ |
+| track | Track\<unknown> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/extractor/src/extractors/SoundCloudExtractor.ts#L34)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/extractor/src/extractors/SoundCloudExtractor.ts#L42)
 ### public handle(query, context): Promise\<ExtractorInfo>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -67,7 +71,7 @@ Dispatch an event to the player
 | context | ExtractorSearchContext | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/extractor/src/extractors/SoundCloudExtractor.ts#L44)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/extractor/src/extractors/SoundCloudExtractor.ts#L52)
 ### public handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
 
@@ -84,14 +88,14 @@ Reconfigures this extractor
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| options | object | ❌ | The new options to apply |
+| options | SoundCloudExtractorInit | ❌ | The new options to apply |
 ### public stream(info): Promise\<string>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
-| info | Track | ❌ |
+| info | Track\<unknown> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/extractor/src/extractors/SoundCloudExtractor.ts#L164)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/extractor/src/extractors/SoundCloudExtractor.ts#L166)
 ### public validate(query, type?): Promise\<boolean>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -99,4 +103,4 @@ Reconfigures this extractor
 | type | null \| SearchQueryType | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/extractor/src/extractors/SoundCloudExtractor.ts#L21)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/extractor/src/extractors/SoundCloudExtractor.ts#L29)

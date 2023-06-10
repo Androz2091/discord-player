@@ -2,7 +2,7 @@ import { FiltersName } from '../types/types';
 
 const bass = (g: number) => `bass=g=${g}:f=110:w=0.3`;
 
-class AudioFilters {
+export class AudioFilters {
     public constructor() {
         return AudioFilters;
     }
@@ -101,6 +101,3 @@ class AudioFilters {
         filtersArray.forEach((arr) => this.define(arr.name, arr.value));
     }
 }
-
-export default AudioFilters;
-export { AudioFilters };

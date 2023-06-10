@@ -46,7 +46,11 @@ export class VimeoExtractor extends BaseExtractor {
                     requestedBy: context.requestedBy,
                     source: 'arbitrary',
                     engine: trackInfo.stream,
-                    queryType: context.type
+                    queryType: context.type,
+                    metadata: trackInfo,
+                    async requestMetadata() {
+                        return trackInfo;
+                    }
                 });
 
                 track.extractor = this;

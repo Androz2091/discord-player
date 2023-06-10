@@ -63,7 +63,11 @@ export class AttachmentExtractor extends BaseExtractor {
                     requestedBy: context.requestedBy,
                     source: 'arbitrary',
                     engine: trackInfo.url,
-                    queryType: context.type
+                    queryType: context.type,
+                    metadata: trackInfo,
+                    async requestMetadata() {
+                        return trackInfo;
+                    }
                 });
 
                 track.extractor = this;
@@ -100,7 +104,11 @@ export class AttachmentExtractor extends BaseExtractor {
                     requestedBy: context.requestedBy,
                     source: 'arbitrary',
                     engine: trackInfo.url,
-                    queryType: context.type
+                    queryType: context.type,
+                    metadata: trackInfo,
+                    async requestMetadata() {
+                        return trackInfo;
+                    }
                 });
 
                 track.extractor = this;

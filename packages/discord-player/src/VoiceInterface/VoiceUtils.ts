@@ -2,8 +2,9 @@ import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
 import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus, AudioPlayer } from '@discordjs/voice';
 import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
-import { GuildQueue } from '../Structures';
+import { GuildQueue } from '../manager';
 import type { Player } from '../Player';
+import { Exceptions } from '../errors';
 
 class VoiceUtils {
     public cache: Collection<Snowflake, StreamDispatcher>;
@@ -35,7 +36,7 @@ class VoiceUtils {
             audioPlayer?: AudioPlayer;
         }
     ): Promise<StreamDispatcher> {
-        if (!options?.queue) throw new Error('GuildQueue is required');
+        if (!options?.queue) throw Exceptions.ERR_NO_GUILD_QUEUE();
         const conn = await this.join(channel, options);
         const sub = new StreamDispatcher(conn, channel, options.queue, options.maxTime, options.audioPlayer);
         this.cache.set(channel.guild.id, sub);

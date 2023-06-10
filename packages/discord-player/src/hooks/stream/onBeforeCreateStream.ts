@@ -1,4 +1,4 @@
-import { OnBeforeCreateStreamHandler } from '../../Structures';
+import { OnBeforeCreateStreamHandler } from '../../manager';
 import { getGlobalRegistry } from '../../utils/__internal__';
 
 export function onBeforeCreateStream(handler: OnBeforeCreateStreamHandler) {

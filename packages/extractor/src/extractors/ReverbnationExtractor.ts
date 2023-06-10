@@ -41,7 +41,11 @@ export class ReverbnationExtractor extends BaseExtractor {
                     requestedBy: context.requestedBy,
                     source: 'arbitrary',
                     engine: trackInfo.streamURL,
-                    queryType: context.type
+                    queryType: context.type,
+                    metadata: trackInfo,
+                    async requestMetadata() {
+                        return trackInfo;
+                    }
                 });
 
                 track.extractor = this;

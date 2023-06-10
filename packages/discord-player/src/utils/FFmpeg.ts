@@ -1,12 +1,13 @@
 import childProcess from 'child_process';
 import { Duplex, DuplexOptions } from 'stream';
+import { Exceptions } from '../errors';
 import { TypeUtil } from './TypeUtil';
 import { Util } from './Util';
 
 type Callback<Args extends Array<unknown>> = (...args: Args) => unknown;
 
 const validatePathParam = (t: unknown) => {
-    if (!TypeUtil.isString(t) || !t) throw new Error('failed to parse arg as a valid string');
+    if (!TypeUtil.isString(t) || !t) throw Exceptions.ERR_INVALID_ARG_TYPE(String(t), 'string', typeof t);
     return t;
 };
 
@@ -175,7 +176,7 @@ export class FFmpeg extends Duplex {
         }
 
         // prettier-ignore
-        throw new Error([
+        throw Exceptions.ERR_FFMPEG_LOCATOR([
             'Could not locate ffmpeg. Tried:\n',
             ...FFmpegPossibleLocations.map((loc, i) => `  ${++i}. ${loc.displayName}`),
             '\n',

@@ -1,11 +1,11 @@
 import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import type { Readable } from 'stream';
 import { YoutubeExtractor } from './YoutubeExtractor';
-import { StreamFN, getFetch, loadYtdl, makeYTSearch } from './common/helper';
+import { StreamFN, getFetch, loadYtdl, pullYTMetadata } from './common/helper';
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
 import { SpotifyAPI } from '../internal';
 
-const re = /^(?:https:\/\/open\.spotify\.com\/(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track)(?:[/:])([A-Za-z0-9]+).*$/;
+const re = /^(?:https:\/\/open\.spotify\.com\/(intl-([a-z]|[A-Z]){0,3}\/)?(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track)(?:[/:])([A-Za-z0-9]+).*$/;
 
 export interface SpotifyExtractorInit {
     clientId?: string | null;
@@ -57,7 +57,8 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
 
     public async getRelatedTracks(track: Track) {
         return await this.handle(track.author || track.title, {
-            type: QueryType.SPOTIFY_SEARCH
+            type: QueryType.SPOTIFY_SEARCH,
+            requestedBy: track.requestedBy
         });
     }
 
@@ -72,7 +73,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                 return this.createResponse(
                     null,
                     data.map((spotifyData) => {
-                        const track = new Track(this.context.player, {
+                        const track: Track = new Track(this.context.player, {
                             title: spotifyData.title,
                             description: `${spotifyData.title} by ${spotifyData.artist}`,
                             author: spotifyData.artist ?? 'Unknown Artist',
@@ -82,7 +83,17 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                             views: 0,
                             requestedBy: context.requestedBy,
                             source: 'spotify',
-                            queryType: QueryType.SPOTIFY_SONG
+                            queryType: QueryType.SPOTIFY_SONG,
+                            metadata: {
+                                source: spotifyData,
+                                bridge: null
+                            },
+                            requestMetadata: async () => {
+                                return {
+                                    source: spotifyData,
+                                    bridge: await pullYTMetadata(this, track)
+                                };
+                            }
                         });
 
                         track.extractor = this;
@@ -94,7 +105,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
             case QueryType.SPOTIFY_SONG: {
                 const spotifyData: SpotifySong | void = await this._lib.getData(query, context.requestOptions as unknown as RequestInit).catch(Util.noop);
                 if (!spotifyData) return { playlist: null, tracks: [] };
-                const spotifyTrack = new Track(this.context.player, {
+                const spotifyTrack: Track = new Track(this.context.player, {
                     title: spotifyData.title,
                     description: `${spotifyData.name} by ${spotifyData.artists.map((m) => m.name).join(', ')}`,
                     author: spotifyData.artists[0]?.name ?? 'Unknown Artist',
@@ -104,7 +115,17 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                     views: 0,
                     requestedBy: context.requestedBy,
                     source: 'spotify',
-                    queryType: context.type
+                    queryType: context.type,
+                    metadata: {
+                        source: spotifyData,
+                        bridge: null
+                    },
+                    requestMetadata: async () => {
+                        return {
+                            source: spotifyData,
+                            bridge: await pullYTMetadata(this, spotifyTrack)
+                        };
+                    }
                 });
 
                 spotifyTrack.extractor = this;
@@ -136,7 +157,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                     });
 
                     playlist.tracks = spotifyPlaylist.tracks.map((spotifyData) => {
-                        const data = new Track(this.context.player, {
+                        const data: Track = new Track(this.context.player, {
                             title: spotifyData.title,
                             description: `${spotifyData.title} by ${spotifyData.artist}`,
                             author: spotifyData.artist ?? 'Unknown Artist',
@@ -146,9 +167,20 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                             views: 0,
                             requestedBy: context.requestedBy,
                             source: 'spotify',
-                            queryType: QueryType.SPOTIFY_SONG
+                            queryType: QueryType.SPOTIFY_SONG,
+                            metadata: {
+                                source: spotifyData,
+                                bridge: null
+                            },
+                            requestMetadata: async () => {
+                                return {
+                                    source: spotifyData,
+                                    bridge: await pullYTMetadata(this, data)
+                                };
+                            }
                         });
                         data.extractor = this;
+                        data.playlist = playlist;
                         return data;
                     }) as Track[];
 
@@ -174,7 +206,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                     });
 
                     playlist.tracks = spotifyPlaylist.trackList.map((m) => {
-                        const data = new Track(this.context.player, {
+                        const data: Track = new Track(this.context.player, {
                             title: m.title ?? '',
                             description: m.title ?? '',
                             author: m.subtitle ?? 'Unknown Artist',
@@ -185,9 +217,20 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                             requestedBy: context.requestedBy,
                             playlist,
                             source: 'spotify',
-                            queryType: 'spotifySong'
+                            queryType: 'spotifySong',
+                            metadata: {
+                                source: m,
+                                bridge: null
+                            },
+                            requestMetadata: async () => {
+                                return {
+                                    source: m,
+                                    bridge: await pullYTMetadata(this, data)
+                                };
+                            }
                         });
                         data.extractor = this;
+                        data.playlist = playlist;
                         return data;
                     }) as Track[];
 
@@ -219,7 +262,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                     });
 
                     playlist.tracks = spotifyAlbum.tracks.map((spotifyData) => {
-                        const data = new Track(this.context.player, {
+                        const data: Track = new Track(this.context.player, {
                             title: spotifyData.title,
                             description: `${spotifyData.title} by ${spotifyData.artist}`,
                             author: spotifyData.artist ?? 'Unknown Artist',
@@ -229,9 +272,20 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                             views: 0,
                             requestedBy: context.requestedBy,
                             source: 'spotify',
-                            queryType: QueryType.SPOTIFY_SONG
+                            queryType: QueryType.SPOTIFY_SONG,
+                            metadata: {
+                                source: spotifyData,
+                                bridge: null
+                            },
+                            requestMetadata: async () => {
+                                return {
+                                    source: spotifyData,
+                                    bridge: await pullYTMetadata(this, data)
+                                };
+                            }
                         });
                         data.extractor = this;
+                        data.playlist = playlist;
                         return data;
                     }) as Track[];
 
@@ -257,7 +311,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                     });
 
                     playlist.tracks = album.trackList.map((m) => {
-                        const data = new Track(this.context.player, {
+                        const data: Track = new Track(this.context.player, {
                             title: m.title ?? '',
                             description: m.title ?? '',
                             author: m.subtitle ?? 'Unknown Artist',
@@ -268,9 +322,20 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                             requestedBy: context.requestedBy,
                             playlist,
                             source: 'spotify',
-                            queryType: 'spotifySong'
+                            queryType: 'spotifySong',
+                            metadata: {
+                                source: m,
+                                bridge: null
+                            },
+                            requestMetadata: async () => {
+                                return {
+                                    source: m,
+                                    bridge: await pullYTMetadata(this, data)
+                                };
+                            }
                         });
                         data.extractor = this;
+                        data.playlist = playlist;
                         return data;
                     }) as Track[];
 
@@ -292,9 +357,13 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
         if (this._isYtdl) {
             if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
             else {
-                const _url = await makeYTSearch(`${info.title} ${info.author}`, 'video')
-                    .then((r) => r[0].url)
-                    .catch(Util.noop);
+                const meta = await pullYTMetadata(this, info);
+                if (meta)
+                    info.setMetadata({
+                        ...(info.metadata || {}),
+                        bridge: meta
+                    });
+                const _url = meta?.url;
                 if (!_url) throw new Error('Failed to fetch resources for ytdl streaming');
                 info.raw.url = url = _url;
             }

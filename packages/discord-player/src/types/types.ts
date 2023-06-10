@@ -1,7 +1,7 @@
 import { Snowflake, User, UserResolvable, VoiceState } from 'discord.js';
-import { GuildQueue } from '../Structures';
-import { Track } from '../Structures/Track';
-import { Playlist } from '../Structures/Playlist';
+import { GuildQueue } from '../manager';
+import { Track } from '../fabric/Track';
+import { Playlist } from '../fabric/Playlist';
 import { downloadOptions } from 'ytdl-core';
 import { QueryCache } from '../utils/QueryCache';
 

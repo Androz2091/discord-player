@@ -4,7 +4,3 @@ export * from './GuildQueueAudioFilters';
 export * from './GuildQueueHistory';
 export * from './GuildQueuePlayerNode';
 export * from './VoiceReceiverNode';
-export * from './Playlist';
-export * from './Track';
-export * from './SearchResult';
-export * from './PlayerError';

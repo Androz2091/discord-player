@@ -44,7 +44,24 @@ import { SoundCloudExtractor } from '@discord-player/extractor';
 
 const result = await player.search(query, {
     // always use soundcloud extractor
-    searchEngine: SoundCloudExtractor.identifier
+    searchEngine: `ext:${SoundCloudExtractor.identifier}`
+});
+```
+
+### Overriding bridged stream
+
+Extractors such as AppleMusicExtractor, SpotifyExtractor cannot stream from their original source so they internally use ytdl to resolve streams.
+In order to bypass this behavior, you can override `createStream` function of the extractor like so:
+
+```js
+// The following concept is similar to global `OnBeforeCreateStream` hook, but applies to a particular extractor only
+await player.extractors.register(SpotifyExtractor, {
+    async createStream(extractor, trackUrl) {
+        // extractor refers to SpotifyExtractor instance
+        // trackUrl would be a spotify track url
+        // return a readable stream or a stream url
+        // unlike onBeforeCreateStream, returning nothing here will throw an error
+    }
 });
 ```
 

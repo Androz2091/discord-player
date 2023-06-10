@@ -1,6 +1,6 @@
 import { Player } from '../Player';
-import { SearchResult } from '../Structures/SearchResult';
-import { Track } from '../Structures/Track';
+import { SearchResult } from '../fabric/SearchResult';
+import { Track } from '../fabric/Track';
 import { User } from 'discord.js';
 import { SearchQueryType } from '../types/types';
 

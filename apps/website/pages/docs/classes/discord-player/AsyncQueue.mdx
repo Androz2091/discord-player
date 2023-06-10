@@ -10,7 +10,7 @@ new AsyncQueue()
 ### public entries: Array\<AsyncQueueEntry>
 The queued entries
 
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/utils/AsyncQueue.ts#L14)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/discord-player/src/utils/AsyncQueue.ts#L14)
 ### public size: number
 The total number of entries in this queue. Returns `0` if no entries are available.
 
@@ -36,13 +36,13 @@ asyncQueue.release();
 | options | AsyncQueueAcquisitionOptions | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/utils/AsyncQueue.ts#L49)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/discord-player/src/utils/AsyncQueue.ts#L49)
 ### public cancelAll(): void
 Cancel all entries
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/utils/AsyncQueue.ts#L75)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/discord-player/src/utils/AsyncQueue.ts#L75)
 ### public clear(consume): void
 Clear entries queue
 
@@ -53,13 +53,13 @@ Clear entries queue
 | consume | boolean | ❌ | Whether or not to consume all entries before clearing |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/utils/AsyncQueue.ts#L20)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/discord-player/src/utils/AsyncQueue.ts#L20)
 ### public release(): void
 Release the current acquisition and move to next entry.
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/utils/AsyncQueue.ts#L65)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/discord-player/src/utils/AsyncQueue.ts#L65)
 ### public removeEntry(entry): boolean
 Remove the given entry from the queue
 
@@ -70,4 +70,4 @@ Remove the given entry from the queue
 | entry | AsyncQueueEntry | ❌ | The entry to remove |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/utils/AsyncQueue.ts#L83)
+- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/discord-player/src/utils/AsyncQueue.ts#L83)

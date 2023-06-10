@@ -1,5 +1,6 @@
 import { Queue } from '@discord-player/utils';
-import { Track } from './Track';
+import { Exceptions } from '../errors';
+import { Track } from '../fabric/Track';
 import { GuildQueue } from './GuildQueue';
 
 export class GuildQueueHistory<Meta = unknown> {
@@ -76,7 +77,7 @@ export class GuildQueueHistory<Meta = unknown> {
     public async next() {
         const track = this.nextTrack;
         if (!track) {
-            throw new Error('No next track in the queue');
+            throw Exceptions.ERR_NO_RESULT('No next track in the queue');
         }
 
         this.queue.node.skip();
@@ -88,7 +89,7 @@ export class GuildQueueHistory<Meta = unknown> {
     public async previous(preserveCurrent = true) {
         const track = this.tracks.dispatch();
         if (!track) {
-            throw new Error('No previous track in the queue');
+            throw Exceptions.ERR_NO_RESULT('No previous track in the queue');
         }
 
         const current = this.currentTrack;

@@ -3,8 +3,9 @@ import { PassThrough, type Readable } from 'stream';
 import { EndBehaviorType } from '@discordjs/voice';
 import * as prism from 'prism-media';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
-import { Track } from './Track';
+import { Track } from '../fabric/Track';
 import { RawTrackData } from '../types/types';
+import { Exceptions } from '../errors';
 
 export interface VoiceReceiverOptions {
     mode?: 'opus' | 'pcm';
@@ -45,7 +46,7 @@ export class VoiceReceiverNode {
     public mergeRecordings(streams: Readable[]) {
         // TODO
         void streams;
-        throw new Error('Not implemented');
+        throw Exceptions.ERR_NOT_IMPLEMENTED(`${this.constructor.name}.mergeRecordings()`);
     }
 
     /**
@@ -66,7 +67,7 @@ export class VoiceReceiverNode {
         const passThrough = new PassThrough();
         const receiver = this.dispatcher.voiceConnection.receiver;
 
-        if (!receiver) throw new Error('Voice receiver is not available, maybe connect to a voice channel first?');
+        if (!receiver) throw Exceptions.ERR_NO_RECEIVER();
 
         receiver.speaking.on('start', (userId) => {
             if (userId === _user) {

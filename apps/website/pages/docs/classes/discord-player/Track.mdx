@@ -7,46 +7,71 @@ new Track(player, data)
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | player | Player | ❌ | The player that instantiated this Track |
-| data | RawTrackData | ❌ | Track data |
+| data | Partial\<WithMetadata\<RawTrackData, T>> | ❌ | Track data |
 
 
 ## Properties
 ### public author: string
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L14)
+
 ### public description: string
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L13)
+
 ### public duration: string
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L17)
+
 ### public extractor: null \| BaseExtractor\<object>
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L25)
+
 ### public id: string
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L26)
+
 ### public player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L11)
+The player that instantiated this Track
 ### public playlist: Playlist
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L20)
+
 ### public queryType: undefined \| null \| SearchQueryType
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L21)
+
 ### public raw: RawTrackData
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L22)
+
 ### public requestedBy: null \| User
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L19)
+
 ### public thumbnail: string
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L16)
+
 ### public title: string
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L12)
+
 ### public url: string
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L15)
+
 ### public views: number
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L18)
+
 ### public durationMS: number
 The track duration in millisecond
+### public hasMetadata: boolean
+If this track has metadata
+### public metadata: undefined \| T
+Metadata of this track
 ### public queue: GuildQueue\<unknown>
 The queue in which this track is located
 ### public source: TrackSource
 Returns source of this track
 
 ## Methods
+### public getBelongingQueues(): Collection\<string, GuildQueue\<unknown>>
+Get belonging queues of this track
+### public play(channel, options?): Promise\<PlayerNodeInitializationResult\<T>>
+Play this track to the given voice channel. If queue exists and another track is being played, this track will be added to the queue.
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| channel | GuildVoiceChannelResolvable | ❌ | Voice channel on which this track shall be played |
+| options | PlayerNodeInitializerOptions\<T> | ✅ | Node initialization options |
+### public requestMetadata(): Promise\<T>
+Request metadata for this track
+### public setMetadata(m): void
+Set metadata for this track
+
+
+
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| m | T | ❌ |
 ### public toJSON(hidePlaylist?): TrackJSON
 Raw JSON representation of this track
 
@@ -55,12 +80,5 @@ Raw JSON representation of this track
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | hidePlaylist | boolean | ✅ |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L177)
 ### public toString(): string
 String representation of this track
-
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/97a849a/packages/discord-player/src/Structures/Track.ts#L169)

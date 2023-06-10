@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { FiltersName, QueueFilters } from '../types/types';
-import AudioFilters from '../utils/AudioFilters';
+import { AudioFilters } from '../utils/AudioFilters';
 import { GuildQueue } from './GuildQueue';
 import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { FFmpegStreamOptions, createFFmpegStream } from '../utils/FFmpegStream';

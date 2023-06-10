@@ -1,4 +1,4 @@
-import { GuildQueue, NodeResolvable } from '../Structures';
+import { GuildQueue, NodeResolvable } from '../manager';
 import { instances } from '../utils/__internal__';
 
 export const getPlayer = () => {

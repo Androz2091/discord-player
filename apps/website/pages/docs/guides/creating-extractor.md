@@ -23,10 +23,12 @@ If you need to extend this functionality and add support for more sources, you c
 // Base extractor
 import { BaseExtractor } from 'discord-player';
 
-// since it extends BaseExtractor, it is aware of Player who loaded this extractor and thus can access information such as queue, voice connections and more. Those data exist inside context property of BaseExtractor, which is an instance of ExtractorExecutionContext and can be accessed using `this.context`. 
+// since it extends BaseExtractor, it is aware of Player who loaded this extractor and thus can access information such as queue, voice connections and more. Those data exist inside context property of BaseExtractor, which is an instance of ExtractorExecutionContext and can be accessed using `this.context`.
 class MyExtractor extends BaseExtractor {
     // (required) you should give a unique id for you extractor here.
     static identifier = 'unique-id-for-my-extractor' as const;
+
+    public createBridgeQuery = (track: Track) => `${track.title} by ${track.author} official audio`;
 
     // this method is called when your extractor is loaded into discord-player's registry
     async activate(): Promise<void> {

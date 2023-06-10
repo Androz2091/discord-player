@@ -1,16 +1,23 @@
 import { User } from 'discord.js';
 import { Readable } from 'stream';
-import { Playlist } from '../Structures/Playlist';
-import { Track } from '../Structures/Track';
+import { Playlist } from '../fabric/Playlist';
+import { Track } from '../fabric/Track';
 import { PlayerEvents, SearchQueryType } from '../types/types';
 import { ExtractorExecutionContext } from './ExtractorExecutionContext';
 import type { RequestOptions } from 'http';
+import { Exceptions } from '../errors';
 
 export class BaseExtractor<T extends object = object> {
     /**
      * Identifier for this extractor
      */
     public static identifier = 'com.discord-player.extractor';
+
+    /**
+     * Handle bridge query creation
+     * @param track The track to build query for
+     */
+    public createBridgeQuery = (track: Track) => `${track.title} by ${track.author} official audio`;
 
     /**
      * Extractor constructor
@@ -67,7 +74,7 @@ export class BaseExtractor<T extends object = object> {
      */
     public async stream(info: Track): Promise<Readable | string> {
         void info;
-        throw new Error('Not Implemented');
+        throw Exceptions.ERR_NOT_IMPLEMENTED(`${this.constructor.name}.stream()`);
     }
 
     /**
@@ -76,7 +83,7 @@ export class BaseExtractor<T extends object = object> {
      */
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         void context;
-        throw new Error('Not Implemented');
+        throw Exceptions.ERR_NOT_IMPLEMENTED(`${this.constructor.name}.handle()`);
     }
 
     /**
@@ -85,7 +92,7 @@ export class BaseExtractor<T extends object = object> {
      */
     public async getRelatedTracks(track: Track): Promise<ExtractorInfo> {
         void track;
-        throw new Error('Not implemented');
+        throw Exceptions.ERR_NOT_IMPLEMENTED(`${this.constructor.name}.getRelatedTracks()`);
     }
 
     /**

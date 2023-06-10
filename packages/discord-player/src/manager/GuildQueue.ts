@@ -1,12 +1,12 @@
-import { Player } from '../Player';
+import { Player, PlayerNodeInitializerOptions, TrackLike } from '../Player';
 import { ChannelType, Guild, GuildVoiceChannelResolvable, VoiceBasedChannel, VoiceState } from 'discord.js';
 import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
-import { Track, TrackResolvable } from './Track';
+import { Track, TrackResolvable } from '../fabric/Track';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { type AudioPlayer, AudioResource, StreamType } from '@discordjs/voice';
-import { Util } from '../utils/Util';
-import { Playlist } from './Playlist';
+import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
+import { Playlist } from '../fabric/Playlist';
 import { GuildQueueHistory } from './GuildQueueHistory';
 import { GuildQueuePlayerNode } from './GuildQueuePlayerNode';
 import { GuildQueueAudioFilters } from './GuildQueueAudioFilters';
@@ -16,6 +16,7 @@ import { setTimeout } from 'timers';
 import { GuildQueueStatistics } from './GuildQueueStatistics';
 import { TypeUtil } from '../utils/TypeUtil';
 import { AsyncQueue } from '../utils/AsyncQueue';
+import { Exceptions } from '../errors';
 
 export interface GuildNodeInit<Meta = unknown> {
     guild: Guild;
@@ -42,6 +43,7 @@ export interface GuildNodeInit<Meta = unknown> {
     metadata?: Meta | null;
     bufferingTimeout: number;
     noEmitInsert: boolean;
+    maxSize?: number;
 }
 
 export interface VoiceConnectConfig {
@@ -323,6 +325,7 @@ export class GuildQueue<Meta = unknown> {
         if (!TypeUtil.isNullish(options.repeatMode)) this.repeatMode = options.repeatMode;
 
         options.selfDeaf ??= true;
+        options.maxSize ??= Infinity;
 
         if (!TypeUtil.isNullish(this.options.biquad) && !TypeUtil.isBoolean(this.options.biquad)) {
             this.filters._lastFiltersCache.biquad = this.options.biquad;
@@ -343,6 +346,12 @@ export class GuildQueue<Meta = unknown> {
         if (TypeUtil.isArray(this.options.ffmpegFilters)) {
             this.filters.ffmpeg.setDefaults(this.options.ffmpegFilters);
         }
+
+        if (!TypeUtil.isNumber(options.maxSize)) {
+            throw Exceptions.ERR_INVALID_ARG_TYPE('[GuildNodeInit.maxSize]', 'number', typeof options.maxSize);
+        }
+
+        if (options.maxSize < 1) options.maxSize = Infinity;
 
         this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
     }
@@ -471,6 +480,20 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * Max size of this queue
+     */
+    public get maxSize() {
+        return this.options.maxSize ?? Infinity;
+    }
+
+    /**
+     * Max size of this queue
+     */
+    public getMaxSize() {
+        return this.maxSize;
+    }
+
+    /**
      * Gets the size of the queue
      */
     public get size() {
@@ -500,6 +523,22 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * Check if this queue is full
+     */
+    public isFull() {
+        return this.tracks.size >= this.maxSize;
+    }
+
+    /**
+     * Get queue capacity
+     */
+    public getCapacity() {
+        if (this.isFull()) return 0;
+        const cap = this.maxSize - this.size;
+        return cap;
+    }
+
+    /**
      * Check if this queue currently holds active audio resource
      */
     public isPlaying() {
@@ -512,8 +551,11 @@ export class GuildQueue<Meta = unknown> {
      */
     public addTrack(track: Track | Track[] | Playlist) {
         const toAdd = track instanceof Playlist ? track.tracks : track;
-        this.tracks.add(toAdd);
         const isMulti = Array.isArray(toAdd);
+
+        VALIDATE_QUEUE_CAP(this, toAdd);
+
+        this.tracks.add(toAdd);
 
         if (isMulti) {
             this.player.events.emit('audioTracksAdd', this, toAdd);
@@ -574,7 +616,7 @@ export class GuildQueue<Meta = unknown> {
     public async connect(channelResolvable: GuildVoiceChannelResolvable, options: VoiceConnectConfig = {}) {
         const channel = this.player.client.channels.resolve(channelResolvable);
         if (!channel || !channel.isVoiceBased()) {
-            throw new Error(`Expected a voice based channel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice}), received ${channel?.type}`);
+            throw Exceptions.ERR_INVALID_ARG_TYPE('channel', `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`, String(channel?.type));
         }
 
         this.debug(`Connecting to ${channel.type === ChannelType.GuildStageVoice ? 'stage' : 'voice'} channel ${channel.name} (ID: ${channel.id})`);
@@ -647,6 +689,17 @@ export class GuildQueue<Meta = unknown> {
      */
     public setSelfMute(mode?: boolean, reason?: string) {
         return this.guild.members.me!.voice.setMute(mode, reason);
+    }
+
+    /**
+     * Play a track in this queue
+     * @param track The track to be played
+     * @param options Player node initialization options
+     */
+    public async play(track: TrackLike, options?: PlayerNodeInitializerOptions<Meta>) {
+        if (!this.channel) throw Exceptions.ERR_NO_VOICE_CONNECTION();
+
+        return this.player.play(this.channel, track, options);
     }
 
     #attachListeners(dispatcher: StreamDispatcher) {

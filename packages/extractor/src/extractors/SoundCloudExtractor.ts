@@ -9,14 +9,22 @@ import {
     Track,
     Util
 } from 'discord-player';
-import { Client, Song } from 'soundcloud-scraper';
+import * as SoundCloud from 'soundcloud.ts';
 
-const soundcloud = new Client(undefined, {
-    fetchAPIKey: true
-});
+export interface SoundCloudExtractorInit {
+    clientId?: string;
+    oauthToken?: string;
+    proxy?: string;
+}
 
-export class SoundCloudExtractor extends BaseExtractor {
+export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> {
     public static identifier = 'com.discord-player.soundcloudextractor' as const;
+
+    public internal = new SoundCloud.default({
+        clientId: this.options.clientId,
+        oauthToken: this.options.oauthToken,
+        proxy: this.options.proxy
+    });
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
         if (typeof query !== 'string') return false;
@@ -44,28 +52,26 @@ export class SoundCloudExtractor extends BaseExtractor {
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         switch (context.type) {
             case QueryType.SOUNDCLOUD_TRACK: {
-                const trackInfo = await soundcloud
-                    .getSongInfo(query, {
-                        fetchComments: false,
-                        fetchEmbed: false,
-                        fetchStreamURL: true
-                    })
-                    .catch(Util.noop);
+                const trackInfo = await this.internal.tracks.getV2(query).catch(Util.noop);
 
                 if (!trackInfo) return this.emptyResponse();
 
                 const track = new Track(this.context.player, {
                     title: trackInfo.title,
-                    url: trackInfo.url,
+                    url: trackInfo.permalink_url,
                     duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
-                    description: trackInfo.description,
-                    thumbnail: trackInfo.thumbnail,
-                    views: trackInfo.playCount,
-                    author: trackInfo.author.name,
+                    description: trackInfo.description ?? '',
+                    thumbnail: trackInfo.artwork_url,
+                    views: trackInfo.playback_count,
+                    author: trackInfo.user.username,
                     requestedBy: context.requestedBy,
                     source: 'soundcloud',
                     engine: trackInfo,
-                    queryType: context.type
+                    queryType: context.type,
+                    metadata: trackInfo,
+                    requestMetadata: async () => {
+                        return trackInfo;
+                    }
                 });
 
                 track.extractor = this;
@@ -73,26 +79,22 @@ export class SoundCloudExtractor extends BaseExtractor {
                 return { playlist: null, tracks: [track] };
             }
             case QueryType.SOUNDCLOUD_PLAYLIST: {
-                const data = await soundcloud
-                    .getPlaylist(query, {
-                        fetchEmbed: false
-                    })
-                    .catch(Util.noop);
+                const data = await this.internal.playlists.getV2(query).catch(Util.noop);
                 if (!data) return { playlist: null, tracks: [] };
 
                 const res = new Playlist(this.context.player, {
                     title: data.title,
                     description: data.description ?? '',
-                    thumbnail: data.thumbnail ?? 'https://soundcloud.com/pwa-icon-192.png',
+                    thumbnail: data.artwork_url ?? data.tracks[0].artwork_url,
                     type: 'playlist',
                     source: 'soundcloud',
                     author: {
-                        name: data.author?.name ?? data.author?.username ?? 'Unknown Artist',
-                        url: data.author?.profile
+                        name: data.user.username,
+                        url: data.user.permalink_url
                     },
                     tracks: [],
                     id: `${data.id}`,
-                    url: data.url,
+                    url: data.permalink_url,
                     rawPlaylist: data
                 });
 
@@ -100,51 +102,51 @@ export class SoundCloudExtractor extends BaseExtractor {
                     const track = new Track(this.context.player, {
                         title: song.title,
                         description: song.description ?? '',
-                        author: song.author?.username ?? song.author?.name ?? 'Unknown Artist',
-                        url: song.url,
-                        thumbnail: song.thumbnail,
+                        author: song.user.username,
+                        url: song.permalink_url,
+                        thumbnail: song.artwork_url,
                         duration: Util.buildTimeCode(Util.parseMS(song.duration)),
-                        views: song.playCount ?? 0,
+                        views: song.playback_count,
                         requestedBy: context.requestedBy,
                         playlist: res,
                         source: 'soundcloud',
                         engine: song,
-                        queryType: context.type
+                        queryType: context.type,
+                        metadata: song,
+                        requestMetadata: async () => {
+                            return song;
+                        }
                     });
                     track.extractor = this;
+                    track.playlist = res;
                     res.tracks.push(track);
                 }
 
                 return { playlist: res, tracks: res.tracks };
             }
             default: {
-                const tracks = await soundcloud.search(query, 'track').catch(Util.noop);
-                if (!tracks || !tracks.length) return this.emptyResponse();
+                const tracks = await this.internal.tracks.searchV2({ q: query }).catch(Util.noop);
+                if (!tracks || !tracks.collection.length) return this.emptyResponse();
 
                 const resolvedTracks: Track[] = [];
 
-                for (const searchedTrack of tracks) {
-                    const trackInfo = await soundcloud
-                        .getSongInfo(searchedTrack.url, {
-                            fetchStreamURL: true,
-                            fetchComments: false,
-                            fetchEmbed: false
-                        })
-                        .catch(Util.noop);
-                    if (!trackInfo) continue;
-
+                for (const trackInfo of tracks.collection) {
                     const track = new Track(this.context.player, {
                         title: trackInfo.title,
-                        url: trackInfo.url,
+                        url: trackInfo.permalink_url,
                         duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
-                        description: trackInfo.description,
-                        thumbnail: trackInfo.thumbnail,
-                        views: trackInfo.playCount,
-                        author: trackInfo.author.name,
+                        description: trackInfo.description ?? '',
+                        thumbnail: trackInfo.artwork_url,
+                        views: trackInfo.playback_count,
+                        author: trackInfo.user.username,
                         requestedBy: context.requestedBy,
                         source: 'soundcloud',
                         engine: trackInfo,
-                        queryType: 'soundcloudTrack'
+                        queryType: 'soundcloudTrack',
+                        metadata: trackInfo,
+                        requestMetadata: async () => {
+                            return trackInfo;
+                        }
                     });
 
                     track.extractor = this;
@@ -162,21 +164,8 @@ export class SoundCloudExtractor extends BaseExtractor {
     }
 
     public async stream(info: Track) {
-        const engine = info.raw.engine as Song;
-        if (engine && engine.streamURL) {
-            return engine.streamURL;
-        }
-
-        const url = await soundcloud.fetchStreamURL(info.url).catch(Util.noop);
+        const url = await this.internal.util.streamLink(info.url).catch(Util.noop);
         if (!url) throw new Error('Could not extract stream from this track source');
-
-        if (engine) {
-            engine.streamURL = url;
-        } else {
-            info.raw.engine = {
-                streamURL: url
-            };
-        }
 
         return url;
     }

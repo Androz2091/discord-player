@@ -1,4 +1,5 @@
 import { container, Listener } from '@sapphire/framework';
+import type { Track } from 'discord-player';
 import { PermissionsBitField } from 'discord.js';
 
 export class PlayerEvent extends Listener {
@@ -10,7 +11,8 @@ export class PlayerEvent extends Listener {
 		});
 	}
 
-	public run(queue, track) {
+	public run(queue, track: Track) {
+		console.log(track.metadata);
 		const resolved = new PermissionsBitField([PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ViewChannel]);
 		const missingPerms = queue.metadata.channel.permissionsFor(queue.metadata.client).missing(resolved);
 		if (missingPerms.length) return;

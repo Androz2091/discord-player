@@ -5,6 +5,7 @@ import { Player } from '../Player';
 import { GuildQueue, OnAfterCreateStreamHandler, OnBeforeCreateStreamHandler } from './GuildQueue';
 import { FiltersName, QueueRepeatMode } from '../types/types';
 import { getGlobalRegistry } from '../utils/__internal__';
+import { Exceptions } from '../errors';
 
 export interface GuildNodeCreateOptions<T = unknown> {
     strategy?: QueueStrategy;
@@ -46,7 +47,7 @@ export class GuildNodeManager<Meta = unknown> {
     public create<T = Meta>(guild: GuildResolvable, options: GuildNodeCreateOptions<T> = {}): GuildQueue<T> {
         const server = this.player.client.guilds.resolve(guild);
         if (!server) {
-            throw new Error('Invalid or unknown guild');
+            throw Exceptions.ERR_NO_GUILD('Invalid or unknown guild');
         }
 
         if (this.cache.has(server.id)) {
@@ -136,7 +137,9 @@ export class GuildNodeManager<Meta = unknown> {
      */
     public delete(node: NodeResolvable) {
         const queue = this.resolve(node);
-        if (!queue) throw new Error('Cannot delete non-existing queue');
+        if (!queue) {
+            throw Exceptions.ERR_NO_GUILD_QUEUE('Cannot delete non-existing queue');
+        }
 
         queue.node.stop(true);
         queue.connection?.removeAllListeners();

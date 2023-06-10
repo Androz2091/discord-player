@@ -1,3 +1,4 @@
+import { BaseExtractor, Track } from 'discord-player';
 import { YouTube } from 'youtube-sr';
 
 let factory: {
@@ -139,4 +140,12 @@ export async function makeYTSearch(query: string, opt: any) {
     });
 
     return res || [];
+}
+
+export async function pullYTMetadata(ext: BaseExtractor, info: Track) {
+    const meta = await makeYTSearch(ext.createBridgeQuery(info), 'video')
+        .then((r) => r[0])
+        .catch(() => null);
+
+    return meta;
 }

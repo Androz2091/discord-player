@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { QueryResolver, QueryType } from '..';
+import { QueryResolver, QueryType } from '../src/index';
 
 describe('QueryResolver', () => {
     const qr = QueryResolver;
@@ -46,6 +46,12 @@ describe('QueryResolver', () => {
 
     it('should be spotifySong', () => {
         const query = 'https://open.spotify.com/track/59Rx7sQnBmVbHwdKqKHOrQ';
+        expect(qr.resolve(query)).toBe(QueryType.SPOTIFY_SONG);
+    });
+
+    it('should be spotifySong (new url)', () => {
+        const query = 'https://open.spotify.com/intl-de/track/2USlegnFJLrVLpoVfPimKB?si=8e3902d2056547ca';
+
         expect(qr.resolve(query)).toBe(QueryType.SPOTIFY_SONG);
     });
 

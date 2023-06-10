@@ -2,11 +2,12 @@ import { AudioResource, StreamType } from '@discordjs/voice';
 import { Readable } from 'stream';
 import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
 import { QueryResolver } from '../utils/QueryResolver';
-import { Util } from '../utils/Util';
-import { Track, TrackResolvable } from './Track';
+import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
+import { Track, TrackResolvable } from '../fabric/Track';
 import { GuildQueue } from './GuildQueue';
 import { setTimeout as waitFor } from 'timers/promises';
 import { AsyncQueue } from '../utils/AsyncQueue';
+import { Exceptions } from '../errors';
 
 export const FFMPEG_SRATE_REGEX = /asetrate=\d+\*(\d(\.\d)?)/;
 
@@ -155,7 +156,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
         const { indicator = '🔘', length = 15, line = '▬', timecodes = true } = options || {};
 
-        if (isNaN(length) || length < 0 || !Number.isFinite(length)) throw new Error('invalid progressbar length');
+        if (isNaN(length) || length < 0 || !Number.isFinite(length)) {
+            throw Exceptions.ERR_OUT_OF_RANGE('[PlayerProgressBarOptions.length]', String(length), '0', 'Finite Number');
+        }
         const index = Math.round((timestamp.current.value / timestamp.total.value) * length);
 
         if (index >= 1 && index <= length) {
@@ -310,7 +313,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      * @param index The position to insert to, defaults to 0.
      */
     public insert(track: Track, index = 0) {
-        if (!(track instanceof Track)) throw new Error('invalid track');
+        if (!(track instanceof Track)) throw Exceptions.ERR_INVALID_ARG_TYPE('track value', 'instance of Track', String(track));
+        VALIDATE_QUEUE_CAP(this.queue, track);
         this.queue.tracks.store.splice(index, 0, track);
         if (!this.queue.options.noEmitInsert) this.queue.player.events.emit('audioTrackAdd', this.queue, track);
     }
@@ -322,7 +326,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      */
     public move(from: TrackResolvable, to: number) {
         const removed = this.remove(from);
-        if (!removed) throw new Error('invalid track to move');
+        if (!removed) {
+            throw Exceptions.ERR_NO_RESULT('invalid track to move');
+        }
         this.insert(removed, to);
     }
 
@@ -333,7 +339,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      */
     public copy(from: TrackResolvable, to: number) {
         const src = this.queue.tracks.at(this.getTrackPosition(from));
-        if (!src) throw new Error('invalid track to copy');
+        if (!src) {
+            throw Exceptions.ERR_NO_RESULT('invalid track to copy');
+        }
         this.insert(src, to);
     }
 
@@ -344,10 +352,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      */
     public swap(first: TrackResolvable, second: TrackResolvable) {
         const src = this.getTrackPosition(first);
-        if (src < 0) throw new Error('invalid src track to swap');
+        if (src < 0) throw Exceptions.ERR_NO_RESULT('invalid src track to swap');
 
         const dest = this.getTrackPosition(second);
-        if (dest < 0) throw new Error('invalid dest track to swap');
+        if (dest < 0) throw Exceptions.ERR_NO_RESULT('invalid dest track to swap');
 
         const srcT = this.queue.tracks.store[src];
         const destT = this.queue.tracks.store[dest];
@@ -393,7 +401,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      */
     public async play(res?: Track | null, options?: ResourcePlayOptions) {
         if (!this.queue.dispatcher?.voiceConnection) {
-            throw new Error('No voice connection available');
+            throw Exceptions.ERR_NO_VOICE_CONNECTION();
         }
 
         this.queue.debug(`Received play request from guild ${this.queue.guild.name} (ID: ${this.queue.guild.id})`);
@@ -416,7 +424,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         const track = res || this.queue.tracks.dispatch();
         if (!track) {
             if (this.queue.options.skipOnNoStream) return;
-            throw new Error('Play request received but track was not provided');
+            throw Exceptions.ERR_NO_RESULT('Play request received but track was not provided');
         }
 
         this.queue.debug('Requested option requires to play the track, initializing...');
@@ -532,7 +540,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     #throw(track: Track, error?: Error | null) {
         // prettier-ignore
         const streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault = (
-            new Error(`Could not extract stream for this track${error ? `\n\n${error.stack || error}` : ''}`)
+            Exceptions.ERR_NO_RESULT(`Could not extract stream for this track${error ? `\n\n${error.stack || error}` : ''}`)
         );
 
         if (this.queue.options.skipOnNoStream) {

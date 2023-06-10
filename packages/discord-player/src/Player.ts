@@ -1,5 +1,6 @@
 import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable, version as djsVersion } from 'discord.js';
-import { Playlist, Track, GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, SearchResult, GuildQueue } from './Structures';
+import { Playlist, Track, SearchResult } from './fabric';
+import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions } from './manager';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
 import { QueryResolver } from './utils/QueryResolver';
@@ -11,6 +12,7 @@ import * as _internals from './utils/__internal__';
 import { QueryCache } from './utils/QueryCache';
 import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
 import { FFmpeg } from './utils/FFmpeg';
+import { Exceptions } from './errors';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -19,6 +21,15 @@ export interface PlayerNodeInitializationResult<T = unknown> {
     extractor: BaseExtractor | null;
     searchResult: SearchResult;
     queue: GuildQueue<T>;
+}
+
+export type TrackLike = string | Track | SearchResult | Track[] | Playlist;
+
+export interface PlayerNodeInitializerOptions<T> extends SearchOptions {
+    nodeOptions?: GuildNodeCreateOptions<T>;
+    connectionOptions?: VoiceConnectConfig;
+    audioPlayerOptions?: ResourcePlayOptions;
+    afterSearch?: (result: SearchResult) => Promise<SearchResult>;
 }
 
 export class Player extends PlayerEventsEmitter<PlayerEvents> {
@@ -345,22 +356,14 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * }
      * ```
      */
-    public async play<T = unknown>(
-        channel: GuildVoiceChannelResolvable,
-        query: string | Track | SearchResult | Track[] | Playlist,
-        options: SearchOptions & {
-            nodeOptions?: GuildNodeCreateOptions<T>;
-            connectionOptions?: VoiceConnectConfig;
-            afterSearch?: (result: SearchResult) => Promise<SearchResult>;
-        } = {}
-    ): Promise<PlayerNodeInitializationResult<T>> {
+    public async play<T = unknown>(channel: GuildVoiceChannelResolvable, query: TrackLike, options: PlayerNodeInitializerOptions<T> = {}): Promise<PlayerNodeInitializationResult<T>> {
         const vc = this.client.channels.resolve(channel);
-        if (!vc?.isVoiceBased()) throw new Error('Expected a voice channel');
+        if (!vc?.isVoiceBased()) throw Exceptions.ERR_INVALID_ARG_TYPE('channel', 'VoiceBasedChannel', !vc ? 'undefined' : `channel type ${vc.type}`);
 
         const originalResult = query instanceof SearchResult ? query : await this.search(query, options);
         const result = (await options.afterSearch?.(originalResult)) || originalResult;
         if (result.isEmpty()) {
-            throw new Error(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
+            throw Exceptions.ERR_NO_RESULT(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
         }
 
         const queue = this.nodes.create(vc.guild, options.nodeOptions);
@@ -381,7 +384,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             } else {
                 queue.addTrack(result.playlist);
             }
-            if (!queue.isPlaying()) await queue.node.play();
+            if (!queue.isPlaying()) await queue.node.play(null, options.audioPlayerOptions);
         } finally {
             this.debug(`[AsyncQueue] Releasing an entry from the queue...`);
             queue.tasksQueue.release();
