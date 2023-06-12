@@ -29,8 +29,8 @@ export class Track<T = unknown> {
     } as RawTrackData;
     public extractor: BaseExtractor | null = null;
     public readonly id = SnowflakeUtil.generate().toString();
-    private __metadata: T | undefined;
-    private __reqMetadataFn: () => Promise<T>;
+    private __metadata: T | null = null;
+    private __reqMetadataFn: () => Promise<T | null>;
 
     /**
      * Track constructor
@@ -49,8 +49,8 @@ export class Track<T = unknown> {
         this.playlist = data.playlist;
         this.description = `${this.title} by ${this.author}`;
         this.raw = Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data);
-        this.__metadata = data.metadata;
-        this.__reqMetadataFn = data.requestMetadata || (() => Promise.reject<T>(null));
+        this.__metadata = data.metadata ?? null;
+        this.__reqMetadataFn = data.requestMetadata || (() => Promise.resolve<T | null>(null));
     }
 
     /**
@@ -67,7 +67,7 @@ export class Track<T = unknown> {
     /**
      * Set metadata for this track
      */
-    public setMetadata(m: T) {
+    public setMetadata(m: T | null) {
         this.__metadata = m;
     }
 

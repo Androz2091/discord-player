@@ -8,7 +8,7 @@ import { type AudioPlayer, AudioResource, StreamType } from '@discordjs/voice';
 import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
 import { Playlist } from '../fabric/Playlist';
 import { GuildQueueHistory } from './GuildQueueHistory';
-import { GuildQueuePlayerNode } from './GuildQueuePlayerNode';
+import { GuildQueuePlayerNode, StreamConfig } from './GuildQueuePlayerNode';
 import { GuildQueueAudioFilters } from './GuildQueueAudioFilters';
 import { Readable } from 'stream';
 import { FiltersName, QueueRepeatMode, SearchQueryType } from '../types/types';
@@ -44,6 +44,7 @@ export interface GuildNodeInit<Meta = unknown> {
     bufferingTimeout: number;
     noEmitInsert: boolean;
     maxSize?: number;
+    preferBridgedMetadata: boolean;
 }
 
 export interface VoiceConnectConfig {
@@ -62,100 +63,104 @@ export type OnAfterCreateStreamHandler = (stream: Readable, queue: GuildQueue) =
 
 export type PlayerTriggeredReason = 'filters' | 'normal';
 
-export enum GuildQueueEvent {
+export const GuildQueueEvent = {
     /**
      * Emitted when audio track is added to the queue
      */
-    audioTrackAdd = 'audioTrackadd',
+    audioTrackAdd: 'audioTrackadd',
     /**
      * Emitted when audio tracks were added to the queue
      */
-    audioTracksAdd = 'audioTracksAdd',
+    audioTracksAdd: 'audioTracksAdd',
     /**
      * Emitted when audio track is removed from the queue
      */
-    audioTrackRemove = 'audioTrackRemove',
+    audioTrackRemove: 'audioTrackRemove',
     /**
      * Emitted when audio tracks are removed from the queue
      */
-    audioTracksRemove = 'audioTracksRemove',
+    audioTracksRemove: 'audioTracksRemove',
     /**
      * Emitted when a connection is created
      */
-    connection = 'connection',
+    connection: 'connection',
     /**
      * Emitted when the bot is disconnected from the channel
      */
-    disconnect = 'disconnect',
+    disconnect: 'disconnect',
     /**
      * Emitted when the queue sends a debug info
      */
-    debug = 'debug',
+    debug: 'debug',
     /**
      * Emitted when the queue encounters error
      */
-    error = 'error',
+    error: 'error',
     /**
      * Emitted when the voice channel is empty
      */
-    emptyChannel = 'emptyChannel',
+    emptyChannel: 'emptyChannel',
     /**
      * Emitted when the queue is empty
      */
-    emptyQueue = 'emptyQueue',
+    emptyQueue: 'emptyQueue',
     /**
      * Emitted when the audio player starts streaming audio track
      */
-    playerStart = 'playerStart',
+    playerStart: 'playerStart',
     /**
      * Emitted when the audio player errors while streaming audio track
      */
-    playerError = 'playerError',
+    playerError: 'playerError',
     /**
      * Emitted when the audio player finishes streaming audio track
      */
-    playerFinish = 'playerFinish',
+    playerFinish: 'playerFinish',
     /**
      * Emitted when the audio player skips current track
      */
-    playerSkip = 'playerSkip',
+    playerSkip: 'playerSkip',
     /**
      * Emitted when the audio player is triggered
      */
-    playerTrigger = 'playerTrigger',
+    playerTrigger: 'playerTrigger',
     /**
      * Emitted when the voice state is updated. Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
      */
-    voiceStateUpdate = 'voiceStateUpdate',
+    voiceStateUpdate: 'voiceStateUpdate',
     /**
      * Emitted when volume is updated
      */
-    volumeChange = 'volumeChange',
+    volumeChange: 'volumeChange',
     /**
      * Emitted when player is paused
      */
-    playerPause = 'playerPause',
+    playerPause: 'playerPause',
     /**
      * Emitted when player is resumed
      */
-    playerResume = 'playerResume',
+    playerResume: 'playerResume',
     /**
      * Biquad Filters Update
      */
-    biquadFiltersUpdate = 'biquadFiltersUpdate',
+    biquadFiltersUpdate: 'biquadFiltersUpdate',
     /**
      * Equalizer Update
      */
-    equalizerUpdate = 'equalizerUpdate',
+    equalizerUpdate: 'equalizerUpdate',
     /**
      * DSP update
      */
-    dspUpdate = 'dspUpdate',
+    dspUpdate: 'dspUpdate',
     /**
      * Audio Filters Update
      */
-    audioFiltersUpdate = 'audioFiltersUpdate'
-}
+    audioFiltersUpdate: 'audioFiltersUpdate',
+    /**
+     * Audio player will play next track
+     */
+    willPlayTrack: 'willPlayTrack'
+} as const;
 
 export interface GuildQueueEvents<Meta = unknown> {
     /**
@@ -297,6 +302,16 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param newFilters New filters
      */
     audioFiltersUpdate: (queue: GuildQueue<Meta>, oldFilters: FiltersName[], newFilters: FiltersName[]) => unknown;
+
+    /**
+     * Emitted before streaming an audio track. This event can be used to modify stream config before playing a track.
+     * Listening to this event will pause the execution of audio player until `done()` is invoked.
+     * @param queue The queue where this event occurred
+     * @param track The track that will be streamed
+     * @param config Configurations for streaming
+     * @param done Done callback
+     */
+    willPlayTrack: (queue: GuildQueue<Meta>, track: Track<unknown>, config: StreamConfig, done: () => void) => unknown;
 }
 
 export class GuildQueue<Meta = unknown> {

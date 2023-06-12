@@ -8,6 +8,8 @@ import { GuildQueue } from './GuildQueue';
 import { setTimeout as waitFor } from 'timers/promises';
 import { AsyncQueue } from '../utils/AsyncQueue';
 import { Exceptions } from '../errors';
+import { TypeUtil } from '../utils/TypeUtil';
+import { CreateStreamOps } from '../VoiceInterface/StreamDispatcher';
 
 export const FFMPEG_SRATE_REGEX = /asetrate=\d+\*(\d(\.\d)?)/;
 
@@ -27,6 +29,11 @@ export interface PlayerTimestamp {
         value: number;
     };
     progress: number;
+}
+
+export interface StreamConfig {
+    dispatcherConfig: CreateStreamOps;
+    playerConfig: ResourcePlayOptions;
 }
 
 export class GuildQueuePlayerNode<Meta = unknown> {
@@ -118,9 +125,31 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      * Estimated total duration of the player
      */
     public get estimatedDuration() {
-        const dur = this.queue.currentTrack?.durationMS ?? 0;
+        const dur = this.totalDuration;
 
         return Math.round(dur / this.getDurationMultiplier());
+    }
+
+    /**
+     * Total duration of the current audio track
+     */
+    public get totalDuration() {
+        const prefersBridgedMetadata = this.queue.options.preferBridgedMetadata;
+        const track = this.queue.currentTrack;
+
+        if (prefersBridgedMetadata && track?.metadata != null && typeof track.metadata === 'object' && 'bridge' in track.metadata) {
+            const duration = (
+                track as Track<{
+                    bridge: {
+                        duration: number;
+                    };
+                }>
+            ).metadata?.bridge.duration;
+
+            if (TypeUtil.isNumber(duration)) return duration;
+        }
+
+        return track?.durationMS ?? 0;
     }
 
     /**
@@ -131,7 +160,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         if (!this.queue.currentTrack) return null;
 
         const current = ignoreFilters ? this.playbackTime : this.estimatedPlaybackTime;
-        const total = ignoreFilters ? this.queue.currentTrack.durationMS : this.estimatedDuration;
+        const total = ignoreFilters ? this.totalDuration : this.estimatedDuration;
 
         return {
             current: {
@@ -483,37 +512,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const cookies = track.raw?.source === 'youtube' ? (<any>this.queue.player.options.ytdlOptions?.requestOptions)?.headers?.cookie : undefined;
-            const pcmStream = this.#createFFmpegStream(streamSrc.stream, track, options.seek ?? 0, cookies);
-
-            if (options.transitionMode) {
-                this.queue.debug(`Transition mode detected, player will wait for buffering timeout to expire (Timeout: ${this.queue.options.bufferingTimeout}ms)`);
-                await waitFor(this.queue.options.bufferingTimeout);
-                this.queue.debug('Buffering timeout has expired!');
-            }
-
-            this.queue.debug(
-                `Preparing final stream config: ${JSON.stringify(
-                    {
-                        disableBiquad: this.queue.options.biquad === false,
-                        disableEqualizer: this.queue.options.equalizer === false,
-                        disableVolume: this.queue.options.volume === false,
-                        disableFilters: this.queue.options.filterer === false,
-                        disableResampler: this.queue.options.resampler === false,
-                        sampleRate: typeof this.queue.options.resampler === 'number' && this.queue.options.resampler > 0 ? this.queue.options.resampler : undefined,
-                        biquadFilter: this.queue.filters._lastFiltersCache.biquad || undefined,
-                        eq: this.queue.filters._lastFiltersCache.equalizer,
-                        defaultFilters: this.queue.filters._lastFiltersCache.filters,
-                        volume: this.queue.filters._lastFiltersCache.volume,
-                        transitionMode: !!options.transitionMode,
-                        ffmpegFilters: this.queue.filters.ffmpeg.toString(),
-                        seek: options.seek
-                    },
-                    null,
-                    2
-                )}`
-            );
-
-            const resource = await this.queue.dispatcher.createStream(pcmStream, {
+            const createStreamConfig = {
                 disableBiquad: this.queue.options.biquad === false,
                 disableEqualizer: this.queue.options.equalizer === false,
                 disableVolume: this.queue.options.volume === false,
@@ -526,7 +525,34 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 volume: this.queue.filters._lastFiltersCache.volume,
                 data: track,
                 type: StreamType.Raw
-            });
+            };
+
+            const trackStreamConfig: StreamConfig = {
+                dispatcherConfig: createStreamConfig,
+                playerConfig: options
+            };
+
+            let resolver: () => void = Util.noop;
+            const donePromise = new Promise<void>((resolve) => (resolver = resolve));
+
+            const success = this.queue.player.events.emit('willPlayTrack', this.queue, track, trackStreamConfig, resolver!);
+
+            // prevent dangling promise
+            if (!success) resolver();
+
+            await donePromise;
+
+            const pcmStream = this.#createFFmpegStream(streamSrc.stream, track, options.seek ?? 0, cookies);
+
+            if (options.transitionMode) {
+                this.queue.debug(`Transition mode detected, player will wait for buffering timeout to expire (Timeout: ${this.queue.options.bufferingTimeout}ms)`);
+                await waitFor(this.queue.options.bufferingTimeout);
+                this.queue.debug('Buffering timeout has expired!');
+            }
+
+            this.queue.debug(`Preparing final stream config: ${JSON.stringify(trackStreamConfig, null, 2)}`);
+
+            const resource = await this.queue.dispatcher.createStream(pcmStream, createStreamConfig);
 
             this.queue.setTransitioning(!!options.transitionMode);
 

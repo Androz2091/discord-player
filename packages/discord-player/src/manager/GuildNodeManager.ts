@@ -32,6 +32,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
     bufferingTimeout?: number;
     noEmitInsert?: boolean;
     maxSize?: number;
+    preferBridgedMetadata?: boolean;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
@@ -72,6 +73,7 @@ export class GuildNodeManager<Meta = unknown> {
         options.connectionTimeout ??= this.player.options.connectionTimeout;
         options.bufferingTimeout ??= 1000;
         options.maxSize ??= Infinity;
+        options.preferBridgedMetadata = Boolean(options.preferBridgedMetadata);
 
         if (getGlobalRegistry().has('@[onBeforeCreateStream]') && !options.onBeforeCreateStream) {
             options.onBeforeCreateStream = getGlobalRegistry().get('@[onBeforeCreateStream]') as OnBeforeCreateStreamHandler;
@@ -105,7 +107,8 @@ export class GuildNodeManager<Meta = unknown> {
             selfDeaf: options.selfDeaf,
             ffmpegFilters: options.defaultFFmpegFilters ?? [],
             bufferingTimeout: options.bufferingTimeout,
-            noEmitInsert: options.noEmitInsert ?? false
+            noEmitInsert: options.noEmitInsert ?? false,
+            preferBridgedMetadata: options.preferBridgedMetadata
         });
 
         this.cache.set(server.id, queue);
