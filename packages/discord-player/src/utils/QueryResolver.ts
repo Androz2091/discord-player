@@ -1,4 +1,3 @@
-import { YouTube } from 'youtube-sr';
 import { QueryType } from '../types/types';
 import { TypeUtil } from './TypeUtil';
 import { Exceptions } from '../errors';
@@ -15,6 +14,9 @@ const appleMusicPlaylistRegex = /^https?:\/\/music\.apple\.com\/.+?\/playlist\/.
 const appleMusicAlbumRegex = /^https?:\/\/music\.apple\.com\/.+?\/album\/.+\/([0-9]+)$/;
 const soundcloudTrackRegex = /^https?:\/\/(m.|www.)?soundcloud.com\/(\w|-)+\/(\w|-)+(.+)?$/;
 const soundcloudPlaylistRegex = /^https?:\/\/(m.|www.)?soundcloud.com\/(\w|-)+\/sets\/(\w|-)+(.+)?$/;
+const youtubePlaylistRegex = /^https?:\/\/(www.)?youtube.com\/playlist\?list=((PL|FL|UU|LL|RD|OL)[a-zA-Z0-9-_]{16,41})$/;
+const youtubeVideoURLRegex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w-]+\?v=|embed\/|v\/)?)([\w-]+)(\S+)?$/;
+const youtubeVideoIdRegex = /^[a-zA-Z0-9-_]{11}$/;
 // #endregion scary things above *sigh*
 
 class QueryResolver {
@@ -35,7 +37,8 @@ class QueryResolver {
             appleMusicPlaylistRegex,
             appleMusicSongRegex,
             soundcloudTrackRegex,
-            soundcloudPlaylistRegex
+            soundcloudPlaylistRegex,
+            youtubePlaylistRegex
         };
     }
 
@@ -53,7 +56,7 @@ class QueryResolver {
         if (spotifyPlaylistRegex.test(query)) return QueryType.SPOTIFY_PLAYLIST;
         if (spotifyAlbumRegex.test(query)) return QueryType.SPOTIFY_ALBUM;
         if (spotifySongRegex.test(query)) return QueryType.SPOTIFY_SONG;
-        if (YouTube.isPlaylist(query)) return QueryType.YOUTUBE_PLAYLIST;
+        if (youtubePlaylistRegex.test(query)) return QueryType.YOUTUBE_PLAYLIST;
         if (QueryResolver.validateId(query) || QueryResolver.validateURL(query)) return QueryType.YOUTUBE_VIDEO;
         if (vimeoRegex.test(query)) return QueryType.VIMEO;
         if (reverbnationRegex.test(query)) return QueryType.REVERBNATION;
@@ -80,11 +83,11 @@ class QueryResolver {
     }
 
     static validateId(q: string) {
-        return YouTube.Regex.VIDEO_ID.test(q);
+        return youtubeVideoIdRegex.test(q);
     }
 
     static validateURL(q: string) {
-        return YouTube.Regex.VIDEO_URL.test(q);
+        return youtubeVideoURLRegex.test(q);
     }
 }
 
