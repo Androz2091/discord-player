@@ -508,6 +508,20 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * Set max size for this queue
+     * @param size The size to set
+     */
+    public setMaxSize(size: number) {
+        if (!TypeUtil.isNumber(size)) {
+            throw Exceptions.ERR_INVALID_ARG_TYPE('size', 'number', typeof size);
+        }
+
+        if (size < 1) size = Infinity;
+
+        this.options.maxSize = size;
+    }
+
+    /**
      * Clear this queue
      */
     public clear() {

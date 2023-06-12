@@ -50,11 +50,11 @@ class QueryResolver {
 
         if (soundcloudPlaylistRegex.test(query)) return QueryType.SOUNDCLOUD_PLAYLIST;
         if (soundcloudTrackRegex.test(query)) return QueryType.SOUNDCLOUD_TRACK;
-        if (YouTube.isPlaylist(query)) return QueryType.YOUTUBE_PLAYLIST;
-        if (QueryResolver.validateId(query) || QueryResolver.validateURL(query)) return QueryType.YOUTUBE_VIDEO;
-        if (spotifySongRegex.test(query)) return QueryType.SPOTIFY_SONG;
         if (spotifyPlaylistRegex.test(query)) return QueryType.SPOTIFY_PLAYLIST;
         if (spotifyAlbumRegex.test(query)) return QueryType.SPOTIFY_ALBUM;
+        if (spotifySongRegex.test(query)) return QueryType.SPOTIFY_SONG;
+        if (YouTube.isPlaylist(query)) return QueryType.YOUTUBE_PLAYLIST;
+        if (QueryResolver.validateId(query) || QueryResolver.validateURL(query)) return QueryType.YOUTUBE_VIDEO;
         if (vimeoRegex.test(query)) return QueryType.VIMEO;
         if (reverbnationRegex.test(query)) return QueryType.REVERBNATION;
         if (appleMusicAlbumRegex.test(query)) return QueryType.APPLE_MUSIC_ALBUM;

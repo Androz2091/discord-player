@@ -31,6 +31,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
     defaultFFmpegFilters?: FiltersName[];
     bufferingTimeout?: number;
     noEmitInsert?: boolean;
+    maxSize?: number;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
@@ -70,6 +71,7 @@ export class GuildNodeManager<Meta = unknown> {
         options.selfDeaf ??= true;
         options.connectionTimeout ??= this.player.options.connectionTimeout;
         options.bufferingTimeout ??= 1000;
+        options.maxSize ??= Infinity;
 
         if (getGlobalRegistry().has('@[onBeforeCreateStream]') && !options.onBeforeCreateStream) {
             options.onBeforeCreateStream = getGlobalRegistry().get('@[onBeforeCreateStream]') as OnBeforeCreateStreamHandler;

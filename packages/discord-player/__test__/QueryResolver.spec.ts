@@ -60,6 +60,11 @@ describe('QueryResolver', () => {
         expect(qr.resolve(query)).toBe(QueryType.SPOTIFY_PLAYLIST);
     });
 
+    it('should be spotifyPlaylist (alternate)', () => {
+        const query = 'https://open.spotify.com/playlist/6Wu1PLrAuL1aApvX0iX9Rh?si=5b6c2f185b624001';
+        expect(qr.resolve(query)).toBe(QueryType.SPOTIFY_PLAYLIST);
+    });
+
     it('should be spotifyAlbum', () => {
         const query = 'https://open.spotify.com/album/3nzuGtN3nXARvvecier4K0';
         expect(qr.resolve(query)).toBe(QueryType.SPOTIFY_ALBUM);
