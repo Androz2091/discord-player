@@ -373,7 +373,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
     }
 
     public parse(q: string) {
-        const [, queryType, id] = re.exec(q) || [];
+        const [, , , queryType, id] = re.exec(q) || [];
 
         return { queryType, id };
     }
