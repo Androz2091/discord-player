@@ -11,9 +11,9 @@ new GuildNodeManager(player)
 
 ## Properties
 ### public cache: Collection\<string, GuildQueue\<unknown>>
-
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildNodeManager.ts#L42)
 ### public player: Player
-
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildNodeManager.ts#L43)
 
 ## Methods
 ### public create(guild, options): GuildQueue\<T>
@@ -25,6 +25,9 @@ Create guild queue if it does not exist
 | ----------- | ----------- | ----------- | ----------- |
 | guild | GuildResolvable | ❌ | The guild which will be the owner of the queue |
 | options | GuildNodeCreateOptions\<T> | ❌ | Queue initializer options |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildNodeManager.ts#L50)
 ### public delete(node): boolean
 Delete queue
 
@@ -33,6 +36,9 @@ Delete queue
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | node | NodeResolvable | ❌ | Queue resolvable |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildNodeManager.ts#L147)
 ### public get(node): null \| GuildQueue\<T>
 Get existing queue
 
@@ -41,6 +47,9 @@ Get existing queue
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | node | NodeResolvable | ❌ | Queue resolvable |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildNodeManager.ts#L127)
 ### public has(node): boolean
 Check if a queue exists
 
@@ -49,6 +58,9 @@ Check if a queue exists
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | node | NodeResolvable | ❌ | Queue resolvable |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildNodeManager.ts#L138)
 ### public resolve(node): undefined \| GuildQueue\<unknown>
 Resolve queue
 
@@ -57,6 +69,9 @@ Resolve queue
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | node | NodeResolvable | ❌ | Queue resolvable |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildNodeManager.ts#L168)
 ### public resolveId(node): null \| string
 Resolve queue id
 
@@ -65,3 +80,6 @@ Resolve queue id
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | node | NodeResolvable | ❌ | Queue resolvable |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildNodeManager.ts#L180)

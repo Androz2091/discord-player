@@ -11,9 +11,9 @@ new GuildQueueHistory(queue)
 
 ## Properties
 ### public queue: GuildQueue\<Meta>
-
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueHistory.ts#L8)
 ### public tracks: Queue\<Track\<unknown>>
-
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueHistory.ts#L7)
 ### public currentTrack: null \| Track\<unknown>
 Current track in the queue
 ### public disabled: boolean
@@ -26,16 +26,37 @@ Previous track in the queue
 Gets the size of the queue
 
 ## Methods
-### public back(): Promise\<void>
+### public back(preserveCurrent): Promise\<void>
 Alias to [GuildQueueHistory].previous()
+
+
+
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| preserveCurrent | boolean | ❌ |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueHistory.ts#L107)
 ### public clear(): void
 Clear history
-### public getSize(): number
 
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueHistory.ts#L73)
+### public getSize(): number
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueHistory.ts#L46)
 ### public isEmpty(): boolean
 If history is empty
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueHistory.ts#L53)
 ### public next(): Promise\<void>
 Play the next track in the queue
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueHistory.ts#L80)
 ### public previous(preserveCurrent): Promise\<void>
 Play the previous track in the queue
 
@@ -44,6 +65,9 @@ Play the previous track in the queue
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | preserveCurrent | boolean | ❌ |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueHistory.ts#L92)
 ### public push(track): boolean
 Add track to track history
 
@@ -52,3 +76,12 @@ Add track to track history
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | track | Track\<unknown> \| Array\<Track\<unknown>> | ❌ | The track to add |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueHistory.ts#L61)
+### public resize(): void
+Resize history store
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueHistory.ts#L114)

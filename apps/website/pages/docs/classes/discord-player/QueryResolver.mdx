@@ -3,7 +3,7 @@
 
 
 ## Properties
-### public regex: \{ appleMusicAlbumRegex: RegExp,appleMusicPlaylistRegex: RegExp,appleMusicSongRegex: RegExp,attachmentRegex: RegExp,reverbnationRegex: RegExp,soundcloudPlaylistRegex: RegExp,soundcloudTrackRegex: RegExp,spotifyAlbumRegex: RegExp,spotifyPlaylistRegex: RegExp,spotifySongRegex: RegExp,vimeoRegex: RegExp }
+### public regex: \{ appleMusicAlbumRegex: RegExp,appleMusicPlaylistRegex: RegExp,appleMusicSongRegex: RegExp,attachmentRegex: RegExp,reverbnationRegex: RegExp,soundcloudPlaylistRegex: RegExp,soundcloudTrackRegex: RegExp,spotifyAlbumRegex: RegExp,spotifyPlaylistRegex: RegExp,spotifySongRegex: RegExp,vimeoRegex: RegExp,youtubePlaylistRegex: RegExp }
 
 
 ## Methods
@@ -17,7 +17,7 @@ Parses vimeo id from url
 | query | string | ❌ | The query |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/discord-player/src/utils/QueryResolver.ts#L73)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/utils/QueryResolver.ts#L76)
 ### public static resolve(query, fallbackSearchEngine): 'auto' \| 'youtube' \| 'youtubePlaylist' \| 'soundcloudTrack' \| 'soundcloudPlaylist' \| 'soundcloud' \| 'spotifySong' \| 'spotifyAlbum' \| 'spotifyPlaylist' \| 'spotifySearch' \| 'facebook' \| 'vimeo' \| 'arbitrary' \| 'reverbnation' \| 'youtubeSearch' \| 'youtubeVideo' \| 'soundcloudSearch' \| 'appleMusicSong' \| 'appleMusicAlbum' \| 'appleMusicPlaylist' \| 'appleMusicSearch' \| 'file' \| 'autoSearch'
 Resolves the given search query
 
@@ -29,18 +29,18 @@ Resolves the given search query
 | fallbackSearchEngine | 'auto' \| 'youtube' \| 'youtubePlaylist' \| 'soundcloudTrack' \| 'soundcloudPlaylist' \| 'soundcloud' \| 'spotifySong' \| 'spotifyAlbum' \| 'spotifyPlaylist' \| 'spotifySearch' \| 'facebook' \| 'vimeo' \| 'arbitrary' \| 'reverbnation' \| 'youtubeSearch' \| 'youtubeVideo' \| 'soundcloudSearch' \| 'appleMusicSong' \| 'appleMusicAlbum' \| 'appleMusicPlaylist' \| 'appleMusicSearch' \| 'file' \| 'autoSearch' | ❌ | N/A |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/discord-player/src/utils/QueryResolver.ts#L46)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/utils/QueryResolver.ts#L49)
 ### public static validateId(q): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | q | string | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/discord-player/src/utils/QueryResolver.ts#L82)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/utils/QueryResolver.ts#L85)
 ### public static validateURL(q): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | q | string | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/7529a33/packages/discord-player/src/utils/QueryResolver.ts#L86)
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/utils/QueryResolver.ts#L89)

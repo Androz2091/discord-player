@@ -11,7 +11,7 @@ new FFmpegFilterer(af)
 
 ## Properties
 ### public af: GuildQueueAudioFilters\<Meta>
-
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L45)
 ### public filters: Array\<keyof QueueFilters>
 Currently active ffmpeg filters
 
@@ -25,10 +25,21 @@ Create ffmpeg stream
 | ----------- | ----------- | ----------- | ----------- |
 | source | string \| Readable | ❌ | The stream source |
 | options | FFmpegStreamOptions | ❌ | The stream options |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L65)
 ### public getFiltersDisabled(): Array\<keyof QueueFilters>
 Get list of disabled filters
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L133)
 ### public getFiltersEnabled(): Array\<keyof QueueFilters>
 Get list of enabled filters
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L126)
 ### public isDisabled(filter): boolean
 Check if the given filter is disabled
 
@@ -37,6 +48,9 @@ Check if the given filter is disabled
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | filter | T | ❌ | The filter |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L149)
 ### public isEnabled(filter): boolean
 Check if the given filter is enabled
 
@@ -45,6 +59,9 @@ Check if the given filter is enabled
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | filter | T | ❌ | The filter |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L141)
 ### public isValidFilter(filter): filter is keyof QueueFilters
 Check if the given filter is a valid filter
 
@@ -53,6 +70,9 @@ Check if the given filter is a valid filter
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | filter | string | ❌ | The filter to test |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L157)
 ### public setDefaults(ff): void
 Set default filters
 
@@ -61,6 +81,9 @@ Set default filters
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | ff | Array\<keyof QueueFilters> | ❌ | Filters list |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L119)
 ### public setFilters(filters): Promise\<boolean>
 Set ffmpeg filters
 
@@ -69,12 +92,27 @@ Set ffmpeg filters
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | filters | boolean \| Array\<keyof QueueFilters> \| Record\<keyof QueueFilters, boolean> | ❌ | The filters |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L73)
 ### public toArray(): Array\<string>
 Convert current filters to array
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L164)
 ### public toJSON(): Record\<keyof QueueFilters, string>
 Convert current filters to JSON object
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L171)
 ### public toString(): string
 String representation of current filters
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L182)
 ### public toggle(filters): Promise\<boolean>
 Toggle given ffmpeg filter(s)
 
@@ -83,3 +121,6 @@ Toggle given ffmpeg filter(s)
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
 | filters | keyof QueueFilters \| Array\<keyof QueueFilters> | ❌ | The filter(s) |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueueAudioFilters.ts#L103)
