@@ -61,6 +61,9 @@ export class GuildQueueHistory<Meta = unknown> {
     public push(track: Track | Track[]) {
         if (this.disabled) return false;
         this.tracks.add(track);
+
+        this.resize();
+
         return true;
     }
 
@@ -101,7 +104,16 @@ export class GuildQueueHistory<Meta = unknown> {
     /**
      * Alias to [GuildQueueHistory].previous()
      */
-    public back() {
-        return this.previous();
+    public back(preserveCurrent = true) {
+        return this.previous(preserveCurrent);
+    }
+
+    /**
+     * Resize history store
+     */
+    public resize() {
+        if (!Number.isFinite(this.queue.maxHistorySize)) return;
+        if (this.tracks.store.length < this.queue.maxHistorySize) return;
+        this.tracks.store.splice(this.queue.maxHistorySize);
     }
 }

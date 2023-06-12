@@ -44,6 +44,7 @@ export interface GuildNodeInit<Meta = unknown> {
     bufferingTimeout: number;
     noEmitInsert: boolean;
     maxSize?: number;
+    maxHistorySize?: number;
     preferBridgedMetadata: boolean;
 }
 
@@ -341,6 +342,7 @@ export class GuildQueue<Meta = unknown> {
 
         options.selfDeaf ??= true;
         options.maxSize ??= Infinity;
+        options.maxHistorySize ??= Infinity;
 
         if (!TypeUtil.isNullish(this.options.biquad) && !TypeUtil.isBoolean(this.options.biquad)) {
             this.filters._lastFiltersCache.biquad = this.options.biquad;
@@ -366,7 +368,12 @@ export class GuildQueue<Meta = unknown> {
             throw Exceptions.ERR_INVALID_ARG_TYPE('[GuildNodeInit.maxSize]', 'number', typeof options.maxSize);
         }
 
+        if (!TypeUtil.isNumber(options.maxHistorySize)) {
+            throw Exceptions.ERR_INVALID_ARG_TYPE('[GuildNodeInit.maxHistorySize]', 'number', typeof options.maxHistorySize);
+        }
+
         if (options.maxSize < 1) options.maxSize = Infinity;
+        if (options.maxHistorySize < 1) options.maxHistorySize = Infinity;
 
         this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
     }
@@ -520,6 +527,34 @@ export class GuildQueue<Meta = unknown> {
      */
     public getSize() {
         return this.size;
+    }
+
+    /**
+     * Max history size of this queue
+     */
+    public get maxHistorySize() {
+        return this.options.maxHistorySize ?? Infinity;
+    }
+
+    /**
+     * Max history size of this queue
+     */
+    public getMaxHistorySize() {
+        return this.maxHistorySize;
+    }
+
+    /**
+     * Set max history size for this queue
+     * @param size The size to set
+     */
+    public setMaxHistorySize(size: number) {
+        if (!TypeUtil.isNumber(size)) {
+            throw Exceptions.ERR_INVALID_ARG_TYPE('size', 'number', typeof size);
+        }
+
+        if (size < 1) size = Infinity;
+
+        this.options.maxHistorySize = size;
     }
 
     /**
