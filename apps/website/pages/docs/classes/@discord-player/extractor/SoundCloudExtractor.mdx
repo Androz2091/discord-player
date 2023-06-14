@@ -16,11 +16,11 @@ new SoundCloudExtractor(context, options)
 ### public createBridgeQuery: (track: Track\<unknown>) => string
 
 ### public internal: default
-- [Source](https://github.com/Androz2091/discord-player/blob/f2dbc02/packages/extractor/src/extractors/SoundCloudExtractor.ts#L23)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/extractor/src/extractors/SoundCloudExtractor.ts#L23)
 ### public options: SoundCloudExtractorInit
 
 ### public static identifier: 'com.discord\-player.soundcloudextractor'
-- [Source](https://github.com/Androz2091/discord-player/blob/f2dbc02/packages/extractor/src/extractors/SoundCloudExtractor.ts#L21)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/extractor/src/extractors/SoundCloudExtractor.ts#L21)
 ### public identifier: string
 Identifier of this extractor
 
@@ -56,14 +56,14 @@ Dispatch an event to the player
 | event | K | ❌ | The event to dispatch |
 | args | Parameters\<PlayerEvents\[K]> | ❌ | The data to dispatch |
 ### public emptyResponse(): ExtractorInfo
-- [Source](https://github.com/Androz2091/discord-player/blob/f2dbc02/packages/extractor/src/extractors/SoundCloudExtractor.ts#L162)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/extractor/src/extractors/SoundCloudExtractor.ts#L162)
 ### public getRelatedTracks(track): Promise\<ExtractorInfo>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | track | Track\<unknown> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/f2dbc02/packages/extractor/src/extractors/SoundCloudExtractor.ts#L42)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/extractor/src/extractors/SoundCloudExtractor.ts#L42)
 ### public handle(query, context): Promise\<ExtractorInfo>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -71,7 +71,7 @@ Dispatch an event to the player
 | context | ExtractorSearchContext | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/f2dbc02/packages/extractor/src/extractors/SoundCloudExtractor.ts#L52)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/extractor/src/extractors/SoundCloudExtractor.ts#L52)
 ### public handlePostStream(stream, next): void
 A stream middleware to handle streams before passing it to the player
 
@@ -95,7 +95,7 @@ Reconfigures this extractor
 | info | Track\<unknown> | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/f2dbc02/packages/extractor/src/extractors/SoundCloudExtractor.ts#L166)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/extractor/src/extractors/SoundCloudExtractor.ts#L166)
 ### public validate(query, type?): Promise\<boolean>
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -103,4 +103,4 @@ Reconfigures this extractor
 | type | null \| SearchQueryType | ✅ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/f2dbc02/packages/extractor/src/extractors/SoundCloudExtractor.ts#L29)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/extractor/src/extractors/SoundCloudExtractor.ts#L29)

@@ -9,7 +9,7 @@ Also this does not perform checks on the current status of the queue. Refer to o
 ## Getting the player instance from anywhere
 
 ```js
-const { useMasterPlayer } = require("discord-player");
+const { useMainPlayer } = require("discord-player");
 ...
 const player = useMainPlayer();
 ```
@@ -17,7 +17,7 @@ const player = useMainPlayer();
 ## Playing a new track
 
 ```js
-const { useMasterPlayer } = require("discord-player");
+const { useMainPlayer } = require("discord-player");
 ...
 const player = useMainPlayer();
 await player.play(interaction.member.voice.channel, query);
@@ -26,7 +26,7 @@ await player.play(interaction.member.voice.channel, query);
 If you are not using `player.play()` and handling queue creation as well as other logic on your own, you may need to use `AsyncQueue` on your command, otherwise you may face [this issue](https://github.com/Androz2091/discord-player/issues/1717):
 
 ```js
-const { useMasterPlayer } = require("discord-player");
+const { useMainPlayer } = require("discord-player");
 ...
 const player = useMainPlayer();
 
@@ -56,7 +56,7 @@ try {
 ## Inserting a new track to a specific position in queue
 
 ```js
-const { useQueue, useMasterPlayer } = require("discord-player");
+const { useQueue, useMainPlayer } = require("discord-player");
 ...
 const player = useMainPlayer();
 const queue = useQueue(interaction.guild.id);

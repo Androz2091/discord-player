@@ -1,5 +1,5 @@
 import { Command } from '@sapphire/framework';
-import { useMasterPlayer, useQueue } from 'discord-player';
+import { useMainPlayer, useQueue } from 'discord-player';
 import { GuildMember } from 'discord.js';
 
 export class DisconnectCommand extends Command {

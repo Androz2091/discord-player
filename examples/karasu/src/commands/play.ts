@@ -1,5 +1,5 @@
 import { Command } from '@sapphire/framework';
-import { useMasterPlayer } from 'discord-player';
+import { useMainPlayer } from 'discord-player';
 import type { GuildMember } from 'discord.js';
 
 export class PlayCommand extends Command {

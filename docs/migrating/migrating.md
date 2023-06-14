@@ -91,7 +91,7 @@ player.events.on('playerStart', (queue, track) => {
 Let's write the command part for `play.js`. You can define the command as you desire. We will only check the command handler part:
 
 ```js
-import { useMasterPlayer } from 'discord-player';
+import { useMainPlayer } from 'discord-player';
 
 async function execute(interaction) {
     const player = useMainPlayer(); // Get the player instance that we created earlier

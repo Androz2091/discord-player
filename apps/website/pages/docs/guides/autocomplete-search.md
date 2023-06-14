@@ -32,7 +32,7 @@ client.on("interactionCreate", async (interaction) => {
 _play.js_
 
 ```js
-import { useMasterPlayer } from 'discord-player';
+import { useMainPlayer } from 'discord-player';
 
 async function autocompleteRun(interaction) {
     const player = useMainPlayer();

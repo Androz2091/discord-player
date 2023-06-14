@@ -50,10 +50,10 @@ const queue = player.nodes.create(..., {
 
 # General Hooks
 
-## useMasterPlayer (Fetch the player instance)
+## useMainPlayer (Fetch the player instance)
 
 ```js
-const { useMasterPlayer } = require("discord-player");
+const { useMainPlayer } = require("discord-player");
 ...
 const player = useMainPlayer();
 ```

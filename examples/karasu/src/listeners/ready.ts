@@ -1,5 +1,5 @@
 import { Listener } from '@sapphire/framework';
-import { useMasterPlayer } from 'discord-player';
+import { useMainPlayer } from 'discord-player';
 
 export class UserEvent extends Listener {
 	public constructor(context: Listener.Context, options: Listener.Options) {

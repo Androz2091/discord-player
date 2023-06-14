@@ -22,6 +22,6 @@ The code above will not create duplicate instances of `Player`. Each time you ca
 Once you initialize Player, you can access that instance of player from anywhere as shown below:
 
 ```js
-const { useMasterPlayer } = require('discord-player');
+const { useMainPlayer } = require('discord-player');
 const player = useMainPlayer();
 ```
