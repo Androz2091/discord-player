@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import { FiltersName, QueueFilters } from '../types/types';
 import { AudioFilters } from '../utils/AudioFilters';
-import { GuildQueue } from './GuildQueue';
+import { GuildQueue, GuildQueueEvent } from './GuildQueue';
 import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { FFmpegStreamOptions, createFFmpegStream } from '../utils/FFmpegStream';
 
@@ -52,7 +52,7 @@ export class FFmpegFilterer<Meta = unknown> {
         this.#ffmpegFilters = [...new Set(filters)];
 
         return this.af.triggerReplay(seekTime).then((t) => {
-            queue.player.events.emit('audioFiltersUpdate', queue, prev, this.#ffmpegFilters.slice());
+            queue.player.events.emit(GuildQueueEvent.audioFiltersUpdate, queue, prev, this.#ffmpegFilters.slice());
             return t;
         });
     }

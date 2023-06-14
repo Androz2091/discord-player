@@ -1,6 +1,6 @@
-import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, ChannelType, GuildVoiceChannelResolvable, version as djsVersion } from 'discord.js';
+import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, GuildVoiceChannelResolvable, version as djsVersion } from 'discord.js';
 import { Playlist, Track, SearchResult } from './fabric';
-import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions } from './manager';
+import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions, GuildQueueEvent } from './manager';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
 import { QueryResolver } from './utils/QueryResolver';
@@ -13,6 +13,7 @@ import { QueryCache } from './utils/QueryCache';
 import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
 import { FFmpeg } from './utils/FFmpeg';
 import { Exceptions } from './errors';
+import { defaultVoiceStateHandler } from './DefaultVoiceStateHandler';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -32,11 +33,14 @@ export interface PlayerNodeInitializerOptions<T> extends SearchOptions {
     afterSearch?: (result: SearchResult) => Promise<SearchResult>;
 }
 
+export type VoiceStateHandler = (player: Player, queue: GuildQueue, oldVoiceState: VoiceState, newVoiceState: VoiceState) => Awaited<void>;
+
 export class Player extends PlayerEventsEmitter<PlayerEvents> {
     #lastLatency = -1;
     #voiceStateUpdateListener = this.handleVoiceState.bind(this);
     #lagMonitorTimeout!: NodeJS.Timeout;
     #lagMonitorInterval!: NodeJS.Timer;
+    #onVoiceStateUpdate: VoiceStateHandler = defaultVoiceStateHandler;
     public static readonly version: string = '[VI]{{inject}}[/VI]';
     public static _singletonKey = kSingleton;
     public readonly id = SnowflakeUtil.generate().toString();
@@ -108,6 +112,14 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 enumerable: false
             });
         }
+    }
+
+    /**
+     * Override default voice state update handler
+     * @param handler The handler callback
+     */
+    public onVoiceStateUpdate(handler: VoiceStateHandler) {
+        this.#onVoiceStateUpdate = handler;
     }
 
     public debug(m: string) {
@@ -216,88 +228,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         if (!queue || !queue.connection || !queue.channel) return;
 
         // dispatch voice state update
-        const wasHandled = this.events.emit('voiceStateUpdate', queue, oldState, newState);
+        const wasHandled = this.events.emit(GuildQueueEvent.voiceStateUpdate, queue, oldState, newState);
         // if the event was handled, return assuming the listener implemented all of the logic below
         if (wasHandled && !this.options.lockVoiceStateHandler) return;
 
-        if (oldState.channelId && !newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
-            try {
-                queue.delete();
-            } catch {
-                /* noop */
-            }
-            return void this.events.emit('disconnect', queue);
-        }
-
-        if (!oldState.channelId && newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
-            if (newState.serverMute != null && oldState.serverMute !== newState.serverMute) {
-                queue.node.setPaused(newState.serverMute);
-            } else if (newState.channel?.type === ChannelType.GuildStageVoice && newState.suppress != null && oldState.suppress !== newState.suppress) {
-                queue.node.setPaused(newState.suppress);
-                if (newState.suppress) {
-                    newState.guild.members.me?.voice.setRequestToSpeak(true).catch(Util.noop);
-                }
-            }
-        }
-
-        if (!newState.channelId && oldState.channelId === queue.channel.id) {
-            if (!Util.isVoiceEmpty(queue.channel)) return;
-            const timeout = setTimeout(() => {
-                if (!Util.isVoiceEmpty(queue.channel!)) return;
-                if (!this.nodes.has(queue.guild.id)) return;
-                if (queue.options.leaveOnEmpty) queue.delete();
-                this.events.emit('emptyChannel', queue);
-            }, queue.options.leaveOnEmptyCooldown || 0).unref();
-            queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
-        }
-
-        if (newState.channelId && newState.channelId === queue.channel.id) {
-            const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
-            const channelEmpty = Util.isVoiceEmpty(queue.channel);
-            if (!channelEmpty && emptyTimeout) {
-                clearTimeout(emptyTimeout);
-                queue.timeouts.delete(`empty_${oldState.guild.id}`);
-            }
-        }
-
-        if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-            if (newState.member?.id === newState.guild.members.me?.id) {
-                if (queue.connection && newState.member?.id === newState.guild.members.me?.id) queue.channel = newState.channel!;
-                const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
-                const channelEmpty = Util.isVoiceEmpty(queue.channel);
-                if (!channelEmpty && emptyTimeout) {
-                    clearTimeout(emptyTimeout);
-                    queue.timeouts.delete(`empty_${oldState.guild.id}`);
-                } else {
-                    const timeout = setTimeout(() => {
-                        if (queue.connection && !Util.isVoiceEmpty(queue.channel!)) return;
-                        if (!this.nodes.has(queue.guild.id)) return;
-                        if (queue.options.leaveOnEmpty) queue.delete();
-                        this.events.emit('emptyChannel', queue);
-                    }, queue.options.leaveOnEmptyCooldown || 0).unref();
-                    queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
-                }
-            } else {
-                if (newState.channelId !== queue.channel.id) {
-                    if (!Util.isVoiceEmpty(queue.channel)) return;
-                    if (queue.timeouts.has(`empty_${oldState.guild.id}`)) return;
-                    const timeout = setTimeout(() => {
-                        if (!Util.isVoiceEmpty(queue.channel!)) return;
-                        if (!this.nodes.has(queue.guild.id)) return;
-                        if (queue.options.leaveOnEmpty) queue.delete();
-                        this.events.emit('emptyChannel', queue);
-                    }, queue.options.leaveOnEmptyCooldown || 0).unref();
-                    queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
-                } else {
-                    const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
-                    const channelEmpty = Util.isVoiceEmpty(queue.channel!);
-                    if (!channelEmpty && emptyTimeout) {
-                        clearTimeout(emptyTimeout);
-                        queue.timeouts.delete(`empty_${oldState.guild.id}`);
-                    }
-                }
-            }
-        }
+        return this.#onVoiceStateUpdate(this, queue, oldState, newState);
     }
 
     /**
