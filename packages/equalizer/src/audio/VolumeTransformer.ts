@@ -15,8 +15,12 @@ export class VolumeTransformer extends PCMTransformer {
         }
     }
 
-    public get volume() {
+    public get volumeApprox() {
         return this._volume * 100;
+    }
+
+    public get volume() {
+        return Math.floor(this.volumeApprox);
     }
 
     public set volume(volume: number) {
