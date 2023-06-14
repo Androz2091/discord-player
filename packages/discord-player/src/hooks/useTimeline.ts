@@ -5,6 +5,11 @@ export interface TimelineDispatcherOptions {
     ignoreFilters: boolean;
 }
 
+/**
+ * Fetch or manipulate current track
+ * @param node Guild queue node resolvable
+ * @param options Options for timeline dispatcher
+ */
 export function useTimeline(node: NodeResolvable, options?: Partial<TimelineDispatcherOptions>) {
     const queue = getQueue(node);
     if (!queue) return null;

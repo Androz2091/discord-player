@@ -12,31 +12,31 @@ new GuildQueue(player, options)
 
 ## Properties
 ### public dispatcher: null \| StreamDispatcher
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L324)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L333)
 ### public filters: GuildQueueAudioFilters\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L326)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L335)
 ### public history: GuildQueueHistory\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L323)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L332)
 ### public node: GuildQueuePlayerNode\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L325)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L334)
 ### public onAfterCreateStream: OnAfterCreateStreamHandler
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L328)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L337)
 ### public onBeforeCreateStream: OnBeforeCreateStreamHandler
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L327)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L336)
 ### public options: GuildNodeInit\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L337)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L346)
 ### public player: Player
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L337)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L346)
 ### public repeatMode: QueueRepeatMode
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L332)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L341)
 ### public stats: GuildQueueStatistics\<Meta>
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L334)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L343)
 ### public tasksQueue: AsyncQueue
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L335)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L344)
 ### public timeouts: Collection\<string, Timeout>
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L333)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L342)
 ### public tracks: Queue\<Track\<unknown>>
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L322)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L331)
 ### public channel: null \| VoiceBasedChannel
 The voice channel of this queue
 ### public connection: null \| VoiceConnection
@@ -77,13 +77,13 @@ Add track to the queue. This will emit `audioTracksAdd` when multiple tracks are
 | track | Track\<unknown> \| Playlist \| Array\<Track\<unknown>> | ❌ | Track or playlist or array of tracks to add |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L616)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L625)
 ### public clear(): void
 Clear this queue
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L577)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L586)
 ### public connect(channelResolvable, options): Promise\<GuildQueue\<Meta>>
 Connect to a voice channel
 
@@ -95,7 +95,7 @@ Connect to a voice channel
 | options | VoiceConnectConfig | ❌ | Join config |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L680)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L689)
 ### public copyTrack(track, index): void
 Copy a track in the queue
 
@@ -107,7 +107,7 @@ Copy a track in the queue
 | index | number | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L662)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L671)
 ### public debug(m): void
 Write a debug message to this queue
 
@@ -118,37 +118,37 @@ Write a debug message to this queue
 | m | string | ❌ | The message to write |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L406)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L415)
 ### public delete(): void
 Delete this queue
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L724)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L733)
 ### public getCapacity(): number
 Get queue capacity
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L599)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L608)
 ### public getMaxHistorySize(): number
 Max history size of this queue
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L542)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L551)
 ### public getMaxSize(): number
 Max size of this queue
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L514)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L523)
 ### public getSize(): number
 The size of this queue
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L528)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L537)
 ### public insertTrack(track, index): void
 Inserts the track to the given index
 
@@ -160,31 +160,31 @@ Inserts the track to the given index
 | index | number | ❌ | The index to insert the track at (defaults to 0) |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L644)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L653)
 ### public isEmpty(): boolean
 Check if this queue has no tracks left in it
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L585)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L594)
 ### public isFull(): boolean
 Check if this queue is full
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L592)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L601)
 ### public isPlaying(): boolean
 Check if this queue currently holds active audio resource
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L608)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L617)
 ### public isTransitioning(): boolean
 if this queue is currently under transition mode
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L492)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L501)
 ### public moveTrack(track, index): void
 Moves a track in the queue
 
@@ -196,7 +196,7 @@ Moves a track in the queue
 | index | number | ❌ |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L653)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L662)
 ### public play(track, options?): Promise\<PlayerNodeInitializationResult\<Meta>>
 Play a track in this queue
 
@@ -208,7 +208,7 @@ Play a track in this queue
 | options | PlayerNodeInitializerOptions\<Meta> | ✅ | Player node initialization options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L763)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L772)
 ### public removeTrack(track): null \| Track\<unknown>
 Remove a track from queue
 
@@ -219,13 +219,13 @@ Remove a track from queue
 | track | TrackResolvable | ❌ | The track to remove |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L635)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L644)
 ### public revive(): void
 Revives this queue
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L734)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L743)
 ### public setMaxHistorySize(size): void
 Set max history size for this queue
 
@@ -236,7 +236,7 @@ Set max history size for this queue
 | size | number | ❌ | The size to set |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L550)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L559)
 ### public setMaxSize(size): void
 Set max size for this queue
 
@@ -247,7 +247,7 @@ Set max size for this queue
 | size | number | ❌ | The size to set |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L564)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L573)
 ### public setMetadata(m): void
 Set metadata for this queue
 
@@ -258,7 +258,7 @@ Set metadata for this queue
 | m | Meta | ❌ | Metadata to set |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L425)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L434)
 ### public setRepeatMode(mode): void
 Set repeat mode for this queue
 
@@ -269,7 +269,7 @@ Set repeat mode for this queue
 | mode | QueueRepeatMode | ❌ | The repeat mode to apply |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L500)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L509)
 ### public setSelfDeaf(mode?, reason?): Promise\<GuildMember>
 Set self deaf
 
@@ -281,7 +281,7 @@ Set self deaf
 | reason | string | ✅ | Reason |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L745)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L754)
 ### public setSelfMute(mode?, reason?): Promise\<GuildMember>
 Set self mute
 
@@ -293,7 +293,7 @@ Set self mute
 | reason | string | ✅ | Reason |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L754)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L763)
 ### public setTransitioning(state): void
 Set transition mode for this queue
 
@@ -304,7 +304,7 @@ Set transition mode for this queue
 | state | boolean | ❌ | The state to set |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L485)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L494)
 ### public swapTracks(src, dest): void
 Swap two tracks in the queue
 
@@ -316,4 +316,4 @@ Swap two tracks in the queue
 | dest | TrackResolvable | ❌ | The second track to swap |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L671)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L680)

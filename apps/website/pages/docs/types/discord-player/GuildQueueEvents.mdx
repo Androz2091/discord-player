@@ -8,6 +8,7 @@
 | audioTracksAdd | (queue: GuildQueue\<Meta>, track: Array\<Track\<unknown>>) => unknown | N/A | Emitted when audio tracks were added to the queue |
 | audioTracksRemove | (queue: GuildQueue\<Meta>, track: Array\<Track\<unknown>>) => unknown | N/A | Emitted when audio tracks are removed from the queue |
 | biquadFiltersUpdate | (queue: GuildQueue\<Meta>, oldFilters: null \| BiquadFilters, newFilters: null \| BiquadFilters) => unknown | N/A | Emitted when biquad filters is updated |
+| channelPopulate | (queue: GuildQueue\<Meta>) => unknown | N/A | Emitted when a voice channel is populated |
 | connection | (queue: GuildQueue\<Meta>) => unknown | N/A | Emitted when a connection is created |
 | debug | (queue: GuildQueue\<Meta>, message: string) => unknown | N/A | Emitted when the queue sends a debug info |
 | disconnect | (queue: GuildQueue\<Meta>) => unknown | N/A | Emitted when the bot is disconnected from the channel |
@@ -28,4 +29,4 @@
 | willPlayTrack | (queue: GuildQueue\<Meta>, track: Track\<unknown>, config: StreamConfig, done: (...args: unknown\[]) => void) => unknown | N/A | Emitted before streaming an audio track. This event can be used to modify stream config before playing a track. Listening to this event will pause the execution of audio player until `done()` is invoked. |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/cd5cf97/packages/discord-player/src/manager/GuildQueue.ts#L166)
+- [Source](https://github.com/Androz2091/discord-player/blob/62d0fce/packages/discord-player/src/manager/GuildQueue.ts#L170)
