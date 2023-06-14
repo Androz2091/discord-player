@@ -11,7 +11,7 @@ Also this does not perform checks on the current status of the queue. Refer to o
 ```js
 const { useMasterPlayer } = require("discord-player");
 ...
-const player = useMasterPlayer();
+const player = useMainPlayer();
 ```
 
 ## Playing a new track
@@ -19,7 +19,7 @@ const player = useMasterPlayer();
 ```js
 const { useMasterPlayer } = require("discord-player");
 ...
-const player = useMasterPlayer();
+const player = useMainPlayer();
 await player.play(interaction.member.voice.channel, query);
 ```
 
@@ -28,7 +28,7 @@ If you are not using `player.play()` and handling queue creation as well as othe
 ```js
 const { useMasterPlayer } = require("discord-player");
 ...
-const player = useMasterPlayer();
+const player = useMainPlayer();
 
 const queue = player.nodes.create(...);
 const result = await player.search(...);
@@ -58,7 +58,7 @@ try {
 ```js
 const { useQueue, useMasterPlayer } = require("discord-player");
 ...
-const player = useMasterPlayer();
+const player = useMainPlayer();
 const queue = useQueue(interaction.guild.id);
 const searchResult = await player.search(query, { requestedBy: interaction.user });
 queue.insertTrack(searchResult.tracks[0], position); //Remember queue index starts from 0, not 1

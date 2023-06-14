@@ -23,5 +23,5 @@ Once you initialize Player, you can access that instance of player from anywhere
 
 ```js
 const { useMasterPlayer } = require('discord-player');
-const player = useMasterPlayer();
+const player = useMainPlayer();
 ```

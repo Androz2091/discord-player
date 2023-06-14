@@ -55,7 +55,7 @@ const queue = player.nodes.create(..., {
 ```js
 const { useMasterPlayer } = require("discord-player");
 ...
-const player = useMasterPlayer();
+const player = useMainPlayer();
 ```
 
 ## usePlayer (Fetch the GuildQueuePlayerNode)

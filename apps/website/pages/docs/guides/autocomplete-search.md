@@ -2,7 +2,8 @@
 
 You can return song suggestions to autocomplete interaction using discord-player. Just apply something similar:
 
-*index.js*
+_index.js_
+
 ```js
 client.on("ready", function (readyClient) {
 
@@ -25,14 +26,16 @@ client.on("interactionCreate", async (interaction) => {
 
 });
 ```
+
 **command** here stands for your command file. Check one of the example bot implementation to understand more.
 
-*play.js*
+_play.js_
+
 ```js
 import { useMasterPlayer } from 'discord-player';
 
 async function autocompleteRun(interaction) {
-    const player = useMasterPlayer();
+    const player = useMainPlayer();
     const query = interaction.options.getString('query', true);
     const results = await player.search(query);
 
@@ -46,21 +49,22 @@ async function autocompleteRun(interaction) {
 }
 
 async function execute(interaction) {
-    const player = useMasterPlayer();
-    const query = interaction.options.getString("query");
-	const searchResult = await player.search(query, { requestedBy: interaction.user });
+    const player = useMainPlayer();
+    const query = interaction.options.getString('query');
+    const searchResult = await player.search(query, { requestedBy: interaction.user });
 
-	if (!searchResult.hasTracks()) { //Check if we found results for this query
-		await interaction.reply(`We found no tracks for ${query}!`);
-		return;
-	} else {
-		    await player.play(interaction.member.voice.channel, searchResult, {
-				nodeOptions: {
-					metadata: interaction.channel,
-					//You can add more options over here
-				},
-			    });
-		    }
-	await interaction.reply({content: `Loading your track(s)"}`,});
+    if (!searchResult.hasTracks()) {
+        //Check if we found results for this query
+        await interaction.reply(`We found no tracks for ${query}!`);
+        return;
+    } else {
+        await player.play(interaction.member.voice.channel, searchResult, {
+            nodeOptions: {
+                metadata: interaction.channel
+                //You can add more options over here
+            }
+        });
+    }
+    await interaction.reply({ content: `Loading your track(s)"}` });
 }
 ```

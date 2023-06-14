@@ -24,7 +24,7 @@ export class DisconnectCommand extends Command {
 			if (permissions.member()) return interaction.reply({ content: permissions.member(), ephemeral: true });
 			if (permissions.client()) return interaction.reply({ content: permissions.client(), ephemeral: true });
 			const queue = useQueue(interaction.guild!.id);
-			const player = useMasterPlayer();
+			const player = useMainPlayer();
 
 			if (queue)
 				return interaction.reply({ content: `${this.container.client.dev.error} | I am **already** in a voice channel`, ephemeral: true });
