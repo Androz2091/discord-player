@@ -4,6 +4,10 @@ import { getQueue } from './common';
 
 type SetterFN<T, P> = (previous: P) => T;
 
+/**
+ * Fetch or manipulate guild queue metadata
+ * @param node Guild queue node resolvable
+ */
 export function useMetadata<T = unknown>(node: NodeResolvable) {
     const queue = getQueue<T>(node);
     const setter = (metadata: T | SetterFN<T, T>) => {

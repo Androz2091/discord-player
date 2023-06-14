@@ -18,7 +18,7 @@ import { EventEmitter } from '@discord-player/utils';
 import { Track } from '../fabric/Track';
 import { Util } from '../utils/Util';
 import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
-import { GuildQueue, PostProcessedResult } from '../manager';
+import { GuildQueue, GuildQueueEvent, PostProcessedResult } from '../manager';
 import { VoiceReceiverNode } from '../manager/VoiceReceiverNode';
 import { Exceptions } from '../errors';
 
@@ -179,11 +179,11 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
         this.audioPlayer.on('stateChange', (oldState, newState) => {
             if (oldState.status !== AudioPlayerStatus.Paused && newState.status === AudioPlayerStatus.Paused) {
-                this.queue.player.events.emit('playerPause', this.queue);
+                this.queue.player.events.emit(GuildQueueEvent.playerPause, this.queue);
             }
 
             if (oldState.status === AudioPlayerStatus.Paused && newState.status !== AudioPlayerStatus.Paused) {
-                this.queue.player.events.emit('playerResume', this.queue);
+                this.queue.player.events.emit(GuildQueueEvent.playerResume, this.queue);
             }
 
             if (newState.status === AudioPlayerStatus.Playing) {

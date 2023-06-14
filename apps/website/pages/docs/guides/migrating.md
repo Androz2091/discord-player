@@ -91,10 +91,10 @@ player.events.on('playerStart', (queue, track) => {
 Let's write the command part for `play.js`. You can define the command as you desire. We will only check the command handler part:
 
 ```js
-import { useMasterPlayer } from 'discord-player';
+import { useMainPlayer } from 'discord-player';
 
 async function execute(interaction) {
-    const player = useMasterPlayer(); // Get the player instance that we created earlier
+    const player = useMainPlayer(); // Get the player instance that we created earlier
     const channel = interaction.message.member.voice.channel;
     if (!channel) return interaction.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
     const query = interaction.options.getString('query', true); // we need input/query to play
