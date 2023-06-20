@@ -1,6 +1,5 @@
 import { container, Listener } from '@sapphire/framework';
 import type { GuildQueue } from 'discord-player';
-import { PermissionsBitField } from 'discord.js';
 
 export class PlayerEvent extends Listener {
 	public constructor(context: Listener.Context, options: Listener.Options) {
