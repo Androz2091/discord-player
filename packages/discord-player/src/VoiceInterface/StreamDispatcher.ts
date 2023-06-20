@@ -9,8 +9,7 @@ import {
     StreamType,
     VoiceConnection,
     VoiceConnectionStatus,
-    VoiceConnectionDisconnectReason,
-    version
+    VoiceConnectionDisconnectReason
 } from '@discordjs/voice';
 import { StageChannel, VoiceChannel } from 'discord.js';
 import type { Readable } from 'stream';
@@ -21,19 +20,6 @@ import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord
 import { GuildQueue, GuildQueueEvent, PostProcessedResult } from '../manager';
 import { VoiceReceiverNode } from '../manager/VoiceReceiverNode';
 import { Exceptions } from '../errors';
-
-const needsKeepAlivePatch = (() => {
-    if ('DP_NO_KEEPALIVE_PATCH' in process.env) return false;
-    // we dont care about dev version and semver:major >= 1
-    if (version.includes('-dev') || version.startsWith('1')) return false;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [, minor, patch] = version.split('.').map((n) => parseInt(n));
-
-    if (isNaN(minor)) return false;
-
-    // we need a patch if semver:minor is < 15 and semver:patch < 1
-    return minor > 14 ? false : minor < 15 && patch < 1;
-})();
 
 export interface CreateStreamOps {
     type?: StreamType;
@@ -122,20 +108,6 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
         this.voiceConnection
             .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
-                if (needsKeepAlivePatch) {
-                    this.queue.debug(`Detected @discordjs/voice version ${version} which needs keepAlive patch, applying patch...`);
-                    const oldNetworking = Reflect.get(oldState, 'networking');
-                    const newNetworking = Reflect.get(newState, 'networking');
-
-                    const networkStateChangeHandler = (_: object, newNetworkState: object) => {
-                        const newUdp = Reflect.get(newNetworkState, 'udp');
-                        clearInterval(newUdp?.keepAliveInterval);
-                    };
-
-                    oldNetworking?.off('stateChange', networkStateChangeHandler);
-                    newNetworking?.on('stateChange', networkStateChangeHandler);
-                }
-
                 if (newState.reason === VoiceConnectionDisconnectReason.Manual) {
                     this.voiceConnection.destroy();
                     return this.end();
