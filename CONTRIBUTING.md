@@ -16,10 +16,9 @@ This will create a package `@discord-player/example-lib` under `packages` dir.
 # Testing the changes
 
 * Run `yarn build` to build your changes
-* Run `cd examples/karasu`
-* Run `yarn install`
-* Create `.env.local` inside `examples/karasu/src` and add your bot token to it (see `.env.example` for example)
-* Run `yarn start` to start the test bot
+* Run `yarn workspace music-bot install` to make sure everything is up-to-date
+* Create `.env.local` inside `apps/music-bot/src` and add your bot token to it (see `.env.example` for example)
+* Run `yarn bot` to start the test bot
 
 # Code Style
 
