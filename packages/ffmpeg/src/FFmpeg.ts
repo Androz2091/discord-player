@@ -1,13 +1,10 @@
 import childProcess from 'child_process';
 import { Duplex, DuplexOptions } from 'stream';
-import { Exceptions } from '../errors';
-import { TypeUtil } from './TypeUtil';
-import { Util } from './Util';
 
 type Callback<Args extends Array<unknown>> = (...args: Args) => unknown;
 
-const validatePathParam = (t: unknown) => {
-    if (!TypeUtil.isString(t) || !t) throw Exceptions.ERR_INVALID_ARG_TYPE(String(t), 'string', typeof t);
+const validatePathParam = (t: unknown, name?: string) => {
+    if (typeof t !== 'string' || !t) throw new TypeError(`Expected ${name ? name.concat(' to be ') : ''}a string, got ${t}`);
     return t;
 };
 
@@ -39,10 +36,10 @@ const isWindows = process.platform === 'win32';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 // prettier-ignore
-const FFmpegPossibleLocations: FFmpegLocation[] = [
+export const FFmpegPossibleLocations: FFmpegLocation[] = [
     {
         getPath() {
-            return validatePathParam(process.env.FFMPEG_PATH);
+            return validatePathParam(process.env.FFMPEG_PATH, this.displayName);
         },
         displayName: 'spawn process.env.FFMPEG_PATH'
     },
@@ -77,28 +74,28 @@ const FFmpegPossibleLocations: FFmpegLocation[] = [
     {
         getPath() {
             const mod = require('@ffmpeg-installer/ffmpeg');
-            return validatePathParam(mod.default?.path || mod.path || mod);
+            return validatePathParam(mod.default?.path || mod.path || mod, this.displayName);
         },
         displayName: 'require("@ffmpeg-installer/ffmpeg")'
     },
     {
         getPath() {
             const mod = require('ffmpeg-static');
-            return validatePathParam(mod.default?.path || mod.path || mod);
+            return validatePathParam(mod.default?.path || mod.path || mod, this.displayName);
         },
         displayName: 'require("ffmpeg-static")'
     },
     {
         getPath() {
             const mod = require('@node-ffmpeg/node-ffmpeg-installer');
-            return validatePathParam(mod.default?.path || mod.path || mod);
+            return validatePathParam(mod.default?.path || mod.path || mod, this.displayName);
         },
         displayName: 'require("@node-ffmpeg/node-ffmpeg-installer")'
     },
     {
         getPath() {
             const mod = require('ffmpeg-binaries');
-            return validatePathParam(mod.default || mod);
+            return validatePathParam(mod.default || mod, this.displayName);
         },
         displayName: 'require("ffmpeg-binaries")'
     }
@@ -165,10 +162,6 @@ export class FFmpeg extends Duplex {
                 ffmpegInfo.isStatic = locator.displayName.startsWith('require("');
                 ffmpegInfo.version = FFmpeg.VersionRegex.exec(ffmpegInfo.metadata || '')?.[1] || null;
 
-                if (ffmpegInfo.isStatic && !('DP_NO_FFMPEG_WARN' in process.env)) {
-                    Util.warn('Found ffmpeg-static which is known to be unstable.', 'FFmpegStaticWarning');
-                }
-
                 return ffmpegInfo;
             } catch (e) {
                 errStacks.push(e as Error);
@@ -176,7 +169,7 @@ export class FFmpeg extends Duplex {
         }
 
         // prettier-ignore
-        throw Exceptions.ERR_FFMPEG_LOCATOR([
+        throw new Error([
             'Could not locate ffmpeg. Tried:\n',
             ...FFmpegPossibleLocations.map((loc, i) => `  ${++i}. ${loc.displayName}`),
             '\n',

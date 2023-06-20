@@ -51,6 +51,7 @@
   "homepage": "https://discord-player.js.org",
   "dependencies": {
     "@discord-player/equalizer": "workspace:^",
+    "@discord-player/ffmpeg": "workspace:^",
     "@discord-player/utils": "workspace:^",
     "@discordjs/voice": "latest",
     "libsodium-wrappers": "^0.7.10"

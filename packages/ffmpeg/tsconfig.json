@@ -1,0 +1,6 @@
+{
+    "extends": "@discord-player/tsconfig/base.json",
+    "include": [
+        "src/**/*"
+    ]
+}

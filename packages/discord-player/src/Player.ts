@@ -1,3 +1,4 @@
+import { FFmpeg } from '@discord-player/ffmpeg';
 import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, GuildVoiceChannelResolvable, version as djsVersion } from 'discord.js';
 import { Playlist, Track, SearchResult } from './fabric';
 import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions, GuildQueueEvent } from './manager';
@@ -11,7 +12,6 @@ import { BaseExtractor } from './extractors/BaseExtractor';
 import * as _internals from './utils/__internal__';
 import { QueryCache } from './utils/QueryCache';
 import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
-import { FFmpeg } from './utils/FFmpeg';
 import { Exceptions } from './errors';
 import { defaultVoiceStateHandler } from './DefaultVoiceStateHandler';
 
@@ -540,7 +540,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 const info = FFmpeg.locateSafe();
                 if (!info) return 'FFmpeg/Avconv not found';
 
-                return [`- ffmpeg: ${info.version}`, `- command: ${info.command}`, `- libopus: ${info.metadata!.includes('--enable-libopus')}`].join('\n');
+                return [`- ffmpeg: ${info.version}`, `- command: ${info.command}`, `- static: ${info.isStatic}`, `- libopus: ${info.metadata!.includes('--enable-libopus')}`].join('\n');
             })(),
             '\n',
             'Loaded Extractors:',

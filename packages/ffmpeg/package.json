@@ -1,0 +1,40 @@
+{
+  "name": "@discord-player/ffmpeg",
+  "version": "0.1.0",
+  "description": "FFmpeg stream abstraction for discord-player",
+  "keywords": [
+    "discord-player",
+    "music",
+    "bot",
+    "discord.js",
+    "javascript",
+    "voip",
+    "lavalink",
+    "lavaplayer"
+  ],
+  "author": "Androz2091 <androz2091@gmail.com>",
+  "homepage": "https://discord-player.js.org",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "scripts": {
+    "build": "tsup && node ./scripts/esm-shim.cjs",
+    "build:check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts --fix"
+  },
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "devDependencies": {
+    "@discord-player/tsconfig": "workspace:^",
+    "@types/node": "^20.3.1"
+  }
+}
