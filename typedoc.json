@@ -6,7 +6,8 @@
         "packages/downloader",
         "packages/equalizer",
         "packages/extractor",
-        "packages/utils"
+        "packages/utils",
+        "packages/ffmpeg"
     ],
     "githubPages": false,
     "readme": "none",

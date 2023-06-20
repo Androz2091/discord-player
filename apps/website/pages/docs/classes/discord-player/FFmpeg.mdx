@@ -6,18 +6,14 @@ new FFmpeg(options)
 ```
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| options | FFmpegOptions | ❌ | Options to initialize ffmpeg |
+| options | FFmpegOptions | ✅ | Options to initialize ffmpeg |
 
 
 ## Properties
 ### public process: ChildProcessWithoutNullStreams
 Current FFmpeg process
-
-- [Source](https://github.com/Androz2091/discord-player/blob/fe42dd7/packages/discord-player/src/utils/FFmpeg.ts#L191)
 ### public static VersionRegex: RegExp
 FFmpeg version regex
-
-- [Source](https://github.com/Androz2091/discord-player/blob/fe42dd7/packages/discord-player/src/utils/FFmpeg.ts#L112)
 ### public _reader: Readable
 
 ### public _writer: Writable
@@ -29,54 +25,35 @@ FFmpeg version regex
 | ----------- | ----------- | ----------- |
 | err | null \| Error | ❌ |
 | cb | Callback\<\[null \| Error]> | ❌ |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/fe42dd7/packages/discord-player/src/utils/FFmpeg.ts#L260)
 ### public _final(cb): void
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
 | cb | Callback\<\[]> | ❌ |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/fe42dd7/packages/discord-player/src/utils/FFmpeg.ts#L265)
 ### public toString(): string
-- [Source](https://github.com/Androz2091/discord-player/blob/fe42dd7/packages/discord-player/src/utils/FFmpeg.ts#L280)
+
 ### public static isAvailable(): boolean
 Check if ffmpeg is available
-
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/fe42dd7/packages/discord-player/src/utils/FFmpeg.ts#L127)
-### public static locate(force): undefined \| FFmpegInfo
+### public static locate(force?): undefined \| FFmpegInfo
 Locate ffmpeg command. Throws error if ffmpeg is not found.
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| force | boolean | ❌ | Forcefully reload |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/fe42dd7/packages/discord-player/src/utils/FFmpeg.ts#L147)
-### public static locateSafe(force): undefined \| null \| FFmpegInfo
+| force | boolean | ✅ | Forcefully reload |
+### public static locateSafe(force?): undefined \| null \| FFmpegInfo
 Safe locate ffmpeg
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| force | boolean | ❌ | if it should relocate the command |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/fe42dd7/packages/discord-player/src/utils/FFmpeg.ts#L135)
-### public static spawn(options): ChildProcessWithoutNullStreams
+| force | boolean | ✅ | if it should relocate the command |
+### public static spawn(options?): ChildProcessWithoutNullStreams
 Spawns ffmpeg process
 
 
 
 | Parameter | Type | Optional | Description |
 | ----------- | ----------- | ----------- | ----------- |
-| options | \{ args: undefined \| Array\<string>,shell: undefined \| boolean } | ❌ | Spawn options |
-
-
-- [Source](https://github.com/Androz2091/discord-player/blob/fe42dd7/packages/discord-player/src/utils/FFmpeg.ts#L118)
+| options | \{ args: Array\<string>,shell: boolean } | ✅ | Spawn options |

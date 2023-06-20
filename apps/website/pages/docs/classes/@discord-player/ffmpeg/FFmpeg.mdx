@@ -1,0 +1,82 @@
+## FFmpeg extends Duplex
+
+
+```typescript
+new FFmpeg(options)
+```
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| options | FFmpegOptions | ❌ | Options to initialize ffmpeg |
+
+
+## Properties
+### public process: ChildProcessWithoutNullStreams
+Current FFmpeg process
+
+- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/ffmpeg/src/FFmpeg.ts#L184)
+### public static VersionRegex: RegExp
+FFmpeg version regex
+
+- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/ffmpeg/src/FFmpeg.ts#L109)
+### public _reader: Readable
+
+### public _writer: Writable
+
+
+## Methods
+### public _destroy(err, cb): unknown
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| err | null \| Error | ❌ |
+| cb | Callback\<\[null \| Error]> | ❌ |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/ffmpeg/src/FFmpeg.ts#L253)
+### public _final(cb): void
+| Parameter | Type | Optional |
+| ----------- | ----------- | ----------- |
+| cb | Callback\<\[]> | ❌ |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/ffmpeg/src/FFmpeg.ts#L258)
+### public toString(): string
+- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/ffmpeg/src/FFmpeg.ts#L273)
+### public static isAvailable(): boolean
+Check if ffmpeg is available
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/ffmpeg/src/FFmpeg.ts#L124)
+### public static locate(force): undefined \| FFmpegInfo
+Locate ffmpeg command. Throws error if ffmpeg is not found.
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| force | boolean | ❌ | Forcefully reload |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/ffmpeg/src/FFmpeg.ts#L144)
+### public static locateSafe(force): undefined \| null \| FFmpegInfo
+Safe locate ffmpeg
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| force | boolean | ❌ | if it should relocate the command |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/ffmpeg/src/FFmpeg.ts#L132)
+### public static spawn(options): ChildProcessWithoutNullStreams
+Spawns ffmpeg process
+
+
+
+| Parameter | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| options | \{ args: undefined \| Array\<string>,shell: undefined \| boolean } | ❌ | Spawn options |
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/ffmpeg/src/FFmpeg.ts#L115)
