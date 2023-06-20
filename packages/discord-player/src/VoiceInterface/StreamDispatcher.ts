@@ -66,12 +66,11 @@ export interface VoiceEvents {
 }
 
 class StreamDispatcher extends EventEmitter<VoiceEvents> {
-    public readonly voiceConnection: VoiceConnection;
-    public readonly audioPlayer: AudioPlayer;
+    public voiceConnection: VoiceConnection;
+    public audioPlayer: AudioPlayer;
     public receiver = new VoiceReceiverNode(this);
     public channel: VoiceChannel | StageChannel;
     public audioResource?: AudioResource<Track> | null;
-    private readyLock = false;
     public dsp = new FiltersChain();
 
     /**
@@ -121,22 +120,27 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
         this.dsp.onError = (e) => this.emit('error', e as AudioPlayerError);
 
-        this.voiceConnection.on('stateChange', async (oldState, newState) => {
-            if (needsKeepAlivePatch) {
-                this.queue.debug(`Detected @discordjs/voice version ${version} which needs keepAlive patch, applying patch...`);
-                const oldNetworking = Reflect.get(oldState, 'networking');
-                const newNetworking = Reflect.get(newState, 'networking');
+        this.voiceConnection
+            .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
+                if (needsKeepAlivePatch) {
+                    this.queue.debug(`Detected @discordjs/voice version ${version} which needs keepAlive patch, applying patch...`);
+                    const oldNetworking = Reflect.get(oldState, 'networking');
+                    const newNetworking = Reflect.get(newState, 'networking');
 
-                const networkStateChangeHandler = (_: object, newNetworkState: object) => {
-                    const newUdp = Reflect.get(newNetworkState, 'udp');
-                    clearInterval(newUdp?.keepAliveInterval);
-                };
+                    const networkStateChangeHandler = (_: object, newNetworkState: object) => {
+                        const newUdp = Reflect.get(newNetworkState, 'udp');
+                        clearInterval(newUdp?.keepAliveInterval);
+                    };
 
-                oldNetworking?.off('stateChange', networkStateChangeHandler);
-                newNetworking?.on('stateChange', networkStateChangeHandler);
-            }
+                    oldNetworking?.off('stateChange', networkStateChangeHandler);
+                    newNetworking?.on('stateChange', networkStateChangeHandler);
+                }
 
-            if (newState.status === VoiceConnectionStatus.Disconnected) {
+                if (newState.reason === VoiceConnectionDisconnectReason.Manual) {
+                    this.voiceConnection.destroy();
+                    return this.end();
+                }
+
                 if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
                     try {
                         await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, this.connectionTimeout);
@@ -157,25 +161,10 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                         this.emit('error', err as AudioPlayerError);
                     }
                 }
-            } else if (newState.status === VoiceConnectionStatus.Destroyed) {
+            })
+            .on(VoiceConnectionStatus.Destroyed, () => {
                 this.end();
-            } else if (!this.readyLock && (newState.status === VoiceConnectionStatus.Connecting || newState.status === VoiceConnectionStatus.Signalling)) {
-                this.readyLock = true;
-                try {
-                    await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, this.connectionTimeout);
-                } catch {
-                    if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
-                        try {
-                            this.voiceConnection.destroy();
-                        } catch (err) {
-                            this.emit('error', err as AudioPlayerError);
-                        }
-                    }
-                } finally {
-                    this.readyLock = false;
-                }
-            }
-        });
+            });
 
         this.audioPlayer.on('stateChange', (oldState, newState) => {
             if (oldState.status !== AudioPlayerStatus.Paused && newState.status === AudioPlayerStatus.Paused) {
