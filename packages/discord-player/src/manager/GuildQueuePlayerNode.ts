@@ -607,7 +607,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     #createFFmpegStream(stream: Readable | string, track: Track, seek = 0, cookies?: string) {
         const ffmpegStream = this.queue.filters.ffmpeg
             .createStream(stream, {
-                encoderArgs: this.queue.filters.ffmpeg.filters.length ? ['-af', this.queue.filters.ffmpeg.toString()] : [],
+                encoderArgs: this.queue.filters.ffmpeg.args,
                 seek: seek / 1000,
                 fmt: 's16le',
                 cookies,

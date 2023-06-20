@@ -4,6 +4,7 @@ import { AudioFilters } from '../utils/AudioFilters';
 import { GuildQueue } from './GuildQueue';
 import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { FFmpegStreamOptions, createFFmpegStream } from '../utils/FFmpegStream';
+import { Exceptions } from '../errors';
 
 type Filters = keyof typeof AudioFilters.filters;
 
@@ -42,6 +43,7 @@ export const EqualizerConfigurationPreset = {
 
 export class FFmpegFilterer<Meta = unknown> {
     #ffmpegFilters: Filters[] = [];
+    #inputArgs: string[] = [];
     public constructor(public af: GuildQueueAudioFilters<Meta>) {}
 
     #setFilters(filters: Filters[]) {
@@ -58,11 +60,43 @@ export class FFmpegFilterer<Meta = unknown> {
     }
 
     /**
+     * Set input args for FFmpeg
+     */
+    public setInputArgs(args: string[]) {
+        if (!args.every((arg) => typeof arg === 'string')) throw Exceptions.ERR_INVALID_ARG_TYPE('args', 'Array<string>', 'invalid item(s)');
+        this.#inputArgs = args;
+    }
+
+    /**
+     * Get input args
+     */
+    public get inputArgs() {
+        return this.#inputArgs;
+    }
+
+    /**
+     * Get encoder args
+     */
+    public get encoderArgs() {
+        if (!this.filters.length) return [];
+
+        return ['-af', this.toString()];
+    }
+
+    /**
+     * Get final ffmpeg args
+     */
+    public get args() {
+        return this.inputArgs.concat(this.encoderArgs);
+    }
+
+    /**
      * Create ffmpeg stream
      * @param source The stream source
      * @param options The stream options
      */
     public createStream(source: string | Readable, options: FFmpegStreamOptions) {
+        if (this.#inputArgs.length) options.encoderArgs = [...this.#inputArgs, ...(options.encoderArgs || [])];
         return createFFmpegStream(source, options);
     }
 
