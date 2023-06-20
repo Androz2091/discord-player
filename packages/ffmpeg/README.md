@@ -5,7 +5,7 @@ FFmpeg stream abstraction for Discord Player.
 ## Installation
 
 ```sh
-$ yarn add --save @discord-player/ffmpeg
+$ yarn add @discord-player/ffmpeg
 ```
 
 ## Supported FFmpeg Locations

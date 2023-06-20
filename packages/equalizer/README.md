@@ -5,7 +5,7 @@ This library implements Lavaplayer's 15 Band PCM Equalizer & biquad utilities.
 ## Installation
 
 ```sh
-$ yarn add --save @discord-player/equalizer
+$ yarn add @discord-player/equalizer
 ```
 
 ## Example
@@ -62,13 +62,13 @@ const output = input.pipe(biquad);
 
 #### Supported Biquad Filters
 
-* SinglePoleLowPassApprox
-* SinglePoleLowPass
-* LowPass
-* HighPass
-* BandPass
-* Notch
-* AllPass
-* LowShelf
-* HighShelf
-* PeakingEQ
+-   SinglePoleLowPassApprox
+-   SinglePoleLowPass
+-   LowPass
+-   HighPass
+-   BandPass
+-   Notch
+-   AllPass
+-   LowShelf
+-   HighShelf
+-   PeakingEQ
