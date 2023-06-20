@@ -1,36 +1,41 @@
 # Extractors
+
 Extractors for `discord-player`.
 
 # Example
 
 ```js
-const { YouTubeExtractor } = require("@discord-player/extractor");
-const player = useMasterPlayer();
+const { YouTubeExtractor } = require('@discord-player/extractor');
+const player = useMainPlayer();
 
 // enables youtube extractor
 player.extractors.register(YouTubeExtractor);
 ```
 
 # Available Extractors
-* Attachment (Remote, Local)
-* Reverbnation
-* SoundCloud
-* Vimeo
-* YouTube
-* Spotify
-* Apple Music
+
+-   Attachment (Remote, Local)
+-   Reverbnation
+-   SoundCloud
+-   Vimeo
+-   YouTube
+-   Spotify
+-   Apple Music
 
 # Lyrics
-```js
-const { lyricsExtractor } = require("@discord-player/extractor");
-const lyricsClient = lyricsExtractor("api_key_or_leave_it_blank");
 
-lyricsClient.search("alan walker faded")
-    .then(x => console.log(x))
+```js
+const { lyricsExtractor } = require('@discord-player/extractor');
+const lyricsClient = lyricsExtractor('api_key_or_leave_it_blank');
+
+lyricsClient
+    .search('alan walker faded')
+    .then((x) => console.log(x))
     .catch(console.error);
 ```
 
 ## Response
+
 ```js
 {
   title: 'Faded',

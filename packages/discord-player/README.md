@@ -1,6 +1,6 @@
 # Discord Player
 
-Discord Player is a powerful framework for JavaScript and TypeScript, built on top of **[@discord.js/voice](https://npm.im/@discordjs/voice)** library.
+Discord Player is a powerful framework for JavaScript and TypeScript, built on top of **[@discordjs/voice](https://npm.im/@discordjs/voice)** library.
 It provides easy set of customizable tools to develop Discord Music bots.
 
 [![downloadsBadge](https://img.shields.io/npm/dt/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
@@ -73,6 +73,8 @@ $ yarn add ytdl-core
 $ yarn add play-dl
 # or
 $ yarn add @distube/ytdl-core
+# or
+$ yarn add yt-stream
 ```
 
 Done with all these? Let's write a simple music bot then.
