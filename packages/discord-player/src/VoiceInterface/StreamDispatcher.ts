@@ -110,7 +110,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
                 if (newState.reason === VoiceConnectionDisconnectReason.Manual) {
                     this.voiceConnection.destroy();
-                    return this.end();
+                    return;
                 }
 
                 if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
@@ -136,15 +136,16 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             })
             .on(VoiceConnectionStatus.Destroyed, () => {
                 this.end();
+                this.queue.emit(GuildQueueEvent.connectionDestroyed, this.queue);
             });
 
         this.audioPlayer.on('stateChange', (oldState, newState) => {
             if (oldState.status !== AudioPlayerStatus.Paused && newState.status === AudioPlayerStatus.Paused) {
-                this.queue.player.events.emit(GuildQueueEvent.playerPause, this.queue);
+                this.queue.emit(GuildQueueEvent.playerPause, this.queue);
             }
 
             if (oldState.status === AudioPlayerStatus.Paused && newState.status !== AudioPlayerStatus.Paused) {
-                this.queue.player.events.emit(GuildQueueEvent.playerResume, this.queue);
+                this.queue.emit(GuildQueueEvent.playerResume, this.queue);
             }
 
             if (newState.status === AudioPlayerStatus.Playing) {
@@ -332,6 +333,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     end() {
         try {
             this.audioPlayer.stop();
+            this.dsp.destroy();
         } catch {
             //
         }

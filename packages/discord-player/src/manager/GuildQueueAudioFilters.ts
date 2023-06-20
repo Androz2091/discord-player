@@ -54,7 +54,7 @@ export class FFmpegFilterer<Meta = unknown> {
         this.#ffmpegFilters = [...new Set(filters)];
 
         return this.af.triggerReplay(seekTime).then((t) => {
-            queue.player.events.emit(GuildQueueEvent.audioFiltersUpdate, queue, prev, this.#ffmpegFilters.slice());
+            queue.emit(GuildQueueEvent.audioFiltersUpdate, queue, prev, this.#ffmpegFilters.slice());
             return t;
         });
     }

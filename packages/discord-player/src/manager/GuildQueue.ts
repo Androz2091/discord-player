@@ -86,6 +86,10 @@ export const GuildQueueEvent = {
      */
     connection: 'connection',
     /**
+     * Emitted when a voice connection is destroyed
+     */
+    connectionDestroyed: 'connectionDestroyed',
+    /**
      * Emitted when the bot is disconnected from the channel
      */
     disconnect: 'disconnect',
@@ -164,7 +168,15 @@ export const GuildQueueEvent = {
     /**
      * Emitted when a voice channel is repopulated
      */
-    channelPopulate: 'channelPopulate'
+    channelPopulate: 'channelPopulate',
+    /**
+     * Emitted when a queue is successfully created
+     */
+    queueCreate: 'queueCreate',
+    /**
+     * Emitted when a queue is deleted
+     */
+    queueDelete: 'queueDelete'
 } as const;
 
 export interface GuildQueueEvents<Meta = unknown> {
@@ -197,6 +209,11 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param queue The queue where this event occurred
      */
     connection: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when a connection is destroyed
+     * @param queue The queue where this event occurred
+     */
+    connectionDestroyed: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when the bot is disconnected from the channel
      * @param queue The queue where this event occurred
@@ -322,6 +339,16 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param queue The queue where this event occurred
      */
     channelPopulate: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when a queue is successfully created
+     * @param queue The queue where this event occurred
+     */
+    queueCreate: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when a queue is successfully deleted
+     * @param queue The queue where this event occurred
+     */
+    queueDelete: (queue: GuildQueue<Meta>) => unknown;
 }
 
 export class GuildQueue<Meta = unknown> {
@@ -385,6 +412,7 @@ export class GuildQueue<Meta = unknown> {
         if (options.maxHistorySize < 1) options.maxHistorySize = Infinity;
 
         this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
+        this.emit(GuildQueueEvent.queueCreate, this);
     }
 
     /**
@@ -413,7 +441,7 @@ export class GuildQueue<Meta = unknown> {
      * @param m The message to write
      */
     public debug(m: string) {
-        this.player.events.emit(GuildQueueEvent.debug, this, m);
+        this.emit(GuildQueueEvent.debug, this, m);
     }
 
     /**
@@ -631,9 +659,9 @@ export class GuildQueue<Meta = unknown> {
         this.tracks.add(toAdd);
 
         if (isMulti) {
-            this.player.events.emit(GuildQueueEvent.audioTracksAdd, this, toAdd);
+            this.emit(GuildQueueEvent.audioTracksAdd, this, toAdd);
         } else {
-            this.player.events.emit(GuildQueueEvent.audioTrackAdd, this, toAdd);
+            this.emit(GuildQueueEvent.audioTrackAdd, this, toAdd);
         }
     }
 
@@ -707,7 +735,7 @@ export class GuildQueue<Meta = unknown> {
             audioPlayer: options?.audioPlayer
         });
 
-        this.player.events.emit(GuildQueueEvent.connection, this);
+        this.emit(GuildQueueEvent.connection, this);
 
         if (this.channel!.type === ChannelType.GuildStageVoice) {
             await this.channel!.guild.members.me!.voice.setSuppressed(false).catch(async () => {
@@ -733,6 +761,7 @@ export class GuildQueue<Meta = unknown> {
     public delete() {
         if (this.player.nodes.delete(this.id)) {
             this.#deleted = true;
+            this.emit(GuildQueueEvent.queueDelete, this);
         }
     }
 
@@ -744,6 +773,7 @@ export class GuildQueue<Meta = unknown> {
         if (!this.deleted || this.player.nodes.has(this.id)) return;
         this.#deleted = false;
         this.player.nodes.cache.set(this.id, this);
+        this.player.events.emit('queueCreate', this);
     }
 
     /**
@@ -775,31 +805,41 @@ export class GuildQueue<Meta = unknown> {
         return this.player.play(this.channel, track, options);
     }
 
+    /**
+     * Emit an event on this queue
+     * @param event The event to emit
+     * @param args The args for the event
+     */
+    public emit<K extends keyof GuildQueueEvents<Meta>>(event: K, ...args: Parameters<GuildQueueEvents<Meta>[K]>): boolean {
+        if (this.deleted) return false;
+        return this.player.events.emit(event, ...args);
+    }
+
     #attachListeners(dispatcher: StreamDispatcher) {
-        dispatcher.on('error', (e) => this.player.events.emit(GuildQueueEvent.error, this, e));
-        dispatcher.on('debug', (m) => this.player.events.emit(GuildQueueEvent.debug, this, m));
+        dispatcher.on('error', (e) => this.emit(GuildQueueEvent.error, this, e));
+        dispatcher.on('debug', (m) => this.emit(GuildQueueEvent.debug, this, m));
         dispatcher.on('finish', (r) => this.#performFinish(r));
         dispatcher.on('start', (r) => this.#performStart(r));
         dispatcher.on('dsp', (f) => {
             if (!Object.is(this.filters._lastFiltersCache.filters, f)) {
-                this.player.events.emit(GuildQueueEvent.dspUpdate, this, this.filters._lastFiltersCache.filters, f);
+                this.emit(GuildQueueEvent.dspUpdate, this, this.filters._lastFiltersCache.filters, f);
             }
             this.filters._lastFiltersCache.filters = f;
         });
         dispatcher.on('biquad', (f) => {
             if (this.filters._lastFiltersCache.biquad !== f) {
-                this.player.events.emit(GuildQueueEvent.biquadFiltersUpdate, this, this.filters._lastFiltersCache.biquad, f);
+                this.emit(GuildQueueEvent.biquadFiltersUpdate, this, this.filters._lastFiltersCache.biquad, f);
             }
             this.filters._lastFiltersCache.biquad = f;
         });
         dispatcher.on('eqBands', (f) => {
             if (!Object.is(f, this.filters._lastFiltersCache.equalizer)) {
-                this.player.events.emit(GuildQueueEvent.equalizerUpdate, this, this.filters._lastFiltersCache.equalizer, f);
+                this.emit(GuildQueueEvent.equalizerUpdate, this, this.filters._lastFiltersCache.equalizer, f);
             }
             this.filters._lastFiltersCache.equalizer = f;
         });
         dispatcher.on('volume', (f) => {
-            if (this.filters._lastFiltersCache.volume !== f) this.player.events.emit(GuildQueueEvent.volumeChange, this, this.filters._lastFiltersCache.volume, f);
+            if (this.filters._lastFiltersCache.volume !== f) this.emit(GuildQueueEvent.volumeChange, this, this.filters._lastFiltersCache.volume, f);
             this.filters._lastFiltersCache.volume = f;
         });
     }
@@ -819,8 +859,8 @@ export class GuildQueue<Meta = unknown> {
             })}`
         );
 
-        this.player.events.emit(GuildQueueEvent.playerTrigger, this, track!, reason);
-        if (track && !this.isTransitioning()) this.player.events.emit(GuildQueueEvent.playerStart, this, track);
+        this.emit(GuildQueueEvent.playerTrigger, this, track!, reason);
+        if (track && !this.isTransitioning()) this.emit(GuildQueueEvent.playerStart, this, track);
         this.setTransitioning(false);
     }
 
@@ -838,7 +878,7 @@ export class GuildQueue<Meta = unknown> {
             this.debug('Adding track to history and emitting finish event since transition mode is disabled...');
             this.history.push(track);
             this.node.resetProgress();
-            this.player.events.emit(GuildQueueEvent.playerFinish, this, track);
+            this.emit(GuildQueueEvent.playerFinish, this, track);
             if (this.tracks.size < 1 && this.repeatMode === QueueRepeatMode.OFF) {
                 this.debug('No more tracks left in the queue to play and repeat mode is off, initiating #emitEnd()');
                 this.#emitEnd();
@@ -871,7 +911,7 @@ export class GuildQueue<Meta = unknown> {
 
     #emitEnd() {
         this.__current = null;
-        this.player.events.emit(GuildQueueEvent.emptyQueue, this);
+        this.emit(GuildQueueEvent.emptyQueue, this);
         if (this.options.leaveOnEnd) {
             const tm: NodeJS.Timeout = setTimeout(() => {
                 if (this.isPlaying()) return clearTimeout(tm);
