@@ -130,6 +130,6 @@ export const ErrorCodes = (() => {
         dict[prop] = prop;
     }
 
-    return Object.preventExtensions(dict) as Readonly<ErrCodes>;
+    return Object.freeze(dict);
 })();
 export const Exceptions = new Proxy(target, handler);

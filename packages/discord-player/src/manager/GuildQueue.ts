@@ -774,7 +774,7 @@ export class GuildQueue<Meta = unknown> {
         this.#deleted = false;
         this.setTransitioning(false);
         this.player.nodes.cache.set(this.id, this);
-        this.player.events.emit('queueCreate', this);
+        this.player.events.emit(GuildQueueEvent.queueCreate, this);
     }
 
     /**
