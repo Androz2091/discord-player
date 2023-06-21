@@ -150,6 +150,7 @@ export class GuildNodeManager<Meta = unknown> {
             throw Exceptions.ERR_NO_GUILD_QUEUE('Cannot delete non-existing queue');
         }
 
+        queue.setTransitioning(true);
         queue.node.stop(true);
         queue.connection?.removeAllListeners();
         queue.dispatcher?.removeAllListeners();
