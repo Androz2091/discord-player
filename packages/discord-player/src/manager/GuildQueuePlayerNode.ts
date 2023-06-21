@@ -403,13 +403,13 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         if (!this.queue.dispatcher) return false;
         this.queue.dispatcher.end();
         if (force) {
-            this.queue.dispatcher.disconnect();
+            this.queue.dispatcher.destroy();
             return true;
         }
         if (this.queue.options.leaveOnStop) {
             const tm: NodeJS.Timeout = setTimeout(() => {
                 if (this.isPlaying() || this.queue.tracks.size) return clearTimeout(tm);
-                this.queue.dispatcher?.disconnect();
+                this.queue.dispatcher?.destroy();
             }, this.queue.options.leaveOnStopCooldown).unref();
         }
         return true;
@@ -433,7 +433,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             throw Exceptions.ERR_NO_VOICE_CONNECTION();
         }
 
-        this.queue.debug(`Received play request from guild ${this.queue.guild.name} (ID: ${this.queue.guild.id})`);
+        if (this.queue.hasDebugger) this.queue.debug(`Received play request from guild ${this.queue.guild.name} (ID: ${this.queue.guild.id})`);
 
         options = Object.assign(
             {},
@@ -446,7 +446,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         )!;
 
         if (res && options.queue) {
-            this.queue.debug('Requested option requires to queue the track, adding the given track to queue instead...');
+            if (this.queue.hasDebugger) this.queue.debug('Requested option requires to queue the track, adding the given track to queue instead...');
             return this.queue.addTrack(res);
         }
 
@@ -456,13 +456,13 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             throw Exceptions.ERR_NO_RESULT('Play request received but track was not provided');
         }
 
-        this.queue.debug('Requested option requires to play the track, initializing...');
+        if (this.queue.hasDebugger) this.queue.debug('Requested option requires to play the track, initializing...');
 
         try {
-            this.queue.debug(`Initiating stream extraction process...`);
+            if (this.queue.hasDebugger) this.queue.debug(`Initiating stream extraction process...`);
             const src = track.raw?.source || track.source;
             const qt: SearchQueryType = track.queryType || (src === 'spotify' ? 'spotifySong' : src === 'apple_music' ? 'appleMusicSong' : src);
-            this.queue.debug(`Executing onBeforeCreateStream hook (QueryType: ${qt})...`);
+            if (this.queue.hasDebugger) this.queue.debug(`Executing onBeforeCreateStream hook (QueryType: ${qt})...`);
 
             const streamSrc = {
                 error: null as Error | null,
@@ -483,7 +483,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             // default behavior when 'onBeforeCreateStream' did not panic
             if (!streamSrc.stream) {
-                this.queue.debug('Failed to get stream from onBeforeCreateStream!');
+                if (this.queue.hasDebugger) this.queue.debug('Failed to get stream from onBeforeCreateStream!');
                 await this.#createGenericStream(track).then(
                     (r) => {
                         if (r?.result) {
@@ -545,12 +545,12 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             const pcmStream = this.#createFFmpegStream(streamSrc.stream, track, options.seek ?? 0, cookies);
 
             if (options.transitionMode) {
-                this.queue.debug(`Transition mode detected, player will wait for buffering timeout to expire (Timeout: ${this.queue.options.bufferingTimeout}ms)`);
+                if (this.queue.hasDebugger) this.queue.debug(`Transition mode detected, player will wait for buffering timeout to expire (Timeout: ${this.queue.options.bufferingTimeout}ms)`);
                 await waitFor(this.queue.options.bufferingTimeout);
-                this.queue.debug('Buffering timeout has expired!');
+                if (this.queue.hasDebugger) this.queue.debug('Buffering timeout has expired!');
             }
 
-            this.queue.debug(`Preparing final stream config: ${JSON.stringify(trackStreamConfig, null, 2)}`);
+            if (this.queue.hasDebugger) this.queue.debug(`Preparing final stream config: ${JSON.stringify(trackStreamConfig, null, 2)}`);
 
             const resource = await this.queue.dispatcher.createStream(pcmStream, createStreamConfig);
 
@@ -558,7 +558,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             await this.#performPlay(resource);
         } catch (e) {
-            this.queue.debug(`Failed to initialize audio player: ${e}`);
+            if (this.queue.hasDebugger) this.queue.debug(`Failed to initialize audio player: ${e}`);
             throw e;
         }
     }
@@ -581,13 +581,13 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     }
 
     async #performPlay(resource: AudioResource<Track>) {
-        this.queue.debug('Initializing audio player...');
+        if (this.queue.hasDebugger) this.queue.debug('Initializing audio player...');
         await this.queue.dispatcher!.playStream(resource);
-        this.queue.debug('Dispatching audio...');
+        if (this.queue.hasDebugger) this.queue.debug('Dispatching audio...');
     }
 
     async #createGenericStream(track: Track) {
-        this.queue.debug(`Attempting to extract stream for Track { title: ${track.title}, url: ${track.url} } using registered extractors`);
+        if (this.queue.hasDebugger) this.queue.debug(`Attempting to extract stream for Track { title: ${track.title}, url: ${track.url} } using registered extractors`);
         const streamInfo = await this.queue.player.extractors.run(async (extractor) => {
             if (this.queue.player.options.blockStreamFrom?.some((ext) => ext === extractor.identifier)) return false;
             const canStream = await extractor.validate(track.url, track.queryType || QueryResolver.resolve(track.url));
@@ -595,11 +595,12 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             return await extractor.stream(track);
         }, false);
         if (!streamInfo || !streamInfo.result) {
-            this.queue.debug(`Failed to extract stream for Track { title: ${track.title}, url: ${track.url} } using registered extractors`);
+            if (this.queue.hasDebugger) this.queue.debug(`Failed to extract stream for Track { title: ${track.title}, url: ${track.url} } using registered extractors`);
             return streamInfo || null;
         }
 
-        this.queue.debug(`Stream extraction was successful for Track { title: ${track.title}, url: ${track.url} } (Extractor: ${streamInfo.extractor?.identifier || 'N/A'})`);
+        if (this.queue.hasDebugger)
+            this.queue.debug(`Stream extraction was successful for Track { title: ${track.title}, url: ${track.url} } (Extractor: ${streamInfo.extractor?.identifier || 'N/A'})`);
 
         return streamInfo;
     }
@@ -616,7 +617,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             .on('error', (err) => {
                 const m = `${err}`.toLowerCase();
 
-                this.queue.debug(`Stream closed due to an error from FFmpeg stream: ${err.stack || err.message || err}`);
+                if (this.queue.hasDebugger) this.queue.debug(`Stream closed due to an error from FFmpeg stream: ${err.stack || err.message || err}`);
 
                 if (m.includes('premature close') || m.includes('epipe')) return;
 

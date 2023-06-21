@@ -48,6 +48,27 @@ const DiscordPlayerErrors = {
             return message || 'No voice connection available, maybe connect to a voice channel first?';
         }
     },
+    ERR_VOICE_CONNECTION_DESTROYED: {
+        name: 'ERR_VOICE_CONNECTION_DESTROYED',
+        type: Error,
+        createError() {
+            return 'Cannot use destroyed voice connection';
+        }
+    },
+    ERR_NO_VOICE_CHANNEL: {
+        name: 'ERR_NO_VOICE_CHANNEL',
+        type: Error,
+        createError() {
+            return 'Could not get the voice channel';
+        }
+    },
+    ERR_INVALID_VOICE_CHANNEL: {
+        name: 'ERR_INVALID_VOICE_CHANNEL',
+        type: Error,
+        createError() {
+            return 'Expected a voice channel';
+        }
+    },
     ERR_NO_RECEIVER: {
         name: 'ERR_NO_RECEIVER',
         type: Error,

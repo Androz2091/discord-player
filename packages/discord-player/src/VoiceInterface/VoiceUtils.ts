@@ -34,6 +34,7 @@ class VoiceUtils {
             maxTime?: number;
             queue: GuildQueue;
             audioPlayer?: AudioPlayer;
+            group?: string;
         }
     ): Promise<StreamDispatcher> {
         if (!options?.queue) throw Exceptions.ERR_NO_GUILD_QUEUE();
@@ -54,6 +55,7 @@ class VoiceUtils {
         options?: {
             deaf?: boolean;
             maxTime?: number;
+            group?: string;
         }
     ) {
         const conn = joinVoiceChannel({
@@ -61,7 +63,8 @@ class VoiceUtils {
             channelId: channel.id,
             adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
             selfDeaf: Boolean(options?.deaf),
-            debug: this.player.events.eventNames().includes('debug')
+            debug: this.player.events.listenerCount('debug') > 0,
+            group: options?.group
         });
 
         return conn;
@@ -87,8 +90,8 @@ class VoiceUtils {
      * @param {Snowflake} guild The guild id
      * @returns {StreamDispatcher}
      */
-    public getConnection(guild: Snowflake) {
-        return this.cache.get(guild) || getVoiceConnection(guild);
+    public getConnection(guild: Snowflake, group?: string) {
+        return this.cache.get(guild) || getVoiceConnection(guild, group);
     }
 }
 

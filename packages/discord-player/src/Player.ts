@@ -97,7 +97,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 const start = performance.now();
                 this.#lagMonitorTimeout = setTimeout(() => {
                     this.#lastLatency = performance.now() - start;
-                    this.debug(`[Lag Monitor] Event loop latency: ${this.#lastLatency}ms`);
+                    if (this.hasDebugger) this.debug(`[Lag Monitor] Event loop latency: ${this.#lastLatency}ms`);
                 }, 0).unref();
             }, this.options.lagMonitor).unref();
         }
@@ -112,6 +112,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 enumerable: false
             });
         }
+    }
+
+    public get hasDebugger() {
+        return this.listenerCount('debug') > 0;
     }
 
     /**
@@ -303,13 +307,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         const queue = this.nodes.create(vc.guild, options.nodeOptions);
 
-        this.debug(`[AsyncQueue] Acquiring an entry...`);
+        if (this.hasDebugger) this.debug(`[AsyncQueue] Acquiring an entry...`);
         const entry = queue.tasksQueue.acquire();
-        this.debug(`[AsyncQueue] Entry ${entry.id} was acquired successfully!`);
+        if (this.hasDebugger) this.debug(`[AsyncQueue] Entry ${entry.id} was acquired successfully!`);
 
-        this.debug(`[AsyncQueue] Waiting for the queue to resolve...`);
+        if (this.hasDebugger) this.debug(`[AsyncQueue] Waiting for the queue to resolve...`);
         await entry.getTask();
-        this.debug(`[AsyncQueue] Entry ${entry.id} was resolved!`);
+        if (this.hasDebugger) this.debug(`[AsyncQueue] Entry ${entry.id} was resolved!`);
 
         try {
             if (!queue.channel) await queue.connect(vc, options.connectionOptions);
@@ -321,7 +325,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             }
             if (!queue.isPlaying()) await queue.node.play(null, options.audioPlayerOptions);
         } finally {
-            this.debug(`[AsyncQueue] Releasing an entry from the queue...`);
+            if (this.hasDebugger) this.debug(`[AsyncQueue] Releasing an entry from the queue...`);
             queue.tasksQueue.release();
         }
 
@@ -386,17 +390,17 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             });
         }
 
-        this.debug(`Searching ${query}`);
+        if (this.hasDebugger) this.debug(`Searching ${query}`);
 
         let extractor: BaseExtractor | null = null;
 
         options.searchEngine ??= QueryType.AUTO;
 
-        this.debug(`Search engine set to ${options.searchEngine}`);
+        if (this.hasDebugger) this.debug(`Search engine set to ${options.searchEngine}`);
 
         const queryType = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query, options.fallbackSearchEngine) : options.searchEngine;
 
-        this.debug(`Query type identified as ${queryType}`);
+        if (this.hasDebugger) this.debug(`Query type identified as ${queryType}`);
 
         // force particular extractor
         if (options.searchEngine.startsWith('ext:')) {
@@ -414,7 +418,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         if (!extractor) {
             // cache validation
             if (!options.ignoreCache) {
-                this.debug(`Checking cache...`);
+                if (this.hasDebugger) this.debug(`Checking cache...`);
                 const res = await this.queryCache?.resolve({
                     query,
                     queryType,
@@ -422,14 +426,14 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 });
                 // cache hit
                 if (res?.hasTracks()) {
-                    this.debug(`Cache hit for query ${query}`);
+                    if (this.hasDebugger) this.debug(`Cache hit for query ${query}`);
                     return res;
                 }
 
-                this.debug(`Cache miss for query ${query}`);
+                if (this.hasDebugger) this.debug(`Cache miss for query ${query}`);
             }
 
-            this.debug(`Executing extractors...`);
+            if (this.hasDebugger) this.debug(`Executing extractors...`);
 
             // cache miss
             extractor =
@@ -443,7 +447,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         // no extractors available
         if (!extractor) {
-            this.debug('Failed to find appropriate extractor');
+            if (this.hasDebugger) this.debug('Failed to find appropriate extractor');
             return new SearchResult(this, {
                 query,
                 queryType,
@@ -451,7 +455,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             });
         }
 
-        this.debug(`Executing metadata query using ${extractor.identifier} extractor...`);
+        if (this.hasDebugger) this.debug(`Executing metadata query using ${extractor.identifier} extractor...`);
         const res = await extractor
             .handle(query, {
                 type: queryType as SearchQueryType,
@@ -460,7 +464,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             .catch(() => null);
 
         if (res) {
-            this.debug('Metadata query was successful!');
+            if (this.hasDebugger) this.debug('Metadata query was successful!');
             const result = new SearchResult(this, {
                 query,
                 queryType,
@@ -471,14 +475,14 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             });
 
             if (!options.ignoreCache) {
-                this.debug(`Adding data to cache...`);
+                if (this.hasDebugger) this.debug(`Adding data to cache...`);
                 await this.queryCache?.addData(result);
             }
 
             return result;
         }
 
-        this.debug('Failed to find result using appropriate extractor. Querying all extractors...');
+        if (this.hasDebugger) this.debug('Failed to find result using appropriate extractor. Querying all extractors...');
         const result = await this.extractors.run(
             async (ext) =>
                 !options.blockExtractors?.includes(ext.identifier) &&
@@ -489,7 +493,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 })
         );
         if (!result?.result) {
-            this.debug(`Failed to query metadata query using ${result?.extractor.identifier || 'N/A'} extractor.`);
+            if (this.hasDebugger) this.debug(`Failed to query metadata query using ${result?.extractor.identifier || 'N/A'} extractor.`);
             return new SearchResult(this, {
                 query,
                 queryType,
@@ -498,7 +502,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             });
         }
 
-        this.debug(`Metadata query was successful using ${result.extractor.identifier}!`);
+        if (this.hasDebugger) this.debug(`Metadata query was successful using ${result.extractor.identifier}!`);
 
         const data = new SearchResult(this, {
             query,
@@ -510,7 +514,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         });
 
         if (!options.ignoreCache) {
-            this.debug(`Adding data to cache...`);
+            if (this.hasDebugger) this.debug(`Adding data to cache...`);
             await this.queryCache?.addData(data);
         }
 

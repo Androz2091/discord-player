@@ -105,14 +105,14 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
 
         try {
             this.store.set(_extractor.identifier, extractor);
-            this.player.debug(`${_extractor.identifier} extractor loaded!`);
+            if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor loaded!`);
             this.emit('registered', this, extractor);
             await extractor.activate();
-            this.player.debug(`${_extractor.identifier} extractor activated!`);
+            if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor activated!`);
             this.emit('activate', this, extractor);
         } catch (e) {
             this.store.delete(_extractor.identifier);
-            this.player.debug(`${_extractor.identifier} extractor failed to activate! Error: ${e}`);
+            if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor failed to activate! Error: ${e}`);
             this.emit('error', this, extractor, e as Error);
         }
     }
@@ -128,13 +128,13 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
         try {
             const key = extractor.identifier || this.store.findKey((e) => e === extractor)!;
             this.store.delete(key);
-            this.player.debug(`${extractor.identifier} extractor disabled!`);
+            if (this.player.hasDebugger) this.player.debug(`${extractor.identifier} extractor disabled!`);
             this.emit('unregistered', this, extractor);
             await extractor.deactivate();
-            this.player.debug(`${extractor.identifier} extractor deactivated!`);
+            if (this.player.hasDebugger) this.player.debug(`${extractor.identifier} extractor deactivated!`);
             this.emit('deactivate', this, extractor);
         } catch (e) {
-            this.player.debug(`${extractor.identifier} extractor failed to deactivate!`);
+            if (this.player.hasDebugger) this.player.debug(`${extractor.identifier} extractor failed to deactivate!`);
             this.emit('error', this, extractor, e as Error);
         }
     }
@@ -168,13 +168,13 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
 
         for (const ext of this.store.values()) {
             if (filterBlocked && blocked.some((e) => e === ext.identifier)) continue;
-            this.player.debug(`Executing extractor ${ext.identifier}...`);
+            if (this.player.hasDebugger) this.player.debug(`Executing extractor ${ext.identifier}...`);
             const result = await fn(ext).then(
                 (res) => {
                     return res;
                 },
                 (e) => {
-                    this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
+                    if (this.player.hasDebugger) this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
 
                     return TypeUtil.isError(e) ? e : new Error(`${e}`);
                 }
@@ -183,7 +183,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
             lastExt = ext;
 
             if (result && !TypeUtil.isError(result)) {
-                this.player.debug(`Extractor ${ext.identifier} executed successfully!`);
+                if (this.player.hasDebugger) this.player.debug(`Extractor ${ext.identifier} executed successfully!`);
 
                 return {
                     extractor: ext,
