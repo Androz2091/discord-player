@@ -4,21 +4,21 @@
 
 ## Properties
 ### public audioPlayer: AudioPlayer
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L70)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L57)
 ### public audioResource: null \| AudioResource\<Track\<unknown>>
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L73)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L60)
 ### public channel: StageChannel \| VoiceChannel
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L72)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L59)
 ### public connectionTimeout: number
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L83)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L69)
 ### public dsp: FiltersChain
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L75)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L61)
 ### public queue: GuildQueue\<unknown>
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L83)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L69)
 ### public receiver: VoiceReceiverNode
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L71)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L58)
 ### public voiceConnection: VoiceConnection
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L69)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L56)
 ### public static defaultMaxListeners: number
 
 ### public biquad: null \| BiquadStream
@@ -55,13 +55,19 @@ Creates stream
 | ops | CreateStreamOps | ✅ | Options |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L283)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L246)
+### public destroy(): void
+Destroys this dispatcher
+
+
+
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L333)
 ### public disconnect(): void
 Disconnects from voice
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L360)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L323)
 ### public emit(event, args): boolean
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -72,7 +78,7 @@ Stops the player
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L371)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L346)
 ### public eventNames(): Array\<U>
 
 ### public getMaxListeners(): number
@@ -82,55 +88,55 @@ Whether or not the player is currently buffering
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L224)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L187)
 ### public isConnecting(): boolean
 Whether or not the voice connection is connecting
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L273)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L236)
 ### public isDestroyed(): boolean
 Whether or not the voice connection has been destroyed
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L245)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L208)
 ### public isDisconnected(): boolean
 Whether or not the voice connection has been destroyed
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L252)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L215)
 ### public isIdle(): boolean
 Whether or not the player is currently idle
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L238)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L201)
 ### public isPaused(): boolean
 Whether or not the player is currently paused automatically or manually.
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L217)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L180)
 ### public isPlaying(): boolean
 Whether or not the player is currently playing
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L231)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L194)
 ### public isReady(): boolean
 Whether or not the voice connection is ready to play
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L259)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L222)
 ### public isSignalling(): boolean
 Whether or not the voice connection is signalling
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L266)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L229)
 ### public listenerCount(type): number
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -164,7 +170,7 @@ Pauses the stream playback
 | interpolateSilence | boolean | ✅ | If true, the player will play 5 packets of silence after pausing to prevent audio glitches. |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L384)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L360)
 ### public playStream(resource?): Promise\<undefined \| StreamDispatcher>
 Play stream
 
@@ -175,7 +181,7 @@ Play stream
 | resource | AudioResource\<Track\<unknown>> | ✅ | The audio resource to play |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L403)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L379)
 ### public prependListener(event, listener): StreamDispatcher
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -204,7 +210,7 @@ Resumes the stream playback
 
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L393)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L369)
 ### public setMaxListeners(n): StreamDispatcher
 | Parameter | Type | Optional |
 | ----------- | ----------- | ----------- |
@@ -219,4 +225,4 @@ Sets playback volume
 | value | number | ❌ | The volume amount |
 
 
-- [Source](https://github.com/Androz2091/discord-player/blob/72b264e/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L433)
+- [Source](https://github.com/Androz2091/discord-player/blob/e2a9cfc/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L409)
