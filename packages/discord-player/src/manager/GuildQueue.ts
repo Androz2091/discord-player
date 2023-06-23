@@ -915,7 +915,7 @@ export class GuildQueue<Meta = unknown> {
             this.history.push(track);
             this.node.resetProgress();
             this.emit(GuildQueueEvent.playerFinish, this, track);
-            if (this.#deleted) return;
+            if (this.#deleted) return this.#emitEnd();
             if (this.tracks.size < 1 && this.repeatMode === QueueRepeatMode.OFF) {
                 if (this.hasDebugger) this.debug('No more tracks left in the queue to play and repeat mode is off, initiating #emitEnd()');
                 this.#emitEnd();
