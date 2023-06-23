@@ -17,7 +17,7 @@ An unofficial extractor for discord-player to add support for deezer source.
 | [Mirasaki Music Bot](https://github.com/Mirasaki/mirasaki-music-bot) | Complete (45+ commands) music bot with persistent settings, effects, filters, auto-play, DJ-roles, and much more. | v6.5.0 |
 | [Discord Player Bot](https://github.com/L0SER8228/discord-player-bot) | Feature rich & configurable discord music bot with a cool dynamic website | v6.3.1 |
 | [Naybor](https://github.com/antoinemcx/naybor) | Complete and configurable discord music bot using discord-player | v6.3.0 |
-| [그린Bot](https://github.com/GreenScreen410/GreenBot) | Very simple and based official guide music bot, written in TypeScript. | v6.3.0 |
+| [그린Bot](https://github.com/GreenScreen410/GreenBot-Discord) | Very simple and based official guide music bot, written in TypeScript. | v6.3.0 |
 | [Music Disc](https://github.com/hmes98318/Music-Disc) | I am using discord-player to play music on Discord with friends. It's easy to set up and run yourself. | v6.3.0 |
 | [Botanique](https://git.mylloon.fr/ConfrerieDuKassoulait/Botanique) | A bot I made with [2-1-1-2](https://github.com/2-1-1-2), we're using discord-player for the music and for lyrics | v6.2.1 |
 | [Jappan](https://github.com/febkosq8/Jappan) | A simple discord bot made to make someone's life easier. Currently features Music Playback, Fun Commands, Leveling System & Moderation Tools | v6.2.1 |
