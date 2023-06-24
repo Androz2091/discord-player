@@ -1,0 +1,14 @@
+@tailwind components;
+@tailwind utilities;
+
+.link {
+    @apply text-blue-500 font-medium hover:underline;
+}
+
+.gridbox {
+    @apply border border-dashed border-collapse py-5;
+}
+
+.background {
+    @apply bg-[url(/bg.svg)];
+}

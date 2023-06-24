@@ -1,34 +1,27 @@
 {
-  "name": "@discord-player/website",
+  "name": "website",
   "version": "0.1.0",
-  "description": "Discord Player website",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Androz2091/discord-player.git"
-  },
-  "author": "skdhg",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Androz2091/discord-player/issues"
-  },
-  "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
-    "@emotion/react": "^11.10.5",
-    "@emotion/server": "^11.10.0",
-    "@mantine/core": "^5.10.2",
-    "@mantine/hooks": "^5.10.2",
-    "@mantine/next": "^5.10.2",
-    "@mantine/prism": "^5.10.2",
-    "next": "^13.1.4",
-    "nextra": "^2.2.10",
-    "nextra-theme-docs": "^2.2.10",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "@edge-ui/react": "0.0.11",
+    "@types/node": "20.3.1",
+    "@types/react": "18.2.13",
+    "@types/react-dom": "18.2.6",
+    "autoprefixer": "10.4.14",
+    "eslint": "8.43.0",
+    "eslint-config-next": "13.4.7",
+    "lucide-react": "^0.252.0",
+    "next": "13.4.7",
+    "postcss": "8.4.24",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "3.3.2",
+    "typescript": "5.1.3"
   }
 }
