@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function InternalError() {
     return (
-        <Container className="min-h-[70vh] space-y-3">
+        <Container className="min-h-[70vh] space-y-3 background">
             <div className="text-center">
                 <Heading.H1 className="text-9xl">500</Heading.H1>
                 <Heading.H3 className="font-normal text-muted-foreground">Something went wrong!</Heading.H3>
