@@ -14,7 +14,7 @@ const inter = Inter({
 export default function App({ Component, pageProps }: AppProps) {
     return (
         <>
-            <EdgeUIProvider fontSans={inter.style.fontFamily}>
+            <EdgeUIProvider fontSans={inter.style.fontFamily} theme="detect">
                 <AppLayout>
                     <Component {...pageProps} />
                 </AppLayout>
