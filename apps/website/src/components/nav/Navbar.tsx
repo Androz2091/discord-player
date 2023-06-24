@@ -13,7 +13,7 @@ export default function Navbar() {
         <div className="border-b">
             <div className="container py-2 hidden lg:flex">
                 <div className="mr-4 hidden md:flex justify-between w-full">
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-6">
                         <Link href="/" className="mr-6 flex items-center space-x-2">
                             <TextMark className="h-10 w-10" />
                         </Link>
