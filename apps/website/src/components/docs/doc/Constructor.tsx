@@ -6,7 +6,7 @@ export function Constructor({ item }: { item: DocumentedClassConstructor }) {
     return (
         <div>
             <Paragraph>{item.description}</Paragraph>
-            <CodeBlock copy={false} language="typescript">{`new ${item.constructor}(${item.parameters
+            <CodeBlock copy={false} language="typescript">{`${item.constructor}(${item.parameters
                 .map((p) => {
                     if (p.optional) return `${p.name}?`;
                     return p.name;
