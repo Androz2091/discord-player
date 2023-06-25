@@ -1,4 +1,4 @@
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@edge-ui/react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@edge-ui/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { DocumentedParameter } from 'typedoc-nextra';
 

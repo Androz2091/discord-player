@@ -1,8 +1,6 @@
 import { CodeBlock, Paragraph } from '@edge-ui/react';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@edge-ui/react';
 import type { DocumentedClassConstructor } from 'typedoc-nextra';
 import { ParameterTable } from './ParameterTable';
-
 export function Constructor({ item }: { item: DocumentedClassConstructor }) {
     if (!item) return <></>;
     return (

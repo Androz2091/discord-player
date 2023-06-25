@@ -1,4 +1,3 @@
-import { CodeBlock } from '@edge-ui/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import type { Documentation, DocumentedClass, DocumentedFunction, DocumentedTypes } from 'typedoc-nextra';
@@ -42,8 +41,6 @@ export function ContentArea({ data }: IProps) {
     }, [target, type, packageName]);
 
     if (!currentItem) return <></>;
-
-    console.log(currentItem);
 
     return (
         <div>
