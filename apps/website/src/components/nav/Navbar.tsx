@@ -4,13 +4,14 @@ import { SunIcon, MoonIcon, Menu } from 'lucide-react';
 import { TextMark } from '../assets/TextMark';
 import { useRouter } from 'next/router';
 import { SearchBox } from '../searchbox/SearchBox';
+import { useState } from 'react';
 
 export default function Navbar() {
     const { isDark, toggle } = useTheme();
     const { pathname } = useRouter();
 
     return (
-        <div className="border-b">
+        <div className="border-b supports-backdrop-blur:bg-background/60 sticky top-0 z-40 w-full bg-background/95 backdrop-blur">
             <div className="container py-2 hidden lg:flex">
                 <div className="mr-4 hidden md:flex justify-between w-full">
                     <div className="flex items-center gap-6">
@@ -58,35 +59,65 @@ export default function Navbar() {
 function MobileNav() {
     const { pathname } = useRouter();
     const theme = useTheme();
+    const [open, setOpen] = useState(false);
 
     return (
         <div className="lg:hidden p-2 flex items-center justify-between">
-            <TextMark className="h-10 w-10" />
+            <Link href="/">
+                <TextMark className="h-10 w-10" />
+            </Link>
             <div className="flex flex-row items-center gap-4">
                 <SearchBox />
-                <Sheet>
+                <Sheet open={open} onOpenChange={setOpen}>
                     <SheetTrigger>
                         <Menu className="h-8 w-8" />
                     </SheetTrigger>
                     <SheetContent side="left">
                         <div className="h-full relative">
                             <nav className="flex flex-col justify-start space-y-6 text-sm font-medium">
-                                <Link href="/" className={cn('transition-colors hover:text-foreground/80', pathname === '/' ? 'text-foreground font-bold' : 'text-foreground/60')}>
+                                <Link
+                                    onClick={() => {
+                                        setOpen(false);
+                                    }}
+                                    href="/"
+                                    className={cn('transition-colors hover:text-foreground/80', pathname === '/' ? 'text-foreground font-bold' : 'text-foreground/60')}
+                                >
                                     Home
                                 </Link>
-                                <Link href="/docs" className={cn('transition-colors hover:text-foreground/80', pathname === '/docs' ? 'text-foreground font-bold' : 'text-foreground/60')}>
+                                <Link
+                                    onClick={() => {
+                                        setOpen(false);
+                                    }}
+                                    href="/docs"
+                                    className={cn('transition-colors hover:text-foreground/80', pathname === '/docs' ? 'text-foreground font-bold' : 'text-foreground/60')}
+                                >
                                     Documentation
                                 </Link>
-                                <Link href="/guide" className={cn('transition-colors hover:text-foreground/80', pathname?.startsWith('/guide') ? 'text-foreground font-bold' : 'text-foreground/60')}>
+                                <Link
+                                    onClick={() => {
+                                        setOpen(false);
+                                    }}
+                                    href="/guide"
+                                    className={cn('transition-colors hover:text-foreground/80', pathname?.startsWith('/guide') ? 'text-foreground font-bold' : 'text-foreground/60')}
+                                >
                                     Guide
                                 </Link>
                                 <Link
+                                    onClick={() => {
+                                        setOpen(false);
+                                    }}
                                     href="/showcase"
                                     className={cn('transition-colors hover:text-foreground/80', pathname?.startsWith('/showcase') ? 'text-foreground font-bold' : 'text-foreground/60')}
                                 >
                                     Showcase
                                 </Link>
-                                <Link href={'https://github.com/androz2091/discord-player'} className={cn('text-foreground/60 transition-colors hover:text-foreground/80')}>
+                                <Link
+                                    onClick={() => {
+                                        setOpen(false);
+                                    }}
+                                    href={'https://github.com/androz2091/discord-player'}
+                                    className={cn('text-foreground/60 transition-colors hover:text-foreground/80')}
+                                >
                                     GitHub
                                 </Link>
                             </nav>

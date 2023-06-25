@@ -8,3 +8,9 @@
 .background {
     @apply bg-[url(/bg.svg)] bg-no-repeat bg-cover;
 }
+
+@layer components {
+    html {
+        @apply selection:bg-indigo-500 selection:text-white;
+    }
+}
