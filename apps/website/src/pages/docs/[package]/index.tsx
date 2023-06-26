@@ -70,7 +70,7 @@ export default function DocsTestPage() {
                                             };
                                         })}
                                         link={(name) => {
-                                            return `/docs/${currentLib.name}?type=class&target=${name}`;
+                                            return `/docs/${encodeURIComponent(currentLib.name)}?type=class&target=${name}`;
                                         }}
                                         icon={<VscSymbolClass className="h-5 w-5" />}
                                     />
@@ -86,7 +86,7 @@ export default function DocsTestPage() {
                                             };
                                         })}
                                         link={(name) => {
-                                            return `/docs/${currentLib.name}?type=function&target=${name}`;
+                                            return `/docs/${encodeURIComponent(currentLib.name)}?type=function&target=${name}`;
                                         }}
                                         icon={<VscSymbolMethod className="h-5 w-5" />}
                                     />
@@ -102,7 +102,7 @@ export default function DocsTestPage() {
                                             };
                                         })}
                                         link={(name) => {
-                                            return `/docs/${currentLib.name}?type=interface&target=${name}`;
+                                            return `/docs/${encodeURIComponent(currentLib.name)}?type=interface&target=${name}`;
                                         }}
                                         icon={<VscSymbolInterface className="h-5 w-5" />}
                                     />
@@ -131,7 +131,7 @@ export default function DocsTestPage() {
                                                         };
                                                     })}
                                                     link={(name) => {
-                                                        return `/docs/${currentLib.name}?type=class&target=${name}`;
+                                                        return `/docs/${encodeURIComponent(currentLib.name)}?type=class&target=${name}`;
                                                     }}
                                                     icon={<VscSymbolClass className="h-5 w-5" />}
                                                 />
@@ -147,7 +147,7 @@ export default function DocsTestPage() {
                                                         };
                                                     })}
                                                     link={(name) => {
-                                                        return `/docs/${currentLib.name}?type=function&target=${name}`;
+                                                        return `/docs/${encodeURIComponent(currentLib.name)}?type=function&target=${name}`;
                                                     }}
                                                     icon={<VscSymbolMethod className="h-5 w-5" />}
                                                 />
@@ -163,7 +163,7 @@ export default function DocsTestPage() {
                                                         };
                                                     })}
                                                     link={(name) => {
-                                                        return `/docs/${currentLib.name}?type=interface&target=${name}`;
+                                                        return `/docs/${encodeURIComponent(currentLib.name)}?type=interface&target=${name}`;
                                                     }}
                                                     icon={<VscSymbolInterface className="h-5 w-5" />}
                                                 />
@@ -175,7 +175,7 @@ export default function DocsTestPage() {
                         </Sheet>
                     </div>
                 </div>
-                <div className="flex-1 overflow-auto">
+                <div className="flex-1 overflow-auto h-screen hidescrollbar">
                     <ContentArea data={currentLib} />
                 </div>
             </div>

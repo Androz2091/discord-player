@@ -1,5 +1,4 @@
-import { getExampleText } from '@/lib/util';
-import { CodeBlock, Heading, Paragraph } from '@edge-ui/react';
+import { CodeBlock, Paragraph } from '@edge-ui/react';
 import type { DocumentedClassConstructor } from 'typedoc-nextra';
 import { Example } from './Example';
 import { ParameterTable } from './ParameterTable';

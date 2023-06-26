@@ -1,8 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import type { Documentation, DocumentedClass, DocumentedFunction, DocumentedTypes } from 'typedoc-nextra';
-import { Constructor } from './doc/Constructor';
-import { EntitySymbol } from './doc/EntitySymbol';
 import { Class } from './renderer/Class';
 
 interface IProps {
@@ -32,12 +30,12 @@ export function ContentArea({ data }: IProps) {
             if (data.classes.length || data.functions.length || data.types.length) {
                 const t = data.classes.length ? 'classes' : data.functions.length ? 'functions' : 'types';
                 const resolvedType = t === 'classes' ? 'class' : t === 'functions' ? 'function' : 'type';
-                if (!type)
-                    return void router.replace(
-                        `/docs/${encodeURIComponent(packageName as string)}?type=${resolvedType}&target=${data[t as Exclude<keyof typeof data, 'name'>][0].data.name}${
-                            router.query.scrollTo ? `&scrollTo=${router.query.scrollTo}` : ''
-                        }`
-                    );
+                if (!type) {
+                    const dest = `/docs/${encodeURIComponent(packageName as string)}?type=${resolvedType}&target=${data[t as Exclude<keyof typeof data, 'name'>][0].data.name}${
+                        router.query.scrollTo ? `&scrollTo=${router.query.scrollTo}` : ''
+                    }`;
+                    return void router.replace(dest);
+                }
             }
         } else {
             const t = type === 'class' ? 'classes' : type === 'function' ? 'functions' : 'types';
