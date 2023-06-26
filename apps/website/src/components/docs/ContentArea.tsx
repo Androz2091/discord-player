@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import type { Documentation, DocumentedClass, DocumentedFunction, DocumentedTypes } from 'typedoc-nextra';
@@ -51,14 +52,19 @@ export function ContentArea({ data }: IProps) {
     if (!currentItem || currentItem.__type !== type) return <></>;
 
     return (
-        <div className="mb-16">
-            {type === 'type' ? (
-                <TypeRenderer entity={currentItem as DocumentedTypes} />
-            ) : type === 'class' ? (
-                <ClassRenderer entity={currentItem as DocumentedClass} />
-            ) : type === 'function' ? (
-                <Function entity={currentItem as DocumentedFunction} />
-            ) : null}
-        </div>
+        <>
+            <Head>
+                <title>{currentItem.name} | Discord Player</title>
+            </Head>
+            <div className="mb-16">
+                {type === 'type' ? (
+                    <TypeRenderer entity={currentItem as DocumentedTypes} />
+                ) : type === 'class' ? (
+                    <ClassRenderer entity={currentItem as DocumentedClass} />
+                ) : type === 'function' ? (
+                    <Function entity={currentItem as DocumentedFunction} />
+                ) : null}
+            </div>
+        </>
     );
 }
