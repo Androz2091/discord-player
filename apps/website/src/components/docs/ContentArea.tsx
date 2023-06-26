@@ -45,7 +45,8 @@ export function ContentArea({ data }: IProps) {
         }
     }, [target, type, packageName]);
 
-    if (!currentItem) return <></>;
+    // @ts-expect-error
+    if (!currentItem || currentItem.__type !== type) return <></>;
 
     return <div className="mb-16">{type === 'class' ? <Class entity={currentItem as DocumentedClass} /> : null}</div>;
 }
