@@ -12,7 +12,7 @@ export function ContentArea({ data }: IProps) {
     const router = useRouter();
     const { package: packageName, type, target, scrollTo } = router.query;
     const [currentItem, setCurrentItem] = useState<DocumentedClass | DocumentedTypes | DocumentedFunction | null>(() => {
-        const t = type === 'class' ? 'classes' : type === 'function' ? 'functions' : 'types';
+        const t = type === 'class' ? 'class' : type === 'function' ? 'function' : 'type';
         const res = data[t as Exclude<keyof typeof data, 'name'>] as unknown as { data: DocumentedClass | DocumentedTypes | DocumentedFunction }[];
         const entity = res.find((e) => e.data.name === target)?.data || null;
 
