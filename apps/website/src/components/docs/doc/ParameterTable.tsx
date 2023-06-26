@@ -3,6 +3,7 @@ import { CheckCircle, XCircle } from 'lucide-react';
 import { DocumentedParameter } from 'typedoc-nextra';
 
 export function ParameterTable({ parameters }: { parameters: DocumentedParameter[] }) {
+    if (!parameters.length) return <></>;
     const hasDescription = parameters.some((p) => p.description != null);
 
     return (

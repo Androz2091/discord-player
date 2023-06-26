@@ -24,17 +24,20 @@ export default function DocsTestPage() {
         setCurrentLib(docs.modules[currentPackageName]);
     }, [currentPackageName]);
 
-    useEffect(() => {
-        if (currentLib != null) {
-            if (currentLib.classes.length || currentLib.functions.length || currentLib.types.length) {
-                const t = currentLib.classes.length ? 'classes' : currentLib.functions.length ? 'functions' : 'types';
-                const type = t === 'classes' ? 'class' : t === 'functions' ? 'function' : 'type';
-
-                return void router.replace(`/docs/${encodeURIComponent(currentLib.name)}?type=${type}&target=${currentLib[t as Exclude<keyof typeof currentLib, 'name'>][0].data.name}`);
-            }
-            router.replace(`/docs/${currentLib}`);
-        }
-    }, [currentLib]);
+    // useEffect(() => {
+    // if (currentLib != null) {
+    //     if (currentLib.classes.length || currentLib.functions.length || currentLib.types.length) {
+    //         const t = currentLib.classes.length ? 'classes' : currentLib.functions.length ? 'functions' : 'types';
+    //         const type = t === 'classes' ? 'class' : t === 'functions' ? 'function' : 'type';
+    //         return void router.replace(
+    //             `/docs/${encodeURIComponent(currentLib.name)}?type=${type}&target=${currentLib[t as Exclude<keyof typeof currentLib, 'name'>][0].data.name}${
+    //                 router.query.scrollTo ? `&scrollTo=${router.query.scrollTo}` : ''
+    //             }`
+    //         );
+    //     }
+    //     router.replace(`/docs/${currentLib}`);
+    // }
+    // }, [currentLib]);
 
     if (!docs.modules[currentPackageName] || !currentLib) return;
 
