@@ -28,7 +28,9 @@ export default function DocsTestPage() {
         if (currentLib != null) {
             if (currentLib.classes.length || currentLib.functions.length || currentLib.types.length) {
                 const t = currentLib.classes.length ? 'classes' : currentLib.functions.length ? 'functions' : 'types';
-                return void router.replace(`/docs/${encodeURIComponent(currentLib.name)}?type=${t}&target=${currentLib[t as Exclude<keyof typeof currentLib, 'name'>][0].data.name}`);
+                const type = t === 'classes' ? 'class' : t === 'functions' ? 'function' : 'type';
+
+                return void router.replace(`/docs/${encodeURIComponent(currentLib.name)}?type=${type}&target=${currentLib[t as Exclude<keyof typeof currentLib, 'name'>][0].data.name}`);
             }
             router.replace(`/docs/${currentLib}`);
         }
@@ -170,7 +172,7 @@ export default function DocsTestPage() {
                         </Sheet>
                     </div>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 overflow-auto">
                     <ContentArea data={currentLib} />
                 </div>
             </div>

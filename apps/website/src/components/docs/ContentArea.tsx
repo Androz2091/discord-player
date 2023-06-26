@@ -30,7 +30,8 @@ export function ContentArea({ data }: IProps) {
         if (!target || !type) {
             if (data.classes.length || data.functions.length || data.types.length) {
                 const t = data.classes.length ? 'classes' : data.functions.length ? 'functions' : 'types';
-                if (!type) return void router.replace(`/docs/${encodeURIComponent(packageName as string)}?type=${t}&target=${data[t as Exclude<keyof typeof data, 'name'>][0].data.name}`);
+                const resolvedType = t === 'classes' ? 'class' : t === 'functions' ? 'function' : 'type';
+                if (!type) return void router.replace(`/docs/${encodeURIComponent(packageName as string)}?type=${resolvedType}&target=${data[t as Exclude<keyof typeof data, 'name'>][0].data.name}`);
             }
         } else {
             const t = type === 'class' ? 'classes' : type === 'function' ? 'functions' : 'types';
