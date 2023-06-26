@@ -39,6 +39,7 @@ export function EntitySymbol({ type, children, id, link }: React.PropsWithChildr
                     <Heading.H4 id={id}>{children}</Heading.H4>
                 </div>
             );
+            break;
         default:
             c = (
                 <Heading.H4 id={id} className={link ? 'cursor-pointer' : ''}>
