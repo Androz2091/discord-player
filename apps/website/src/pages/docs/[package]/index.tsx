@@ -93,16 +93,16 @@ export default function DocsTestPage() {
                                 ) : null}
                                 {currentLib.types.length ? (
                                     <ItemList
-                                        name="Interfaces"
+                                        name="Typedef"
                                         data={currentLib.types.map((m) => {
                                             return {
                                                 lib: currentLib.name,
                                                 name: m.data.name,
-                                                type: 'interface'
+                                                type: 'type'
                                             };
                                         })}
                                         link={(name) => {
-                                            return `/docs/${encodeURIComponent(currentLib.name)}?type=interface&target=${name}`;
+                                            return `/docs/${encodeURIComponent(currentLib.name)}?type=type&target=${name}`;
                                         }}
                                         icon={<VscSymbolInterface className="h-5 w-5" />}
                                     />
@@ -154,16 +154,16 @@ export default function DocsTestPage() {
                                             ) : null}
                                             {currentLib.types.length ? (
                                                 <ItemList
-                                                    name="Interfaces"
+                                                    name="Typedef"
                                                     data={currentLib.types.map((m) => {
                                                         return {
                                                             lib: currentLib.name,
                                                             name: m.data.name,
-                                                            type: 'interface'
+                                                            type: 'type'
                                                         };
                                                     })}
                                                     link={(name) => {
-                                                        return `/docs/${encodeURIComponent(currentLib.name)}?type=interface&target=${name}`;
+                                                        return `/docs/${encodeURIComponent(currentLib.name)}?type=type&target=${name}`;
                                                     }}
                                                     icon={<VscSymbolInterface className="h-5 w-5" />}
                                                 />

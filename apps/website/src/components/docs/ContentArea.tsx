@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import type { Documentation, DocumentedClass, DocumentedFunction, DocumentedTypes } from 'typedoc-nextra';
 import { Function } from './doc/Function';
 import { ClassRenderer } from './renderer/ClassRenderer';
+import { TypeRenderer } from './renderer/TypeRenderer';
 
 interface IProps {
     data: Documentation['modules'][string];
@@ -49,9 +50,17 @@ export function ContentArea({ data }: IProps) {
     // @ts-expect-error
     if (!currentItem || currentItem.__type !== type) return <></>;
 
+    console.log(currentItem);
+
     return (
         <div className="mb-16">
-            {type === 'class' ? <ClassRenderer entity={currentItem as DocumentedClass} /> : type === 'function' ? <Function entity={currentItem as DocumentedFunction} /> : null}
+            {type === 'type' ? (
+                <TypeRenderer entity={currentItem as DocumentedTypes} />
+            ) : type === 'class' ? (
+                <ClassRenderer entity={currentItem as DocumentedClass} />
+            ) : type === 'function' ? (
+                <Function entity={currentItem as DocumentedFunction} />
+            ) : null}
         </div>
     );
 }

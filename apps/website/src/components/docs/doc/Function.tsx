@@ -1,3 +1,4 @@
+import { inter } from '@/lib/constants';
 import { Badge, Paragraph } from '@edge-ui/react';
 import { DocumentedClassMethod, DocumentedFunction } from 'typedoc-nextra';
 import { EntitySymbol } from './EntitySymbol';
@@ -17,10 +18,12 @@ export function Function({ entity }: { entity: DocumentedFunction | DocumentedCl
                         return p.name;
                     })
                     .join(', ')}
-                {');'}{' '}
+                {');'} {entity.deprecated ? <Badge variant="destructive">Deprecated</Badge> : null}
             </EntitySymbol>
             <div>
-                <Paragraph>{entity.description}</Paragraph>
+                <Paragraph>
+                    <pre className={inter.className}>{entity.description}</pre>
+                </Paragraph>
                 <ParameterTable parameters={entity.parameters} />
                 <div className="my-2">
                     Returns: <Badge variant="outline">{entity.returns?.type}</Badge>

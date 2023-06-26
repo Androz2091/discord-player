@@ -1,4 +1,4 @@
-import { Heading } from '@edge-ui/react';
+import { Badge, Heading } from '@edge-ui/react';
 import type { DocumentedClass } from 'typedoc-nextra';
 import { Constructor } from '../doc/Constructor';
 import { EntitySymbol } from '../doc/EntitySymbol';
@@ -10,7 +10,7 @@ export function ClassRenderer({ entity }: { entity: DocumentedClass }) {
         <>
             <EntitySymbol type={'class'} id={`c-${entity.name}`} link>
                 {entity.name}
-                {entity.extends ? ` extends ${entity.extends}` : ''}
+                {entity.extends ? ` extends ${entity.extends}` : ''} {entity.deprecated ? <Badge variant="destructive">Deprecated</Badge> : null}
             </EntitySymbol>
             <Constructor item={entity.constructor!} />
             {entity.properties.length ? (

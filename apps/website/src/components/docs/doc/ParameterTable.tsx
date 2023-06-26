@@ -1,4 +1,5 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@edge-ui/react';
+import { inter } from '@/lib/constants';
+import { Paragraph, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@edge-ui/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { DocumentedParameter } from 'typedoc-nextra';
 
@@ -21,7 +22,13 @@ export function ParameterTable({ parameters }: { parameters: DocumentedParameter
                     <TableRow key={param.name}>
                         <TableCell className="font-medium">{param.name}</TableCell>
                         <TableCell>{param.type || 'any'}</TableCell>
-                        {hasDescription ? <TableCell>{param.description}</TableCell> : null}
+                        {hasDescription ? (
+                            <TableCell>
+                                <Paragraph>
+                                    <pre className={inter.className}>{param.description}</pre>
+                                </Paragraph>
+                            </TableCell>
+                        ) : null}
                         <TableCell>{param.optional ? <CheckCircle className="text-green-500" /> : <XCircle className="text-destructive" />}</TableCell>
                     </TableRow>
                 ))}

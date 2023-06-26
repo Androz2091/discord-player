@@ -1,4 +1,4 @@
-import { Fira_Code, Orbitron } from 'next/font/google';
+import { Fira_Code, Inter, Orbitron } from 'next/font/google';
 
 interface IFeature {
     title: string;
@@ -98,4 +98,10 @@ export const orbitron = Orbitron({
 
 export const firaCode = Fira_Code({
     subsets: ['latin']
+});
+
+export const inter = Inter({
+    subsets: ['latin'],
+    variable: '--font-sans',
+    display: 'swap'
 });
