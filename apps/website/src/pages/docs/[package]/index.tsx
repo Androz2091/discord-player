@@ -27,7 +27,7 @@ export default function DocsTestPage() {
     useEffect(() => {
         if (currentLib != null) {
             if (currentLib.classes.length || currentLib.functions.length || currentLib.types.length) {
-                const t = currentLib.classes.length ? 'classes' : currentLib.functions.length ? 'functions' : 'types';
+                const t = currentLib.classes.length ? 'class' : currentLib.functions.length ? 'function' : 'type';
                 return void router.replace(`/docs/${encodeURIComponent(currentLib.name)}?type=${t}&target=${currentLib[t as Exclude<keyof typeof currentLib, 'name'>][0].data.name}`);
             }
             router.replace(`/docs/${currentLib}`);
