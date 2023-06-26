@@ -12,6 +12,7 @@ import { useDocs } from '@/lib/context';
 
 export default function DocsTestPage() {
     const router = useRouter();
+    // eslint-disable-next-line
     const [_, setDoc] = useDocs();
     const currentPackageName = router.query.package as string;
     const [currentLib, setCurrentLib] = useState<ReturnType<typeof getLibraries>[number]>(docs.modules[currentPackageName]);

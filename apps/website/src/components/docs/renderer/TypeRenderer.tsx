@@ -1,4 +1,4 @@
-import { firaCode, inter } from '@/lib/constants';
+import { inter } from '@/lib/constants';
 import { Badge, Heading, Paragraph } from '@edge-ui/react';
 import type { DocumentedTypes } from 'typedoc-nextra';
 import { EntitySymbol } from '../doc/EntitySymbol';
