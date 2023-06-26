@@ -50,8 +50,6 @@ export function ContentArea({ data }: IProps) {
     // @ts-expect-error
     if (!currentItem || currentItem.__type !== type) return <></>;
 
-    console.log(currentItem);
-
     return (
         <div className="mb-16">
             {type === 'type' ? (

@@ -8,7 +8,7 @@ import { Properties } from '../doc/Properties';
 export function TypeRenderer({ entity }: { entity: DocumentedTypes }) {
     return (
         <>
-            <EntitySymbol type={'interface'} id={`c-${entity.name}`} link>
+            <EntitySymbol type={'interface'} id={`c-${entity.name}`} link source={entity.metadata?.url}>
                 {entity.name}
             </EntitySymbol>
             {entity.description ? (

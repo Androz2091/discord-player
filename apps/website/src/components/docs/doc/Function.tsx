@@ -8,7 +8,7 @@ import { ParameterTable } from './ParameterTable';
 export function Function({ entity }: { entity: DocumentedFunction | DocumentedClassMethod }) {
     return (
         <div className="space-y-3">
-            <EntitySymbol type={'function'} id={`fm-${entity.name}`} link>
+            <EntitySymbol type={'function'} id={`fm-${entity.name}`} link source={entity.metadata?.url}>
                 {entity.static ? <span className="text-base text-purple-600">static </span> : ''}
                 {entity.name}
                 {'('}

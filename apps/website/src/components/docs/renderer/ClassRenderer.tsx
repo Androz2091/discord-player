@@ -8,7 +8,7 @@ import { Properties } from '../doc/Properties';
 export function ClassRenderer({ entity }: { entity: DocumentedClass }) {
     return (
         <>
-            <EntitySymbol type={'class'} id={`c-${entity.name}`} link>
+            <EntitySymbol type={'class'} id={`c-${entity.name}`} link source={entity.metadata?.url}>
                 {entity.name}
                 {entity.extends ? ` extends ${entity.extends}` : ''} {entity.deprecated ? <Badge variant="destructive">Deprecated</Badge> : null}
             </EntitySymbol>
