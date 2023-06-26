@@ -4,7 +4,7 @@ export function AppLayout({ children }: React.PropsWithChildren) {
     return (
         <>
             <Navbar />
-            <div>{children}</div>
+            <div className="transition-all">{children}</div>
         </>
     );
 }

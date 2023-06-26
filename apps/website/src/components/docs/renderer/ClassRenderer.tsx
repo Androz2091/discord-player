@@ -5,7 +5,7 @@ import { EntitySymbol } from '../doc/EntitySymbol';
 import { Function } from '../doc/Function';
 import { Properties } from '../doc/Properties';
 
-export function Class({ entity }: { entity: DocumentedClass }) {
+export function ClassRenderer({ entity }: { entity: DocumentedClass }) {
     return (
         <>
             <EntitySymbol type={'class'} id={`c-${entity.name}`} link>

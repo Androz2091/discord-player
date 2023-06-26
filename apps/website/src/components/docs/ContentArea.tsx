@@ -1,7 +1,8 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import type { Documentation, DocumentedClass, DocumentedFunction, DocumentedTypes } from 'typedoc-nextra';
-import { Class } from './renderer/Class';
+import { Function } from './doc/Function';
+import { ClassRenderer } from './renderer/ClassRenderer';
 
 interface IProps {
     data: Documentation['modules'][string];
@@ -48,5 +49,9 @@ export function ContentArea({ data }: IProps) {
     // @ts-expect-error
     if (!currentItem || currentItem.__type !== type) return <></>;
 
-    return <div className="mb-16">{type === 'class' ? <Class entity={currentItem as DocumentedClass} /> : null}</div>;
+    return (
+        <div className="mb-16">
+            {type === 'class' ? <ClassRenderer entity={currentItem as DocumentedClass} /> : type === 'function' ? <Function entity={currentItem as DocumentedFunction} /> : null}
+        </div>
+    );
 }
