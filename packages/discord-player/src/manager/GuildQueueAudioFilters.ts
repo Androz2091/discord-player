@@ -20,7 +20,28 @@ const makeBands = (arr: number[]) => {
     ) as EqualizerBand[];
 };
 
-export const EqualizerConfigurationPreset = {
+type EQPreset = {
+    Flat: EqualizerBand[];
+    Classical: EqualizerBand[];
+    Club: EqualizerBand[];
+    Dance: EqualizerBand[];
+    FullBass: EqualizerBand[];
+    FullBassTreble: EqualizerBand[];
+    FullTreble: EqualizerBand[];
+    Headphones: EqualizerBand[];
+    LargeHall: EqualizerBand[];
+    Live: EqualizerBand[];
+    Party: EqualizerBand[];
+    Pop: EqualizerBand[];
+    Reggae: EqualizerBand[];
+    Rock: EqualizerBand[];
+    Ska: EqualizerBand[];
+    Soft: EqualizerBand[];
+    SoftRock: EqualizerBand[];
+    Techno: EqualizerBand[];
+};
+
+export const EqualizerConfigurationPreset: Readonly<EQPreset> = Object.freeze({
     Flat: makeBands([]),
     Classical: makeBands([-1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -7.2, -7.2, -7.2, -9.6]),
     Club: makeBands([-1.11022e-15, -1.11022e-15, 8.0, 5.6, 5.6, 5.6, 3.2, -1.11022e-15, -1.11022e-15, -1.11022e-15]),
@@ -39,7 +60,7 @@ export const EqualizerConfigurationPreset = {
     Soft: makeBands([4.8, 1.6, -1.11022e-15, -2.4, -1.11022e-15, 4.0, 8.0, 9.6, 11.2, 12.0]),
     SoftRock: makeBands([4.0, 4.0, 2.4, -1.11022e-15, -4.0, -5.6, -3.2, -1.11022e-15, 2.4, 8.8]),
     Techno: makeBands([8.0, 5.6, -1.11022e-15, -5.6, -4.8, -1.11022e-15, 8.0, 9.6, 9.6, 8.8])
-} as const;
+});
 
 export class FFmpegFilterer<Meta = unknown> {
     #ffmpegFilters: Filters[] = [];
