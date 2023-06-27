@@ -12,7 +12,7 @@ interface IProps {
     icon?: React.ReactNode;
 }
 
-export function ItemList({ data, name, link, icon }: IProps) {
+export function DocsItemList({ data, name, link, icon }: IProps) {
     const router = useRouter();
     const [open, setOpen] = useState(true);
 

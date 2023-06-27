@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { docs, libNames } from '@/lib/docs';
 import { ScrollArea, Sheet, SheetContent, SheetTrigger } from '@edge-ui/react';
 import { PanelRightClose } from 'lucide-react';
-import { ItemList } from '@/components/docs/ItemList';
+import { DocsItemList } from '@/components/docs/DocsItemList';
 import { Combobox } from '@/components/combobox';
 import { useRouter } from 'next/router';
 import { ContentArea } from '@/components/docs/ContentArea';
@@ -53,7 +53,7 @@ export default function DocsTestPage() {
                         <ScrollArea className="max-h-screen">
                             <div className="space-y-3 max-h-[84vh]">
                                 {currentLib.classes.length ? (
-                                    <ItemList
+                                    <DocsItemList
                                         name="Classes"
                                         data={currentLib.classes.map((m) => {
                                             return {
@@ -69,7 +69,7 @@ export default function DocsTestPage() {
                                     />
                                 ) : null}
                                 {currentLib.functions.length ? (
-                                    <ItemList
+                                    <DocsItemList
                                         name="Functions"
                                         data={currentLib.functions.map((m) => {
                                             return {
@@ -85,7 +85,7 @@ export default function DocsTestPage() {
                                     />
                                 ) : null}
                                 {currentLib.types.length ? (
-                                    <ItemList
+                                    <DocsItemList
                                         name="Typedef"
                                         data={currentLib.types.map((m) => {
                                             return {
@@ -114,7 +114,7 @@ export default function DocsTestPage() {
                                     <ScrollArea className="max-h-screen">
                                         <div className="space-y-3 max-h-[84vh]">
                                             {currentLib.classes.length ? (
-                                                <ItemList
+                                                <DocsItemList
                                                     name="Classes"
                                                     data={currentLib.classes.map((m) => {
                                                         return {
@@ -130,7 +130,7 @@ export default function DocsTestPage() {
                                                 />
                                             ) : null}
                                             {currentLib.functions.length ? (
-                                                <ItemList
+                                                <DocsItemList
                                                     name="Functions"
                                                     data={currentLib.functions.map((m) => {
                                                         return {
@@ -146,7 +146,7 @@ export default function DocsTestPage() {
                                                 />
                                             ) : null}
                                             {currentLib.types.length ? (
-                                                <ItemList
+                                                <DocsItemList
                                                     name="Typedef"
                                                     data={currentLib.types.map((m) => {
                                                         return {
