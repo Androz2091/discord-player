@@ -1,4 +1,5 @@
 import { docsLink } from '@/lib/docs';
+import { cleanupTypes } from '@/lib/util';
 import { cn } from '@edge-ui/react';
 import Link from 'next/link';
 import { useCallback } from 'react';
@@ -7,18 +8,7 @@ export function Type({ types, prefix }: { types: string[]; prefix?: string }) {
     const findType = useCallback(() => {
         const resolved: JSX.Element[] = [];
 
-        types = types
-            .filter((f) => f !== ' ' && f.trim().length)
-            .map((t, i, a) => {
-                t = t.replace(/\\|,\|/g, '');
-                if (i === a.length - 1 || ['keyof', 'typeof'].includes(t)) return t;
-                if (a[i + 1] != null && ['<', '>', ':', ';', '[', ']', ')', "'", '"'].includes(a[i + 1])) return t;
-                if (!['=>'].includes(a[i]) && /\>|[a-zA-Z]|\}/.test(t)) {
-                    return [t, '|'];
-                }
-                return t;
-            })
-            .flat(2);
+        types = cleanupTypes(types);
 
         for (const type of types) {
             const mod = docsLink.internal.find((link) => link.target === type);

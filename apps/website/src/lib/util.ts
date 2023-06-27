@@ -29,3 +29,18 @@ export function splitType(str: string) {
     }
     return result;
 }
+
+export function cleanupTypes(t: string[]) {
+    return t
+        .filter((f) => f !== ' ' && f.trim().length)
+        .map((t, i, a) => {
+            t = t.replace(/\\|,\|/g, '');
+            if (i === a.length - 1 || ['keyof', 'typeof'].includes(t)) return t;
+            if (a[i + 1] != null && ['<', '>', ':', ';', '[', ']', ')', "'", '"'].includes(a[i + 1])) return t;
+            if (!['=>'].includes(a[i]) && />|[a-zA-Z]|\}/.test(t)) {
+                return [t, '|'];
+            }
+            return t;
+        })
+        .flat(2);
+}
