@@ -15,8 +15,8 @@ jobs:
         name: ESLint
         runs-on: ubuntu-latest
         env:
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
@@ -24,13 +24,13 @@ jobs:
             - name: Install Node v18
               uses: actions/setup-node@v1
               with:
-                  node-version: 18
+                  node-version: 20
 
             - name: Cache yarn
               uses: actions/cache@v3
               with:
-                path: .yarn/cache
-                key: yarn-cache-node-18
+                  path: .yarn/cache
+                  key: yarn-cache-node-20
 
             - name: Install dependencies
               run: yarn install --immutable

@@ -1,4 +1,4 @@
-name: Node.js Package
+name: Documentation
 on:
     workflow_dispatch:
     release:
@@ -7,7 +7,7 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
     cancel-in-progress: true
 jobs:
-    publish-npm:
+    publish-docs:
         runs-on: ubuntu-20.04
         env:
             TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -23,8 +23,20 @@ jobs:
               with:
                   path: .yarn/cache
                   key: yarn-cache-node-20
-            - run: yarn install --immutable
-            - name: Build and publish
-              uses: ./.github/actions/npm
-              env:
-                  NPM_TOKEN: ${{secrets.npm_token}}
+
+            - name: Install dependencies
+              run: yarn install --immutable
+
+            - name: Build
+              run: yarn build
+
+            - name: Docgen
+              run: yarn docs
+
+            - name: Commit & Push
+              run: |
+                  git config --global user.name '${{ github.actor }}'
+                  git config --global user.email '${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com'
+                  git add -u
+                  git commit -m 'chore: generate docs'
+                  git push
