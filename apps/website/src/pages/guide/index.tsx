@@ -11,6 +11,9 @@ import { GuideItemList } from '@/components/guide/GuideItemList';
 import Link from 'next/link';
 
 const entries = {
+    Welcome: {
+        Welcome: lazy(() => import('./_guides/welcome/welcome.mdx'))
+    },
     Examples: {
         'Adding Events': lazy(() => import('./_guides/examples/adding_events.mdx')),
         'Autocomplete Search': lazy(() => import('./_guides/examples/autocomplete_search.mdx')),
@@ -87,13 +90,16 @@ export default function Guide() {
     const [CurrentPage, setCurrentPage] = useState<(() => JSX.Element) | null>(null);
 
     useEffect(() => {
+        if (!topic || !page) {
+            return void router.replace('/guide?topic=Welcome&page=Welcome');
+        }
         try {
             const el = entries[topic as keyof typeof entries][decodeURIComponent(page as string) as keyof (typeof entries)[keyof typeof entries]];
             setCurrentPage(el || null);
         } catch {
             setCurrentPage(null);
         }
-    }, [topic, page]);
+    }, [topic, page, router]);
 
     const guideItems = tableOfContent.map(([name, contents]) => (
         <GuideItemList
