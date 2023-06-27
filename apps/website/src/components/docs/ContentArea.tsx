@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import type { Documentation, DocumentedClass, DocumentedFunction, DocumentedTypes } from 'typedoc-nextra';
-import { Function } from './doc/Function';
+import { Function } from './entities/Function';
 import { ClassRenderer } from './renderer/ClassRenderer';
 import { TypeRenderer } from './renderer/TypeRenderer';
 
@@ -46,7 +46,7 @@ export function ContentArea({ data }: IProps) {
             const entity = res.find((e) => e.data.name === target)?.data || null;
             setCurrentItem(entity);
         }
-    }, [target, type, packageName]);
+    }, [target, type, packageName, data]);
 
     // @ts-expect-error
     if (!currentItem || currentItem.__type !== type) return <></>;

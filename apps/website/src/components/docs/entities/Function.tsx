@@ -4,6 +4,7 @@ import { DocumentedClassMethod, DocumentedFunction } from 'typedoc-nextra';
 import { EntitySymbol } from './EntitySymbol';
 import { Example } from './Example';
 import { ParameterTable } from './ParameterTable';
+import { Type } from './Type';
 
 export function Function({ entity }: { entity: DocumentedFunction | DocumentedClassMethod }) {
     return (
@@ -26,7 +27,7 @@ export function Function({ entity }: { entity: DocumentedFunction | DocumentedCl
                 </Paragraph>
                 <ParameterTable parameters={entity.parameters} />
                 <div className="my-2">
-                    Returns: <Badge variant="outline">{entity.returns?.type}</Badge>
+                    <Type types={entity.returns?.rawType || ['any']} prefix="Returns:" />
                     {entity.returns?.description ? <Paragraph>{entity.returns.description}</Paragraph> : null}
                 </div>
                 <Example item={entity} />

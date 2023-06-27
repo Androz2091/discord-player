@@ -2,6 +2,7 @@ import { inter } from '@/lib/constants';
 import { Paragraph, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@edge-ui/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { DocumentedParameter } from 'typedoc-nextra';
+import { Type } from './Type';
 
 export function ParameterTable({ parameters }: { parameters: DocumentedParameter[] }) {
     if (!parameters.length) return <></>;
@@ -21,7 +22,7 @@ export function ParameterTable({ parameters }: { parameters: DocumentedParameter
                 {parameters.map((param) => (
                     <TableRow key={param.name}>
                         <TableCell className="font-medium">{param.name}</TableCell>
-                        <TableCell>{param.type || 'any'}</TableCell>
+                        <TableCell>{<Type types={param.rawType || ['any']} />}</TableCell>
                         {hasDescription ? (
                             <TableCell>
                                 <Paragraph>

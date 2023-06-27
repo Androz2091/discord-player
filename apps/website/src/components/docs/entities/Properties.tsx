@@ -1,7 +1,9 @@
 import { inter } from '@/lib/constants';
+import { makeTypeParams, splitType } from '@/lib/util';
 import { Badge, Paragraph } from '@edge-ui/react';
 import type { DocumentedClassProperty } from 'typedoc-nextra';
 import { EntitySymbol } from './EntitySymbol';
+import { Type } from './Type';
 
 export function Properties({ entity }: { entity: DocumentedClassProperty }) {
     return (
@@ -19,7 +21,7 @@ export function Properties({ entity }: { entity: DocumentedClassProperty }) {
                     </Paragraph>
                 ) : null}
                 <div className="my-2">
-                    Type: <Badge variant="outline">{entity.type}</Badge>
+                    <Type types={entity.rawType || entity.type ? makeTypeParams(entity.type!) : ['any']} prefix="Type:" />
                 </div>
             </div>
         </div>

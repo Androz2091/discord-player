@@ -1,9 +1,10 @@
 import { inter } from '@/lib/constants';
 import { Badge, Heading, Paragraph } from '@edge-ui/react';
 import type { DocumentedTypes } from 'typedoc-nextra';
-import { EntitySymbol } from '../doc/EntitySymbol';
-import { ParameterTable } from '../doc/ParameterTable';
-import { Properties } from '../doc/Properties';
+import { EntitySymbol } from '../entities/EntitySymbol';
+import { ParameterTable } from '../entities/ParameterTable';
+import { Properties } from '../entities/Properties';
+import { Type } from '../entities/Type';
 
 export function TypeRenderer({ entity }: { entity: DocumentedTypes }) {
     return (
@@ -27,7 +28,7 @@ export function TypeRenderer({ entity }: { entity: DocumentedTypes }) {
             <ParameterTable parameters={entity.parameters} />
             {!entity.properties.length && entity.type ? (
                 <div className="my-2">
-                    Type: <Badge variant="outline">{entity.type}</Badge>
+                    <Type types={[entity.type]} prefix="Type:" />
                 </div>
             ) : null}
         </>

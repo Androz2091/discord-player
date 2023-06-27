@@ -1,17 +1,18 @@
 import { Badge, Heading } from '@edge-ui/react';
 import type { DocumentedClass } from 'typedoc-nextra';
-import { Constructor } from '../doc/Constructor';
-import { EntitySymbol } from '../doc/EntitySymbol';
-import { Function } from '../doc/Function';
-import { Properties } from '../doc/Properties';
+import { Constructor } from '../entities/Constructor';
+import { EntitySymbol } from '../entities/EntitySymbol';
+import { Function } from '../entities/Function';
+import { Properties } from '../entities/Properties';
+import { Type } from '../entities/Type';
 
 export function ClassRenderer({ entity }: { entity: DocumentedClass }) {
     return (
         <>
             <EntitySymbol type={'class'} id={`c-${entity.name}`} link source={entity.metadata?.url}>
-                {entity.name}
-                {entity.extends ? ` extends ${entity.extends}` : ''} {entity.deprecated ? <Badge variant="destructive">Deprecated</Badge> : null}
+                {entity.name} {entity.deprecated ? <Badge variant="destructive">Deprecated</Badge> : null}
             </EntitySymbol>
+            {entity.extends ? <Type prefix="extends" types={[entity.extends]} /> : ''}
             <Constructor item={entity.constructor!} />
             {entity.properties.length ? (
                 <div className="flex flex-col gap-4 mt-5">

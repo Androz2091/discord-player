@@ -26,7 +26,7 @@ export function EntitySymbol({ type, children, id, link, source }: EntityProps) 
     switch (type) {
         case 'class':
             c = (
-                <div className={cn('flex items-end gap-2', link ? 'cursor-pointer' : '')} onClick={updateLink}>
+                <div className={cn('flex flex-row items-end gap-2', link ? 'cursor-pointer' : '')} onClick={updateLink}>
                     <VscSymbolClass className="h-6 w-6 text-orange-600" />
                     <Heading.H4 id={id}>{children}</Heading.H4>
                 </div>
@@ -34,7 +34,7 @@ export function EntitySymbol({ type, children, id, link, source }: EntityProps) 
             break;
         case 'property':
             c = (
-                <div className={cn('flex items-end gap-2', link ? 'cursor-pointer' : '')} onClick={updateLink}>
+                <div className={cn('flex flex-row items-end gap-2', link ? 'cursor-pointer' : '')} onClick={updateLink}>
                     <VscSymbolProperty className="h-6 w-6 text-amber-600" />
                     <Heading.H4 id={id}>{children}</Heading.H4>
                 </div>
@@ -42,7 +42,7 @@ export function EntitySymbol({ type, children, id, link, source }: EntityProps) 
             break;
         case 'function':
             c = (
-                <div className={cn('flex items-end gap-2', link ? 'cursor-pointer' : '')} onClick={updateLink}>
+                <div className={cn('flex flex-row items-end gap-2', link ? 'cursor-pointer' : '')} onClick={updateLink}>
                     <VscSymbolMethod className="h-6 w-6 text-purple-600" />
                     <Heading.H4 id={id}>{children}</Heading.H4>
                 </div>
@@ -50,7 +50,7 @@ export function EntitySymbol({ type, children, id, link, source }: EntityProps) 
             break;
         case 'interface':
             c = (
-                <div className={cn('flex items-end gap-2', link ? 'cursor-pointer' : '')} onClick={updateLink}>
+                <div className={cn('flex flex-row items-end gap-2', link ? 'cursor-pointer' : '')} onClick={updateLink}>
                     <VscSymbolInterface className="h-6 w-6 text-blue-600" />
                     <Heading.H4 id={id}>{children}</Heading.H4>
                 </div>
