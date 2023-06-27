@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import { ContentArea } from '@/components/docs/ContentArea';
 import { VscSymbolClass, VscSymbolInterface, VscSymbolMethod } from 'react-icons/vsc';
 import { useDocs } from '@/lib/context';
+import { ScrollTop } from '@/components/scrolltop/ScrollTop';
 
 export default function DocsTestPage() {
     const router = useRouter();
@@ -171,6 +172,7 @@ export default function DocsTestPage() {
                     <ContentArea data={currentLib} />
                 </div>
             </div>
+            <ScrollTop />
         </Container>
     );
 }
