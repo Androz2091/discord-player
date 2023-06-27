@@ -2,59 +2,21 @@
 
 Player state changes get emitted as events. You can attach to a particular listener to keep track of them.
 
-List of all available events : [Link](https://discord-player.js.org/docs/types/discord-player/guildqueueevent)
+List of all available events: [Link](/docs/discord-player?type=type&target=GuildQueueEvents)
 
-The most commonly used listeners and their sample implementation are listed below :
+The most commonly used listeners and their sample implementation are listed below:
 
 Add these in your _index.js_ where you initialized the Discord Player instance
-
-## Debug events
-
-```js
-player.on('debug', async (message) => {
-    // Emitted when the player sends debug info
-    // Useful for seeing what dependencies, extractors, etc are loaded
-    console.log(`General player debug event: ${message}`);
-});
-
-player.events.on('debug', async (queue, message) => {
-    // Emitted when the player queue sends debug info
-    // Useful for seeing what state the current queue is at
-    console.log(`Player debug event: ${message}`);
-});
-```
-
-## Error events
-
-```js
-player.events.on('error', (queue, error) => {
-    // Emitted when the player queue encounters error
-    console.log(`General player error event: ${error.message}`);
-    console.log(error);
-});
-
-player.events.on('playerError', (queue, error) => {
-    // Emitted when the audio player errors while streaming audio track
-    console.log(`Player error event: ${error.message}`);
-    console.log(error);
-});
-```
 
 ## General events
 
 `queue.metadata.send()` is used here to send a message to the interaction channel.
 
-_NOTE : For this example to work, you will need to pass `interaction.channel` as the metadata while executing the play command. Check the example below._
+> _NOTE : For this example to work, you will need to pass `interaction.channel` as the metadata while executing the play command. Check the example below._
 
-```js
-await player.play(channel, query, {
-    nodeOptions: {
-        metadata: interaction.channel
-    }
-});
-```
+<CH.Code>
 
-```js
+```js events.js
 player.events.on('playerStart', (queue, track) => {
     // Emitted when the player starts to play a song
     queue.metadata.send(`Started playing: **${track.title}**`);
@@ -89,3 +51,53 @@ player.events.on('emptyQueue', (queue) => {
     queue.metadata.send('Queue finished!');
 });
 ```
+
+```js play.js
+await player.play(channel, query, {
+    nodeOptions: {
+        metadata: interaction.channel
+    }
+});
+```
+
+</CH.Code>
+
+## Debug events
+
+<CH.Code>
+
+```js events.js
+player.on('debug', async (message) => {
+    // Emitted when the player sends debug info
+    // Useful for seeing what dependencies, extractors, etc are loaded
+    console.log(`General player debug event: ${message}`);
+});
+
+player.events.on('debug', async (queue, message) => {
+    // Emitted when the player queue sends debug info
+    // Useful for seeing what state the current queue is at
+    console.log(`Player debug event: ${message}`);
+});
+```
+
+</CH.Code>
+
+## Error events
+
+<CH.Code>
+
+```js events.js
+player.events.on('error', (queue, error) => {
+    // Emitted when the player queue encounters error
+    console.log(`General player error event: ${error.message}`);
+    console.log(error);
+});
+
+player.events.on('playerError', (queue, error) => {
+    // Emitted when the audio player errors while streaming audio track
+    console.log(`Player error event: ${error.message}`);
+    console.log(error);
+});
+```
+
+</CH.Code>

@@ -4,8 +4,8 @@ import { ExternalLink } from 'lucide-react';
 import { features, tools } from '@/lib/constants';
 import { Container } from '@/components/layout/Container';
 import Hero from '@/components/homepage/Hero';
-import { Section } from '@/components/homepage/Section';
-import { CardGrid } from '@/components/homepage/CardGrid';
+import { Section } from '@/components/layout/Section';
+import { CardGrid } from '@/components/layout/CardGrid';
 
 export default function Main() {
     return (

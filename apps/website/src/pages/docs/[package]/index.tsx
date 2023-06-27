@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { docs, libNames } from '@/lib/docs';
 import { ScrollArea, Sheet, SheetContent, SheetTrigger } from '@edge-ui/react';
 import { PanelRightClose } from 'lucide-react';
-import { ItemList } from '@/components/docs/itemlist';
+import { ItemList } from '@/components/docs/ItemList';
 import { Combobox } from '@/components/combobox';
 import { useRouter } from 'next/router';
 import { ContentArea } from '@/components/docs/ContentArea';

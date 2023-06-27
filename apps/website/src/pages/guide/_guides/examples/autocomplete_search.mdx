@@ -1,16 +1,17 @@
 # Search Autocomplete
 
-You can return song suggestions to autocomplete interaction using discord-player. Just apply something similar:
+You can return song suggestions to autocomplete interaction using discord-player. Just apply something similar to this:
 
-_index.js_
+> **command** here stands for your command file. Check one of the example bot implementation to understand more.
 
-```js
+<CH.Code>
+
+```js index.js
 client.on("ready", function (readyClient) {
 
     //Discord Player Initialization
 	const { Player } = require("discord-player");
 	const player = new Player(readyClient);
-
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -18,20 +19,15 @@ client.on("interactionCreate", async (interaction) => {
         //Handling autocomplete requests
         ...
         await command.autocompleteRun(interaction);
-    }else if(interaction.isChatInputCommand()){
+    } else if(interaction.isChatInputCommand()){
         //Handling chat slashCommand  requests
         ...
         await command.execute(interaction);
     }
-
 });
 ```
 
-**command** here stands for your command file. Check one of the example bot implementation to understand more.
-
-_play.js_
-
-```js
+```js play.js
 import { useMainPlayer } from 'discord-player';
 
 async function autocompleteRun(interaction) {
@@ -68,3 +64,5 @@ async function execute(interaction) {
     await interaction.reply({ content: `Loading your track(s)"}` });
 }
 ```
+
+</CH.Code>

@@ -123,7 +123,7 @@ async function execute(interaction) {
 }
 ```
 
-_You can find the full list of available nodeOptions over [here](https://discord-player.js.org/docs/types/discord-player/GuildNodeInit)_
+> _You can find the full list of available `nodeOptions` over [here](http://localhost:3000/docs/discord-player?type=type&target=GuildNodeInit)_
 
 That's all it takes to build a simple play command.
 
@@ -277,7 +277,7 @@ Note: metadata setter is still functional
 
 ### Event Changes
 
-Player [events](https://discord-player.js.org/docs/types/discord-player/GuildQueueEvents) are now emitted from the `player.events` object. (ex. `player.events.on(event.name, (...args) => event.execute(...args));`)
+Player [events](/docs/discord-player?type=type&target=GuildQueueEvents) are now emitted from the `player.events` object. (ex. `player.events.on(event.name, (...args) => event.execute(...args));`)
 
 ```diff
 - botDisconnect
@@ -328,7 +328,7 @@ In addition to the change in events, there are also new events that have been ad
 
 ### Filters
 
-There are several new filter options, with some shown below. A full list can be found [here](https://discord-player.js.org/docs/types/discord-player/QueueFilters).
+There are several new filter options, with some shown below. A full list can be found [here](/docs/discord-player?type=type&target=QueueFilters).
 
 The 8D filter used is **not** the one in FFmpeg and you will see it applied immediately unlike the FFmpeg one.
 
