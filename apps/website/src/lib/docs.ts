@@ -1,5 +1,6 @@
 import _rawDocs from '../data/docs.json';
 import type { Documentation } from 'typedoc-nextra';
+import Fuse from 'fuse.js';
 
 for (const prop in _rawDocs.modules) {
     // @ts-expect-error
@@ -11,6 +12,14 @@ for (const prop in _rawDocs.modules) {
 }
 
 export const docs = _rawDocs as unknown as Documentation;
+
+type Doc = {
+    name: string;
+    type: 'class' | 'function' | 'type' | 'property';
+    href: string;
+    module: string;
+    displayName: string;
+};
 
 const EXTERNAL_LINKS = {
     string: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String',
@@ -107,3 +116,74 @@ export const docsLink = (() => {
     return { internal: entries, external: EXTERNAL_LINKS };
 })();
 export const libNames = Object.values(_rawDocs.modules).map((m) => m.name);
+
+const seed: Doc[] = (() => {
+    const props: Doc[] = [];
+
+    for (const mod of Object.values(_rawDocs.modules)) {
+        mod.classes.forEach((cls) => {
+            props.push({
+                module: mod.name,
+                href: `/docs/${encodeURIComponent(mod.name)}?type=class&target=${cls.data.name}`,
+                name: cls.data.name,
+                type: 'class',
+                displayName: cls.data.name
+            });
+
+            cls.data.methods.forEach((method) => {
+                props.push({
+                    href: `/docs/${encodeURIComponent(mod.name)}?type=class&target=${cls.data.name}&scrollTo=fm-${method.name}`,
+                    module: mod.name,
+                    name: method.name,
+                    type: 'function',
+                    displayName: `${cls.data.name}.${method.name}()`
+                });
+            });
+
+            cls.data.properties.forEach((prop) => {
+                props.push({
+                    href: `/docs/${encodeURIComponent(mod.name)}?type=class&target=${cls.data.name}&scrollTo=p-${prop.name}`,
+                    module: mod.name,
+                    name: prop.name,
+                    type: 'property',
+                    displayName: `${cls.data.name}.${prop.name}`
+                });
+            });
+        });
+
+        mod.types.forEach((cls) =>
+            props.push({
+                module: mod.name,
+                href: `/docs/${encodeURIComponent(mod.name)}?type=type&target=${cls.data.name}`,
+                name: cls.data.name,
+                type: 'type',
+                displayName: cls.data.name
+            })
+        );
+
+        mod.functions.forEach((cls) =>
+            props.push({
+                module: mod.name,
+                href: `/docs/${encodeURIComponent(mod.name)}?type=function&target=${cls.data.name}`,
+                name: cls.data.name,
+                type: 'function',
+                displayName: cls.data.name
+            })
+        );
+    }
+
+    return props;
+})();
+
+const fuse = new Fuse(seed, {
+    keys: ['name'],
+    shouldSort: true,
+    threshold: 0.5,
+    location: 0,
+    distance: 80,
+    minMatchCharLength: 1
+});
+
+export function searchDocs(query: string) {
+    return fuse.search(query, { limit: 50 }).map((r) => r.item);
+}

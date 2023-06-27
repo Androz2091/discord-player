@@ -8,13 +8,10 @@ import { Combobox } from '@/components/combobox';
 import { useRouter } from 'next/router';
 import { ContentArea } from '@/components/docs/ContentArea';
 import { VscSymbolClass, VscSymbolInterface, VscSymbolMethod } from 'react-icons/vsc';
-import { useDocs } from '@/lib/context';
 import { ScrollTop } from '@/components/scrolltop/ScrollTop';
 
 export default function DocsTestPage() {
     const router = useRouter();
-    // eslint-disable-next-line
-    const [_, setDoc] = useDocs();
     const currentPackageName = router.query.package as string;
     const [currentLib, setCurrentLib] = useState<ReturnType<typeof getLibraries>[number]>(docs.modules[currentPackageName]);
     const getLibraries = useCallback(() => {
@@ -27,10 +24,6 @@ export default function DocsTestPage() {
         if (!docs.modules[currentPackageName]) return void router.replace('/404');
         setCurrentLib(docs.modules[currentPackageName]);
     }, [currentPackageName]);
-
-    useEffect(() => {
-        setDoc(currentLib);
-    }, [currentLib]);
 
     if (!docs.modules[currentPackageName] || !currentLib) return;
 

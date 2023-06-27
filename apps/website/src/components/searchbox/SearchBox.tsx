@@ -1,16 +1,33 @@
-import { Button, cn, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, useTheme } from '@edge-ui/react';
-import { Laptop, Moon, Search, SunMedium } from 'lucide-react';
+import { searchDocs } from '@/lib/docs';
+import { Button, cn, useDebounce } from '@edge-ui/react';
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/cmdk/CommandDialog';
+import { Search } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { VscSymbolClass, VscSymbolInterface, VscSymbolMethod, VscSymbolProperty } from 'react-icons/vsc';
+import { useRouter } from 'next/router';
 
 export function SearchBox() {
+    const router = useRouter();
     const [open, setOpen] = useState(false);
-    const theme = useTheme();
-    // const [docs] = useDocs();
+    const [value, setValue] = useState('');
+    const query = useDebounce(value);
+    const [result, setResult] = useState<ReturnType<typeof searchDocs>>([]);
 
     const runCommand = useCallback((cmd: () => void) => {
         setOpen(false);
         cmd();
     }, []);
+
+    void runCommand;
+
+    const onValueChange = (val: string) => {
+        setValue(val);
+    };
+
+    useEffect(() => {
+        if (!query.length) return setResult([]);
+        setResult(searchDocs(query));
+    }, [query]);
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -33,74 +50,39 @@ export function SearchBox() {
                 </kbd>
             </Button>
             <Search className="lg:hidden" onClick={() => setOpen(true)} />
-            <CommandDialog open={open} onOpenChange={setOpen}>
-                <CommandInput placeholder="Search documentation or command..." />
+            <CommandDialog
+                open={open}
+                shouldFilter={false}
+                onOpenChange={(opn) => {
+                    setOpen(opn);
+                    setValue('');
+                }}
+            >
+                <CommandInput placeholder="Search documentation or command..." value={value} onValueChange={onValueChange} />
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
-                    {/* TODO: fix */}
-                    {/* {!docs ? null : (
-                        <>
-                            {docs.classes.map((cls) => {
-                                return (
-                                    <CommandGroup heading={cls.data.name} key={cls.data.name}>
-                                        <CommandItem>
-                                            <VscSymbolClass className="h-4 w-4 mr-2 text-orange-600" />
-                                            {cls.data.name}
-                                        </CommandItem>
-                                        {cls.data.methods.map((method) => {
-                                            return (
-                                                <CommandItem key={method.name}>
-                                                    <VscSymbolMethod className="h-4 w-4 mr-2 text-purple-600" />
-                                                    {method.name}
-                                                </CommandItem>
-                                            );
-                                        })}
-                                        {cls.data.properties.map((prop) => {
-                                            return (
-                                                <CommandItem key={prop.name}>
-                                                    <VscSymbolProperty className="h-4 w-4 mr-2 text-amber-600" />
-                                                    {prop.name}
-                                                </CommandItem>
-                                            );
-                                        })}
-                                    </CommandGroup>
-                                );
-                            })}
-                            <CommandGroup heading={'Functions'}>
-                                {docs.functions.map((func) => {
-                                    return (
-                                        <CommandItem key={func.data.name}>
-                                            <VscSymbolMethod className="h-4 w-4 mr-2 text-purple-600" />
-                                            {func.data.name}
-                                        </CommandItem>
-                                    );
-                                })}
-                            </CommandGroup>
-                            <CommandGroup heading={'Typedef'}>
-                                {docs.types.map((type) => {
-                                    return (
-                                        <CommandItem key={type.data.name}>
-                                            <VscSymbolInterface className="h-4 w-4 mr-2 text-blue-600" />
-                                            {type.data.name}
-                                        </CommandItem>
-                                    );
-                                })}
-                            </CommandGroup>
-                        </>
-                    )} */}
-                    <CommandGroup heading="Theme">
-                        <CommandItem onSelect={() => runCommand(() => theme.setTheme('light'))}>
-                            <SunMedium className="mr-2 h-4 w-4" />
-                            Light
-                        </CommandItem>
-                        <CommandItem onSelect={() => runCommand(() => theme.setTheme('dark'))}>
-                            <Moon className="mr-2 h-4 w-4" />
-                            Dark
-                        </CommandItem>
-                        <CommandItem onSelect={() => runCommand(() => theme.setTheme('system'))}>
-                            <Laptop className="mr-2 h-4 w-4" />
-                            System
-                        </CommandItem>
+                    <CommandGroup heading={`Total ${result.length} results`}>
+                        {result.map((res, i) => {
+                            return (
+                                <CommandItem
+                                    key={`${res.name}-${i}`}
+                                    onSelect={() => {
+                                        runCommand(() => router.push(res.href));
+                                    }}
+                                >
+                                    {res.type === 'class' ? (
+                                        <VscSymbolClass className="h-4 w-4 mr-2 text-orange-600" />
+                                    ) : res.type === 'function' ? (
+                                        <VscSymbolMethod className="h-4 w-4 mr-2 text-purple-600" />
+                                    ) : res.type === 'property' ? (
+                                        <VscSymbolProperty className="h-4 w-4 mr-2 text-amber-600" />
+                                    ) : (
+                                        <VscSymbolInterface className="h-4 w-4 mr-2 text-blue-600" />
+                                    )}
+                                    {res.displayName} (<span className="text-muted-foreground text-sm">{res.module}</span>)
+                                </CommandItem>
+                            );
+                        })}
                     </CommandGroup>
                 </CommandList>
             </CommandDialog>
