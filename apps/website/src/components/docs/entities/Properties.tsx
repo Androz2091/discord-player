@@ -1,5 +1,5 @@
 import { inter } from '@/lib/constants';
-import { makeTypeParams, splitType } from '@/lib/util';
+import { makeTypeParams } from '@/lib/util';
 import { Badge, Paragraph } from '@edge-ui/react';
 import type { DocumentedClassProperty } from 'typedoc-nextra';
 import { EntitySymbol } from './EntitySymbol';

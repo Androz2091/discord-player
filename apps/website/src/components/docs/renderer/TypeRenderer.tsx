@@ -1,5 +1,5 @@
 import { inter } from '@/lib/constants';
-import { Badge, Heading, Paragraph } from '@edge-ui/react';
+import { Heading, Paragraph } from '@edge-ui/react';
 import type { DocumentedTypes } from 'typedoc-nextra';
 import { EntitySymbol } from '../entities/EntitySymbol';
 import { ParameterTable } from '../entities/ParameterTable';
