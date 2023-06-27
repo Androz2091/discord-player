@@ -17,12 +17,12 @@ export default function Hero() {
                 </Heading.H5>
             </div>
             <div className="flex items-center gap-4 mt-6 px-4 flex-col md:flex-row w-full md:w-auto">
-                <Link href="/docs">
+                <Link href="/docs" className="w-full md:w-auto">
                     <Button size="lg" className="w-full md:w-auto">
                         Get Started
                     </Button>
                 </Link>
-                <Link href="https://github.com/androz2091/discord-player" target="_blank" rel="noreferrer noopener">
+                <Link href="https://github.com/androz2091/discord-player" target="_blank" rel="noreferrer noopener" className="w-full md:w-auto">
                     <Button variant="outline" className="gap-1 w-full  md:w-auto" size="lg">
                         <GitHubIcon className="h-5 w-5" />
                         GitHub

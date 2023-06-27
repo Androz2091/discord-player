@@ -3,7 +3,26 @@ import { lazy, useEffect, useState } from 'react';
 import { MDXProvider } from '@mdx-js/react';
 import { ScrollTop } from '@/components/scrolltop/ScrollTop';
 import { Container } from '@/components/layout/Container';
-import { ScrollArea, SheetContent, SheetTrigger, Sheet, Heading, Blockquote, Paragraph, List, ListItem, Code, CodeBlock, Table, TableHead, TableHeader, TableRow, TableCell, cn } from '@edge-ui/react';
+import {
+    ScrollArea,
+    SheetContent,
+    SheetTrigger,
+    Sheet,
+    Heading,
+    Blockquote,
+    Paragraph,
+    List,
+    ListItem,
+    Code,
+    CodeBlock,
+    Table,
+    TableHead,
+    TableHeader,
+    TableRow,
+    TableCell,
+    cn,
+    Loader
+} from '@edge-ui/react';
 import { VscBook } from 'react-icons/vsc';
 import { PanelRightClose } from 'lucide-react';
 import { useRouter } from 'next/router';
@@ -142,7 +161,15 @@ export default function Guide() {
                     </div>
                 </div>
                 <div className="flex-1 overflow-auto h-screen hidescrollbar mb-16">
-                    <MDXProvider components={mdxComponents}>{CurrentPage ? <CurrentPage /> : null}</MDXProvider>
+                    <MDXProvider components={mdxComponents}>
+                        {CurrentPage ? (
+                            <CurrentPage />
+                        ) : (
+                            <div className="h-1/2 grid place-items-center">
+                                <Loader variant="bars" className="h-10 w-10" />
+                            </div>
+                        )}
+                    </MDXProvider>
                 </div>
             </div>
             <ScrollTop />
