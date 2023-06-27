@@ -8,7 +8,7 @@ import { Type } from './Type';
 export function Properties({ entity }: { entity: DocumentedClassProperty }) {
     return (
         <div className="space-y-3">
-            <EntitySymbol type={'property'} id={`p-${entity.name}`} link source={entity.metadata?.url}>
+            <EntitySymbol type={'property'} link source={entity.metadata?.url}>
                 {entity.static ? <span className="text-base text-purple-600">static </span> : ''}
                 {entity.readonly ? <span className="text-base text-rose-600">readonly </span> : ''}
                 {entity.name}

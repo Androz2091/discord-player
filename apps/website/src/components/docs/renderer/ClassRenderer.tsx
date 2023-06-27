@@ -7,6 +7,7 @@ import { Properties } from '../entities/Properties';
 import { Type } from '../entities/Type';
 
 export function ClassRenderer({ entity }: { entity: DocumentedClass }) {
+    console.log(entity);
     return (
         <>
             <EntitySymbol type={'class'} id={`c-${entity.name}`} link source={entity.metadata?.url}>
@@ -17,8 +18,8 @@ export function ClassRenderer({ entity }: { entity: DocumentedClass }) {
             {entity.properties.length ? (
                 <div className="flex flex-col gap-4 mt-5">
                     <Heading.H3>Properties</Heading.H3>
-                    {entity.properties.map((property) => (
-                        <Properties entity={property} key={property.name} />
+                    {entity.properties.map((property, i) => (
+                        <Properties entity={property} key={`${i}-${entity.name}-${property.name}`} />
                     ))}
                 </div>
             ) : null}
@@ -26,7 +27,7 @@ export function ClassRenderer({ entity }: { entity: DocumentedClass }) {
                 <div className="flex flex-col gap-4 mt-5">
                     <Heading.H3>Methods</Heading.H3>
                     {entity.methods.map((method) => (
-                        <Function key={method.name} entity={method} />
+                        <Function key={`${entity.name}-${method.name}`} entity={method} />
                     ))}
                 </div>
             ) : null}
