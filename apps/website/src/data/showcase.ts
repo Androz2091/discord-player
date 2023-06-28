@@ -129,8 +129,8 @@ export const ShowcaseResource: IShowcase = {
         },
         {
             name: 'Flowease',
-            description: 'I am using discord-player to play songs from NetEase.',
-            version: 'v5.3.2',
+            description: 'A discord bot that use discord-player to play music from netease-cloud-music',
+            version: 'v6.6.0',
             url: 'https://github.com/Lutra-Fs/Flowease'
         },
         {
