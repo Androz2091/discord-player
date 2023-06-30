@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "bootstrap": "node ./scripts/bootstrap.js",
-    "build": "turbo run build --color",
+    "build": "turbo run build --color --filter=!website --filter=!music-bot",
     "docs": "node ./scripts/docgen.js",
     "build:check": "turbo run build:check --color",
     "lint": "turbo run lint --color",
