@@ -30,6 +30,7 @@ export interface PlayerNodeInitializerOptions<T> extends SearchOptions {
     nodeOptions?: GuildNodeCreateOptions<T>;
     connectionOptions?: VoiceConnectConfig;
     audioPlayerOptions?: ResourcePlayOptions;
+    signal?: AbortSignal;
     afterSearch?: (result: SearchResult) => Promise<SearchResult>;
 }
 
@@ -308,7 +309,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         const queue = this.nodes.create(vc.guild, options.nodeOptions);
 
         if (this.hasDebugger) this.debug(`[AsyncQueue] Acquiring an entry...`);
-        const entry = queue.tasksQueue.acquire();
+        const entry = queue.tasksQueue.acquire({ signal: options.signal });
         if (this.hasDebugger) this.debug(`[AsyncQueue] Entry ${entry.id} was acquired successfully!`);
 
         if (this.hasDebugger) this.debug(`[AsyncQueue] Waiting for the queue to resolve...`);
