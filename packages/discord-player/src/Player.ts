@@ -532,14 +532,14 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      */
     public scanDeps() {
         const line = '-'.repeat(50);
-        const runtime = 'Bun' in globalThis ? 'bun' : 'Deno' in globalThis ? 'deno' : 'node';
+        const runtime = 'Bun' in globalThis ? 'Bun' : 'Deno' in globalThis ? 'Deno' : 'Node';
         const depsReport = [
             'Discord Player',
             line,
             `- discord-player: ${Player.version}`,
             `- @discordjs/voice: ${dVoiceVersion}`,
             `- discord.js: ${djsVersion}`,
-            `- ${runtime} version: ${process.version}`,
+            `- Node version: ${process.version} (Detected Runtime: ${runtime})`,
             (() => {
                 if (this.options.useLegacyFFmpeg) return '- ffmpeg: N/A (using legacy ffmpeg)';
                 const info = FFmpeg.locateSafe();
