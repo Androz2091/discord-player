@@ -1,7 +1,8 @@
-import { Player } from '../Player';
+import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
 import { Track } from './Track';
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';
 import { Util } from '../utils/Util';
+import { GuildVoiceChannelResolvable } from 'discord.js';
 
 export class Playlist {
     public readonly player: Player;
@@ -147,5 +148,16 @@ export class Playlist {
         if (withTracks) payload.tracks = this.tracks.map((m) => m.toJSON(true));
 
         return payload as PlaylistJSON;
+    }
+
+    /**
+     * Play this playlist to the given voice channel. If queue exists and another track is being played, this playlist will be added to the queue.
+     * @param channel Voice channel on which this playlist shall be played
+     * @param options Node initialization options
+     */
+    public async play<T = unknown>(channel: GuildVoiceChannelResolvable, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
+        const fn = this.player.play.bind(this.player);
+
+        return await fn(channel, this, options);
     }
 }
