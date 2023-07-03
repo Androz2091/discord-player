@@ -7,19 +7,18 @@ import type { Player } from '../Player';
 import { Exceptions } from '../errors';
 
 class VoiceUtils {
-    public cache: Collection<Snowflake, StreamDispatcher>;
+    /**
+     * Voice connection cache to store voice connections of the Player components.
+     * This property is deprecated and will be removed in the future.
+     * It only exists for compatibility reasons.
+     * @deprecated
+     */
+    public cache: Collection<Snowflake, StreamDispatcher> = new Collection<Snowflake, StreamDispatcher>();
 
     /**
-     * The voice utils
-     * @private
+     * The voice utils constructor
      */
-    constructor(public player: Player) {
-        /**
-         * The cache where voice utils stores stream managers
-         * @type {Collection<Snowflake, StreamDispatcher>}
-         */
-        this.cache = new Collection<Snowflake, StreamDispatcher>();
-    }
+    constructor(public player: Player) {}
 
     /**
      * Joins a voice channel, creating basic stream dispatch manager
@@ -40,7 +39,6 @@ class VoiceUtils {
         if (!options?.queue) throw Exceptions.ERR_NO_GUILD_QUEUE();
         const conn = await this.join(channel, options);
         const sub = new StreamDispatcher(conn, channel, options.queue, options.maxTime, options.audioPlayer);
-        this.cache.set(channel.guild.id, sub);
         return sub;
     }
 
@@ -91,7 +89,7 @@ class VoiceUtils {
      * @returns {StreamDispatcher}
      */
     public getConnection(guild: Snowflake, group?: string) {
-        return this.cache.get(guild) || getVoiceConnection(guild, group);
+        return getVoiceConnection(guild, group);
     }
 }
 
