@@ -1,7 +1,7 @@
 const DiscordPlayerErrors = {
     ERR_OUT_OF_SPACE: {
         name: 'ERR_OUT_OF_SPACE',
-        type: Error,
+        type: RangeError,
         createError(target: string, capacity: number, total: number) {
             return `Max capacity reached for ${target} (Capacity ${capacity}/Total ${total})`;
         }
