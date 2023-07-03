@@ -180,31 +180,30 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      * @param options Progress bar options
      */
     public createProgressBar(options?: PlayerProgressbarOptions) {
-        const timestamp = this.getTimestamp();
-        if (!timestamp) return null;
-
-        const { indicator = '🔘', length = 15, line = '▬', timecodes = true } = options || {};
-
-        if (isNaN(length) || length < 0 || !Number.isFinite(length)) {
-            throw Exceptions.ERR_OUT_OF_RANGE('[PlayerProgressBarOptions.length]', String(length), '0', 'Finite Number');
-        }
-        const index = Math.round((timestamp.current.value / timestamp.total.value) * length);
-
-        if (index >= 1 && index <= length) {
-            const bar = line.repeat(length - 1).split('');
-            bar.splice(index, 0, indicator);
+          const timestamp = this.getTimestamp();
+          if (!timestamp)
+            return null;
+          const { indicator = "🔘", leftChar = "▬", rightChar = "▬", length = 15, timecodes = true } = options || {};
+          if (isNaN(length) || length < 0 || !Number.isFinite(length)) {
+            throw Exceptions.ERR_OUT_OF_RANGE("[PlayerProgressBarOptions.length]", String(length), "0", "Finite Number");
+          }
+          const index = Math.round(timestamp.current.value / timestamp.total.value * length);
+          if (index >= 1 && index <= length) {
+            const bar = leftChar.repeat(index - 1).split("");
+            bar.push(indicator);
+            bar.push(rightChar.repeat(length - index));
             if (timecodes) {
-                return `${timestamp.current.label} ┃ ${bar.join('')} ┃ ${timestamp.total.label}`;
+              return `${timestamp.current.label} \u2503 ${bar.join("")} \u2503 ${timestamp.total.label}`;
             } else {
-                return `${bar.join('')}`;
+              return `${bar.join("")}`;
             }
-        } else {
+          } else {
             if (timecodes) {
-                return `${timestamp.current.label} ┃ ${indicator}${line.repeat(length - 1)} ┃ ${timestamp.total.label}`;
+              return `${timestamp.current.label} \u2503 ${indicator}${rightChar.repeat(length - 1)} \u2503 ${timestamp.total.label}`;
             } else {
-                return `${indicator}${line.repeat(length - 1)}`;
+              return `${indicator}${rightChar.repeat(length - 1)}`;
             }
-        }
+          }
     }
 
     /**
