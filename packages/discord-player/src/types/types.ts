@@ -117,6 +117,7 @@ export interface TimeData {
  * @property {number} [length] The bar length
  * @property {string} [leftChar] The elapsed time track
  * @property {string} [rightChar] The remaining time track
+ * @property {string} [separator] The separation between timestamp and line
  * @property {string} [indicator] The indicator
  */
 export interface PlayerProgressbarOptions {
@@ -124,6 +125,7 @@ export interface PlayerProgressbarOptions {
     length?: number;
     leftChar?: string;
     rightChar? : string;
+    separator? : string;
     indicator?: string;
     queue?: boolean;
 }
