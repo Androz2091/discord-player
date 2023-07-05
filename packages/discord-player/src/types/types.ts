@@ -115,13 +115,17 @@ export interface TimeData {
  * @property {boolean} [timecodes] If it should render time codes
  * @property {boolean} [queue] If it should create progress bar for the whole queue
  * @property {number} [length] The bar length
- * @property {string} [line] The bar track
+ * @property {string} [leftChar] The elapsed time track
+ * @property {string} [rightChar] The remaining time track
+ * @property {string} [separator] The separation between timestamp and line
  * @property {string} [indicator] The indicator
  */
 export interface PlayerProgressbarOptions {
     timecodes?: boolean;
     length?: number;
-    line?: string;
+    leftChar?: string;
+    rightChar?: string;
+    separator?: string;
     indicator?: string;
     queue?: boolean;
 }

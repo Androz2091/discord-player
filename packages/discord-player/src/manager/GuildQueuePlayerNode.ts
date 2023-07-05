@@ -181,31 +181,31 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      */
     public createProgressBar(options?: PlayerProgressbarOptions) {
         const timestamp = this.getTimestamp();
-        if (!timestamp) return null;
-
-        const { indicator = '🔘', length = 15, line = '▬', timecodes = true } = options || {};
-
+        if (!timestamp)
+            return null;
+        const { indicator = "\u{1F518}", leftChar = "\u25AC", rightChar = "\u25AC", length = 15, timecodes = true, separator = "\u2503" } = options || {};
         if (isNaN(length) || length < 0 || !Number.isFinite(length)) {
-            throw Exceptions.ERR_OUT_OF_RANGE('[PlayerProgressBarOptions.length]', String(length), '0', 'Finite Number');
+            throw Exceptions.ERR_OUT_OF_RANGE("[PlayerProgressBarOptions.length]", String(length), "0", "Finite Number");
         }
-        const index = Math.round((timestamp.current.value / timestamp.total.value) * length);
-
+        const index = Math.round(timestamp.current.value / timestamp.total.value * length);
         if (index >= 1 && index <= length) {
-            const bar = line.repeat(length - 1).split('');
-            bar.splice(index, 0, indicator);
+            const bar = leftChar.repeat(index - 1).split('');
+            bar.push(indicator);
+            bar.push(rightChar.repeat(length - index));
             if (timecodes) {
-                return `${timestamp.current.label} ┃ ${bar.join('')} ┃ ${timestamp.total.label}`;
+                return `${timestamp.current.label} ${separator} ${bar.join('')} ${separator} ${timestamp.total.label}`;
             } else {
                 return `${bar.join('')}`;
             }
         } else {
             if (timecodes) {
-                return `${timestamp.current.label} ┃ ${indicator}${line.repeat(length - 1)} ┃ ${timestamp.total.label}`;
+                return `${timestamp.current.label} ${separator} ${indicator}${rightChar.repeat(length - 1)} ${separator} ${timestamp.total.label}`;
             } else {
-                return `${indicator}${line.repeat(length - 1)}`;
+                return `${indicator}${rightChar.repeat(length - 1)}`;
             }
         }
     }
+      
 
     /**
      * Seek the player
