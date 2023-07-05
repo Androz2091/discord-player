@@ -124,8 +124,8 @@ export interface PlayerProgressbarOptions {
     timecodes?: boolean;
     length?: number;
     leftChar?: string;
-    rightChar? : string;
-    separator? : string;
+    rightChar?: string;
+    separator?: string;
     indicator?: string;
     queue?: boolean;
 }
