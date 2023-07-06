@@ -5,6 +5,9 @@ import { Playlist } from '../fabric/Playlist';
 import { downloadOptions } from 'ytdl-core';
 import { QueryCache } from '../utils/QueryCache';
 
+// @ts-ignore
+import type { BridgeProvider } from '@discord-player/extractor';
+
 export type FiltersName = keyof QueueFilters;
 
 export interface PlayerSearchResult {
@@ -346,6 +349,7 @@ export interface PlaylistJSON {
  * @property {QueryCache | null} [queryCache] Query cache provider
  * @property {boolean} [ignoreInstance] Ignore player instance
  * @property {boolean} [useLegacyFFmpeg] Use legacy version of ffmpeg
+ * @property {BridgeProvider} [bridgeProvider] Set bridge provider
  */
 export interface PlayerInitOptions {
     ytdlOptions?: downloadOptions;
@@ -357,4 +361,5 @@ export interface PlayerInitOptions {
     queryCache?: QueryCache | null;
     ignoreInstance?: boolean;
     useLegacyFFmpeg?: boolean;
+    bridgeProvider?: BridgeProvider;
 }

@@ -1,5 +1,6 @@
 import { BaseExtractor, Track } from 'discord-player';
 import { YouTube } from 'youtube-sr';
+import { SoundCloudExtractor } from '../SoundCloudExtractor';
 
 let factory: {
     name: string;
@@ -142,8 +143,35 @@ export async function makeYTSearch(query: string, opt: any) {
     return res || [];
 }
 
+export async function makeSCSearch(query: string) {
+    const { soundcloud } = SoundCloudExtractor;
+    if (!soundcloud) return [];
+
+    try {
+        const info = await soundcloud.tracks.searchV2({
+            q: query,
+            limit: 5
+        });
+
+        return info.collection;
+    } catch {
+        // fallback
+        const info = await soundcloud.tracks.searchAlt(query);
+
+        return info;
+    }
+}
+
 export async function pullYTMetadata(ext: BaseExtractor, info: Track) {
     const meta = await makeYTSearch(ext.createBridgeQuery(info), 'video')
+        .then((r) => r[0])
+        .catch(() => null);
+
+    return meta;
+}
+
+export async function pullSCMetadata(ext: BaseExtractor, info: Track) {
+    const meta = await makeSCSearch(ext.createBridgeQuery(info))
         .then((r) => r[0])
         .catch(() => null);
 

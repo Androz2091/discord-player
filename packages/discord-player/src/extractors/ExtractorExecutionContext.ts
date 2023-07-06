@@ -99,9 +99,12 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      * @param _extractor The extractor to register
      * @param options Options supplied to the extractor
      */
-    public async register<O extends object, T extends typeof BaseExtractor<O>>(_extractor: T, options: ConstructorParameters<T>['1']) {
-        if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return;
+    public async register<O extends object, T extends typeof BaseExtractor<O>>(_extractor: T, options: ConstructorParameters<T>['1']): Promise<InstanceType<T> | null> {
+        if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return null;
         const extractor = new _extractor(this, options);
+
+        // @ts-ignore
+        if (this.player.options.bridgeProvider) options.bridgeProvider ??= this.player.options.bridgeProvider;
 
         try {
             this.store.set(_extractor.identifier, extractor);
@@ -110,10 +113,12 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
             await extractor.activate();
             if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor activated!`);
             this.emit('activate', this, extractor);
+            return extractor as unknown as InstanceType<T>;
         } catch (e) {
             this.store.delete(_extractor.identifier);
             if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor failed to activate! Error: ${e}`);
             this.emit('error', this, extractor, e as Error);
+            return null;
         }
     }
 

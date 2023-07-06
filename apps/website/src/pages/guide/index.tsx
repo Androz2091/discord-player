@@ -47,6 +47,7 @@ const entries = {
     },
     Extractors: {
         'Creating Extractor': lazy(() => import('./_guides/extractors/creating_extractor.mdx')),
+        'Setting Bridge Source': lazy(() => import('./_guides/extractors/set_bridge_source.mdx')),
         'Stream Sources': lazy(() => import('./_guides/extractors/stream_sources.mdx'))
     },
     FAQ: {
