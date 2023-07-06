@@ -75,7 +75,7 @@ export class GuildNodeManager<Meta = unknown> {
         options.bufferingTimeout ??= 1000;
         options.maxSize ??= Infinity;
         options.maxHistorySize ??= Infinity;
-        options.preferBridgedMetadata = Boolean(options.preferBridgedMetadata);
+        options.preferBridgedMetadata ??= true;
 
         if (getGlobalRegistry().has('@[onBeforeCreateStream]') && !options.onBeforeCreateStream) {
             options.onBeforeCreateStream = getGlobalRegistry().get('@[onBeforeCreateStream]') as OnBeforeCreateStreamHandler;

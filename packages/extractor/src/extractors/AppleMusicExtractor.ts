@@ -3,9 +3,11 @@ import { AppleMusic } from '../internal';
 import { Readable } from 'stream';
 import { YoutubeExtractor } from './YoutubeExtractor';
 import { StreamFN, loadYtdl, pullYTMetadata } from './common/helper';
+import { BridgeProvider } from './common/BridgeProvider';
 
 export interface AppleMusicExtractorInit {
     createStream?: (ext: AppleMusicExtractor, url: string) => Promise<Readable | string>;
+    bridgeProvider?: BridgeProvider;
 }
 
 export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> {
@@ -14,6 +16,9 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
     private _isYtdl = false;
 
     public async activate(): Promise<void> {
+        // skip if we have a bridge provider
+        if (this.options.bridgeProvider) return;
+
         const fn = this.options.createStream;
 
         if (typeof fn === 'function') {
@@ -80,7 +85,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: await pullYTMetadata(this, track)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                                 };
                             }
                         });
@@ -135,7 +140,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             requestMetadata: async () => {
                                 return {
                                     source: info,
-                                    bridge: await pullYTMetadata(this, track)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                                 };
                             }
                         });
@@ -189,7 +194,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: await pullYTMetadata(this, track)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                                 };
                             }
                         });
@@ -225,7 +230,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                     requestMetadata: async () => {
                         return {
                             source: info,
-                            bridge: await pullYTMetadata(this, track)
+                            bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                         };
                     }
                 });
@@ -240,6 +245,20 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
     }
 
     public async stream(info: Track): Promise<string | Readable> {
+        if (this.options.bridgeProvider) {
+            const provider = this.options.bridgeProvider;
+
+            const data = await provider.resolve(this, info);
+            if (!data) throw new Error('Failed to bridge this track');
+
+            info.setMetadata({
+                ...(info.metadata || {}),
+                bridge: data.data
+            });
+
+            return await provider.stream(data);
+        }
+
         if (!this._stream) {
             throw new Error(`Could not initialize streaming api for '${this.constructor.name}'`);
         }
