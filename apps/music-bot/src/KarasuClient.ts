@@ -30,8 +30,7 @@ export class KarasuClient extends SapphireClient {
 		this.dev = Emojis;
 		this.perms = Permissions;
 
-		const bridgeProvider = new BridgeProvider();
-		bridgeProvider.setBridgeSource(BridgeSource.SoundCloud);
+		const bridgeProvider = new BridgeProvider(BridgeSource.SoundCloud);
 
 		this.player = new Player(this as any, {
 			bridgeProvider,

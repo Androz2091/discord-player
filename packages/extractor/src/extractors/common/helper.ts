@@ -149,7 +149,8 @@ export async function makeSCSearch(query: string) {
 
     try {
         const info = await soundcloud.tracks.searchV2({
-            q: query
+            q: query,
+            limit: 5
         });
 
         return info.collection;
