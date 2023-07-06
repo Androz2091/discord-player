@@ -181,13 +181,12 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      */
     public createProgressBar(options?: PlayerProgressbarOptions) {
         const timestamp = this.getTimestamp();
-        if (!timestamp)
-            return null;
-        const { indicator = "\u{1F518}", leftChar = "\u25AC", rightChar = "\u25AC", length = 15, timecodes = true, separator = "\u2503" } = options || {};
+        if (!timestamp) return null;
+        const { indicator = '\u{1F518}', leftChar = '\u25AC', rightChar = '\u25AC', length = 15, timecodes = true, separator = '\u2503' } = options || {};
         if (isNaN(length) || length < 0 || !Number.isFinite(length)) {
-            throw Exceptions.ERR_OUT_OF_RANGE("[PlayerProgressBarOptions.length]", String(length), "0", "Finite Number");
+            throw Exceptions.ERR_OUT_OF_RANGE('[PlayerProgressBarOptions.length]', String(length), '0', 'Finite Number');
         }
-        const index = Math.round(timestamp.current.value / timestamp.total.value * length);
+        const index = Math.round((timestamp.current.value / timestamp.total.value) * length);
         if (index >= 1 && index <= length) {
             const bar = leftChar.repeat(index - 1).split('');
             bar.push(indicator);
@@ -205,7 +204,6 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             }
         }
     }
-      
 
     /**
      * Seek the player
