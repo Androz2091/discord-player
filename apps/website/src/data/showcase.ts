@@ -138,6 +138,12 @@ export const ShowcaseResource: IShowcase = {
             description: 'We are using discord-player to manager all of our music commands.',
             version: 'v4.1.0',
             url: 'https://github.com/Androz2091/AtlantaBot'
+        },
+        {
+            name: 'Radio Bot',
+            description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source.',
+            version: 'v6.6.0',
+            url: 'https://github.com/mariusbegby/radio-discord-bott'
         }
     ].sort((a, b) => semver.rcompare(a.version, b.version)),
     extractors: [
