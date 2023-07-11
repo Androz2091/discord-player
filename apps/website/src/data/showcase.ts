@@ -74,8 +74,8 @@ export const ShowcaseResource: IShowcase = {
         {
             name: 'Auricle',
             description:
-                'This is a music bot created by using the [sapphire framework](https://github.com/sapphiredev/framework) & [discord-player](https://github.com/Androz2091/discord-player/tree/master) with this project being written in TypeScript.',
-            version: 'v6.1.1',
+                'This is a music bot created by using the sapphire framework & discord-player with this project being written in TypeScript.',
+            version: 'v6.6.1',
             url: 'https://github.com/itsauric/auricle-music-bot'
         },
         {
