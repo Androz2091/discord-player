@@ -49,7 +49,7 @@ export const ShowcaseResource: IShowcase = {
         },
         {
             name: 'Botanique',
-            description: "A bot I made with [2-1-1-2](https://github.com/2-1-1-2), we're using discord-player for the music and for lyrics",
+            description: "A bot I made with 2-1-1-2, we're using discord-player for the music and for lyrics",
             version: 'v6.2.1',
             url: 'https://git.mylloon.fr/ConfrerieDuKassoulait/Botanique'
         },
