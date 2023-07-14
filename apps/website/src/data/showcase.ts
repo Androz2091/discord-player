@@ -151,6 +151,11 @@ export const ShowcaseResource: IShowcase = {
             name: 'discord-player-deezer',
             description: 'An unofficial extractor for discord-player to add support for deezer source.',
             url: 'https://npm.im/discord-player-deezer'
+        },
+        {
+            name: 'discord-player-yandexmusic',
+            description: 'Unofficial discord-player extractor for Yandex Music.',
+            url: 'https://npm.im/discord-player-yandexmusic'
         }
     ]
 };
