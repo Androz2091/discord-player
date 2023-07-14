@@ -786,7 +786,7 @@ export class GuildQueue<Meta = unknown> {
     public delete() {
         if (this.player.nodes.delete(this.id)) {
             this.#deleted = true;
-            this.emit(GuildQueueEvent.queueDelete, this);
+            this.player.events.emit(GuildQueueEvent.queueDelete, this);
             this.node.tasksQueue.cancelAll();
             this.tasksQueue.cancelAll();
         }
