@@ -62,6 +62,7 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
                     if (!player.nodes.has(queue.guild.id)) return;
                     if (queue.options.leaveOnEmpty) queue.delete();
                     player.events.emit(GuildQueueEvent.emptyChannel, queue);
+                    player.events.emit(GuildQueueEvent.playerFinish, queue);
                 }, queue.options.leaveOnEmptyCooldown || 0).unref();
                 queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
             }
