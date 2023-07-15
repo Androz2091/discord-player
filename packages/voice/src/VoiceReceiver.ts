@@ -25,7 +25,7 @@ export class VoiceReceiver {
      * @returns A readable stream of Opus packets received from the target
      */
     public subscribe(userId: string, options?: ReceiverOptions) {
-        this.receiver.subscribe(userId, options);
+        return this.receiver.subscribe(userId, options);
     }
 
     /**
