@@ -12,9 +12,11 @@ export class VoiceConnection {
     /**
      * The receiver of this voice connection. You should join the voice channel with selfDeaf set to false for this feature to work properly.
      */
-    public receiver = new VoiceReceiver(this.connection.receiver);
+    public receiver: VoiceReceiver;
 
-    public constructor(public readonly connection: DiscordVoiceConnection) {}
+    public constructor(public readonly connection: DiscordVoiceConnection) {
+        this.receiver = new VoiceReceiver(this.connection.receiver);
+    }
 
     /**
      * The voice connection has either been severed or not established.
