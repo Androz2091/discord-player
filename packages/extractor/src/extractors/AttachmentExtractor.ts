@@ -15,6 +15,8 @@ import * as fileType from 'file-type';
 import path from 'path';
 import { stat } from 'fs/promises';
 
+const ATTACHMENT_HEADER = ['audio/', 'video/', 'application/ogg'] as const;
+
 export class AttachmentExtractor extends BaseExtractor {
     public static identifier = 'com.discord-player.attachmentextractor' as const;
 
@@ -32,7 +34,7 @@ export class AttachmentExtractor extends BaseExtractor {
         switch (context.type) {
             case QueryType.ARBITRARY: {
                 const data = (await downloadStream(query, context.requestOptions)) as IncomingMessage;
-                if (!['audio/', 'video/'].some((r) => !!data.headers['content-type']?.startsWith(r))) return this.emptyResponse();
+                if (!ATTACHMENT_HEADER.some((r) => !!data.headers['content-type']?.startsWith(r))) return this.emptyResponse();
 
                 const trackInfo = {
                     title: (
@@ -94,7 +96,7 @@ export class AttachmentExtractor extends BaseExtractor {
                 const fstat = await stat(query);
                 if (!fstat.isFile()) return this.emptyResponse();
                 const mime = await fileType.fromFile(query).catch(() => null);
-                if (!mime || !['audio/', 'video/'].some((r) => !!mime.mime.startsWith(r))) return this.emptyResponse();
+                if (!mime || !ATTACHMENT_HEADER.some((r) => !!mime.mime.startsWith(r))) return this.emptyResponse();
 
                 const trackInfo = {
                     title: path.basename(query) || 'Attachment',
