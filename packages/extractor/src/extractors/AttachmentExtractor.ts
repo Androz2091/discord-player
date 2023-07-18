@@ -15,6 +15,8 @@ import * as fileType from 'file-type';
 import path from 'path';
 import { stat } from 'fs/promises';
 
+const ATTACHMENT_HEADER = ['audio/', 'video/', 'application/ogg'] as const;
+
 export class AttachmentExtractor extends BaseExtractor {
     public static identifier = 'com.discord-player.attachmentextractor' as const;
 
@@ -32,7 +34,8 @@ export class AttachmentExtractor extends BaseExtractor {
         switch (context.type) {
             case QueryType.ARBITRARY: {
                 const data = (await downloadStream(query, context.requestOptions)) as IncomingMessage;
-                if (!['audio/', 'video/'].some((r) => !!data.headers['content-type']?.startsWith(r))) return this.emptyResponse();
+                if (!ATTACHMENT_HEADER.some((r) => !!data.headers['content-type']?.startsWith(r))) return this.emptyResponse();
+
                 const trackInfo = {
                     title: (
                         query
@@ -51,6 +54,17 @@ export class AttachmentExtractor extends BaseExtractor {
                     description: ((data as any).client?.servername as string) || 'Attachment',
                     url: data.url || query
                 };
+
+                try {
+                    // eslint-disable-next-line
+                    const mediaplex = require('mediaplex') as typeof import('mediaplex');
+
+                    const result = await mediaplex.probeStream(data);
+                    if (result.result) trackInfo.duration = result.result.duration * 1000;
+                    result.stream.destroy();
+                } catch {
+                    //
+                }
 
                 const track = new Track(this.context.player, {
                     title: trackInfo.title,
@@ -82,7 +96,8 @@ export class AttachmentExtractor extends BaseExtractor {
                 const fstat = await stat(query);
                 if (!fstat.isFile()) return this.emptyResponse();
                 const mime = await fileType.fromFile(query).catch(() => null);
-                if (!mime || !['audio/', 'video/'].some((r) => !!mime.mime.startsWith(r))) return this.emptyResponse();
+                if (!mime || !ATTACHMENT_HEADER.some((r) => !!mime.mime.startsWith(r))) return this.emptyResponse();
+
                 const trackInfo = {
                     title: path.basename(query) || 'Attachment',
                     duration: 0,
@@ -92,6 +107,22 @@ export class AttachmentExtractor extends BaseExtractor {
                     description: 'Attachment',
                     url: query
                 };
+
+                try {
+                    // eslint-disable-next-line
+                    const mediaplex = require('mediaplex') as typeof import('mediaplex');
+
+                    const result = await mediaplex.probeStream(
+                        createReadStream(query, {
+                            start: 0,
+                            end: 1024
+                        })
+                    );
+                    if (result.result) trackInfo.duration = result.result.duration * 1000;
+                    result.stream.destroy();
+                } catch {
+                    //
+                }
 
                 const track = new Track(this.context.player, {
                     title: trackInfo.title,

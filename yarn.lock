@@ -81,7 +81,7 @@ __metadata:
     prettier: ^2.8.2
     rimraf: ^4.1.2
     tsup: ^6.5.0
-    turbo: ^1.8.3
+    turbo: latest
     typedoc-nextra: 0.1.5
     typescript: ^4.9.4
     vitest: ^0.29.1
@@ -115,6 +115,7 @@ __metadata:
     discord-player: "workspace:^"
     file-type: ^16.5.4
     genius-lyrics: ^4.4.3
+    mediaplex: ^0.0.0
     node-html-parser: ^6.1.4
     play-dl: ^1.9.6
     reverbnation-scraper: ^2.0.0
@@ -7638,6 +7639,155 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mediaplex-android-arm-eabi@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-android-arm-eabi@npm:0.0.0"
+  conditions: os=android & cpu=arm
+  languageName: node
+  linkType: hard
+
+"mediaplex-android-arm64@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-android-arm64@npm:0.0.0"
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"mediaplex-darwin-arm64@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-darwin-arm64@npm:0.0.0"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"mediaplex-darwin-universal@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-darwin-universal@npm:0.0.0"
+  conditions: os=darwin
+  languageName: node
+  linkType: hard
+
+"mediaplex-darwin-x64@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-darwin-x64@npm:0.0.0"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"mediaplex-freebsd-x64@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-freebsd-x64@npm:0.0.0"
+  conditions: os=freebsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"mediaplex-linux-arm-gnueabihf@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.0"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"mediaplex-linux-arm64-gnu@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-linux-arm64-gnu@npm:0.0.0"
+  conditions: os=linux & cpu=arm64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"mediaplex-linux-arm64-musl@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-linux-arm64-musl@npm:0.0.0"
+  conditions: os=linux & cpu=arm64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"mediaplex-linux-x64-gnu@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-linux-x64-gnu@npm:0.0.0"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"mediaplex-linux-x64-musl@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-linux-x64-musl@npm:0.0.0"
+  conditions: os=linux & cpu=x64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"mediaplex-win32-arm64-msvc@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-win32-arm64-msvc@npm:0.0.0"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"mediaplex-win32-ia32-msvc@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-win32-ia32-msvc@npm:0.0.0"
+  conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"mediaplex-win32-x64-msvc@npm:0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex-win32-x64-msvc@npm:0.0.0"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"mediaplex@npm:^0.0.0":
+  version: 0.0.0
+  resolution: "mediaplex@npm:0.0.0"
+  dependencies:
+    mediaplex-android-arm-eabi: 0.0.0
+    mediaplex-android-arm64: 0.0.0
+    mediaplex-darwin-arm64: 0.0.0
+    mediaplex-darwin-universal: 0.0.0
+    mediaplex-darwin-x64: 0.0.0
+    mediaplex-freebsd-x64: 0.0.0
+    mediaplex-linux-arm-gnueabihf: 0.0.0
+    mediaplex-linux-arm64-gnu: 0.0.0
+    mediaplex-linux-arm64-musl: 0.0.0
+    mediaplex-linux-x64-gnu: 0.0.0
+    mediaplex-linux-x64-musl: 0.0.0
+    mediaplex-win32-arm64-msvc: 0.0.0
+    mediaplex-win32-ia32-msvc: 0.0.0
+    mediaplex-win32-x64-msvc: 0.0.0
+  dependenciesMeta:
+    mediaplex-android-arm-eabi:
+      optional: true
+    mediaplex-android-arm64:
+      optional: true
+    mediaplex-darwin-arm64:
+      optional: true
+    mediaplex-darwin-universal:
+      optional: true
+    mediaplex-darwin-x64:
+      optional: true
+    mediaplex-freebsd-x64:
+      optional: true
+    mediaplex-linux-arm-gnueabihf:
+      optional: true
+    mediaplex-linux-arm64-gnu:
+      optional: true
+    mediaplex-linux-arm64-musl:
+      optional: true
+    mediaplex-linux-x64-gnu:
+      optional: true
+    mediaplex-linux-x64-musl:
+      optional: true
+    mediaplex-win32-arm64-msvc:
+      optional: true
+    mediaplex-win32-ia32-msvc:
+      optional: true
+    mediaplex-win32-x64-msvc:
+      optional: true
+  checksum: 0387d865d069d1d8827a36d55218f29858c9948f859a36186e82ef7bb07597a919c4bb700774e703f98b779f8d46a9616dab15c09f83b1e20ecdee05d3a805a6
+  languageName: node
+  linkType: hard
+
 "memorystream@npm:^0.3.1":
   version: 0.3.1
   resolution: "memorystream@npm:0.3.1"
@@ -11002,58 +11152,58 @@ __metadata:
   languageName: node
   linkType: hard
 
-"turbo-darwin-64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "turbo-darwin-64@npm:1.8.3"
+"turbo-darwin-64@npm:1.10.7":
+  version: 1.10.7
+  resolution: "turbo-darwin-64@npm:1.10.7"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-darwin-arm64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "turbo-darwin-arm64@npm:1.8.3"
+"turbo-darwin-arm64@npm:1.10.7":
+  version: 1.10.7
+  resolution: "turbo-darwin-arm64@npm:1.10.7"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo-linux-64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "turbo-linux-64@npm:1.8.3"
+"turbo-linux-64@npm:1.10.7":
+  version: 1.10.7
+  resolution: "turbo-linux-64@npm:1.10.7"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-linux-arm64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "turbo-linux-arm64@npm:1.8.3"
+"turbo-linux-arm64@npm:1.10.7":
+  version: 1.10.7
+  resolution: "turbo-linux-arm64@npm:1.10.7"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo-windows-64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "turbo-windows-64@npm:1.8.3"
+"turbo-windows-64@npm:1.10.7":
+  version: 1.10.7
+  resolution: "turbo-windows-64@npm:1.10.7"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-windows-arm64@npm:1.8.3":
-  version: 1.8.3
-  resolution: "turbo-windows-arm64@npm:1.8.3"
+"turbo-windows-arm64@npm:1.10.7":
+  version: 1.10.7
+  resolution: "turbo-windows-arm64@npm:1.10.7"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo@npm:^1.8.3":
-  version: 1.8.3
-  resolution: "turbo@npm:1.8.3"
+"turbo@npm:latest":
+  version: 1.10.7
+  resolution: "turbo@npm:1.10.7"
   dependencies:
-    turbo-darwin-64: 1.8.3
-    turbo-darwin-arm64: 1.8.3
-    turbo-linux-64: 1.8.3
-    turbo-linux-arm64: 1.8.3
-    turbo-windows-64: 1.8.3
-    turbo-windows-arm64: 1.8.3
+    turbo-darwin-64: 1.10.7
+    turbo-darwin-arm64: 1.10.7
+    turbo-linux-64: 1.10.7
+    turbo-linux-arm64: 1.10.7
+    turbo-windows-64: 1.10.7
+    turbo-windows-arm64: 1.10.7
   dependenciesMeta:
     turbo-darwin-64:
       optional: true
@@ -11069,7 +11219,7 @@ __metadata:
       optional: true
   bin:
     turbo: bin/turbo
-  checksum: 4a07d120ef8adf6c8e58a48abd02e075ffa215287cc6c3ef843d4fb08aeb0a566fe810ec9bfc376254468a2aa4f29bae154a60804a83af78dfa86d0e8e995476
+  checksum: 58329caf13b5fef284ccfc21bd1f841023122371d75d2202be809a385aade84fd886cf5c2093323c115c497d503c9c34e1f7ae09e13d06d1dcb4b649883f60dd
   languageName: node
   linkType: hard
 
