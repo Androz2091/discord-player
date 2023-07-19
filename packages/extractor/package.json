@@ -38,7 +38,7 @@
     "@types/node": "^18.11.18",
     "@types/node-fetch": "^2.6.2",
     "discord-player": "workspace:^",
-    "mediaplex": "^0.0.0",
+    "mediaplex": "^0.0.1",
     "play-dl": "^1.9.6",
     "yt-stream": "^1.4.7",
     "ytdl-core": "^4.11.4"

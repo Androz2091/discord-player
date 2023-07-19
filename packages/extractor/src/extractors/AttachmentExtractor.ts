@@ -58,10 +58,19 @@ export class AttachmentExtractor extends BaseExtractor {
                 try {
                     // eslint-disable-next-line
                     const mediaplex = require('mediaplex') as typeof import('mediaplex');
+                    const { result, stream } = await mediaplex.probeStream(data);
 
-                    const result = await mediaplex.probeStream(data);
-                    if (result.result) trackInfo.duration = result.result.duration * 1000;
-                    result.stream.destroy();
+                    if (result) {
+                        trackInfo.duration = result.duration * 1000;
+
+                        const metadata = mediaplex.readMetadata(result);
+                        if (metadata.author) trackInfo.author = metadata.author;
+                        if (metadata.title) trackInfo.title = metadata.title;
+
+                        trackInfo.description = `${trackInfo.title} by ${trackInfo.author}`;
+                    }
+
+                    stream.destroy();
                 } catch {
                     //
                 }
@@ -112,14 +121,24 @@ export class AttachmentExtractor extends BaseExtractor {
                     // eslint-disable-next-line
                     const mediaplex = require('mediaplex') as typeof import('mediaplex');
 
-                    const result = await mediaplex.probeStream(
+                    const { result, stream } = await mediaplex.probeStream(
                         createReadStream(query, {
                             start: 0,
                             end: 1024
                         })
                     );
-                    if (result.result) trackInfo.duration = result.result.duration * 1000;
-                    result.stream.destroy();
+
+                    if (result) {
+                        trackInfo.duration = result.duration * 1000;
+
+                        const metadata = mediaplex.readMetadata(result);
+                        if (metadata.author) trackInfo.author = metadata.author;
+                        if (metadata.title) trackInfo.title = metadata.title;
+
+                        trackInfo.description = `${trackInfo.title} by ${trackInfo.author}`;
+                    }
+
+                    stream.destroy();
                 } catch {
                     //
                 }
