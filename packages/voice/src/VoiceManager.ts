@@ -3,7 +3,9 @@ import { CreateVoiceConnectionOptions, DiscordGatewayAdapterLibraryMethods, join
 import { VoiceConnection } from './VoiceConnection';
 import { GatewayVoiceStateUpdateDispatchData, GatewayVoiceServerUpdateDispatchData, GatewayDispatchEvents, GatewayVoiceState } from 'discord-api-types/v10';
 
-export type JoinVoiceChannelConfig = Omit<CreateVoiceConnectionOptions & JoinVoiceChannelOptions, 'group' | 'adapterCreator'>;
+export type JoinVoiceChannelConfig = Omit<CreateVoiceConnectionOptions & JoinVoiceChannelOptions, 'group' | 'adapterCreator'> & {
+    connectionTimeout?: number;
+};
 
 export interface VoicePayload {
     op: number;
@@ -118,7 +120,7 @@ export class VoiceManager extends EventEmitter<VoiceManagerEvents> {
             ...options,
             group: options.guildId,
             adapterCreator: (methods) => {
-                const key = `${options.guildId}::${options.guildId}`;
+                const key = `${options.channelId}::${options.guildId}::${options.guildId}`;
 
                 this.adapters.set(key, methods);
 
@@ -133,6 +135,8 @@ export class VoiceManager extends EventEmitter<VoiceManagerEvents> {
             }
         });
 
-        return new VoiceConnection(connection);
+        return new VoiceConnection(this, connection, {
+            connectionTimeout: options.connectionTimeout ?? 120_000
+        });
     }
 }

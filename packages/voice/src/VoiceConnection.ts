@@ -1,7 +1,12 @@
 import { AudioPlayer, JoinConfig, PlayerSubscription, VoiceConnection as DiscordVoiceConnection, VoiceConnectionStatus } from '@discordjs/voice';
+import { VoiceManager } from './VoiceManager';
 import { VoiceReceiver } from './VoiceReceiver';
 
 export type PartialJoinConfig = Omit<JoinConfig, 'group' | 'guildId'>;
+
+export interface VoiceConnectionInit {
+    connectionTimeout?: number;
+}
 
 export class VoiceConnection {
     /**
@@ -14,7 +19,12 @@ export class VoiceConnection {
      */
     public receiver: VoiceReceiver;
 
-    public constructor(public readonly connection: DiscordVoiceConnection) {
+    /**
+     * Whether or not this connection has adapter available
+     */
+    public hasAdapter = this.manager.adapters.has(this.identifier);
+
+    public constructor(public readonly manager: VoiceManager, public readonly connection: DiscordVoiceConnection, public readonly options: VoiceConnectionInit) {
         this.receiver = new VoiceReceiver(this.connection.receiver);
     }
 
