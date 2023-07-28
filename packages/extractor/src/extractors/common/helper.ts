@@ -14,6 +14,7 @@ export const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 
 export const fetch = unfetch;
 
 export const YouTubeLibs = [
+    'youtube-ext',
     'ytdl-core',
     '@distube/ytdl-core',
     'play-dl',
@@ -50,8 +51,31 @@ export async function loadYtdl(options?: any, force = false) {
     if (lib) {
         const isYtdl = ['ytdl-core', '@distube/ytdl-core'].some((lib) => lib === _ytLibName);
 
+        const hlsRegex = /\/manifest\/hls_(variant|playlist)\//;
         _stream = async (query) => {
-            if (isYtdl) {
+            if (_ytLibName === 'youtube-ext') {
+                const dl = lib as typeof import('youtube-ext');
+                const opt = {
+                    requestOptions: options?.requestOptions || {}
+                };
+
+                const info = await dl.videoInfo(query, opt);
+
+                const streamFormats = await dl.getFormats(info.streams, opt);
+
+                const formats = streamFormats
+                    .filter((format) => {
+                        if (!format.url) return false;
+                        if (info.isLive) return hlsRegex.test(format.url) && typeof format.bitrate === 'number';
+                        return typeof format.bitrate === 'number';
+                    })
+                    .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
+
+                const fmt = formats.find((format) => !format.qualityLabel) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
+                const url = fmt?.url;
+                if (!url) throw new Error(`Failed to parse stream url for ${query}`);
+                return url;
+            } else if (isYtdl) {
                 const dl = lib as typeof import('ytdl-core');
                 const info = await dl.getInfo(query, options);
 
@@ -72,9 +96,8 @@ export async function loadYtdl(options?: any, force = false) {
                 const info = await dl.video_info(query);
                 const formats = info.format
                     .filter((format) => {
-                        const re = /\/manifest\/hls_(variant|playlist)\//;
                         if (!format.url) return false;
-                        if (info.video_details.live) return re.test(format.url) && typeof format.bitrate === 'number';
+                        if (info.video_details.live) return hlsRegex.test(format.url) && typeof format.bitrate === 'number';
                         return typeof format.bitrate === 'number';
                     })
                     .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
