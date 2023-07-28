@@ -136,10 +136,22 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param client The client that instantiated player
      * @param options Player initializer options
      */
-    public static singleton(client: Client, options: PlayerInitOptions = {}) {
+    public static singleton(client: Client, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
         return new Player(client, {
             ...options,
             ignoreInstance: false
+        });
+    }
+
+    /**
+     * Creates new discord-player instance.
+     * @param client The client that instantiated player
+     * @param options Player initializer options
+     */
+    public static create(client: Client, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
+        return new Player(client, {
+            ...options,
+            ignoreInstance: true
         });
     }
 
