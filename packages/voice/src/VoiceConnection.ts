@@ -19,13 +19,15 @@ export class VoiceConnection {
      */
     public receiver: VoiceReceiver;
 
+    public constructor(public readonly manager: VoiceManager, public readonly connection: DiscordVoiceConnection, public readonly options: VoiceConnectionInit) {
+        this.receiver = new VoiceReceiver(this.connection.receiver);
+    }
+
     /**
      * Whether or not this connection has adapter available
      */
-    public hasAdapter = this.manager.adapters.has(this.identifier);
-
-    public constructor(public readonly manager: VoiceManager, public readonly connection: DiscordVoiceConnection, public readonly options: VoiceConnectionInit) {
-        this.receiver = new VoiceReceiver(this.connection.receiver);
+    public get hasAdapter() {
+        return this.manager.adapters.has(this.identifier);
     }
 
     /**
