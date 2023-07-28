@@ -757,7 +757,7 @@ export class GuildQueue<Meta = unknown> {
             maxTime: options?.timeout ?? this.options.connectionTimeout ?? 120_000,
             queue: this,
             audioPlayer: options?.audioPlayer,
-            group: options.group
+            group: options.group ?? this.player.client.user?.id
         });
 
         this.emit(GuildQueueEvent.connection, this);
