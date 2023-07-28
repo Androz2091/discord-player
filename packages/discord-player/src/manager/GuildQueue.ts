@@ -46,6 +46,7 @@ export interface GuildNodeInit<Meta = unknown> {
     maxSize?: number;
     maxHistorySize?: number;
     preferBridgedMetadata: boolean;
+    pauseOnEmpty?: boolean;
 }
 
 export interface VoiceConnectConfig {
@@ -380,6 +381,7 @@ export class GuildQueue<Meta = unknown> {
         options.selfDeaf ??= true;
         options.maxSize ??= Infinity;
         options.maxHistorySize ??= Infinity;
+        options.pauseOnEmpty ??= true;
 
         if (!TypeUtil.isNullish(this.options.biquad) && !TypeUtil.isBoolean(this.options.biquad)) {
             this.filters._lastFiltersCache.biquad = this.options.biquad;
