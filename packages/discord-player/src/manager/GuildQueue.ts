@@ -1001,7 +1001,14 @@ export class GuildQueue<Meta = unknown> {
 
             // prevent dangling promise
             if (!success) {
-                resolver(tracks.length ? Util.randomChoice(tracks.slice(0, 3)) : null);
+                resolver(
+                    tracks.length
+                        ? (() => {
+                              const unique = tracks.filter((tr) => !this.history.tracks.find((t) => t.url === tr.url));
+                              return unique?.[0] ?? Util.randomChoice(tracks.slice(0, 5));
+                          })()
+                        : null
+                );
             }
 
             const nextTrack = await donePromise;
