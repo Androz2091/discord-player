@@ -1,5 +1,5 @@
 import { Command } from '@sapphire/framework';
-import { useMainPlayer } from 'discord-player';
+import { QueryType, useMainPlayer } from 'discord-player';
 import type { GuildMember } from 'discord.js';
 
 export class PlayCommand extends Command {
@@ -26,7 +26,10 @@ export class PlayCommand extends Command {
 		if (!query) return [];
 
 		const player = useMainPlayer();
-		const results = await player!.search(query!);
+		const results = await player!.search(query!, {
+			requestedBy: interaction.user,
+			fallbackSearchEngine: QueryType.YOUTUBE_SEARCH
+		});
 
 		let tracks;
 		tracks = results!.tracks
@@ -59,7 +62,10 @@ export class PlayCommand extends Command {
 
 		if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
 
-		const results = await player!.search(query!);
+		const results = await player!.search(query!, {
+			requestedBy: interaction.user,
+			fallbackSearchEngine: QueryType.YOUTUBE_SEARCH
+		});
 
 		if (!results.hasTracks())
 			return interaction.reply({
@@ -80,8 +86,9 @@ export class PlayCommand extends Command {
 					leaveOnEmptyCooldown: 300000,
 					leaveOnEmpty: true,
 					leaveOnEnd: false,
+					pauseOnEmpty: true,
 					bufferingTimeout: 0,
-					volume: 10,
+					volume: 40,
 					defaultFFmpegFilters: ['lofi', 'bassboost', 'normalizer']
 				}
 			});

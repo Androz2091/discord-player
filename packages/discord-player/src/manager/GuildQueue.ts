@@ -178,10 +178,15 @@ export const GuildQueueEvent = {
     /**
      * Emitted when a queue is deleted
      */
-    queueDelete: 'queueDelete'
+    queueDelete: 'queueDelete',
+    /**
+     * Emitted when a queue is trying to add similar track for autoplay
+     */
+    willAutoPlay: 'willAutoPlay'
 } as const;
 
-export interface GuildQueueEvents<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface GuildQueueEvents<Meta = any> {
     /**
      * Emitted when audio track is added to the queue
      * @param queue The queue where this event occurred
@@ -351,6 +356,13 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param queue The queue where this event occurred
      */
     queueDelete: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when a queue is trying to add similar track for autoplay
+     * @param queue The queue where this event occurred
+     * @param tracks The similar tracks that were found
+     * @param done Done callback
+     */
+    willAutoPlay: (queue: GuildQueue<Meta>, tracks: Track[], done: (track: Track | null) => void) => unknown;
 }
 
 export class GuildQueue<Meta = unknown> {
@@ -981,13 +993,24 @@ export class GuildQueue<Meta = unknown> {
                     })
                 )?.result ||
                 [];
-            if (!tracks?.length) {
-                if (this.hasDebugger) this.debug(`Autoplay >> No related tracks found.`);
-                throw 'no related tracks';
+
+            let resolver: (track: Track | null) => void = Util.noop;
+            const donePromise = new Promise<Track | null>((resolve) => (resolver = resolve));
+
+            const success = this.emit(GuildQueueEvent.willAutoPlay, this, tracks, resolver!);
+
+            // prevent dangling promise
+            if (!success) {
+                resolver(tracks.length ? Util.randomChoice(tracks.slice(0, 3)) : null);
             }
 
-            if (this.hasDebugger) this.debug(`Autoplay >> Picking random track from first 5 tracks...`);
-            const nextTrack = Util.randomChoice(tracks.slice(0, 5));
+            const nextTrack = await donePromise;
+
+            if (!nextTrack) {
+                if (this.hasDebugger) this.debug('Autoplay >> No track was found, initiating #emitEnd()');
+                throw 'No track was found';
+            }
+
             await this.node.play(nextTrack, {
                 queue: false,
                 seek: 0,
