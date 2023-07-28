@@ -588,7 +588,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         if (this.queue.hasDebugger) this.queue.debug(`Attempting to extract stream for Track { title: ${track.title}, url: ${track.url} } using registered extractors`);
         const streamInfo = await this.queue.player.extractors.run(async (extractor) => {
             if (this.queue.player.options.blockStreamFrom?.some((ext) => ext === extractor.identifier)) return false;
-            const canStream = await extractor.validate(track.url, track.queryType || QueryResolver.resolve(track.url));
+            const canStream = await extractor.validate(track.url, track.queryType || QueryResolver.resolve(track.url).type);
             if (!canStream) return false;
             return await extractor.stream(track);
         }, false);

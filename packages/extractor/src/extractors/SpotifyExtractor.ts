@@ -1,7 +1,7 @@
 import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import type { Readable } from 'stream';
 import { YoutubeExtractor } from './YoutubeExtractor';
-import { StreamFN, getFetch, loadYtdl, pullYTMetadata } from './common/helper';
+import { StreamFN, fetch, loadYtdl, pullYTMetadata } from './common/helper';
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
 import { SpotifyAPI } from '../internal';
 import { BridgeProvider } from './common/BridgeProvider';
@@ -27,6 +27,9 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
     public internal = new SpotifyAPI(this._credentials);
 
     public async activate(): Promise<void> {
+        this._lib = spotify(fetch);
+        if (this.internal.isTokenExpired()) await this.internal.requestToken();
+
         // skip if we have a bridge provider
         if (this.options.bridgeProvider) return;
 
@@ -37,15 +40,11 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
             this._stream = (q: string) => {
                 return fn(this, q);
             };
-
-            return;
+        } else {
+            const lib = await loadYtdl(this.context.player.options.ytdlOptions);
+            this._stream = lib.stream;
+            this._isYtdl = true;
         }
-
-        const lib = await loadYtdl(this.context.player.options.ytdlOptions);
-        this._stream = lib.stream;
-        this._lib = spotify(getFetch);
-        this._isYtdl = true;
-        if (this.internal.isTokenExpired()) await this.internal.requestToken();
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {

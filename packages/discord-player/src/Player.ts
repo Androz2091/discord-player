@@ -4,7 +4,7 @@ import { Playlist, Track, SearchResult } from './fabric';
 import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions, GuildQueueEvent } from './manager';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
-import { QueryResolver } from './utils/QueryResolver';
+import { QueryResolver, ResolvedQuery } from './utils/QueryResolver';
 import { Util } from './utils/Util';
 import { generateDependencyReport, version as dVoiceVersion } from '@discordjs/voice';
 import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
@@ -350,37 +350,37 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * console.log(result); // Logs `SearchResult` object
      * ```
      */
-    public async search(query: string | Track | Track[] | Playlist | SearchResult, options: SearchOptions = {}): Promise<SearchResult> {
-        if (query instanceof SearchResult) return query;
+    public async search(searchQuery: string | Track | Track[] | Playlist | SearchResult, options: SearchOptions = {}): Promise<SearchResult> {
+        if (searchQuery instanceof SearchResult) return searchQuery;
 
         if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
         options.blockExtractors ??= this.options.blockExtractors;
         options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 
-        if (query instanceof Track) {
+        if (searchQuery instanceof Track) {
             return new SearchResult(this, {
-                playlist: query.playlist || null,
-                tracks: [query],
-                query: query.title,
-                extractor: query.extractor,
-                queryType: query.queryType,
+                playlist: searchQuery.playlist || null,
+                tracks: [searchQuery],
+                query: searchQuery.title,
+                extractor: searchQuery.extractor,
+                queryType: searchQuery.queryType,
                 requestedBy: options.requestedBy
             });
         }
 
-        if (query instanceof Playlist) {
+        if (searchQuery instanceof Playlist) {
             return new SearchResult(this, {
-                playlist: query,
-                tracks: query.tracks,
-                query: query.title,
-                extractor: query.tracks[0]?.extractor,
+                playlist: searchQuery,
+                tracks: searchQuery.tracks,
+                query: searchQuery.title,
+                extractor: searchQuery.tracks[0]?.extractor,
                 queryType: QueryType.AUTO,
                 requestedBy: options.requestedBy
             });
         }
 
-        if (Array.isArray(query)) {
-            const tracks = query.filter((t) => t instanceof Track);
+        if (Array.isArray(searchQuery)) {
+            const tracks = searchQuery.filter((t) => t instanceof Track);
             return new SearchResult(this, {
                 playlist: null,
                 tracks,
@@ -391,7 +391,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             });
         }
 
-        if (this.hasDebugger) this.debug(`Searching ${query}`);
+        if (this.hasDebugger) this.debug(`Searching ${searchQuery}`);
 
         let extractor: BaseExtractor | null = null;
 
@@ -399,7 +399,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         if (this.hasDebugger) this.debug(`Search engine set to ${options.searchEngine}`);
 
-        const queryType = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query, options.fallbackSearchEngine) : options.searchEngine;
+        const { type: queryType, query } =
+            options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(searchQuery, options.fallbackSearchEngine) : ({ type: options.searchEngine, query: searchQuery } as ResolvedQuery);
 
         if (this.hasDebugger) this.debug(`Query type identified as ${queryType}`);
 

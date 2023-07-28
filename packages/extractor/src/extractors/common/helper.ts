@@ -1,6 +1,7 @@
 import { BaseExtractor, Track } from 'discord-player';
 import { YouTube } from 'youtube-sr';
 import { SoundCloudExtractor } from '../SoundCloudExtractor';
+import unfetch from 'isomorphic-unfetch';
 
 let factory: {
     name: string;
@@ -10,6 +11,7 @@ let factory: {
 
 export const createImport = (lib: string) => import(lib).catch(() => null);
 export const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49';
+export const fetch = unfetch;
 
 export const YouTubeLibs = [
     'ytdl-core',
@@ -24,25 +26,6 @@ const ERR_NO_YT_LIB = new Error(`Could not load youtube library. Install one of 
 // forced lib
 const forcedLib = process.env.DP_FORCE_YTDL_MOD;
 if (forcedLib) YouTubeLibs.unshift(forcedLib);
-
-export const getFetch =
-    typeof fetch !== 'undefined'
-        ? fetch
-        : async (info: RequestInfo, init?: RequestInit): Promise<Response> => {
-              // eslint-disable-next-line
-              let dy: any;
-
-              /* eslint-disable no-cond-assign */
-              if ((dy = await createImport('undici'))) {
-                  return (dy.fetch || dy.default.fetch)(info, init);
-              } else if ((dy = await createImport('node-fetch'))) {
-                  return (dy.fetch || dy.default)(info, init);
-              } else {
-                  throw new Error('No fetch lib found');
-              }
-
-              /* eslint-enable no-cond-assign */
-          };
 
 export type StreamFN = (q: string) => Promise<import('stream').Readable | string>;
 
