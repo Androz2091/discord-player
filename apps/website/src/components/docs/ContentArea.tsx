@@ -2,6 +2,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import type { Documentation, DocumentedClass, DocumentedFunction, DocumentedTypes } from 'typedoc-nextra';
+import { HeadingMeta } from '../heading';
 import { Function } from './entities/Function';
 import { ClassRenderer } from './renderer/ClassRenderer';
 import { TypeRenderer } from './renderer/TypeRenderer';
@@ -53,9 +54,7 @@ export function ContentArea({ data }: IProps) {
 
     return (
         <>
-            <Head>
-                <title>{currentItem.name} | Discord Player</title>
-            </Head>
+            <HeadingMeta title={`${currentItem.name} | Discord Player`} description={`Documentation for ${currentItem.name}.`} />
             <div className="mb-16">
                 {type === 'type' ? (
                     <TypeRenderer entity={currentItem as DocumentedTypes} />

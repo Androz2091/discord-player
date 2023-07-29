@@ -28,10 +28,18 @@ import { PanelRightClose } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { GuideItemList } from '@/components/guide/GuideItemList';
 import Link from 'next/link';
+import { HeadingMeta } from '@/components/heading';
 
 const entries = {
     Welcome: {
         Welcome: lazy(() => import('./_guides/welcome/welcome.mdx'))
+    },
+    FAQ: {
+        'Attachments Metadata': lazy(() => import('./_guides/faq/attachment_metadata.mdx')),
+        'Common Errors': lazy(() => import('./_guides/faq/common_errors.mdx')),
+        'Disabling YouTube': lazy(() => import('./_guides/faq/disable_youtube.mdx')),
+        'How To Access Player': lazy(() => import('./_guides/faq/how_to_access_player.mdx')),
+        'Performance Optimizations': lazy(() => import('./_guides/faq/performance_optimization.mdx'))
     },
     Examples: {
         'Adding Events': lazy(() => import('./_guides/examples/adding_events.mdx')),
@@ -49,11 +57,6 @@ const entries = {
         'Creating Extractor': lazy(() => import('./_guides/extractors/creating_extractor.mdx')),
         'Setting Bridge Source': lazy(() => import('./_guides/extractors/set_bridge_source.mdx')),
         'Stream Sources': lazy(() => import('./_guides/extractors/stream_sources.mdx'))
-    },
-    FAQ: {
-        'Common Errors': lazy(() => import('./_guides/faq/common_errors.mdx')),
-        'How To Access Player': lazy(() => import('./_guides/faq/how_to_access_player.mdx')),
-        Questions: lazy(() => import('./_guides/faq/questions.mdx'))
     },
     Filters: {
         'Audio Filters': lazy(() => import('./_guides/filters/audio_filters.mdx')),
@@ -84,7 +87,7 @@ const mdxComponents = {
     h4: (props: any) => <Heading.H4 {...props} />,
     h5: (props: any) => <Heading.H5 {...props} />,
     h6: (props: any) => <Heading.H6 {...props} />,
-    p: (props: any) => <Paragraph {...props} />,
+    p: (props: any) => <Paragraph {...props} className="[&:not(:first-child)]:mt-2 mb-2" />,
     blockquote: (props: any) => <Blockquote {...props} />,
     ul: (props: any) => <List {...props} />,
     li: (props: any) => <ListItem {...props} />,
@@ -97,7 +100,7 @@ const mdxComponents = {
     td: (props: any) => <TableCell {...props} />,
     code: (props: any) =>
         typeof props.children === 'string' && !props.children.includes('\n') ? (
-            <Code {...props} />
+            <Code {...props} className="bg-zinc-600/80 text-gray-200" />
         ) : (
             <CodeBlock lines={props.children.trim().includes('\n')} language={lgn(props.className)} {...props} />
         )
@@ -110,9 +113,6 @@ export default function Guide() {
     const [CurrentPage, setCurrentPage] = useState<(() => JSX.Element) | null>(null);
 
     useEffect(() => {
-        if (!topic || !page) {
-            return void router.replace('/guide?topic=Welcome&page=Welcome');
-        }
         try {
             const el = entries[topic as keyof typeof entries][decodeURIComponent(page as string) as keyof (typeof entries)[keyof typeof entries]];
             setCurrentPage(el || null);
@@ -139,6 +139,10 @@ export default function Guide() {
 
     return (
         <Container>
+            <HeadingMeta
+                title={topic && page ? `${page} - ${topic}` : 'Discord Player'}
+                description={topic && page ? `This guide explains about ${page} on the topic ${topic}.` : `The official guidebook of Discord Player`}
+            />
             <div className="flex flex-row items-start w-full gap-5 mt-2">
                 <div className="lg:border lg:p-2 rounded-lg lg:w-[20%] mb-5 gap-5">
                     <div className="hidden lg:flex flex-col gap-5 mt-5">

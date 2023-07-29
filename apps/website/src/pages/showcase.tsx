@@ -1,3 +1,4 @@
+import { HeadingMeta } from '@/components/heading';
 import { CardGrid } from '@/components/layout/CardGrid';
 import { Container } from '@/components/layout/Container';
 import { ShowcaseResource } from '@/data/showcase';
@@ -10,6 +11,7 @@ const resURL = 'https://github.com/Androz2091/discord-player/blob/master/apps/we
 export default function Showcase() {
     return (
         <Container>
+            <HeadingMeta title="Showcase | Discord Player" description="A curated list of resources like open-source music bots and extractors, built by the Discord Player community." />
             <div className="mt-5 mb-10 space-y-5">
                 <div>
                     <Heading.H1>Showcase</Heading.H1>

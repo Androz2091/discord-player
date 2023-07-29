@@ -18,7 +18,7 @@ export function DocsItemList({ data, name, link, icon }: IProps) {
 
     return (
         <Collapsible open={open} onOpenChange={setOpen}>
-            <CollapsibleTrigger className="w-full">
+            <CollapsibleTrigger className="w-full" asChild>
                 <Button className="w-full font-bold justify-between rounded-bl-none rounded-tr-none" variant="outline">
                     <span className="flex items-center  gap-3">
                         {icon} {name}

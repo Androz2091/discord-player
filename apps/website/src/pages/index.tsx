@@ -6,10 +6,12 @@ import { Container } from '@/components/layout/Container';
 import Hero from '@/components/homepage/Hero';
 import { Section } from '@/components/layout/Section';
 import { CardGrid } from '@/components/layout/CardGrid';
+import { HeadingMeta } from '@/components/heading';
 
 export default function Main() {
     return (
         <Container>
+            <HeadingMeta />
             <Hero />
             <Section>
                 <Heading.H2>Why choose discord-player?</Heading.H2>

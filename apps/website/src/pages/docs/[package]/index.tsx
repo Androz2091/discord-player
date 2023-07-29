@@ -20,6 +20,11 @@ export default function DocsTestPage() {
     }, []);
 
     useEffect(() => {
+        if (!currentLib) return;
+        router.push(`/docs/${encodeURIComponent(currentLib.name)}`);
+    }, [currentLib]);
+
+    useEffect(() => {
         if (!currentPackageName) return;
         if (!docs.modules[currentPackageName]) return void router.replace('/404');
         setCurrentLib(docs.modules[currentPackageName]);
@@ -30,7 +35,9 @@ export default function DocsTestPage() {
     const selectList = (
         <Combobox
             onSelect={(val) => {
-                setCurrentLib(getLibraries().find((libr) => libr.name === val)!);
+                const lib = getLibraries().find((libr) => libr.name === val)!;
+                if (!lib) return;
+                setCurrentLib(lib);
             }}
             value={currentLib.name}
             options={libNames.map((l) => ({ label: l, value: l }))}
