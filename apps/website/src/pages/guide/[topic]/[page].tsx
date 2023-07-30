@@ -1,5 +1,5 @@
 import '@code-hike/mdx/dist/index.css';
-import { lazy, useEffect, useState } from 'react';
+import { lazy, useMemo } from 'react';
 import { MDXProvider } from '@mdx-js/react';
 import { ScrollTop } from '@/components/scrolltop/ScrollTop';
 import { Container } from '@/components/layout/Container';
@@ -241,25 +241,25 @@ const mdxComponents = {
 export default function Guide() {
     const router = useRouter();
     const { topic, page } = router.query;
-    const [CurrentPage, setCurrentPage] = useState<(() => JSX.Element) | null>(null);
+    const currentPage = useMemo(() => {
+        if (!topic || !page) return null;
+        const t = pages.find((m) => m.name === topic);
+        if (!t) return null;
+        const p = t.pages.find((m) => m.name === page);
+        if (!p) return null;
 
-    useEffect(() => {
-        if (!topic || !page) return;
-
-        const currentPage = pages.find((m) => m.name === topic)?.pages.find((m) => m.name === page)?.component;
-        if (!currentPage) return;
-
-        try {
-            setCurrentPage(currentPage as any);
-        } catch {
-            setCurrentPage(null);
-        }
-    }, [topic, page, router]);
+        return {
+            component: p.component,
+            topic: t.displayName,
+            page: p.displayName
+        };
+    }, [topic, page]);
 
     const guideItems = pages.map((page) => (
         <GuideItemList
             key={page.name}
             name={page.displayName}
+            id={page.name}
             data={page.pages.map((m) => {
                 return {
                     name: m.displayName,
@@ -276,8 +276,8 @@ export default function Guide() {
     return (
         <Container>
             <HeadingMeta
-                title={topic && page ? `${decodeURIComponent(page.toString())} - ${decodeURIComponent(topic.toString())}` : 'Discord Player'}
-                description={topic && page ? `This guide explains about ${page} on the topic ${topic}.` : `The official guidebook of Discord Player`}
+                title={currentPage?.topic && currentPage.page ? `${currentPage.page} - ${currentPage.topic}` : 'Discord Player'}
+                description={currentPage?.topic && currentPage.page ? `This guide explains about ${currentPage.page} on the topic ${currentPage.topic}.` : `The official guidebook of Discord Player.`}
             />
             <div className="flex flex-row items-start w-full gap-5 mt-2">
                 <div className="lg:border lg:p-2 rounded-lg lg:w-[20%] mb-5 gap-5">
@@ -303,8 +303,8 @@ export default function Guide() {
                 </div>
                 <div className="flex-1 overflow-auto h-screen hidescrollbar mb-16">
                     <MDXProvider components={mdxComponents}>
-                        {CurrentPage ? (
-                            <CurrentPage />
+                        {currentPage ? (
+                            <currentPage.component />
                         ) : (
                             <div className="h-1/2 grid place-items-center">
                                 <Loader variant="bubble" className="h-16 w-16" />

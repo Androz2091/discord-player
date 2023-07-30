@@ -20,7 +20,7 @@ function Icon() {
 
 function StatusIndicator({ online = false }: { online?: boolean }) {
     return (
-        <svg className={cn(online ? 'fill-[#23a559]' : 'fill-[#b5bac1] dark:fill-[#4e5058]', 'h-[0.6rem] w-[0.6rem]')} stroke-width="0" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <svg className={cn(online ? 'fill-[#23a559]' : 'fill-[#b5bac1] dark:fill-[#4e5058]', 'h-[0.6rem] w-[0.6rem]')} strokeWidth="0" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
             <path d="M256 23.05C127.5 23.05 23.05 127.5 23.05 256S127.5 488.9 256 488.9 488.9 384.5 488.9 256 384.5 23.05 256 23.05z"></path>
         </svg>
     );

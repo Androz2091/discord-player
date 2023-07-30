@@ -7,12 +7,13 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface IProps {
     name: string;
+    id: string;
     data: { name: string; id: string }[];
     link?: (name: string) => string;
     icon?: React.ReactNode;
 }
 
-export function GuideItemList({ data, name, link, icon }: IProps) {
+export function GuideItemList({ data, name, id, link, icon }: IProps) {
     const router = useRouter();
     const [open, setOpen] = useState(true);
 
@@ -32,7 +33,7 @@ export function GuideItemList({ data, name, link, icon }: IProps) {
                         <h1
                             className={cn(
                                 'text-base font-normal text-muted-foreground cursor-pointer',
-                                item.name === decodeURIComponent(router.query.page as string) && name === decodeURIComponent(router.query.topic as string) ? 'font-medium text-secondary' : ''
+                                item.id === decodeURIComponent(router.query.page as string) && id === decodeURIComponent(router.query.topic as string) ? 'font-medium text-secondary' : ''
                             )}
                         >
                             {item.name}
