@@ -2,6 +2,7 @@ import { cn, Heading } from '@edge-ui/react';
 import { SquareCode } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useMemo } from 'react';
 import { VscSymbolClass, VscSymbolInterface, VscSymbolMethod, VscSymbolProperty } from 'react-icons/vsc';
 
 type EntityProps = React.PropsWithChildren<{
@@ -14,10 +15,13 @@ type EntityProps = React.PropsWithChildren<{
 export function EntitySymbol({ type, children, id, link, source }: EntityProps) {
     const router = useRouter();
     let c: React.ReactNode;
-    const href = `${router.asPath.split('?')[0]}${Object.entries(router.query)
-        .filter((f) => !['package', 'scrollTo'].includes(f[0]))
-        .map((m, i) => `${i === 0 ? '?' : ''}${m[0]}=${m[1]}`)
-        .join('&')}&scrollTo=${id}`;
+
+    const href = useMemo(() => {
+        const entries = Object.entries(router.query).filter((f) => !['scrollTo', 'target', 'package', 'type'].includes(f[0]));
+        const href = `${router.asPath.split('?')[0]}${entries.map((m, i) => `${i === 0 ? '?' : ''}${m[0]}=${m[1]}`).join('&')}${entries.length ? '&' : '?'}scrollTo=${id}`;
+
+        return href;
+    }, []);
 
     const updateLink = () => {
         router.push(href);

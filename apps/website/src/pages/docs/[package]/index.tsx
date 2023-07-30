@@ -1,178 +1,32 @@
 import { Container } from '@/components/layout/Container';
-import { useCallback, useEffect, useState } from 'react';
-import { docs, libNames } from '@/lib/docs';
-import { ScrollArea, Sheet, SheetContent, SheetTrigger } from '@edge-ui/react';
-import { PanelRightClose } from 'lucide-react';
-import { DocsItemList } from '@/components/docs/DocsItemList';
-import { Combobox } from '@/components/combobox';
+import { DocumentationStore } from '@/lib/store';
+import { Loader } from '@edge-ui/react';
 import { useRouter } from 'next/router';
-import { ContentArea } from '@/components/docs/ContentArea';
-import { VscSymbolClass, VscSymbolInterface, VscSymbolMethod } from 'react-icons/vsc';
-import { ScrollTop } from '@/components/scrolltop/ScrollTop';
+import { useEffect } from 'react';
 
-export default function DocsTestPage() {
+export default function DocumentationEntryPoint() {
     const router = useRouter();
-    const currentPackageName = router.query.package as string;
-    const [currentLib, setCurrentLib] = useState<ReturnType<typeof getLibraries>[number]>(docs.modules[currentPackageName]);
-    const getLibraries = useCallback(() => {
-        const libs = Object.values(docs.modules);
-        return libs;
-    }, []);
+    const { libraries } = DocumentationStore;
 
     useEffect(() => {
-        if (!currentLib) return;
-        router.push(`/docs/${encodeURIComponent(currentLib.name)}`);
-    }, [currentLib]);
+        if (!router.query.package) return;
+        const pkg = libraries.find((lib) => lib.name === router.query.package);
+        if (!pkg) return;
 
-    useEffect(() => {
-        if (!currentPackageName) return;
-        if (!docs.modules[currentPackageName]) return void router.replace('/404');
-        setCurrentLib(docs.modules[currentPackageName]);
-    }, [currentPackageName]);
+        const name = pkg.name;
+        const type = pkg.classes.length ? 'class' : pkg.types.length ? 'type' : pkg.functions.length ? 'function' : '';
+        const target = pkg.classes.length ? pkg.classes[0].data.name : pkg.types.length ? pkg.types[0].data.name : pkg.functions.length ? pkg.functions[0].data.name : '';
 
-    if (!docs.modules[currentPackageName] || !currentLib) return;
+        if (!target || !type) return;
 
-    const selectList = (
-        <Combobox
-            onSelect={(val) => {
-                const lib = getLibraries().find((libr) => libr.name === val)!;
-                if (!lib) return;
-                setCurrentLib(lib);
-            }}
-            value={currentLib.name}
-            options={libNames.map((l) => ({ label: l, value: l }))}
-        />
-    );
+        router.push(`/docs/${encodeURIComponent(name)}/${encodeURIComponent(type)}/${encodeURIComponent(target)}`);
+    }, [router.query.package]);
 
     return (
         <Container>
-            <div className="flex flex-row items-start w-full gap-5 mt-2">
-                <div className="lg:border lg:p-2 rounded-lg lg:w-[20%] mb-5 gap-5">
-                    <div className="hidden lg:flex flex-col gap-5 mt-5">
-                        {selectList}
-                        <ScrollArea className="max-h-screen">
-                            <div className="space-y-3 max-h-[84vh]">
-                                {currentLib.classes.length ? (
-                                    <DocsItemList
-                                        name="Classes"
-                                        data={currentLib.classes.map((m) => {
-                                            return {
-                                                lib: currentLib.name,
-                                                name: m.data.name,
-                                                type: 'class'
-                                            };
-                                        })}
-                                        link={(name) => {
-                                            return `/docs/${encodeURIComponent(currentLib.name)}?type=class&target=${name}`;
-                                        }}
-                                        icon={<VscSymbolClass className="h-5 w-5" />}
-                                    />
-                                ) : null}
-                                {currentLib.functions.length ? (
-                                    <DocsItemList
-                                        name="Functions"
-                                        data={currentLib.functions.map((m) => {
-                                            return {
-                                                lib: currentLib.name,
-                                                name: m.data.name,
-                                                type: 'function'
-                                            };
-                                        })}
-                                        link={(name) => {
-                                            return `/docs/${encodeURIComponent(currentLib.name)}?type=function&target=${name}`;
-                                        }}
-                                        icon={<VscSymbolMethod className="h-5 w-5" />}
-                                    />
-                                ) : null}
-                                {currentLib.types.length ? (
-                                    <DocsItemList
-                                        name="Typedef"
-                                        data={currentLib.types.map((m) => {
-                                            return {
-                                                lib: currentLib.name,
-                                                name: m.data.name,
-                                                type: 'type'
-                                            };
-                                        })}
-                                        link={(name) => {
-                                            return `/docs/${encodeURIComponent(currentLib.name)}?type=type&target=${name}`;
-                                        }}
-                                        icon={<VscSymbolInterface className="h-5 w-5" />}
-                                    />
-                                ) : null}
-                            </div>
-                        </ScrollArea>
-                    </div>
-                    <div className="lg:hidden absolute left-0 top-[4.3rem]">
-                        <Sheet>
-                            <SheetTrigger className="sticky">
-                                <PanelRightClose className="h-8 w-8" />
-                            </SheetTrigger>
-                            <SheetContent side="left" className="w-[85%]">
-                                <div className="flex flex-col gap-5 mt-5">
-                                    {selectList}
-                                    <ScrollArea className="max-h-screen">
-                                        <div className="space-y-3 max-h-[84vh]">
-                                            {currentLib.classes.length ? (
-                                                <DocsItemList
-                                                    name="Classes"
-                                                    data={currentLib.classes.map((m) => {
-                                                        return {
-                                                            lib: currentLib.name,
-                                                            name: m.data.name,
-                                                            type: 'class'
-                                                        };
-                                                    })}
-                                                    link={(name) => {
-                                                        return `/docs/${encodeURIComponent(currentLib.name)}?type=class&target=${name}`;
-                                                    }}
-                                                    icon={<VscSymbolClass className="h-5 w-5" />}
-                                                />
-                                            ) : null}
-                                            {currentLib.functions.length ? (
-                                                <DocsItemList
-                                                    name="Functions"
-                                                    data={currentLib.functions.map((m) => {
-                                                        return {
-                                                            lib: currentLib.name,
-                                                            name: m.data.name,
-                                                            type: 'function'
-                                                        };
-                                                    })}
-                                                    link={(name) => {
-                                                        return `/docs/${encodeURIComponent(currentLib.name)}?type=function&target=${name}`;
-                                                    }}
-                                                    icon={<VscSymbolMethod className="h-5 w-5" />}
-                                                />
-                                            ) : null}
-                                            {currentLib.types.length ? (
-                                                <DocsItemList
-                                                    name="Typedef"
-                                                    data={currentLib.types.map((m) => {
-                                                        return {
-                                                            lib: currentLib.name,
-                                                            name: m.data.name,
-                                                            type: 'type'
-                                                        };
-                                                    })}
-                                                    link={(name) => {
-                                                        return `/docs/${encodeURIComponent(currentLib.name)}?type=type&target=${name}`;
-                                                    }}
-                                                    icon={<VscSymbolInterface className="h-5 w-5" />}
-                                                />
-                                            ) : null}
-                                        </div>
-                                    </ScrollArea>
-                                </div>
-                            </SheetContent>
-                        </Sheet>
-                    </div>
-                </div>
-                <div className="flex-1 overflow-auto h-screen hidescrollbar">
-                    <ContentArea data={currentLib} />
-                </div>
+            <div className="grid place-items-center h-[80vh]">
+                <Loader variant="bubble" className="h-16 w-16" />
             </div>
-            <ScrollTop />
         </Container>
     );
 }

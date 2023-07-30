@@ -3,12 +3,12 @@ import { Loader } from '@edge-ui/react';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
-export default function GuideEntryPoint() {
+export default function DocumentationEntryPoint() {
     const router = useRouter();
 
     useEffect(() => {
-        router.push(`/guide/welcome/welcome`);
-    }, [router]);
+        router.push(`/docs/discord-player/class/Player`);
+    }, []);
 
     return (
         <Container>

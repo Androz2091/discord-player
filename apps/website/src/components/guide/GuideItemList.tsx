@@ -7,7 +7,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface IProps {
     name: string;
-    data: { name: string }[];
+    data: { name: string; id: string }[];
     link?: (name: string) => string;
     icon?: React.ReactNode;
 }
@@ -41,7 +41,7 @@ export function GuideItemList({ data, name, link, icon }: IProps) {
 
                     return (
                         <div key={item.name} className="hover:bg-secondary">
-                            {link ? <Link href={link(encodeURIComponent(item.name))}>{linker}</Link> : linker}
+                            {link ? <Link href={link(encodeURIComponent(item.id))}>{linker}</Link> : linker}
                         </div>
                     );
                 })}

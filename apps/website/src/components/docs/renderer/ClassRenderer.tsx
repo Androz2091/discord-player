@@ -7,7 +7,6 @@ import { Properties } from '../entities/Properties';
 import { Type } from '../entities/Type';
 
 export function ClassRenderer({ entity }: { entity: DocumentedClass }) {
-    console.log(entity);
     return (
         <>
             <EntitySymbol type={'class'} id={`c-${entity.name}`} link source={entity.metadata?.url}>

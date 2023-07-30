@@ -7,7 +7,7 @@ export default function GuideEntryPoint() {
     const router = useRouter();
 
     useEffect(() => {
-        router.push(`/guide/welcome/welcome`);
+        if (!router.query.topic) return void router.replace('/404');
     }, [router]);
 
     return (

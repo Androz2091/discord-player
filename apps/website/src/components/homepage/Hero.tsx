@@ -2,6 +2,7 @@ import { firaCode, orbitron } from '@/lib/constants';
 import { Button, cn, GitHubIcon, Heading, Label } from '@edge-ui/react';
 import Link from 'next/link';
 import React from 'react';
+import DiscordInvite from './DiscordInvite';
 
 export default function Hero() {
     return (
@@ -33,6 +34,9 @@ export default function Hero() {
                 <Label className={cn(firaCode.className, 'text-muted-foreground')}>
                     <span className="select-none">$</span> npm i --save discord-player
                 </Label>
+            </div>
+            <div className="mt-5">
+                <DiscordInvite />
             </div>
         </div>
     );
