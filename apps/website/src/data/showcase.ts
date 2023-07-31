@@ -139,9 +139,9 @@ export const ShowcaseResource: IShowcase = {
             url: 'https://github.com/Androz2091/AtlantaBot'
         },
         {
-            name: 'Cadence Bot',
-            description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source.',
-            version: 'v6.6.0',
+            name: 'Cadence',
+            description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source!',
+            version: 'v6.6.2',
             url: 'https://github.com/mariusbegby/cadence-discord-bot'
         }
     ].sort((a, b) => semver.rcompare(a.version, b.version)),
