@@ -90,7 +90,7 @@ export const docsLink = (() => {
         mod.classes.forEach((c) =>
             entries.push({
                 module: mod.name,
-                href: `/docs/${encodeURIComponent(mod.name)}?type=class&target=${c.data.name}`,
+                href: `/docs/${encodeURIComponent(mod.name)}/class/${c.data.name}`,
                 target: c.data.name,
                 type: 'class'
             })
@@ -98,7 +98,7 @@ export const docsLink = (() => {
         mod.functions.forEach((c) =>
             entries.push({
                 module: mod.name,
-                href: `/docs/${encodeURIComponent(mod.name)}?type=function&target=${c.data.name}`,
+                href: `/docs/${encodeURIComponent(mod.name)}/function/${c.data.name}`,
                 target: c.data.name,
                 type: 'function'
             })
@@ -106,7 +106,7 @@ export const docsLink = (() => {
         mod.types.forEach((c) =>
             entries.push({
                 module: mod.name,
-                href: `/docs/${encodeURIComponent(mod.name)}?type=type&target=${c.data.name}`,
+                href: `/docs/${encodeURIComponent(mod.name)}/type/${c.data.name}`,
                 target: c.data.name,
                 type: 'type'
             })
@@ -124,7 +124,7 @@ const seed: Doc[] = (() => {
         mod.classes.forEach((cls) => {
             props.push({
                 module: mod.name,
-                href: `/docs/${encodeURIComponent(mod.name)}?type=class&target=${cls.data.name}`,
+                href: `/docs/${encodeURIComponent(mod.name)}/class/${cls.data.name}`,
                 name: cls.data.name,
                 type: 'class',
                 displayName: cls.data.name
@@ -132,7 +132,7 @@ const seed: Doc[] = (() => {
 
             cls.data.methods.forEach((method) => {
                 props.push({
-                    href: `/docs/${encodeURIComponent(mod.name)}?type=class&target=${cls.data.name}&scrollTo=fm-${method.name}`,
+                    href: `/docs/${encodeURIComponent(mod.name)}/class/${cls.data.name}?scrollTo=fm-${method.name}`,
                     module: mod.name,
                     name: method.name,
                     type: 'function',
@@ -142,7 +142,7 @@ const seed: Doc[] = (() => {
 
             cls.data.properties.forEach((prop) => {
                 props.push({
-                    href: `/docs/${encodeURIComponent(mod.name)}?type=class&target=${cls.data.name}&scrollTo=p-${prop.name}`,
+                    href: `/docs/${encodeURIComponent(mod.name)}/class/${cls.data.name}?scrollTo=p-${prop.name}`,
                     module: mod.name,
                     name: prop.name,
                     type: 'property',
@@ -154,7 +154,7 @@ const seed: Doc[] = (() => {
         mod.types.forEach((cls) =>
             props.push({
                 module: mod.name,
-                href: `/docs/${encodeURIComponent(mod.name)}?type=type&target=${cls.data.name}`,
+                href: `/docs/${encodeURIComponent(mod.name)}/type/${cls.data.name}`,
                 name: cls.data.name,
                 type: 'type',
                 displayName: cls.data.name
@@ -164,7 +164,7 @@ const seed: Doc[] = (() => {
         mod.functions.forEach((cls) =>
             props.push({
                 module: mod.name,
-                href: `/docs/${encodeURIComponent(mod.name)}?type=function&target=${cls.data.name}`,
+                href: `/docs/${encodeURIComponent(mod.name)}/function/${cls.data.name}`,
                 name: cls.data.name,
                 type: 'function',
                 displayName: cls.data.name
