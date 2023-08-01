@@ -36,9 +36,29 @@ This issue is most likely caused by outdated version of `@discordjs/voice`. Make
 
 ## "Something" is not working
 
-If you encounter issues and something isn't functioning correctly, try attaching a `debug` listener to `player.events` to check for any unusual behavior.
+If you encounter issues and something isn't functioning correctly, try attaching a `debug` listener to `player.events` to check for any unusual behavior:
 
-If you receive peculiar errors such as "something is not a constructor" or "version.split is not a function" or similar, follow these steps:
+```js
+const { useMainPlayer } = require('discord-player');
+
+client.once('ready', () => {
+    const player = useMainPlayer();
+
+    // generate dependencies report
+    console.log(player.scanDeps());
+    // ^------ This is similar to @discordjs/voice's `generateDependenciesReport()` function, but with additional informations related to discord-player
+
+    // log metadata query, search execution, etc.
+    player.on('debug', console.log);
+    // ^------ This shows how your search query is interpreted, if the query was cached, which extractor resolved the query or which extractor failed to resolve, etc.
+
+    // log debug logs of the queue, such as voice connection logs, player execution, streaming process etc.
+    player.events.on('debug', (queue, message) => console.log(`[DEBUG ${queue.guild.id}] ${message}`));
+    // ^------ This shows how queue handles the track. It logs informations like the status of audio player, streaming process, configurations used, if streaming failed or not, etc.
+});
+```
+
+If you receive errors such as "something is not a constructor" or "version.split is not a function" or similar, follow these steps:
 
 1. If you are using `npm`, remove `node_modules`, `package-lock.json`, or any lockfiles you have. Then, run `npm cache clean --force`, or use a similar command for your package manager, and finally run `npm install` (or the install command of your package manager).
 2. If the above step does not resolve the issue, consider using another package manager like `yarn`, `pnpm`, or `bun`.
