@@ -1,6 +1,8 @@
+import DiscordInvite from '@/components/homepage/DiscordInvite';
+
 # Troubleshooting Common Issues
 
-## Cannot find opusscript or @discordjs/opus or node-opus
+## Cannot find `opusscript` or `@discordjs/opus` or `node-opus`
 
 To resolve this issue, you need to install the opus encoder. Use one of the following commands based on your preference:
 
@@ -60,7 +62,11 @@ client.once('ready', () => {
 
 If you receive errors such as "something is not a constructor" or "version.split is not a function" or similar, follow these steps:
 
-1. If you are using `npm`, remove `node_modules`, `package-lock.json`, or any lockfiles you have. Then, run `npm cache clean --force`, or use a similar command for your package manager, and finally run `npm install` (or the install command of your package manager).
-2. If the above step does not resolve the issue, consider using another package manager like `yarn`, `pnpm`, or `bun`.
+- If you are using `npm`, remove `node_modules`, `package-lock.json`, or any lockfiles you have. Then, run `npm cache clean --force`, or use a similar command for your package manager, and finally run `npm install` (or the install command of your package manager).
+- If the above step does not resolve the issue, consider using another package manager like `yarn`, `pnpm`, or `bun`.
 
-If you are still unable to resolve the problem, don't hesitate to seek assistance from our official support server 👉 [https://androz2091.fr/discord](https://androz2091.fr/discord)
+If you are still unable to resolve the problem, don't hesitate to seek assistance from our official support server
+
+<br/>
+
+<DiscordInvite />
