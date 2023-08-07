@@ -24,3 +24,13 @@ await player.play(channel, filePath, {
     // ... (other options if you need)
 });
 ```
+
+This does not show the metadata of the track you are playing. In order to add support for the metadata, you need to install [mediaplex](https://npm.im/mediaplex) on your system.
+
+```sh
+$ npm install --save mediaplex
+```
+
+Discord Player will automatically attempt to parse file metadata using mediaplex. The metadata includes title of the track, author of the track, duration of the track, etc.
+
+> Note: Mediaplex is experimental and it may not 100% work.
