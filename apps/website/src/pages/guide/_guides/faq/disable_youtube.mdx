@@ -59,3 +59,30 @@ const player = new Player(client, {
 ```
 
 In order to use `SoundCloud` as the `BridgeProvider` source, you need to register the `SoundCloudExtractor` first. See <Link className="text-teal-500 hover:underline" href="/guide/extractors/setting-bridge-source">Setting Bridge Source</Link> for more information.
+
+Together, it should look something like this
+
+```js
+import { Player } from 'discord-player';
+import { YouTubeExtractor, BridgeProvider, BridgeSource } from '@discord-player/extractor';
+
+const player = new Player(client, {
+    bridgeProvider: new BridgeProvider(BridgeSource.SoundCloud),
+    blockStreamFrom: [
+        // now your bot will no longer be able to use
+        // youtube extractor to play audio even if the track was
+        // extracted from youtube
+        YouTubeExtractor.identifier
+    ],
+    blockExtractors: [
+        // this will block the listed extractors from being
+        // able to query metadata (aka search results parsing)
+        // This example disables youtube search
+        YouTubeExtractor.identifier
+    ]
+});
+
+await player.extractors.loadDefault();
+```
+
+This will load all extractors and disable youtube completely.
