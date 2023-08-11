@@ -137,6 +137,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@discord-player/opus@workspace:packages/opus":
+  version: 0.0.0-use.local
+  resolution: "@discord-player/opus@workspace:packages/opus"
+  dependencies:
+    "@discord-player/tsconfig": "workspace:^"
+  languageName: unknown
+  linkType: soft
+
 "@discord-player/tsconfig@workspace:^, @discord-player/tsconfig@workspace:packages/tsconfig":
   version: 0.0.0-use.local
   resolution: "@discord-player/tsconfig@workspace:packages/tsconfig"
