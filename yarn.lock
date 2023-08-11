@@ -120,7 +120,7 @@ __metadata:
     play-dl: ^1.9.6
     reverbnation-scraper: ^2.0.0
     soundcloud.ts: ^0.5.0
-    spotify-url-info: ^3.2.5
+    spotify-url-info: ^3.2.6
     youtube-ext: ^1.1.4
     youtube-sr: ^4.3.4
     yt-stream: ^1.4.7
@@ -10584,20 +10584,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"spotify-uri@npm:~3.0.3":
-  version: 3.0.3
-  resolution: "spotify-uri@npm:3.0.3"
-  checksum: 8c05c67efe9e96b477e5129491f6911d03c84a9f9bb17e9f70f8ec82ac6b54fa158a6032933405dc654eff28598bdb2587665918804b1e5e66009d3c7cec2c11
+"spotify-uri@npm:~4.0.0":
+  version: 4.0.0
+  resolution: "spotify-uri@npm:4.0.0"
+  checksum: 272e1692a750a8509625bc3caeebc14b2424b6f63ab664cb018edcc0dacd181bd234d38daa9b7fd0f449c7a650a13b7904cc9a783e048bb94da0ad63f264731a
   languageName: node
   linkType: hard
 
-"spotify-url-info@npm:^3.2.5":
-  version: 3.2.5
-  resolution: "spotify-url-info@npm:3.2.5"
+"spotify-url-info@npm:^3.2.6":
+  version: 3.2.6
+  resolution: "spotify-url-info@npm:3.2.6"
   dependencies:
     himalaya: ~1.1.0
-    spotify-uri: ~3.0.3
-  checksum: 14da61cbb5d0bf91c3210eefa8853d67ca94d225fd0c6d5c8b3ca5d8112edc72e54b6b5aa0e1faf2918e08129bed78668e060192b707a28f2e9c239e8314e320
+    spotify-uri: ~4.0.0
+  checksum: 4101df615b63307478a41375696ea188402116ce6e49193e1b930ca4f8046fd1246c6ef3db9b9138580c31850636e290cbf9bb7dc6099148702820bb23215d2c
   languageName: node
   linkType: hard
 
