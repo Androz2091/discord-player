@@ -51,9 +51,9 @@ const loadModule = (
 };
 
 export const CTL = {
-    BITRATE: 4002,
-    FEC: 4012,
-    PLP: 4014
+    BITRATE: 0xfa2,
+    FEC: 0xfac,
+    PLP: 0xfae
 } as const;
 
 export const OPUS_MOD_REGISTRY: IMod[] = [
@@ -222,7 +222,7 @@ export class OpusEncoder extends OpusStream {
      * @param {number} options.channels the number of channels to use
      * @param {number} options.rate the sampling rate in Hz
      */
-    constructor(options: IOpusStreamInit) {
+    constructor(options = {} as IOpusStreamInit) {
         super(options);
     }
 
