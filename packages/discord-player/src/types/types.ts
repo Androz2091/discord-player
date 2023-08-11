@@ -3,7 +3,7 @@ import { GuildQueue } from '../manager';
 import { Track } from '../fabric/Track';
 import { Playlist } from '../fabric/Playlist';
 import { downloadOptions } from 'ytdl-core';
-import { QueryCache } from '../utils/QueryCache';
+import { QueryCacheProvider } from '../utils/QueryCache';
 
 // @ts-ignore
 import type { BridgeProvider } from '@discord-player/extractor';
@@ -358,7 +358,7 @@ export interface PlayerInitOptions {
     lockVoiceStateHandler?: boolean;
     blockExtractors?: string[];
     blockStreamFrom?: string[];
-    queryCache?: QueryCache | null;
+    queryCache?: QueryCacheProvider<any> | null;
     ignoreInstance?: boolean;
     useLegacyFFmpeg?: boolean;
     bridgeProvider?: BridgeProvider;

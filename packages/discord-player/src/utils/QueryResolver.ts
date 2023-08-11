@@ -58,6 +58,10 @@ class QueryResolver {
         // sanitize query
         if (query.includes('youtube.com')) query = query.replace(/(m(usic)?|gaming)\./, '').trim();
         if (query.includes('spotify.com')) query = query.replace(/intl-([a-zA-Z]+)\//, '');
+        if (query.includes('youtube.com') && query.includes('&list=')) {
+            const id = query.split('&list=')[1]?.split('&')?.[0];
+            if (id) query = `https://www.youtube.com/playlist?list=${id}`;
+        }
 
         const resolver = (type: typeof fallbackSearchEngine) => ({ type, query });
 
