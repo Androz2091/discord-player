@@ -85,10 +85,10 @@ export const tools: ITools[] = [
         description: 'Discord Player leverages ffmpeg, a comprehensive multimedia framework, to handle audio encoding, decoding, and streaming. It ensures efficient and high-quality audio playback.'
     },
     {
-        title: '@discordjs/voice',
-        link: 'https://npm.im/@discordjs/voice',
+        title: 'discord-voip',
+        link: 'https://npm.im/discord-voip',
         description:
-            'Discord Player utilizes @discordjs/voice, a dedicated library for voice-related functionalities in discord.js. It offers a seamless integration for handling voice connections and streaming audio.'
+            'Discord Player utilizes discord-voip, a dedicated library for voice-related functionalities in discord.js. It offers a seamless integration for handling voice connections and streaming audio.'
     }
 ];
 

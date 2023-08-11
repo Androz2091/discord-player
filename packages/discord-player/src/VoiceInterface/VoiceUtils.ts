@@ -1,5 +1,5 @@
 import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
-import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus, AudioPlayer } from '@discordjs/voice';
+import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus, AudioPlayer } from 'discord-voip';
 import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
 import { GuildQueue } from '../manager';

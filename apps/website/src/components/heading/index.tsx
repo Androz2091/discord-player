@@ -7,7 +7,7 @@ interface IProps {
 
 const DEFAULT_TITLE = 'Discord Player';
 const DEFAULT_DESC =
-    'Discord Player is a robust framework for developing Discord Music bots using JavaScript and TypeScript. It is built on top of the @discordjs/voice library and offers a comprehensive set of customizable tools, making it one of the most feature enrich framework in town.';
+    'Discord Player is a robust framework for developing Discord Music bots using JavaScript and TypeScript. It is built on top of the discord-voip library and offers a comprehensive set of customizable tools, making it one of the most feature enrich framework in town.';
 
 export function HeadingMeta(props: IProps) {
     const { title = DEFAULT_TITLE, description = DEFAULT_DESC } = props;

@@ -1,15 +1,16 @@
-import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
+import { ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import { AppleMusic } from '../internal';
 import { Readable } from 'stream';
 import { StreamFN, pullYTMetadata } from './common/helper';
 import { BridgeProvider } from './common/BridgeProvider';
+import { BridgedExtractor } from './BridgedExtractor';
 
 export interface AppleMusicExtractorInit {
     createStream?: (ext: AppleMusicExtractor, url: string) => Promise<Readable | string>;
     bridgeProvider?: BridgeProvider;
 }
 
-export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> {
+export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorInit> {
     public static identifier = 'com.discord-player.applemusicextractor' as const;
     private _stream!: StreamFN;
 
@@ -239,7 +240,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
             return stream;
         }
 
-        const provider = this.options.bridgeProvider;
+        const provider = this.bridgeProvider;
         if (!provider) throw new Error(`Could not find bridge provider for '${this.constructor.name}'`);
 
         const data = await provider.resolve(this, info);

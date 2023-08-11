@@ -8,7 +8,6 @@ export interface BridgedOption {
 export class BridgedExtractor<T extends BridgedOption> extends BaseExtractor<T> {
     public constructor(context: ExtractorExecutionContext, options?: T | undefined) {
         super(context, options);
-        if (!this.bridgeProvider) this.setBridgeProvider(defaultBridgeProvider);
     }
 
     public setBridgeProvider(provider: BridgeProvider) {

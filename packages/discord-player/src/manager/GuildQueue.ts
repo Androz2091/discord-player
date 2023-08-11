@@ -4,7 +4,7 @@ import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Track, TrackResolvable } from '../fabric/Track';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
-import { type AudioPlayer, AudioResource, StreamType, VoiceConnection, VoiceConnectionStatus } from '@discordjs/voice';
+import { type AudioPlayer, AudioResource, StreamType, VoiceConnection, VoiceConnectionStatus } from 'discord-voip';
 import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
 import { Playlist } from '../fabric/Playlist';
 import { GuildQueueHistory } from './GuildQueueHistory';

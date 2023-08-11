@@ -10,7 +10,7 @@ import {
     VoiceConnection,
     VoiceConnectionStatus,
     VoiceConnectionDisconnectReason
-} from '@discordjs/voice';
+} from 'discord-voip';
 import { StageChannel, VoiceChannel } from 'discord.js';
 import type { Readable } from 'stream';
 import { EventEmitter } from '@discord-player/utils';

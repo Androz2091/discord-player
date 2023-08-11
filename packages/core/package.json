@@ -31,8 +31,8 @@
   },
   "dependencies": {
     "@discord-player/utils": "workspace:^",
-    "@discordjs/voice": "^0.11.0",
-    "discord-api-types": "^0.37.2"
+    "discord-api-types": "^0.37.2",
+    "discord-voip": "^0.1.2"
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^"

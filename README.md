@@ -1,6 +1,6 @@
 # Discord Player
 
-Discord Player is a robust framework for developing Discord Music bots using JavaScript and TypeScript. It is built on top of the [@discordjs/voice](https://npm.im/@discordjs/voice) library and offers a comprehensive set of customizable tools, making it one of the most feature enrich framework in town.
+Discord Player is a robust framework for developing Discord Music bots using JavaScript and TypeScript. It is built on top of the [discord-voip](https://npm.im/discord-voip) library and offers a comprehensive set of customizable tools, making it one of the most feature enrich framework in town.
 
 [![downloadsBadge](https://img.shields.io/npm/dt/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)
 [![versionBadge](https://img.shields.io/npm/v/discord-player?style=for-the-badge)](https://npmjs.com/discord-player)

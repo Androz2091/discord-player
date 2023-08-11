@@ -11,8 +11,8 @@ export default function Hero() {
                 <Heading.H1 className={cn('lg:text-8xl md:text-7xl text-6xl uppercase select-none', orbitron.className)}>Discord Player</Heading.H1>
                 <Heading.H5 className="mt-2 text-muted-foreground font-normal border-t-0 text-start md:text-center">
                     Discord Player is a robust framework for developing Discord Music bots using JavaScript and TypeScript. It is built on top of the{' '}
-                    <Link href="https://npm.im/@discordjs/voice" target="_blank" className="link">
-                        @discordjs/voice
+                    <Link href="https://npm.im/discord-voip" target="_blank" className="link">
+                        discord-voip
                     </Link>{' '}
                     library and offers a comprehensive set of customizable tools, making it one of the most feature enrich framework in town.
                 </Heading.H5>

@@ -1,4 +1,4 @@
-import { AudioResource, StreamType } from '@discordjs/voice';
+import { AudioResource, StreamType } from 'discord-voip';
 import { Readable } from 'stream';
 import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
 import { QueryResolver } from '../utils/QueryResolver';

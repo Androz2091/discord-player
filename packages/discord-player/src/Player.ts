@@ -6,7 +6,7 @@ import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
 import { QueryResolver, ResolvedQuery } from './utils/QueryResolver';
 import { Util } from './utils/Util';
-import { generateDependencyReport, version as dVoiceVersion } from '@discordjs/voice';
+import { generateDependencyReport, version as dVoiceVersion } from 'discord-voip';
 import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
 import { BaseExtractor } from './extractors/BaseExtractor';
 import * as _internals from './utils/__internal__';
@@ -536,7 +536,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     }
 
     /**
-     * Generates a report of the dependencies used by the `@discordjs/voice` module. Useful for debugging.
+     * Generates a report of the dependencies used by the `discord-voip` module. Useful for debugging.
      * @example ```typescript
      * console.log(player.scanDeps());
      * // -> logs dependencies report
@@ -550,7 +550,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             'Discord Player',
             line,
             `- discord-player: ${Player.version}`,
-            `- @discordjs/voice: ${dVoiceVersion}`,
+            `- discord-voip: ${dVoiceVersion}`,
             `- discord.js: ${djsVersion}`,
             `- Node version: ${process.version} (Detected Runtime: ${runtime})`,
             (() => {
@@ -568,7 +568,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                     return m.identifier;
                 })
                 .join('\n') || 'N/A',
-            '\n\n@discordjs/voice',
+            '\n\ndiscord-voip',
             generateDependencyReport()
         ];
 

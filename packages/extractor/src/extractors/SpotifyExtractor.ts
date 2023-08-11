@@ -348,7 +348,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
             return stream;
         }
 
-        const provider = this.options.bridgeProvider;
+        const provider = this.bridgeProvider;
         if (!provider) throw new Error(`Could not find bridge provider for '${this.constructor.name}'`);
 
         const data = await provider.resolve(this, info);

@@ -1,4 +1,4 @@
-import { DiscordGatewayAdapterLibraryMethods } from '@discordjs/voice';
+import { DiscordGatewayAdapterLibraryMethods } from 'discord-voip';
 import { GatewayVoiceServerUpdateDispatch, GatewayVoiceStateUpdateDispatch } from 'discord-api-types/v10';
 import { VoiceManager } from './VoiceManager';
 

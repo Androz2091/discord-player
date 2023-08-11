@@ -30,7 +30,7 @@ export {
     AF_VAPORWAVE_RATE,
     FiltersChain
 } from '@discord-player/equalizer';
-export { createAudioPlayer, AudioPlayer, type CreateAudioPlayerOptions } from '@discordjs/voice';
+export { createAudioPlayer, AudioPlayer, type CreateAudioPlayerOptions } from 'discord-voip';
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
 export const version: string = '[VI]{{inject}}[/VI]';

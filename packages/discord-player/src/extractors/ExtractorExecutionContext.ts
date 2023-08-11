@@ -14,7 +14,7 @@ const knownExtractorKeys = [
     'VimeoExtractor',
     'ReverbnationExtractor',
     'AttachmentExtractor'
-];
+] as const;
 const knownExtractorLib = '@discord-player/extractor';
 
 export interface ExtractorExecutionEvents {
@@ -59,11 +59,11 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
     /**
      * Load default extractors from `@discord-player/extractor`
      */
-    public async loadDefault() {
+    public async loadDefault(filter?: (ext: (typeof knownExtractorKeys)[number]) => boolean) {
         const mod = await Util.import(knownExtractorLib);
         if (mod.error) return { success: false, error: mod.error as Error };
 
-        knownExtractorKeys.forEach((key) => {
+        (filter ? knownExtractorKeys.filter(filter) : knownExtractorKeys).forEach((key) => {
             if (!mod.module[key]) return;
             this.register(<typeof BaseExtractor>mod.module[key], {});
         });

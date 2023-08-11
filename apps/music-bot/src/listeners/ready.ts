@@ -1,5 +1,6 @@
 import { Listener } from '@sapphire/framework';
 import { useMainPlayer } from 'discord-player';
+import { YouTubeExtractor } from '@discord-player/extractor';
 
 export class UserEvent extends Listener {
 	public constructor(context: Listener.Context, options: Listener.Options) {

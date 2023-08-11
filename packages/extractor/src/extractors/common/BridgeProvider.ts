@@ -59,14 +59,22 @@ export class BridgeProvider {
         if (!meta.data) throw new Error('Could not find bridge metadata info.');
 
         if (meta.source === 'soundcloud') {
-            if (!SoundCloudExtractor.soundcloud) {
+            if (!SoundCloudExtractor.instance) {
                 throw new Error('Could not find soundcloud extractor, make sure SoundCloudExtractor is instantiated properly.');
             }
 
-            return await SoundCloudExtractor.soundcloud.util.streamLink(meta.data as SoundcloudTrackV2, 'progressive');
+            if (isExtDisabled(SoundCloudExtractor.instance)) {
+                throw new Error('Cannot stream, SoundCloudExtractor is disabled.');
+            }
+
+            return await SoundCloudExtractor.instance.internal.util.streamLink(meta.data as SoundcloudTrackV2, 'progressive');
         } else if (meta.source === 'youtube') {
             if (!YouTubeExtractor.instance) {
                 throw new Error('Could not find youtube extractor, make sure YouTubeExtractor is instantiated properly.');
+            }
+
+            if (isExtDisabled(YouTubeExtractor.instance)) {
+                throw new Error('Cannot stream, YouTubeExtractor is disabled.');
             }
 
             return YouTubeExtractor.instance._stream((meta.data as Video).url);
@@ -74,6 +82,13 @@ export class BridgeProvider {
             throw new TypeError('invalid bridge source');
         }
     }
+}
+
+function isExtDisabled(ext: BaseExtractor) {
+    const streamBlocked = !!ext.context.player.options.blockStreamFrom?.some((x) => x === ext.identifier);
+    // const extBlocked = !!ext.context.player.options.blockExtractors?.some((x) => x === ext.identifier);
+
+    return streamBlocked;
 }
 
 interface BridgedMetadata {

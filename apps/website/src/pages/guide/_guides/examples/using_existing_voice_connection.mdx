@@ -7,7 +7,7 @@ If you are manually handling voice connections, you may want to use it instead o
 ### joinVoiceChannel example
 
 ```js
-import { joinVoiceChannel } from '@discordjs/voice'
+import { joinVoiceChannel } from 'discord-voip'
 
 const connection = joinVoiceChannel(...);
 
@@ -22,7 +22,7 @@ const { track } = await queue.play(query, { options });
 ### getVoiceConnection example
 
 ```js
-import { getVoiceConnection } from '@discordjs/voice'
+import { getVoiceConnection } from 'discord-voip'
 
 const connection = getVoiceConnection(guildId);
 const queue = await player.nodes.create(guild, {...});

@@ -1,5 +1,5 @@
 import { Collection } from '@discord-player/utils';
-import { DiscordGatewayAdapterLibraryMethods, joinVoiceChannel, VoiceConnection } from '@discordjs/voice';
+import { DiscordGatewayAdapterLibraryMethods, joinVoiceChannel } from 'discord-voip';
 import { WorkerEvents } from '../utils/enums';
 import { AudioNode } from './AudioNode';
 import { notify } from './notifier';

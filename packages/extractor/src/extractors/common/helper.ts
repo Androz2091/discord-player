@@ -150,11 +150,11 @@ export async function makeYTSearch(query: string, opt: any) {
 }
 
 export async function makeSCSearch(query: string) {
-    const { soundcloud } = SoundCloudExtractor;
-    if (!soundcloud) return [];
+    const { instance } = SoundCloudExtractor;
+    if (!instance?.internal) return [];
 
     try {
-        const info = await soundcloud.tracks.searchV2({
+        const info = await instance.internal.tracks.searchV2({
             q: query,
             limit: 5
         });
@@ -162,7 +162,7 @@ export async function makeSCSearch(query: string) {
         return info.collection;
     } catch {
         // fallback
-        const info = await soundcloud.tracks.searchAlt(query);
+        const info = await instance.internal.tracks.searchAlt(query);
 
         return info;
     }

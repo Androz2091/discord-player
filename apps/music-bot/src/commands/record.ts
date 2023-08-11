@@ -1,4 +1,4 @@
-import { EndBehaviorType } from '@discordjs/voice';
+import { EndBehaviorType } from 'discord-voip';
 import { Command } from '@sapphire/framework';
 import type { GuildMember } from 'discord.js';
 import { createWriteStream } from 'fs';
@@ -49,12 +49,12 @@ export class RecordCommand extends Command {
 		});
 
 		try {
-			await queue.connect(member.voice.channelId, { deaf: false });
+			await queue.connect(member.voice.channelId!, { deaf: false });
 		} catch {
 			return interaction.followUp('Failed to connect to your channel');
 		}
 
-		const stream = queue.voiceReceiver?.recordUser(target.id, {
+		const stream = queue.voiceReceiver?.recordUser(target!.id, {
 			mode: 'pcm',
 			end: EndBehaviorType.AfterSilence
 		});
@@ -66,7 +66,7 @@ export class RecordCommand extends Command {
 			queue.delete();
 		});
 
-		const writer = stream.pipe(createWriteStream(`${this.container.client.recordingPath}/recording-${target.id}.pcm`));
+		const writer = stream.pipe(createWriteStream(`${this.container.client.recordingPath}/recording-${target!.id}.pcm`));
 		writer.once('finish', () => {
 			if (interaction.isRepliable()) interaction.followUp(`Finished writing audio!`);
 			queue.delete();

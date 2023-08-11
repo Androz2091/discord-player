@@ -19,8 +19,7 @@ export interface SoundCloudExtractorInit {
 
 export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> {
     public static identifier = 'com.discord-player.soundcloudextractor' as const;
-
-    public static soundcloud: import('soundcloud.ts').default | null = null;
+    public static instance: SoundCloudExtractor | null = null;
 
     public internal = new SoundCloud.default({
         clientId: this.options.clientId,
@@ -29,7 +28,11 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
     });
 
     public async activate(): Promise<void> {
-        SoundCloudExtractor.soundcloud = this.internal;
+        SoundCloudExtractor.instance = this;
+    }
+
+    public async deactivate(): Promise<void> {
+        SoundCloudExtractor.instance = null;
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {

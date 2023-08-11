@@ -62,8 +62,8 @@ __metadata:
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
     "@discord-player/utils": "workspace:^"
-    "@discordjs/voice": ^0.11.0
     discord-api-types: ^0.37.2
+    discord-voip: ^0.1.2
   languageName: unknown
   linkType: soft
 
@@ -128,7 +128,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@discord-player/ffmpeg@workspace:^, @discord-player/ffmpeg@workspace:packages/ffmpeg":
+"@discord-player/ffmpeg@^0.1.0, @discord-player/ffmpeg@workspace:^, @discord-player/ffmpeg@workspace:packages/ffmpeg":
   version: 0.0.0-use.local
   resolution: "@discord-player/ffmpeg@workspace:packages/ffmpeg"
   dependencies:
@@ -137,7 +137,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@discord-player/opus@workspace:packages/opus":
+"@discord-player/opus@^0.1.0, @discord-player/opus@workspace:packages/opus":
   version: 0.0.0-use.local
   resolution: "@discord-player/opus@workspace:packages/opus"
   dependencies:
@@ -166,7 +166,7 @@ __metadata:
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
     "@discord-player/utils": "workspace:^"
-    "@discordjs/voice": ^0.16.0
+    discord-voip: ^0.1.2
   languageName: unknown
   linkType: soft
 
@@ -276,32 +276,6 @@ __metadata:
   version: 0.3.1
   resolution: "@discordjs/util@npm:0.3.1"
   checksum: afd53427bc25c84e05cd34d6daf355cab14629a5f340d33528ea18d3a1177e777584bc5847cfcb7711c7387252c34917d749a0b1a91a99d2ce572878208212df
-  languageName: node
-  linkType: hard
-
-"@discordjs/voice@npm:0.16.0, @discordjs/voice@npm:^0.16.0, @discordjs/voice@npm:latest":
-  version: 0.16.0
-  resolution: "@discordjs/voice@npm:0.16.0"
-  dependencies:
-    "@types/ws": ^8.5.4
-    discord-api-types: ^0.37.37
-    prism-media: ^1.3.5
-    tslib: ^2.5.0
-    ws: ^8.13.0
-  checksum: 521824475c5257cf2098b7e7303e44c7906c2126603c7d85de14ad5f6ec12e61e459e18af92b97a11d504db91209aeb5b3e0c324b1f4f790c20e8db925fd66e9
-  languageName: node
-  linkType: hard
-
-"@discordjs/voice@npm:^0.11.0":
-  version: 0.11.0
-  resolution: "@discordjs/voice@npm:0.11.0"
-  dependencies:
-    "@types/ws": ^8.5.3
-    discord-api-types: ^0.36.2
-    prism-media: ^1.3.4
-    tslib: ^2.4.0
-    ws: ^8.8.1
-  checksum: f8d2bb597ccc073995aa493bff8889f7e663e072a82943aeb018137dd5e45d9ff515c8e820d257dbe5afa3d9947536ddc2c933a218feac2dbddc8ae37c6968b9
   languageName: node
   linkType: hard
 
@@ -4573,13 +4547,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:^0.36.2":
-  version: 0.36.2
-  resolution: "discord-api-types@npm:0.36.2"
-  checksum: 0275ac9db1bb8354ed3fedb37d7fa66d02b63aa6dc749add1e9ed52b428e94cb8b5111bd60e781cf0c2c5cdb0e948c4e83d00b74f500f1b0ac90ddc38a822798
-  languageName: node
-  linkType: hard
-
 "discord-api-types@npm:^0.36.3":
   version: 0.36.3
   resolution: "discord-api-types@npm:0.36.3"
@@ -4608,10 +4575,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:^0.37.37":
-  version: 0.37.37
-  resolution: "discord-api-types@npm:0.37.37"
-  checksum: 6b680f52c19aebf0dd1a714ef109a55bfe6786d10fd410f7bf1ee9244041f8b10ba81a988799a832382b34b2ae5ef3027ee31f6d1cf4555f1647252635c6eaaa
+"discord-api-types@npm:^0.37.50":
+  version: 0.37.52
+  resolution: "discord-api-types@npm:0.37.52"
+  checksum: ecd62d054bac7517e58c3229f4f126e88fc228acfadd42cd4121702ae0c60fab809955f195aa49efd381a00e6e99a9c1b86d90157a2cf04d632bf5b6ab5d4d94
   languageName: node
   linkType: hard
 
@@ -4623,10 +4590,10 @@ __metadata:
     "@discord-player/ffmpeg": "workspace:^"
     "@discord-player/tsconfig": "workspace:^"
     "@discord-player/utils": "workspace:^"
-    "@discordjs/voice": latest
     "@types/node": ^18.6.3
     "@types/ws": ^8.5.3
     discord-api-types: ^0.37.0
+    discord-voip: ^0.1.2
     discord.js: ^14.1.2
     libsodium-wrappers: ^0.7.10
     opusscript: ^0.0.8
@@ -4638,6 +4605,21 @@ __metadata:
     youtube-sr: 4.x
   languageName: unknown
   linkType: soft
+
+"discord-voip@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "discord-voip@npm:0.1.2"
+  dependencies:
+    "@discord-player/ffmpeg": ^0.1.0
+    "@discord-player/opus": ^0.1.0
+    "@types/ws": ^8.5.5
+    discord-api-types: ^0.37.50
+    prism-media: ^1.3.5
+    tslib: ^2.6.1
+    ws: ^8.13.0
+  checksum: 695928040b706e6830ba7dfbca9e4322b41689c83b5de1e459bce78b370294d6cd58e47eacbcaf159df04e13682d0eec94295c01d56ba4ac4a447e2e71824c1e
+  languageName: node
+  linkType: hard
 
 "discord.js@npm:^14.1.2":
   version: 14.1.2
@@ -7781,9 +7763,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mediaplex-android-arm64@npm:0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex-android-arm64@npm:0.0.2"
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
 "mediaplex-darwin-arm64@npm:0.0.1":
   version: 0.0.1
   resolution: "mediaplex-darwin-arm64@npm:0.0.1"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"mediaplex-darwin-arm64@npm:0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex-darwin-arm64@npm:0.0.2"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
@@ -7795,9 +7791,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mediaplex-darwin-universal@npm:0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex-darwin-universal@npm:0.0.2"
+  conditions: os=darwin
+  languageName: node
+  linkType: hard
+
 "mediaplex-darwin-x64@npm:0.0.1":
   version: 0.0.1
   resolution: "mediaplex-darwin-x64@npm:0.0.1"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"mediaplex-darwin-x64@npm:0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex-darwin-x64@npm:0.0.2"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
@@ -7809,9 +7819,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mediaplex-freebsd-x64@npm:0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex-freebsd-x64@npm:0.0.2"
+  conditions: os=freebsd & cpu=x64
+  languageName: node
+  linkType: hard
+
 "mediaplex-linux-arm-gnueabihf@npm:0.0.1":
   version: 0.0.1
   resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.1"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"mediaplex-linux-arm-gnueabihf@npm:0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.2"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
@@ -7837,6 +7861,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mediaplex-linux-x64-gnu@npm:0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex-linux-x64-gnu@npm:0.0.2"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
 "mediaplex-linux-x64-musl@npm:0.0.1":
   version: 0.0.1
   resolution: "mediaplex-linux-x64-musl@npm:0.0.1"
@@ -7851,6 +7882,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mediaplex-win32-arm64-msvc@npm:0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex-win32-arm64-msvc@npm:0.0.2"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
 "mediaplex-win32-ia32-msvc@npm:0.0.1":
   version: 0.0.1
   resolution: "mediaplex-win32-ia32-msvc@npm:0.0.1"
@@ -7858,9 +7896,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mediaplex-win32-ia32-msvc@npm:0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex-win32-ia32-msvc@npm:0.0.2"
+  conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
 "mediaplex-win32-x64-msvc@npm:0.0.1":
   version: 0.0.1
   resolution: "mediaplex-win32-x64-msvc@npm:0.0.1"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"mediaplex-win32-x64-msvc@npm:0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex-win32-x64-msvc@npm:0.0.2"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -7913,6 +7965,45 @@ __metadata:
     mediaplex-win32-x64-msvc:
       optional: true
   checksum: dd7abe43d09fdad2cc9913af8405e53a3a2dc7989987568564410625d852941b69543972994f8bf3de09f46d0f91df7e6bc6e044c9c6898be5e4a64ab6544b9b
+  languageName: node
+  linkType: hard
+
+"mediaplex@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "mediaplex@npm:0.0.2"
+  dependencies:
+    mediaplex-android-arm64: 0.0.2
+    mediaplex-darwin-arm64: 0.0.2
+    mediaplex-darwin-universal: 0.0.2
+    mediaplex-darwin-x64: 0.0.2
+    mediaplex-freebsd-x64: 0.0.2
+    mediaplex-linux-arm-gnueabihf: 0.0.2
+    mediaplex-linux-x64-gnu: 0.0.2
+    mediaplex-win32-arm64-msvc: 0.0.2
+    mediaplex-win32-ia32-msvc: 0.0.2
+    mediaplex-win32-x64-msvc: 0.0.2
+  dependenciesMeta:
+    mediaplex-android-arm64:
+      optional: true
+    mediaplex-darwin-arm64:
+      optional: true
+    mediaplex-darwin-universal:
+      optional: true
+    mediaplex-darwin-x64:
+      optional: true
+    mediaplex-freebsd-x64:
+      optional: true
+    mediaplex-linux-arm-gnueabihf:
+      optional: true
+    mediaplex-linux-x64-gnu:
+      optional: true
+    mediaplex-win32-arm64-msvc:
+      optional: true
+    mediaplex-win32-ia32-msvc:
+      optional: true
+    mediaplex-win32-x64-msvc:
+      optional: true
+  checksum: 89b210cbbcae00ab291b5fb61fd6b42a837fd21234b9e1629c8da10f2695ee119ad27537daa95947327e8190498ab587d44c7b4b5dde8f7f4d1029819f09dde9
   languageName: node
   linkType: hard
 
@@ -8617,7 +8708,6 @@ __metadata:
     "@discord-player/extractor": "workspace:^"
     "@discord-player/utils": "workspace:^"
     "@discordjs/opus": ^0.9.0
-    "@discordjs/voice": 0.16.0
     "@distube/ytdl-core": ^4.11.10
     "@sapphire/discord.js-utilities": ^6.0.3
     "@sapphire/duration": ^1.0.0
@@ -8635,6 +8725,7 @@ __metadata:
     colorette: ^2.0.19
     discord-api-types: ^0.37.35
     discord-player: "workspace:^"
+    mediaplex: ^0.0.2
     npm-run-all: ^4.1.5
     opusscript: ^0.0.8
     prettier: ^2.8.4
@@ -9590,27 +9681,6 @@ __metadata:
     ansi-styles: ^5.0.0
     react-is: ^17.0.1
   checksum: cf610cffcb793885d16f184a62162f2dd0df31642d9a18edf4ca298e909a8fe80bdbf556d5c9573992c102ce8bf948691da91bf9739bee0ffb6e79c8a8a6e088
-  languageName: node
-  linkType: hard
-
-"prism-media@npm:^1.3.4":
-  version: 1.3.4
-  resolution: "prism-media@npm:1.3.4"
-  peerDependencies:
-    "@discordjs/opus": ^0.8.0
-    ffmpeg-static: ^5.0.2 || ^4.2.7 || ^3.0.0 || ^2.4.0
-    node-opus: ^0.3.3
-    opusscript: ^0.0.8
-  peerDependenciesMeta:
-    "@discordjs/opus":
-      optional: true
-    ffmpeg-static:
-      optional: true
-    node-opus:
-      optional: true
-    opusscript:
-      optional: true
-  checksum: 703be28c87b4694714a52a0ea84516b19d2e62e510d0f204efc074b044ad93dde00241d4b4741c25aa2e27a00e3b472e60ad0f6c94e88710f0827dc63889373a
   languageName: node
   linkType: hard
 
@@ -11249,6 +11319,13 @@ __metadata:
   version: 2.5.0
   resolution: "tslib@npm:2.5.0"
   checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.6.1":
+  version: 2.6.1
+  resolution: "tslib@npm:2.6.1"
+  checksum: b0d176d176487905b66ae4d5856647df50e37beea7571c53b8d10ba9222c074b81f1410fb91da13debaf2cbc970663609068bdebafa844ea9d69b146527c38fe
   languageName: node
   linkType: hard
 

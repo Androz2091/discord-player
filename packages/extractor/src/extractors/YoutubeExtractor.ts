@@ -46,6 +46,10 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
         YoutubeExtractor.instance = this;
     }
 
+    public async deactivate(): Promise<void> {
+        YoutubeExtractor.instance = null;
+    }
+
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
         if (typeof query !== 'string') return false;
         // prettier-ignore
