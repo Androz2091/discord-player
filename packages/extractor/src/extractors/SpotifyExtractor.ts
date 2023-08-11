@@ -1,10 +1,10 @@
-import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
+import { ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import type { Readable } from 'stream';
-import { YoutubeExtractor } from './YoutubeExtractor';
-import { StreamFN, fetch, loadYtdl, pullYTMetadata } from './common/helper';
+import { StreamFN, fetch, pullYTMetadata } from './common/helper';
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
 import { SpotifyAPI } from '../internal';
 import { BridgeProvider } from './common/BridgeProvider';
+import { BridgedExtractor } from './BridgedExtractor';
 
 const re = /^(?:https:\/\/open\.spotify\.com\/(intl-([a-z]|[A-Z]){0,3}\/)?(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track)(?:[/:])([A-Za-z0-9]+).*$/;
 
@@ -15,10 +15,9 @@ export interface SpotifyExtractorInit {
     bridgeProvider?: BridgeProvider;
 }
 
-export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
+export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
     public static identifier = 'com.discord-player.spotifyextractor' as const;
     private _stream!: StreamFN;
-    private _isYtdl = false;
     private _lib!: Spotify;
     private _credentials = {
         clientId: this.options.clientId || process.env.DP_SPOTIFY_CLIENT_ID || null,
@@ -30,20 +29,11 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
         this._lib = spotify(fetch);
         if (this.internal.isTokenExpired()) await this.internal.requestToken();
 
-        // skip if we have a bridge provider
-        if (this.options.bridgeProvider) return;
-
         const fn = this.options.createStream;
-
         if (typeof fn === 'function') {
-            this._isYtdl = false;
             this._stream = (q: string) => {
                 return fn(this, q);
             };
-        } else {
-            const lib = await loadYtdl(this.context.player.options.ytdlOptions);
-            this._stream = lib.stream;
-            this._isYtdl = true;
         }
     }
 
@@ -352,42 +342,24 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
     }
 
     public async stream(info: Track): Promise<string | Readable> {
-        if (this.options.bridgeProvider) {
-            const provider = this.options.bridgeProvider;
-
-            const data = await provider.resolve(this, info);
-            if (!data) throw new Error('Failed to bridge this track');
-
-            info.setMetadata({
-                ...(info.metadata || {}),
-                bridge: data.data
-            });
-
-            return await provider.stream(data);
+        if (this._stream) {
+            const stream = await this._stream(info.url);
+            if (typeof stream === 'string') return stream;
+            return stream;
         }
 
-        if (!this._stream) {
-            throw new Error(`Could not initialize streaming api for '${this.constructor.name}'`);
-        }
+        const provider = this.options.bridgeProvider;
+        if (!provider) throw new Error(`Could not find bridge provider for '${this.constructor.name}'`);
 
-        let url = info.url;
+        const data = await provider.resolve(this, info);
+        if (!data) throw new Error('Failed to bridge this track');
 
-        if (this._isYtdl) {
-            if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
-            else {
-                const meta = await pullYTMetadata(this, info);
-                if (meta)
-                    info.setMetadata({
-                        ...(info.metadata || {}),
-                        bridge: meta
-                    });
-                const _url = meta?.url;
-                if (!_url) throw new Error('Failed to fetch resources for ytdl streaming');
-                info.raw.url = url = _url;
-            }
-        }
+        info.setMetadata({
+            ...(info.metadata || {}),
+            bridge: data.data
+        });
 
-        return this._stream(url);
+        return await provider.stream(data);
     }
 
     public parse(q: string) {

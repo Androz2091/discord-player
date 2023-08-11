@@ -26,8 +26,9 @@ export interface YoutubeExtractorInit {
 
 export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
     public static identifier = 'com.discord-player.youtubeextractor' as const;
-    private _stream!: StreamFN;
+    public _stream!: StreamFN;
     public _ytLibName!: string;
+    public static instance: YoutubeExtractor | null;
 
     public async activate() {
         const fn = this.options.createStream;
@@ -36,13 +37,13 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
             this._stream = (q: string) => {
                 return fn(this, q);
             };
-
-            return;
+        } else {
+            const { stream, name } = await loadYtdl(this.context.player.options.ytdlOptions);
+            this._stream = stream;
+            this._ytLibName = name;
         }
 
-        const { stream, name } = await loadYtdl(this.context.player.options.ytdlOptions);
-        this._stream = stream;
-        this._ytLibName = name;
+        YoutubeExtractor.instance = this;
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {

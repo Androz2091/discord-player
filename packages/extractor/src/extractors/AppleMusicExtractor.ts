@@ -1,8 +1,7 @@
 import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import { AppleMusic } from '../internal';
 import { Readable } from 'stream';
-import { YoutubeExtractor } from './YoutubeExtractor';
-import { StreamFN, loadYtdl, pullYTMetadata } from './common/helper';
+import { StreamFN, pullYTMetadata } from './common/helper';
 import { BridgeProvider } from './common/BridgeProvider';
 
 export interface AppleMusicExtractorInit {
@@ -13,26 +12,15 @@ export interface AppleMusicExtractorInit {
 export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> {
     public static identifier = 'com.discord-player.applemusicextractor' as const;
     private _stream!: StreamFN;
-    private _isYtdl = false;
 
     public async activate(): Promise<void> {
-        // skip if we have a bridge provider
-        if (this.options.bridgeProvider) return;
-
         const fn = this.options.createStream;
 
         if (typeof fn === 'function') {
-            this._isYtdl = false;
             this._stream = (q: string) => {
                 return fn(this, q);
             };
-
-            return;
         }
-
-        const lib = await loadYtdl(this.context.player.options.ytdlOptions);
-        this._stream = lib.stream;
-        this._isYtdl = true;
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
@@ -245,41 +233,23 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
     }
 
     public async stream(info: Track): Promise<string | Readable> {
-        if (this.options.bridgeProvider) {
-            const provider = this.options.bridgeProvider;
-
-            const data = await provider.resolve(this, info);
-            if (!data) throw new Error('Failed to bridge this track');
-
-            info.setMetadata({
-                ...(info.metadata || {}),
-                bridge: data.data
-            });
-
-            return await provider.stream(data);
+        if (this._stream) {
+            const stream = await this._stream(info.url);
+            if (typeof stream === 'string') return stream;
+            return stream;
         }
 
-        if (!this._stream) {
-            throw new Error(`Could not initialize streaming api for '${this.constructor.name}'`);
-        }
+        const provider = this.options.bridgeProvider;
+        if (!provider) throw new Error(`Could not find bridge provider for '${this.constructor.name}'`);
 
-        let url = info.url;
+        const data = await provider.resolve(this, info);
+        if (!data) throw new Error('Failed to bridge this track');
 
-        if (this._isYtdl) {
-            if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
-            else {
-                const meta = await pullYTMetadata(this, info);
-                if (meta)
-                    info.setMetadata({
-                        ...(info.metadata || {}),
-                        bridge: meta
-                    });
-                const _url = meta?.url;
-                if (!_url) throw new Error('Failed to fetch resources for ytdl streaming');
-                info.raw.url = url = _url;
-            }
-        }
+        info.setMetadata({
+            ...(info.metadata || {}),
+            bridge: data.data
+        });
 
-        return this._stream(url);
+        return await provider.stream(data);
     }
 }

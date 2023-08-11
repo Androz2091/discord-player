@@ -2,7 +2,8 @@ import { BaseExtractor, Track } from 'discord-player';
 import { SoundcloudTrackV2 } from 'soundcloud.ts';
 import { Video } from 'youtube-sr';
 import { SoundCloudExtractor } from '../SoundCloudExtractor';
-import { loadYtdl, pullSCMetadata, pullYTMetadata } from './helper';
+import { YouTubeExtractor } from '../YoutubeExtractor';
+import { pullSCMetadata, pullYTMetadata } from './helper';
 
 export enum BridgeSource {
     SoundCloud = 'soundcloud',
@@ -55,15 +56,22 @@ export class BridgeProvider {
     }
 
     public async stream(meta: BridgedMetadata) {
+        if (!meta.data) throw new Error('Could not find bridge metadata info.');
+
         if (meta.source === 'soundcloud') {
             if (!SoundCloudExtractor.soundcloud) {
-                throw new Error('Could not find soundcloud client, make sure SoundCloudExtractor is instantiated properly.');
+                throw new Error('Could not find soundcloud extractor, make sure SoundCloudExtractor is instantiated properly.');
             }
 
             return await SoundCloudExtractor.soundcloud.util.streamLink(meta.data as SoundcloudTrackV2, 'progressive');
+        } else if (meta.source === 'youtube') {
+            if (!YouTubeExtractor.instance) {
+                throw new Error('Could not find youtube extractor, make sure YouTubeExtractor is instantiated properly.');
+            }
+
+            return YouTubeExtractor.instance._stream((meta.data as Video).url);
         } else {
-            const ytdl = await loadYtdl();
-            return ytdl.stream((meta.data as Video).url);
+            throw new TypeError('invalid bridge source');
         }
     }
 }
@@ -72,3 +80,6 @@ interface BridgedMetadata {
     source: IBridgeSource;
     data: SoundcloudTrackV2 | Video | null;
 }
+
+export const defaultBridgeProvider = new BridgeProvider(BridgeSource.YouTube);
+export const createBridgeProvider = (source: BridgeSource) => new BridgeProvider(source);
