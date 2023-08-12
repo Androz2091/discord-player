@@ -124,7 +124,7 @@ export class AttachmentExtractor extends BaseExtractor {
                     const { result, stream } = await mediaplex.probeStream(
                         createReadStream(query, {
                             start: 0,
-                            end: 1024
+                            end: 1024 * 1024 * 10
                         })
                     );
 
