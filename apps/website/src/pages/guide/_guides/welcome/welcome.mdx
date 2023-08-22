@@ -135,7 +135,10 @@ Let's move on to the command part. You can define the command as per your requir
 <CH.Code>
 
 ```js play.js
+const { useMainPlayer } = require('discord-player');
+
 async function execute(interaction) {
+    const player = useMainPlayer();
     const channel = interaction.member.voice.channel;
     if (!channel) return interaction.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
     const query = interaction.options.getString('query', true); // we need input/query to play
