@@ -2,11 +2,13 @@ import DiscordInvite from '@/components/homepage/DiscordInvite';
 
 # Troubleshooting Common Issues
 
-## Cannot find `opusscript` or `@discordjs/opus` or `node-opus`
+## Cannot find `mediaplex` or `opusscript` or `@discordjs/opus` or `node-opus`
 
 To resolve this issue, you need to install the opus encoder. Use one of the following commands based on your preference:
 
 ```sh
+$ yarn add mediaplex
+# or
 $ yarn add @discordjs/opus
 # or
 $ yarn add opusscript
@@ -26,6 +28,7 @@ You have several options to get FFmpeg:
 
 -   Download it from the official FFmpeg website: [www.ffmpeg.org/download.html](https://www.ffmpeg.org/download.html)
 -   Use the Node Module (ffmpeg-static): [npmjs.com/package/ffmpeg-static](https://npmjs.com/package/ffmpeg-static) (Note: Using static binaries like `ffmpeg-static` is not recommended)
+-   You can dockerize your bot with a Node environment (Example : 18.16.0-bullseye) that can have ffmpeg installed.
 -   Alternatively, if you prefer using Avconv instead of FFmpeg, install it on your system or place the Avconv executable at the root of your project.
 
 ## Audio player stops immediately without errors
