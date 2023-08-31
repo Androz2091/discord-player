@@ -37,7 +37,7 @@
     "@discord-player/tsconfig": "workspace:^",
     "@types/node": "^18.11.18",
     "discord-player": "workspace:^",
-    "mediaplex": "^0.0.1",
+    "mediaplex": "^0.0.6",
     "play-dl": "^1.9.6",
     "youtube-ext": "^1.1.4",
     "yt-stream": "^1.4.7",
