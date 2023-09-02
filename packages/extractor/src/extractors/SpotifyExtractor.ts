@@ -50,10 +50,53 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
     }
 
     public async getRelatedTracks(track: Track) {
-        return await this.handle(track.author || track.title, {
-            type: QueryType.SPOTIFY_SEARCH,
-            requestedBy: track.requestedBy
+        const useSpotifyApi = true;
+
+        // if useSpotifyApi is false, we will use old way to retrieve related tracks
+        if (!useSpotifyApi) {
+            return await this.handle(track.author || track.title, {
+                type: QueryType.SPOTIFY_SEARCH,
+                requestedBy: track.requestedBy
+            });
+        }
+
+        const trackMetadata = track.metadata as { source: SpotifySong };
+        const trackId = trackMetadata.source.id;
+        const artistId = trackMetadata.source.artists[0].uri.split(':')[2];
+        if (!trackId || !artistId) return this.createResponse();
+
+        const data = await this.internal.getRelatedTracks(trackId, artistId, 5);
+        if (!data) return this.createResponse();
+
+        const response = data.map((spotifyData) => {
+            const relatedTrack: Track = new Track(this.context.player, {
+                title: spotifyData.title,
+                description: `${spotifyData.title} by ${spotifyData.artists.map((m) => m.name).join(', ')}`,
+                author: spotifyData.artists[0]?.name ?? 'Unknown Artist',
+                url: spotifyData.url,
+                thumbnail: spotifyData.thumbnail || 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+                duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration ?? 0)),
+                views: 0,
+                requestedBy: track.requestedBy,
+                source: 'spotify',
+                queryType: QueryType.SPOTIFY_SONG,
+                metadata: {
+                    source: spotifyData,
+                    bridge: null
+                },
+                requestMetadata: async () => {
+                    return {
+                        source: spotifyData,
+                        bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, relatedTrack)).data : await pullYTMetadata(this, relatedTrack)
+                    };
+                }
+            });
+
+            relatedTrack.extractor = this;
+
+            return relatedTrack;
         });
+        return this.createResponse(null, response);
     }
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {

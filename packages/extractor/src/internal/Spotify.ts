@@ -272,6 +272,42 @@ export class SpotifyAPI {
             return null;
         }
     }
+
+    public async getRelatedTracks(trackId: string, artistId: string, limit = 1) {
+        try {
+            // req
+            if (this.isTokenExpired()) await this.requestToken();
+            // failed
+            if (!this.accessToken) return null;
+
+            const res = await fetch(`${SP_BASE}/recommendations/?limit=${limit}&market=US&seed_tracks=${trackId}&seed_artists=${artistId}`, {
+                headers: {
+                    'User-Agent': UA,
+                    Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!res.ok) return null;
+
+            const data: { tracks: SpotifyTrack[] } = await res.json();
+            return data.tracks.map((m) => ({
+                id: m.id,
+                title: m.name,
+                duration: m.duration_ms,
+                artists: m.artists.map((m) => {
+                    return {
+                        name: m.name,
+                        uri: m.uri
+                    };
+                }),
+                url: m.external_urls?.spotify || `https://open.spotify.com/track/${m.id}`,
+                thumbnail: m.album.images?.[0]?.url || null
+            }));
+        } catch {
+            return null;
+        }
+    }
 }
 
 export interface SpotifyTrack {
@@ -283,7 +319,7 @@ export interface SpotifyTrack {
         }[];
     };
     artists: {
-        id: string;
+        uri: string;
         name: string;
     }[];
     duration_ms: number;
