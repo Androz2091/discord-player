@@ -72,6 +72,8 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
             case QueryType.YOUTUBE_PLAYLIST: {
                 const ytpl = await YouTube.getPlaylist(query, {
                     fetchAll: true,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    limit: (context.requestOptions as any)?.limit,
                     requestOptions: context.requestOptions as unknown as RequestInit
                 }).catch(Util.noop);
                 if (!ytpl) return this.emptyResponse();
