@@ -49,8 +49,8 @@ export const ShowcaseResource: IShowcase = {
         },
         {
             name: 'Botanique',
-            description: "A bot I made with 2-1-1-2, we're using discord-player for the music and for lyrics",
-            version: 'v6.2.1',
+            description: "Typescript bot running on Docker, using discord-player for music and lyrics.",
+            version: 'v6.6.3',
             url: 'https://git.mylloon.fr/ConfrerieDuKassoulait/Botanique'
         },
         {
@@ -141,7 +141,7 @@ export const ShowcaseResource: IShowcase = {
         {
             name: 'Cadence',
             description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source!',
-            version: 'v6.6.2',
+            version: 'v6.6.3',
             url: 'https://github.com/mariusbegby/cadence-discord-bot'
         }
     ].sort((a, b) => semver.rcompare(a.version, b.version)),
