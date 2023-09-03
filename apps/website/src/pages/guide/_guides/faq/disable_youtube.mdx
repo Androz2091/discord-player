@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 # Disabling YouTube Playback
 
 Streaming from youtube is against YouTube's terms of service. A lot of Discord Bots have been banned for streaming from YouTube. If you want to avoid getting banned, you should disable YouTube playback in your bot. Discord Player supports YouTube playback as long as you have Youtube Extractor registered. You can disable YouTube playback by not registering the Youtube Extractor.
@@ -10,79 +8,8 @@ Do not use
 await player.extractors.loadDefault();
 ```
 
-as it loads all the extractors. Instead, manually register the extractors you need.
+as it loads all the extractors. Instead, filter out youtube extractor and you are done!
 
 ```js
-import { SoundCloudExtractor, SpotifyExtractor } from '@discord-player/extractor';
-
-await player.extractors.register(SoundCloudExtractor, {});
-await player.extractors.register(SpotifyExtractor, {});
-// add more if needed
+await player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
 ```
-
-You can also disable YouTube extractor while using `await player.extractors.loadDefault();`.
-
-```js
-import { Player } from 'discord-player';
-import { YouTubeExtractor } from '@discord-player/extractor';
-
-const player = new Player(client, {
-    blockStreamFrom: [
-        // now your bot will no longer be able to use
-        // youtube extractor to play audio even if the track was
-        // extracted from youtube
-        YouTubeExtractor.identifier
-    ],
-    blockExtractors: [
-        // this will block the listed extractors from being
-        // able to query metadata (aka search results parsing)
-        // This example disables youtube search
-        YouTubeExtractor.identifier
-    ]
-});
-```
-
-See <Link className="text-teal-500 hover:underline" href="/guide/extractors/stream-sources">Stream Sources</Link> for more information.
-
-## Disable YouTube bridging
-
-Extractors like `SpotifyExtractor` and `AppleMusicExtractor` fall back to youtube streaming. In order to prevent this behavior, you can set a custom bridge source that points to `SoundCloud` instead.
-
-```js
-import { BridgeProvider, BridgeSource } from '@discord-player/extractor';
-
-const bridgeProvider = new BridgeProvider(BridgeSource.SoundCloud);
-
-const player = new Player(client, {
-    bridgeProvider
-});
-```
-
-In order to use `SoundCloud` as the `BridgeProvider` source, you need to register the `SoundCloudExtractor` first. See <Link className="text-teal-500 hover:underline" href="/guide/extractors/setting-bridge-source">Setting Bridge Source</Link> for more information.
-
-Together, it should look something like this
-
-```js
-import { Player } from 'discord-player';
-import { YouTubeExtractor, BridgeProvider, BridgeSource } from '@discord-player/extractor';
-
-const player = new Player(client, {
-    bridgeProvider: new BridgeProvider(BridgeSource.SoundCloud),
-    blockStreamFrom: [
-        // now your bot will no longer be able to use
-        // youtube extractor to play audio even if the track was
-        // extracted from youtube
-        YouTubeExtractor.identifier
-    ],
-    blockExtractors: [
-        // this will block the listed extractors from being
-        // able to query metadata (aka search results parsing)
-        // This example disables youtube search
-        YouTubeExtractor.identifier
-    ]
-});
-
-await player.extractors.loadDefault();
-```
-
-This will load all extractors and disable youtube completely.
