@@ -101,12 +101,13 @@ export async function loadYtdl(options?: any, force = false) {
                     true
                 );
 
-                const info = await dl.extractStreamInfo(query, opt);
+                const info = await dl.videoInfo(query, opt);
+                const videoFormats = await dl.getFormats(info.stream, opt);
 
-                const formats = info.formats
+                const formats = videoFormats
                     .filter((format) => {
                         if (!format.url) return false;
-                        if (format.isLive) return hlsRegex.test(format.url) && typeof format.bitrate === 'number';
+                        if (info.isLive) return hlsRegex.test(format.url) && typeof format.bitrate === 'number';
                         return typeof format.bitrate === 'number';
                     })
                     .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
