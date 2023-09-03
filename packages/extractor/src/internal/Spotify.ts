@@ -273,14 +273,14 @@ export class SpotifyAPI {
         }
     }
 
-    public async getRelatedTracks(trackId: string, artistId: string, limit = 1) {
+    public async getRelatedTracks(trackId: string, artistId: string) {
         try {
             // req
             if (this.isTokenExpired()) await this.requestToken();
             // failed
             if (!this.accessToken) return null;
 
-            const res = await fetch(`${SP_BASE}/recommendations/?limit=${limit}&market=US&seed_tracks=${trackId}&seed_artists=${artistId}`, {
+            const res = await fetch(`${SP_BASE}/recommendations/?limit=1&market=US&seed_tracks=${trackId}&seed_artists=${artistId}`, {
                 headers: {
                     'User-Agent': UA,
                     Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
@@ -291,6 +291,7 @@ export class SpotifyAPI {
             if (!res.ok) return null;
 
             const data: { tracks: SpotifyTrack[] } = await res.json();
+
             return data.tracks.map((m) => ({
                 id: m.id,
                 title: m.name,
@@ -319,8 +320,9 @@ export interface SpotifyTrack {
         }[];
     };
     artists: {
-        uri: string;
+        id: string;
         name: string;
+        uri: string;
     }[];
     duration_ms: number;
     explicit: boolean;
