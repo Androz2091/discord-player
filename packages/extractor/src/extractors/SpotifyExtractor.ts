@@ -1,4 +1,4 @@
-import { ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
+import { ExtractorInfo, ExtractorSearchContext, GuildQueueHistory, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import type { Readable } from 'stream';
 import { StreamFN, fetch, pullYTMetadata } from './common/helper';
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
@@ -49,13 +49,14 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
         ]).some((t) => t === type);
     }
 
-    public async getRelatedTracks(track: Track) {
+    public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
         const trackMetadata = track.metadata as { source: SpotifySong };
         const trackId = trackMetadata.source.id;
         const artistId = trackMetadata.source.artists[0].uri.split(':')[2];
+
         if (!trackId || !artistId) return this.createResponse();
 
-        const data = await this.internal.getRelatedTracks(trackId, artistId);
+        const data = await this.internal.getRelatedTracks(trackId, artistId, history);
         if (!data || data.length === 0) {
             return await this.handle(track.author || track.title, {
                 type: QueryType.SPOTIFY_SEARCH,

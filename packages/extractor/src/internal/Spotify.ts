@@ -1,3 +1,4 @@
+import { GuildQueueHistory } from 'discord-player';
 import { fetch, UA } from '../extractors';
 
 const SP_ANON_TOKEN_URL = 'https://open.spotify.com/get_access_token?reason=transport&productType=embed';
@@ -273,14 +274,47 @@ export class SpotifyAPI {
         }
     }
 
-    public async getRelatedTracks(trackId: string, artistId: string) {
+    public async getRelatedTracks(trackId: string, artistId: string, history: GuildQueueHistory) {
         try {
             // req
             if (this.isTokenExpired()) await this.requestToken();
             // failed
             if (!this.accessToken) return null;
 
-            const res = await fetch(`${SP_BASE}/recommendations/?limit=1&market=US&seed_tracks=${trackId}&seed_artists=${artistId}`, {
+            let trackIds: string[] = [];
+            let artistIds: string[] = [];
+
+            if (history) {
+                const spotifyHistoryTracks = history.tracks.data.filter((m) => m.queryType === 'spotifySong').slice(0, 5);
+                trackIds = spotifyHistoryTracks.map((m) => (m.metadata as { source: SpotifyTrack }).source.id);
+                artistIds = spotifyHistoryTracks.map((m) => (m.metadata as { source: SpotifyTrack }).source.artists[0].uri.split(':')[2]);
+            } else {
+                trackIds = [trackId];
+                artistIds = [artistId];
+            }
+
+            if (!trackIds || !artistIds) return null;
+
+            // Spotify recommendations API only allows 5 seeds
+            // This will limit to 5 seeds, prioritizing artist ids over track ids
+            if (trackIds.length + artistIds.length > 5) {
+                const diff = trackIds.length + artistIds.length - 5;
+                if (trackIds.length > diff) {
+                    trackIds = trackIds.slice(0, trackIds.length - diff);
+                } else {
+                    const remainingDiff = diff - trackIds.length;
+                    trackIds = [];
+                    artistIds = artistIds.slice(0, artistIds.length - remainingDiff);
+                }
+            }
+
+            // Ensure at least 1 track id
+            if (trackIds.length === 0 && artistIds.length > 1) {
+                artistIds = artistIds.slice(0, artistIds.length - 1);
+                trackIds = [trackId];
+            }
+
+            const res = await fetch(`${SP_BASE}/recommendations/?limit=1&market=US&seed_tracks=${trackIds.join(',')}&seed_artists=${artistIds.join(',')}`, {
                 headers: {
                     'User-Agent': UA,
                     Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
