@@ -51,7 +51,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
 
     public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
         if (track.queryType === QueryType.SOUNDCLOUD_TRACK) {
-            const data = await this.internal.tracks.relatedV2(track.url, 10);
+            const data = await this.internal.tracks.relatedV2(track.url, 1);
 
             const unique = data.filter((t) => !history.tracks.some((h) => h.url === t.permalink_url));
 
