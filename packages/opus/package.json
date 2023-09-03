@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/opus",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A complete framework to simplify the implementation of music commands for Discord bots",
   "keywords": [
     "discord-player",
@@ -36,6 +36,7 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "devDependencies": {
-    "@discord-player/tsconfig": "workspace:^"
+    "@discord-player/tsconfig": "workspace:^",
+    "@evan/opus": "^1.0.2"
   }
 }

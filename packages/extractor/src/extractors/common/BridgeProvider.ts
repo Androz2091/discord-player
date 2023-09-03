@@ -6,11 +6,21 @@ import { YouTubeExtractor } from '../YoutubeExtractor';
 import { pullSCMetadata, pullYTMetadata } from './helper';
 
 export enum BridgeSource {
+    /**
+     * Automatically resolve the bridge source
+     */
+    Auto = 'auto',
+    /**
+     * Use SoundCloud as the bridge source
+     */
     SoundCloud = 'soundcloud',
+    /**
+     * Use YouTube as the bridge source
+     */
     YouTube = 'youtube'
 }
 
-export type IBridgeSource = 'soundcloud' | 'youtube';
+export type IBridgeSource = 'soundcloud' | 'youtube' | 'auto';
 
 export class BridgeProvider {
     public bridgeSource: BridgeSource = BridgeSource.SoundCloud;
@@ -29,6 +39,10 @@ export class BridgeProvider {
             case BridgeSource.YouTube:
                 this.bridgeSource = BridgeSource.YouTube;
                 break;
+            case 'auto':
+            case BridgeSource.Auto:
+                this.bridgeSource = BridgeSource.Auto;
+                break;
             default:
                 throw new TypeError('invalid bridge source');
         }
@@ -42,8 +56,28 @@ export class BridgeProvider {
         return this.bridgeSource === BridgeSource.YouTube;
     }
 
+    public isAuto() {
+        return this.bridgeSource === BridgeSource.Auto;
+    }
+
+    public resolveProvider() {
+        if (this.isAuto()) {
+            if (YouTubeExtractor.instance && !isExtDisabled(YouTubeExtractor.instance)) {
+                return BridgeSource.YouTube;
+            }
+
+            if (SoundCloudExtractor.instance && !isExtDisabled(SoundCloudExtractor.instance)) {
+                return BridgeSource.SoundCloud;
+            }
+
+            throw new Error('Could not find any available extractors for automatic bridging.');
+        }
+
+        return this.bridgeSource;
+    }
+
     public async resolve(ext: BaseExtractor, track: Track) {
-        const isSoundcloud = this.isSoundCloud();
+        const isSoundcloud = this.resolveProvider() === BridgeSource.SoundCloud;
         const bridgefn = isSoundcloud ? pullSCMetadata : pullYTMetadata;
 
         // patch query
@@ -77,7 +111,7 @@ export class BridgeProvider {
                 throw new Error('Cannot stream, YouTubeExtractor is disabled.');
             }
 
-            return YouTubeExtractor.instance._stream((meta.data as Video).url);
+            return YouTubeExtractor.instance._stream((meta.data as Video).url, YouTubeExtractor.instance);
         } else {
             throw new TypeError('invalid bridge source');
         }
@@ -96,5 +130,5 @@ interface BridgedMetadata {
     data: SoundcloudTrackV2 | Video | null;
 }
 
-export const defaultBridgeProvider = new BridgeProvider(BridgeSource.YouTube);
+export const defaultBridgeProvider = new BridgeProvider(BridgeSource.Auto);
 export const createBridgeProvider = (source: BridgeSource) => new BridgeProvider(source);

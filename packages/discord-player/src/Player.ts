@@ -14,6 +14,7 @@ import { QueryCache } from './utils/QueryCache';
 import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
 import { Exceptions } from './errors';
 import { defaultVoiceStateHandler } from './DefaultVoiceStateHandler';
+import { IPRotator } from './utils/IPRotator';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -51,6 +52,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     public readonly voiceUtils = new VoiceUtils(this);
     public extractors = new ExtractorExecutionContext(this);
     public events = new PlayerEventsEmitter<GuildQueueEvents>(['error', 'playerError']);
+    public routePlanner: IPRotator | null = null;
 
     /**
      * Creates new Discord Player
@@ -80,7 +82,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             blockExtractors: [],
             blockStreamFrom: [],
             connectionTimeout: 20000,
-            smoothVolume: true,
             lagMonitor: 30000,
             queryCache: options.queryCache === null ? null : options.queryCache || new QueryCache(this),
             useLegacyFFmpeg: false,
@@ -101,6 +102,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                     if (this.hasDebugger) this.debug(`[Lag Monitor] Event loop latency: ${this.#lastLatency}ms`);
                 }, 0).unref();
             }, this.options.lagMonitor).unref();
+        }
+
+        if (this.options.ipconfig) {
+            this.routePlanner = new IPRotator(this.options.ipconfig);
         }
 
         _internals.addPlayer(this);
@@ -473,7 +478,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         const res = await extractor
             .handle(query, {
                 type: queryType as SearchQueryType,
-                requestedBy: options.requestedBy as User
+                requestedBy: options.requestedBy as User,
+                requestOptions: options.requestOptions
             })
             .catch(() => null);
 
@@ -503,7 +509,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 (await ext.validate(query)) &&
                 ext.handle(query, {
                     type: queryType as SearchQueryType,
-                    requestedBy: options.requestedBy as User
+                    requestedBy: options.requestedBy as User,
+                    requestOptions: options.requestOptions
                 })
         );
         if (!result?.result) {

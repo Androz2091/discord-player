@@ -6,7 +6,6 @@ import { envParseArray } from '@skyra/env-utilities';
 import * as Permissions from './lib/perms';
 import path from 'path';
 import { mkdirSync, existsSync } from 'fs';
-import { BridgeProvider, BridgeSource } from '@discord-player/extractor';
 
 export class KarasuClient extends SapphireClient {
 	public player: Player;
@@ -30,10 +29,7 @@ export class KarasuClient extends SapphireClient {
 		this.dev = Emojis;
 		this.perms = Permissions;
 
-		// const bridgeProvider = new BridgeProvider(BridgeSource.SoundCloud);
-
 		this.player = new Player(this as any, {
-			// bridgeProvider,
 			ytdlOptions: {
 				requestOptions: {
 					headers: {

@@ -15,9 +15,9 @@
     "build:check": "turbo run build:check --color",
     "lint": "turbo run lint --color",
     "format": "prettier --write \"{packages,scripts,examples,apps}/**/*.{js,ts,mjs,mts,jsx,tsx}\"",
-    "dev:web": "turbo run dev --filter=@discord-player/website",
-    "build:web": "turbo run build --filter=@discord-player/website",
-    "start:web": "turbo run preview --filter=@discord-player/website",
+    "dev:web": "turbo run dev --filter=website",
+    "build:web": "turbo run build --filter=website",
+    "start:web": "turbo run preview --filter=website",
     "test": "turbo run test --color",
     "bot": "yarn workspace music-bot start"
   },

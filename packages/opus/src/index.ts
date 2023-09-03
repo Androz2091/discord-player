@@ -1,6 +1,6 @@
 // based on https://github.com/amishshah/prism-media/blob/4ef1d6f9f53042c085c1f68627e889003e248d77/src/opus/Opus.js
 
-import { Transform } from 'stream';
+import { Transform, type TransformCallback } from 'stream';
 
 export type IEncoder = {
     new (rate: number, channels: number, application: number): {
@@ -65,8 +65,64 @@ export const OPUS_MOD_REGISTRY: IMod[] = [
         }
     ],
     ['@discordjs/opus', (opus) => ({ Encoder: opus.OpusEncoder })],
-    ['node-opus', (opus) => ({ Encoder: opus.OpusEncoder })],
-    ['opusscript', (opus) => ({ Encoder: opus })]
+    ['opusscript', (opus) => ({ Encoder: opus })],
+    [
+        '@evan/opus',
+        (opus) => {
+            const { Encoder, Decoder } = opus as typeof import('@evan/opus');
+
+            class OpusEncoder {
+                private _encoder!: InstanceType<typeof Encoder> | null;
+                private _decoder!: InstanceType<typeof Decoder> | null;
+
+                public constructor(private _rate: number, private _channels: number, private _application: number) {}
+
+                private _ensureEncoder() {
+                    if (this._encoder) return;
+                    this._encoder = new Encoder({
+                        channels: this._channels as 2,
+                        sample_rate: this._rate as 48000,
+                        application: (<const>{
+                            2048: 'voip',
+                            2049: 'audio',
+                            2051: 'restricted_lowdelay'
+                        })[this._application]
+                    });
+                }
+
+                private _ensureDecoder() {
+                    if (this._decoder) return;
+                    this._decoder = new Decoder({
+                        channels: this._channels as 2,
+                        sample_rate: this._rate as 48000
+                    });
+                }
+
+                public encode(buffer: Buffer) {
+                    this._ensureEncoder();
+                    return Buffer.from(this._encoder!.encode(buffer));
+                }
+
+                public decode(buffer: Buffer) {
+                    this._ensureDecoder();
+                    return Buffer.from(this._decoder!.decode(buffer));
+                }
+
+                public applyEncoderCTL(ctl: number, value: number) {
+                    this._ensureEncoder();
+                    this._encoder!.ctl(ctl, value);
+                }
+
+                public delete() {
+                    this._encoder = null;
+                    this._decoder = null;
+                }
+            }
+
+            return { Encoder: OpusEncoder };
+        }
+    ],
+    ['node-opus', (opus) => ({ Encoder: opus.OpusEncoder })]
 ];
 
 let Opus: { Encoder?: IEncoder; name?: string } = {};
@@ -143,7 +199,7 @@ export class OpusStream extends Transform {
     }
 
     /**
-     * Returns the Opus module being used - `opusscript`, `node-opus`, or `@discordjs/opus`.
+     * Returns the Opus module being used - `mediaplex`, `opusscript`, `node-opus`, or `@discordjs/opus`.
      * @type {string}
      * @readonly
      * @example
@@ -194,7 +250,7 @@ export class OpusStream extends Transform {
      * @private
      */
     _cleanup() {
-        if (Opus.name === 'opusscript' && this.encoder!) this.encoder!.delete!();
+        if (typeof this.encoder?.delete === 'function') this.encoder!.delete!();
         this.encoder = null;
     }
 }
@@ -211,7 +267,7 @@ export class OpusStream extends Transform {
  * // encoder will now output Opus-encoded audio packets
  */
 export class OpusEncoder extends OpusStream {
-    _buffer: Buffer | null = Buffer.alloc(0);
+    _buffer: Buffer = Buffer.allocUnsafe(0);
 
     /**
      * Creates a new Opus encoder stream.
@@ -226,21 +282,30 @@ export class OpusEncoder extends OpusStream {
         super(options);
     }
 
-    _transform(chunk: Buffer, encoding: BufferEncoding, done: () => void) {
-        this._buffer = Buffer.concat([this._buffer!, chunk]);
-        let n = 0;
-        while (this._buffer.length >= this._required * (n + 1)) {
-            const buf = this._encode(this._buffer.slice(n * this._required, (n + 1) * this._required));
-            this.push(buf);
-            n++;
+    public _transform(newChunk: Buffer, encoding: BufferEncoding, done: TransformCallback): void {
+        const chunk = Buffer.concat([this._buffer, newChunk]);
+
+        let i = 0;
+        while (chunk.length >= i + this._required) {
+            const pcm = chunk.slice(i, i + this._required);
+            let opus: Buffer | undefined;
+            try {
+                opus = this.encoder!.encode(pcm);
+            } catch (error) {
+                done(error as Error);
+                return;
+            }
+            this.push(opus);
+            i += this._required;
         }
-        if (n > 0) this._buffer = this._buffer.slice(n * this._required);
-        return done();
+
+        if (i > 0) this._buffer = chunk.slice(i);
+        done();
     }
 
     _destroy(err: Error, cb: (err: Error | null) => void) {
         super._destroy(err, cb);
-        this._buffer = null;
+        this._buffer = Buffer.allocUnsafe(0);
     }
 }
 

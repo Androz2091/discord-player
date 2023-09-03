@@ -381,7 +381,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
 
     public async stream(info: Track): Promise<string | Readable> {
         if (this._stream) {
-            const stream = await this._stream(info.url);
+            const stream = await this._stream(info.url, this);
             if (typeof stream === 'string') return stream;
             return stream;
         }

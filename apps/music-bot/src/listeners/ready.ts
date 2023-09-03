@@ -1,6 +1,5 @@
 import { Listener } from '@sapphire/framework';
 import { useMainPlayer } from 'discord-player';
-import { YouTubeExtractor } from '@discord-player/extractor';
 
 export class UserEvent extends Listener {
 	public constructor(context: Listener.Context, options: Listener.Options) {
@@ -15,7 +14,7 @@ export class UserEvent extends Listener {
 
 		const player = useMainPlayer();
 		if (player) {
-			await player.extractors.loadDefault();
+			await player.extractors.loadDefault(/* (ext) => ext !== 'YouTubeExtractor' */);
 			console.log(player.scanDeps());
 		}
 	}

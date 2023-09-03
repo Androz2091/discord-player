@@ -4,6 +4,7 @@ import { Track } from '../fabric/Track';
 import { Playlist } from '../fabric/Playlist';
 import { downloadOptions } from 'ytdl-core';
 import { QueryCacheProvider } from '../utils/QueryCache';
+import type { IPRotationConfig } from '../utils/IPRotator';
 
 // @ts-ignore
 import type { BridgeProvider } from '@discord-player/extractor';
@@ -53,6 +54,7 @@ export interface QueueFilters {
     dim?: boolean;
     earrape?: boolean;
     lofi?: boolean;
+    silenceremove?: boolean;
 }
 
 /**
@@ -227,12 +229,15 @@ export type QueryExtractorSearch = `ext:${string}`;
  * @property {string[]} [blockExtractors[]] List of the extractors to block
  * @property {boolean} [ignoreCache] If it should ignore query cache lookup
  * @property {SearchQueryType} [fallbackSearchEngine='autoSearch'] Fallback search engine to use
+ * @property {any} [requestOptions] The request options
  */
 export interface SearchOptions {
     requestedBy?: UserResolvable;
     searchEngine?: SearchQueryType | QueryExtractorSearch;
     blockExtractors?: string[];
     ignoreCache?: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    requestOptions?: any;
     fallbackSearchEngine?: (typeof QueryType)[keyof typeof QueryType];
 }
 
@@ -350,6 +355,7 @@ export interface PlaylistJSON {
  * @property {boolean} [ignoreInstance] Ignore player instance
  * @property {boolean} [useLegacyFFmpeg] Use legacy version of ffmpeg
  * @property {BridgeProvider} [bridgeProvider] Set bridge provider
+ * @property {object} [ipconfig] IP rotator config
  */
 export interface PlayerInitOptions {
     ytdlOptions?: downloadOptions;
@@ -358,8 +364,10 @@ export interface PlayerInitOptions {
     lockVoiceStateHandler?: boolean;
     blockExtractors?: string[];
     blockStreamFrom?: string[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     queryCache?: QueryCacheProvider<any> | null;
     ignoreInstance?: boolean;
     useLegacyFFmpeg?: boolean;
     bridgeProvider?: BridgeProvider;
+    ipconfig?: IPRotationConfig;
 }

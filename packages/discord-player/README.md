@@ -41,17 +41,33 @@ $ npm install --save @discord-player/extractor # extractors provider
 
 #### Opus Library
 
-Since Discord only accepts opus packets, you need to install the opus library. Choose one of the following options:
+Since Discord only accepts opus packets, you need to install the opus library. Discord Player supports multiple opus libraries, such as:
+
+-   [mediaplex](https://npmjs.com/mediaplex)
+-   [@discordjs/opus](https://npmjs.com/@discordjs/opus)
+-   [opusscript](https://npmjs.com/opusscript)
+-   [@evan/opus](https://npmjs.com/@evan/opus)
+-   [node-opus](https://npmjs.com/node-opus)
+
+Among these, mediaplex is the recommended library as it adds more functionalities to discord-player than just libopus interface. You can install opus libraries by running:
 
 ```bash
+$ npm install --save mediaplex
+# or
 $ npm install --save @discordjs/opus
 # or
 $ npm install --save opusscript
+# or
+$ npm install --save @evan/opus
+# or
+$ npm install --save node-opus
 ```
 
 #### FFmpeg or Avconv
 
-FFmpeg or Avconv is required for media transcoding. You can obtain it from [https://ffmpeg.org](https://ffmpeg.org) or install it via npm (we recommend against using ffmpeg-static or other binaries):
+FFmpeg or Avconv is required for media transcoding. You can obtain it from [https://ffmpeg.org](https://ffmpeg.org) or via npm.
+
+> We do not recommend installing ffmpeg via npm because binaries pulled from npm is known to be unstable. It is recommended to install it from the official source.
 
 ```bash
 $ npm install --save ffmpeg-static
@@ -67,17 +83,21 @@ $ npm install --save ffmpeg-binaries
 
 #### Streaming Library
 
-If you want to add support for YouTube playback, you need to install a streaming library. Choose one of the following options:
+YouTube streaming is not supported without installing one of the following package. If you want to add support for YouTube playback, you need to install a streaming library. This step is not needed if you do not plan on using youtube source.
 
 ```bash
-$ npm install --save ytdl-core
+$ npm install --save youtube-ext
 # or
 $ npm install --save play-dl
 # or
 $ npm install --save @distube/ytdl-core
 # or
 $ npm install --save yt-stream
+# or
+$ npm install --save ytdl-core
 ```
+
+We recommend using `youtube-ext` for better performance.
 
 Once you have completed these installations, let's proceed with writing a simple music bot.
 
@@ -85,11 +105,8 @@ Once you have completed these installations, let's proceed with writing a simple
 
 Let's create a main player instance. This instance handles and keeps track of all the queues and its components.
 
-```js
+```js index.js
 const { Player } = require('discord-player');
-
-// get some extractors if you want to handpick sources
-const { SpotifyExtractor, SoundCloudExtractor } = require('@discord-player/extractor');
 
 const client = new Discord.Client({
     // Make sure you have 'GuildVoiceStates' intent enabled
@@ -99,17 +116,13 @@ const client = new Discord.Client({
 // this is the entrypoint for discord-player based application
 const player = new Player(client);
 
-// This method will load all the extractors from the @discord-player/extractor package
-await player.extractors.loadDefault();
-
-// If you dont want to use all of the extractors and register only the required ones manually, use
-await player.extractors.register(SpotifyExtractor, {});
-await player.extractors.register(SoundCloudExtractor, {});
+// Now, lets load all the default extractors, except 'YouTubeExtractor'. You can remove the filter if you want to load all the extractors.
+await player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
 ```
 
 Discord Player is mostly events based. It emits different events based on the context and actions. Let's add a basic event listener to notify the user when a track starts to play:
 
-```js
+```js index.js
 // this event is emitted whenever discord-player starts to play a track
 player.events.on('playerStart', (queue, track) => {
     // we will later define queue.metadata object while creating the queue
@@ -117,10 +130,13 @@ player.events.on('playerStart', (queue, track) => {
 });
 ```
 
-Let's move on to the command part. You can define the command as per your requirements. We will only focus on the command handler part:
+Let's move on to the command part. You can define the command as per your requirements. We will only focus on the command part:
 
-```js
-async function execute(interaction) {
+```js play.js
+const { useMainPlayer } = require('discord-player');
+
+export async function execute(interaction) {
+    const player = useMainPlayer();
     const channel = interaction.member.voice.channel;
     if (!channel) return interaction.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
     const query = interaction.options.getString('query', true); // we need input/query to play

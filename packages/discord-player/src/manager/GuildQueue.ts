@@ -977,11 +977,11 @@ export class GuildQueue<Meta = unknown> {
         try {
             if (this.hasDebugger) this.debug(`Autoplay >> Finding related tracks for Track ${track.title} (${track.url}) [ext:${track.extractor?.identifier || 'N/A'}]`);
             const tracks =
-                (await track.extractor?.getRelatedTracks(track))?.tracks ||
+                (await track.extractor?.getRelatedTracks(track, this.history))?.tracks ||
                 (
                     await this.player.extractors.run(async (ext) => {
                         if (this.hasDebugger) this.debug(`Autoplay >> Querying extractor ${ext.identifier}`);
-                        const res = await ext.getRelatedTracks(track);
+                        const res = await ext.getRelatedTracks(track, this.history);
                         if (!res.tracks.length) {
                             if (this.hasDebugger) this.debug(`Autoplay >> Extractor ${ext.identifier} failed to provide results.`);
                             return false;
