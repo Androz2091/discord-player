@@ -56,7 +56,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
         if (!trackId || !artistId) return this.createResponse();
 
         const data = await this.internal.getRelatedTracks(trackId, artistId);
-        if (!data) {
+        if (!data || data.length === 0) {
             return await this.handle(track.author || track.title, {
                 type: QueryType.SPOTIFY_SEARCH,
                 requestedBy: track.requestedBy
