@@ -142,6 +142,7 @@ __metadata:
   resolution: "@discord-player/opus@workspace:packages/opus"
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
+    "@evan/opus": ^1.0.2
   languageName: unknown
   linkType: soft
 
@@ -745,6 +746,13 @@ __metadata:
   version: 8.43.0
   resolution: "@eslint/js@npm:8.43.0"
   checksum: 580487a09c82ac169744d36e4af77bc4f582c9a37749d1e9481eb93626c8f3991b2390c6e4e69e5642e3b6e870912b839229a0e23594fae348156ea5a8ed7e2e
+  languageName: node
+  linkType: hard
+
+"@evan/opus@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@evan/opus@npm:1.0.2"
+  checksum: 5473155e79eb99a6bf5d2b35cbad5b2ff687e9aa5b1e2a7c15bd701eb3eb3986b6452079650823e8211727d8f033a6be86484e10c87f7eef5ebbbbfb7e10c928
   languageName: node
   linkType: hard
 

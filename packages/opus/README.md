@@ -13,6 +13,7 @@ Additionally, install one of the following opus libraries:
 -   `mediaplex`
 -   `@discordjs/opus`
 -   `opusscript`
+-   `@evan/opus`
 -   `node-opus`
 
 If one does not work, feel free to switch to another.
