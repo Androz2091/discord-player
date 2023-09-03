@@ -5,6 +5,7 @@ import {
     BaseExtractor,
     ExtractorInfo,
     ExtractorSearchContext,
+    type GuildQueueHistory,
     Playlist,
     QueryType,
     SearchQueryType,
@@ -191,7 +192,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
         });
     }
 
-    public async getRelatedTracks(track: Track) {
+    public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
         let info: Video[] | void;
 
         if (YoutubeExtractor.validateURL(track.url))
@@ -209,7 +210,9 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
             return this.createResponse();
         }
 
-        const similar = info.map((video) => {
+        const unique = info.filter((t) => !history.tracks.some((x) => x.url === t.url));
+
+        const similar = (unique.length > 0 ? unique : info).map((video) => {
             const t = new Track(this.context.player, {
                 title: video.title!,
                 url: `https://www.youtube.com/watch?v=${video.id}`,
@@ -239,7 +242,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
         return { playlist: null, tracks: [] };
     }
 
-    public async stream(info: Track) {
+    public async stream(info: Track): Promise<Readable | string> {
         if (!this._stream) {
             throw new Error(`Could not find youtube streaming library. Install one of ${YouTubeLibs.join(', ')}`);
         }
@@ -247,7 +250,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
         let url = info.url;
         url = url.includes('youtube.com') ? url.replace(/(m(usic)?|gaming)\./, '') : url;
 
-        return this._stream(url);
+        return this._stream(url, this);
     }
 
     public static validateURL(link: string) {

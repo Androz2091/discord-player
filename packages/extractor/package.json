@@ -39,7 +39,7 @@
     "discord-player": "workspace:^",
     "mediaplex": "^0.0.6",
     "play-dl": "^1.9.6",
-    "youtube-ext": "^1.1.4",
+    "youtube-ext": "^1.1.10",
     "yt-stream": "^1.4.7",
     "ytdl-core": "^4.11.4"
   },

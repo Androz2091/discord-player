@@ -1,4 +1,4 @@
-import { ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
+import { ExtractorInfo, ExtractorSearchContext, GuildQueueHistory, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import { AppleMusic } from '../internal';
 import { Readable } from 'stream';
 import { StreamFN, pullYTMetadata } from './common/helper';
@@ -36,12 +36,16 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
         ]).some((t) => t === type);
     }
 
-    public async getRelatedTracks(track: Track) {
-        if (track.queryType === QueryType.APPLE_MUSIC_SONG)
-            return this.handle(track.author || track.title, {
+    public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
+        if (track.queryType === QueryType.APPLE_MUSIC_SONG) {
+            const data = await this.handle(track.author || track.title, {
                 type: QueryType.APPLE_MUSIC_SEARCH,
                 requestedBy: track.requestedBy
             });
+
+            const unique = data.tracks.filter((t) => !history.tracks.some((h) => h.url === t.url));
+            return unique.length > 0 ? this.createResponse(null, unique) : this.createResponse();
+        }
 
         return this.createResponse();
     }
@@ -235,7 +239,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
 
     public async stream(info: Track): Promise<string | Readable> {
         if (this._stream) {
-            const stream = await this._stream(info.url);
+            const stream = await this._stream(info.url, this);
             if (typeof stream === 'string') return stream;
             return stream;
         }

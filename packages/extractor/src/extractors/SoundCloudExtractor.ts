@@ -3,6 +3,7 @@ import {
     BaseExtractor,
     ExtractorInfo,
     ExtractorSearchContext,
+    type GuildQueueHistory,
     Playlist,
     QueryType,
     SearchQueryType,
@@ -48,12 +49,36 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
         ] as SearchQueryType[]).some((r) => r === type);
     }
 
-    public async getRelatedTracks(track: Track) {
-        if (track.queryType === QueryType.SOUNDCLOUD_TRACK)
-            return this.handle(track.author || track.title, {
-                requestedBy: track.requestedBy,
-                type: QueryType.SOUNDCLOUD_SEARCH
-            });
+    public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
+        if (track.queryType === QueryType.SOUNDCLOUD_TRACK) {
+            const data = await this.internal.tracks.relatedV2(track.url, 10);
+
+            const unique = data.filter((t) => !history.tracks.some((h) => h.url === t.permalink_url));
+
+            return this.createResponse(
+                null,
+                (unique.length > 0 ? unique : data).map(
+                    (trackInfo) =>
+                        new Track(this.context.player, {
+                            title: trackInfo.title,
+                            url: trackInfo.permalink_url,
+                            duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
+                            description: trackInfo.description ?? '',
+                            thumbnail: trackInfo.artwork_url,
+                            views: trackInfo.playback_count,
+                            author: trackInfo.user.username,
+                            requestedBy: track.requestedBy,
+                            source: 'soundcloud',
+                            engine: trackInfo,
+                            queryType: QueryType.SOUNDCLOUD_TRACK,
+                            metadata: trackInfo,
+                            requestMetadata: async () => {
+                                return trackInfo;
+                            }
+                        })
+                )
+            );
+        }
 
         return this.createResponse();
     }
@@ -140,6 +165,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                 const resolvedTracks: Track[] = [];
 
                 for (const trackInfo of tracks.collection) {
+                    if (!trackInfo.streamable) continue;
                     const track = new Track(this.context.player, {
                         title: trackInfo.title,
                         url: trackInfo.permalink_url,

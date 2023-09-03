@@ -2,6 +2,8 @@ import { BaseExtractor, Track } from 'discord-player';
 import { YouTube } from 'youtube-sr';
 import { SoundCloudExtractor } from '../SoundCloudExtractor';
 import unfetch from 'isomorphic-unfetch';
+import http from 'http';
+import https from 'https';
 
 let factory: {
     name: string;
@@ -26,9 +28,11 @@ const ERR_NO_YT_LIB = new Error(`Could not load youtube library. Install one of 
 
 // forced lib
 const forcedLib = process.env.DP_FORCE_YTDL_MOD;
-if (forcedLib) YouTubeLibs.unshift(forcedLib);
+if (forcedLib) YouTubeLibs.unshift(...forcedLib.split(','));
 
-export type StreamFN = (q: string) => Promise<import('stream').Readable | string>;
+export type StreamFN = (q: string, ext: BaseExtractor) => Promise<import('stream').Readable | string>;
+
+let httpAgent: http.Agent, httpsAgent: https.Agent;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function loadYtdl(options?: any, force = false) {
@@ -52,21 +56,57 @@ export async function loadYtdl(options?: any, force = false) {
         const isYtdl = ['ytdl-core', '@distube/ytdl-core'].some((lib) => lib === _ytLibName);
 
         const hlsRegex = /\/manifest\/hls_(variant|playlist)\//;
-        _stream = async (query) => {
+        _stream = async (query, extractor) => {
+            const planner = extractor.context.player.routePlanner;
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const applyPlannerConfig = (opt: any, applyAgents = false) => {
+                if (planner) {
+                    try {
+                        const { ip, family } = planner.getIP();
+
+                        if (!applyAgents) {
+                            opt.requestOptions.localAddress = ip;
+                            opt.requestOptions.family = family;
+                        } else {
+                            const options = opt?.requestOptions || {};
+
+                            options.localAddress = ip;
+                            options.family = family;
+
+                            if (!httpAgent) httpAgent = new http.Agent(options);
+                            if (!httpsAgent) httpsAgent = new https.Agent(options);
+
+                            return Object.assign(opt, {
+                                requestOptions: options,
+                                httpAgent,
+                                httpsAgent
+                            });
+                        }
+                    } catch {
+                        //
+                    }
+                }
+
+                return opt;
+            };
+
             if (_ytLibName === 'youtube-ext') {
                 const dl = lib as typeof import('youtube-ext');
-                const opt = {
-                    requestOptions: options?.requestOptions || {}
-                };
+                const opt = applyPlannerConfig(
+                    {
+                        ...options,
+                        requestOptions: options?.requestOptions || {}
+                    },
+                    true
+                );
 
-                const info = await dl.videoInfo(query, opt);
+                const info = await dl.extractStreamInfo(query, opt);
 
-                const streamFormats = await dl.getFormats(info.streams, opt);
-
-                const formats = streamFormats
+                const formats = info.formats
                     .filter((format) => {
                         if (!format.url) return false;
-                        if (info.isLive) return hlsRegex.test(format.url) && typeof format.bitrate === 'number';
+                        if (format.isLive) return hlsRegex.test(format.url) && typeof format.bitrate === 'number';
                         return typeof format.bitrate === 'number';
                     })
                     .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
@@ -77,7 +117,7 @@ export async function loadYtdl(options?: any, force = false) {
                 return url;
             } else if (isYtdl) {
                 const dl = lib as typeof import('ytdl-core');
-                const info = await dl.getInfo(query, options);
+                const info = await dl.getInfo(query, applyPlannerConfig(options));
 
                 const formats = info.formats
                     .filter((format) => {
@@ -92,6 +132,9 @@ export async function loadYtdl(options?: any, force = false) {
                 // return dl(query, this.context.player.options.ytdlOptions);
             } else if (_ytLibName === 'play-dl') {
                 const dl = lib as typeof import('play-dl');
+                dl.setToken({
+                    youtube: options?.requestOptions?.headers?.cookie
+                });
 
                 const info = await dl.video_info(query);
                 const formats = info.format
@@ -141,6 +184,7 @@ export async function loadYtdl(options?: any, force = false) {
 export async function makeYTSearch(query: string, opt: any) {
     const res = await YouTube.search(query, {
         type: 'video',
+        safeSearch: opt?.safeSearch,
         requestOptions: opt
     }).catch(() => {
         //
