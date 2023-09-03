@@ -57,26 +57,29 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
 
             return this.createResponse(
                 null,
-                (unique.length > 0 ? unique : data).map(
-                    (trackInfo) =>
-                        new Track(this.context.player, {
-                            title: trackInfo.title,
-                            url: trackInfo.permalink_url,
-                            duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
-                            description: trackInfo.description ?? '',
-                            thumbnail: trackInfo.artwork_url,
-                            views: trackInfo.playback_count,
-                            author: trackInfo.user.username,
-                            requestedBy: track.requestedBy,
-                            source: 'soundcloud',
-                            engine: trackInfo,
-                            queryType: QueryType.SOUNDCLOUD_TRACK,
-                            metadata: trackInfo,
-                            requestMetadata: async () => {
-                                return trackInfo;
-                            }
-                        })
-                )
+                (unique.length > 0 ? unique : data).map((trackInfo) => {
+                    const newTrack = new Track(this.context.player, {
+                        title: trackInfo.title,
+                        url: trackInfo.permalink_url,
+                        duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
+                        description: trackInfo.description ?? '',
+                        thumbnail: trackInfo.artwork_url,
+                        views: trackInfo.playback_count,
+                        author: trackInfo.user.username,
+                        requestedBy: track.requestedBy,
+                        source: 'soundcloud',
+                        engine: trackInfo,
+                        queryType: QueryType.SOUNDCLOUD_TRACK,
+                        metadata: trackInfo,
+                        requestMetadata: async () => {
+                            return trackInfo;
+                        }
+                    });
+
+                    newTrack.extractor = this;
+
+                    return newTrack;
+                })
             );
         }
 
