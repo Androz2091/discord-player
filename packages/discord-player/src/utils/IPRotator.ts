@@ -57,9 +57,7 @@ export class IPRotator {
         const random = IPRotator.getRandomIP(block.cidr, block.cidrSize);
 
         if (this.isFailedOrExcluded(random)) {
-            this.#retries++;
-
-            if (this.#retries > this.MAX_NEXT_RETRIES) {
+            if (this.#retries++ > this.MAX_NEXT_RETRIES) {
                 this.#retries = 0;
                 throw new Error('Unable to find an IP that is not excluded');
             }
