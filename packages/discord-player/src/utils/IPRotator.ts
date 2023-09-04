@@ -56,7 +56,7 @@ export class IPRotator {
 
         const random = IPRotator.getRandomIP(block.cidr, block.cidrSize);
 
-        while (this.isFailedOrExcluded(random)) {
+        if (this.isFailedOrExcluded(random)) {
             this.#retries++;
 
             if (this.#retries > this.MAX_NEXT_RETRIES) {
