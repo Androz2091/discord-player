@@ -63,7 +63,7 @@ export class AudioFilters {
         return Object.keys(this.filters) as FiltersName[];
     }
 
-    // @ts-expect-error AudioFilters.length
+    // @ts-ignore
     public static get length() {
         return this.names.length;
     }

@@ -195,7 +195,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
     }
 
     public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
-        let info: Video[] | void;
+        let info: Video[] | void = undefined;
 
         if (YoutubeExtractor.validateURL(track.url))
             info = await YouTube.getVideo(track.url)

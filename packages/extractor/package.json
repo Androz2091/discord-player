@@ -35,11 +35,12 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
+    "@distube/ytdl-core": "^4.13.0",
     "@types/node": "^18.11.18",
     "discord-player": "workspace:^",
     "mediaplex": "^0.0.6",
     "play-dl": "^1.9.6",
-    "youtube-ext": "^1.1.10",
+    "youtube-ext": "^1.1.14",
     "yt-stream": "^1.4.7",
     "ytdl-core": "^4.11.4"
   },

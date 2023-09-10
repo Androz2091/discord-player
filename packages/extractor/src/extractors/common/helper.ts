@@ -53,7 +53,7 @@ export async function loadYtdl(options?: any, force = false) {
     }
 
     if (lib) {
-        const isYtdl = ['ytdl-core', '@distube/ytdl-core'].some((lib) => lib === _ytLibName);
+        const isYtdl = ['ytdl-core'].some((lib) => lib === _ytLibName);
 
         const hlsRegex = /\/manifest\/hls_(variant|playlist)\//;
         _stream = async (query, extractor) => {
@@ -107,7 +107,7 @@ export async function loadYtdl(options?: any, force = false) {
                 const formats = videoFormats
                     .filter((format) => {
                         if (!format.url) return false;
-                        if (info.isLive) return hlsRegex.test(format.url) && typeof format.bitrate === 'number';
+                        if (info.isLive) return dl.utils.isHlsContentURL(format.url) && format.url.endsWith('.m3u8');
                         return typeof format.bitrate === 'number';
                     })
                     .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
@@ -131,6 +131,45 @@ export async function loadYtdl(options?: any, force = false) {
                 if (!url) throw new Error(`Failed to parse stream url for ${query}`);
                 return url;
                 // return dl(query, this.context.player.options.ytdlOptions);
+            } else if (_ytLibName === '@distube/ytdl-core') {
+                const dl = lib as typeof import('@distube/ytdl-core');
+                let opt: any;
+
+                if (planner) {
+                    opt = {
+                        localAddress: planner.getIP().ip,
+                        autoSelectFamily: true
+                    };
+                }
+
+                const cookie = options?.requestOptions?.headers?.cookie;
+
+                const agent = dl.createAgent(Array.isArray(cookie) ? cookie : undefined, opt);
+
+                const reqOpt: any = {
+                    agent
+                };
+
+                if (cookie && !Array.isArray(cookie)) {
+                    reqOpt.requestOptions = {
+                        headers: {
+                            cookie
+                        }
+                    };
+                }
+
+                const info = await dl.getInfo(query, reqOpt);
+
+                const formats = info.formats
+                    .filter((format) => {
+                        return info.videoDetails.isLiveContent ? format.isHLS && format.hasAudio : format.hasAudio;
+                    })
+                    .sort((a, b) => Number(b.audioBitrate) - Number(a.audioBitrate) || Number(a.bitrate) - Number(b.bitrate));
+
+                const fmt = formats.find((format) => !format.hasVideo) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
+                const url = fmt?.url;
+                if (!url) throw new Error(`Failed to parse stream url for ${query}`);
+                return url;
             } else if (_ytLibName === 'play-dl') {
                 const dl = lib as typeof import('play-dl');
                 dl.setToken({
@@ -141,7 +180,7 @@ export async function loadYtdl(options?: any, force = false) {
                 const formats = info.format
                     .filter((format) => {
                         if (!format.url) return false;
-                        if (info.video_details.live) return hlsRegex.test(format.url) && typeof format.bitrate === 'number';
+                        if (info.video_details.live) return (hlsRegex.test(format.url) && typeof format.bitrate === 'number') || (hlsRegex.test(format.url) && format.url.endsWith('.m3u8'));
                         return typeof format.bitrate === 'number';
                     })
                     .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
