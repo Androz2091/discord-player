@@ -61,8 +61,8 @@ export const ShowcaseResource: IShowcase = {
         },
         {
             name: 'Mittelbot',
-            description: 'I am using discord-player to let people play their favourite music in their discord servers (No yt ofc)',
-            version: 'v6.2.1',
+            description: "A moderation & utility bot with music to play everyone's favourite music.",
+            version: 'v6.6.3',
             url: 'https://github.com/Mittelbots/Mittelbot'
         },
         {
