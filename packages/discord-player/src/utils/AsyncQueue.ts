@@ -7,11 +7,15 @@ export interface AsyncQueueAcquisitionOptions {
     signal?: AbortSignal;
 }
 
+export type AsyncQueueExceptionHandler = (exception: Error) => void;
+
 export class AsyncQueue {
     /**
      * The queued entries
      */
     public entries: Array<AsyncQueueEntry> = [];
+
+    public exceptionHandler?: AsyncQueueExceptionHandler;
 
     /**
      * Clear entries queue
@@ -35,8 +39,7 @@ export class AsyncQueue {
     /**
      * Acquire an entry.
      *
-     * ```typescript
-     * // lock the queue
+     * @example // lock the queue
      * const entry = asyncQueue.acquire();
      * // wait until previous task is completed
      * await entry.getTask();
@@ -44,10 +47,12 @@ export class AsyncQueue {
      * await performSomethingExpensive();
      * // make sure to release the lock once done
      * asyncQueue.release();
-     * ```
+     *
      */
     public acquire(options?: AsyncQueueAcquisitionOptions) {
         const entry = new AsyncQueueEntry(this, options);
+
+        if (this.exceptionHandler) entry.getTask().catch(this.exceptionHandler);
 
         if (this.entries.length === 0) {
             this.entries.push(entry);

@@ -5,6 +5,7 @@ import {
     BaseExtractor,
     ExtractorInfo,
     ExtractorSearchContext,
+    type GuildQueueHistory,
     Playlist,
     QueryType,
     SearchQueryType,
@@ -26,8 +27,9 @@ export interface YoutubeExtractorInit {
 
 export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
     public static identifier = 'com.discord-player.youtubeextractor' as const;
-    private _stream!: StreamFN;
+    public _stream!: StreamFN;
     public _ytLibName!: string;
+    public static instance: YoutubeExtractor | null;
 
     public async activate() {
         const fn = this.options.createStream;
@@ -36,13 +38,17 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
             this._stream = (q: string) => {
                 return fn(this, q);
             };
-
-            return;
+        } else {
+            const { stream, name } = await loadYtdl(this.context.player.options.ytdlOptions);
+            this._stream = stream;
+            this._ytLibName = name;
         }
 
-        const { stream, name } = await loadYtdl(this.context.player.options.ytdlOptions);
-        this._stream = stream;
-        this._ytLibName = name;
+        YoutubeExtractor.instance = this;
+    }
+
+    public async deactivate(): Promise<void> {
+        YoutubeExtractor.instance = null;
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
@@ -66,6 +72,8 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
             case QueryType.YOUTUBE_PLAYLIST: {
                 const ytpl = await YouTube.getPlaylist(query, {
                     fetchAll: true,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    limit: (context.requestOptions as any)?.limit,
                     requestOptions: context.requestOptions as unknown as RequestInit
                 }).catch(Util.noop);
                 if (!ytpl) return this.emptyResponse();
@@ -186,8 +194,8 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
         });
     }
 
-    public async getRelatedTracks(track: Track) {
-        let info: Video[] | void;
+    public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
+        let info: Video[] | void = undefined;
 
         if (YoutubeExtractor.validateURL(track.url))
             info = await YouTube.getVideo(track.url)
@@ -204,7 +212,9 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
             return this.createResponse();
         }
 
-        const similar = info.map((video) => {
+        const unique = info.filter((t) => !history.tracks.some((x) => x.url === t.url));
+
+        const similar = (unique.length > 0 ? unique : info).map((video) => {
             const t = new Track(this.context.player, {
                 title: video.title!,
                 url: `https://www.youtube.com/watch?v=${video.id}`,
@@ -234,7 +244,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
         return { playlist: null, tracks: [] };
     }
 
-    public async stream(info: Track) {
+    public async stream(info: Track): Promise<Readable | string> {
         if (!this._stream) {
             throw new Error(`Could not find youtube streaming library. Install one of ${YouTubeLibs.join(', ')}`);
         }
@@ -242,7 +252,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
         let url = info.url;
         url = url.includes('youtube.com') ? url.replace(/(m(usic)?|gaming)\./, '') : url;
 
-        return this._stream(url);
+        return this._stream(url, this);
     }
 
     public static validateURL(link: string) {

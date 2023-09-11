@@ -1,7 +1,7 @@
 const DiscordPlayerErrors = {
     ERR_OUT_OF_SPACE: {
         name: 'ERR_OUT_OF_SPACE',
-        type: Error,
+        type: RangeError,
         createError(target: string, capacity: number, total: number) {
             return `Max capacity reached for ${target} (Capacity ${capacity}/Total ${total})`;
         }
@@ -46,6 +46,27 @@ const DiscordPlayerErrors = {
         type: Error,
         createError(message?: string) {
             return message || 'No voice connection available, maybe connect to a voice channel first?';
+        }
+    },
+    ERR_VOICE_CONNECTION_DESTROYED: {
+        name: 'ERR_VOICE_CONNECTION_DESTROYED',
+        type: Error,
+        createError() {
+            return 'Cannot use destroyed voice connection';
+        }
+    },
+    ERR_NO_VOICE_CHANNEL: {
+        name: 'ERR_NO_VOICE_CHANNEL',
+        type: Error,
+        createError() {
+            return 'Could not get the voice channel';
+        }
+    },
+    ERR_INVALID_VOICE_CHANNEL: {
+        name: 'ERR_INVALID_VOICE_CHANNEL',
+        type: Error,
+        createError() {
+            return 'Expected a voice channel';
         }
     },
     ERR_NO_RECEIVER: {
@@ -130,6 +151,6 @@ export const ErrorCodes = (() => {
         dict[prop] = prop;
     }
 
-    return Object.preventExtensions(dict) as Readonly<ErrCodes>;
+    return Object.freeze(dict);
 })();
 export const Exceptions = new Proxy(target, handler);

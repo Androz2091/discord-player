@@ -4,7 +4,7 @@ import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Track, TrackResolvable } from '../fabric/Track';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
-import { type AudioPlayer, AudioResource, StreamType } from '@discordjs/voice';
+import { type AudioPlayer, AudioResource, StreamType, VoiceConnection, VoiceConnectionStatus } from 'discord-voip';
 import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
 import { Playlist } from '../fabric/Playlist';
 import { GuildQueueHistory } from './GuildQueueHistory';
@@ -46,11 +46,13 @@ export interface GuildNodeInit<Meta = unknown> {
     maxSize?: number;
     maxHistorySize?: number;
     preferBridgedMetadata: boolean;
+    pauseOnEmpty?: boolean;
 }
 
 export interface VoiceConnectConfig {
     deaf?: boolean;
     timeout?: number;
+    group?: string;
     audioPlayer?: AudioPlayer;
 }
 
@@ -85,6 +87,10 @@ export const GuildQueueEvent = {
      * Emitted when a connection is created
      */
     connection: 'connection',
+    /**
+     * Emitted when a voice connection is destroyed
+     */
+    connectionDestroyed: 'connectionDestroyed',
     /**
      * Emitted when the bot is disconnected from the channel
      */
@@ -164,10 +170,23 @@ export const GuildQueueEvent = {
     /**
      * Emitted when a voice channel is repopulated
      */
-    channelPopulate: 'channelPopulate'
+    channelPopulate: 'channelPopulate',
+    /**
+     * Emitted when a queue is successfully created
+     */
+    queueCreate: 'queueCreate',
+    /**
+     * Emitted when a queue is deleted
+     */
+    queueDelete: 'queueDelete',
+    /**
+     * Emitted when a queue is trying to add similar track for autoplay
+     */
+    willAutoPlay: 'willAutoPlay'
 } as const;
 
-export interface GuildQueueEvents<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface GuildQueueEvents<Meta = any> {
     /**
      * Emitted when audio track is added to the queue
      * @param queue The queue where this event occurred
@@ -197,6 +216,11 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param queue The queue where this event occurred
      */
     connection: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when a connection is destroyed
+     * @param queue The queue where this event occurred
+     */
+    connectionDestroyed: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when the bot is disconnected from the channel
      * @param queue The queue where this event occurred
@@ -322,6 +346,23 @@ export interface GuildQueueEvents<Meta = unknown> {
      * @param queue The queue where this event occurred
      */
     channelPopulate: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when a queue is successfully created
+     * @param queue The queue where this event occurred
+     */
+    queueCreate: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when a queue is successfully deleted
+     * @param queue The queue where this event occurred
+     */
+    queueDelete: (queue: GuildQueue<Meta>) => unknown;
+    /**
+     * Emitted when a queue is trying to add similar track for autoplay
+     * @param queue The queue where this event occurred
+     * @param tracks The similar tracks that were found
+     * @param done Done callback
+     */
+    willAutoPlay: (queue: GuildQueue<Meta>, tracks: Track[], done: (track: Track | null) => void) => unknown;
 }
 
 export class GuildQueue<Meta = unknown> {
@@ -352,6 +393,7 @@ export class GuildQueue<Meta = unknown> {
         options.selfDeaf ??= true;
         options.maxSize ??= Infinity;
         options.maxHistorySize ??= Infinity;
+        options.pauseOnEmpty ??= true;
 
         if (!TypeUtil.isNullish(this.options.biquad) && !TypeUtil.isBoolean(this.options.biquad)) {
             this.filters._lastFiltersCache.biquad = this.options.biquad;
@@ -384,7 +426,8 @@ export class GuildQueue<Meta = unknown> {
         if (options.maxSize < 1) options.maxSize = Infinity;
         if (options.maxHistorySize < 1) options.maxHistorySize = Infinity;
 
-        this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
+        if (this.hasDebugger) this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
+        this.emit(GuildQueueEvent.queueCreate, this);
     }
 
     /**
@@ -413,7 +456,7 @@ export class GuildQueue<Meta = unknown> {
      * @param m The message to write
      */
     public debug(m: string) {
-        this.player.events.emit(GuildQueueEvent.debug, this, m);
+        this.emit(GuildQueueEvent.debug, this, m);
     }
 
     /**
@@ -631,9 +674,9 @@ export class GuildQueue<Meta = unknown> {
         this.tracks.add(toAdd);
 
         if (isMulti) {
-            this.player.events.emit(GuildQueueEvent.audioTracksAdd, this, toAdd);
+            this.emit(GuildQueueEvent.audioTracksAdd, this, toAdd);
         } else {
-            this.player.events.emit(GuildQueueEvent.audioTrackAdd, this, toAdd);
+            this.emit(GuildQueueEvent.audioTrackAdd, this, toAdd);
         }
     }
 
@@ -682,6 +725,28 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * Create stream dispatcher from the given connection
+     * @param connection The connection to use
+     */
+    public createDispatcher(connection: VoiceConnection, options: Pick<VoiceConnectConfig, 'audioPlayer' | 'timeout'> = {}) {
+        if (connection.state.status === VoiceConnectionStatus.Destroyed) {
+            throw Exceptions.ERR_VOICE_CONNECTION_DESTROYED();
+        }
+
+        const channel = this.player.client.channels.cache.get(connection.joinConfig.channelId!);
+        if (!channel) throw Exceptions.ERR_NO_VOICE_CHANNEL();
+        if (!channel.isVoiceBased()) throw Exceptions.ERR_INVALID_ARG_TYPE('channel', `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`, String(channel?.type));
+
+        if (this.dispatcher) {
+            this.#removeListeners(this.dispatcher);
+            this.dispatcher.destroy();
+            this.dispatcher = null;
+        }
+
+        this.dispatcher = new StreamDispatcher(connection, channel, this, options.timeout ?? this.options.connectionTimeout, options.audioPlayer);
+    }
+
+    /**
      * Connect to a voice channel
      * @param channelResolvable The voice channel to connect to
      * @param options Join config
@@ -692,22 +757,24 @@ export class GuildQueue<Meta = unknown> {
             throw Exceptions.ERR_INVALID_ARG_TYPE('channel', `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`, String(channel?.type));
         }
 
-        this.debug(`Connecting to ${channel.type === ChannelType.GuildStageVoice ? 'stage' : 'voice'} channel ${channel.name} (ID: ${channel.id})`);
+        if (this.hasDebugger) this.debug(`Connecting to ${channel.type === ChannelType.GuildStageVoice ? 'stage' : 'voice'} channel ${channel.name} (ID: ${channel.id})`);
 
-        if (this.dispatcher) {
-            this.debug('Destroying old connection');
+        if (this.dispatcher && channel.id !== this.dispatcher.channel.id) {
+            if (this.hasDebugger) this.debug('Destroying old connection');
             this.#removeListeners(this.dispatcher);
-            this.dispatcher.disconnect();
+            this.dispatcher.destroy();
+            this.dispatcher = null;
         }
 
         this.dispatcher = await this.player.voiceUtils.connect(channel, {
             deaf: options.deaf ?? this.options.selfDeaf ?? true,
             maxTime: options?.timeout ?? this.options.connectionTimeout ?? 120_000,
             queue: this,
-            audioPlayer: options?.audioPlayer
+            audioPlayer: options?.audioPlayer,
+            group: options.group ?? this.player.client.user?.id
         });
 
-        this.player.events.emit(GuildQueueEvent.connection, this);
+        this.emit(GuildQueueEvent.connection, this);
 
         if (this.channel!.type === ChannelType.GuildStageVoice) {
             await this.channel!.guild.members.me!.voice.setSuppressed(false).catch(async () => {
@@ -733,6 +800,9 @@ export class GuildQueue<Meta = unknown> {
     public delete() {
         if (this.player.nodes.delete(this.id)) {
             this.#deleted = true;
+            this.player.events.emit(GuildQueueEvent.queueDelete, this);
+            this.node.tasksQueue.cancelAll();
+            this.tasksQueue.cancelAll();
         }
     }
 
@@ -743,7 +813,9 @@ export class GuildQueue<Meta = unknown> {
     public revive() {
         if (!this.deleted || this.player.nodes.has(this.id)) return;
         this.#deleted = false;
+        this.setTransitioning(false);
         this.player.nodes.cache.set(this.id, this);
+        this.player.events.emit(GuildQueueEvent.queueCreate, this);
     }
 
     /**
@@ -775,91 +847,112 @@ export class GuildQueue<Meta = unknown> {
         return this.player.play(this.channel, track, options);
     }
 
+    /**
+     * Emit an event on this queue
+     * @param event The event to emit
+     * @param args The args for the event
+     */
+    public emit<K extends keyof GuildQueueEvents<Meta>>(event: K, ...args: Parameters<GuildQueueEvents<Meta>[K]>): boolean {
+        if (this.deleted) return false;
+        return this.player.events.emit(event, ...args);
+    }
+
     #attachListeners(dispatcher: StreamDispatcher) {
-        dispatcher.on('error', (e) => this.player.events.emit(GuildQueueEvent.error, this, e));
-        dispatcher.on('debug', (m) => this.player.events.emit(GuildQueueEvent.debug, this, m));
+        dispatcher.on('error', (e) => this.emit(GuildQueueEvent.error, this, e));
+        dispatcher.on('debug', (m) => this.hasDebugger && this.emit(GuildQueueEvent.debug, this, m));
         dispatcher.on('finish', (r) => this.#performFinish(r));
         dispatcher.on('start', (r) => this.#performStart(r));
+        dispatcher.on('destroyed', () => {
+            this.#removeListeners(dispatcher);
+            this.dispatcher = null;
+        });
         dispatcher.on('dsp', (f) => {
             if (!Object.is(this.filters._lastFiltersCache.filters, f)) {
-                this.player.events.emit(GuildQueueEvent.dspUpdate, this, this.filters._lastFiltersCache.filters, f);
+                this.emit(GuildQueueEvent.dspUpdate, this, this.filters._lastFiltersCache.filters, f);
             }
             this.filters._lastFiltersCache.filters = f;
         });
         dispatcher.on('biquad', (f) => {
             if (this.filters._lastFiltersCache.biquad !== f) {
-                this.player.events.emit(GuildQueueEvent.biquadFiltersUpdate, this, this.filters._lastFiltersCache.biquad, f);
+                this.emit(GuildQueueEvent.biquadFiltersUpdate, this, this.filters._lastFiltersCache.biquad, f);
             }
             this.filters._lastFiltersCache.biquad = f;
         });
         dispatcher.on('eqBands', (f) => {
             if (!Object.is(f, this.filters._lastFiltersCache.equalizer)) {
-                this.player.events.emit(GuildQueueEvent.equalizerUpdate, this, this.filters._lastFiltersCache.equalizer, f);
+                this.emit(GuildQueueEvent.equalizerUpdate, this, this.filters._lastFiltersCache.equalizer, f);
             }
             this.filters._lastFiltersCache.equalizer = f;
         });
         dispatcher.on('volume', (f) => {
-            if (this.filters._lastFiltersCache.volume !== f) this.player.events.emit(GuildQueueEvent.volumeChange, this, this.filters._lastFiltersCache.volume, f);
+            if (this.filters._lastFiltersCache.volume !== f) this.emit(GuildQueueEvent.volumeChange, this, this.filters._lastFiltersCache.volume, f);
             this.filters._lastFiltersCache.volume = f;
         });
     }
 
-    #removeListeners(dispatcher: StreamDispatcher) {
-        dispatcher.removeAllListeners();
+    public get hasDebugger() {
+        return this.player.events.listenerCount(GuildQueueEvent.debug) > 0;
+    }
+
+    #removeListeners<T extends { removeAllListeners: () => unknown }>(target: T) {
+        target.removeAllListeners();
     }
 
     #performStart(resource?: AudioResource<Track>) {
         const track = resource?.metadata || this.currentTrack;
         const reason = this.isTransitioning() ? 'filters' : 'normal';
 
-        this.debug(
-            `Player triggered for Track ${JSON.stringify({
-                title: track?.title,
-                reason
-            })}`
-        );
+        if (this.hasDebugger)
+            this.debug(
+                `Player triggered for Track ${JSON.stringify({
+                    title: track?.title,
+                    reason
+                })}`
+            );
 
-        this.player.events.emit(GuildQueueEvent.playerTrigger, this, track!, reason);
-        if (track && !this.isTransitioning()) this.player.events.emit(GuildQueueEvent.playerStart, this, track);
+        this.emit(GuildQueueEvent.playerTrigger, this, track!, reason);
+        if (track && !this.isTransitioning()) this.emit(GuildQueueEvent.playerStart, this, track);
         this.setTransitioning(false);
     }
 
     #performFinish(resource?: AudioResource<Track>) {
         const track = resource?.metadata || this.currentTrack;
 
-        this.debug(
-            `Track ${JSON.stringify({
-                title: track?.title,
-                isTransitionMode: this.isTransitioning()
-            })} was marked as finished`
-        );
+        if (this.hasDebugger)
+            this.debug(
+                `Track ${JSON.stringify({
+                    title: track?.title,
+                    isTransitionMode: this.isTransitioning()
+                })} was marked as finished`
+            );
 
         if (track && !this.isTransitioning()) {
-            this.debug('Adding track to history and emitting finish event since transition mode is disabled...');
+            if (this.hasDebugger) this.debug('Adding track to history and emitting finish event since transition mode is disabled...');
             this.history.push(track);
             this.node.resetProgress();
-            this.player.events.emit(GuildQueueEvent.playerFinish, this, track);
+            this.emit(GuildQueueEvent.playerFinish, this, track);
+            if (this.#deleted) return this.#emitEnd();
             if (this.tracks.size < 1 && this.repeatMode === QueueRepeatMode.OFF) {
-                this.debug('No more tracks left in the queue to play and repeat mode is off, initiating #emitEnd()');
+                if (this.hasDebugger) this.debug('No more tracks left in the queue to play and repeat mode is off, initiating #emitEnd()');
                 this.#emitEnd();
             } else {
                 if (this.repeatMode === QueueRepeatMode.TRACK) {
-                    this.debug('Repeat mode is set to track, repeating last track from the history...');
+                    if (this.hasDebugger) this.debug('Repeat mode is set to track, repeating last track from the history...');
                     this.__current = this.history.tracks.dispatch() || track;
                     return this.node.play(this.__current!, { queue: false });
                 }
                 if (this.repeatMode === QueueRepeatMode.QUEUE) {
-                    this.debug('Repeat mode is set to queue, moving last track from the history to current queue...');
+                    if (this.hasDebugger) this.debug('Repeat mode is set to queue, moving last track from the history to current queue...');
                     this.tracks.add(this.history.tracks.dispatch() || track);
                 }
                 if (!this.tracks.size) {
                     if (this.repeatMode === QueueRepeatMode.AUTOPLAY) {
-                        this.debug('Repeat mode is set to autoplay, initiating autoplay handler...');
+                        if (this.hasDebugger) this.debug('Repeat mode is set to autoplay, initiating autoplay handler...');
                         this.#handleAutoplay(track);
                         return;
                     }
                 } else {
-                    this.debug('Initializing next track of the queue...');
+                    if (this.hasDebugger) this.debug('Initializing next track of the queue...');
                     this.__current = this.tracks.dispatch()!;
                     this.node.play(this.__current, {
                         queue: false
@@ -871,7 +964,7 @@ export class GuildQueue<Meta = unknown> {
 
     #emitEnd() {
         this.__current = null;
-        this.player.events.emit(GuildQueueEvent.emptyQueue, this);
+        this.emit(GuildQueueEvent.emptyQueue, this);
         if (this.options.leaveOnEnd) {
             const tm: NodeJS.Timeout = setTimeout(() => {
                 if (this.isPlaying()) return clearTimeout(tm);
@@ -882,31 +975,49 @@ export class GuildQueue<Meta = unknown> {
 
     async #handleAutoplay(track: Track) {
         try {
-            this.debug(`Autoplay >> Finding related tracks for Track ${track.title} (${track.url}) [ext:${track.extractor?.identifier || 'N/A'}]`);
+            if (this.hasDebugger) this.debug(`Autoplay >> Finding related tracks for Track ${track.title} (${track.url}) [ext:${track.extractor?.identifier || 'N/A'}]`);
             const tracks =
-                (await track.extractor?.getRelatedTracks(track))?.tracks ||
+                (await track.extractor?.getRelatedTracks(track, this.history))?.tracks ||
                 (
                     await this.player.extractors.run(async (ext) => {
-                        this.debug(`Autoplay >> Querying extractor ${ext.identifier}`);
-                        const res = await ext.getRelatedTracks(track);
+                        if (this.hasDebugger) this.debug(`Autoplay >> Querying extractor ${ext.identifier}`);
+                        const res = await ext.getRelatedTracks(track, this.history);
                         if (!res.tracks.length) {
-                            this.debug(`Autoplay >> Extractor ${ext.identifier} failed to provide results.`);
+                            if (this.hasDebugger) this.debug(`Autoplay >> Extractor ${ext.identifier} failed to provide results.`);
                             return false;
                         }
 
-                        this.debug(`Autoplay >> Extractor ${ext.identifier} successfully returned results.`);
+                        if (this.hasDebugger) this.debug(`Autoplay >> Extractor ${ext.identifier} successfully returned results.`);
 
                         return res.tracks;
                     })
                 )?.result ||
                 [];
-            if (!tracks?.length) {
-                this.debug(`Autoplay >> No related tracks found.`);
-                throw 'no related tracks';
+
+            let resolver: (track: Track | null) => void = Util.noop;
+            const donePromise = new Promise<Track | null>((resolve) => (resolver = resolve));
+
+            const success = this.emit(GuildQueueEvent.willAutoPlay, this, tracks, resolver!);
+
+            // prevent dangling promise
+            if (!success) {
+                resolver(
+                    tracks.length
+                        ? (() => {
+                              const unique = tracks.filter((tr) => !this.history.tracks.find((t) => t.url === tr.url));
+                              return unique?.[0] ?? Util.randomChoice(tracks.slice(0, 5));
+                          })()
+                        : null
+                );
             }
 
-            this.debug(`Autoplay >> Picking random track from first 5 tracks...`);
-            const nextTrack = Util.randomChoice(tracks.slice(0, 5));
+            const nextTrack = await donePromise;
+
+            if (!nextTrack) {
+                if (this.hasDebugger) this.debug('Autoplay >> No track was found, initiating #emitEnd()');
+                throw 'No track was found';
+            }
+
             await this.node.play(nextTrack, {
                 queue: false,
                 seek: 0,

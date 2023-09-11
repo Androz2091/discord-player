@@ -1,0 +1,42 @@
+name: Documentation
+on:
+    workflow_dispatch:
+    release:
+        types: [published]
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+jobs:
+    publish-docs:
+        runs-on: ubuntu-20.04
+        env:
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 20
+                  registry-url: https://registry.npmjs.org/
+            - name: Cache yarn
+              uses: actions/cache@v3
+              with:
+                  path: .yarn/cache
+                  key: yarn-cache-node-20
+
+            - name: Install dependencies
+              run: yarn install --immutable
+
+            - name: Build
+              run: yarn build
+
+            - name: Docgen
+              run: yarn docs
+
+            - name: Commit & Push
+              run: |
+                  git config --global user.name '${{ github.actor }}'
+                  git config --global user.email '${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com'
+                  git add -u
+                  git commit -m 'chore: generate docs'
+                  git push origin ${GITHUB_REF_TYPE == 'tag' ? 'master' : GITHUB_REF_NAME}

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { QueryResolver } from 'discord-player';
 import { parse, HTMLElement } from 'node-html-parser';
-import { UA, getFetch } from '../extractors/common/helper';
+import { UA, fetch } from '../extractors/common/helper';
 
 function getHTML(link: string): Promise<HTMLElement | null> {
-    return getFetch(link, {
+    return fetch(link, {
         headers: {
             'User-Agent': UA
         }

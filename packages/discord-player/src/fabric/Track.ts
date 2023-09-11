@@ -110,6 +110,13 @@ export class Track<T = unknown> {
     }
 
     /**
+     * Discord hyperlink representation of this track
+     */
+    public toHyperlink(): string /* not using `[${string}](${string})` yet */ {
+        return `[${this.title}](${this.url})`;
+    }
+
+    /**
      * Returns source of this track
      */
     public get source() {

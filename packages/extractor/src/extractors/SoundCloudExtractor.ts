@@ -3,6 +3,7 @@ import {
     BaseExtractor,
     ExtractorInfo,
     ExtractorSearchContext,
+    type GuildQueueHistory,
     Playlist,
     QueryType,
     SearchQueryType,
@@ -19,12 +20,21 @@ export interface SoundCloudExtractorInit {
 
 export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> {
     public static identifier = 'com.discord-player.soundcloudextractor' as const;
+    public static instance: SoundCloudExtractor | null = null;
 
     public internal = new SoundCloud.default({
         clientId: this.options.clientId,
         oauthToken: this.options.oauthToken,
         proxy: this.options.proxy
     });
+
+    public async activate(): Promise<void> {
+        SoundCloudExtractor.instance = this;
+    }
+
+    public async deactivate(): Promise<void> {
+        SoundCloudExtractor.instance = null;
+    }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
         if (typeof query !== 'string') return false;
@@ -39,12 +49,39 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
         ] as SearchQueryType[]).some((r) => r === type);
     }
 
-    public async getRelatedTracks(track: Track) {
-        if (track.queryType === QueryType.SOUNDCLOUD_TRACK)
-            return this.handle(track.author || track.title, {
-                requestedBy: track.requestedBy,
-                type: QueryType.SOUNDCLOUD_SEARCH
-            });
+    public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
+        if (track.queryType === QueryType.SOUNDCLOUD_TRACK) {
+            const data = await this.internal.tracks.relatedV2(track.url, 1);
+
+            const unique = data.filter((t) => !history.tracks.some((h) => h.url === t.permalink_url));
+
+            return this.createResponse(
+                null,
+                (unique.length > 0 ? unique : data).map((trackInfo) => {
+                    const newTrack = new Track(this.context.player, {
+                        title: trackInfo.title,
+                        url: trackInfo.permalink_url,
+                        duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
+                        description: trackInfo.description ?? '',
+                        thumbnail: trackInfo.artwork_url,
+                        views: trackInfo.playback_count,
+                        author: trackInfo.user.username,
+                        requestedBy: track.requestedBy,
+                        source: 'soundcloud',
+                        engine: trackInfo,
+                        queryType: QueryType.SOUNDCLOUD_TRACK,
+                        metadata: trackInfo,
+                        requestMetadata: async () => {
+                            return trackInfo;
+                        }
+                    });
+
+                    newTrack.extractor = this;
+
+                    return newTrack;
+                })
+            );
+        }
 
         return this.createResponse();
     }
@@ -131,6 +168,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                 const resolvedTracks: Track[] = [];
 
                 for (const trackInfo of tracks.collection) {
+                    if (!trackInfo.streamable) continue;
                     const track = new Track(this.context.player, {
                         title: trackInfo.title,
                         url: trackInfo.permalink_url,

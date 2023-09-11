@@ -1,6 +1,6 @@
 import { UserResolvable } from 'discord.js';
 import { PassThrough, type Readable } from 'stream';
-import { EndBehaviorType } from '@discordjs/voice';
+import { EndBehaviorType } from 'discord-voip';
 import * as prism from 'prism-media';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { Track } from '../fabric/Track';

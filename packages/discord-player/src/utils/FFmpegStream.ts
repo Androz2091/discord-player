@@ -1,6 +1,6 @@
 import type { Duplex, Readable } from 'stream';
 import * as prism from 'prism-media';
-import { FFmpeg } from './FFmpeg';
+import { FFmpeg } from '@discord-player/ffmpeg';
 
 export interface FFmpegStreamOptions {
     fmt?: string;

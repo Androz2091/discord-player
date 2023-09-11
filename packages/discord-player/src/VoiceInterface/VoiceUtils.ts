@@ -1,5 +1,5 @@
 import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
-import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus, AudioPlayer } from '@discordjs/voice';
+import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus, AudioPlayer } from 'discord-voip';
 import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
 import { GuildQueue } from '../manager';
@@ -7,19 +7,18 @@ import type { Player } from '../Player';
 import { Exceptions } from '../errors';
 
 class VoiceUtils {
-    public cache: Collection<Snowflake, StreamDispatcher>;
+    /**
+     * Voice connection cache to store voice connections of the Player components.
+     * This property is deprecated and will be removed in the future.
+     * It only exists for compatibility reasons.
+     * @deprecated
+     */
+    public cache: Collection<Snowflake, StreamDispatcher> = new Collection<Snowflake, StreamDispatcher>();
 
     /**
-     * The voice utils
-     * @private
+     * The voice utils constructor
      */
-    constructor(public player: Player) {
-        /**
-         * The cache where voice utils stores stream managers
-         * @type {Collection<Snowflake, StreamDispatcher>}
-         */
-        this.cache = new Collection<Snowflake, StreamDispatcher>();
-    }
+    constructor(public player: Player) {}
 
     /**
      * Joins a voice channel, creating basic stream dispatch manager
@@ -34,12 +33,12 @@ class VoiceUtils {
             maxTime?: number;
             queue: GuildQueue;
             audioPlayer?: AudioPlayer;
+            group?: string;
         }
     ): Promise<StreamDispatcher> {
         if (!options?.queue) throw Exceptions.ERR_NO_GUILD_QUEUE();
         const conn = await this.join(channel, options);
         const sub = new StreamDispatcher(conn, channel, options.queue, options.maxTime, options.audioPlayer);
-        this.cache.set(channel.guild.id, sub);
         return sub;
     }
 
@@ -54,6 +53,7 @@ class VoiceUtils {
         options?: {
             deaf?: boolean;
             maxTime?: number;
+            group?: string;
         }
     ) {
         const conn = joinVoiceChannel({
@@ -61,7 +61,8 @@ class VoiceUtils {
             channelId: channel.id,
             adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
             selfDeaf: Boolean(options?.deaf),
-            debug: this.player.events.eventNames().includes('debug')
+            debug: this.player.events.listenerCount('debug') > 0,
+            group: options?.group
         });
 
         return conn;
@@ -87,8 +88,8 @@ class VoiceUtils {
      * @param {Snowflake} guild The guild id
      * @returns {StreamDispatcher}
      */
-    public getConnection(guild: Snowflake) {
-        return this.cache.get(guild) || getVoiceConnection(guild);
+    public getConnection(guild: Snowflake, group?: string) {
+        return getVoiceConnection(guild, group);
     }
 }
 

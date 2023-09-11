@@ -1,4 +1,4 @@
-import { UA, getFetch } from '../extractors';
+import { fetch, UA } from '../extractors';
 
 const SP_ANON_TOKEN_URL = 'https://open.spotify.com/get_access_token?reason=transport&productType=embed';
 const SP_ACCESS_TOKEN_URL = 'https://accounts.spotify.com/api/token?grant_type=client_credentials';
@@ -31,7 +31,7 @@ export class SpotifyAPI {
         if (!key) return await this.requestAnonymousToken();
 
         try {
-            const res = await getFetch(SP_ACCESS_TOKEN_URL, {
+            const res = await fetch(SP_ACCESS_TOKEN_URL, {
                 method: 'POST',
                 headers: {
                     'User-Agent': UA,
@@ -58,7 +58,7 @@ export class SpotifyAPI {
 
     public async requestAnonymousToken() {
         try {
-            const res = await getFetch(SP_ANON_TOKEN_URL, {
+            const res = await fetch(SP_ANON_TOKEN_URL, {
                 headers: {
                     'User-Agent': UA,
                     'Content-Type': 'application/json'
@@ -95,7 +95,7 @@ export class SpotifyAPI {
             // failed
             if (!this.accessToken) return null;
 
-            const res = await getFetch(`${SP_BASE}/search/?q=${encodeURIComponent(query)}&type=track&market=US`, {
+            const res = await fetch(`${SP_BASE}/search/?q=${encodeURIComponent(query)}&type=track&market=US`, {
                 headers: {
                     'User-Agent': UA,
                     Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
@@ -126,7 +126,7 @@ export class SpotifyAPI {
             // failed
             if (!this.accessToken) return null;
 
-            const res = await getFetch(`${SP_BASE}/playlists/${id}?market=US`, {
+            const res = await fetch(`${SP_BASE}/playlists/${id}?market=US`, {
                 headers: {
                     'User-Agent': UA,
                     Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
@@ -155,7 +155,7 @@ export class SpotifyAPI {
 
             while (typeof next === 'string') {
                 try {
-                    const res = await getFetch(next, {
+                    const res = await fetch(next, {
                         headers: {
                             'User-Agent': UA,
                             Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
@@ -203,7 +203,7 @@ export class SpotifyAPI {
             // failed
             if (!this.accessToken) return null;
 
-            const res = await getFetch(`${SP_BASE}/albums/${id}?market=US`, {
+            const res = await fetch(`${SP_BASE}/albums/${id}?market=US`, {
                 headers: {
                     'User-Agent': UA,
                     Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
@@ -232,7 +232,7 @@ export class SpotifyAPI {
 
             while (typeof next === 'string') {
                 try {
-                    const res = await getFetch(next, {
+                    const res = await fetch(next, {
                         headers: {
                             'User-Agent': UA,
                             Authorization: `${this.accessToken.type} ${this.accessToken.token}`,

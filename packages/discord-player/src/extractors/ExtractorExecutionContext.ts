@@ -14,7 +14,7 @@ const knownExtractorKeys = [
     'VimeoExtractor',
     'ReverbnationExtractor',
     'AttachmentExtractor'
-];
+] as const;
 const knownExtractorLib = '@discord-player/extractor';
 
 export interface ExtractorExecutionEvents {
@@ -59,11 +59,11 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
     /**
      * Load default extractors from `@discord-player/extractor`
      */
-    public async loadDefault() {
+    public async loadDefault(filter?: (ext: (typeof knownExtractorKeys)[number]) => boolean) {
         const mod = await Util.import(knownExtractorLib);
         if (mod.error) return { success: false, error: mod.error as Error };
 
-        knownExtractorKeys.forEach((key) => {
+        (filter ? knownExtractorKeys.filter(filter) : knownExtractorKeys).forEach((key) => {
             if (!mod.module[key]) return;
             this.register(<typeof BaseExtractor>mod.module[key], {});
         });
@@ -99,21 +99,26 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      * @param _extractor The extractor to register
      * @param options Options supplied to the extractor
      */
-    public async register<O extends object, T extends typeof BaseExtractor<O>>(_extractor: T, options: ConstructorParameters<T>['1']) {
-        if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return;
+    public async register<O extends object, T extends typeof BaseExtractor<O>>(_extractor: T, options: ConstructorParameters<T>['1']): Promise<InstanceType<T> | null> {
+        if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return null;
         const extractor = new _extractor(this, options);
+
+        // @ts-ignore
+        if (this.player.options.bridgeProvider) options.bridgeProvider ??= this.player.options.bridgeProvider;
 
         try {
             this.store.set(_extractor.identifier, extractor);
-            this.player.debug(`${_extractor.identifier} extractor loaded!`);
+            if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor loaded!`);
             this.emit('registered', this, extractor);
             await extractor.activate();
-            this.player.debug(`${_extractor.identifier} extractor activated!`);
+            if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor activated!`);
             this.emit('activate', this, extractor);
+            return extractor as unknown as InstanceType<T>;
         } catch (e) {
             this.store.delete(_extractor.identifier);
-            this.player.debug(`${_extractor.identifier} extractor failed to activate! Error: ${e}`);
+            if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor failed to activate! Error: ${e}`);
             this.emit('error', this, extractor, e as Error);
+            return null;
         }
     }
 
@@ -128,13 +133,13 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
         try {
             const key = extractor.identifier || this.store.findKey((e) => e === extractor)!;
             this.store.delete(key);
-            this.player.debug(`${extractor.identifier} extractor disabled!`);
+            if (this.player.hasDebugger) this.player.debug(`${extractor.identifier} extractor disabled!`);
             this.emit('unregistered', this, extractor);
             await extractor.deactivate();
-            this.player.debug(`${extractor.identifier} extractor deactivated!`);
+            if (this.player.hasDebugger) this.player.debug(`${extractor.identifier} extractor deactivated!`);
             this.emit('deactivate', this, extractor);
         } catch (e) {
-            this.player.debug(`${extractor.identifier} extractor failed to deactivate!`);
+            if (this.player.hasDebugger) this.player.debug(`${extractor.identifier} extractor failed to deactivate!`);
             this.emit('error', this, extractor, e as Error);
         }
     }
@@ -168,13 +173,13 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
 
         for (const ext of this.store.values()) {
             if (filterBlocked && blocked.some((e) => e === ext.identifier)) continue;
-            this.player.debug(`Executing extractor ${ext.identifier}...`);
+            if (this.player.hasDebugger) this.player.debug(`Executing extractor ${ext.identifier}...`);
             const result = await fn(ext).then(
                 (res) => {
                     return res;
                 },
                 (e) => {
-                    this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
+                    if (this.player.hasDebugger) this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
 
                     return TypeUtil.isError(e) ? e : new Error(`${e}`);
                 }
@@ -183,7 +188,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
             lastExt = ext;
 
             if (result && !TypeUtil.isError(result)) {
-                this.player.debug(`Extractor ${ext.identifier} executed successfully!`);
+                if (this.player.hasDebugger) this.player.debug(`Extractor ${ext.identifier} executed successfully!`);
 
                 return {
                     extractor: ext,

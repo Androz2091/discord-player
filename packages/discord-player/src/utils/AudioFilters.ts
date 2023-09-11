@@ -41,7 +41,8 @@ export class AudioFilters {
         chorus3d: 'chorus=0.5:0.9:50|60|40:0.4|0.32|0.3:0.25|0.4|0.3:2|2.3|1.3',
         fadein: 'afade=t=in:ss=0:d=10',
         dim: `afftfilt="'real=re * (1-clip((b/nb)*b,0,1))':imag='im * (1-clip((b/nb)*b,0,1))'"`,
-        earrape: 'channelsplit,sidechaingate=level_in=64'
+        earrape: 'channelsplit,sidechaingate=level_in=64',
+        silenceremove: 'silenceremove=1:0:-50dB'
     };
 
     public static get<K extends FiltersName>(name: K) {
@@ -62,7 +63,7 @@ export class AudioFilters {
         return Object.keys(this.filters) as FiltersName[];
     }
 
-    // @ts-expect-error AudioFilters.length
+    // @ts-ignore
     public static get length() {
         return this.names.length;
     }

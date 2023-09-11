@@ -3,7 +3,11 @@ import { GuildQueue } from '../manager';
 import { Track } from '../fabric/Track';
 import { Playlist } from '../fabric/Playlist';
 import { downloadOptions } from 'ytdl-core';
-import { QueryCache } from '../utils/QueryCache';
+import { QueryCacheProvider } from '../utils/QueryCache';
+import type { IPRotationConfig } from '../utils/IPRotator';
+
+// @ts-ignore
+import type { BridgeProvider } from '@discord-player/extractor';
 
 export type FiltersName = keyof QueueFilters;
 
@@ -50,6 +54,7 @@ export interface QueueFilters {
     dim?: boolean;
     earrape?: boolean;
     lofi?: boolean;
+    silenceremove?: boolean;
 }
 
 /**
@@ -115,13 +120,17 @@ export interface TimeData {
  * @property {boolean} [timecodes] If it should render time codes
  * @property {boolean} [queue] If it should create progress bar for the whole queue
  * @property {number} [length] The bar length
- * @property {string} [line] The bar track
+ * @property {string} [leftChar] The elapsed time track
+ * @property {string} [rightChar] The remaining time track
+ * @property {string} [separator] The separation between timestamp and line
  * @property {string} [indicator] The indicator
  */
 export interface PlayerProgressbarOptions {
     timecodes?: boolean;
     length?: number;
-    line?: string;
+    leftChar?: string;
+    rightChar?: string;
+    separator?: string;
     indicator?: string;
     queue?: boolean;
 }
@@ -220,12 +229,15 @@ export type QueryExtractorSearch = `ext:${string}`;
  * @property {string[]} [blockExtractors[]] List of the extractors to block
  * @property {boolean} [ignoreCache] If it should ignore query cache lookup
  * @property {SearchQueryType} [fallbackSearchEngine='autoSearch'] Fallback search engine to use
+ * @property {any} [requestOptions] The request options
  */
 export interface SearchOptions {
     requestedBy?: UserResolvable;
     searchEngine?: SearchQueryType | QueryExtractorSearch;
     blockExtractors?: string[];
     ignoreCache?: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    requestOptions?: any;
     fallbackSearchEngine?: (typeof QueryType)[keyof typeof QueryType];
 }
 
@@ -342,6 +354,8 @@ export interface PlaylistJSON {
  * @property {QueryCache | null} [queryCache] Query cache provider
  * @property {boolean} [ignoreInstance] Ignore player instance
  * @property {boolean} [useLegacyFFmpeg] Use legacy version of ffmpeg
+ * @property {BridgeProvider} [bridgeProvider] Set bridge provider
+ * @property {object} [ipconfig] IP rotator config
  */
 export interface PlayerInitOptions {
     ytdlOptions?: downloadOptions;
@@ -350,7 +364,10 @@ export interface PlayerInitOptions {
     lockVoiceStateHandler?: boolean;
     blockExtractors?: string[];
     blockStreamFrom?: string[];
-    queryCache?: QueryCache | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryCache?: QueryCacheProvider<any> | null;
     ignoreInstance?: boolean;
     useLegacyFFmpeg?: boolean;
+    bridgeProvider?: BridgeProvider;
+    ipconfig?: IPRotationConfig;
 }

@@ -4,6 +4,7 @@ import { AudioFilters } from '../utils/AudioFilters';
 import { GuildQueue, GuildQueueEvent } from './GuildQueue';
 import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { FFmpegStreamOptions, createFFmpegStream } from '../utils/FFmpegStream';
+import { Exceptions } from '../errors';
 
 type Filters = keyof typeof AudioFilters.filters;
 
@@ -19,7 +20,28 @@ const makeBands = (arr: number[]) => {
     ) as EqualizerBand[];
 };
 
-export const EqualizerConfigurationPreset = {
+type EQPreset = {
+    Flat: EqualizerBand[];
+    Classical: EqualizerBand[];
+    Club: EqualizerBand[];
+    Dance: EqualizerBand[];
+    FullBass: EqualizerBand[];
+    FullBassTreble: EqualizerBand[];
+    FullTreble: EqualizerBand[];
+    Headphones: EqualizerBand[];
+    LargeHall: EqualizerBand[];
+    Live: EqualizerBand[];
+    Party: EqualizerBand[];
+    Pop: EqualizerBand[];
+    Reggae: EqualizerBand[];
+    Rock: EqualizerBand[];
+    Ska: EqualizerBand[];
+    Soft: EqualizerBand[];
+    SoftRock: EqualizerBand[];
+    Techno: EqualizerBand[];
+};
+
+export const EqualizerConfigurationPreset: Readonly<EQPreset> = Object.freeze({
     Flat: makeBands([]),
     Classical: makeBands([-1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -7.2, -7.2, -7.2, -9.6]),
     Club: makeBands([-1.11022e-15, -1.11022e-15, 8.0, 5.6, 5.6, 5.6, 3.2, -1.11022e-15, -1.11022e-15, -1.11022e-15]),
@@ -38,10 +60,11 @@ export const EqualizerConfigurationPreset = {
     Soft: makeBands([4.8, 1.6, -1.11022e-15, -2.4, -1.11022e-15, 4.0, 8.0, 9.6, 11.2, 12.0]),
     SoftRock: makeBands([4.0, 4.0, 2.4, -1.11022e-15, -4.0, -5.6, -3.2, -1.11022e-15, 2.4, 8.8]),
     Techno: makeBands([8.0, 5.6, -1.11022e-15, -5.6, -4.8, -1.11022e-15, 8.0, 9.6, 9.6, 8.8])
-} as const;
+});
 
 export class FFmpegFilterer<Meta = unknown> {
     #ffmpegFilters: Filters[] = [];
+    #inputArgs: string[] = [];
     public constructor(public af: GuildQueueAudioFilters<Meta>) {}
 
     #setFilters(filters: Filters[]) {
@@ -52,9 +75,40 @@ export class FFmpegFilterer<Meta = unknown> {
         this.#ffmpegFilters = [...new Set(filters)];
 
         return this.af.triggerReplay(seekTime).then((t) => {
-            queue.player.events.emit(GuildQueueEvent.audioFiltersUpdate, queue, prev, this.#ffmpegFilters.slice());
+            queue.emit(GuildQueueEvent.audioFiltersUpdate, queue, prev, this.#ffmpegFilters.slice());
             return t;
         });
+    }
+
+    /**
+     * Set input args for FFmpeg
+     */
+    public setInputArgs(args: string[]) {
+        if (!args.every((arg) => typeof arg === 'string')) throw Exceptions.ERR_INVALID_ARG_TYPE('args', 'Array<string>', 'invalid item(s)');
+        this.#inputArgs = args;
+    }
+
+    /**
+     * Get input args
+     */
+    public get inputArgs() {
+        return this.#inputArgs;
+    }
+
+    /**
+     * Get encoder args
+     */
+    public get encoderArgs() {
+        if (!this.filters.length) return [];
+
+        return ['-af', this.toString()];
+    }
+
+    /**
+     * Get final ffmpeg args
+     */
+    public get args() {
+        return this.inputArgs.concat(this.encoderArgs);
     }
 
     /**
@@ -63,6 +117,7 @@ export class FFmpegFilterer<Meta = unknown> {
      * @param options The stream options
      */
     public createStream(source: string | Readable, options: FFmpegStreamOptions) {
+        if (this.#inputArgs.length) options.encoderArgs = [...this.#inputArgs, ...(options.encoderArgs || [])];
         return createFFmpegStream(source, options);
     }
 

@@ -7,13 +7,13 @@ A high level framework for Discord VoIP client.
 ## Installation
 
 ```sh
-$ yarn add --save @discord-player/voice
+$ yarn add @discord-player/voice
 ```
 
 ## Example
 
 ```js
-import pkg from "@discord-player/voice";
+import pkg from '@discord-player/voice';
 
 // other code
 ```

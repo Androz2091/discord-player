@@ -15,9 +15,10 @@ export * from './types/types';
 export * from './utils/FFmpegStream';
 export * from './utils/QueryCache';
 export * from './utils/QueryResolver';
-export * from './utils/FFmpeg';
+export * from '@discord-player/ffmpeg';
 export * from './Player';
 export * from './hooks';
+export * from './utils/IPRotator';
 export {
     AudioFilters as PCMAudioFilters,
     type BiquadFilters,
@@ -30,7 +31,7 @@ export {
     AF_VAPORWAVE_RATE,
     FiltersChain
 } from '@discord-player/equalizer';
-export { createAudioPlayer, AudioPlayer, type CreateAudioPlayerOptions } from '@discordjs/voice';
+export { createAudioPlayer, AudioPlayer, type CreateAudioPlayerOptions } from 'discord-voip';
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
 export const version: string = '[VI]{{inject}}[/VI]';

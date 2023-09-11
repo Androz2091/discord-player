@@ -1,19 +1,20 @@
+import { FFmpeg } from '@discord-player/ffmpeg';
 import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, GuildVoiceChannelResolvable, version as djsVersion } from 'discord.js';
 import { Playlist, Track, SearchResult } from './fabric';
 import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions, GuildQueueEvent } from './manager';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
-import { QueryResolver } from './utils/QueryResolver';
+import { QueryResolver, ResolvedQuery } from './utils/QueryResolver';
 import { Util } from './utils/Util';
-import { generateDependencyReport, version as dVoiceVersion } from '@discordjs/voice';
+import { generateDependencyReport, version as dVoiceVersion } from 'discord-voip';
 import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
 import { BaseExtractor } from './extractors/BaseExtractor';
 import * as _internals from './utils/__internal__';
 import { QueryCache } from './utils/QueryCache';
 import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
-import { FFmpeg } from './utils/FFmpeg';
 import { Exceptions } from './errors';
 import { defaultVoiceStateHandler } from './DefaultVoiceStateHandler';
+import { IPRotator } from './utils/IPRotator';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -30,6 +31,7 @@ export interface PlayerNodeInitializerOptions<T> extends SearchOptions {
     nodeOptions?: GuildNodeCreateOptions<T>;
     connectionOptions?: VoiceConnectConfig;
     audioPlayerOptions?: ResourcePlayOptions;
+    signal?: AbortSignal;
     afterSearch?: (result: SearchResult) => Promise<SearchResult>;
 }
 
@@ -50,6 +52,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     public readonly voiceUtils = new VoiceUtils(this);
     public extractors = new ExtractorExecutionContext(this);
     public events = new PlayerEventsEmitter<GuildQueueEvents>(['error', 'playerError']);
+    public routePlanner: IPRotator | null = null;
 
     /**
      * Creates new Discord Player
@@ -79,7 +82,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             blockExtractors: [],
             blockStreamFrom: [],
             connectionTimeout: 20000,
-            smoothVolume: true,
             lagMonitor: 30000,
             queryCache: options.queryCache === null ? null : options.queryCache || new QueryCache(this),
             useLegacyFFmpeg: false,
@@ -97,9 +99,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 const start = performance.now();
                 this.#lagMonitorTimeout = setTimeout(() => {
                     this.#lastLatency = performance.now() - start;
-                    this.debug(`[Lag Monitor] Event loop latency: ${this.#lastLatency}ms`);
+                    if (this.hasDebugger) this.debug(`[Lag Monitor] Event loop latency: ${this.#lastLatency}ms`);
                 }, 0).unref();
             }, this.options.lagMonitor).unref();
+        }
+
+        if (this.options.ipconfig) {
+            this.routePlanner = new IPRotator(this.options.ipconfig);
         }
 
         _internals.addPlayer(this);
@@ -112,6 +118,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 enumerable: false
             });
         }
+    }
+
+    public get hasDebugger() {
+        return this.listenerCount('debug') > 0;
     }
 
     /**
@@ -131,10 +141,22 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param client The client that instantiated player
      * @param options Player initializer options
      */
-    public static singleton(client: Client, options: PlayerInitOptions = {}) {
+    public static singleton(client: Client, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
         return new Player(client, {
             ...options,
             ignoreInstance: false
+        });
+    }
+
+    /**
+     * Creates new discord-player instance.
+     * @param client The client that instantiated player
+     * @param options Player initializer options
+     */
+    public static create(client: Client, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
+        return new Player(client, {
+            ...options,
+            ignoreInstance: true
         });
     }
 
@@ -303,13 +325,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         const queue = this.nodes.create(vc.guild, options.nodeOptions);
 
-        this.debug(`[AsyncQueue] Acquiring an entry...`);
-        const entry = queue.tasksQueue.acquire();
-        this.debug(`[AsyncQueue] Entry ${entry.id} was acquired successfully!`);
+        if (this.hasDebugger) this.debug(`[AsyncQueue] Acquiring an entry...`);
+        const entry = queue.tasksQueue.acquire({ signal: options.signal });
+        if (this.hasDebugger) this.debug(`[AsyncQueue] Entry ${entry.id} was acquired successfully!`);
 
-        this.debug(`[AsyncQueue] Waiting for the queue to resolve...`);
+        if (this.hasDebugger) this.debug(`[AsyncQueue] Waiting for the queue to resolve...`);
         await entry.getTask();
-        this.debug(`[AsyncQueue] Entry ${entry.id} was resolved!`);
+        if (this.hasDebugger) this.debug(`[AsyncQueue] Entry ${entry.id} was resolved!`);
 
         try {
             if (!queue.channel) await queue.connect(vc, options.connectionOptions);
@@ -321,7 +343,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             }
             if (!queue.isPlaying()) await queue.node.play(null, options.audioPlayerOptions);
         } finally {
-            this.debug(`[AsyncQueue] Releasing an entry from the queue...`);
+            if (this.hasDebugger) this.debug(`[AsyncQueue] Releasing an entry from the queue...`);
             queue.tasksQueue.release();
         }
 
@@ -345,37 +367,37 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * console.log(result); // Logs `SearchResult` object
      * ```
      */
-    public async search(query: string | Track | Track[] | Playlist | SearchResult, options: SearchOptions = {}): Promise<SearchResult> {
-        if (query instanceof SearchResult) return query;
+    public async search(searchQuery: string | Track | Track[] | Playlist | SearchResult, options: SearchOptions = {}): Promise<SearchResult> {
+        if (searchQuery instanceof SearchResult) return searchQuery;
 
         if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
         options.blockExtractors ??= this.options.blockExtractors;
         options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 
-        if (query instanceof Track) {
+        if (searchQuery instanceof Track) {
             return new SearchResult(this, {
-                playlist: query.playlist || null,
-                tracks: [query],
-                query: query.title,
-                extractor: query.extractor,
-                queryType: query.queryType,
+                playlist: searchQuery.playlist || null,
+                tracks: [searchQuery],
+                query: searchQuery.title,
+                extractor: searchQuery.extractor,
+                queryType: searchQuery.queryType,
                 requestedBy: options.requestedBy
             });
         }
 
-        if (query instanceof Playlist) {
+        if (searchQuery instanceof Playlist) {
             return new SearchResult(this, {
-                playlist: query,
-                tracks: query.tracks,
-                query: query.title,
-                extractor: query.tracks[0]?.extractor,
+                playlist: searchQuery,
+                tracks: searchQuery.tracks,
+                query: searchQuery.title,
+                extractor: searchQuery.tracks[0]?.extractor,
                 queryType: QueryType.AUTO,
                 requestedBy: options.requestedBy
             });
         }
 
-        if (Array.isArray(query)) {
-            const tracks = query.filter((t) => t instanceof Track);
+        if (Array.isArray(searchQuery)) {
+            const tracks = searchQuery.filter((t) => t instanceof Track);
             return new SearchResult(this, {
                 playlist: null,
                 tracks,
@@ -386,17 +408,18 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             });
         }
 
-        this.debug(`Searching ${query}`);
+        if (this.hasDebugger) this.debug(`Searching ${searchQuery}`);
 
         let extractor: BaseExtractor | null = null;
 
         options.searchEngine ??= QueryType.AUTO;
 
-        this.debug(`Search engine set to ${options.searchEngine}`);
+        if (this.hasDebugger) this.debug(`Search engine set to ${options.searchEngine}`);
 
-        const queryType = options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(query, options.fallbackSearchEngine) : options.searchEngine;
+        const { type: queryType, query } =
+            options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(searchQuery, options.fallbackSearchEngine) : ({ type: options.searchEngine, query: searchQuery } as ResolvedQuery);
 
-        this.debug(`Query type identified as ${queryType}`);
+        if (this.hasDebugger) this.debug(`Query type identified as ${queryType}`);
 
         // force particular extractor
         if (options.searchEngine.startsWith('ext:')) {
@@ -414,7 +437,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         if (!extractor) {
             // cache validation
             if (!options.ignoreCache) {
-                this.debug(`Checking cache...`);
+                if (this.hasDebugger) this.debug(`Checking cache...`);
                 const res = await this.queryCache?.resolve({
                     query,
                     queryType,
@@ -422,14 +445,14 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 });
                 // cache hit
                 if (res?.hasTracks()) {
-                    this.debug(`Cache hit for query ${query}`);
+                    if (this.hasDebugger) this.debug(`Cache hit for query ${query}`);
                     return res;
                 }
 
-                this.debug(`Cache miss for query ${query}`);
+                if (this.hasDebugger) this.debug(`Cache miss for query ${query}`);
             }
 
-            this.debug(`Executing extractors...`);
+            if (this.hasDebugger) this.debug(`Executing extractors...`);
 
             // cache miss
             extractor =
@@ -443,7 +466,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         // no extractors available
         if (!extractor) {
-            this.debug('Failed to find appropriate extractor');
+            if (this.hasDebugger) this.debug('Failed to find appropriate extractor');
             return new SearchResult(this, {
                 query,
                 queryType,
@@ -451,16 +474,17 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             });
         }
 
-        this.debug(`Executing metadata query using ${extractor.identifier} extractor...`);
+        if (this.hasDebugger) this.debug(`Executing metadata query using ${extractor.identifier} extractor...`);
         const res = await extractor
             .handle(query, {
                 type: queryType as SearchQueryType,
-                requestedBy: options.requestedBy as User
+                requestedBy: options.requestedBy as User,
+                requestOptions: options.requestOptions
             })
             .catch(() => null);
 
         if (res) {
-            this.debug('Metadata query was successful!');
+            if (this.hasDebugger) this.debug('Metadata query was successful!');
             const result = new SearchResult(this, {
                 query,
                 queryType,
@@ -471,25 +495,26 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             });
 
             if (!options.ignoreCache) {
-                this.debug(`Adding data to cache...`);
+                if (this.hasDebugger) this.debug(`Adding data to cache...`);
                 await this.queryCache?.addData(result);
             }
 
             return result;
         }
 
-        this.debug('Failed to find result using appropriate extractor. Querying all extractors...');
+        if (this.hasDebugger) this.debug('Failed to find result using appropriate extractor. Querying all extractors...');
         const result = await this.extractors.run(
             async (ext) =>
                 !options.blockExtractors?.includes(ext.identifier) &&
                 (await ext.validate(query)) &&
                 ext.handle(query, {
                     type: queryType as SearchQueryType,
-                    requestedBy: options.requestedBy as User
+                    requestedBy: options.requestedBy as User,
+                    requestOptions: options.requestOptions
                 })
         );
         if (!result?.result) {
-            this.debug(`Failed to query metadata query using ${result?.extractor.identifier || 'N/A'} extractor.`);
+            if (this.hasDebugger) this.debug(`Failed to query metadata query using ${result?.extractor.identifier || 'N/A'} extractor.`);
             return new SearchResult(this, {
                 query,
                 queryType,
@@ -498,7 +523,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             });
         }
 
-        this.debug(`Metadata query was successful using ${result.extractor.identifier}!`);
+        if (this.hasDebugger) this.debug(`Metadata query was successful using ${result.extractor.identifier}!`);
 
         const data = new SearchResult(this, {
             query,
@@ -510,7 +535,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         });
 
         if (!options.ignoreCache) {
-            this.debug(`Adding data to cache...`);
+            if (this.hasDebugger) this.debug(`Adding data to cache...`);
             await this.queryCache?.addData(data);
         }
 
@@ -518,7 +543,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     }
 
     /**
-     * Generates a report of the dependencies used by the `@discordjs/voice` module. Useful for debugging.
+     * Generates a report of the dependencies used by the `discord-voip` module. Useful for debugging.
      * @example ```typescript
      * console.log(player.scanDeps());
      * // -> logs dependencies report
@@ -527,20 +552,20 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      */
     public scanDeps() {
         const line = '-'.repeat(50);
-        const runtime = 'Bun' in globalThis ? 'bun' : 'Deno' in globalThis ? 'deno' : 'node';
+        const runtime = 'Bun' in globalThis ? 'Bun' : 'Deno' in globalThis ? 'Deno' : 'Node';
         const depsReport = [
             'Discord Player',
             line,
             `- discord-player: ${Player.version}`,
-            `- @discordjs/voice: ${dVoiceVersion}`,
+            `- discord-voip: ${dVoiceVersion}`,
             `- discord.js: ${djsVersion}`,
-            `- ${runtime} version: ${process.version}`,
+            `- Node version: ${process.version} (Detected Runtime: ${runtime})`,
             (() => {
                 if (this.options.useLegacyFFmpeg) return '- ffmpeg: N/A (using legacy ffmpeg)';
                 const info = FFmpeg.locateSafe();
                 if (!info) return 'FFmpeg/Avconv not found';
 
-                return [`- ffmpeg: ${info.version}`, `- command: ${info.command}`, `- libopus: ${info.metadata!.includes('--enable-libopus')}`].join('\n');
+                return [`- ffmpeg: ${info.version}`, `- command: ${info.command}`, `- static: ${info.isStatic}`, `- libopus: ${info.metadata!.includes('--enable-libopus')}`].join('\n');
             })(),
             '\n',
             'Loaded Extractors:',
@@ -550,7 +575,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                     return m.identifier;
                 })
                 .join('\n') || 'N/A',
-            '\n\n@discordjs/voice',
+            '\n\ndiscord-voip',
             generateDependencyReport()
         ];
 

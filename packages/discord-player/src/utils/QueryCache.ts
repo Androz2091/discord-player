@@ -11,7 +11,13 @@ export interface QueryCacheOptions {
 // 5h
 const DEFAULT_EXPIRY_TIMEOUT = 18_000_000;
 
-export class QueryCache {
+export interface QueryCacheProvider<T> {
+    getData(): Promise<DiscordPlayerQueryResultCache<T>[]>;
+    addData(data: SearchResult): Promise<void>;
+    resolve(context: QueryCacheResolverContext): Promise<SearchResult>;
+}
+
+export class QueryCache implements QueryCacheProvider<Track> {
     #defaultCache = new Map<string, DiscordPlayerQueryResultCache<Track>>();
     public timer: NodeJS.Timer;
     public constructor(

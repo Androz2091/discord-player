@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import http from 'http';
 import https from 'https';
-import { getFetch } from '../extractors/common/helper';
+import { fetch } from '../extractors/common/helper';
 
 class Vimeo {
     constructor() {
@@ -39,7 +39,7 @@ class Vimeo {
         const url = `https://player.vimeo.com/video/${id}`;
 
         try {
-            const res = await getFetch(url);
+            const res = await fetch(url);
             const data = await res.text();
             const json = JSON.parse(data.split('window.playerConfig =')[1].split(';')[0].trim());
 

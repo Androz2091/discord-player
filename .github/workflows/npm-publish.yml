@@ -10,19 +10,19 @@ jobs:
     publish-npm:
         runs-on: ubuntu-20.04
         env:
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
         steps:
             - uses: actions/checkout@v2
             - uses: actions/setup-node@v1
               with:
-                  node-version: 18
+                  node-version: 20
                   registry-url: https://registry.npmjs.org/
             - name: Cache yarn
               uses: actions/cache@v3
               with:
-                path: .yarn/cache
-                key: yarn-cache-node-18
+                  path: .yarn/cache
+                  key: yarn-cache-node-20
             - run: yarn install --immutable
             - name: Build and publish
               uses: ./.github/actions/npm

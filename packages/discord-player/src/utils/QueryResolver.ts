@@ -19,6 +19,11 @@ const youtubeVideoURLRegex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com
 const youtubeVideoIdRegex = /^[a-zA-Z0-9-_]{11}$/;
 // #endregion scary things above *sigh*
 
+export interface ResolvedQuery {
+    type: (typeof QueryType)[keyof typeof QueryType];
+    query: string;
+}
+
 class QueryResolver {
     /**
      * Query resolver
@@ -46,26 +51,35 @@ class QueryResolver {
      * Resolves the given search query
      * @param {string} query The query
      */
-    static resolve(query: string, fallbackSearchEngine: (typeof QueryType)[keyof typeof QueryType] = QueryType.AUTO_SEARCH): (typeof QueryType)[keyof typeof QueryType] {
+    static resolve(query: string, fallbackSearchEngine: (typeof QueryType)[keyof typeof QueryType] = QueryType.AUTO_SEARCH): ResolvedQuery {
         if (!TypeUtil.isString(query)) throw Exceptions.ERR_INVALID_ARG_TYPE(query, 'string', typeof query);
         if (!query.length) throw Exceptions.ERR_INFO_REQUIRED('query', String(query));
-        query = !query.includes('youtube.com') ? query.trim() : query.replace(/(m(usic)?|gaming)\./, '').trim();
 
-        if (soundcloudPlaylistRegex.test(query)) return QueryType.SOUNDCLOUD_PLAYLIST;
-        if (soundcloudTrackRegex.test(query)) return QueryType.SOUNDCLOUD_TRACK;
-        if (spotifyPlaylistRegex.test(query)) return QueryType.SPOTIFY_PLAYLIST;
-        if (spotifyAlbumRegex.test(query)) return QueryType.SPOTIFY_ALBUM;
-        if (spotifySongRegex.test(query)) return QueryType.SPOTIFY_SONG;
-        if (youtubePlaylistRegex.test(query)) return QueryType.YOUTUBE_PLAYLIST;
-        if (QueryResolver.validateId(query) || QueryResolver.validateURL(query)) return QueryType.YOUTUBE_VIDEO;
-        if (vimeoRegex.test(query)) return QueryType.VIMEO;
-        if (reverbnationRegex.test(query)) return QueryType.REVERBNATION;
-        if (appleMusicAlbumRegex.test(query)) return QueryType.APPLE_MUSIC_ALBUM;
-        if (appleMusicPlaylistRegex.test(query)) return QueryType.APPLE_MUSIC_PLAYLIST;
-        if (appleMusicSongRegex.test(query)) return QueryType.APPLE_MUSIC_SONG;
-        if (attachmentRegex.test(query)) return QueryType.ARBITRARY;
+        // sanitize query
+        if (query.includes('youtube.com')) query = query.replace(/(m(usic)?|gaming)\./, '').trim();
+        if (query.includes('spotify.com')) query = query.replace(/intl-([a-zA-Z]+)\//, '');
+        if (query.includes('youtube.com') && query.includes('&list=')) {
+            const id = query.split('&list=')[1]?.split('&')?.[0];
+            if (id) query = `https://www.youtube.com/playlist?list=${id}`;
+        }
 
-        return fallbackSearchEngine;
+        const resolver = (type: typeof fallbackSearchEngine) => ({ type, query });
+
+        if (soundcloudPlaylistRegex.test(query)) return resolver(QueryType.SOUNDCLOUD_PLAYLIST);
+        if (soundcloudTrackRegex.test(query)) return resolver(QueryType.SOUNDCLOUD_TRACK);
+        if (spotifyPlaylistRegex.test(query)) return resolver(QueryType.SPOTIFY_PLAYLIST);
+        if (spotifyAlbumRegex.test(query)) return resolver(QueryType.SPOTIFY_ALBUM);
+        if (spotifySongRegex.test(query)) return resolver(QueryType.SPOTIFY_SONG);
+        if (youtubePlaylistRegex.test(query)) return resolver(QueryType.YOUTUBE_PLAYLIST);
+        if (QueryResolver.validateId(query) || QueryResolver.validateURL(query)) return resolver(QueryType.YOUTUBE_VIDEO);
+        if (vimeoRegex.test(query)) return resolver(QueryType.VIMEO);
+        if (reverbnationRegex.test(query)) return resolver(QueryType.REVERBNATION);
+        if (appleMusicAlbumRegex.test(query)) return resolver(QueryType.APPLE_MUSIC_ALBUM);
+        if (appleMusicPlaylistRegex.test(query)) return resolver(QueryType.APPLE_MUSIC_PLAYLIST);
+        if (appleMusicSongRegex.test(query)) return resolver(QueryType.APPLE_MUSIC_SONG);
+        if (attachmentRegex.test(query)) return resolver(QueryType.ARBITRARY);
+
+        return resolver(fallbackSearchEngine);
     }
 
     /**
@@ -74,7 +88,7 @@ class QueryResolver {
      * @returns {string}
      */
     static getVimeoID(query: string): string | null | undefined {
-        return QueryResolver.resolve(query) === QueryType.VIMEO
+        return QueryResolver.resolve(query).type === QueryType.VIMEO
             ? query
                   .split('/')
                   .filter((x) => !!x)

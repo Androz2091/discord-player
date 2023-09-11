@@ -19,6 +19,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
     onBeforeCreateStream?: OnBeforeCreateStreamHandler;
     onAfterCreateStream?: OnAfterCreateStreamHandler;
     repeatMode?: QueueRepeatMode;
+    pauseOnEmpty?: boolean;
     leaveOnEmpty?: boolean;
     leaveOnEmptyCooldown?: number;
     leaveOnEnd?: boolean;
@@ -75,7 +76,8 @@ export class GuildNodeManager<Meta = unknown> {
         options.bufferingTimeout ??= 1000;
         options.maxSize ??= Infinity;
         options.maxHistorySize ??= Infinity;
-        options.preferBridgedMetadata = Boolean(options.preferBridgedMetadata);
+        options.preferBridgedMetadata ??= true;
+        options.pauseOnEmpty ??= true;
 
         if (getGlobalRegistry().has('@[onBeforeCreateStream]') && !options.onBeforeCreateStream) {
             options.onBeforeCreateStream = getGlobalRegistry().get('@[onBeforeCreateStream]') as OnBeforeCreateStreamHandler;
@@ -112,7 +114,8 @@ export class GuildNodeManager<Meta = unknown> {
             noEmitInsert: options.noEmitInsert ?? false,
             preferBridgedMetadata: options.preferBridgedMetadata,
             maxHistorySize: options.maxHistorySize,
-            maxSize: options.maxSize
+            maxSize: options.maxSize,
+            pauseOnEmpty: options.pauseOnEmpty
         });
 
         this.cache.set(server.id, queue);
@@ -150,6 +153,7 @@ export class GuildNodeManager<Meta = unknown> {
             throw Exceptions.ERR_NO_GUILD_QUEUE('Cannot delete non-existing queue');
         }
 
+        queue.setTransitioning(true);
         queue.node.stop(true);
         queue.connection?.removeAllListeners();
         queue.dispatcher?.removeAllListeners();

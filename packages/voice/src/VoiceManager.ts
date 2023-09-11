@@ -1,5 +1,5 @@
 import { Collection } from '@discord-player/utils';
-import { DiscordGatewayAdapterImplementerMethods } from '@discordjs/voice';
+import { DiscordGatewayAdapterImplementerMethods } from 'discord-voip';
 // import { DiscordVoiceAdapter } from './DiscordVoiceAdapter';
 import { VoiceConnection } from './VoiceConnection';
 

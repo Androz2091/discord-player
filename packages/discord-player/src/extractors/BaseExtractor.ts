@@ -6,6 +6,7 @@ import { PlayerEvents, SearchQueryType } from '../types/types';
 import { ExtractorExecutionContext } from './ExtractorExecutionContext';
 import type { RequestOptions } from 'http';
 import { Exceptions } from '../errors';
+import type { GuildQueueHistory } from '../manager';
 
 export class BaseExtractor<T extends object = object> {
     /**
@@ -90,8 +91,9 @@ export class BaseExtractor<T extends object = object> {
      * Get related tracks for the given track
      * @param track The track source
      */
-    public async getRelatedTracks(track: Track): Promise<ExtractorInfo> {
+    public async getRelatedTracks(track: Track, history: GuildQueueHistory): Promise<ExtractorInfo> {
         void track;
+        void history;
         throw Exceptions.ERR_NOT_IMPLEMENTED(`${this.constructor.name}.getRelatedTracks()`);
     }
 
@@ -128,6 +130,13 @@ export class BaseExtractor<T extends object = object> {
      */
     public debug(message: string) {
         return this.context.player.debug(message);
+    }
+
+    /**
+     * IP rotator instance, if available
+     */
+    public get routePlanner() {
+        return this.context.player.routePlanner;
     }
 }
 

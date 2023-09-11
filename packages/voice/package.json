@@ -40,6 +40,6 @@
   },
   "dependencies": {
     "@discord-player/utils": "workspace:^",
-    "@discordjs/voice": "^0.16.0"
+    "discord-voip": "^0.1.2"
   }
 }

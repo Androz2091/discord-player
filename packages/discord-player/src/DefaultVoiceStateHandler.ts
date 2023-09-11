@@ -15,6 +15,24 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
         return void player.events.emit(GuildQueueEvent.disconnect, queue);
     }
 
+    if (queue.options.pauseOnEmpty) {
+        const isEmpty = Util.isVoiceEmpty(queue.channel);
+
+        if (queue.hasDebugger) {
+            if (isEmpty) {
+                queue.node.setPaused(true);
+                Reflect.set(queue, '__pausedOnEmpty', true);
+                queue.debug('Voice channel is empty and options#pauseOnEmpty is true, pausing...');
+            } else {
+                if (Reflect.get(queue, '__pausedOnEmpty')) {
+                    queue.node.setPaused(false);
+                    Reflect.set(queue, '__pausedOnEmpty', false);
+                    queue.debug('Voice channel is not empty and options#pauseOnEmpty is true, resuming...');
+                }
+            }
+        }
+    }
+
     if (!oldState.channelId && newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
         if (newState.serverMute != null && oldState.serverMute !== newState.serverMute) {
             queue.node.setPaused(newState.serverMute);
@@ -67,7 +85,8 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
             }
         } else {
             if (newState.channelId !== queue.channel.id) {
-                if (!Util.isVoiceEmpty(queue.channel)) return;
+                const channelEmpty = Util.isVoiceEmpty(queue.channel!);
+                if (!channelEmpty) return;
                 if (queue.timeouts.has(`empty_${oldState.guild.id}`)) return;
                 const timeout = setTimeout(() => {
                     if (!Util.isVoiceEmpty(queue.channel!)) return;

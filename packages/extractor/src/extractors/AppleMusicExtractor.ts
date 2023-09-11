@@ -1,33 +1,27 @@
-import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
+import { ExtractorInfo, ExtractorSearchContext, GuildQueueHistory, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import { AppleMusic } from '../internal';
 import { Readable } from 'stream';
-import { YoutubeExtractor } from './YoutubeExtractor';
-import { StreamFN, loadYtdl, pullYTMetadata } from './common/helper';
+import { StreamFN, pullYTMetadata } from './common/helper';
+import { BridgeProvider } from './common/BridgeProvider';
+import { BridgedExtractor } from './BridgedExtractor';
 
 export interface AppleMusicExtractorInit {
     createStream?: (ext: AppleMusicExtractor, url: string) => Promise<Readable | string>;
+    bridgeProvider?: BridgeProvider;
 }
 
-export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> {
+export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorInit> {
     public static identifier = 'com.discord-player.applemusicextractor' as const;
     private _stream!: StreamFN;
-    private _isYtdl = false;
 
     public async activate(): Promise<void> {
         const fn = this.options.createStream;
 
         if (typeof fn === 'function') {
-            this._isYtdl = false;
             this._stream = (q: string) => {
                 return fn(this, q);
             };
-
-            return;
         }
-
-        const lib = await loadYtdl(this.context.player.options.ytdlOptions);
-        this._stream = lib.stream;
-        this._isYtdl = true;
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
@@ -42,12 +36,16 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
         ]).some((t) => t === type);
     }
 
-    public async getRelatedTracks(track: Track) {
-        if (track.queryType === QueryType.APPLE_MUSIC_SONG)
-            return this.handle(track.author || track.title, {
+    public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
+        if (track.queryType === QueryType.APPLE_MUSIC_SONG) {
+            const data = await this.handle(track.author || track.title, {
                 type: QueryType.APPLE_MUSIC_SEARCH,
                 requestedBy: track.requestedBy
             });
+
+            const unique = data.tracks.filter((t) => !history.tracks.some((h) => h.url === t.url));
+            return unique.length > 0 ? this.createResponse(null, unique) : this.createResponse();
+        }
 
         return this.createResponse();
     }
@@ -80,7 +78,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: await pullYTMetadata(this, track)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                                 };
                             }
                         });
@@ -135,7 +133,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             requestMetadata: async () => {
                                 return {
                                     source: info,
-                                    bridge: await pullYTMetadata(this, track)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                                 };
                             }
                         });
@@ -189,7 +187,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: await pullYTMetadata(this, track)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                                 };
                             }
                         });
@@ -225,7 +223,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                     requestMetadata: async () => {
                         return {
                             source: info,
-                            bridge: await pullYTMetadata(this, track)
+                            bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                         };
                     }
                 });
@@ -240,27 +238,23 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
     }
 
     public async stream(info: Track): Promise<string | Readable> {
-        if (!this._stream) {
-            throw new Error(`Could not initialize streaming api for '${this.constructor.name}'`);
+        if (this._stream) {
+            const stream = await this._stream(info.url, this);
+            if (typeof stream === 'string') return stream;
+            return stream;
         }
 
-        let url = info.url;
+        const provider = this.bridgeProvider;
+        if (!provider) throw new Error(`Could not find bridge provider for '${this.constructor.name}'`);
 
-        if (this._isYtdl) {
-            if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
-            else {
-                const meta = await pullYTMetadata(this, info);
-                if (meta)
-                    info.setMetadata({
-                        ...(info.metadata || {}),
-                        bridge: meta
-                    });
-                const _url = meta?.url;
-                if (!_url) throw new Error('Failed to fetch resources for ytdl streaming');
-                info.raw.url = url = _url;
-            }
-        }
+        const data = await provider.resolve(this, info);
+        if (!data) throw new Error('Failed to bridge this track');
 
-        return this._stream(url);
+        info.setMetadata({
+            ...(info.metadata || {}),
+            bridge: data.data
+        });
+
+        return await provider.stream(data);
     }
 }

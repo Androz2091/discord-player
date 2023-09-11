@@ -1,9 +1,10 @@
-import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
+import { ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import type { Readable } from 'stream';
-import { YoutubeExtractor } from './YoutubeExtractor';
-import { StreamFN, getFetch, loadYtdl, pullYTMetadata } from './common/helper';
+import { StreamFN, fetch, pullYTMetadata } from './common/helper';
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
 import { SpotifyAPI } from '../internal';
+import { BridgeProvider } from './common/BridgeProvider';
+import { BridgedExtractor } from './BridgedExtractor';
 
 const re = /^(?:https:\/\/open\.spotify\.com\/(intl-([a-z]|[A-Z]){0,3}\/)?(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track)(?:[/:])([A-Za-z0-9]+).*$/;
 
@@ -11,12 +12,12 @@ export interface SpotifyExtractorInit {
     clientId?: string | null;
     clientSecret?: string | null;
     createStream?: (ext: SpotifyExtractor, url: string) => Promise<Readable | string>;
+    bridgeProvider?: BridgeProvider;
 }
 
-export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
+export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
     public static identifier = 'com.discord-player.spotifyextractor' as const;
     private _stream!: StreamFN;
-    private _isYtdl = false;
     private _lib!: Spotify;
     private _credentials = {
         clientId: this.options.clientId || process.env.DP_SPOTIFY_CLIENT_ID || null,
@@ -25,22 +26,15 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
     public internal = new SpotifyAPI(this._credentials);
 
     public async activate(): Promise<void> {
-        const fn = this.options.createStream;
+        this._lib = spotify(fetch);
+        if (this.internal.isTokenExpired()) await this.internal.requestToken();
 
+        const fn = this.options.createStream;
         if (typeof fn === 'function') {
-            this._isYtdl = false;
             this._stream = (q: string) => {
                 return fn(this, q);
             };
-
-            return;
         }
-
-        const lib = await loadYtdl(this.context.player.options.ytdlOptions);
-        this._stream = lib.stream;
-        this._lib = spotify(getFetch);
-        this._isYtdl = true;
-        if (this.internal.isTokenExpired()) await this.internal.requestToken();
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
@@ -91,7 +85,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: spotifyData,
-                                    bridge: await pullYTMetadata(this, track)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                                 };
                             }
                         });
@@ -123,7 +117,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                     requestMetadata: async () => {
                         return {
                             source: spotifyData,
-                            bridge: await pullYTMetadata(this, spotifyTrack)
+                            bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, spotifyTrack)).data : await pullYTMetadata(this, spotifyTrack)
                         };
                     }
                 });
@@ -175,7 +169,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: spotifyData,
-                                    bridge: await pullYTMetadata(this, data)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, data)).data : await pullYTMetadata(this, data)
                                 };
                             }
                         });
@@ -225,7 +219,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: await pullYTMetadata(this, data)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, data)).data : await pullYTMetadata(this, data)
                                 };
                             }
                         });
@@ -280,7 +274,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: spotifyData,
-                                    bridge: await pullYTMetadata(this, data)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, data)).data : await pullYTMetadata(this, data)
                                 };
                             }
                         });
@@ -330,7 +324,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: await pullYTMetadata(this, data)
+                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, data)).data : await pullYTMetadata(this, data)
                                 };
                             }
                         });
@@ -348,28 +342,24 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
     }
 
     public async stream(info: Track): Promise<string | Readable> {
-        if (!this._stream) {
-            throw new Error(`Could not initialize streaming api for '${this.constructor.name}'`);
+        if (this._stream) {
+            const stream = await this._stream(info.url, this);
+            if (typeof stream === 'string') return stream;
+            return stream;
         }
 
-        let url = info.url;
+        const provider = this.bridgeProvider;
+        if (!provider) throw new Error(`Could not find bridge provider for '${this.constructor.name}'`);
 
-        if (this._isYtdl) {
-            if (YoutubeExtractor.validateURL(info.raw.url)) url = info.raw.url;
-            else {
-                const meta = await pullYTMetadata(this, info);
-                if (meta)
-                    info.setMetadata({
-                        ...(info.metadata || {}),
-                        bridge: meta
-                    });
-                const _url = meta?.url;
-                if (!_url) throw new Error('Failed to fetch resources for ytdl streaming');
-                info.raw.url = url = _url;
-            }
-        }
+        const data = await provider.resolve(this, info);
+        if (!data) throw new Error('Failed to bridge this track');
 
-        return this._stream(url);
+        info.setMetadata({
+            ...(info.metadata || {}),
+            bridge: data.data
+        });
+
+        return await provider.stream(data);
     }
 
     public parse(q: string) {

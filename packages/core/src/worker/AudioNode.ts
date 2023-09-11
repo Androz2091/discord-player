@@ -1,4 +1,4 @@
-import { createAudioPlayer, createAudioResource, StreamType, VoiceConnection } from '@discordjs/voice';
+import { createAudioPlayer, createAudioResource, StreamType, VoiceConnection } from 'discord-voip';
 
 export interface NodePlayerOptions {
     query: string;

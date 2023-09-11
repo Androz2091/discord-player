@@ -11,7 +11,7 @@ export function defineConfig({
     entry = ['./src/index.ts'],
     skipNodeModulesBundle = true,
     sourcemap = 'inline',
-    target = 'ES2020',
+    target = 'es2020',
     silent = true,
     shims = true
 }: Options) {

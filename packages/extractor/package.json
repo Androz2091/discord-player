@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/extractor",
-  "version": "4.3.1",
+  "version": "4.4.3",
   "description": "Extractors for discord-player",
   "keywords": [
     "discord-player",
@@ -35,20 +35,23 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
+    "@distube/ytdl-core": "^4.13.0",
     "@types/node": "^18.11.18",
-    "@types/node-fetch": "^2.6.2",
     "discord-player": "workspace:^",
+    "mediaplex": "^0.0.6",
     "play-dl": "^1.9.6",
+    "youtube-ext": "^1.1.14",
     "yt-stream": "^1.4.7",
     "ytdl-core": "^4.11.4"
   },
   "dependencies": {
     "file-type": "^16.5.4",
     "genius-lyrics": "^4.4.3",
+    "isomorphic-unfetch": "^4.0.2",
     "node-html-parser": "^6.1.4",
     "reverbnation-scraper": "^2.0.0",
     "soundcloud.ts": "^0.5.0",
-    "spotify-url-info": "^3.2.5",
+    "spotify-url-info": "^3.2.6",
     "youtube-sr": "^4.3.4"
   },
   "typedoc": {
