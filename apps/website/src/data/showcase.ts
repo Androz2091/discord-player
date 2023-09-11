@@ -20,7 +20,7 @@ export const ShowcaseResource: IShowcase = {
         {
             name: 'Mirasaki Music Bot',
             description: 'Complete (45+ commands) music bot with persistent settings, effects, filters, auto-play, DJ-roles, and much more.',
-            version: 'v6.5.0',
+            version: 'v6.6.3',
             url: 'https://github.com/Mirasaki/mirasaki-music-bot'
         },
         {
