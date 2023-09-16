@@ -114,9 +114,9 @@ __metadata:
     "@types/node": ^18.11.18
     discord-player: "workspace:^"
     file-type: ^16.5.4
-    genius-lyrics: ^4.4.3
+    genius-lyrics: ^4.4.6
     isomorphic-unfetch: ^4.0.2
-    mediaplex: ^0.0.6
+    mediaplex: ^0.0.7
     node-html-parser: ^6.1.4
     play-dl: ^1.9.6
     reverbnation-scraper: ^2.0.0
@@ -124,7 +124,7 @@ __metadata:
     spotify-url-info: ^3.2.6
     youtube-ext: ^1.1.14
     youtube-sr: ^4.3.4
-    yt-stream: ^1.4.7
+    yt-stream: ^1.4.8
     ytdl-core: ^4.11.4
   languageName: unknown
   linkType: soft
@@ -4202,35 +4202,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cheerio-select@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "cheerio-select@npm:2.1.0"
-  dependencies:
-    boolbase: ^1.0.0
-    css-select: ^5.1.0
-    css-what: ^6.1.0
-    domelementtype: ^2.3.0
-    domhandler: ^5.0.3
-    domutils: ^3.0.1
-  checksum: 843d6d479922f28a6c5342c935aff1347491156814de63c585a6eb73baf7bb4185c1b4383a1195dca0f12e3946d737c7763bcef0b9544c515d905c5c44c5308b
-  languageName: node
-  linkType: hard
-
-"cheerio@npm:^1.0.0-rc.9":
-  version: 1.0.0-rc.12
-  resolution: "cheerio@npm:1.0.0-rc.12"
-  dependencies:
-    cheerio-select: ^2.1.0
-    dom-serializer: ^2.0.0
-    domhandler: ^5.0.3
-    domutils: ^3.0.1
-    htmlparser2: ^8.0.1
-    parse5: ^7.0.0
-    parse5-htmlparser2-tree-adapter: ^7.0.0
-  checksum: 5d4c1b7a53cf22d3a2eddc0aff70cf23cbb30d01a4c79013e703a012475c02461aa1fcd99127e8d83a02216386ed6942b2c8103845fd0812300dd199e6e7e054
-  languageName: node
-  linkType: hard
-
 "chokidar@npm:^3.5.1, chokidar@npm:^3.5.3":
   version: 3.5.3
   resolution: "chokidar@npm:3.5.3"
@@ -4869,7 +4840,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"domhandler@npm:^5.0.1, domhandler@npm:^5.0.2, domhandler@npm:^5.0.3":
+"domhandler@npm:^5.0.1, domhandler@npm:^5.0.2":
   version: 5.0.3
   resolution: "domhandler@npm:5.0.3"
   dependencies:
@@ -4966,7 +4937,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"entities@npm:^4.2.0, entities@npm:^4.3.0, entities@npm:^4.4.0":
+"entities@npm:^4.2.0":
   version: 4.4.0
   resolution: "entities@npm:4.4.0"
   checksum: 84d250329f4b56b40fa93ed067b194db21e8815e4eb9b59f43a086f0ecd342814f6bc483de8a77da5d64e0f626033192b1b4f1792232a7ea6b970ebe0f3187c2
@@ -6199,13 +6170,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"genius-lyrics@npm:^4.4.3":
-  version: 4.4.3
-  resolution: "genius-lyrics@npm:4.4.3"
+"genius-lyrics@npm:^4.4.6":
+  version: 4.4.6
+  resolution: "genius-lyrics@npm:4.4.6"
   dependencies:
-    cheerio: ^1.0.0-rc.9
-    undici: ^5.8.2
-  checksum: 5612f4b97503a5e1fab912ccd46c3dfe95495e2f0b90179a718a4454422fbd0370690734dad5d79e0c043e533ee4e3bd90540de0e6ab6668875b3cb0947a0391
+    node-html-parser: ^6.1.9
+    undici: ^5.24.0
+  checksum: 05a7420c7548badce414cd3cb45f4ba9822d951f8b7ed0d9b1b546cf5117847f9e17d8453db883d56e6cba745401da3d7de81cc6a625d54b313cef95e5f0c259
   languageName: node
   linkType: hard
 
@@ -6600,18 +6571,6 @@ __metadata:
   version: 2.8.9
   resolution: "hosted-git-info@npm:2.8.9"
   checksum: c955394bdab888a1e9bb10eb33029e0f7ce5a2ac7b3f158099dc8c486c99e73809dca609f5694b223920ca2174db33d32b12f9a2a47141dc59607c29da5a62dd
-  languageName: node
-  linkType: hard
-
-"htmlparser2@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "htmlparser2@npm:8.0.1"
-  dependencies:
-    domelementtype: ^2.3.0
-    domhandler: ^5.0.2
-    domutils: ^3.0.1
-    entities: ^4.3.0
-  checksum: 06d5c71e8313597722bc429ae2a7a8333d77bd3ab07ccb916628384b37332027b047f8619448d8f4a3312b6609c6ea3302a4e77435d859e9e686999e6699ca39
   languageName: node
   linkType: hard
 
@@ -7810,9 +7769,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-android-arm64@npm:0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex-android-arm64@npm:0.0.6"
+"mediaplex-android-arm64@npm:0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex-android-arm64@npm:0.0.7"
   conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
@@ -7824,9 +7783,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-arm64@npm:0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex-darwin-arm64@npm:0.0.6"
+"mediaplex-darwin-arm64@npm:0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex-darwin-arm64@npm:0.0.7"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
@@ -7838,9 +7797,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-universal@npm:0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex-darwin-universal@npm:0.0.6"
+"mediaplex-darwin-universal@npm:0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex-darwin-universal@npm:0.0.7"
   conditions: os=darwin
   languageName: node
   linkType: hard
@@ -7852,9 +7811,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-x64@npm:0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex-darwin-x64@npm:0.0.6"
+"mediaplex-darwin-x64@npm:0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex-darwin-x64@npm:0.0.7"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
@@ -7866,9 +7825,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-freebsd-x64@npm:0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex-freebsd-x64@npm:0.0.6"
+"mediaplex-freebsd-x64@npm:0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex-freebsd-x64@npm:0.0.7"
   conditions: os=freebsd & cpu=x64
   languageName: node
   linkType: hard
@@ -7880,9 +7839,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-linux-arm-gnueabihf@npm:0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.6"
+"mediaplex-linux-arm-gnueabihf@npm:0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.7"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
@@ -7894,9 +7853,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-linux-x64-gnu@npm:0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex-linux-x64-gnu@npm:0.0.6"
+"mediaplex-linux-x64-gnu@npm:0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex-linux-x64-gnu@npm:0.0.7"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
@@ -7908,9 +7867,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-win32-arm64-msvc@npm:0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex-win32-arm64-msvc@npm:0.0.6"
+"mediaplex-win32-arm64-msvc@npm:0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex-win32-arm64-msvc@npm:0.0.7"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
@@ -7922,9 +7881,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-win32-ia32-msvc@npm:0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex-win32-ia32-msvc@npm:0.0.6"
+"mediaplex-win32-ia32-msvc@npm:0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex-win32-ia32-msvc@npm:0.0.7"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
@@ -7936,9 +7895,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-win32-x64-msvc@npm:0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex-win32-x64-msvc@npm:0.0.6"
+"mediaplex-win32-x64-msvc@npm:0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex-win32-x64-msvc@npm:0.0.7"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -7982,20 +7941,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex@npm:^0.0.6":
-  version: 0.0.6
-  resolution: "mediaplex@npm:0.0.6"
+"mediaplex@npm:^0.0.7":
+  version: 0.0.7
+  resolution: "mediaplex@npm:0.0.7"
   dependencies:
-    mediaplex-android-arm64: 0.0.6
-    mediaplex-darwin-arm64: 0.0.6
-    mediaplex-darwin-universal: 0.0.6
-    mediaplex-darwin-x64: 0.0.6
-    mediaplex-freebsd-x64: 0.0.6
-    mediaplex-linux-arm-gnueabihf: 0.0.6
-    mediaplex-linux-x64-gnu: 0.0.6
-    mediaplex-win32-arm64-msvc: 0.0.6
-    mediaplex-win32-ia32-msvc: 0.0.6
-    mediaplex-win32-x64-msvc: 0.0.6
+    mediaplex-android-arm64: 0.0.7
+    mediaplex-darwin-arm64: 0.0.7
+    mediaplex-darwin-universal: 0.0.7
+    mediaplex-darwin-x64: 0.0.7
+    mediaplex-freebsd-x64: 0.0.7
+    mediaplex-linux-arm-gnueabihf: 0.0.7
+    mediaplex-linux-x64-gnu: 0.0.7
+    mediaplex-win32-arm64-msvc: 0.0.7
+    mediaplex-win32-ia32-msvc: 0.0.7
+    mediaplex-win32-x64-msvc: 0.0.7
   dependenciesMeta:
     mediaplex-android-arm64:
       optional: true
@@ -8017,7 +7976,7 @@ __metadata:
       optional: true
     mediaplex-win32-x64-msvc:
       optional: true
-  checksum: 4a24f786efc3f30d6f0c895e893e0abd86944b23ea184a4e98d75b35c093f99444071fad759bc56fbda6edd2287b47e36d4f00916177c5737e61d4d2d40abfd3
+  checksum: 47b35b838a8bf78f8223a8c7bda4d7013f2275450d70a59918fb35f15d05eb09336ef35ad98aba35ce0a129deb61523e2b0eb7aaa14a0802edd0e434313c6cdb
   languageName: node
   linkType: hard
 
@@ -8964,6 +8923,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-html-parser@npm:^6.1.9":
+  version: 6.1.10
+  resolution: "node-html-parser@npm:6.1.10"
+  dependencies:
+    css-select: ^5.1.0
+    he: 1.2.0
+  checksum: 927f6a38b3b1cbc042bce609e24fb594d3b1e0f1067ffb416a925fa5a699e907be31980f349e094d55bab706dc16a71958b08f8dcdab62faf7b12013f29442bc
+  languageName: node
+  linkType: hard
+
 "node-releases@npm:^2.0.12":
   version: 2.0.12
   resolution: "node-releases@npm:2.0.12"
@@ -9341,25 +9310,6 @@ __metadata:
     error-ex: ^1.3.1
     json-parse-better-errors: ^1.0.1
   checksum: 0fe227d410a61090c247e34fa210552b834613c006c2c64d9a05cfe9e89cf8b4246d1246b1a99524b53b313e9ac024438d0680f67e33eaed7e6f38db64cfe7b5
-  languageName: node
-  linkType: hard
-
-"parse5-htmlparser2-tree-adapter@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "parse5-htmlparser2-tree-adapter@npm:7.0.0"
-  dependencies:
-    domhandler: ^5.0.2
-    parse5: ^7.0.0
-  checksum: fc5d01e07733142a1baf81de5c2a9c41426c04b7ab29dd218acb80cd34a63177c90aff4a4aee66cf9f1d0aeecff1389adb7452ad6f8af0a5888e3e9ad6ef733d
-  languageName: node
-  linkType: hard
-
-"parse5@npm:^7.0.0":
-  version: 7.1.1
-  resolution: "parse5@npm:7.1.1"
-  dependencies:
-    entities: ^4.4.0
-  checksum: 8f72fbfa6df83a3f29f58e1818f7bd46b47ff3e26d79c74e10b8fc7ef7ee76163f205113f1b2f6a5b8dc4e31e726f490444f04890cead6e974dbcbe8172b1321
   languageName: node
   linkType: hard
 
@@ -11742,7 +11692,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^5.23.0":
+"undici@npm:^5.23.0, undici@npm:^5.24.0":
   version: 5.24.0
   resolution: "undici@npm:5.24.0"
   dependencies:
@@ -11755,15 +11705,6 @@ __metadata:
   version: 5.8.0
   resolution: "undici@npm:5.8.0"
   checksum: 7b486ad064da00628d3906e140b86223023cd3494c811da8d7aa1375c2392fe6a6ac421af236c056fd3d3136bba3a91b99e0505dde071dd946070946eb0718b8
-  languageName: node
-  linkType: hard
-
-"undici@npm:^5.8.2":
-  version: 5.15.0
-  resolution: "undici@npm:5.15.0"
-  dependencies:
-    busboy: ^1.6.0
-  checksum: cdc03ceff8d2b76a5ae08dc48d0b9d44dcb970f6e89e8a3cfe7031b9351dd3c90b223c143565c153a5f1165cd573aae1b128e6b9f557b4af4eb36da337a2a345
   languageName: node
   linkType: hard
 
@@ -12411,10 +12352,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yt-stream@npm:^1.4.7":
-  version: 1.4.7
-  resolution: "yt-stream@npm:1.4.7"
-  checksum: 27fdefa939591f110ff3bd91812d6daa6719ba4a02c4ff326374a53b2ee05595c202c90b11931be544b241df509b6f13843292e6456683a701cbe6041b0ba5e9
+"yt-stream@npm:^1.4.8":
+  version: 1.4.8
+  resolution: "yt-stream@npm:1.4.8"
+  checksum: 73901f5af07bb75673feadce8f0d04b7b0d283d4a9948fc630ccf80a077221183f3c32541f3a0be9ecd50490ff89792c6bd88d06fccfa1a2f318a85f18f7bad7
   languageName: node
   linkType: hard
 
