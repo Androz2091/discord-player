@@ -413,8 +413,9 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         let extractor: BaseExtractor | null = null;
 
         options.searchEngine ??= QueryType.AUTO;
+        options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 
-        if (this.hasDebugger) this.debug(`Search engine set to ${options.searchEngine}`);
+        if (this.hasDebugger) this.debug(`Search engine set to ${options.searchEngine}, fallback search engine set to ${options.fallbackSearchEngine}`);
 
         const { type: queryType, query } =
             options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(searchQuery, options.fallbackSearchEngine) : ({ type: options.searchEngine, query: searchQuery } as ResolvedQuery);

@@ -47,6 +47,11 @@ export interface GuildNodeInit<Meta = unknown> {
     maxHistorySize?: number;
     preferBridgedMetadata: boolean;
     pauseOnEmpty?: boolean;
+    disableVolume: boolean;
+    disableEqualizer: boolean;
+    disableFilterer: boolean;
+    disableBiquad: boolean;
+    disableResampler: boolean;
 }
 
 export interface VoiceConnectConfig {

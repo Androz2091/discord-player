@@ -14,7 +14,7 @@ export class UserEvent extends Listener {
 
 		const player = useMainPlayer();
 		if (player) {
-			await player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
+			await player.extractors.loadDefault(/* (ext) => ext !== 'YouTubeExtractor' */);
 			console.log(player.scanDeps());
 		}
 	}

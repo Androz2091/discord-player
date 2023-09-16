@@ -511,11 +511,11 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const cookies = track.raw?.source === 'youtube' ? (<any>this.queue.player.options.ytdlOptions?.requestOptions)?.headers?.cookie : undefined;
             const createStreamConfig = {
-                disableBiquad: this.queue.options.biquad === false,
-                disableEqualizer: this.queue.options.equalizer === false,
-                disableVolume: this.queue.options.volume === false,
-                disableFilters: this.queue.options.filterer === false,
-                disableResampler: this.queue.options.resampler === false,
+                disableBiquad: this.queue.options.disableBiquad,
+                disableEqualizer: this.queue.options.disableEqualizer,
+                disableVolume: this.queue.options.disableVolume,
+                disableFilters: this.queue.options.disableFilterer,
+                disableResampler: this.queue.options.disableResampler,
                 sampleRate: typeof this.queue.options.resampler === 'number' && this.queue.options.resampler > 0 ? this.queue.options.resampler : undefined,
                 biquadFilter: this.queue.filters._lastFiltersCache.biquad || undefined,
                 eq: this.queue.filters._lastFiltersCache.equalizer,
@@ -537,6 +537,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             // prevent dangling promise
             if (!success) resolver();
+
+            if (this.queue.hasDebugger) this.queue.debug('Waiting for willPlayTrack event to resolve...');
 
             await donePromise;
 
