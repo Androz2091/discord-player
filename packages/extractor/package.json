@@ -50,7 +50,7 @@
     "isomorphic-unfetch": "^4.0.2",
     "node-html-parser": "^6.1.4",
     "reverbnation-scraper": "^2.0.0",
-    "soundcloud.ts": "^0.5.0",
+    "soundcloud.ts": "^0.5.2",
     "spotify-url-info": "^3.2.6",
     "youtube-sr": "^4.3.4"
   },

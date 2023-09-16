@@ -120,7 +120,7 @@ __metadata:
     node-html-parser: ^6.1.4
     play-dl: ^1.9.6
     reverbnation-scraper: ^2.0.0
-    soundcloud.ts: ^0.5.0
+    soundcloud.ts: ^0.5.2
     spotify-url-info: ^3.2.6
     youtube-ext: ^1.1.14
     youtube-sr: ^4.3.4
@@ -10615,12 +10615,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"soundcloud.ts@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "soundcloud.ts@npm:0.5.0"
+"soundcloud.ts@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "soundcloud.ts@npm:0.5.2"
   dependencies:
-    undici: ^5.21.2
-  checksum: aa2d68f46bd297be96d54f8712d50f260dabce13e43c56af0115c5bcd77c13ddaf50136018dac32cb993c5388a3ea8d5cb2a4c9daf972cecfae2115db4d849f6
+    undici: ^5.22.1
+  checksum: 6abd85b629625b9d80adbf628b8c302ddb4fdfdef97ee5de951bc565cc0bbeb10133b645eb38ffdd55f320d6b8fa347e26c3e2457485c5d4816c072dbde61c66
   languageName: node
   linkType: hard
 
@@ -11733,7 +11733,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^5.21.2, undici@npm:^5.22.1":
+"undici@npm:^5.22.1":
   version: 5.22.1
   resolution: "undici@npm:5.22.1"
   dependencies:
