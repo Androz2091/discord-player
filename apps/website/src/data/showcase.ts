@@ -20,7 +20,7 @@ export const ShowcaseResource: IShowcase = {
         {
             name: 'Mirasaki Music Bot',
             description: 'Complete (45+ commands) music bot with persistent settings, effects, filters, auto-play, DJ-roles, and much more.',
-            version: 'v6.5.0',
+            version: 'v6.6.3',
             url: 'https://github.com/Mirasaki/mirasaki-music-bot'
         },
         {
@@ -61,8 +61,8 @@ export const ShowcaseResource: IShowcase = {
         },
         {
             name: 'Mittelbot',
-            description: 'I am using discord-player to let people play their favourite music in their discord servers (No yt ofc)',
-            version: 'v6.2.1',
+            description: "A moderation & utility bot with music to play everyone's favourite music.",
+            version: 'v6.6.3',
             url: 'https://github.com/Mittelbots/Mittelbot'
         },
         {
