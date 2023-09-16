@@ -4,6 +4,7 @@ import { SoundCloudExtractor } from '../SoundCloudExtractor';
 import unfetch from 'isomorphic-unfetch';
 import http from 'http';
 import https from 'https';
+import type * as SoundCloud from 'soundcloud.ts';
 
 let factory: {
     name: string;
@@ -237,19 +238,23 @@ export async function makeSCSearch(query: string) {
     const { instance } = SoundCloudExtractor;
     if (!instance?.internal) return [];
 
+    let data: SoundCloud.SoundcloudTrackV2[];
+
     try {
         const info = await instance.internal.tracks.searchV2({
             q: query,
             limit: 5
         });
 
-        return info.collection;
+        data = info.collection;
     } catch {
         // fallback
         const info = await instance.internal.tracks.searchAlt(query);
 
-        return info;
+        data = info;
     }
+
+    return filterSoundCloudPreviews(data);
 }
 
 export async function pullYTMetadata(ext: BaseExtractor, info: Track) {
@@ -266,4 +271,15 @@ export async function pullSCMetadata(ext: BaseExtractor, info: Track) {
         .catch(() => null);
 
     return meta;
+}
+
+export function filterSoundCloudPreviews(tracks: SoundCloud.SoundcloudTrackV2[]): SoundCloud.SoundcloudTrackV2[] {
+    const filtered = tracks.filter((t) => {
+        if (typeof t.policy === 'string') return t.policy.toUpperCase() === 'ALLOW';
+        return !(t.duration === 30_000 && t.full_duration > 30_000);
+    });
+
+    const result = filtered.length > 0 ? filtered : tracks;
+
+    return result;
 }

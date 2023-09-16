@@ -11,6 +11,7 @@ import {
     Util
 } from 'discord-player';
 import * as SoundCloud from 'soundcloud.ts';
+import { filterSoundCloudPreviews } from './common/helper';
 
 export interface SoundCloudExtractorInit {
     clientId?: string;
@@ -49,20 +50,11 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
         ] as SearchQueryType[]).some((r) => r === type);
     }
 
-    private _filterPreviews(tracks: SoundCloud.SoundcloudTrackV2[]): SoundCloud.SoundcloudTrackV2[] {
-        const filtered = tracks.filter((t) => {
-            if (typeof t.policy === 'string') return t.policy.toUpperCase() === 'ALLOW';
-            return !(t.duration === 30_000 && t.full_duration > 30_000);
-        });
-
-        return filtered.length > 0 ? filtered : tracks;
-    }
-
     public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
         if (track.queryType === QueryType.SOUNDCLOUD_TRACK) {
             const data = await this.internal.tracks.relatedV2(track.url, 5);
 
-            const unique = this._filterPreviews(data).filter((t) => !history.tracks.some((h) => h.url === t.permalink_url));
+            const unique = filterSoundCloudPreviews(data).filter((t) => !history.tracks.some((h) => h.url === t.permalink_url));
 
             return this.createResponse(
                 null,
@@ -180,7 +172,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
 
                 if (!tracks || !tracks.length) return this.emptyResponse();
 
-                tracks = this._filterPreviews(tracks);
+                tracks = filterSoundCloudPreviews(tracks);
 
                 const resolvedTracks: Track[] = [];
 
