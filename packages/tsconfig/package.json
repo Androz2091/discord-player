@@ -2,7 +2,7 @@
   "name": "@discord-player/tsconfig",
   "version": "0.0.0",
   "description": "TSConfig for discord-player monorepo",
-  "author": "skdhg",
+  "author": "twlite",
   "homepage": "https://discord-player.js.org",
   "license": "MIT",
   "main": "index.js",

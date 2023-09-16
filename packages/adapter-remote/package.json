@@ -5,7 +5,7 @@
   "keywords": [
     "discord-player"
   ],
-  "author": "skdhg",
+  "author": "twlite",
   "homepage": "https://discord-player.js.org",
   "license": "MIT",
   "main": "dist/index.js",

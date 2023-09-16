@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/equalizer",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "PCM Equalizer implementation for Discord Player",
   "keywords": [
     "discord-player",
