@@ -173,10 +173,10 @@ export async function loadYtdl(options?: any, force = false) {
                 return url;
             } else if (_ytLibName === 'play-dl') {
                 const dl = lib as typeof import('play-dl');
-                dl.setToken({
-                    youtube: options?.requestOptions?.headers?.cookie
+                
+                if (options?.requestOptions?.headers?.cookie) dl.setToken({
+                  youtube: options.requestOptions.headers.cookie
                 });
-
                 const info = await dl.video_info(query);
                 const formats = info.format
                     .filter((format) => {
