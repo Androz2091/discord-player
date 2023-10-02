@@ -143,6 +143,12 @@ export const ShowcaseResource: IShowcase = {
             description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source!',
             version: 'v6.6.4',
             url: 'https://github.com/mariusbegby/cadence-discord-bot'
+        },
+        {
+            name: 'Elite Music',
+            description: 'An open-source & feature-packed Discord music bot, complete with a large selection of commands, effects, customisability, Docker & Plex support and much more! 🚀💪',
+            version: 'v6.6.4',
+            url: 'https://github.com/ThatGuyJacobee/Elite-Music'
         }
     ].sort((a, b) => semver.rcompare(a.version, b.version)),
     extractors: [
