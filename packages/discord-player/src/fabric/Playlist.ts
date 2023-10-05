@@ -3,6 +3,11 @@ import { Track } from './Track';
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';
 import { Util } from '../utils/Util';
 import { GuildVoiceChannelResolvable } from 'discord.js';
+import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
+import { TypeUtil } from '../utils/TypeUtil';
+import { Exceptions } from '../errors';
+
+export type SerializedPlaylist = ReturnType<Playlist['serialize']>;
 
 export class Playlist {
     public readonly player: Player;
@@ -148,6 +153,38 @@ export class Playlist {
         if (withTracks) payload.tracks = this.tracks.map((m) => m.toJSON(true));
 
         return payload as PlaylistJSON;
+    }
+
+    /**
+     * Serialize this playlist into reconstructable data
+     */
+    public serialize() {
+        return {
+            tracks: this.tracks.map((m) => m.serialize()),
+            title: this.title,
+            description: this.description,
+            thumbnail: TypeUtil.isString(this.thumbnail) ? this.thumbnail : tryIntoThumbnailString(this.thumbnail),
+            type: this.type,
+            source: this.source,
+            author: this.author,
+            id: this.id,
+            url: this.url,
+            $type: SerializedType.Playlist,
+            $encoder_version: '[VI]{{inject}}[/VI]'
+        };
+    }
+
+    /**
+     * Deserialize this playlist from serialized data
+     * @param player Player instance
+     * @param data Serialized data
+     */
+    public static fromSerialized(player: Player, data: SerializedPlaylist) {
+        if (data.$type !== SerializedType.Playlist) throw Exceptions.ERR_INVALID_ARG_TYPE('data', 'SerializedPlaylist', 'malformed data');
+        return new Playlist(player, {
+            ...data,
+            tracks: data.tracks.map((m) => Track.fromSerialized(player, m))
+        });
     }
 
     /**
