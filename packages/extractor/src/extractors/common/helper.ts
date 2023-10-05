@@ -134,7 +134,7 @@ export async function loadYtdl(options?: any, force = false) {
                 // return dl(query, this.context.player.options.ytdlOptions);
             } else if (_ytLibName === '@distube/ytdl-core') {
                 const dl = lib as typeof import('@distube/ytdl-core');
-                let opt: any;
+                let opt: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
                 if (planner) {
                     opt = {
@@ -147,6 +147,7 @@ export async function loadYtdl(options?: any, force = false) {
 
                 const agent = dl.createAgent(Array.isArray(cookie) ? cookie : undefined, opt);
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const reqOpt: any = {
                     agent
                 };
