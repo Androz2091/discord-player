@@ -1,10 +1,13 @@
-import { User, escapeMarkdown, SnowflakeUtil, GuildVoiceChannelResolvable } from 'discord.js';
+import { User, escapeMarkdown, SnowflakeUtil, GuildVoiceChannelResolvable, APIUser } from 'discord.js';
 import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
 import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
 import { Playlist } from './Playlist';
 import { GuildQueue } from '../manager/GuildQueue';
 import { BaseExtractor } from '../extractors/BaseExtractor';
 import { Collection } from '@discord-player/utils';
+import { TypeUtil } from '../utils/TypeUtil';
+import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
+import { Exceptions } from '../errors';
 
 export type TrackResolvable = Track | string | number;
 
@@ -12,6 +15,8 @@ export type WithMetadata<T extends object, M> = T & {
     metadata: M;
     requestMetadata(): Promise<M>;
 };
+
+export type SerializedTrack = ReturnType<Track['serialize']>;
 
 export class Track<T = unknown> {
     public title: string;
@@ -147,6 +152,61 @@ export class Track<T = unknown> {
             requestedBy: this.requestedBy?.id || null,
             playlist: hidePlaylist ? null : this.playlist?.toJSON() ?? null
         } as TrackJSON;
+    }
+
+    /**
+     * Serialized track data that can be reconstructed
+     */
+    public serialize() {
+        return {
+            title: this.title,
+            description: this.description,
+            author: this.author,
+            url: this.url,
+            thumbnail: TypeUtil.isString(this.thumbnail) ? this.thumbnail : tryIntoThumbnailString(this.thumbnail),
+            duration: this.duration,
+            views: this.views ?? 0,
+            requested_by: this.requestedBy?.toJSON() ?? null,
+            source: this.source,
+            live: false,
+            query_type: this.queryType,
+            extractor: this.extractor?.identifier ?? null,
+            metadata: this.metadata,
+            $type: SerializedType.Track,
+            $encoder_version: '[VI]{{inject}}[/VI]'
+        };
+    }
+
+    /**
+     * Construct a track from serialized data
+     * @param player Player instance
+     * @param data Serialized data
+     */
+    public static fromSerialized(player: Player, data: ReturnType<Track['serialize']>) {
+        if (data.$type !== SerializedType.Track) throw Exceptions.ERR_INVALID_ARG_TYPE('data', 'SerializedTrack', 'malformed data');
+        const track = new Track(player, {
+            ...data,
+            requestedBy: data.requested_by
+                ? (() => {
+                      const res = data.requested_by as APIUser;
+                      try {
+                          const resolved = player.client.users.resolve(res.id);
+                          if (resolved) return resolved;
+                          if (player.client.users.cache.has(res.id)) return player.client.users.cache.get(res.id)!;
+                          // @ts-expect-error
+                          const user = new User(player.client, res);
+                          return user;
+                      } catch {
+                          return null;
+                      }
+                  })()
+                : null,
+            queryType: data.query_type ?? undefined
+        });
+
+        track.setMetadata(data.metadata);
+
+        return track;
     }
 
     /**
