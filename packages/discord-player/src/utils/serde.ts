@@ -7,8 +7,8 @@ import { Buffer } from 'buffer';
 import { Player } from '../Player';
 
 export enum SerializedType {
-    Track = '$track',
-    Playlist = '$playlist'
+    Track = 'track',
+    Playlist = 'playlist'
 }
 
 export type Encodable = SerializedTrack | SerializedPlaylist;
