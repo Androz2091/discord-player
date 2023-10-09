@@ -167,3 +167,21 @@ That's all it takes to build your own music bot. Please check out the [Documenta
 ## Community Resources
 
 Explore a curated list of resources built by the Discord Player community, including open-source music bots and extractors. Visit [https://discord-player.js.org/showcase](https://discord-player.js.org/showcase) for more information.
+
+## Contributors ✨
+
+Thanks goes to these wonderful people :
+
+<table>
+  <tr>
+     <td>
+  <a href="https://github.com/Androz2091/discord-player/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Androz2091/discord-player" />
+  </a>
+    </td>
+  </tr>
+</table>
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+<p align="right"><a href="#top">Back to top</a></p>
