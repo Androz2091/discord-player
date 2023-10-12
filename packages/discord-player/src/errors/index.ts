@@ -124,6 +124,13 @@ const DiscordPlayerErrors = {
         createError() {
             return `[${this.name}]` + "Don't know how to deserialize this data";
         }
+    },
+    ERR_ILLEGAL_HOOK_INVOCATION: {
+        name: 'ERR_ILLEGAL_HOOK_INVOCATION',
+        type: Error,
+        createError(target: string, message?: string) {
+            return `[${this.name}] ` + `Illegal invocation of ${target} hook.${message ? ` ${message}` : ''}`;
+        }
     }
 } as const;
 
