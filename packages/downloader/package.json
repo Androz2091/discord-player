@@ -34,7 +34,8 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "devDependencies": {
-    "@discord-player/tsconfig": "workspace:^"
+    "@discord-player/tsconfig": "workspace:^",
+    "tsup": "^7.2.0"
   },
   "dependencies": {
     "youtube-dl-exec": "^2.1.11"

@@ -31,7 +31,18 @@ const ERR_NO_YT_LIB = new Error(`Could not load youtube library. Install one of 
 const forcedLib = process.env.DP_FORCE_YTDL_MOD;
 if (forcedLib) YouTubeLibs.unshift(...forcedLib.split(','));
 
-export type StreamFN = (q: string, ext: BaseExtractor) => Promise<import('stream').Readable | string>;
+export type StreamFN = (
+    q: string,
+    ext: BaseExtractor,
+    demuxable?: boolean
+) => Promise<
+    | import('stream').Readable
+    | string
+    | {
+          stream: import('stream').Readable;
+          $fmt: string;
+      }
+>;
 
 let httpAgent: http.Agent, httpsAgent: https.Agent;
 
@@ -57,7 +68,7 @@ export async function loadYtdl(options?: any, force = false) {
         const isYtdl = ['ytdl-core'].some((lib) => lib === _ytLibName);
 
         const hlsRegex = /\/manifest\/hls_(variant|playlist)\//;
-        _stream = async (query, extractor) => {
+        _stream = async (query, extractor, demuxable = false) => {
             const planner = extractor.context.player.routePlanner;
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -105,6 +116,22 @@ export async function loadYtdl(options?: any, force = false) {
                 const info = await dl.videoInfo(query, opt);
                 const videoFormats = await dl.getFormats(info.stream, opt);
 
+                if (demuxable) {
+                    const demuxableFormat =
+                        info.duration.lengthSec != '0'
+                            ? videoFormats.find((fmt) => {
+                                  return /audio\/webm; codecs="opus"/.test(fmt.mimeType || '') && fmt.audioSampleRate == '48000';
+                              })
+                            : null;
+
+                    if (demuxableFormat) {
+                        return {
+                            stream: await dl.getReadableStream(demuxableFormat, opt),
+                            $fmt: 'webm/opus'
+                        };
+                    }
+                }
+
                 const formats = videoFormats
                     .filter((format) => {
                         if (!format.url) return false;
@@ -120,6 +147,24 @@ export async function loadYtdl(options?: any, force = false) {
             } else if (isYtdl) {
                 const dl = lib as typeof import('ytdl-core');
                 const info = await dl.getInfo(query, applyPlannerConfig(options));
+
+                if (demuxable) {
+                    const filter = (format: import('ytdl-core').videoFormat) => {
+                        return format.codecs === 'opus' && format.container === 'webm' && format.audioSampleRate == '48000';
+                    };
+
+                    const format = info.formats.find(filter);
+
+                    if (format && info.videoDetails.lengthSeconds != '0') {
+                        return {
+                            stream: dl.downloadFromInfo(info, {
+                                ...applyPlannerConfig(options),
+                                filter
+                            }),
+                            $fmt: 'webm/opus'
+                        };
+                    }
+                }
 
                 const formats = info.formats
                     .filter((format) => {
@@ -162,6 +207,24 @@ export async function loadYtdl(options?: any, force = false) {
 
                 const info = await dl.getInfo(query, reqOpt);
 
+                if (demuxable) {
+                    const filter = (format: import('@distube/ytdl-core').videoFormat) => {
+                        return format.codecs === 'opus' && format.container === 'webm' && format.audioSampleRate == '48000';
+                    };
+
+                    const format = info.formats.find(filter);
+
+                    if (format && info.videoDetails.lengthSeconds != '0') {
+                        return {
+                            stream: dl.downloadFromInfo(info, {
+                                ...applyPlannerConfig(options),
+                                filter
+                            }),
+                            $fmt: 'webm/opus'
+                        };
+                    }
+                }
+
                 const formats = info.formats
                     .filter((format) => {
                         return info.videoDetails.isLiveContent ? format.isHLS && format.hasAudio : format.hasAudio;
@@ -175,11 +238,28 @@ export async function loadYtdl(options?: any, force = false) {
             } else if (_ytLibName === 'play-dl') {
                 const dl = lib as typeof import('play-dl');
 
-                if (options?.requestOptions?.headers?.cookie)
+                if (typeof options?.requestOptions?.headers?.cookie === 'string') {
                     dl.setToken({
                         youtube: options.requestOptions.headers.cookie
                     });
+                }
                 const info = await dl.video_info(query);
+
+                if (demuxable) {
+                    try {
+                        const stream = await dl.stream(query, {
+                            discordPlayerCompatibility: false
+                        });
+
+                        return {
+                            stream: stream.stream,
+                            $fmt: stream.type as string
+                        };
+                    } catch {
+                        //
+                    }
+                }
+
                 const formats = info.format
                     .filter((format) => {
                         if (!format.url) return false;
@@ -192,7 +272,6 @@ export async function loadYtdl(options?: any, force = false) {
                 const url = fmt?.url;
                 if (!url) throw new Error(`Failed to parse stream url for ${query}`);
                 return url;
-                // return (await dl.stream(query, { discordPlayerCompatibility: true })).stream;
             } else if (_ytLibName === 'yt-stream') {
                 const dl = lib as typeof import('yt-stream');
 

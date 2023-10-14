@@ -1,4 +1,4 @@
-import { ExtractorInfo, ExtractorSearchContext, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
+import { ExtractorInfo, ExtractorSearchContext, ExtractorStreamable, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import type { Readable } from 'stream';
 import { StreamFN, fetch, pullYTMetadata } from './common/helper';
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
@@ -341,7 +341,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
         }
     }
 
-    public async stream(info: Track): Promise<string | Readable> {
+    public async stream(info: Track): Promise<ExtractorStreamable> {
         if (this._stream) {
             const stream = await this._stream(info.url, this);
             if (typeof stream === 'string') return stream;

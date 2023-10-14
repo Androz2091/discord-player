@@ -36,8 +36,22 @@ export class KarasuClient extends SapphireClient {
 						cookie: process.env.YOUTUBE_COOKIE
 					}
 				}
-			}
+			},
+			skipFFmpeg: true
 		});
+
+		// this.player.events.on('willPlayTrack', (_, __, config, done) => {
+		// 	config.dispatcherConfig = {
+		// 		...config.dispatcherConfig,
+		// 		disableBiquad: true,
+		// 		disableEqualizer: true,
+		// 		disableFilters: true,
+		// 		disableResampler: true,
+		// 		disableVolume: true
+		// 	};
+
+		// 	done();
+		// });
 
 		if (!existsSync(this.recordingPath))
 			mkdirSync(this.recordingPath, {

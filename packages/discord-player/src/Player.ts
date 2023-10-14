@@ -85,6 +85,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             lagMonitor: 30000,
             queryCache: options.queryCache === null ? null : options.queryCache || new QueryCache(this),
             useLegacyFFmpeg: false,
+            skipFFmpeg: false,
             ...options,
             ytdlOptions: {
                 highWaterMark: 1 << 25,

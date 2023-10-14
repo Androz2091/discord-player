@@ -45,6 +45,7 @@ __metadata:
   resolution: "@discord-player/adapter-local@workspace:packages/adapter-local"
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
+    tsup: ^7.2.0
   languageName: unknown
   linkType: soft
 
@@ -53,6 +54,7 @@ __metadata:
   resolution: "@discord-player/adapter-remote@workspace:packages/adapter-remote"
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
+    tsup: ^7.2.0
   languageName: unknown
   linkType: soft
 
@@ -64,6 +66,7 @@ __metadata:
     "@discord-player/utils": "workspace:^"
     discord-api-types: ^0.37.2
     discord-voip: ^0.1.2
+    tsup: ^7.2.0
   languageName: unknown
   linkType: soft
 
@@ -93,6 +96,7 @@ __metadata:
   resolution: "@discord-player/downloader@workspace:packages/downloader"
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
+    tsup: ^7.2.0
     youtube-dl-exec: ^2.1.11
   languageName: unknown
   linkType: soft
@@ -102,6 +106,7 @@ __metadata:
   resolution: "@discord-player/equalizer@workspace:packages/equalizer"
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
+    tsup: ^7.2.0
   languageName: unknown
   linkType: soft
 
@@ -122,6 +127,7 @@ __metadata:
     reverbnation-scraper: ^2.0.0
     soundcloud.ts: ^0.5.2
     spotify-url-info: ^3.2.6
+    tsup: ^7.2.0
     youtube-ext: ^1.1.14
     youtube-sr: ^4.3.4
     yt-stream: ^1.4.8
@@ -135,6 +141,7 @@ __metadata:
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
     "@types/node": ^20.3.1
+    tsup: ^7.2.0
   languageName: unknown
   linkType: soft
 
@@ -144,12 +151,15 @@ __metadata:
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
     "@evan/opus": ^1.0.2
+    tsup: ^7.2.0
   languageName: unknown
   linkType: soft
 
 "@discord-player/tsconfig@workspace:^, @discord-player/tsconfig@workspace:packages/tsconfig":
   version: 0.0.0-use.local
   resolution: "@discord-player/tsconfig@workspace:packages/tsconfig"
+  dependencies:
+    tsup: ^7.2.0
   languageName: unknown
   linkType: soft
 
@@ -159,6 +169,7 @@ __metadata:
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
     "@discordjs/collection": ^1.1.0
+    tsup: ^7.2.0
   languageName: unknown
   linkType: soft
 
@@ -169,6 +180,7 @@ __metadata:
     "@discord-player/tsconfig": "workspace:^"
     "@discord-player/utils": "workspace:^"
     discord-voip: ^0.1.2
+    tsup: ^7.2.0
   languageName: unknown
   linkType: soft
 
@@ -291,6 +303,19 @@ __metadata:
     tough-cookie: ^4.1.3
     undici: ^5.23.0
   checksum: ee7b4ced517edb19dde8b8e17cb6002e6139ddc3efb43bcbd271b3625ba97b4e7281335c00df8ba04d56f2a3324eb57dbbd60a8b5b292310617f1c70ce68946a
+  languageName: node
+  linkType: hard
+
+"@distube/ytdl-core@npm:^4.13.2":
+  version: 4.13.2
+  resolution: "@distube/ytdl-core@npm:4.13.2"
+  dependencies:
+    http-cookie-agent: ^5.0.4
+    m3u8stream: ^0.8.6
+    sax: ^1.2.4
+    tough-cookie: ^4.1.3
+    undici: ^5.25.2
+  checksum: f8b73ab5f537b779070cbe39583d894742ef72653d231a0bc30b1db1b37e4d16754bcce3ac246e4d490a6b35a0bd86c632517087c29acd6143ba447fc53202e8
   languageName: node
   linkType: hard
 
@@ -902,6 +927,13 @@ __metadata:
   version: 1.0.2
   resolution: "@evan/opus@npm:1.0.2"
   checksum: 5473155e79eb99a6bf5d2b35cbad5b2ff687e9aa5b1e2a7c15bd701eb3eb3986b6452079650823e8211727d8f033a6be86484e10c87f7eef5ebbbbfb7e10c928
+  languageName: node
+  linkType: hard
+
+"@fastify/busboy@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@fastify/busboy@npm:2.0.0"
+  checksum: 41879937ce1dee6421ef9cd4da53239830617e1f0bb7a0e843940772cd72827205d05e518af6adabe6e1ea19301285fff432b9d11bad01a531e698bea95c781b
   languageName: node
   linkType: hard
 
@@ -4739,6 +4771,7 @@ __metadata:
     ip: ^1.1.8
     libsodium-wrappers: ^0.7.10
     opusscript: ^0.0.8
+    tsup: ^7.2.0
     typescript: ^4.7.4
     youtube-sr: ^4.3.4
   peerDependencies:
@@ -5126,83 +5159,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.17.6, esbuild@npm:~0.17.6":
-  version: 0.17.19
-  resolution: "esbuild@npm:0.17.19"
-  dependencies:
-    "@esbuild/android-arm": 0.17.19
-    "@esbuild/android-arm64": 0.17.19
-    "@esbuild/android-x64": 0.17.19
-    "@esbuild/darwin-arm64": 0.17.19
-    "@esbuild/darwin-x64": 0.17.19
-    "@esbuild/freebsd-arm64": 0.17.19
-    "@esbuild/freebsd-x64": 0.17.19
-    "@esbuild/linux-arm": 0.17.19
-    "@esbuild/linux-arm64": 0.17.19
-    "@esbuild/linux-ia32": 0.17.19
-    "@esbuild/linux-loong64": 0.17.19
-    "@esbuild/linux-mips64el": 0.17.19
-    "@esbuild/linux-ppc64": 0.17.19
-    "@esbuild/linux-riscv64": 0.17.19
-    "@esbuild/linux-s390x": 0.17.19
-    "@esbuild/linux-x64": 0.17.19
-    "@esbuild/netbsd-x64": 0.17.19
-    "@esbuild/openbsd-x64": 0.17.19
-    "@esbuild/sunos-x64": 0.17.19
-    "@esbuild/win32-arm64": 0.17.19
-    "@esbuild/win32-ia32": 0.17.19
-    "@esbuild/win32-x64": 0.17.19
-  dependenciesMeta:
-    "@esbuild/android-arm":
-      optional: true
-    "@esbuild/android-arm64":
-      optional: true
-    "@esbuild/android-x64":
-      optional: true
-    "@esbuild/darwin-arm64":
-      optional: true
-    "@esbuild/darwin-x64":
-      optional: true
-    "@esbuild/freebsd-arm64":
-      optional: true
-    "@esbuild/freebsd-x64":
-      optional: true
-    "@esbuild/linux-arm":
-      optional: true
-    "@esbuild/linux-arm64":
-      optional: true
-    "@esbuild/linux-ia32":
-      optional: true
-    "@esbuild/linux-loong64":
-      optional: true
-    "@esbuild/linux-mips64el":
-      optional: true
-    "@esbuild/linux-ppc64":
-      optional: true
-    "@esbuild/linux-riscv64":
-      optional: true
-    "@esbuild/linux-s390x":
-      optional: true
-    "@esbuild/linux-x64":
-      optional: true
-    "@esbuild/netbsd-x64":
-      optional: true
-    "@esbuild/openbsd-x64":
-      optional: true
-    "@esbuild/sunos-x64":
-      optional: true
-    "@esbuild/win32-arm64":
-      optional: true
-    "@esbuild/win32-ia32":
-      optional: true
-    "@esbuild/win32-x64":
-      optional: true
-  bin:
-    esbuild: bin/esbuild
-  checksum: ac11b1a5a6008e4e37ccffbd6c2c054746fc58d0ed4a2f9ee643bd030cfcea9a33a235087bc777def8420f2eaafb3486e76adb7bdb7241a9143b43a69a10afd8
-  languageName: node
-  linkType: hard
-
 "esbuild@npm:^0.18.2":
   version: 0.18.20
   resolution: "esbuild@npm:0.18.20"
@@ -5277,6 +5233,83 @@ __metadata:
   bin:
     esbuild: bin/esbuild
   checksum: 5d253614e50cdb6ec22095afd0c414f15688e7278a7eb4f3720a6dd1306b0909cf431e7b9437a90d065a31b1c57be60130f63fe3e8d0083b588571f31ee6ec7b
+  languageName: node
+  linkType: hard
+
+"esbuild@npm:~0.17.6":
+  version: 0.17.19
+  resolution: "esbuild@npm:0.17.19"
+  dependencies:
+    "@esbuild/android-arm": 0.17.19
+    "@esbuild/android-arm64": 0.17.19
+    "@esbuild/android-x64": 0.17.19
+    "@esbuild/darwin-arm64": 0.17.19
+    "@esbuild/darwin-x64": 0.17.19
+    "@esbuild/freebsd-arm64": 0.17.19
+    "@esbuild/freebsd-x64": 0.17.19
+    "@esbuild/linux-arm": 0.17.19
+    "@esbuild/linux-arm64": 0.17.19
+    "@esbuild/linux-ia32": 0.17.19
+    "@esbuild/linux-loong64": 0.17.19
+    "@esbuild/linux-mips64el": 0.17.19
+    "@esbuild/linux-ppc64": 0.17.19
+    "@esbuild/linux-riscv64": 0.17.19
+    "@esbuild/linux-s390x": 0.17.19
+    "@esbuild/linux-x64": 0.17.19
+    "@esbuild/netbsd-x64": 0.17.19
+    "@esbuild/openbsd-x64": 0.17.19
+    "@esbuild/sunos-x64": 0.17.19
+    "@esbuild/win32-arm64": 0.17.19
+    "@esbuild/win32-ia32": 0.17.19
+    "@esbuild/win32-x64": 0.17.19
+  dependenciesMeta:
+    "@esbuild/android-arm":
+      optional: true
+    "@esbuild/android-arm64":
+      optional: true
+    "@esbuild/android-x64":
+      optional: true
+    "@esbuild/darwin-arm64":
+      optional: true
+    "@esbuild/darwin-x64":
+      optional: true
+    "@esbuild/freebsd-arm64":
+      optional: true
+    "@esbuild/freebsd-x64":
+      optional: true
+    "@esbuild/linux-arm":
+      optional: true
+    "@esbuild/linux-arm64":
+      optional: true
+    "@esbuild/linux-ia32":
+      optional: true
+    "@esbuild/linux-loong64":
+      optional: true
+    "@esbuild/linux-mips64el":
+      optional: true
+    "@esbuild/linux-ppc64":
+      optional: true
+    "@esbuild/linux-riscv64":
+      optional: true
+    "@esbuild/linux-s390x":
+      optional: true
+    "@esbuild/linux-x64":
+      optional: true
+    "@esbuild/netbsd-x64":
+      optional: true
+    "@esbuild/openbsd-x64":
+      optional: true
+    "@esbuild/sunos-x64":
+      optional: true
+    "@esbuild/win32-arm64":
+      optional: true
+    "@esbuild/win32-ia32":
+      optional: true
+    "@esbuild/win32-x64":
+      optional: true
+  bin:
+    esbuild: bin/esbuild
+  checksum: ac11b1a5a6008e4e37ccffbd6c2c054746fc58d0ed4a2f9ee643bd030cfcea9a33a235087bc777def8420f2eaafb3486e76adb7bdb7241a9143b43a69a10afd8
   languageName: node
   linkType: hard
 
@@ -8681,6 +8714,7 @@ __metadata:
     "@discord-player/extractor": "workspace:^"
     "@discord-player/utils": "workspace:^"
     "@discordjs/opus": ^0.9.0
+    "@distube/ytdl-core": ^4.13.2
     "@sapphire/discord.js-utilities": ^6.0.3
     "@sapphire/duration": ^1.0.0
     "@sapphire/framework": ^4.2.1
@@ -8700,9 +8734,10 @@ __metadata:
     mediaplex: ^0.0.2
     npm-run-all: ^4.1.5
     opusscript: ^0.0.8
+    play-dl: ^1.9.7
     prettier: ^2.8.4
     tsc-watch: ^6.0.0
-    tsup: ^6.6.3
+    tsup: ^7.2.0
     tsx: ^3.12.7
     typescript: 4.9.5
   languageName: unknown
@@ -9490,6 +9525,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"play-dl@npm:^1.9.7":
+  version: 1.9.7
+  resolution: "play-dl@npm:1.9.7"
+  dependencies:
+    play-audio: ^0.5.2
+  checksum: d626de7fa9231223c1f0480f01eabeb4f50e85d4412501da31049aaf5ebb532032f525b6111f088221cfd29ba8cf5c5c6e85527275c06d7841263c2a306838ee
+  languageName: node
+  linkType: hard
+
 "postcss-import@npm:^15.1.0":
   version: 15.1.0
   resolution: "postcss-import@npm:15.1.0"
@@ -9511,24 +9555,6 @@ __metadata:
   peerDependencies:
     postcss: ^8.4.21
   checksum: 5c1e83efeabeb5a42676193f4357aa9c88f4dc1b3c4a0332c132fe88932b33ea58848186db117cf473049fc233a980356f67db490bd0a7832ccba9d0b3fd3491
-  languageName: node
-  linkType: hard
-
-"postcss-load-config@npm:^3.0.1":
-  version: 3.1.4
-  resolution: "postcss-load-config@npm:3.1.4"
-  dependencies:
-    lilconfig: ^2.0.5
-    yaml: ^1.10.2
-  peerDependencies:
-    postcss: ">=8.0.9"
-    ts-node: ">=9.0.0"
-  peerDependenciesMeta:
-    postcss:
-      optional: true
-    ts-node:
-      optional: true
-  checksum: 1c589504c2d90b1568aecae8238ab993c17dba2c44f848a8f13619ba556d26a1c09644d5e6361b5784e721e94af37b604992f9f3dc0483e687a0cc1cc5029a34
   languageName: node
   linkType: hard
 
@@ -11352,42 +11378,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsup@npm:^6.6.3":
-  version: 6.7.0
-  resolution: "tsup@npm:6.7.0"
-  dependencies:
-    bundle-require: ^4.0.0
-    cac: ^6.7.12
-    chokidar: ^3.5.1
-    debug: ^4.3.1
-    esbuild: ^0.17.6
-    execa: ^5.0.0
-    globby: ^11.0.3
-    joycon: ^3.0.1
-    postcss-load-config: ^3.0.1
-    resolve-from: ^5.0.0
-    rollup: ^3.2.5
-    source-map: 0.8.0-beta.0
-    sucrase: ^3.20.3
-    tree-kill: ^1.2.2
-  peerDependencies:
-    "@swc/core": ^1
-    postcss: ^8.4.12
-    typescript: ">=4.1.0"
-  peerDependenciesMeta:
-    "@swc/core":
-      optional: true
-    postcss:
-      optional: true
-    typescript:
-      optional: true
-  bin:
-    tsup: dist/cli-default.js
-    tsup-node: dist/cli-node.js
-  checksum: 91ff179f0b9828a6880b6decaa8603fd7af0311f46a38d3a93647a2497298750d676810aeff533a335443a01a7b340dbba7c76523bcd7a87d7b05b7677742901
-  languageName: node
-  linkType: hard
-
 "tsup@npm:^7.2.0":
   version: 7.2.0
   resolution: "tsup@npm:7.2.0"
@@ -11698,6 +11688,15 @@ __metadata:
   dependencies:
     busboy: ^1.6.0
   checksum: 0795b69e0f7e1b2b162bce0d1670e6b44c968960e519f5b450df5196fd9c5102e0838ed854e68e61588f3c2436a3dc3d4390f9bf4a24b04eeb03926fe0eaa599
+  languageName: node
+  linkType: hard
+
+"undici@npm:^5.25.2":
+  version: 5.26.3
+  resolution: "undici@npm:5.26.3"
+  dependencies:
+    "@fastify/busboy": ^2.0.0
+  checksum: aaa9aadb712cf80e1a9cea2377e4842670105e00abbc184a21770ea5a8b77e4e2eadc200eac62442e74a1cd3b16a840c6f73b112b9e886bd3c1a125eb22e4f21
   languageName: node
   linkType: hard
 
@@ -12143,6 +12142,7 @@ __metadata:
     remark-gfm: ^3.0.1
     semver: ^7.5.3
     tailwindcss: 3.3.2
+    tsup: ^7.2.0
     typescript: 5.1.3
   languageName: unknown
   linkType: soft
@@ -12293,13 +12293,6 @@ __metadata:
   version: 4.0.0
   resolution: "yallist@npm:4.0.0"
   checksum: 343617202af32df2a15a3be36a5a8c0c8545208f3d3dfbc6bb7c3e3b7e8c6f8e7485432e4f3b88da3031a6e20afa7c711eded32ddfb122896ac5d914e75848d5
-  languageName: node
-  linkType: hard
-
-"yaml@npm:^1.10.2":
-  version: 1.10.2
-  resolution: "yaml@npm:1.10.2"
-  checksum: ce4ada136e8a78a0b08dc10b4b900936912d15de59905b2bf415b4d33c63df1d555d23acb2a41b23cf9fb5da41c256441afca3d6509de7247daa062fd2c5ea5f
   languageName: node
   linkType: hard
 
