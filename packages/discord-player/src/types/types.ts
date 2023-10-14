@@ -519,4 +519,8 @@ export interface PlayerInitOptions {
      * Skip ffmpeg process when possible
      */
     skipFFmpeg?: boolean;
+    /**
+     * The probe timeout in milliseconds. Defaults to 5000.
+     */
+    probeTimeout?: number;
 }
