@@ -35,6 +35,7 @@ export interface CreateStreamOps {
     volume?: number;
     disableResampler?: boolean;
     sampleRate?: number;
+    skipFFmpeg?: boolean;
 }
 
 export interface VoiceEvents {
@@ -374,6 +375,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     /**
      * Play stream
      * @param {AudioResource<Track>} [resource=this.audioResource] The audio resource to play
+     * @param {boolean} [opus=false] Whether or not to use opus
      * @returns {Promise<StreamDispatcher>}
      */
     async playStream(resource: AudioResource<Track> = this.audioResource!) {

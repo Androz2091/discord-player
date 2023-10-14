@@ -24,6 +24,7 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "devDependencies": {
-    "@discord-player/tsconfig": "workspace:^"
+    "@discord-player/tsconfig": "workspace:^",
+    "tsup": "^7.2.0"
   }
 }

@@ -40,6 +40,7 @@
     "discord-player": "workspace:^",
     "mediaplex": "^0.0.7",
     "play-dl": "^1.9.6",
+    "tsup": "^7.2.0",
     "youtube-ext": "^1.1.14",
     "yt-stream": "^1.4.8",
     "ytdl-core": "^4.11.4"

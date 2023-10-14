@@ -8,6 +8,14 @@ import type { RequestOptions } from 'http';
 import { Exceptions } from '../errors';
 import type { GuildQueueHistory } from '../manager';
 
+export type ExtractorStreamable =
+    | Readable
+    | string
+    | {
+          $fmt: string;
+          stream: Readable;
+      };
+
 export class BaseExtractor<T extends object = object> {
     /**
      * Identifier for this extractor
@@ -73,7 +81,7 @@ export class BaseExtractor<T extends object = object> {
      * Stream the given track
      * @param info The track to stream
      */
-    public async stream(info: Track): Promise<Readable | string> {
+    public async stream(info: Track): Promise<ExtractorStreamable> {
         void info;
         throw Exceptions.ERR_NOT_IMPLEMENTED(`${this.constructor.name}.stream()`);
     }
@@ -137,6 +145,13 @@ export class BaseExtractor<T extends object = object> {
      */
     public get routePlanner() {
         return this.context.player.routePlanner;
+    }
+
+    /**
+     * A flag to indicate `Demuxable` stream support for `opus`/`ogg/opus`/`webm/opus` formats.
+     */
+    public get supportsDemux() {
+        return !!this.context.player.options.skipFFmpeg;
     }
 }
 

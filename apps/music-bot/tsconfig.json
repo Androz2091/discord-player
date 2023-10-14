@@ -7,8 +7,8 @@
 		"tsBuildInfoFile": "dist/.tsbuildinfo",
 		"skipLibCheck": true,
 		"noImplicitAny": false,
-		"noImplicitReturns": false
+		"noImplicitReturns": false,
+		"ignoreDeprecations": "5.0"
 	},
 	"include": ["src"]
 }
- 
