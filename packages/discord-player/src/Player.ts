@@ -418,8 +418,9 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         if (this.hasDebugger) this.debug(`Search engine set to ${options.searchEngine}, fallback search engine set to ${options.fallbackSearchEngine}`);
 
+        const redirected = await QueryResolver.preResolve(searchQuery);
         const { type: queryType, query } =
-            options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(searchQuery, options.fallbackSearchEngine) : ({ type: options.searchEngine, query: searchQuery } as ResolvedQuery);
+            options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(redirected, options.fallbackSearchEngine) : ({ type: options.searchEngine, query: redirected } as ResolvedQuery);
 
         if (this.hasDebugger) this.debug(`Query type identified as ${queryType}`);
 

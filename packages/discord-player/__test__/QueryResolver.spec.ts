@@ -104,4 +104,18 @@ describe('QueryResolver', () => {
         const query = 'https://example.com/music';
         expect(qr.resolve(query).type).toBe(QueryType.ARBITRARY);
     });
+
+    it('should resolve redirected url', async () => {
+        const query = 'https://spotify.link/QCGEhSsnuDb';
+        const result = await qr.preResolve(query);
+
+        expect(result).toMatch(qr.regex.spotifySongRegex);
+    });
+
+    it('should resolve invalid url in preResolve', async () => {
+        const query = 'query boi';
+        const result = await qr.preResolve(query);
+
+        expect(result).toBe(query);
+    });
 });
