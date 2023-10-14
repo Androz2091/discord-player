@@ -1,7 +1,7 @@
 import { Queue } from '@discord-player/utils';
 import { Exceptions } from '../errors';
 import { Track } from '../fabric/Track';
-import { GuildQueue } from './GuildQueue';
+import { GuildQueue, TrackSkipReason } from './GuildQueue';
 
 export class GuildQueueHistory<Meta = unknown> {
     public tracks = new Queue<Track>('LIFO');
@@ -83,7 +83,10 @@ export class GuildQueueHistory<Meta = unknown> {
             throw Exceptions.ERR_NO_RESULT('No next track in the queue');
         }
 
-        this.queue.node.skip();
+        this.queue.node.skip({
+            reason: TrackSkipReason.HistoryNext,
+            description: 'Skipped by GuildQueueHistory.next()'
+        });
     }
 
     /**

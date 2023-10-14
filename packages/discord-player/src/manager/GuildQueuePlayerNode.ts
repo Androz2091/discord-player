@@ -4,7 +4,7 @@ import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
 import { QueryResolver } from '../utils/QueryResolver';
 import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
 import { Track, TrackResolvable } from '../fabric/Track';
-import { GuildQueue, GuildQueueEvent } from './GuildQueue';
+import { GuildQueue, GuildQueueEvent, TrackSkipReason } from './GuildQueue';
 import { setTimeout as waitFor } from 'timers/promises';
 import { AsyncQueue } from '../utils/AsyncQueue';
 import { Exceptions } from '../errors';
@@ -19,6 +19,11 @@ export interface ResourcePlayOptions {
     queue?: boolean;
     seek?: number;
     transitionMode?: boolean;
+}
+
+export interface SkipOptions {
+    reason: TrackSkipReason;
+    description: string;
 }
 
 export interface PlayerTimestamp {
@@ -218,7 +223,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         if (!this.queue.currentTrack) return false;
         if (duration === this.estimatedPlaybackTime) return true;
         if (duration > this.totalDuration) {
-            return this.skip();
+            return this.skip({
+                reason: TrackSkipReason.SEEK_OVER_THRESHOLD,
+                description: Exceptions.ERR_OUT_OF_RANGE('[duration]', String(duration), '0', String(this.totalDuration)).message
+            });
         }
         if (duration < 0) duration = 0;
         return await this.queue.filters.triggerReplay(duration);
@@ -276,10 +284,17 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     /**
      * Skip current track
      */
-    public skip() {
+    public skip(options?: SkipOptions) {
         if (!this.queue.dispatcher) return false;
+        const track = this.queue.currentTrack;
+        if (!track) return false;
         this.queue.setTransitioning(false);
         this.queue.dispatcher.end();
+        const { reason, description } = options || {
+            reason: TrackSkipReason.Manual,
+            description: 'The track was skipped manually'
+        };
+        this.queue.emit(GuildQueueEvent.playerSkip, this.queue, track, reason, description);
         return true;
     }
 
@@ -312,7 +327,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         const removed = this.remove(track);
         if (!removed) return false;
         this.queue.tracks.store.unshift(removed);
-        return this.skip();
+        return this.skip({
+            reason: TrackSkipReason.Jump,
+            description: 'The track was jumped to manually'
+        });
     }
 
     /**
@@ -341,7 +359,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         const toRemove = this.queue.tracks.store.filter((_, i) => i <= idx);
         this.queue.tracks.store.splice(0, idx, removed);
         this.queue.emit(GuildQueueEvent.audioTracksRemove, this.queue, toRemove);
-        return this.skip();
+        return this.skip({
+            reason: TrackSkipReason.SkipTo,
+            description: 'The player was skipped to another track manually'
+        });
     }
 
     /**
@@ -460,8 +481,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
         const track = res || this.queue.tracks.dispatch();
         if (!track) {
-            if (this.queue.options.skipOnNoStream) return;
-            throw Exceptions.ERR_NO_RESULT('Play request received but track was not provided');
+            const error = Exceptions.ERR_NO_RESULT('Play request received but track was not provided');
+            this.queue.emit(GuildQueueEvent.error, this.queue, error);
+            return;
         }
 
         if (this.queue.hasDebugger) this.queue.debug('Requested option requires to play the track, initializing...');
@@ -637,15 +659,11 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             Exceptions.ERR_NO_RESULT(`Could not extract stream for this track${error ? `\n\n${error.stack || error}` : ''}`)
         );
 
-        if (this.queue.options.skipOnNoStream) {
-            this.queue.emit(GuildQueueEvent.playerSkip, this.queue, track);
-            this.queue.emit(GuildQueueEvent.playerError, this.queue, streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault, track);
-            const nextTrack = this.queue.tracks.dispatch();
-            if (nextTrack) this.play(nextTrack, { queue: false });
-            return;
-        }
-
-        throw streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault;
+        this.queue.emit(GuildQueueEvent.playerSkip, this.queue, track, TrackSkipReason.NoStream, streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault.message);
+        this.queue.emit(GuildQueueEvent.playerError, this.queue, streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault, track);
+        const nextTrack = this.queue.tracks.dispatch();
+        if (nextTrack) this.play(nextTrack, { queue: false });
+        return;
     }
 
     async #performPlay(resource: AudioResource<Track>) {
