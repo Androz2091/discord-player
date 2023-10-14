@@ -1,6 +1,7 @@
 import { QueryType } from '../types/types';
 import { TypeUtil } from './TypeUtil';
 import { Exceptions } from '../errors';
+import { fetch } from 'undici';
 
 // #region scary things below *sigh*
 const spotifySongRegex = /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(intl-([a-z]|[A-Z])+\/)?(?:track\/|\?uri=spotify:track:)((\w|-){22})(\?si=.+)?$/;
@@ -28,6 +29,11 @@ const DomainsMap = {
     AppleMusic: ['music.apple.com']
 };
 
+// prettier-ignore
+const redirectDomains = new Set([
+    /^https?:\/\/spotify.link\/[A-Za-z0-9]+$/,
+]);
+
 export interface ResolvedQuery {
     type: (typeof QueryType)[keyof typeof QueryType];
     query: string;
@@ -54,6 +60,41 @@ class QueryResolver {
             soundcloudPlaylistRegex,
             youtubePlaylistRegex
         };
+    }
+
+    /**
+     * Pre-resolve redirect urls
+     */
+    static async preResolve(query: string, maxDepth = 5): Promise<string> {
+        if (!TypeUtil.isString(query)) throw Exceptions.ERR_INVALID_ARG_TYPE(query, 'string', typeof query);
+
+        for (const domain of redirectDomains) {
+            if (domain.test(query)) {
+                try {
+                    const res = await fetch(query, {
+                        method: 'GET',
+                        redirect: 'follow'
+                    });
+
+                    if (!res.ok) break;
+
+                    // spotify does not "redirect", it returns a page with js that redirects
+                    if (/^https?:\/\/spotify.app.link\/(.+)$/.test(res.url)) {
+                        const body = await res.text();
+                        const target = body.split('window.top.location = validateProtocol("')[1].split('?si=')[0];
+
+                        if (!target) break;
+
+                        return target;
+                    }
+                    return maxDepth < 1 ? res.url : this.preResolve(res.url, maxDepth - 1);
+                } catch {
+                    break;
+                }
+            }
+        }
+
+        return query;
     }
 
     /**
