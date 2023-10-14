@@ -15,7 +15,6 @@ export interface GuildNodeCreateOptions<T = unknown> {
     biquad?: BiquadFilters;
     resampler?: number;
     disableHistory?: boolean;
-    skipOnNoStream?: boolean;
     onBeforeCreateStream?: OnBeforeCreateStreamHandler;
     onAfterCreateStream?: OnAfterCreateStreamHandler;
     repeatMode?: QueueRepeatMode;
@@ -68,7 +67,6 @@ export class GuildNodeManager<Meta = unknown> {
         options.equalizer ??= [];
         options.a_filter ??= [];
         options.disableHistory ??= false;
-        options.skipOnNoStream ??= false;
         options.leaveOnEmpty ??= true;
         options.leaveOnEmptyCooldown ??= 0;
         options.leaveOnEnd ??= true;
@@ -107,7 +105,6 @@ export class GuildNodeManager<Meta = unknown> {
             biquad: options.biquad,
             resampler: options.resampler,
             disableHistory: options.disableHistory,
-            skipOnNoStream: options.skipOnNoStream,
             onBeforeCreateStream: options.onBeforeCreateStream,
             onAfterCreateStream: options.onAfterCreateStream,
             repeatMode: options.repeatMode,

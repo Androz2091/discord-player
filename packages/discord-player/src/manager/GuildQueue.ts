@@ -28,7 +28,6 @@ export interface GuildNodeInit<Meta = unknown> {
     filterer: PCMFilters[] | boolean;
     ffmpegFilters: FiltersName[];
     disableHistory: boolean;
-    skipOnNoStream: boolean;
     onBeforeCreateStream?: OnBeforeCreateStreamHandler;
     onAfterCreateStream?: OnAfterCreateStreamHandler;
     repeatMode?: QueueRepeatMode;
@@ -190,6 +189,15 @@ export const GuildQueueEvent = {
     willAutoPlay: 'willAutoPlay'
 } as const;
 
+export enum TrackSkipReason {
+    NoStream = 'ERR_NO_STREAM',
+    Manual = 'MANUAL',
+    SEEK_OVER_THRESHOLD = 'SEEK_OVER_THRESHOLD',
+    Jump = 'JUMPED_TO_ANOTHER_TRACK',
+    SkipTo = 'SKIP_TO_ANOTHER_TRACK',
+    HistoryNext = 'HISTORY_NEXT_TRACK'
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface GuildQueueEvents<Meta = any> {
     /**
@@ -276,8 +284,10 @@ export interface GuildQueueEvents<Meta = any> {
      * Emitted when the audio player skips current track
      * @param queue The queue where this event occurred
      * @param track The track that was skipped
+     * @param reason The reason for skipping
+     * @param description The description for skipping
      */
-    playerSkip: (queue: GuildQueue<Meta>, track: Track) => unknown;
+    playerSkip: (queue: GuildQueue<Meta>, track: Track, reason: TrackSkipReason, description: string) => unknown;
     /**
      * Emitted when the audio player is triggered
      * @param queue The queue where this event occurred
