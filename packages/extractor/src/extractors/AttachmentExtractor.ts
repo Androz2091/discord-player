@@ -58,7 +58,14 @@ export class AttachmentExtractor extends BaseExtractor {
                 try {
                     // eslint-disable-next-line
                     const mediaplex = require('mediaplex') as typeof import('mediaplex');
-                    const { result, stream } = await mediaplex.probeStream(data);
+                    const timeout = this.context.player.options.probeTimeout ?? 5000;
+
+                    const { result, stream } = (await Promise.race([
+                        mediaplex.probeStream(data),
+                        new Promise((_, r) => {
+                            setTimeout(() => r(new Error('Timeout')), timeout);
+                        })
+                    ])) as Awaited<ReturnType<typeof mediaplex.probeStream>>;
 
                     if (result) {
                         trackInfo.duration = result.duration * 1000;
@@ -121,12 +128,19 @@ export class AttachmentExtractor extends BaseExtractor {
                     // eslint-disable-next-line
                     const mediaplex = require('mediaplex') as typeof import('mediaplex');
 
-                    const { result, stream } = await mediaplex.probeStream(
-                        createReadStream(query, {
-                            start: 0,
-                            end: 1024 * 1024 * 10
+                    const timeout = this.context.player.options.probeTimeout ?? 5000;
+
+                    const { result, stream } = (await Promise.race([
+                        mediaplex.probeStream(
+                            createReadStream(query, {
+                                start: 0,
+                                end: 1024 * 1024 * 10
+                            })
+                        ),
+                        new Promise((_, r) => {
+                            setTimeout(() => r(new Error('Timeout')), timeout);
                         })
-                    );
+                    ])) as Awaited<ReturnType<typeof mediaplex.probeStream>>;
 
                     if (result) {
                         trackInfo.duration = result.duration * 1000;
