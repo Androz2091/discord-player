@@ -111,7 +111,7 @@ export class BridgeProvider {
                 throw new Error('Cannot stream, YouTubeExtractor is disabled.');
             }
 
-            return YouTubeExtractor.instance._stream((meta.data as Video).url, YouTubeExtractor.instance);
+            return YouTubeExtractor.instance._stream((meta.data as Video).url, YouTubeExtractor.instance, YouTubeExtractor.instance.supportsDemux);
         } else {
             throw new TypeError('invalid bridge source');
         }
