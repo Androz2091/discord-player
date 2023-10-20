@@ -81,11 +81,11 @@ class QueryResolver {
                     // spotify does not "redirect", it returns a page with js that redirects
                     if (/^https?:\/\/spotify.app.link\/(.+)$/.test(res.url)) {
                         const body = await res.text();
-                        const target = body.split('window.top.location = validateProtocol("')[1].split('?si=')[0];
+                        const target = body.split('https://open.spotify.com/track/')[1].split('?si=')[0];
 
                         if (!target) break;
 
-                        return target;
+                        return `https://open.spotify.com/track/${target}`;
                     }
                     return maxDepth < 1 ? res.url : this.preResolve(res.url, maxDepth - 1);
                 } catch {
