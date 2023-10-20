@@ -122,10 +122,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         }
     }
 
-    public get hasDebugger() {
-        return this.listenerCount('debug') > 0;
-    }
-
     /**
      * Override default voice state update handler
      * @param handler The handler callback
@@ -563,7 +559,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             `- discord-player: ${Player.version}`,
             `- discord-voip: ${dVoiceVersion}`,
             `- discord.js: ${djsVersion}`,
-            `- Node version: ${process.version} (Detected Runtime: ${runtime})`,
+            `- Node version: ${process.version} (Detected Runtime: ${runtime}, Platform: ${process.platform} [${process.arch}])`,
             (() => {
                 if (this.options.useLegacyFFmpeg) return '- ffmpeg: N/A (using legacy ffmpeg)';
                 const info = FFmpeg.locateSafe();
