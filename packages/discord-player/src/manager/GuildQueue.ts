@@ -906,7 +906,7 @@ export class GuildQueue<Meta = unknown> {
     }
 
     public get hasDebugger() {
-        return this.player.events.listenerCount(GuildQueueEvent.debug) > 0;
+        return this.player.events.hasDebugger;
     }
 
     #removeListeners<T extends { removeAllListeners: () => unknown }>(target: T) {
