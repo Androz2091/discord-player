@@ -129,7 +129,7 @@ __metadata:
     spotify-url-info: ^3.2.6
     tsup: ^7.2.0
     youtube-ext: ^1.1.14
-    youtube-sr: ^4.3.6
+    youtube-sr: ^4.3.8
     yt-stream: ^1.4.8
     ytdl-core: ^4.11.4
   languageName: unknown
@@ -4773,11 +4773,8 @@ __metadata:
     opusscript: ^0.0.8
     tsup: ^7.2.0
     typescript: ^4.7.4
-    youtube-sr: ^4.3.6
   peerDependencies:
     "@discord-player/extractor": "workspace:^"
-    discord.js: 14.x
-    youtube-sr: 4.x
   languageName: unknown
   linkType: soft
 
@@ -12338,10 +12335,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"youtube-sr@npm:^4.3.6":
-  version: 4.3.6
-  resolution: "youtube-sr@npm:4.3.6"
-  checksum: 8f32650ad182d3fe0fb4b9eb3990a24d0f193f8a8d879fba8133a8b2008793349ad7413dc1c00c6cdc52f2ebb145a73ab081bf2f9af1b07d77054500b466f831
+"youtube-sr@npm:^4.3.8":
+  version: 4.3.8
+  resolution: "youtube-sr@npm:4.3.8"
+  checksum: 4cdf9d74a426578a1918804e00e6ba87bfea20aa9dec0e6ca7c7892d1473104abde2ee8dc997ee9d84ef1620ca50bafb69fe2b81abf5702bb57143527fcf703b
   languageName: node
   linkType: hard
 
