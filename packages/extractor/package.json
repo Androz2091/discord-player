@@ -53,7 +53,7 @@
     "reverbnation-scraper": "^2.0.0",
     "soundcloud.ts": "^0.5.2",
     "spotify-url-info": "^3.2.6",
-    "youtube-sr": "^4.3.4"
+    "youtube-sr": "^4.3.5"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts",

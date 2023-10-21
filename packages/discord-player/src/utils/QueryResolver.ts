@@ -113,7 +113,9 @@ class QueryResolver {
             if (DomainsMap.YouTube.includes(url.host)) {
                 query = query.replace(/(m(usic)?|gaming)\./, '').trim();
                 const playlistId = url.searchParams.get('list');
+                const videoId = url.searchParams.get('v');
                 if (playlistId) {
+                    if (videoId && playlistId.startsWith('RD')) return resolver(QueryType.YOUTUBE_PLAYLIST, `https://www.youtube.com/watch?v=${videoId}&list=${playlistId}`);
                     return resolver(QueryType.YOUTUBE_PLAYLIST, `https://www.youtube.com/playlist?list=${playlistId}`);
                 }
                 if (QueryResolver.validateId(query) || QueryResolver.validateURL(query)) return resolver(QueryType.YOUTUBE_VIDEO, query);

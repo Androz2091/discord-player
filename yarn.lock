@@ -129,7 +129,7 @@ __metadata:
     spotify-url-info: ^3.2.6
     tsup: ^7.2.0
     youtube-ext: ^1.1.14
-    youtube-sr: ^4.3.4
+    youtube-sr: ^4.3.5
     yt-stream: ^1.4.8
     ytdl-core: ^4.11.4
   languageName: unknown
@@ -12342,6 +12342,13 @@ __metadata:
   version: 4.3.4
   resolution: "youtube-sr@npm:4.3.4"
   checksum: e097f2a82ddc51a580e7b8556aba83968ee580ad29a8d035cbfdc497c4a6f227b3e3ef0bf4648c6edaf25aed18b872a0fad8fda0554d270129f7c5e60e4a01ef
+  languageName: node
+  linkType: hard
+
+"youtube-sr@npm:^4.3.5":
+  version: 4.3.5
+  resolution: "youtube-sr@npm:4.3.5"
+  checksum: 1262c3dcb7f517afac9c2d17370b3bd928654d7894e6f0beef44dcf4c36a648b765f2279743559723b5237f176fe663e16733b916e618ccb55af836d67e6718d
   languageName: node
   linkType: hard
 

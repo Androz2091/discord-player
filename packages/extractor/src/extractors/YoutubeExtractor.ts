@@ -67,7 +67,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         query = query.includes('youtube.com') ? query.replace(/(m(usic)?|gaming)\./, '') : query;
-        if (YoutubeExtractor.validateURL(query)) context.type = QueryType.YOUTUBE_VIDEO;
+        if (!query.includes('list=RD') && YoutubeExtractor.validateURL(query)) context.type = QueryType.YOUTUBE_VIDEO;
 
         switch (context.type) {
             case QueryType.YOUTUBE_PLAYLIST: {

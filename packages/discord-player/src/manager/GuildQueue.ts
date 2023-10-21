@@ -986,16 +986,13 @@ export class GuildQueue<Meta = unknown> {
 
         if (!store.length) return;
 
-        const tracks = Util.arrayCloneShuffle(store);
-        const randomDispatch = tracks.shift();
+        const track = Util.randomChoice(store);
 
-        if (randomDispatch) {
-            this.tracks.removeOne((t) => {
-                return t.id === randomDispatch.id;
-            });
-        }
+        this.tracks.removeOne((t) => {
+            return t.id === track.id;
+        });
 
-        return randomDispatch;
+        return track;
     }
 
     #performFinish(resource?: AudioResource<Track>) {
