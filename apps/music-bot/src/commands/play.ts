@@ -69,9 +69,8 @@ export class PlayCommand extends Command {
 		});
 
 		if (!results.hasTracks())
-			return interaction.reply({
-				content: `${this.container.client.dev.error} | **No** tracks were found for your query`,
-				ephemeral: true
+			return interaction.editReply({
+				content: `${this.container.client.dev.error} | **No** tracks were found for your query`
 			});
 
 		try {
