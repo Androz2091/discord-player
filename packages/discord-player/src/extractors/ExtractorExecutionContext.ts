@@ -70,6 +70,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
 
         (filter ? knownExtractorKeys.filter(filter) : knownExtractorKeys).forEach((key) => {
             if (!mod.module[key]) return;
+            // @ts-ignore types
             this.register(<typeof BaseExtractor>mod.module[key], options?.[key] || {});
         });
 
