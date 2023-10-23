@@ -84,6 +84,9 @@ export class BridgeProvider {
         const oldQc = ext.createBridgeQuery;
         if (isSoundcloud) ext.createBridgeQuery = (track) => `${track.author} ${track.title}`;
         const res = await bridgefn(ext, track);
+
+        ext.debug(`Extracted bridge metadata using ${isSoundcloud ? 'soundcloud' : 'youtube'} extractor: ${JSON.stringify(res)}`);
+
         ext.createBridgeQuery = oldQc;
 
         return { source: isSoundcloud ? 'soundcloud' : 'youtube', data: res } as BridgedMetadata;
