@@ -17,6 +17,10 @@ const knownExtractorKeys = [
 ] as const;
 const knownExtractorLib = '@discord-player/extractor';
 
+export type ExtractorLoaderOptionDict = {
+    [K in (typeof knownExtractorKeys)[number]]?: ConstructorParameters<typeof import('@discord-player/extractor')[K]>['1'];
+};
+
 export interface ExtractorExecutionEvents {
     /**
      * Emitted when a extractor is registered
@@ -59,13 +63,13 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
     /**
      * Load default extractors from `@discord-player/extractor`
      */
-    public async loadDefault(filter?: (ext: (typeof knownExtractorKeys)[number]) => boolean) {
+    public async loadDefault(filter?: (ext: (typeof knownExtractorKeys)[number]) => boolean | null, options?: ExtractorLoaderOptionDict) {
         const mod = await Util.import(knownExtractorLib);
         if (mod.error) return { success: false, error: mod.error as Error };
 
         (filter ? knownExtractorKeys.filter(filter) : knownExtractorKeys).forEach((key) => {
             if (!mod.module[key]) return;
-            this.register(<typeof BaseExtractor>mod.module[key], {});
+            this.register(<typeof BaseExtractor>mod.module[key], options?.[key] || {});
         });
 
         return { success: true, error: null };
