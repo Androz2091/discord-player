@@ -18,7 +18,7 @@ const knownExtractorKeys = [
 const knownExtractorLib = '@discord-player/extractor';
 
 export type ExtractorLoaderOptionDict = {
-    [K in (typeof knownExtractorKeys)[number]]?: ConstructorParameters<typeof import('@discord-player/extractor')[K]>['1'];
+    [K in (typeof knownExtractorKeys)[number]]?: ConstructorParameters<typeof import('@discord-player/extractor')[K]>[1];
 };
 
 export interface ExtractorExecutionEvents {
