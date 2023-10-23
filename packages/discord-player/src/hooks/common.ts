@@ -1,8 +1,18 @@
+import type { Player } from '../Player';
 import { GuildQueue, NodeResolvable } from '../manager';
 import { instances } from '../utils/__internal__';
 
+const preferredInstanceKey = '__discord_player_hook_instance_cache__';
+
 export const getPlayer = () => {
-    return instances.first() || null;
+    return instances.get(preferredInstanceKey) || instances.first() || null;
+};
+
+/**
+ * Bind a player instance to the hook system, defaults to the first instance.
+ */
+export const bindHook = (player: Player) => {
+    instances.set(preferredInstanceKey, player);
 };
 
 export const getQueue = <T = unknown>(node: NodeResolvable) => {

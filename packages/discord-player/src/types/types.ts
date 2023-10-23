@@ -1,9 +1,9 @@
-import { User, UserResolvable, VoiceState } from 'discord.js';
-import { GuildQueue } from '../manager';
-import { Track } from '../fabric/Track';
-import { Playlist } from '../fabric/Playlist';
-import { downloadOptions } from 'ytdl-core';
-import { QueryCacheProvider } from '../utils/QueryCache';
+import type { User, UserResolvable, VoiceState } from 'discord.js';
+import type { GuildQueue } from '../manager';
+import type { Track } from '../fabric/Track';
+import type { Playlist } from '../fabric/Playlist';
+import type { downloadOptions } from 'ytdl-core';
+import type { QueryCacheProvider } from '../utils/QueryCache';
 import type { IPRotationConfig } from '../utils/IPRotator';
 
 // @ts-ignore
