@@ -70,6 +70,11 @@ const pages = [
                 name: 'performance-optimization',
                 displayName: 'Performance Optimizations',
                 component: lazy(() => import('../_guides/faq/performance_optimization.mdx'))
+            },
+            {
+                name: 'serialization-and-deserialization',
+                displayName: 'Serialization and Deserialization',
+                component: lazy(() => import('../_guides/faq/serialization_and_deserialization.mdx'))
             }
         ]
     },
