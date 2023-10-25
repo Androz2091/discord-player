@@ -152,7 +152,8 @@ export const ShowcaseResource: IShowcase = {
         },
         {
             name: 'AstroMonkey',
-            description: 'AstroMonkey is an open-source music bot! it has support for Autocomplete search using Slash Commands, Queue management to take control of your music, and playlists to add music too for later.',
+            description:
+                'AstroMonkey is an open-source music bot! it has support for Autocomplete search using Slash Commands, Queue management to take control of your music, and playlists to add music too for later.',
             version: 'v6.6.3',
             url: 'https://github.com/ToothlessBrush/AstroMonkey'
         }
