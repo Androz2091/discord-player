@@ -23,6 +23,11 @@ export class BaseExtractor<T extends object = object> {
     public static identifier = 'com.discord-player.extractor';
 
     /**
+     * Priority of this extractor. Higher value means higher priority (will be executed first).
+     */
+    public priority = 1;
+
+    /**
      * Handle bridge query creation
      * @param track The track to build query for
      */

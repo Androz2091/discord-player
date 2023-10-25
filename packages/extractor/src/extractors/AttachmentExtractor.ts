@@ -20,6 +20,9 @@ const ATTACHMENT_HEADER = ['audio/', 'video/', 'application/ogg'] as const;
 export class AttachmentExtractor extends BaseExtractor {
     public static identifier = 'com.discord-player.attachmentextractor' as const;
 
+    // use lowest priority to avoid conflict with other extractors
+    public priority = 0;
+
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
         if (typeof query !== 'string') return false;
         return ([QueryType.ARBITRARY, QueryType.FILE] as SearchQueryType[]).some((r) => r === type);
