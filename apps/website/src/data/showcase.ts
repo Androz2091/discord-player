@@ -149,6 +149,12 @@ export const ShowcaseResource: IShowcase = {
             description: 'An open-source & feature-packed Discord music bot, complete with a large selection of commands, effects, customisability, Docker & Plex support and much more! 🚀💪',
             version: 'v6.6.4',
             url: 'https://github.com/ThatGuyJacobee/Elite-Music'
+        },
+        {
+            name: 'AstroMonkey',
+            description: 'AstroMonkey is an open-source music bot! it has support for Autocomplete search using Slash Commands, Queue management to take control of your music, and playlists to add music too for later.',
+            version: 'v6.6.3',
+            url: 'https://github.com/ToothlessBrush/AstroMonkey'
         }
     ].sort((a, b) => semver.rcompare(a.version, b.version)),
     extractors: [
