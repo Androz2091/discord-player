@@ -12,6 +12,7 @@ import { TypeUtil } from '../utils/TypeUtil';
 import { CreateStreamOps } from '../VoiceInterface/StreamDispatcher';
 import { ExtractorStreamable } from '../extractors/BaseExtractor';
 import * as prism from 'prism-media';
+import { OpusDecoder } from '@discord-player/opus';
 
 export const FFMPEG_SRATE_REGEX = /asetrate=\d+\*(\d(\.\d)?)/;
 
@@ -607,7 +608,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 if (shouldPCM) {
                     // if we have any filters enabled, we need to decode the opus stream to pcm
                     finalStream = opusStream.pipe(
-                        new prism.opus.Decoder({
+                        new OpusDecoder({
                             channels: 2,
                             frameSize: 960,
                             rate: 48000
