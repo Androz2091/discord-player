@@ -38,7 +38,7 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "homepage": "https://github.com/Androz2091/discord-player#readme",
-  "packageManager": "yarn@3.3.1",
+  "packageManager": "yarn@4.0.0",
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
@@ -49,12 +49,9 @@
     "fs-extra": "^11.1.0",
     "prettier": "^2.8.2",
     "rimraf": "^4.1.2",
-    "tsup": "^7.2.0",
     "turbo": "latest",
     "typedoc-nextra": "0.1.5",
-    "typescript": "^5.2.2"
-  },
-  "devDependencies": {
-    "vitest": "^0.29.1"
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6"
   }
 }

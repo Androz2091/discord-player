@@ -19,6 +19,6 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "devDependencies": {
-    "tsup": "^7.2.0"
+    "typescript": "^5.2.2"
   }
 }
