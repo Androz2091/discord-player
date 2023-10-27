@@ -4,6 +4,7 @@ import { setTimeout } from 'timers/promises';
 import { GuildQueue } from '../manager';
 import { Playlist, Track } from '../fabric';
 import { Exceptions } from '../errors';
+import { randomInt } from 'crypto';
 
 class Util {
     /**
@@ -135,7 +136,20 @@ class Util {
     }
 
     static randomChoice<T>(src: T[]): T {
-        return src[Math.floor(Math.random() * src.length)];
+        return src[randomInt(src.length)];
+    }
+
+    static arrayCloneShuffle<T>(src: T[]): T[] {
+        const arr = src.slice();
+
+        let m = arr.length;
+
+        while (m) {
+            const i = Math.floor(Math.random() * m--);
+            [arr[m], arr[i]] = [arr[i], arr[m]];
+        }
+
+        return arr;
     }
 }
 

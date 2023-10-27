@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/extractor",
-  "version": "4.4.1",
+  "version": "4.4.5",
   "description": "Extractors for discord-player",
   "keywords": [
     "discord-player",
@@ -35,23 +35,27 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
+    "@distube/ytdl-core": "^4.13.0",
     "@types/node": "^18.11.18",
     "discord-player": "workspace:^",
-    "mediaplex": "^0.0.6",
+    "mediaplex": "^0.0.7",
     "play-dl": "^1.9.6",
-    "youtube-ext": "^1.1.10",
-    "yt-stream": "^1.4.7",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6",
+    "youtube-ext": "^1.1.14",
+    "yt-stream": "^1.4.8",
     "ytdl-core": "^4.11.4"
   },
   "dependencies": {
     "file-type": "^16.5.4",
-    "genius-lyrics": "^4.4.3",
+    "genius-lyrics": "^4.4.6",
     "isomorphic-unfetch": "^4.0.2",
     "node-html-parser": "^6.1.4",
     "reverbnation-scraper": "^2.0.0",
-    "soundcloud.ts": "^0.5.0",
+    "soundcloud.ts": "^0.5.2",
     "spotify-url-info": "^3.2.6",
-    "youtube-sr": "^4.3.4"
+    "youtube-sr": "^4.3.9"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts",

@@ -4,6 +4,7 @@ import { SoundCloudExtractor } from '../SoundCloudExtractor';
 import unfetch from 'isomorphic-unfetch';
 import http from 'http';
 import https from 'https';
+import type * as SoundCloud from 'soundcloud.ts';
 
 let factory: {
     name: string;
@@ -30,7 +31,18 @@ const ERR_NO_YT_LIB = new Error(`Could not load youtube library. Install one of 
 const forcedLib = process.env.DP_FORCE_YTDL_MOD;
 if (forcedLib) YouTubeLibs.unshift(...forcedLib.split(','));
 
-export type StreamFN = (q: string, ext: BaseExtractor) => Promise<import('stream').Readable | string>;
+export type StreamFN = (
+    q: string,
+    ext: BaseExtractor,
+    demuxable?: boolean
+) => Promise<
+    | import('stream').Readable
+    | string
+    | {
+          stream: import('stream').Readable;
+          $fmt: string;
+      }
+>;
 
 let httpAgent: http.Agent, httpsAgent: https.Agent;
 
@@ -53,10 +65,10 @@ export async function loadYtdl(options?: any, force = false) {
     }
 
     if (lib) {
-        const isYtdl = ['ytdl-core', '@distube/ytdl-core'].some((lib) => lib === _ytLibName);
+        const isYtdl = ['ytdl-core'].some((lib) => lib === _ytLibName);
 
         const hlsRegex = /\/manifest\/hls_(variant|playlist)\//;
-        _stream = async (query, extractor) => {
+        _stream = async (query, extractor, demuxable = false) => {
             const planner = extractor.context.player.routePlanner;
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,10 +116,26 @@ export async function loadYtdl(options?: any, force = false) {
                 const info = await dl.videoInfo(query, opt);
                 const videoFormats = await dl.getFormats(info.stream, opt);
 
+                if (demuxable) {
+                    const demuxableFormat =
+                        info.duration.lengthSec != '0'
+                            ? videoFormats.find((fmt) => {
+                                  return /audio\/webm; codecs="opus"/.test(fmt.mimeType || '') && fmt.audioSampleRate == '48000';
+                              })
+                            : null;
+
+                    if (demuxableFormat) {
+                        return {
+                            stream: await dl.getReadableStream(demuxableFormat, opt),
+                            $fmt: 'webm/opus'
+                        };
+                    }
+                }
+
                 const formats = videoFormats
                     .filter((format) => {
                         if (!format.url) return false;
-                        if (info.isLive) return hlsRegex.test(format.url) && typeof format.bitrate === 'number';
+                        if (info.isLive) return dl.utils.isHlsContentURL(format.url) && format.url.endsWith('.m3u8');
                         return typeof format.bitrate === 'number';
                     })
                     .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
@@ -120,6 +148,24 @@ export async function loadYtdl(options?: any, force = false) {
                 const dl = lib as typeof import('ytdl-core');
                 const info = await dl.getInfo(query, applyPlannerConfig(options));
 
+                if (demuxable) {
+                    const filter = (format: import('ytdl-core').videoFormat) => {
+                        return format.codecs === 'opus' && format.container === 'webm' && format.audioSampleRate == '48000';
+                    };
+
+                    const format = info.formats.find(filter);
+
+                    if (format && info.videoDetails.lengthSeconds != '0') {
+                        return {
+                            stream: dl.downloadFromInfo(info, {
+                                ...applyPlannerConfig(options),
+                                filter
+                            }),
+                            $fmt: 'webm/opus'
+                        };
+                    }
+                }
+
                 const formats = info.formats
                     .filter((format) => {
                         return info.videoDetails.isLiveContent ? format.isHLS && format.hasAudio : format.hasAudio;
@@ -131,17 +177,93 @@ export async function loadYtdl(options?: any, force = false) {
                 if (!url) throw new Error(`Failed to parse stream url for ${query}`);
                 return url;
                 // return dl(query, this.context.player.options.ytdlOptions);
+            } else if (_ytLibName === '@distube/ytdl-core') {
+                const dl = lib as typeof import('@distube/ytdl-core');
+                let opt: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+                if (planner) {
+                    opt = {
+                        localAddress: planner.getIP().ip,
+                        autoSelectFamily: true
+                    };
+                }
+
+                const cookie = options?.requestOptions?.headers?.cookie;
+
+                const agent = dl.createAgent(Array.isArray(cookie) ? cookie : undefined, opt);
+
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const reqOpt: any = {
+                    agent
+                };
+
+                if (cookie && !Array.isArray(cookie)) {
+                    reqOpt.requestOptions = {
+                        headers: {
+                            cookie
+                        }
+                    };
+                }
+
+                const info = await dl.getInfo(query, reqOpt);
+
+                if (demuxable) {
+                    const filter = (format: import('@distube/ytdl-core').videoFormat) => {
+                        return format.codecs === 'opus' && format.container === 'webm' && format.audioSampleRate == '48000';
+                    };
+
+                    const format = info.formats.find(filter);
+
+                    if (format && info.videoDetails.lengthSeconds != '0') {
+                        return {
+                            stream: dl.downloadFromInfo(info, {
+                                ...applyPlannerConfig(options),
+                                filter
+                            }),
+                            $fmt: 'webm/opus'
+                        };
+                    }
+                }
+
+                const formats = info.formats
+                    .filter((format) => {
+                        return info.videoDetails.isLiveContent ? format.isHLS && format.hasAudio : format.hasAudio;
+                    })
+                    .sort((a, b) => Number(b.audioBitrate) - Number(a.audioBitrate) || Number(a.bitrate) - Number(b.bitrate));
+
+                const fmt = formats.find((format) => !format.hasVideo) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
+                const url = fmt?.url;
+                if (!url) throw new Error(`Failed to parse stream url for ${query}`);
+                return url;
             } else if (_ytLibName === 'play-dl') {
                 const dl = lib as typeof import('play-dl');
-                dl.setToken({
-                    youtube: options?.requestOptions?.headers?.cookie
-                });
 
+                if (typeof options?.requestOptions?.headers?.cookie === 'string') {
+                    dl.setToken({
+                        youtube: options.requestOptions.headers.cookie
+                    });
+                }
                 const info = await dl.video_info(query);
+
+                if (demuxable) {
+                    try {
+                        const stream = await dl.stream(query, {
+                            discordPlayerCompatibility: false
+                        });
+
+                        return {
+                            stream: stream.stream,
+                            $fmt: stream.type as string
+                        };
+                    } catch {
+                        //
+                    }
+                }
+
                 const formats = info.format
                     .filter((format) => {
                         if (!format.url) return false;
-                        if (info.video_details.live) return hlsRegex.test(format.url) && typeof format.bitrate === 'number';
+                        if (info.video_details.live) return (hlsRegex.test(format.url) && typeof format.bitrate === 'number') || (hlsRegex.test(format.url) && format.url.endsWith('.m3u8'));
                         return typeof format.bitrate === 'number';
                     })
                     .sort((a, b) => Number(b.bitrate) - Number(a.bitrate));
@@ -150,7 +272,6 @@ export async function loadYtdl(options?: any, force = false) {
                 const url = fmt?.url;
                 if (!url) throw new Error(`Failed to parse stream url for ${query}`);
                 return url;
-                // return (await dl.stream(query, { discordPlayerCompatibility: true })).stream;
             } else if (_ytLibName === 'yt-stream') {
                 const dl = lib as typeof import('yt-stream');
 
@@ -198,19 +319,23 @@ export async function makeSCSearch(query: string) {
     const { instance } = SoundCloudExtractor;
     if (!instance?.internal) return [];
 
+    let data: SoundCloud.SoundcloudTrackV2[];
+
     try {
         const info = await instance.internal.tracks.searchV2({
             q: query,
             limit: 5
         });
 
-        return info.collection;
+        data = info.collection;
     } catch {
         // fallback
         const info = await instance.internal.tracks.searchAlt(query);
 
-        return info;
+        data = info;
     }
+
+    return filterSoundCloudPreviews(data);
 }
 
 export async function pullYTMetadata(ext: BaseExtractor, info: Track) {
@@ -227,4 +352,15 @@ export async function pullSCMetadata(ext: BaseExtractor, info: Track) {
         .catch(() => null);
 
     return meta;
+}
+
+export function filterSoundCloudPreviews(tracks: SoundCloud.SoundcloudTrackV2[]): SoundCloud.SoundcloudTrackV2[] {
+    const filtered = tracks.filter((t) => {
+        if (typeof t.policy === 'string') return t.policy.toUpperCase() === 'ALLOW';
+        return !(t.duration === 30_000 && t.full_duration > 30_000);
+    });
+
+    const result = filtered.length > 0 ? filtered : tracks;
+
+    return result;
 }

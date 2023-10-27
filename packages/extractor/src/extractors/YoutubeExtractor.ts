@@ -10,7 +10,8 @@ import {
     QueryType,
     SearchQueryType,
     Track,
-    Util
+    Util,
+    ExtractorStreamable
 } from 'discord-player';
 
 import { StreamFN, YouTubeLibs, loadYtdl, makeYTSearch } from './common/helper';
@@ -66,7 +67,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
         query = query.includes('youtube.com') ? query.replace(/(m(usic)?|gaming)\./, '') : query;
-        if (YoutubeExtractor.validateURL(query)) context.type = QueryType.YOUTUBE_VIDEO;
+        if (!query.includes('list=RD') && YoutubeExtractor.validateURL(query)) context.type = QueryType.YOUTUBE_VIDEO;
 
         switch (context.type) {
             case QueryType.YOUTUBE_PLAYLIST: {
@@ -195,7 +196,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
     }
 
     public async getRelatedTracks(track: Track, history: GuildQueueHistory) {
-        let info: Video[] | void;
+        let info: Video[] | void = undefined;
 
         if (YoutubeExtractor.validateURL(track.url))
             info = await YouTube.getVideo(track.url)
@@ -244,7 +245,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
         return { playlist: null, tracks: [] };
     }
 
-    public async stream(info: Track): Promise<Readable | string> {
+    public async stream(info: Track): Promise<ExtractorStreamable> {
         if (!this._stream) {
             throw new Error(`Could not find youtube streaming library. Install one of ${YouTubeLibs.join(', ')}`);
         }
@@ -252,7 +253,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
         let url = info.url;
         url = url.includes('youtube.com') ? url.replace(/(m(usic)?|gaming)\./, '') : url;
 
-        return this._stream(url, this);
+        return this._stream(url, this, this.supportsDemux);
     }
 
     public static validateURL(link: string) {

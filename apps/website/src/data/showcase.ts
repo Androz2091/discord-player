@@ -20,7 +20,7 @@ export const ShowcaseResource: IShowcase = {
         {
             name: 'Mirasaki Music Bot',
             description: 'Complete (45+ commands) music bot with persistent settings, effects, filters, auto-play, DJ-roles, and much more.',
-            version: 'v6.5.0',
+            version: 'v6.6.3',
             url: 'https://github.com/Mirasaki/mirasaki-music-bot'
         },
         {
@@ -49,8 +49,8 @@ export const ShowcaseResource: IShowcase = {
         },
         {
             name: 'Botanique',
-            description: "A bot I made with 2-1-1-2, we're using discord-player for the music and for lyrics",
-            version: 'v6.2.1',
+            description: 'Typescript bot running on Docker, using discord-player for music and lyrics.',
+            version: 'v6.6.4',
             url: 'https://git.mylloon.fr/ConfrerieDuKassoulait/Botanique'
         },
         {
@@ -61,8 +61,8 @@ export const ShowcaseResource: IShowcase = {
         },
         {
             name: 'Mittelbot',
-            description: 'I am using discord-player to let people play their favourite music in their discord servers (No yt ofc)',
-            version: 'v6.2.1',
+            description: "A moderation & utility bot with music to play everyone's favourite music.",
+            version: 'v6.6.3',
             url: 'https://github.com/Mittelbots/Mittelbot'
         },
         {
@@ -99,7 +99,7 @@ export const ShowcaseResource: IShowcase = {
             name: 'Bhop Music Bot',
             description:
                 'There were not many bots made with discord-player 6.0.0 and discord.js 14.7.1, I was bored and made a simple one. We are using discord-player to listen music while bhopping. 🐇',
-            version: 'v6.1.0',
+            version: 'v6.6.4',
             url: 'https://github.com/akanora/bhop-music-bot'
         },
         {
@@ -141,8 +141,21 @@ export const ShowcaseResource: IShowcase = {
         {
             name: 'Cadence',
             description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source!',
-            version: 'v6.6.2',
+            version: 'v6.6.4',
             url: 'https://github.com/mariusbegby/cadence-discord-bot'
+        },
+        {
+            name: 'Elite Music',
+            description: 'An open-source & feature-packed Discord music bot, complete with a large selection of commands, effects, customisability, Docker & Plex support and much more! 🚀💪',
+            version: 'v6.6.4',
+            url: 'https://github.com/ThatGuyJacobee/Elite-Music'
+        },
+        {
+            name: 'AstroMonkey',
+            description:
+                'AstroMonkey is an open-source music bot! it has support for Autocomplete search using Slash Commands, Queue management to take control of your music, and playlists to add music too for later.',
+            version: 'v6.6.3',
+            url: 'https://github.com/ToothlessBrush/AstroMonkey'
         }
     ].sort((a, b) => semver.rcompare(a.version, b.version)),
     extractors: [

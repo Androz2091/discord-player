@@ -85,6 +85,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             lagMonitor: 30000,
             queryCache: options.queryCache === null ? null : options.queryCache || new QueryCache(this),
             useLegacyFFmpeg: false,
+            skipFFmpeg: true,
+            probeTimeout: 5000,
             ...options,
             ytdlOptions: {
                 highWaterMark: 1 << 25,
@@ -118,10 +120,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 enumerable: false
             });
         }
-    }
-
-    public get hasDebugger() {
-        return this.listenerCount('debug') > 0;
     }
 
     /**
@@ -413,11 +411,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         let extractor: BaseExtractor | null = null;
 
         options.searchEngine ??= QueryType.AUTO;
+        options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 
-        if (this.hasDebugger) this.debug(`Search engine set to ${options.searchEngine}`);
+        if (this.hasDebugger) this.debug(`Search engine set to ${options.searchEngine}, fallback search engine set to ${options.fallbackSearchEngine}`);
 
+        const redirected = await QueryResolver.preResolve(searchQuery);
         const { type: queryType, query } =
-            options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(searchQuery, options.fallbackSearchEngine) : ({ type: options.searchEngine, query: searchQuery } as ResolvedQuery);
+            options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(redirected, options.fallbackSearchEngine) : ({ type: options.searchEngine, query: redirected } as ResolvedQuery);
 
         if (this.hasDebugger) this.debug(`Query type identified as ${queryType}`);
 
@@ -559,7 +559,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             `- discord-player: ${Player.version}`,
             `- discord-voip: ${dVoiceVersion}`,
             `- discord.js: ${djsVersion}`,
-            `- Node version: ${process.version} (Detected Runtime: ${runtime})`,
+            `- Node version: ${process.version} (Detected Runtime: ${runtime}, Platform: ${process.platform} [${process.arch}])`,
             (() => {
                 if (this.options.useLegacyFFmpeg) return '- ffmpeg: N/A (using legacy ffmpeg)';
                 const info = FFmpeg.locateSafe();

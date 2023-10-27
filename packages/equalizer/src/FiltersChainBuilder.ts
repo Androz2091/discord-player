@@ -1,4 +1,4 @@
-import { Readable, pipeline } from 'stream';
+import { type Readable, pipeline } from 'stream';
 import { EqualizerStream, EqualizerStreamOptions } from './equalizer';
 import { AudioFilter, PCMFiltererOptions, PCMResampler, PCMResamplerOptions } from './audio';
 import { BiquadStream, BiquadStreamOptions } from './biquad';
@@ -31,10 +31,10 @@ export class FiltersChain {
         this.source = src;
 
         // const resampler = new PCMResampler(presets.resampler);
-        const equalizerStream = new EqualizerStream(presets.equalizer);
-        const dspStream = new AudioFilter(presets.dsp);
-        const biquadStream = new BiquadStream(presets.biquad);
-        const volumeTransformer = new VolumeTransformer(presets.volume);
+        const equalizerStream = !presets.equalizer?.disabled ? new EqualizerStream(presets.equalizer) : null;
+        const dspStream = !presets.dsp?.disabled ? new AudioFilter(presets.dsp) : null;
+        const biquadStream = !presets.biquad?.disabled ? new BiquadStream(presets.biquad) : null;
+        const volumeTransformer = !presets.volume?.disabled ? new VolumeTransformer(presets.volume) : null;
 
         // this.resampler = resampler;
         this.equalizer = equalizerStream;
@@ -44,21 +44,26 @@ export class FiltersChain {
 
         // update listeners
         // resampler.onUpdate = this.onUpdate;
-        equalizerStream.onUpdate = this.onUpdate;
-        dspStream.onUpdate = this.onUpdate;
-        biquadStream.onUpdate = this.onUpdate;
-        volumeTransformer.onUpdate = this.onUpdate;
+        if (equalizerStream) equalizerStream.onUpdate = this.onUpdate;
+        if (dspStream) dspStream.onUpdate = this.onUpdate;
+        if (biquadStream) biquadStream.onUpdate = this.onUpdate;
+        if (volumeTransformer) volumeTransformer.onUpdate = this.onUpdate;
 
-        this.destination = pipeline(src, /* resampler,*/ equalizerStream, dspStream, biquadStream, volumeTransformer, (err) => {
+        const chains = [src, equalizerStream, dspStream, biquadStream, volumeTransformer].filter(Boolean) as Readonly<Readable[]>;
+
+        if (!chains.length) return src;
+
+        // @ts-ignore
+        this.destination = pipeline(...chains, (err: Error | null) => {
             if (err) {
                 this.destroy();
                 if (!err.message.includes('ERR_STREAM_PREMATURE_CLOSE')) this.onError(err);
             }
         });
 
-        this.destination.once('close', this.destroy.bind(this));
+        this.destination!.once('close', this.destroy.bind(this));
 
-        return this.destination;
+        return this.destination as Readable;
     }
 
     public destroy() {

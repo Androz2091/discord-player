@@ -9,13 +9,12 @@ import { Exceptions } from '../errors';
 
 export interface GuildNodeCreateOptions<T = unknown> {
     strategy?: QueueStrategy;
-    volume?: number | boolean;
-    equalizer?: EqualizerBand[] | boolean;
-    a_filter?: PCMFilters[] | boolean;
-    biquad?: BiquadFilters | boolean;
-    resampler?: number | boolean;
+    volume?: number;
+    equalizer?: EqualizerBand[];
+    a_filter?: PCMFilters[];
+    biquad?: BiquadFilters;
+    resampler?: number;
     disableHistory?: boolean;
-    skipOnNoStream?: boolean;
     onBeforeCreateStream?: OnBeforeCreateStreamHandler;
     onAfterCreateStream?: OnAfterCreateStreamHandler;
     repeatMode?: QueueRepeatMode;
@@ -35,6 +34,11 @@ export interface GuildNodeCreateOptions<T = unknown> {
     maxSize?: number;
     maxHistorySize?: number;
     preferBridgedMetadata?: boolean;
+    disableVolume?: boolean;
+    disableEqualizer?: boolean;
+    disableFilterer?: boolean;
+    disableBiquad?: boolean;
+    disableResampler?: boolean;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
@@ -63,7 +67,6 @@ export class GuildNodeManager<Meta = unknown> {
         options.equalizer ??= [];
         options.a_filter ??= [];
         options.disableHistory ??= false;
-        options.skipOnNoStream ??= false;
         options.leaveOnEmpty ??= true;
         options.leaveOnEmptyCooldown ??= 0;
         options.leaveOnEnd ??= true;
@@ -78,6 +81,12 @@ export class GuildNodeManager<Meta = unknown> {
         options.maxHistorySize ??= Infinity;
         options.preferBridgedMetadata ??= true;
         options.pauseOnEmpty ??= true;
+        // todo(twlite): maybe disable these by default?
+        options.disableBiquad ??= false;
+        options.disableEqualizer ??= false;
+        options.disableFilterer ??= false;
+        options.disableResampler ??= false;
+        options.disableVolume ??= false;
 
         if (getGlobalRegistry().has('@[onBeforeCreateStream]') && !options.onBeforeCreateStream) {
             options.onBeforeCreateStream = getGlobalRegistry().get('@[onBeforeCreateStream]') as OnBeforeCreateStreamHandler;
@@ -96,7 +105,6 @@ export class GuildNodeManager<Meta = unknown> {
             biquad: options.biquad,
             resampler: options.resampler,
             disableHistory: options.disableHistory,
-            skipOnNoStream: options.skipOnNoStream,
             onBeforeCreateStream: options.onBeforeCreateStream,
             onAfterCreateStream: options.onAfterCreateStream,
             repeatMode: options.repeatMode,
@@ -115,7 +123,12 @@ export class GuildNodeManager<Meta = unknown> {
             preferBridgedMetadata: options.preferBridgedMetadata,
             maxHistorySize: options.maxHistorySize,
             maxSize: options.maxSize,
-            pauseOnEmpty: options.pauseOnEmpty
+            pauseOnEmpty: options.pauseOnEmpty,
+            disableBiquad: options.disableBiquad,
+            disableEqualizer: options.disableEqualizer,
+            disableFilterer: options.disableFilterer,
+            disableResampler: options.disableResampler,
+            disableVolume: options.disableVolume
         });
 
         this.cache.set(server.id, queue);

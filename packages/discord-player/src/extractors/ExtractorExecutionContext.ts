@@ -17,6 +17,11 @@ const knownExtractorKeys = [
 ] as const;
 const knownExtractorLib = '@discord-player/extractor';
 
+export type ExtractorLoaderOptionDict = {
+    // @ts-ignore types
+    [K in (typeof knownExtractorKeys)[number]]?: ConstructorParameters<typeof import('@discord-player/extractor')[K]>[1];
+};
+
 export interface ExtractorExecutionEvents {
     /**
      * Emitted when a extractor is registered
@@ -59,13 +64,14 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
     /**
      * Load default extractors from `@discord-player/extractor`
      */
-    public async loadDefault(filter?: (ext: (typeof knownExtractorKeys)[number]) => boolean) {
+    public async loadDefault(filter?: (ext: (typeof knownExtractorKeys)[number]) => boolean | null, options?: ExtractorLoaderOptionDict) {
         const mod = await Util.import(knownExtractorLib);
         if (mod.error) return { success: false, error: mod.error as Error };
 
         (filter ? knownExtractorKeys.filter(filter) : knownExtractorKeys).forEach((key) => {
             if (!mod.module[key]) return;
-            this.register(<typeof BaseExtractor>mod.module[key], {});
+            // @ts-ignore types
+            this.register(<typeof BaseExtractor>mod.module[key], options?.[key] || {});
         });
 
         return { success: true, error: null };
@@ -168,10 +174,13 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
             return;
         }
 
+        // sort by priority so that extractors with higher priority are executed first
+        const extractors = this.store.sort((a, b) => b.priority - a.priority);
+
         let err: Error | null = null,
             lastExt: BaseExtractor | null = null;
 
-        for (const ext of this.store.values()) {
+        for (const ext of extractors.values()) {
             if (filterBlocked && blocked.some((e) => e === ext.identifier)) continue;
             if (this.player.hasDebugger) this.player.debug(`Executing extractor ${ext.identifier}...`);
             const result = await fn(ext).then(

@@ -19,6 +19,7 @@ export * from '@discord-player/ffmpeg';
 export * from './Player';
 export * from './hooks';
 export * from './utils/IPRotator';
+export * from './utils/serde';
 export {
     AudioFilters as PCMAudioFilters,
     type BiquadFilters,

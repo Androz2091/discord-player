@@ -70,6 +70,11 @@ const pages = [
                 name: 'performance-optimization',
                 displayName: 'Performance Optimizations',
                 component: lazy(() => import('../_guides/faq/performance_optimization.mdx'))
+            },
+            {
+                name: 'serialization-and-deserialization',
+                displayName: 'Serialization and Deserialization',
+                component: lazy(() => import('../_guides/faq/serialization_and_deserialization.mdx'))
             }
         ]
     },
@@ -151,6 +156,27 @@ const pages = [
         ]
     },
     {
+        name: 'youtube',
+        displayName: 'YouTube Ratelimits',
+        pages: [
+            {
+                name: 'cookies',
+                displayName: 'Using Cookies',
+                component: lazy(() => import('../_guides/youtube/cookies.mdx'))
+            },
+            {
+                name: 'ip-rotation',
+                displayName: 'IP Rotation',
+                component: lazy(() => import('../_guides/youtube/ip_rotation.mdx'))
+            },
+            {
+                name: 'proxy',
+                displayName: 'Using Proxy',
+                component: lazy(() => import('../_guides/youtube/proxy.mdx'))
+            }
+        ]
+    },
+    {
         name: 'filters',
         displayName: 'Filters',
         pages: [
@@ -185,22 +211,6 @@ const pages = [
                 name: 'migrating-from-v5',
                 displayName: 'Migrating from v5',
                 component: lazy(() => import('../_guides/migrating/migrating.mdx'))
-            }
-        ]
-    },
-    {
-        name: 'youtube',
-        displayName: 'YouTube',
-        pages: [
-            {
-                name: 'cookies',
-                displayName: 'Using Cookies',
-                component: lazy(() => import('../_guides/youtube/cookies.mdx'))
-            },
-            {
-                name: 'proxy',
-                displayName: 'Using Proxy',
-                component: lazy(() => import('../_guides/youtube/proxy.mdx'))
             }
         ]
     }

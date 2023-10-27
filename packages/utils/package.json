@@ -5,7 +5,7 @@
   "keywords": [
     "discord-player"
   ],
-  "author": "skdhg",
+  "author": "twlite",
   "homepage": "https://discord-player.js.org",
   "license": "MIT",
   "main": "dist/index.js",
@@ -34,7 +34,10 @@
     "@discordjs/collection": "^1.1.0"
   },
   "devDependencies": {
-    "@discord-player/tsconfig": "workspace:^"
+    "@discord-player/tsconfig": "workspace:^",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts",

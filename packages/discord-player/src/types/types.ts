@@ -1,9 +1,9 @@
-import { Snowflake, User, UserResolvable, VoiceState } from 'discord.js';
-import { GuildQueue } from '../manager';
-import { Track } from '../fabric/Track';
-import { Playlist } from '../fabric/Playlist';
-import { downloadOptions } from 'ytdl-core';
-import { QueryCacheProvider } from '../utils/QueryCache';
+import type { User, UserResolvable, VoiceState } from 'discord.js';
+import type { GuildQueue } from '../manager';
+import type { Track } from '../fabric/Track';
+import type { Playlist } from '../fabric/Playlist';
+import type { downloadOptions } from 'ytdl-core';
+import type { QueryCacheProvider } from '../utils/QueryCache';
 import type { IPRotationConfig } from '../utils/IPRotator';
 
 // @ts-ignore
@@ -17,7 +17,7 @@ export interface PlayerSearchResult {
 }
 
 /**
- * @typedef {AudioFilters} QueueFilters
+ * Represents FFmpeg filters
  */
 export interface QueueFilters {
     bassboost_low?: boolean;
@@ -64,74 +64,115 @@ export interface QueueFilters {
  * - spotify
  * - apple_music
  * - arbitrary
- * @typedef {string} TrackSource
  */
 export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'apple_music' | 'arbitrary';
 
-/**
- * @typedef {object} RawTrackData
- * @property {string} title The title
- * @property {string} description The description
- * @property {string} author The author
- * @property {string} url The url
- * @property {string} thumbnail The thumbnail
- * @property {string} duration The duration
- * @property {number} views The views
- * @property {User} requestedBy The user who requested this track
- * @property {Playlist} [playlist] The playlist
- * @property {TrackSource} [source="arbitrary"] The source
- * @property {any} [engine] The engine
- * @property {boolean} [live] If this track is live
- * @property {any} [raw] The raw data
- */
 export interface RawTrackData {
+    /**
+     * The title
+     */
     title: string;
+    /**
+     * The description
+     */
     description: string;
+    /**
+     * The author
+     */
     author: string;
+    /**
+     * The url
+     */
     url: string;
+    /**
+     * The thumbnail
+     */
     thumbnail: string;
+    /**
+     * The duration
+     */
     duration: string;
+    /**
+     * The duration in ms
+     */
     views: number;
+    /**
+     * The user who requested this track
+     */
     requestedBy?: User | null;
+    /**
+     * The playlist
+     */
     playlist?: Playlist;
+    /**
+     * The source
+     */
     source?: TrackSource;
+    /**
+     * The engine
+     */
     engine?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    /**
+     * If this track is live
+     */
     live?: boolean;
+    /**
+     * The raw data
+     */
     raw?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    /**
+     * The query type
+     */
     queryType?: SearchQueryType;
 }
 
-/**
- * @typedef {object} TimeData
- * @property {number} days Time in days
- * @property {number} hours Time in hours
- * @property {number} minutes Time in minutes
- * @property {number} seconds Time in seconds
- */
 export interface TimeData {
+    /**
+     * Time in days
+     */
     days: number;
+    /**
+     * Time in hours
+     */
     hours: number;
+    /**
+     * Time in minutes
+     */
     minutes: number;
+    /**
+     * Time in seconds
+     */
     seconds: number;
 }
 
-/**
- * @typedef {object} PlayerProgressbarOptions
- * @property {boolean} [timecodes] If it should render time codes
- * @property {boolean} [queue] If it should create progress bar for the whole queue
- * @property {number} [length] The bar length
- * @property {string} [leftChar] The elapsed time track
- * @property {string} [rightChar] The remaining time track
- * @property {string} [separator] The separation between timestamp and line
- * @property {string} [indicator] The indicator
- */
 export interface PlayerProgressbarOptions {
+    /**
+     * If it should render time codes
+     */
     timecodes?: boolean;
+    /**
+     * If it should create progress bar for the whole queue
+     */
     length?: number;
+    /**
+     * The bar length
+     */
     leftChar?: string;
+    /**
+     * The elapsed time track
+     */
     rightChar?: string;
+    /**
+     * The remaining time track
+     */
     separator?: string;
+    /**
+     * The separation between timestamp and line
+     */
     indicator?: string;
+    /**
+     * The indicator
+     */
     queue?: boolean;
 }
 
@@ -206,38 +247,52 @@ export enum PlayerEvent {
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-/**
- * @typedef {object} PlayOptions
- * @property {boolean} [filtersUpdate=false] If this play was triggered for filters update
- * @property {string[]} [encoderArgs=[]] FFmpeg args passed to encoder
- * @property {number} [seek] Time to seek to before playing
- * @property {boolean} [immediate=false] If it should start playing the provided track immediately
- */
 export interface PlayOptions {
+    /**
+     * If this play was triggered for filters update
+     */
     filtersUpdate?: boolean;
+    /**
+     * FFmpeg args passed to encoder
+     */
     encoderArgs?: string[];
+    /**
+     * Time to seek to before playing
+     */
     seek?: number;
+    /**
+     * If it should start playing the provided track immediately
+     */
     immediate?: boolean;
 }
 
 export type QueryExtractorSearch = `ext:${string}`;
 
-/**
- * @typedef {object} SearchOptions
- * @property {UserResolvable} requestedBy The user who requested this search
- * @property {typeof QueryType|string} [searchEngine='auto'] The query search engine, can be extractor name to target specific one (custom)
- * @property {string[]} [blockExtractors[]] List of the extractors to block
- * @property {boolean} [ignoreCache] If it should ignore query cache lookup
- * @property {SearchQueryType} [fallbackSearchEngine='autoSearch'] Fallback search engine to use
- * @property {any} [requestOptions] The request options
- */
 export interface SearchOptions {
+    /**
+     * The user who requested this search
+     */
     requestedBy?: UserResolvable;
+    /**
+     * The query search engine, can be extractor name to target specific one (custom)
+     */
     searchEngine?: SearchQueryType | QueryExtractorSearch;
+    /**
+     * List of the extractors to block
+     */
     blockExtractors?: string[];
+    /**
+     * If it should ignore query cache lookup
+     */
     ignoreCache?: boolean;
+    /**
+     * Fallback search engine to use
+     */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     requestOptions?: any;
+    /**
+     * Fallback search engine to use
+     */
     fallbackSearchEngine?: (typeof QueryType)[keyof typeof QueryType];
 }
 
@@ -247,127 +302,225 @@ export interface SearchOptions {
  * - TRACK
  * - QUEUE
  * - AUTOPLAY
- * @typedef {number} QueueRepeatMode
  */
 export enum QueueRepeatMode {
+    /**
+     * Disable repeat mode.
+     */
     OFF = 0,
+    /**
+     * Repeat the current track.
+     */
     TRACK = 1,
+    /**
+     * Repeat the entire queue.
+     */
     QUEUE = 2,
+    /**
+     * When last track ends, play similar tracks in the future if queue is empty.
+     */
     AUTOPLAY = 3
 }
 
-/**
- * @typedef {object} PlaylistInitData
- * @property {Track[]} tracks The tracks of this playlist
- * @property {string} title The playlist title
- * @property {string} description The description
- * @property {string} thumbnail The thumbnail
- * @property {album|playlist} type The playlist type: `album` | `playlist`
- * @property {TrackSource} source The playlist source
- * @property {object} author The playlist author
- * @property {string} [author.name] The author name
- * @property {string} [author.url] The author url
- * @property {string} id The playlist id
- * @property {string} url The playlist url
- * @property {any} [rawPlaylist] The raw playlist data
- */
 export interface PlaylistInitData {
+    /**
+     * The tracks of this playlist
+     */
     tracks: Track[];
+    /**
+     * The playlist title
+     */
     title: string;
+    /**
+     * The description
+     */
     description: string;
+    /**
+     * The thumbnail
+     */
     thumbnail: string;
+    /**
+     * The playlist type: `album` | `playlist`
+     */
     type: 'album' | 'playlist';
+    /**
+     * The playlist source
+     */
     source: TrackSource;
+    /**
+     * The playlist author
+     */
     author: {
+        /**
+         * The author name
+         */
         name: string;
+        /**
+         * The author url
+         */
         url: string;
     };
+    /**
+     * The playlist id
+     */
     id: string;
+    /**
+     * The playlist url
+     */
     url: string;
+    /**
+     * The raw playlist data
+     */
     rawPlaylist?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-/**
- * @typedef {object} TrackJSON
- * @property {string} title The track title
- * @property {string} description The track description
- * @property {string} author The author
- * @property {string} url The url
- * @property {string} thumbnail The thumbnail
- * @property {string} duration The duration
- * @property {number} durationMS The duration in ms
- * @property {number} views The views count
- * @property {Snowflake} requestedBy The id of the user who requested this track
- * @property {PlaylistJSON} [playlist] The playlist info (if any)
- */
 export interface TrackJSON {
-    id: Snowflake;
+    /**
+     * The track id
+     */
+    id: string;
+    /**
+     * The track title
+     */
     title: string;
+    /**
+     * The track description
+     */
     description: string;
+    /**
+     * The track author
+     */
     author: string;
+    /**
+     * The track url
+     */
     url: string;
+    /**
+     * The track thumbnail
+     */
     thumbnail: string;
+    /**
+     * The track duration
+     */
     duration: string;
+    /**
+     * The track duration in ms
+     */
     durationMS: number;
+    /**
+     * The track views
+     */
     views: number;
-    requestedBy: Snowflake;
+    /**
+     * The user id who requested this track
+     */
+    requestedBy: string;
+    /**
+     * The playlist info (if any)
+     */
     playlist?: PlaylistJSON;
 }
 
-/**
- * @typedef {object} PlaylistJSON
- * @property {string} id The playlist id
- * @property {string} url The playlist url
- * @property {string} title The playlist title
- * @property {string} description The playlist description
- * @property {string} thumbnail The thumbnail
- * @property {album|playlist} type The playlist type: `album` | `playlist`
- * @property {TrackSource} source The track source
- * @property {object} author The playlist author
- * @property {string} [author.name] The author name
- * @property {string} [author.url] The author url
- * @property {TrackJSON[]} tracks The tracks data (if any)
- */
 export interface PlaylistJSON {
+    /**
+     * The playlist id
+     */
     id: string;
+    /**
+     * The playlist url
+     */
     url: string;
+    /**
+     * The playlist title
+     */
     title: string;
+    /**
+     * The playlist description
+     */
     description: string;
+    /**
+     * The thumbnail
+     */
     thumbnail: string;
+    /**
+     * The playlist type: `album` | `playlist`
+     */
     type: 'album' | 'playlist';
+    /**
+     * The track source
+     */
     source: TrackSource;
+    /**
+     * The playlist author
+     */
     author: {
+        /**
+         * The author name
+         */
         name: string;
+        /**
+         * The author url
+         */
         url: string;
     };
+    /**
+     * The tracks data (if any)
+     */
     tracks: TrackJSON[];
 }
 
-/**
- * @typedef {object} PlayerInitOptions
- * @property {YTDLDownloadOptions} [ytdlOptions] The options passed to `ytdl-core`
- * @property {number} [connectionTimeout=20000] The voice connection timeout
- * @property {boolean} [lagMonitor=30000] Time in ms to re-monitor event loop lag
- * @property {boolean} [lockVoiceStateHandler] Prevent voice state handler from being overridden
- * @property {string[]} [blockExtractors] List of extractors to disable querying metadata from
- * @property {string[]} [blockStreamFrom] List of extractors to disable streaming from
- * @property {QueryCache | null} [queryCache] Query cache provider
- * @property {boolean} [ignoreInstance] Ignore player instance
- * @property {boolean} [useLegacyFFmpeg] Use legacy version of ffmpeg
- * @property {BridgeProvider} [bridgeProvider] Set bridge provider
- * @property {object} [ipconfig] IP rotator config
- */
 export interface PlayerInitOptions {
+    /**
+     * The options passed to `ytdl-core`.
+     */
     ytdlOptions?: downloadOptions;
+    /**
+     * The voice connection timeout
+     */
     connectionTimeout?: number;
+    /**
+     * Time in ms to re-monitor event loop lag
+     */
     lagMonitor?: number;
+    /**
+     * Prevent voice state handler from being overridden
+     */
     lockVoiceStateHandler?: boolean;
+    /**
+     * List of extractors to disable querying metadata from
+     */
     blockExtractors?: string[];
+    /**
+     * List of extractors to disable streaming from
+     */
     blockStreamFrom?: string[];
+    /**
+     * Query cache provider
+     */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     queryCache?: QueryCacheProvider<any> | null;
+    /**
+     * Ignore player instance
+     */
     ignoreInstance?: boolean;
+    /**
+     * Use legacy version of ffmpeg
+     */
     useLegacyFFmpeg?: boolean;
+    /**
+     * Set bridge provider
+     */
     bridgeProvider?: BridgeProvider;
+    /**
+     * IP rotator config
+     */
     ipconfig?: IPRotationConfig;
+    /**
+     * Skip ffmpeg process when possible
+     */
+    skipFFmpeg?: boolean;
+    /**
+     * The probe timeout in milliseconds. Defaults to 5000.
+     */
+    probeTimeout?: number;
 }

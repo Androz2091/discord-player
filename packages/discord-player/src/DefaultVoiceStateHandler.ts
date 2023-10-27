@@ -18,15 +18,21 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
     if (queue.options.pauseOnEmpty) {
         const isEmpty = Util.isVoiceEmpty(queue.channel);
 
-        if (queue.hasDebugger) {
-            if (isEmpty) {
+        if (isEmpty) {
+            queue.node.setPaused(true);
+            Reflect.set(queue, '__pausedOnEmpty', true);
+            if (queue.hasDebugger) {
                 queue.debug('Voice channel is empty and options#pauseOnEmpty is true, pausing...');
-            } else {
-                queue.debug('Voice channel is not empty and options#pauseOnEmpty is true, resuming...');
+            }
+        } else {
+            if (Reflect.get(queue, '__pausedOnEmpty')) {
+                queue.node.setPaused(false);
+                Reflect.set(queue, '__pausedOnEmpty', false);
+                if (queue.hasDebugger) {
+                    queue.debug('Voice channel is not empty and options#pauseOnEmpty is true, resuming...');
+                }
             }
         }
-
-        queue.node.setPaused(isEmpty);
     }
 
     if (!oldState.channelId && newState.channelId && newState.member?.id === newState.guild.members.me?.id) {

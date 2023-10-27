@@ -26,6 +26,7 @@ export class PlayCommand extends Command {
 		if (!query) return [];
 
 		const player = useMainPlayer();
+
 		const results = await player!.search(query!, {
 			requestedBy: interaction.user,
 			fallbackSearchEngine: QueryType.YOUTUBE_SEARCH
@@ -61,19 +62,16 @@ export class PlayCommand extends Command {
 		const query = interaction.options.getString('query');
 
 		if (permissions.clientToMember()) return interaction.reply({ content: permissions.clientToMember(), ephemeral: true });
-
+		await interaction.deferReply();
 		const results = await player!.search(query!, {
 			requestedBy: interaction.user,
 			fallbackSearchEngine: QueryType.YOUTUBE_SEARCH
 		});
 
 		if (!results.hasTracks())
-			return interaction.reply({
-				content: `${this.container.client.dev.error} | **No** tracks were found for your query`,
-				ephemeral: true
+			return interaction.editReply({
+				content: `${this.container.client.dev.error} | **No** tracks were found for your query`
 			});
-
-		await interaction.deferReply();
 
 		try {
 			const res = await player!.play(member.voice.channel!.id, results, {
@@ -88,8 +86,8 @@ export class PlayCommand extends Command {
 					leaveOnEnd: false,
 					pauseOnEmpty: true,
 					bufferingTimeout: 0,
-					volume: 50,
-					defaultFFmpegFilters: ['silenceremove']
+					volume: 50
+					// defaultFFmpegFilters: ['silenceremove']
 				}
 			});
 

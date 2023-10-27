@@ -67,11 +67,20 @@ export class FFmpegFilterer<Meta = unknown> {
     #inputArgs: string[] = [];
     public constructor(public af: GuildQueueAudioFilters<Meta>) {}
 
+    /**
+     * Indicates whether ffmpeg may be skipped
+     */
+    public get skippable() {
+        return !!this.af.queue.player.options.skipFFmpeg;
+    }
+
     #setFilters(filters: Filters[]) {
         const { queue } = this.af;
-        const prev = this.#ffmpegFilters.slice();
+        // skip if filters are the same
+        if (filters.every((f) => this.#ffmpegFilters.includes(f)) && this.#ffmpegFilters.every((f) => filters.includes(f))) return Promise.resolve(false);
         const ignoreFilters = this.filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave') && !filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave');
         const seekTime = queue.node.getTimestamp(ignoreFilters)?.current.value || 0;
+        const prev = this.#ffmpegFilters.slice();
         this.#ffmpegFilters = [...new Set(filters)];
 
         return this.af.triggerReplay(seekTime).then((t) => {
@@ -264,6 +273,20 @@ export class GuildQueueAudioFilters<Meta = unknown> {
         }
     }
 
+    // TODO: enable this in the future
+    // public get ffmpeg(): FFmpegFilterer<Meta> | null {
+    //     if (this.queue.player.options.skipFFmpeg) {
+    //         if (this.#ffmpeg) this.#ffmpeg = null;
+    //         return null;
+    //     }
+
+    //     if (!this.#ffmpeg) {
+    //         this.#ffmpeg = new FFmpegFilterer<Meta>(this);
+    //     }
+
+    //     return this.#ffmpeg;
+    // }
+
     /**
      * Volume transformer
      */
@@ -326,7 +349,7 @@ export class AFilterGraph<Meta = unknown> {
     public constructor(public af: GuildQueueAudioFilters<Meta>) {}
 
     public get ffmpeg() {
-        return this.af.ffmpeg.filters;
+        return this.af.ffmpeg?.filters ?? [];
     }
 
     public get equalizer() {
@@ -337,8 +360,7 @@ export class AFilterGraph<Meta = unknown> {
     }
 
     public get biquad() {
-        return null;
-        // return (this.af.biquad?.getFilterName() as Exclude<BiquadFilters, number> | null) || null;
+        return (this.af.biquad?.getFilterName() as Exclude<BiquadFilters, number> | null) || null;
     }
 
     public get filters() {

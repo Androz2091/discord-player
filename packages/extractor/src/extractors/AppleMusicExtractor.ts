@@ -1,4 +1,4 @@
-import { ExtractorInfo, ExtractorSearchContext, GuildQueueHistory, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
+import { ExtractorInfo, ExtractorSearchContext, ExtractorStreamable, GuildQueueHistory, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import { AppleMusic } from '../internal';
 import { Readable } from 'stream';
 import { StreamFN, pullYTMetadata } from './common/helper';
@@ -237,7 +237,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
         }
     }
 
-    public async stream(info: Track): Promise<string | Readable> {
+    public async stream(info: Track): Promise<ExtractorStreamable> {
         if (this._stream) {
             const stream = await this._stream(info.url, this);
             if (typeof stream === 'string') return stream;
