@@ -1018,12 +1018,12 @@ export class GuildQueue<Meta = unknown> {
             } else {
                 if (this.repeatMode === QueueRepeatMode.TRACK) {
                     if (this.hasDebugger) this.debug('Repeat mode is set to track, repeating last track from the history...');
-                    this.__current = this.#getNextTrack() || track;
+                    this.__current = this.history.tracks.dispatch() || track;
                     return this.node.play(this.__current!, { queue: false });
                 }
                 if (this.repeatMode === QueueRepeatMode.QUEUE) {
                     if (this.hasDebugger) this.debug('Repeat mode is set to queue, moving last track from the history to current queue...');
-                    this.tracks.add(this.#getNextTrack() || track);
+                    this.tracks.add(this.history.tracks.dispatch() || track);
                 }
                 if (!this.tracks.size) {
                     if (this.repeatMode === QueueRepeatMode.AUTOPLAY) {
