@@ -85,7 +85,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: spotifyData,
-                                    bridge: (await this.options.bridgeProvider.resolve(this, track)).data
+                                    bridge: (await this.options.bridgeProvider?.resolve(this, track))?.data
                                 };
                             }
                         });
