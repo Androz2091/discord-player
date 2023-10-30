@@ -133,7 +133,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                             requestMetadata: async () => {
                                 return {
                                     source: info,
-                                    bridge: (await this.options.bridgeProvider.resolve(this, track)).data
+                                    bridge: (await this.options.bridgeProvider?.resolve(this, track))?.data
                                 };
                             }
                         });
