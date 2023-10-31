@@ -28,6 +28,11 @@ export class BaseExtractor<T extends object = object> {
     public priority = 1;
 
     /**
+     * A list of query protocols that this extractor supports.
+     */
+    public protocols: string[] = [];
+
+    /**
      * Handle bridge query creation
      * @param track The track to build query for
      */
@@ -171,4 +176,5 @@ export interface ExtractorSearchContext {
     type?: SearchQueryType | null;
     requestedBy?: User | null;
     requestOptions?: RequestOptions;
+    protocol?: string | null;
 }

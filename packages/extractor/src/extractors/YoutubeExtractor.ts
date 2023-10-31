@@ -33,6 +33,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
     public static instance: YoutubeExtractor | null;
 
     public async activate() {
+        this.protocols = ['ytsearch', 'youtube'];
         const fn = this.options.createStream;
 
         if (typeof fn === 'function') {
@@ -49,6 +50,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
     }
 
     public async deactivate(): Promise<void> {
+        this.protocols = [];
         YoutubeExtractor.instance = null;
     }
 
@@ -66,6 +68,7 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
     }
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
+        if (context.protocol === 'ytsearch') context.type = QueryType.YOUTUBE_SEARCH;
         query = query.includes('youtube.com') ? query.replace(/(m(usic)?|gaming)\./, '') : query;
         if (!query.includes('list=RD') && YoutubeExtractor.validateURL(query)) context.type = QueryType.YOUTUBE_VIDEO;
 

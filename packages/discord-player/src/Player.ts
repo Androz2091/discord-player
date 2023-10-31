@@ -408,21 +408,39 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         if (this.hasDebugger) this.debug(`Searching ${searchQuery}`);
 
-        let extractor: BaseExtractor | null = null;
+        let extractor: BaseExtractor | null = null,
+            protocol: string | null = null;
 
         options.searchEngine ??= QueryType.AUTO;
         options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 
         if (this.hasDebugger) this.debug(`Search engine set to ${options.searchEngine}, fallback search engine set to ${options.fallbackSearchEngine}`);
 
+        if (/^\w+:/.test(searchQuery)) {
+            const [protocolName, ...query] = searchQuery.split(':');
+            if (this.hasDebugger) this.debug(`Protocol ${protocolName} detected in query`);
+
+            const matchingExtractor = this.extractors.store.find((e) => !this.extractors.isDisabled(e.identifier) && e.protocols.includes(protocolName));
+
+            if (matchingExtractor) {
+                if (this.hasDebugger) this.debug(`Protocol ${protocolName} is supported by ${matchingExtractor.identifier} extractor!`);
+                extractor = matchingExtractor;
+                searchQuery = query.join(':');
+                protocol = protocolName;
+            } else {
+                if (this.hasDebugger) this.debug(`Could not find an extractor that supports ${protocolName} protocol. Falling back to default behavior...`);
+            }
+        }
+
         const redirected = await QueryResolver.preResolve(searchQuery);
         const { type: queryType, query } =
             options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(redirected, options.fallbackSearchEngine) : ({ type: options.searchEngine, query: redirected } as ResolvedQuery);
 
-        if (this.hasDebugger) this.debug(`Query type identified as ${queryType}`);
+        if (this.hasDebugger) this.debug(`Query type identified as ${queryType}${extractor && protocol ? ' but might not be used due to the presence of protocol' : ''}`);
 
         // force particular extractor
         if (options.searchEngine.startsWith('ext:')) {
+            if (this.hasDebugger) this.debug(`Forcing ${options.searchEngine.substring(4)} extractor...`);
             extractor = this.extractors.get(options.searchEngine.substring(4))!;
             if (!extractor)
                 return new SearchResult(this, {
@@ -479,7 +497,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             .handle(query, {
                 type: queryType as SearchQueryType,
                 requestedBy: options.requestedBy as User,
-                requestOptions: options.requestOptions
+                requestOptions: options.requestOptions,
+                protocol
             })
             .catch(() => null);
 
@@ -510,7 +529,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 ext.handle(query, {
                     type: queryType as SearchQueryType,
                     requestedBy: options.requestedBy as User,
-                    requestOptions: options.requestOptions
+                    requestOptions: options.requestOptions,
+                    protocol
                 })
         );
         if (!result?.result) {
