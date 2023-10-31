@@ -8,27 +8,27 @@ Discord Player is a robust framework for developing Discord Music bots using Jav
 
 # Why Choose Discord Player?
 
--   Beginner-friendly with easy-to-understand features
--   TypeScript support
+-   Beginner-friendly with easy-to-understand features.
+-   TypeScript support.
 -   Offers hackable APIs.
--   Supports audio player sharing
--   Quick and easy setup process
--   Wide range of player management features
--   Offers 64+ built-in audio filter presets
--   Highly customizable according to your needs
--   Automatic queue management
--   Query caching support
--   Extensible sources through the Extractors API
--   Object-oriented design
--   Built-in stats tracker
--   Offers easy debugging methods
--   Out-of-the-box voice states handling
--   IP Rotation support
--   Easy serialization and deserialization
+-   Supports audio player sharing.
+-   Quick and easy setup process.
+-   Wide range of player management features.
+-   Offers 64+ built-in audio filter presets.
+-   Highly customizable according to your needs.
+-   Automatic queue management.
+-   Query caching support.
+-   Extensible sources through the Extractors API.
+-   Object-oriented design.
+-   Built-in stats tracker.
+-   Offers easy debugging methods.
+-   Out-of-the-box voice states handling.
+-   IP Rotation support.
+-   Easy serialization and deserialization.
 
 ## Installation
 
-### Before you start
+### Before You Start
 
 Discord Player requires Discord.js 14.0 or higher. Please ensure that you have a compatible version by running `npm list discord.js` in your terminal. If you're using an earlier version, please update it. The [discord.js Guide](https://discordjs.guide) provides resources to assist you with the update process.
 
