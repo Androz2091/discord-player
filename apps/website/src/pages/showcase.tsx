@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDebounce } from '@edge-ui/react';
 import { HeadingMeta } from '@/components/heading';
 import { CardGrid } from '@/components/layout/CardGrid';
 import { Container } from '@/components/layout/Container';
@@ -11,9 +12,10 @@ const resURL = 'https://github.com/Androz2091/discord-player/blob/master/apps/we
 
 export default function Showcase() {
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const debouncedSearch = useDebounce(searchTerm, 500);
 
-    const filteredBots = ShowcaseResource.bots.filter((bot) => bot.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    const filteredExtractors = ShowcaseResource.extractors.filter((extractor) => extractor.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredBots = ShowcaseResource.bots.filter((bot) => bot.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
+    const filteredExtractors = ShowcaseResource.extractors.filter((extractor) => extractor.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
 
     return (
         <Container>
@@ -33,7 +35,7 @@ export default function Showcase() {
                 </div>
 
                 <div className="py-5 felx justify-center">
-                    <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="max-w-xl" />
                 </div>
 
                 {filteredExtractors.length > 0 && (
