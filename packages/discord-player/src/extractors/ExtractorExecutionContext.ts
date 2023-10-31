@@ -56,7 +56,11 @@ export interface ExtractorExecutionEvents {
 }
 
 export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExecutionEvents> {
+    /**
+     * The extractors store
+     */
     public store = new Collection<string, BaseExtractor>();
+
     public constructor(public player: Player) {
         super(['error']);
     }
@@ -216,6 +220,34 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
                 result: false
             } as ExtractorExecutionResult<false>;
     }
+
+    /**
+     * Check if extractor is disabled
+     */
+    public isDisabled(identifier: string) {
+        return this.player.options.blockExtractors?.includes(identifier) ?? false;
+    }
+
+    /**
+     * Check if extractor is enabled
+     */
+    public isEnabled(identifier: string) {
+        return !this.isDisabled(identifier);
+    }
+
+    /**
+     * Resolve extractor identifier
+     */
+    public resolveId(resolvable: ExtractorResolvable) {
+        return typeof resolvable === 'string' ? resolvable : resolvable.identifier;
+    }
+
+    /**
+     * Resolve extractor
+     */
+    public resolve(resolvable: ExtractorResolvable) {
+        return typeof resolvable === 'string' ? this.get(resolvable) : resolvable;
+    }
 }
 
 export interface ExtractorExecutionResult<T = unknown> {
@@ -225,3 +257,5 @@ export interface ExtractorExecutionResult<T = unknown> {
 }
 
 export type ExtractorExecutionFN<T = unknown> = (extractor: BaseExtractor) => Promise<T | boolean>;
+
+export type ExtractorResolvable = string | BaseExtractor;

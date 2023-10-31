@@ -15,6 +15,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
     private _stream!: StreamFN;
 
     public async activate(): Promise<void> {
+        this.protocols = ['amsearch', 'applemusic'];
         const fn = this.options.createStream;
 
         if (typeof fn === 'function') {
@@ -22,6 +23,10 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                 return fn(this, q);
             };
         }
+    }
+
+    public async deactivate() {
+        this.protocols = [];
     }
 
     public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
@@ -51,6 +56,8 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
     }
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
+        if (context.protocol === 'amsearch') context.type = QueryType.APPLE_MUSIC_SEARCH;
+
         switch (context.type) {
             case QueryType.AUTO:
             case QueryType.AUTO_SEARCH:

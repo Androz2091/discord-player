@@ -16,7 +16,8 @@ export class UserEvent extends Listener {
 		if (player) {
 			// await player.extractors.loadDefault(/* (ext) => ext !== 'YouTubeExtractor' */);
 			// console.log(player.scanDeps());
-			await player.extractors.loadDefault((ext) => ext === 'YouTubeExtractor' || ext === 'SpotifyExtractor' || ext === 'AttachmentExtractor');
+			// await player.extractors.loadDefault((ext) => ext === 'YouTubeExtractor' || ext === 'SpotifyExtractor' || ext === 'AttachmentExtractor');
+			await player.extractors.loadDefault(/* (ext) => ext !== 'YouTubeExtractor' */);
 		}
 	}
 }
