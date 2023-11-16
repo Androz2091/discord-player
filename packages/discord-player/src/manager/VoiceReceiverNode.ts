@@ -1,7 +1,7 @@
 import { UserResolvable } from 'discord.js';
 import { PassThrough, type Readable } from 'stream';
 import { EndBehaviorType } from 'discord-voip';
-import * as prism from 'prism-media';
+import { OpusDecoder } from '@discord-player/opus';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { Track } from '../fabric/Track';
 import { RawTrackData } from '../types/types';
@@ -82,7 +82,7 @@ export class VoiceReceiverNode {
                     if (options.mode === 'pcm') {
                         const pcm = receiveStream.pipe(
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            new (prism.opus || (<any>prism).default.opus).Decoder({
+                            new OpusDecoder({
                                 channels: 2,
                                 frameSize: 960,
                                 rate: 48000

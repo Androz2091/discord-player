@@ -125,8 +125,12 @@ export async function loadYtdl(options?: any, force = false) {
                             : null;
 
                     if (demuxableFormat) {
+                        const stream = await dl.getReadableStream(demuxableFormat, opt);
+
+                        stream.once('error', () => stream.destroy());
+
                         return {
-                            stream: await dl.getReadableStream(demuxableFormat, opt),
+                            stream,
                             $fmt: 'webm/opus'
                         };
                     }
@@ -215,11 +219,12 @@ export async function loadYtdl(options?: any, force = false) {
                     const format = info.formats.find(filter);
 
                     if (format && info.videoDetails.lengthSeconds != '0') {
+                        const stream = dl.downloadFromInfo(info, {
+                            ...applyPlannerConfig(options),
+                            filter
+                        });
                         return {
-                            stream: dl.downloadFromInfo(info, {
-                                ...applyPlannerConfig(options),
-                                filter
-                            }),
+                            stream: stream.once('error', () => stream.destroy()),
                             $fmt: 'webm/opus'
                         };
                     }
@@ -247,13 +252,15 @@ export async function loadYtdl(options?: any, force = false) {
 
                 if (demuxable) {
                     try {
-                        const stream = await dl.stream(query, {
+                        const { stream, type } = await dl.stream(query, {
                             discordPlayerCompatibility: false
                         });
 
+                        stream.once('error', () => stream.destroy());
+
                         return {
-                            stream: stream.stream,
-                            $fmt: stream.type as string
+                            stream: stream,
+                            $fmt: type as string
                         };
                     } catch {
                         //

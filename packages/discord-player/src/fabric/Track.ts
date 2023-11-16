@@ -6,7 +6,7 @@ import { GuildQueue } from '../manager/GuildQueue';
 import { BaseExtractor } from '../extractors/BaseExtractor';
 import { Collection } from '@discord-player/utils';
 import { TypeUtil } from '../utils/TypeUtil';
-import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
+import { Serializable, SerializedType, tryIntoThumbnailString } from '../utils/serde';
 import { Exceptions } from '../errors';
 
 export type TrackResolvable = Track | string | number;
@@ -18,7 +18,7 @@ export type WithMetadata<T extends object, M> = T & {
 
 export type SerializedTrack = ReturnType<Track['serialize']>;
 
-export class Track<T = unknown> {
+export class Track<T = unknown> implements Serializable {
     public title: string;
     public description: string;
     public author: string;

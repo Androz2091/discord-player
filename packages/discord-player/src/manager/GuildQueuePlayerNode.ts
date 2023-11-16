@@ -1,6 +1,6 @@
 import { AudioResource, StreamType } from 'discord-voip';
 import { Readable } from 'stream';
-import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
+import { PlayerProgressbarOptions, QueueRepeatMode, SearchQueryType } from '../types/types';
 import { QueryResolver } from '../utils/QueryResolver';
 import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
 import { Track, TrackResolvable } from '../fabric/Track';
@@ -286,7 +286,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      * Skip current track
      */
     public skip(options?: SkipOptions) {
-        if (!this.queue.dispatcher) return false;
+        if (!this.queue.dispatcher || !this.isPlaying()) return false;
         const track = this.queue.currentTrack;
         if (!track) return false;
         this.queue.setTransitioning(false);
@@ -430,6 +430,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     public stop(force = false) {
         this.queue.tracks.clear();
         this.queue.history.clear();
+        this.queue.setRepeatMode(QueueRepeatMode.OFF);
         if (!this.queue.dispatcher) return false;
         this.queue.dispatcher.end();
         if (force) {

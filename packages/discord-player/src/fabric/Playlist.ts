@@ -3,13 +3,13 @@ import { Track } from './Track';
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';
 import { Util } from '../utils/Util';
 import { GuildVoiceChannelResolvable } from 'discord.js';
-import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
+import { Serializable, SerializedType, tryIntoThumbnailString } from '../utils/serde';
 import { TypeUtil } from '../utils/TypeUtil';
 import { Exceptions } from '../errors';
 
 export type SerializedPlaylist = ReturnType<Playlist['serialize']>;
 
-export class Playlist {
+export class Playlist implements Serializable {
     public readonly player: Player;
     public tracks: Track[];
     public title: string;

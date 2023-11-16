@@ -67,7 +67,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {VoiceChannel|StageChannel} channel The connected channel
      * @private
      */
-    constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel, public queue: GuildQueue, public readonly connectionTimeout: number = 20000, audioPlayer?: AudioPlayer) {
+    public constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel, public queue: GuildQueue, public readonly connectionTimeout: number = 20000, audioPlayer?: AudioPlayer) {
         super();
 
         /**
@@ -167,74 +167,78 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     /**
      * Check if the player has been paused manually
      */
-    get paused() {
+    public get paused() {
         return this.audioPlayer.state.status === AudioPlayerStatus.Paused;
     }
 
-    set paused(val: boolean) {
+    public set paused(val: boolean) {
         val ? this.pause(true) : this.resume();
+    }
+
+    public isActive() {
+        return this.audioResource != null && !this.isIdle();
     }
 
     /**
      * Whether or not the player is currently paused automatically or manually.
      */
-    isPaused() {
+    public isPaused() {
         return this.paused || this.audioPlayer.state.status === AudioPlayerStatus.AutoPaused;
     }
 
     /**
      * Whether or not the player is currently buffering
      */
-    isBuffering() {
+    public isBuffering() {
         return this.audioPlayer.state.status === AudioPlayerStatus.Buffering;
     }
 
     /**
      * Whether or not the player is currently playing
      */
-    isPlaying() {
+    public isPlaying() {
         return this.audioPlayer.state.status === AudioPlayerStatus.Playing;
     }
 
     /**
      * Whether or not the player is currently idle
      */
-    isIdle() {
+    public isIdle() {
         return this.audioPlayer.state.status === AudioPlayerStatus.Idle;
     }
 
     /**
      * Whether or not the voice connection has been destroyed
      */
-    isDestroyed() {
+    public isDestroyed() {
         return this.voiceConnection.state.status === VoiceConnectionStatus.Destroyed;
     }
 
     /**
      * Whether or not the voice connection has been destroyed
      */
-    isDisconnected() {
+    public isDisconnected() {
         return this.voiceConnection.state.status === VoiceConnectionStatus.Disconnected;
     }
 
     /**
      * Whether or not the voice connection is ready to play
      */
-    isReady() {
+    public isReady() {
         return this.voiceConnection.state.status === VoiceConnectionStatus.Ready;
     }
 
     /**
      * Whether or not the voice connection is signalling
      */
-    isSignalling() {
+    public isSignalling() {
         return this.voiceConnection.state.status === VoiceConnectionStatus.Signalling;
     }
 
     /**
      * Whether or not the voice connection is connecting
      */
-    isConnecting() {
+    public isConnecting() {
         return this.voiceConnection.state.status === VoiceConnectionStatus.Connecting;
     }
 
@@ -244,7 +248,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {object} [ops] Options
      * @returns {AudioResource}
      */
-    async createStream(src: Readable, ops?: CreateStreamOps) {
+    public async createStream(src: Readable, ops?: CreateStreamOps) {
         if (!ops?.disableFilters && this.queue.hasDebugger) this.queue.debug('Initiating DSP filters pipeline...');
         const stream = !ops?.disableFilters
             ? this.dsp.create(src, {
@@ -313,7 +317,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * The player status
      * @type {AudioPlayerStatus}
      */
-    get status() {
+    public get status() {
         return this.audioPlayer.state.status;
     }
 
@@ -321,7 +325,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * Disconnects from voice
      * @returns {void}
      */
-    disconnect() {
+    public disconnect() {
         try {
             if (this.audioPlayer) this.audioPlayer.stop(true);
             if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
@@ -344,7 +348,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * Stops the player
      * @returns {void}
      */
-    end() {
+    public end() {
         try {
             this.audioPlayer.stop();
             this.dsp.destroy();
@@ -358,7 +362,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {boolean} [interpolateSilence=false] If true, the player will play 5 packets of silence after pausing to prevent audio glitches.
      * @returns {boolean}
      */
-    pause(interpolateSilence?: boolean) {
+    public pause(interpolateSilence?: boolean) {
         const success = this.audioPlayer.pause(interpolateSilence);
         return success;
     }
@@ -367,7 +371,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * Resumes the stream playback
      * @returns {boolean}
      */
-    resume() {
+    public resume() {
         const success = this.audioPlayer.unpause();
         return success;
     }
@@ -378,7 +382,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {boolean} [opus=false] Whether or not to use opus
      * @returns {Promise<StreamDispatcher>}
      */
-    async playStream(resource: AudioResource<Track> = this.audioResource!) {
+    public async playStream(resource: AudioResource<Track> = this.audioResource!) {
         if (!resource) {
             throw Exceptions.ERR_NO_AUDIO_RESOURCE();
         }
@@ -408,7 +412,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {number} value The volume amount
      * @returns {boolean}
      */
-    setVolume(value: number) {
+    public setVolume(value: number) {
         if (!this.dsp.volume) return false;
         return this.dsp.volume.setVolume(value);
     }
@@ -417,7 +421,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * The current volume
      * @type {number}
      */
-    get volume() {
+    public get volume() {
         if (!this.dsp.volume) return 100;
         return this.dsp.volume.volume;
     }
@@ -426,7 +430,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * The playback time
      * @type {number}
      */
-    get streamTime() {
+    public get streamTime() {
         if (!this.audioResource) return 0;
         return this.audioResource.playbackDuration;
     }

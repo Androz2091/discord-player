@@ -68,4 +68,12 @@ export class PlayerEventsEmitter<L extends ListenerSignature<L> = DefaultListene
     public get hasDebugger() {
         return this.#hasDebugger;
     }
+
+    public incrementListeners(size = 1) {
+        this.setMaxListeners(this.getMaxListeners() + size);
+    }
+
+    public decrementListeners(size = 1) {
+        this.setMaxListeners(this.getMaxListeners() - size);
+    }
 }

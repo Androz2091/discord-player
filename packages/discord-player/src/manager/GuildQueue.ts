@@ -555,6 +555,25 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * Await for the next transition event
+     * @param end If true, will wait for the player to finish playing the track instead of starting it.
+     */
+    public awaitTransition(end = false) {
+        return new Promise<void>((resolve) => {
+            const event = end ? GuildQueueEvent.playerFinish : GuildQueueEvent.playerStart;
+
+            const listener = () => {
+                this.player.events.removeListener(event, listener);
+                this.player.events.decrementListeners();
+                resolve();
+            };
+
+            this.player.events.incrementListeners();
+            this.player.events.once(event, listener);
+        });
+    }
+
+    /**
      * if this queue is currently under transition mode
      */
     public isTransitioning() {
