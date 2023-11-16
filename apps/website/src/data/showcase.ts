@@ -14,9 +14,27 @@ interface IShowcase {
     }[];
 }
 
+const PromotedList: IShowcase = {
+    bots: [
+        {
+            name: 'Music Bot',
+            description: 'A complete music bot example covering topics like custom playlists, persistent config, custom extractor, redis cache, web interface and more.',
+            version: '(Promoted)',
+            url: 'https://github.com/twlite/music-bot'
+        },
+        {
+            name: 'Cadence',
+            description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source!',
+            version: 'v6.6.4',
+            url: 'https://github.com/mariusbegby/cadence-discord-bot'
+        }
+    ],
+    extractors: []
+};
+
 // you don't need to care about sorting by version, just add your project here
 export const ShowcaseResource: IShowcase = {
-    bots: [
+    bots: PromotedList.bots.concat([
         {
             name: 'Mirasaki Music Bot',
             description: 'Complete (45+ commands) music bot with persistent settings, effects, filters, auto-play, DJ-roles, and much more.',
@@ -139,12 +157,6 @@ export const ShowcaseResource: IShowcase = {
             url: 'https://github.com/Androz2091/AtlantaBot'
         },
         {
-            name: 'Cadence',
-            description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source!',
-            version: 'v6.6.4',
-            url: 'https://github.com/mariusbegby/cadence-discord-bot'
-        },
-        {
             name: 'Elite Music',
             description: 'An open-source & feature-packed Discord music bot, complete with a large selection of commands, effects, customisability, Docker & Plex support and much more! 🚀💪',
             version: 'v6.6.4',
@@ -157,8 +169,8 @@ export const ShowcaseResource: IShowcase = {
             version: 'v6.6.3',
             url: 'https://github.com/ToothlessBrush/AstroMonkey'
         }
-    ].sort((a, b) => semver.rcompare(a.version, b.version)),
-    extractors: [
+    ].sort((a, b) => semver.rcompare(a.version, b.version))),
+    extractors: PromotedList.extractors.concat([
         {
             name: 'discord-player-deezer',
             description: 'An unofficial extractor for discord-player to add support for deezer source.',
@@ -169,5 +181,5 @@ export const ShowcaseResource: IShowcase = {
             description: 'Unofficial discord-player extractor for Yandex Music.',
             url: 'https://npm.im/discord-player-yandexmusic'
         }
-    ]
+    ])
 };
