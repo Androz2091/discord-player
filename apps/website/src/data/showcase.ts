@@ -14,9 +14,21 @@ interface IShowcase {
     }[];
 }
 
+const PromotedList: IShowcase = {
+    bots: [
+        {
+            name: 'Music Bot',
+            description: 'A complete music bot example covering topics like custom playlists, persistent config, custom extractor, redis cache, web interface and more.',
+            version: 'latest',
+            url: 'https://github.com/twlite/music-bot'
+        }
+    ],
+    extractors: []
+};
+
 // you don't need to care about sorting by version, just add your project here
 export const ShowcaseResource: IShowcase = {
-    bots: [
+    bots: PromotedList.concat([
         {
             name: 'Mirasaki Music Bot',
             description: 'Complete (45+ commands) music bot with persistent settings, effects, filters, auto-play, DJ-roles, and much more.',
@@ -157,7 +169,7 @@ export const ShowcaseResource: IShowcase = {
             version: 'v6.6.3',
             url: 'https://github.com/ToothlessBrush/AstroMonkey'
         }
-    ].sort((a, b) => semver.rcompare(a.version, b.version)),
+    ].sort((a, b) => semver.rcompare(a.version, b.version))),
     extractors: [
         {
             name: 'discord-player-deezer',
