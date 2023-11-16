@@ -28,7 +28,7 @@ const PromotedList: IShowcase = {
 
 // you don't need to care about sorting by version, just add your project here
 export const ShowcaseResource: IShowcase = {
-    bots: PromotedList.concat([
+    bots: PromotedList.bots.concat([
         {
             name: 'Mirasaki Music Bot',
             description: 'Complete (45+ commands) music bot with persistent settings, effects, filters, auto-play, DJ-roles, and much more.',
@@ -170,7 +170,7 @@ export const ShowcaseResource: IShowcase = {
             url: 'https://github.com/ToothlessBrush/AstroMonkey'
         }
     ].sort((a, b) => semver.rcompare(a.version, b.version))),
-    extractors: [
+    extractors: PromotedList.extractors.concat([
         {
             name: 'discord-player-deezer',
             description: 'An unofficial extractor for discord-player to add support for deezer source.',
@@ -181,5 +181,5 @@ export const ShowcaseResource: IShowcase = {
             description: 'Unofficial discord-player extractor for Yandex Music.',
             url: 'https://npm.im/discord-player-yandexmusic'
         }
-    ]
+    ])
 };
