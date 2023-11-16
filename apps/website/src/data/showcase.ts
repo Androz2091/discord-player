@@ -14,6 +14,7 @@ interface IShowcase {
     }[];
 }
 
+// please do not edit this list, this list is updated by the maintainers of discord-player
 const PromotedList: IShowcase = {
     bots: [
         {
@@ -25,14 +26,14 @@ const PromotedList: IShowcase = {
         {
             name: 'Cadence',
             description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source!',
-            version: 'v6.6.4',
+            version: '(Promoted)',
             url: 'https://github.com/mariusbegby/cadence-discord-bot'
         }
     ],
     extractors: []
 };
 
-// you don't need to care about sorting by version, just add your project here
+// You can edit this list. You don't need to care about sorting by version, just add your project here
 export const ShowcaseResource: IShowcase = {
     bots: PromotedList.bots.concat([
         {
