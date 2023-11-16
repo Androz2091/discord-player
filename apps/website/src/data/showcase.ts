@@ -19,8 +19,14 @@ const PromotedList: IShowcase = {
         {
             name: 'Music Bot',
             description: 'A complete music bot example covering topics like custom playlists, persistent config, custom extractor, redis cache, web interface and more.',
-            version: 'latest',
+            version: '(Promoted)',
             url: 'https://github.com/twlite/music-bot'
+        },
+        {
+            name: 'Cadence',
+            description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source!',
+            version: 'v6.6.4',
+            url: 'https://github.com/mariusbegby/cadence-discord-bot'
         }
     ],
     extractors: []
@@ -149,12 +155,6 @@ export const ShowcaseResource: IShowcase = {
             description: 'We are using discord-player to manager all of our music commands.',
             version: 'v4.1.0',
             url: 'https://github.com/Androz2091/AtlantaBot'
-        },
-        {
-            name: 'Cadence',
-            description: 'A free music and audio bot for Discord. No locked functionality, free forever. Open source!',
-            version: 'v6.6.4',
-            url: 'https://github.com/mariusbegby/cadence-discord-bot'
         },
         {
             name: 'Elite Music',
