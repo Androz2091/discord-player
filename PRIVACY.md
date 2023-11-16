@@ -21,6 +21,6 @@ Discord Player is committed to protecting your privacy and ensuring the confiden
    Discord Player may update this privacy policy periodically to reflect changes in our practices or to comply with legal requirements. Users are encouraged to review this policy regularly for any updates.
 
 7. **Contact Information:**
-   If you have any questions, concerns, or inquiries regarding the privacy policy or data usage within Discord Player, you may contact us at [androz2091@gmail.com](mailto:androz2091@gmail.com) or [hello@twlite.dev](hello@twlite.dev).
+   If you have any questions, concerns, or inquiries regarding the privacy policy or data usage within Discord Player, you may contact us at [androz2091@gmail.com](mailto:androz2091@gmail.com) or [hello@twlite.dev](mailto:hello@twlite.dev).
 
 By using Discord Player, you acknowledge and agree to the terms outlined in this privacy policy. It is essential to understand that our commitment to privacy extends to ensuring that your data remains under your control, and we take every precaution to uphold the confidentiality of information processed within your application.
