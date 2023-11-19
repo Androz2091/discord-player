@@ -1,7 +1,6 @@
 import '@code-hike/mdx/dist/index.css';
 import { lazy, useMemo } from 'react';
 import { MDXProvider } from '@mdx-js/react';
-import { ScrollTop } from '@/components/scrolltop/ScrollTop';
 import { Container } from '@/components/layout/Container';
 import {
     ScrollArea,
@@ -323,7 +322,6 @@ export default function Guide() {
                     </MDXProvider>
                 </div>
             </div>
-            <ScrollTop />
         </Container>
     );
 }

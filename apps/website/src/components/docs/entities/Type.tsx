@@ -2,10 +2,10 @@ import { docsLink } from '@/lib/docs';
 import { cleanupTypes } from '@/lib/util';
 import { cn } from '@edge-ui/react';
 import Link from 'next/link';
-import { useCallback } from 'react';
+import { useMemo } from 'react';
 
 export function Type({ types, prefix }: { types: string[]; prefix?: string }) {
-    const findType = useCallback(() => {
+    const resolvedType = useMemo(() => {
         const resolved: JSX.Element[] = [];
 
         types = cleanupTypes(types);
@@ -53,7 +53,7 @@ export function Type({ types, prefix }: { types: string[]; prefix?: string }) {
     return (
         <div className="flex flex-row items-center">
             {prefix ? <span className="mr-2">{prefix}</span> : null}
-            {findType()}
+            {resolvedType}
         </div>
     );
 }
