@@ -4,13 +4,13 @@ import { cn } from '@edge-ui/react';
 
 export default function Footer() {
     return (
-        <footer className="border-t py-4 px-16">
-            <div className="flex items-start justify-around">
+        <footer className="border-t py-4 lg:px-16">
+            <div className="flex flex-col lg:flex-row items-center justify-around">
                 <div className="flex flex-col items-center">
                     <TextMark />
                     <h2 className={cn('text-lg font-bold select-none')}>Discord Player</h2>
                 </div>
-                <div className="flex items-start gap-16">
+                <div className="grid grid-cols-3 gap-2 md:gap-8">
                     <div className="flex items-start flex-col text-sm">
                         <h3 className="font-semibold">Links</h3>
                         <Link href="/docs" className="text-blue-500">
