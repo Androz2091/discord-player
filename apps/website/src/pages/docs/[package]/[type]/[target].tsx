@@ -7,7 +7,6 @@ import { Combobox } from '@/components/combobox';
 import { useRouter } from 'next/router';
 import { ContentArea } from '@/components/docs/ContentArea';
 import { VscSymbolClass, VscSymbolInterface, VscSymbolMethod } from 'react-icons/vsc';
-import { ScrollTop } from '@/components/scrolltop/ScrollTop';
 import { DocumentationStore } from '@/lib/store';
 
 export default function DocsPage() {
@@ -182,7 +181,6 @@ export default function DocsPage() {
                     <ContentArea data={currentLib} />
                 </div>
             </div>
-            <ScrollTop />
         </Container>
     );
 }

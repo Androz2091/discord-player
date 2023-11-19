@@ -85,8 +85,8 @@ export class GuildNodeManager<Meta = unknown> {
         options.disableBiquad ??= false;
         options.disableEqualizer ??= false;
         options.disableFilterer ??= false;
-        options.disableResampler ??= false;
         options.disableVolume ??= false;
+        options.disableResampler ??= true;
 
         if (getGlobalRegistry().has('@[onBeforeCreateStream]') && !options.onBeforeCreateStream) {
             options.onBeforeCreateStream = getGlobalRegistry().get('@[onBeforeCreateStream]') as OnBeforeCreateStreamHandler;

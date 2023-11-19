@@ -1,3 +1,4 @@
+import Footer from '../footer';
 import Navbar from '../nav/Navbar';
 
 export function AppLayout({ children }: React.PropsWithChildren) {
@@ -5,6 +6,7 @@ export function AppLayout({ children }: React.PropsWithChildren) {
         <>
             <Navbar />
             <div className="transition-all">{children}</div>
+            <Footer />
         </>
     );
 }
