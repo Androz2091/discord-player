@@ -71,36 +71,3 @@ export default function Footer() {
         </footer>
     );
 }
-
-/*
-<footer className="border-t py-4">
-            <div className="flex items-center justify-around">
-                <div>
-                    <Link href="/" className="mr-6 flex items-center space-x-2">
-                        <TextMark className="h-10 w-10" />
-                    </Link>
-                </div>
-                <div className="flex items-start gap-8">
-                    
-                </div>
-            </div>
-            <div className="flex flex-col items-start justify-start mt-3">
-                <span className="text-sm text-muted font-medium">
-                    Made with ❤️ by{' '}
-                    <Link href="https://github.com/Androz2091" className="text-blue-500">
-                        Androz2091
-                    </Link>{' '}
-                    and{' '}
-                    <Link href="https://github.com/twlite" className="text-blue-500">
-                        twlite
-                    </Link>
-                </span>
-                <span className="text-sm text-muted">
-                    © {new Date().getFullYear()}{' '}
-                    <Link href="https://github.com/Androz2091" className="text-blue-500">
-                        Androz2091
-                    </Link>
-                </span>
-            </div>
-        </footer>
-*/
