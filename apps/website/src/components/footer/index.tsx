@@ -65,6 +65,9 @@ export default function Footer() {
                     - Not affiliated with{' '}
                     <Link className="text-blue-500" href="https://discord.com">
                         Discord
+                    </Link>{' '}
+                    or <Link className="text-blue-500" href="https://discord.js.org">
+                        discord.js
                     </Link>
                 </span>
             </div>
