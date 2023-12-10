@@ -17,5 +17,8 @@
   },
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
   }
 }

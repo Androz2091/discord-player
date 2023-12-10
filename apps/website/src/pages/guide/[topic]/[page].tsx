@@ -1,7 +1,6 @@
 import '@code-hike/mdx/dist/index.css';
 import { lazy, useMemo } from 'react';
 import { MDXProvider } from '@mdx-js/react';
-import { ScrollTop } from '@/components/scrolltop/ScrollTop';
 import { Container } from '@/components/layout/Container';
 import {
     ScrollArea,
@@ -70,6 +69,11 @@ const pages = [
                 name: 'performance-optimization',
                 displayName: 'Performance Optimizations',
                 component: lazy(() => import('../_guides/faq/performance_optimization.mdx'))
+            },
+            {
+                name: 'serialization-and-deserialization',
+                displayName: 'Serialization and Deserialization',
+                component: lazy(() => import('../_guides/faq/serialization_and_deserialization.mdx'))
             }
         ]
     },
@@ -318,7 +322,6 @@ export default function Guide() {
                     </MDXProvider>
                 </div>
             </div>
-            <ScrollTop />
         </Container>
     );
 }

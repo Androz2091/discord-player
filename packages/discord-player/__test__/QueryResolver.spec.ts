@@ -95,6 +95,18 @@ describe('QueryResolver', () => {
         expect(qr.resolve(query).type).toBe(QueryType.APPLE_MUSIC_PLAYLIST);
     });
 
+    it('should resolve alternative apple music playlist [1]', () => {
+        const query = 'https://music.apple.com/us/playlist/new-music-mix/pl.u-d5779e520ff52d7f35681bfcaa17b064';
+
+        expect(qr.resolve(query).type).toBe(QueryType.APPLE_MUSIC_PLAYLIST);
+    });
+
+    it('should resolve alternative apple music playlist [2]', () => {
+        const query = 'https://music.apple.com/us/playlist/new-music-mix/pl.pm-d5779e520ff52d7f35681bfcaa17b064';
+
+        expect(qr.resolve(query).type).toBe(QueryType.APPLE_MUSIC_PLAYLIST);
+    });
+
     it('should be appleMusicAlbum', () => {
         const query = 'https://music.apple.com/us/album/whenever-you-need-somebody-deluxe-edition-2022-remaster/1615678477';
         expect(qr.resolve(query).type).toBe(QueryType.APPLE_MUSIC_ALBUM);
@@ -103,5 +115,19 @@ describe('QueryResolver', () => {
     it('should be arbitrary', () => {
         const query = 'https://example.com/music';
         expect(qr.resolve(query).type).toBe(QueryType.ARBITRARY);
+    });
+
+    it('should resolve redirected url', async () => {
+        const query = 'https://spotify.link/QCGEhSsnuDb';
+        const result = await qr.preResolve(query);
+
+        expect(result).toMatch(qr.regex.spotifySongRegex);
+    });
+
+    it('should resolve invalid url in preResolve', async () => {
+        const query = 'query boi';
+        const result = await qr.preResolve(query);
+
+        expect(result).toBe(query);
     });
 });

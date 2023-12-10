@@ -4,12 +4,15 @@ import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
 import { QueryResolver } from '../utils/QueryResolver';
 import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
 import { Track, TrackResolvable } from '../fabric/Track';
-import { GuildQueue, GuildQueueEvent } from './GuildQueue';
+import { GuildQueue, GuildQueueEvent, TrackSkipReason } from './GuildQueue';
 import { setTimeout as waitFor } from 'timers/promises';
 import { AsyncQueue } from '../utils/AsyncQueue';
 import { Exceptions } from '../errors';
 import { TypeUtil } from '../utils/TypeUtil';
 import { CreateStreamOps } from '../VoiceInterface/StreamDispatcher';
+import { ExtractorStreamable } from '../extractors/BaseExtractor';
+import * as prism from 'prism-media';
+import { OpusDecoder } from '@discord-player/opus';
 
 export const FFMPEG_SRATE_REGEX = /asetrate=\d+\*(\d(\.\d)?)/;
 
@@ -17,6 +20,11 @@ export interface ResourcePlayOptions {
     queue?: boolean;
     seek?: number;
     transitionMode?: boolean;
+}
+
+export interface SkipOptions {
+    reason: TrackSkipReason;
+    description: string;
 }
 
 export interface PlayerTimestamp {
@@ -38,8 +46,11 @@ export interface StreamConfig {
 
 export class GuildQueuePlayerNode<Meta = unknown> {
     #progress = 0;
+    #hasFFmpegOptimization = false;
     public tasksQueue = new AsyncQueue();
-    public constructor(public queue: GuildQueue<Meta>) {}
+    public constructor(public queue: GuildQueue<Meta>) {
+        this.#hasFFmpegOptimization = /libopus: (yes|true)/.test(this.queue.player.scanDeps());
+    }
 
     /**
      * If the player is currently in idle mode
@@ -211,6 +222,14 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      */
     public async seek(duration: number) {
         if (!this.queue.currentTrack) return false;
+        if (duration === this.estimatedPlaybackTime) return true;
+        if (duration > this.totalDuration) {
+            return this.skip({
+                reason: TrackSkipReason.SEEK_OVER_THRESHOLD,
+                description: Exceptions.ERR_OUT_OF_RANGE('[duration]', String(duration), '0', String(this.totalDuration)).message
+            });
+        }
+        if (duration < 0) duration = 0;
         return await this.queue.filters.triggerReplay(duration);
     }
 
@@ -266,10 +285,17 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     /**
      * Skip current track
      */
-    public skip() {
+    public skip(options?: SkipOptions) {
         if (!this.queue.dispatcher) return false;
+        const track = this.queue.currentTrack;
+        if (!track) return false;
         this.queue.setTransitioning(false);
         this.queue.dispatcher.end();
+        const { reason, description } = options || {
+            reason: TrackSkipReason.Manual,
+            description: 'The track was skipped manually'
+        };
+        this.queue.emit(GuildQueueEvent.playerSkip, this.queue, track, reason, description);
         return true;
     }
 
@@ -302,7 +328,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         const removed = this.remove(track);
         if (!removed) return false;
         this.queue.tracks.store.unshift(removed);
-        return this.skip();
+        return this.skip({
+            reason: TrackSkipReason.Jump,
+            description: 'The track was jumped to manually'
+        });
     }
 
     /**
@@ -331,7 +360,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         const toRemove = this.queue.tracks.store.filter((_, i) => i <= idx);
         this.queue.tracks.store.splice(0, idx, removed);
         this.queue.emit(GuildQueueEvent.audioTracksRemove, this.queue, toRemove);
-        return this.skip();
+        return this.skip({
+            reason: TrackSkipReason.SkipTo,
+            description: 'The player was skipped to another track manually'
+        });
     }
 
     /**
@@ -450,8 +482,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
         const track = res || this.queue.tracks.dispatch();
         if (!track) {
-            if (this.queue.options.skipOnNoStream) return;
-            throw Exceptions.ERR_NO_RESULT('Play request received but track was not provided');
+            const error = Exceptions.ERR_NO_RESULT('Play request received but track was not provided');
+            this.queue.emit(GuildQueueEvent.error, this.queue, error);
+            return;
         }
 
         if (this.queue.hasDebugger) this.queue.debug('Requested option requires to play the track, initializing...');
@@ -464,7 +497,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             const streamSrc = {
                 error: null as Error | null,
-                stream: null as Readable | null
+                stream: null as ExtractorStreamable | null
             };
 
             await this.queue.onBeforeCreateStream?.(track, qt || 'arbitrary', this.queue).then(
@@ -510,23 +543,23 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const cookies = track.raw?.source === 'youtube' ? (<any>this.queue.player.options.ytdlOptions?.requestOptions)?.headers?.cookie : undefined;
-            const createStreamConfig = {
-                disableBiquad: this.queue.options.disableBiquad,
-                disableEqualizer: this.queue.options.disableEqualizer,
-                disableVolume: this.queue.options.disableVolume,
-                disableFilters: this.queue.options.disableFilterer,
-                disableResampler: this.queue.options.disableResampler,
-                sampleRate: typeof this.queue.options.resampler === 'number' && this.queue.options.resampler > 0 ? this.queue.options.resampler : undefined,
-                biquadFilter: this.queue.filters._lastFiltersCache.biquad || undefined,
-                eq: this.queue.filters._lastFiltersCache.equalizer,
-                defaultFilters: this.queue.filters._lastFiltersCache.filters,
-                volume: this.queue.filters._lastFiltersCache.volume,
-                data: track,
-                type: StreamType.Raw
-            };
 
             const trackStreamConfig: StreamConfig = {
-                dispatcherConfig: createStreamConfig,
+                dispatcherConfig: {
+                    disableBiquad: this.queue.options.disableBiquad,
+                    disableEqualizer: this.queue.options.disableEqualizer,
+                    disableVolume: this.queue.options.disableVolume,
+                    disableFilters: this.queue.options.disableFilterer,
+                    disableResampler: this.queue.options.disableResampler,
+                    sampleRate: typeof this.queue.options.resampler === 'number' && this.queue.options.resampler > 0 ? this.queue.options.resampler : undefined,
+                    biquadFilter: this.queue.filters._lastFiltersCache.biquad || undefined,
+                    eq: this.queue.filters._lastFiltersCache.equalizer,
+                    defaultFilters: this.queue.filters._lastFiltersCache.filters,
+                    volume: this.queue.filters._lastFiltersCache.volume,
+                    data: track,
+                    type: StreamType.Raw,
+                    skipFFmpeg: this.queue.player.options.skipFFmpeg
+                },
                 playerConfig: options
             };
 
@@ -542,7 +575,65 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             await donePromise;
 
-            const pcmStream = this.#createFFmpegStream(streamSrc.stream, track, options.seek ?? 0, cookies);
+            // prettier-ignore
+            const daspDisabled = [
+                trackStreamConfig.dispatcherConfig.disableBiquad,
+                trackStreamConfig.dispatcherConfig.disableEqualizer,
+                trackStreamConfig.dispatcherConfig.disableFilters,
+                trackStreamConfig.dispatcherConfig.disableResampler,
+                trackStreamConfig.dispatcherConfig.disableVolume
+            ].every((e) => !!e === true);
+
+            const needsFilters = !!trackStreamConfig.playerConfig.seek || !!this.queue.filters.ffmpeg.args.length;
+            const shouldSkipFFmpeg = !!trackStreamConfig.dispatcherConfig.skipFFmpeg && !needsFilters;
+
+            let finalStream: Readable;
+
+            const demuxable = (fmt: string) => [StreamType.Opus, StreamType.WebmOpus, StreamType.OggOpus].includes(fmt as StreamType);
+
+            // skip ffmpeg when possible
+            if (shouldSkipFFmpeg && !(streamSrc.stream instanceof Readable) && typeof streamSrc.stream !== 'string' && demuxable(streamSrc.stream.$fmt)) {
+                const { $fmt, stream } = streamSrc.stream;
+                const shouldPCM = !daspDisabled;
+
+                if (this.queue.hasDebugger) this.queue.debug(`skipFFmpeg is set to true and stream is demuxable, creating stream with type ${shouldPCM ? 'pcm' : 'opus'}`);
+
+                // prettier-ignore
+                const opusStream = $fmt === StreamType.Opus ?
+                    stream :
+                    $fmt === StreamType.OggOpus ?
+                    stream.pipe(new prism.opus.OggDemuxer()) :
+                    stream.pipe(new prism.opus.WebmDemuxer());
+
+                if (shouldPCM) {
+                    // if we have any filters enabled, we need to decode the opus stream to pcm
+                    finalStream = opusStream.pipe(
+                        new OpusDecoder({
+                            channels: 2,
+                            frameSize: 960,
+                            rate: 48000
+                        })
+                    );
+                    trackStreamConfig.dispatcherConfig.type = StreamType.Raw;
+                } else {
+                    finalStream = opusStream;
+                    trackStreamConfig.dispatcherConfig.type = StreamType.Opus;
+                }
+            } else {
+                // const opus = daspDisabled && this.#hasFFmpegOptimization;
+                // if (opus && this.queue.hasDebugger) this.queue.debug('Disabling PCM output since all filters are disabled and opus encoding is supported...');
+
+                finalStream = this.#createFFmpegStream(
+                    streamSrc.stream instanceof Readable || typeof streamSrc.stream === 'string' ? streamSrc.stream : streamSrc.stream.stream,
+                    track,
+                    options.seek ?? 0,
+                    cookies
+                    // opus
+                );
+                trackStreamConfig.dispatcherConfig.type = StreamType.Raw;
+                // FIXME: OggOpus results in static noise
+                // trackStreamConfig.dispatcherConfig.type = opus ? StreamType.OggOpus : StreamType.Raw;
+            }
 
             if (options.transitionMode) {
                 if (this.queue.hasDebugger) this.queue.debug(`Transition mode detected, player will wait for buffering timeout to expire (Timeout: ${this.queue.options.bufferingTimeout}ms)`);
@@ -552,7 +643,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             if (this.queue.hasDebugger) this.queue.debug(`Preparing final stream config: ${JSON.stringify(trackStreamConfig, null, 2)}`);
 
-            const resource = await this.queue.dispatcher.createStream(pcmStream, createStreamConfig);
+            const resource = await this.queue.dispatcher.createStream(finalStream, trackStreamConfig.dispatcherConfig);
 
             this.queue.setTransitioning(!!options.transitionMode);
 
@@ -569,15 +660,11 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             Exceptions.ERR_NO_RESULT(`Could not extract stream for this track${error ? `\n\n${error.stack || error}` : ''}`)
         );
 
-        if (this.queue.options.skipOnNoStream) {
-            this.queue.emit(GuildQueueEvent.playerSkip, this.queue, track);
-            this.queue.emit(GuildQueueEvent.playerError, this.queue, streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault, track);
-            const nextTrack = this.queue.tracks.dispatch();
-            if (nextTrack) this.play(nextTrack, { queue: false });
-            return;
-        }
-
-        throw streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault;
+        this.queue.emit(GuildQueueEvent.playerSkip, this.queue, track, TrackSkipReason.NoStream, streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault.message);
+        this.queue.emit(GuildQueueEvent.playerError, this.queue, streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault, track);
+        const nextTrack = this.queue.tracks.dispatch();
+        if (nextTrack) this.play(nextTrack, { queue: false });
+        return;
     }
 
     async #performPlay(resource: AudioResource<Track>) {
@@ -605,12 +692,12 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return streamInfo;
     }
 
-    #createFFmpegStream(stream: Readable | string, track: Track, seek = 0, cookies?: string) {
+    #createFFmpegStream(stream: Readable | string, track: Track, seek = 0, cookies?: string, opus?: boolean) {
         const ffmpegStream = this.queue.filters.ffmpeg
             .createStream(stream, {
                 encoderArgs: this.queue.filters.ffmpeg.args,
                 seek: seek / 1000,
-                fmt: 's16le',
+                fmt: opus ? 'opus' : 's16le',
                 cookies,
                 useLegacyFFmpeg: !!this.queue.player.options.useLegacyFFmpeg
             })

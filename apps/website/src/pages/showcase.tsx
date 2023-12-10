@@ -1,18 +1,26 @@
+import { useState } from 'react';
+import { useDebounce } from '@edge-ui/react';
 import { HeadingMeta } from '@/components/heading';
 import { CardGrid } from '@/components/layout/CardGrid';
 import { Container } from '@/components/layout/Container';
 import { ShowcaseResource } from '@/data/showcase';
-import { Badge, Button, Card, CardDescription, CardHeader, CardTitle, Heading, Paragraph } from '@edge-ui/react';
+import { Badge, Button, Card, CardDescription, CardHeader, CardTitle, Heading, Paragraph, Input } from '@edge-ui/react';
 import { ExternalLink, Upload } from 'lucide-react';
 import Link from 'next/link';
 
 const resURL = 'https://github.com/Androz2091/discord-player/blob/master/apps/website/src/data/showcase.ts';
 
 export default function Showcase() {
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const debouncedSearch = useDebounce(searchTerm, 500);
+
+    const filteredBots = ShowcaseResource.bots.filter((bot) => bot.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
+    const filteredExtractors = ShowcaseResource.extractors.filter((extractor) => extractor.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
+
     return (
         <Container>
             <HeadingMeta title="Showcase | Discord Player" description="A curated list of resources like open-source music bots and extractors, built by the Discord Player community." />
-            <div className="mt-5 mb-10 space-y-5">
+            <div className="mt-5 mb-10 space-y-5 w-full">
                 <div>
                     <Heading.H1>Showcase</Heading.H1>
                     <Paragraph>A curated list of resources like open-source music bots and extractors, built by the Discord Player community.</Paragraph>
@@ -25,45 +33,57 @@ export default function Showcase() {
                         </Link>
                     </div>
                 </div>
-                <div className="space-y-2">
-                    <Heading.H2>Extractors</Heading.H2>
-                    <CardGrid>
-                        {ShowcaseResource.extractors.map((ext) => (
-                            <Link href={ext.url} target="_blank" rel="noopener noreferrer" key={ext.name}>
-                                <Card className="bg-transparent cursor-pointer">
+
+                <div className="py-5 felx justify-center">
+                    <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="max-w-xl" />
+                </div>
+
+                {filteredExtractors.length > 0 && (
+                    <div className="space-y-2">
+                        <Heading.H2>Extractors</Heading.H2>
+                        <CardGrid>
+                            {filteredExtractors.map((ext) => (
+                                <Link href={ext.url} target="_blank" rel="noopener noreferrer" key={ext.name}>
+                                    <Card className="bg-transparent cursor-pointer">
+                                        <CardHeader>
+                                            <CardTitle>
+                                                <span className="flex flex-row gap-1 items-center">
+                                                    {ext.name} <ExternalLink className="h-4 w-4" />
+                                                </span>
+                                            </CardTitle>
+                                            <CardDescription>{ext.description}</CardDescription>
+                                        </CardHeader>
+                                    </Card>
+                                </Link>
+                            ))}
+                        </CardGrid>
+                    </div>
+                )}
+
+                {filteredBots.length > 0 && (
+                    <div className="space-y-2 pt-5">
+                        <Heading.H2>Music Bots</Heading.H2>
+                        <CardGrid>
+                            {filteredBots.map((bot) => (
+                                <Card className="bg-transparent" key={bot.name}>
                                     <CardHeader>
-                                        <CardTitle>
-                                            <span className="flex flex-row gap-1 items-center">
-                                                {ext.name} <ExternalLink className="h-4 w-4" />
-                                            </span>
+                                        <CardTitle className="space-y-2">
+                                            <Link href={bot.url} target="_blank" rel="noopener noreferrer">
+                                                <span className="flex flex-row gap-1 items-center cursor-pointer">
+                                                    {bot.name} <ExternalLink className="h-4 w-4" />
+                                                </span>
+                                            </Link>
+                                            <Badge variant="default">Discord Player {bot.version}</Badge>
                                         </CardTitle>
-                                        <CardDescription>{ext.description}</CardDescription>
+                                        <CardDescription>{bot.description}</CardDescription>
                                     </CardHeader>
                                 </Card>
-                            </Link>
-                        ))}
-                    </CardGrid>
-                </div>
-                <div className="space-y-2">
-                    <Heading.H2>Music Bots</Heading.H2>
-                    <CardGrid>
-                        {ShowcaseResource.bots.map((bot) => (
-                            <Card className="bg-transparent" key={bot.name}>
-                                <CardHeader>
-                                    <CardTitle className="space-y-2">
-                                        <Link href={bot.url} target="_blank" rel="noopener noreferrer">
-                                            <span className="flex flex-row gap-1 items-center cursor-pointer">
-                                                {bot.name} <ExternalLink className="h-4 w-4" />
-                                            </span>
-                                        </Link>
-                                        <Badge variant="default">Discord Player {bot.version}</Badge>
-                                    </CardTitle>
-                                    <CardDescription>{bot.description}</CardDescription>
-                                </CardHeader>
-                            </Card>
-                        ))}
-                    </CardGrid>
-                </div>
+                            ))}
+                        </CardGrid>
+                    </div>
+                )}
+
+                {!filteredBots.length && !filteredExtractors.length && <Heading.H3 className="text-center">No result!</Heading.H3>}
                 {/* <div>
                     <Heading.H2>Extractors</Heading.H2>
                     <Table className="border">

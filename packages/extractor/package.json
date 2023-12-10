@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/extractor",
-  "version": "4.4.4",
+  "version": "4.4.5",
   "description": "Extractors for discord-player",
   "keywords": [
     "discord-player",
@@ -40,6 +40,9 @@
     "discord-player": "workspace:^",
     "mediaplex": "^0.0.7",
     "play-dl": "^1.9.6",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6",
     "youtube-ext": "^1.1.14",
     "yt-stream": "^1.4.8",
     "ytdl-core": "^4.11.4"
@@ -52,7 +55,7 @@
     "reverbnation-scraper": "^2.0.0",
     "soundcloud.ts": "^0.5.2",
     "spotify-url-info": "^3.2.6",
-    "youtube-sr": "^4.3.4"
+    "youtube-sr": "^4.3.9"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts",

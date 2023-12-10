@@ -85,6 +85,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             lagMonitor: 30000,
             queryCache: options.queryCache === null ? null : options.queryCache || new QueryCache(this),
             useLegacyFFmpeg: false,
+            skipFFmpeg: true,
+            probeTimeout: 5000,
             ...options,
             ytdlOptions: {
                 highWaterMark: 1 << 25,
@@ -118,10 +120,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 enumerable: false
             });
         }
-    }
-
-    public get hasDebugger() {
-        return this.listenerCount('debug') > 0;
     }
 
     /**
@@ -410,20 +408,39 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         if (this.hasDebugger) this.debug(`Searching ${searchQuery}`);
 
-        let extractor: BaseExtractor | null = null;
+        let extractor: BaseExtractor | null = null,
+            protocol: string | null = null;
 
         options.searchEngine ??= QueryType.AUTO;
         options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 
         if (this.hasDebugger) this.debug(`Search engine set to ${options.searchEngine}, fallback search engine set to ${options.fallbackSearchEngine}`);
 
-        const { type: queryType, query } =
-            options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(searchQuery, options.fallbackSearchEngine) : ({ type: options.searchEngine, query: searchQuery } as ResolvedQuery);
+        if (/^\w+:/.test(searchQuery)) {
+            const [protocolName, ...query] = searchQuery.split(':');
+            if (this.hasDebugger) this.debug(`Protocol ${protocolName} detected in query`);
 
-        if (this.hasDebugger) this.debug(`Query type identified as ${queryType}`);
+            const matchingExtractor = this.extractors.store.find((e) => !this.extractors.isDisabled(e.identifier) && e.protocols.includes(protocolName));
+
+            if (matchingExtractor) {
+                if (this.hasDebugger) this.debug(`Protocol ${protocolName} is supported by ${matchingExtractor.identifier} extractor!`);
+                extractor = matchingExtractor;
+                searchQuery = query.join(':');
+                protocol = protocolName;
+            } else {
+                if (this.hasDebugger) this.debug(`Could not find an extractor that supports ${protocolName} protocol. Falling back to default behavior...`);
+            }
+        }
+
+        const redirected = await QueryResolver.preResolve(searchQuery);
+        const { type: queryType, query } =
+            options.searchEngine === QueryType.AUTO ? QueryResolver.resolve(redirected, options.fallbackSearchEngine) : ({ type: options.searchEngine, query: redirected } as ResolvedQuery);
+
+        if (this.hasDebugger) this.debug(`Query type identified as ${queryType}${extractor && protocol ? ' but might not be used due to the presence of protocol' : ''}`);
 
         // force particular extractor
         if (options.searchEngine.startsWith('ext:')) {
+            if (this.hasDebugger) this.debug(`Forcing ${options.searchEngine.substring(4)} extractor...`);
             extractor = this.extractors.get(options.searchEngine.substring(4))!;
             if (!extractor)
                 return new SearchResult(this, {
@@ -480,7 +497,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             .handle(query, {
                 type: queryType as SearchQueryType,
                 requestedBy: options.requestedBy as User,
-                requestOptions: options.requestOptions
+                requestOptions: options.requestOptions,
+                protocol
             })
             .catch(() => null);
 
@@ -511,7 +529,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 ext.handle(query, {
                     type: queryType as SearchQueryType,
                     requestedBy: options.requestedBy as User,
-                    requestOptions: options.requestOptions
+                    requestOptions: options.requestOptions,
+                    protocol
                 })
         );
         if (!result?.result) {
@@ -560,7 +579,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             `- discord-player: ${Player.version}`,
             `- discord-voip: ${dVoiceVersion}`,
             `- discord.js: ${djsVersion}`,
-            `- Node version: ${process.version} (Detected Runtime: ${runtime})`,
+            `- Node version: ${process.version} (Detected Runtime: ${runtime}, Platform: ${process.platform} [${process.arch}])`,
             (() => {
                 if (this.options.useLegacyFFmpeg) return '- ffmpeg: N/A (using legacy ffmpeg)';
                 const info = FFmpeg.locateSafe();

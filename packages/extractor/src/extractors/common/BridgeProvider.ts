@@ -84,6 +84,9 @@ export class BridgeProvider {
         const oldQc = ext.createBridgeQuery;
         if (isSoundcloud) ext.createBridgeQuery = (track) => `${track.author} ${track.title}`;
         const res = await bridgefn(ext, track);
+
+        ext.debug(`Extracted bridge metadata using ${isSoundcloud ? 'soundcloud' : 'youtube'} extractor: ${JSON.stringify(res)}`);
+
         ext.createBridgeQuery = oldQc;
 
         return { source: isSoundcloud ? 'soundcloud' : 'youtube', data: res } as BridgedMetadata;
@@ -111,7 +114,7 @@ export class BridgeProvider {
                 throw new Error('Cannot stream, YouTubeExtractor is disabled.');
             }
 
-            return YouTubeExtractor.instance._stream((meta.data as Video).url, YouTubeExtractor.instance);
+            return YouTubeExtractor.instance._stream((meta.data as Video).url, YouTubeExtractor.instance, YouTubeExtractor.instance.supportsDemux);
         } else {
             throw new TypeError('invalid bridge source');
         }

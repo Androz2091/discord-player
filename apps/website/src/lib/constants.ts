@@ -1,4 +1,4 @@
-import { Fira_Code, Inter, Orbitron } from 'next/font/google';
+import { JetBrains_Mono, Inter, Orbitron } from 'next/font/google';
 
 interface IFeature {
     title: string;
@@ -96,7 +96,7 @@ export const orbitron = Orbitron({
     subsets: ['latin']
 });
 
-export const firaCode = Fira_Code({
+export const jbMono = JetBrains_Mono({
     subsets: ['latin']
 });
 

@@ -64,6 +64,21 @@ await player.extractors.register(SpotifyExtractor, {
 });
 ```
 
+### Using protocols
+
+Discord Player supports protocol based search queries which can target specific extractor. The query format for this type of action is `protocolName:queryValue`.
+For example, if you want to make soundcloud search, you can use `scsearch:songName` as your search query. Discord Player executes first extractor that supports this query.
+If none of the extractor support this protocol, discord-player resolves your query via default query resolving algorithm.
+
+##### List of protocols supported by `@discord-player/extractor`s
+
+| Extractor           | Protocols                |
+|---------------------|--------------------------|
+| YoutubeExtractor    | `ytsearch`, `youtube`    |
+| SpotifyExtractor    | `spsearch`, `spotify`    |
+| SoundcloudExtractor | `scsearch`, `soundcloud` |
+| AppleMusicExtractor | `amsearch`, `applemusic` |
+
 ### Adding more sources
 
 Discord Player provides an **Extractor API** that enables you to use your custom stream extractor with it. Some packages have been made by the community to add new features using this API.

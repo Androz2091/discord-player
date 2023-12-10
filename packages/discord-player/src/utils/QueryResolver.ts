@@ -1,6 +1,7 @@
 import { QueryType } from '../types/types';
 import { TypeUtil } from './TypeUtil';
 import { Exceptions } from '../errors';
+import { fetch } from 'undici';
 
 // #region scary things below *sigh*
 const spotifySongRegex = /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(intl-([a-z]|[A-Z])+\/)?(?:track\/|\?uri=spotify:track:)((\w|-){22})(\?si=.+)?$/;
@@ -10,7 +11,7 @@ const vimeoRegex = /^(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\
 const reverbnationRegex = /^https:\/\/(www.)?reverbnation.com\/(.+)\/song\/(.+)$/;
 const attachmentRegex = /^https?:\/\/.+$/;
 const appleMusicSongRegex = /^https?:\/\/music\.apple\.com\/.+?\/(song|album)\/.+?(\/.+?\?i=|\/)([0-9]+)$/;
-const appleMusicPlaylistRegex = /^https?:\/\/music\.apple\.com\/.+?\/playlist\/.+\/pl\.(u-)?[a-zA-Z0-9]+$/;
+const appleMusicPlaylistRegex = /^https?:\/\/music\.apple\.com\/.+?\/playlist\/.+\/pl\.(u-|pm-)?[a-zA-Z0-9]+$/;
 const appleMusicAlbumRegex = /^https?:\/\/music\.apple\.com\/.+?\/album\/.+\/([0-9]+)$/;
 const soundcloudTrackRegex = /^https?:\/\/(m.|www.)?soundcloud.com\/(\w|-)+\/(\w|-)+(.+)?$/;
 const soundcloudPlaylistRegex = /^https?:\/\/(m.|www.)?soundcloud.com\/(\w|-)+\/sets\/(\w|-)+(.+)?$/;
@@ -27,6 +28,11 @@ const DomainsMap = {
     SoundCloud: ['soundcloud.com'],
     AppleMusic: ['music.apple.com']
 };
+
+// prettier-ignore
+const redirectDomains = new Set([
+    /^https?:\/\/spotify.link\/[A-Za-z0-9]+$/,
+]);
 
 export interface ResolvedQuery {
     type: (typeof QueryType)[keyof typeof QueryType];
@@ -57,6 +63,41 @@ class QueryResolver {
     }
 
     /**
+     * Pre-resolve redirect urls
+     */
+    static async preResolve(query: string, maxDepth = 5): Promise<string> {
+        if (!TypeUtil.isString(query)) throw Exceptions.ERR_INVALID_ARG_TYPE(query, 'string', typeof query);
+
+        for (const domain of redirectDomains) {
+            if (domain.test(query)) {
+                try {
+                    const res = await fetch(query, {
+                        method: 'GET',
+                        redirect: 'follow'
+                    });
+
+                    if (!res.ok) break;
+
+                    // spotify does not "redirect", it returns a page with js that redirects
+                    if (/^https?:\/\/spotify.app.link\/(.+)$/.test(res.url)) {
+                        const body = await res.text();
+                        const target = body.split('https://open.spotify.com/track/')[1].split('?si=')[0];
+
+                        if (!target) break;
+
+                        return `https://open.spotify.com/track/${target}`;
+                    }
+                    return maxDepth < 1 ? res.url : this.preResolve(res.url, maxDepth - 1);
+                } catch {
+                    break;
+                }
+            }
+        }
+
+        return query;
+    }
+
+    /**
      * Resolves the given search query
      * @param {string} query The query
      */
@@ -72,7 +113,9 @@ class QueryResolver {
             if (DomainsMap.YouTube.includes(url.host)) {
                 query = query.replace(/(m(usic)?|gaming)\./, '').trim();
                 const playlistId = url.searchParams.get('list');
+                const videoId = url.searchParams.get('v');
                 if (playlistId) {
+                    if (videoId && playlistId.startsWith('RD')) return resolver(QueryType.YOUTUBE_PLAYLIST, `https://www.youtube.com/watch?v=${videoId}&list=${playlistId}`);
                     return resolver(QueryType.YOUTUBE_PLAYLIST, `https://www.youtube.com/playlist?list=${playlistId}`);
                 }
                 if (QueryResolver.validateId(query) || QueryResolver.validateURL(query)) return resolver(QueryType.YOUTUBE_VIDEO, query);

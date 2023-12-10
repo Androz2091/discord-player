@@ -30,10 +30,12 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
     });
 
     public async activate(): Promise<void> {
+        this.protocols = ['scsearch', 'soundcloud'];
         SoundCloudExtractor.instance = this;
     }
 
     public async deactivate(): Promise<void> {
+        this.protocols = [];
         SoundCloudExtractor.instance = null;
     }
 
@@ -88,6 +90,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
     }
 
     public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
+        if (context.protocol === 'scsearch') context.type = QueryType.SOUNDCLOUD_SEARCH;
         switch (context.type) {
             case QueryType.SOUNDCLOUD_TRACK: {
                 const trackInfo = await this.internal.tracks.getV2(query).catch(Util.noop);

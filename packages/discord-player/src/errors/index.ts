@@ -3,112 +3,133 @@ const DiscordPlayerErrors = {
         name: 'ERR_OUT_OF_SPACE',
         type: RangeError,
         createError(target: string, capacity: number, total: number) {
-            return `Max capacity reached for ${target} (Capacity ${capacity}/Total ${total})`;
+            return `[${this.name}] Max capacity reached for ${target} (Capacity ${capacity}/Total ${total})`;
         }
     },
     ERR_INVALID_ARG_TYPE: {
         name: 'ERR_INVALID_ARG_TYPE',
         type: TypeError,
         createError(target: string, expectation: string, found: string) {
-            return `Expected ${target} to be "${expectation}", received "${found}"`;
+            return `[${this.name}] Expected ${target} to be "${expectation}", received "${found}"`;
         }
     },
     ERR_NO_RESULT: {
         name: 'ERR_NO_RESULT',
         type: Error,
         createError(message: string) {
-            return message;
+            return `[${this.name}] ${message}`;
         }
     },
     ERR_NOT_IMPLEMENTED: {
         name: 'ERR_NOT_IMPLEMENTED',
         type: Error,
         createError(target: string) {
-            return `${target} is not yet implemented`;
+            return `[${this.name}] ${target} is not yet implemented`;
         }
     },
     ERR_NOT_EXISTING: {
         name: 'ERR_NOT_EXISTING',
         type: Error,
         createError(target: string) {
-            return `${target} does not exist`;
+            return `[${this.name}] ${target} does not exist`;
         }
     },
     ERR_OUT_OF_RANGE: {
         name: 'ERR_OUT_OF_RANGE',
         type: RangeError,
         createError(target: string, value: string, minimum: string, maximum: string) {
-            return `${target} is out of range (Expected minimum ${maximum} and maximum ${maximum}, got ${value})`;
+            return `[${this.name}] ${target} is out of range (Expected minimum ${maximum} and maximum ${maximum}, got ${value})`;
         }
     },
     ERR_NO_VOICE_CONNECTION: {
         name: 'ERR_NO_VOICE_CONNECTION',
         type: Error,
         createError(message?: string) {
-            return message || 'No voice connection available, maybe connect to a voice channel first?';
+            return `[${this.name}] ` + (message || 'No voice connection available, maybe connect to a voice channel first?');
         }
     },
     ERR_VOICE_CONNECTION_DESTROYED: {
         name: 'ERR_VOICE_CONNECTION_DESTROYED',
         type: Error,
         createError() {
-            return 'Cannot use destroyed voice connection';
+            return `[${this.name}] ` + 'Cannot use destroyed voice connection';
         }
     },
     ERR_NO_VOICE_CHANNEL: {
         name: 'ERR_NO_VOICE_CHANNEL',
         type: Error,
         createError() {
-            return 'Could not get the voice channel';
+            return `[${this.name}] ` + 'Could not get the voice channel';
         }
     },
     ERR_INVALID_VOICE_CHANNEL: {
         name: 'ERR_INVALID_VOICE_CHANNEL',
         type: Error,
         createError() {
-            return 'Expected a voice channel';
+            return `[${this.name}] ` + 'Expected a voice channel';
         }
     },
     ERR_NO_RECEIVER: {
         name: 'ERR_NO_RECEIVER',
         type: Error,
         createError(message?: string) {
-            return message || 'No voice receiver is available, maybe connect to a voice channel first?';
+            return `[${this.name}] ` + (message || 'No voice receiver is available, maybe connect to a voice channel first?');
         }
     },
     ERR_FFMPEG_LOCATOR: {
         name: 'ERR_FFMPEG_LOCATOR',
         type: Error,
         createError(message: string) {
-            return message;
+            return `[${this.name}] ` + message;
         }
     },
     ERR_NO_AUDIO_RESOURCE: {
         name: 'ERR_NO_AUDIO_RESOURCE',
         type: Error,
         createError(message?: string) {
-            return message || 'Expected an audio resource';
+            return `[${this.name}] ` + (message || 'Expected an audio resource');
         }
     },
     ERR_NO_GUILD_QUEUE: {
         name: 'ERR_NO_GUILD_QUEUE',
         type: Error,
         createError(message?: string) {
-            return message || 'Expected a guild queue';
+            return `[${this.name}] ` + (message || 'Expected a guild queue');
         }
     },
     ERR_NO_GUILD: {
         name: 'ERR_NO_GUILD',
         type: Error,
         createError(message?: string) {
-            return message || 'Expected a guild';
+            return `[${this.name}] ` + (message || 'Expected a guild');
         }
     },
     ERR_INFO_REQUIRED: {
         name: 'ERR_INFO_REQUIRED',
         type: Error,
         createError(target: string, actual: string) {
-            return `Expected ${target}, found "${actual}"`;
+            return `[${this.name}] Expected ${target}, found "${actual}"`;
+        }
+    },
+    ERR_SERIALIZATION_FAILED: {
+        name: 'ERR_SERIALIZATION_FAILED',
+        type: Error,
+        createError() {
+            return `[${this.name}]` + "Don't know how to serialize this data";
+        }
+    },
+    ERR_DESERIALIZATION_FAILED: {
+        name: 'ERR_DESERIALIZATION_FAILED',
+        type: Error,
+        createError() {
+            return `[${this.name}]` + "Don't know how to deserialize this data";
+        }
+    },
+    ERR_ILLEGAL_HOOK_INVOCATION: {
+        name: 'ERR_ILLEGAL_HOOK_INVOCATION',
+        type: Error,
+        createError(target: string, message?: string) {
+            return `[${this.name}] ` + `Illegal invocation of ${target} hook.${message ? ` ${message}` : ''}`;
         }
     }
 } as const;

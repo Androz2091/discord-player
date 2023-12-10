@@ -14,18 +14,30 @@ export interface FFmpegStreamOptions {
 const getFFmpegProvider = (legacy = false) => (legacy ? (prism as typeof prism & { default: typeof prism }).default?.FFmpeg || prism.FFmpeg : FFmpeg);
 
 export function FFMPEG_ARGS_STRING(stream: string, fmt?: string, cookies?: string) {
-    // prettier-ignore
     const args = [
-        "-reconnect", "1",
-        "-reconnect_streamed", "1",
-        "-reconnect_delay_max", "5",
-        "-i", stream,
-        "-analyzeduration", "0",
-        "-loglevel", "0",
-        "-f", `${typeof fmt === "string" ? fmt : "s16le"}`,
-        "-ar", "48000",
-        "-ac", "2"
+        '-reconnect',
+        '1',
+        '-reconnect_streamed',
+        '1',
+        '-reconnect_delay_max',
+        '5',
+        '-i',
+        stream,
+        '-analyzeduration',
+        '0',
+        '-loglevel',
+        '0',
+        '-ar',
+        '48000',
+        '-ac',
+        '2',
+        '-f',
+        `${typeof fmt === 'string' ? fmt : 's16le'}`
     ];
+
+    if (fmt === 'opus') {
+        args.push('-acodec', 'libopus');
+    }
 
     if (typeof cookies === 'string') {
         // https://ffmpeg.org/ffmpeg-protocols.html#HTTP-Cookies
@@ -37,13 +49,24 @@ export function FFMPEG_ARGS_STRING(stream: string, fmt?: string, cookies?: strin
 
 export function FFMPEG_ARGS_PIPED(fmt?: string) {
     // prettier-ignore
-    return [
-        "-analyzeduration", "0",
-        "-loglevel", "0",
-        "-f", `${typeof fmt === "string" ? fmt : "s16le"}`,
-        "-ar", "48000",
-        "-ac", "2"
+    const args = [
+        '-analyzeduration',
+        '0',
+        '-loglevel',
+        '0',
+        '-ar',
+        '48000',
+        '-ac',
+        '2',
+        '-f',
+        `${typeof fmt === 'string' ? fmt : 's16le'}`,
     ];
+
+    if (fmt === 'opus') {
+        args.push('-acodec', 'libopus');
+    }
+
+    return args;
 }
 
 /**

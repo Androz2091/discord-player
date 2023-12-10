@@ -39,11 +39,16 @@ class MyExtractor extends BaseExtractor {
 
         // in order to access Player instance, use
         const player = this.context.player;
+
+        // to register protocol, use
+        this.protocols = ['protocol_name'];
     }
 
     // discord-player calls this method when your extractor is removed from its registry
     async deactivate(): Promise<void> {
         // do something here, such as disconnecting from API or cleanup or whatever it is
+        // remove protocol for example
+        this.protocols = [];
     }
 
     // discord-player calls this method when it wants some metadata from you. When you return true, discord-player will use you for further processing. If you return false here, discord-player will query another extractor from its registry.
@@ -53,6 +58,7 @@ class MyExtractor extends BaseExtractor {
 
     // discord-player calls this method when it wants a search result. It is called with the search query and a context parameter (options passed to player.search() method)
     async handle(query, context): Promise<ExtractorInfo> {
+        // if query contained protocol, you can access that protocol via context.protocol
         return this.createResponse(playlist | null, [tracks]);
     }
 

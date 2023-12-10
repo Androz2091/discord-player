@@ -28,7 +28,6 @@ export interface GuildNodeInit<Meta = unknown> {
     filterer: PCMFilters[] | boolean;
     ffmpegFilters: FiltersName[];
     disableHistory: boolean;
-    skipOnNoStream: boolean;
     onBeforeCreateStream?: OnBeforeCreateStreamHandler;
     onAfterCreateStream?: OnAfterCreateStreamHandler;
     repeatMode?: QueueRepeatMode;
@@ -190,6 +189,15 @@ export const GuildQueueEvent = {
     willAutoPlay: 'willAutoPlay'
 } as const;
 
+export enum TrackSkipReason {
+    NoStream = 'ERR_NO_STREAM',
+    Manual = 'MANUAL',
+    SEEK_OVER_THRESHOLD = 'SEEK_OVER_THRESHOLD',
+    Jump = 'JUMPED_TO_ANOTHER_TRACK',
+    SkipTo = 'SKIP_TO_ANOTHER_TRACK',
+    HistoryNext = 'HISTORY_NEXT_TRACK'
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface GuildQueueEvents<Meta = any> {
     /**
@@ -276,8 +284,10 @@ export interface GuildQueueEvents<Meta = any> {
      * Emitted when the audio player skips current track
      * @param queue The queue where this event occurred
      * @param track The track that was skipped
+     * @param reason The reason for skipping
+     * @param description The description for skipping
      */
-    playerSkip: (queue: GuildQueue<Meta>, track: Track) => unknown;
+    playerSkip: (queue: GuildQueue<Meta>, track: Track, reason: TrackSkipReason, description: string) => unknown;
     /**
      * Emitted when the audio player is triggered
      * @param queue The queue where this event occurred
@@ -373,6 +383,7 @@ export interface GuildQueueEvents<Meta = any> {
 export class GuildQueue<Meta = unknown> {
     #transitioning = false;
     #deleted = false;
+    #shuffle = false;
     private __current: Track | null = null;
     public tracks: Queue<Track>;
     public history = new GuildQueueHistory<Meta>(this);
@@ -793,6 +804,52 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
+     * Enable shuffle mode for this queue
+     * @param dynamic Whether to shuffle the queue dynamically. Defaults to `true`.
+     * Dynamic shuffling will shuffle the queue when the current track ends, without mutating the queue.
+     * If set to `false`, the queue will be shuffled immediately in-place, which cannot be undone.
+     */
+    public enableShuffle(dynamic = true) {
+        if (!dynamic) {
+            this.tracks.shuffle();
+            return true;
+        }
+
+        this.#shuffle = true;
+        return true;
+    }
+
+    /**
+     * Disable shuffle mode for this queue.
+     */
+    public disableShuffle() {
+        this.#shuffle = false;
+        return true;
+    }
+
+    /**
+     * Toggle shuffle mode for this queue.
+     * @param dynamic Whether to shuffle the queue dynamically. Defaults to `true`.
+     * @returns Whether shuffle is enabled or disabled.
+     */
+    public toggleShuffle(dynamic = true) {
+        if (dynamic) {
+            this.#shuffle = !this.#shuffle;
+            return this.#shuffle;
+        } else {
+            this.tracks.shuffle();
+            return true;
+        }
+    }
+
+    /**
+     * Whether shuffle mode is enabled for this queue.
+     */
+    public get isShuffling() {
+        return this.#shuffle;
+    }
+
+    /**
      * The voice connection latency of this queue
      */
     public get ping() {
@@ -896,7 +953,7 @@ export class GuildQueue<Meta = unknown> {
     }
 
     public get hasDebugger() {
-        return this.player.events.listenerCount(GuildQueueEvent.debug) > 0;
+        return this.player.events.hasDebugger;
     }
 
     #removeListeners<T extends { removeAllListeners: () => unknown }>(target: T) {
@@ -918,6 +975,24 @@ export class GuildQueue<Meta = unknown> {
         this.emit(GuildQueueEvent.playerTrigger, this, track!, reason);
         if (track && !this.isTransitioning()) this.emit(GuildQueueEvent.playerStart, this, track);
         this.setTransitioning(false);
+    }
+
+    #getNextTrack() {
+        if (!this.isShuffling) {
+            return this.tracks.dispatch();
+        }
+
+        const store = this.tracks.store;
+
+        if (!store.length) return;
+
+        const track = Util.randomChoice(store);
+
+        this.tracks.removeOne((t) => {
+            return t.id === track.id;
+        });
+
+        return track;
     }
 
     #performFinish(resource?: AudioResource<Track>) {
@@ -958,7 +1033,7 @@ export class GuildQueue<Meta = unknown> {
                     }
                 } else {
                     if (this.hasDebugger) this.debug('Initializing next track of the queue...');
-                    this.__current = this.tracks.dispatch()!;
+                    this.__current = this.#getNextTrack()!;
                     this.node.play(this.__current, {
                         queue: false
                     });

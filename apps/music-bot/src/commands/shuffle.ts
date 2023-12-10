@@ -30,7 +30,8 @@ export class ShuffleCommand extends Command {
 				ephemeral: true
 			});
 
-		queue.tracks.shuffle();
-		return interaction.reply({ content: `${this.container.client.dev.success} | I have **shuffled** the queue` });
+		// queue.tracks.shuffle();
+		const status = queue.toggleShuffle();
+		return interaction.reply({ content: `${this.container.client.dev.success} | I have **${status ? 'shuffled' : 'unshuffled'}** the queue` });
 	}
 }
