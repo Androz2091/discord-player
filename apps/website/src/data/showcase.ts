@@ -64,8 +64,8 @@ export const ShowcaseResource: IShowcase = {
             {
                 name: 'Music Disc',
                 description: "I am using discord-player to play music on Discord with friends. It's easy to set up and run yourself.",
-                version: 'v6.3.0',
-                url: 'https://github.com/hmes98318/Music-Disc'
+                version: 'v6.6.6',
+                url: 'https://github.com/hmes98318/Music-Disc-discord-player'
             },
             {
                 name: 'Botanique',
