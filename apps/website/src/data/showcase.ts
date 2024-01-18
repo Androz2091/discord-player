@@ -176,6 +176,7 @@ export const ShowcaseResource: IShowcase = {
                 description: 'An open-source Discord music bot with an interative dashboard, only plays music, nothing else.',
                 version: 'v1.2.1',
                 url: 'https://muusik.app'
+            }
         ].sort((a, b) => semver.rcompare(a.version, b.version))
     ),
     extractors: PromotedList.extractors.concat([
