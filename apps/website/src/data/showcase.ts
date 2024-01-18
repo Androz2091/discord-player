@@ -170,7 +170,12 @@ export const ShowcaseResource: IShowcase = {
                     'AstroMonkey is an open-source music bot! it has support for Autocomplete search using Slash Commands, Queue management to take control of your music, and playlists to add music too for later.',
                 version: 'v6.6.3',
                 url: 'https://github.com/ToothlessBrush/AstroMonkey'
-            }
+            },
+            {
+                name: 'muusik.app',
+                description: 'An open-source Discord music bot with an interative dashboard, only plays music, nothing else.',
+                version: 'v1.2.1',
+                url: 'https://muusik.app'
         ].sort((a, b) => semver.rcompare(a.version, b.version))
     ),
     extractors: PromotedList.extractors.concat([
