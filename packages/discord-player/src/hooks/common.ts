@@ -1,4 +1,6 @@
+import { Guild } from 'discord.js';
 import type { Player } from '../Player';
+import { createContext, useContext } from './context/async-context';
 import { GuildQueue, NodeResolvable } from '../manager';
 import { instances } from '../utils/__internal__';
 
@@ -6,6 +8,20 @@ const preferredInstanceKey = '__discord_player_hook_instance_cache__';
 
 export const getPlayer = () => {
     return instances.get(preferredInstanceKey) || instances.first() || null;
+};
+
+export interface HooksCtx {
+    guild: Guild;
+}
+
+export const HooksContextProvider = createContext<HooksCtx>();
+export const withContext = HooksContextProvider.provide.bind(HooksContextProvider);
+
+export const useHooksContext = () => {
+    const ctx = useContext(HooksContextProvider);
+    if (!ctx) throw new Error('useHooksContext must be called inside a HooksContextProvider');
+
+    return ctx;
 };
 
 /**

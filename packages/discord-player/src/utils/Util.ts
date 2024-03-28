@@ -1,10 +1,10 @@
 import { StageChannel, VoiceChannel } from 'discord.js';
 import { TimeData } from '../types/types';
-import { setTimeout } from 'timers/promises';
+import { setTimeout } from 'node:timers/promises';
 import { GuildQueue } from '../manager';
 import { Playlist, Track } from '../fabric';
 import { Exceptions } from '../errors';
-import { randomInt } from 'crypto';
+import { randomInt } from 'node:crypto';
 
 class Util {
     /**
