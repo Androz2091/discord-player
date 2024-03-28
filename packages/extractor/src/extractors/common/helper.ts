@@ -240,7 +240,9 @@ export async function loadYtdl(options?: any, force = false) {
 
                 if (typeof options?.requestOptions?.headers?.cookie === 'string') {
                     dl.setToken({
-                        youtube: options.requestOptions.headers.cookie
+                        youtube: {
+                            cookie: options.requestOptions.headers.cookie
+                        }
                     });
                 }
                 const info = await dl.video_info(query);
