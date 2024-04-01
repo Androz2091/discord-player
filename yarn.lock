@@ -4896,7 +4896,7 @@ __metadata:
     discord-voip: "npm:^0.1.3"
     discord.js: "npm:^14.1.2"
     ip: "npm:^1.1.8"
-    libsodium-wrappers: "npm:^0.7.10"
+    libsodium-wrappers: "npm:^0.7.13"
     opusscript: "npm:^0.0.8"
     tsup: "npm:^7.2.0"
     typescript: "npm:^5.2.2"
@@ -7444,19 +7444,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libsodium-wrappers@npm:^0.7.10":
-  version: 0.7.10
-  resolution: "libsodium-wrappers@npm:0.7.10"
+"libsodium-wrappers@npm:^0.7.13":
+  version: 0.7.13
+  resolution: "libsodium-wrappers@npm:0.7.13"
   dependencies:
-    libsodium: "npm:^0.7.0"
-  checksum: 7bba87d464bc914d57bec85c9901529746b706083ffdba1642f2860a11a4f71351fecb94406330c5c0cc6ec493ebc019a706a70d976ba508831d63a93236c44f
+    libsodium: "npm:^0.7.13"
+  checksum: e5f7f5baf37095a764e3f5037ab47d65343db0c0efca4add80a5c2037ac2cb9fb05f00646f7b75220bd4f30bccc02e9742603ceb8eb97e5c305103cd4f86392d
   languageName: node
   linkType: hard
 
-"libsodium@npm:^0.7.0":
-  version: 0.7.9
-  resolution: "libsodium@npm:0.7.9"
-  checksum: 3ad30dc469fad658d716f4160a8b2143e9f7337bbaef6fe9a983b6611f2f68f6f2fc094b53e73dc79a3b1e810fafff768609ab885f151469cff5a4372ae4a586
+"libsodium@npm:^0.7.13":
+  version: 0.7.13
+  resolution: "libsodium@npm:0.7.13"
+  checksum: 0105523135c1ed1c4ee853a36cd3b3b562ed150f5888ae61be4b2945f0b1010e7ecaad4cdc9333beac034a88bdf470a93f22609877a06f15f5d690a9591e0d7c
   languageName: node
   linkType: hard
 

@@ -8,20 +8,6 @@ type unsafe = any;
  */
 export type ContextReceiver<R> = () => R;
 
-/**
- * The props for the context provider
- */
-export interface ContextProviderProps<T, R> {
-    /**
-     * The value to provide
-     */
-    value: T;
-    /**
-     * The receiver function that will be called when the context is provided
-     */
-    receiver: ContextReceiver<R>;
-}
-
 export class Context<T> {
     private storage = new AsyncLocalStorage<T>();
 
@@ -55,9 +41,13 @@ export class Context<T> {
     /**
      * Run a function within the context of this provider
      */
-    public provide<R = unsafe>({ receiver, value }: ContextProviderProps<T, R>): R {
+    public provide<R = unsafe>(value: T, receiver: ContextReceiver<R>): R {
         if (value === undefined) {
             throw new Error('Context value may not be undefined');
+        }
+
+        if (typeof receiver !== 'function') {
+            throw new Error('Context receiver must be a function');
         }
 
         return this.storage.run(value, receiver);
@@ -76,7 +66,7 @@ export class Context<T> {
  *  };
  *
  *  // provide the context value to the receiver
- *  context.provide({ value: user, receiver: handler });
+ *  context.provide(user, handler);
  *
  *  function handler() {
  *    // get the context value
