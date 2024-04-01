@@ -25,10 +25,12 @@ export async function execute(interaction) {
 First of all, your command handler needs to provide context to `HooksContextProvider`:
 
 ```js
-const { withContext } = require('discord-player');
+const { useMainPlayer } = require('discord-player');
 
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isCommand()) return;
+
+    const player = useMainPlayer();
 
     // assuming the following code is your target command to be executed
     const command = getCommandSomehow(); // shape is roughly { execute: Function }
@@ -36,7 +38,7 @@ client.on('interactionCreate', async (interaction) => {
     const context = { guild: interaction.guild };
 
     // provide context and execute the command
-    await withContext(context, () => command.execute(interaction));
+    await player.context.provide(context, () => command.execute(interaction));
 });
 ```
 

@@ -44,7 +44,7 @@ export class Context<T> {
     /**
      * Get the current value of the context. If the context is lost and no default value is provided, undefined will be returned.
      */
-    public getValue(): T | undefined {
+    public consume(): T | undefined {
         const data = this.storage.getStore();
 
         if (data === undefined && this.defaultValue !== undefined) return this.defaultValue;
@@ -95,5 +95,5 @@ export function createContext<T = unsafe>(defaultValue?: T): Context<T> {
  * @example const value = useContext(context);
  */
 export function useContext<T = unsafe>(context: Context<T>): T | undefined {
-    return context.getValue();
+    return context.consume();
 }

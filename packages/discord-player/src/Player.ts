@@ -15,6 +15,8 @@ import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
 import { Exceptions } from './errors';
 import { defaultVoiceStateHandler } from './DefaultVoiceStateHandler';
 import { IPRotator } from './utils/IPRotator';
+import { Context, createContext } from './hooks';
+import { HooksCtx } from './hooks/common';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -43,6 +45,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     #lagMonitorTimeout!: NodeJS.Timeout;
     #lagMonitorInterval!: NodeJS.Timer;
     #onVoiceStateUpdate: VoiceStateHandler = defaultVoiceStateHandler;
+    #hooksCtx: Context<HooksCtx> | null = null;
     public static readonly version: string = '[VI]{{inject}}[/VI]';
     public static _singletonKey = kSingleton;
     public readonly id = SnowflakeUtil.generate().toString();
@@ -120,6 +123,17 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 enumerable: false
             });
         }
+    }
+
+    /**
+     * The hooks context for this player instance.
+     */
+    public get context() {
+        if (!this.#hooksCtx) {
+            this.#hooksCtx = createContext();
+        }
+
+        return this.#hooksCtx;
     }
 
     /**

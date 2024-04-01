@@ -12,7 +12,7 @@ export type MetadataDispatch<T> = readonly [() => T, (metadata: T | SetterFN<T, 
 export function useMetadata<T = unknown>(): MetadataDispatch<T>;
 export function useMetadata<T = unknown>(node: NodeResolvable): MetadataDispatch<T>;
 export function useMetadata<T = unknown>(node?: NodeResolvable): MetadataDispatch<T> {
-    const _node = node ?? useHooksContext().guild;
+    const _node = node ?? useHooksContext('useMetadata').guild;
     const queue = getQueue<T>(_node);
     const setter = (metadata: T | SetterFN<T, T>) => {
         if (queue) {

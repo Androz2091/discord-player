@@ -11,7 +11,7 @@ export interface TimelineDispatcherOptions {
  * @param options Options for timeline dispatcher
  */
 export function useTimeline(node?: NodeResolvable, options?: Partial<TimelineDispatcherOptions>) {
-    const _node = node ?? useHooksContext().guild;
+    const _node = node ?? useHooksContext('useTimeline').guild;
     const queue = getQueue(_node);
     if (!queue) return null;
 

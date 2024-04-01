@@ -12,7 +12,7 @@ type VolumeDispatch = readonly [() => number, (volume: number | SetterFN) => boo
 export function useVolume(): VolumeDispatch;
 export function useVolume(node: NodeResolvable): VolumeDispatch;
 export function useVolume(node?: NodeResolvable): VolumeDispatch {
-    const _node = node ?? useHooksContext().guild;
+    const _node = node ?? useHooksContext('useVolume').guild;
     const queue = getQueue(_node);
     const setter = (volume: number | SetterFN) => {
         if (queue) {

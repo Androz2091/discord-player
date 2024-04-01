@@ -1,8 +1,9 @@
 import { Guild } from 'discord.js';
 import type { Player } from '../Player';
-import { createContext, useContext } from './context/async-context';
 import { GuildQueue, NodeResolvable } from '../manager';
 import { instances } from '../utils/__internal__';
+import { Exceptions } from '../errors';
+import { useContext } from './context/async-context';
 
 const preferredInstanceKey = '__discord_player_hook_instance_cache__';
 
@@ -14,15 +15,19 @@ export interface HooksCtx {
     guild: Guild;
 }
 
-export const HooksContextProvider = createContext<HooksCtx>();
-export const withContext = HooksContextProvider.provide.bind(HooksContextProvider);
+/**
+ * @private
+ */
+export function useHooksContext(hookName: string) {
+    const player = getPlayer();
+    if (!player) throw Exceptions.ERR_ILLEGAL_HOOK_INVOCATION('discord-player', 'Player instance must be created before using hooks');
 
-export const useHooksContext = () => {
-    const ctx = useContext(HooksContextProvider);
-    if (!ctx) throw new Error('useHooksContext must be called inside a HooksContextProvider');
+    const context = useContext(player.context);
 
-    return ctx;
-};
+    if (!context) throw Exceptions.ERR_ILLEGAL_HOOK_INVOCATION(hookName, `${hookName} must be called inside a player context created by <Player>.context.provide()`);
+
+    return context;
+}
 
 /**
  * Bind a player instance to the hook system, defaults to the first instance.

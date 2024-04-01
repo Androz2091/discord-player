@@ -8,7 +8,7 @@ import { getQueue, useHooksContext } from './common';
 export function useHistory<Meta = unknown>(): GuildQueueHistory<Meta> | null;
 export function useHistory<Meta = unknown>(node: NodeResolvable): GuildQueueHistory<Meta> | null;
 export function useHistory<Meta = unknown>(node?: NodeResolvable): GuildQueueHistory<Meta> | null {
-    const _node = node ?? useHooksContext().guild;
+    const _node = node ?? useHooksContext('useHistory').guild;
 
     const queue = getQueue<Meta>(_node);
     if (!queue) return null;
