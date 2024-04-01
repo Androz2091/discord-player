@@ -21,7 +21,7 @@ const youtubeVideoIdRegex = /^[a-zA-Z0-9-_]{11}$/;
 // #endregion scary things above *sigh*
 
 const DomainsMap = {
-    YouTube: ['youtube.com', 'youtu.be', 'music.youtube.com', 'gaming.youtube.com', 'www.youtube.com'],
+    YouTube: ['youtube.com', 'youtu.be', 'music.youtube.com', 'gaming.youtube.com', 'www.youtube.com', 'm.youtube.com'],
     Spotify: ['open.spotify.com', 'embed.spotify.com'],
     Vimeo: ['vimeo.com', 'player.vimeo.com'],
     ReverbNation: ['reverbnation.com'],
