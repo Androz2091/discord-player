@@ -8907,6 +8907,7 @@ __metadata:
     tsx: "npm:^3.12.7"
     typescript: "npm:^5.2.2"
     vitest: "npm:^0.34.6"
+    youtube-ext: "npm:^1.1.23"
   languageName: unknown
   linkType: soft
 
@@ -11875,6 +11876,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici@npm:^6.11.1":
+  version: 6.13.0
+  resolution: "undici@npm:6.13.0"
+  checksum: 4ec2038e95779d4f1114a5dcf5bc74ec59c7fc76f6287f8a6bea6d69113f0190e6d41cc6e14409b5d912b0a92ce910b33bfa05808f40b6bf2b802b58b427f2cf
+  languageName: node
+  linkType: hard
+
 "unfetch@npm:^5.0.0":
   version: 5.0.0
   resolution: "unfetch@npm:5.0.0"
@@ -12515,6 +12523,15 @@ __metadata:
   dependencies:
     axios: "npm:^1.5.0"
   checksum: 6825baea5a222d444a7b7214ba121b80b244435816ca068dd551a595cb47a13e4ed92d4ee959e480847c1c6123fbfd4272ba9c6ce156808cb2499b9f2563ff22
+  languageName: node
+  linkType: hard
+
+"youtube-ext@npm:^1.1.23":
+  version: 1.1.23
+  resolution: "youtube-ext@npm:1.1.23"
+  dependencies:
+    undici: "npm:^6.11.1"
+  checksum: 3a8bb7612327d869914f895b22d6b0fcd00af857d38b0cc78a966cdf4d2ff386e7ff9c10b333baf43edb7ba486d657e2cb1cd6c07c5e623e9fc088778781e356
   languageName: node
   linkType: hard
 

@@ -26,6 +26,8 @@ export class LyricsCommand extends Command {
 		const queue = useQueue(interaction.guild!.id);
 		const track = interaction.options.getString('name') || (queue?.currentTrack?.title as string);
 
+		await interaction.deferReply();
+
 		const results = await player.lyrics
 			.search({
 				q: track
@@ -60,6 +62,6 @@ export class LyricsCommand extends Command {
 			.setDescription(trimmedLyrics.length === 1997 ? `${trimmedLyrics}...` : trimmedLyrics)
 			.setColor('Yellow');
 
-		return interaction.reply({ embeds: [embed] });
+		return interaction.editReply({ embeds: [embed] });
 	}
 }
