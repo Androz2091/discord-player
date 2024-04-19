@@ -1,5 +1,5 @@
 import type { User, UserResolvable, VoiceState } from 'discord.js';
-import type { GuildQueue } from '../manager';
+import type { GuildQueue } from '../queue';
 import type { Track } from '../fabric/Track';
 import type { Playlist } from '../fabric/Playlist';
 import type { downloadOptions } from 'ytdl-core';

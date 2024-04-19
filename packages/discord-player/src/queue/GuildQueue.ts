@@ -17,6 +17,8 @@ import { GuildQueueStatistics } from './GuildQueueStatistics';
 import { TypeUtil } from '../utils/TypeUtil';
 import { AsyncQueue } from '../utils/AsyncQueue';
 import { Exceptions } from '../errors';
+import { SyncedLyricsProvider } from './SyncedLyricsProvider';
+import { LrcGetResult, LrcSearchResult } from '../lrclib/LrcLib';
 
 export interface GuildNodeInit<Meta = unknown> {
     guild: Guild;
@@ -399,6 +401,7 @@ export class GuildQueue<Meta = unknown> {
     public timeouts = new Collection<string, NodeJS.Timeout>();
     public stats = new GuildQueueStatistics<Meta>(this);
     public tasksQueue = new AsyncQueue();
+    public syncedLyricsProvider = new SyncedLyricsProvider(this);
 
     public constructor(public player: Player, public options: GuildNodeInit<Meta>) {
         this.tracks = new Queue<Track>(options.queueStrategy);
@@ -465,6 +468,24 @@ export class GuildQueue<Meta = unknown> {
      */
     public get voiceReceiver() {
         return this.dispatcher?.receiver ?? null;
+    }
+
+    /**
+     * The sync lyrics provider for this queue.
+     * @example const lyrics = await player.lyrics.search({ q: 'Alan Walker Faded' });
+     * const syncedLyrics = queue.syncedLyrics(lyrics[0]);
+     * console.log(syncedLyrics.at(10_000));
+     * // subscribe to lyrics change
+     * const unsubscribe = syncedLyrics.onChange((lyrics, timestamp) => {
+     *    console.log(lyrics, timestamp);
+     * });
+     * // unsubscribe from lyrics change
+     * unsubscribe(); // or
+     * syncedLyrics.unsubscribe();
+     */
+    public syncedLyrics(lyrics: LrcGetResult | LrcSearchResult) {
+        this.syncedLyricsProvider.load(lyrics?.syncedLyrics ?? '');
+        return this.syncedLyricsProvider;
     }
 
     /**
@@ -1007,6 +1028,8 @@ export class GuildQueue<Meta = unknown> {
             );
 
         if (track && !this.isTransitioning()) {
+            this.syncedLyricsProvider.unsubscribe();
+            this.syncedLyricsProvider.lyrics.clear();
             if (this.hasDebugger) this.debug('Adding track to history and emitting finish event since transition mode is disabled...');
             this.history.push(track);
             this.node.resetProgress();

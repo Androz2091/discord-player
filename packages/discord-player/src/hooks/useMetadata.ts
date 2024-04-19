@@ -1,5 +1,5 @@
 import { TypeUtil } from '../utils/TypeUtil';
-import { NodeResolvable } from '../manager';
+import { NodeResolvable } from '../queue';
 import { getQueue, useHooksContext } from './common';
 
 export type SetterFN<T, P> = (previous: P) => T;

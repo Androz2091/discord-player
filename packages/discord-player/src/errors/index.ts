@@ -153,7 +153,8 @@ const handler: ProxyHandler<typeof target> = {
         return (...args: Parameters<(typeof err)['createError']>) => {
             // @ts-expect-error
             const exception = new err.type(err.createError(...args));
-            exception.name = err.name;
+            const originalName = exception.name;
+            exception.name = `${err.name} [${originalName}]`;
 
             return exception;
         };

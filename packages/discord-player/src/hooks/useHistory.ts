@@ -1,4 +1,4 @@
-import { GuildQueueHistory, NodeResolvable } from '../manager';
+import { GuildQueueHistory, NodeResolvable } from '../queue';
 import { getQueue, useHooksContext } from './common';
 
 /**

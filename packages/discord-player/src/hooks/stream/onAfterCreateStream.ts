@@ -1,4 +1,4 @@
-import { OnAfterCreateStreamHandler } from '../../manager';
+import { OnAfterCreateStreamHandler } from '../../queue';
 import { getGlobalRegistry } from '../../utils/__internal__';
 
 /**

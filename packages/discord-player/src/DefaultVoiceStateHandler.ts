@@ -1,5 +1,5 @@
 import { ChannelType, VoiceState } from 'discord.js';
-import { GuildQueue, GuildQueueEvent } from './manager';
+import { GuildQueue, GuildQueueEvent } from './queue';
 import { Player } from './Player';
 import { Util } from './utils/Util';
 

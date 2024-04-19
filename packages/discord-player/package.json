@@ -54,7 +54,7 @@
     "@discord-player/ffmpeg": "workspace:^",
     "@discord-player/utils": "workspace:^",
     "discord-voip": "^0.1.3",
-    "ip": "^1.1.8",
+    "ip": "^2.0.1",
     "libsodium-wrappers": "^0.7.13"
   },
   "peerDependencies": {

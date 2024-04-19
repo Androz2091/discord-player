@@ -1,4 +1,4 @@
-import { GuildQueue, NodeResolvable } from '../manager';
+import { GuildQueue, NodeResolvable } from '../queue';
 import { getQueue, useHooksContext } from './common';
 
 /**

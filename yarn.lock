@@ -325,16 +325,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@distube/ytdl-core@npm:^4.13.2":
-  version: 4.13.2
-  resolution: "@distube/ytdl-core@npm:4.13.2"
+"@distube/ytdl-core@npm:^4.13.3":
+  version: 4.13.3
+  resolution: "@distube/ytdl-core@npm:4.13.3"
   dependencies:
     http-cookie-agent: "npm:^5.0.4"
     m3u8stream: "npm:^0.8.6"
+    miniget: "npm:^4.2.3"
     sax: "npm:^1.2.4"
     tough-cookie: "npm:^4.1.3"
     undici: "npm:^5.25.2"
-  checksum: e142c9180c8123a0e599cb724a236595e21aa8728f3966c609b7e7c39ed2bc5fafdc71cc160d267a4b6e6e742d8cbbf42b1d68d95c6a10349c067e595e69e424
+  checksum: b7c8080274346aeafa44d61204324d450c29dd8f000340e637467396a8ba0191984721ca83c564b3c2b221ce9b781bad09e7bd82e017b45bacdae718c3780877
   languageName: node
   linkType: hard
 
@@ -4895,7 +4896,7 @@ __metadata:
     discord-api-types: "npm:^0.37.0"
     discord-voip: "npm:^0.1.3"
     discord.js: "npm:^14.1.2"
-    ip: "npm:^1.1.8"
+    ip: "npm:^2.0.1"
     libsodium-wrappers: "npm:^0.7.13"
     opusscript: "npm:^0.0.8"
     tsup: "npm:^7.2.0"
@@ -6942,17 +6943,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ip@npm:^1.1.8":
-  version: 1.1.8
-  resolution: "ip@npm:1.1.8"
-  checksum: 52975ebf84a090162d561fc6948fbc4c53775a8054c05371f09cfcb40e30a53aa225b4efb624f630cff5af2dd8124c82dd68e4df065dc1d1ca91d04e850e9cde
-  languageName: node
-  linkType: hard
-
 "ip@npm:^2.0.0":
   version: 2.0.0
   resolution: "ip@npm:2.0.0"
   checksum: 1270b11e534a466fb4cf4426cbcc3a907c429389f7f4e4e3b288b42823562e88d6a509ceda8141a507de147ca506141f745005c0aa144569d94cf24a54eb52bc
+  languageName: node
+  linkType: hard
+
+"ip@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "ip@npm:2.0.1"
+  checksum: d6dd154e1bc5e8725adfdd6fb92218635b9cbe6d873d051bd63b178f009777f751a5eea4c67021723a7056325fc3052f8b6599af0a2d56f042c93e684b4a0349
   languageName: node
   linkType: hard
 
@@ -7941,13 +7942,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-android-arm64@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-android-arm64@npm:0.0.2"
-  conditions: os=android & cpu=arm64
-  languageName: node
-  linkType: hard
-
 "mediaplex-android-arm64@npm:0.0.7":
   version: 0.0.7
   resolution: "mediaplex-android-arm64@npm:0.0.7"
@@ -7955,10 +7949,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-arm64@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-darwin-arm64@npm:0.0.2"
-  conditions: os=darwin & cpu=arm64
+"mediaplex-android-arm64@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-android-arm64@npm:0.0.9"
+  conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -7969,10 +7963,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-universal@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-darwin-universal@npm:0.0.2"
-  conditions: os=darwin
+"mediaplex-darwin-arm64@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-darwin-arm64@npm:0.0.9"
+  conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -7983,10 +7977,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-x64@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-darwin-x64@npm:0.0.2"
-  conditions: os=darwin & cpu=x64
+"mediaplex-darwin-universal@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-darwin-universal@npm:0.0.9"
+  conditions: os=darwin
   languageName: node
   linkType: hard
 
@@ -7997,10 +7991,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-freebsd-x64@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-freebsd-x64@npm:0.0.2"
-  conditions: os=freebsd & cpu=x64
+"mediaplex-darwin-x64@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-darwin-x64@npm:0.0.9"
+  conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
@@ -8011,10 +8005,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-linux-arm-gnueabihf@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.2"
-  conditions: os=linux & cpu=arm
+"mediaplex-freebsd-x64@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-freebsd-x64@npm:0.0.9"
+  conditions: os=freebsd & cpu=x64
   languageName: node
   linkType: hard
 
@@ -8025,10 +8019,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-linux-x64-gnu@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-linux-x64-gnu@npm:0.0.2"
-  conditions: os=linux & cpu=x64 & libc=glibc
+"mediaplex-linux-arm-gnueabihf@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.9"
+  conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
@@ -8039,10 +8033,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-win32-arm64-msvc@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-win32-arm64-msvc@npm:0.0.2"
-  conditions: os=win32 & cpu=arm64
+"mediaplex-linux-x64-gnu@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-linux-x64-gnu@npm:0.0.9"
+  conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
@@ -8053,10 +8047,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-win32-ia32-msvc@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-win32-ia32-msvc@npm:0.0.2"
-  conditions: os=win32 & cpu=ia32
+"mediaplex-win32-arm64-msvc@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-win32-arm64-msvc@npm:0.0.9"
+  conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -8067,10 +8061,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-win32-x64-msvc@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-win32-x64-msvc@npm:0.0.2"
-  conditions: os=win32 & cpu=x64
+"mediaplex-win32-ia32-msvc@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-win32-ia32-msvc@npm:0.0.9"
+  conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
@@ -8081,42 +8075,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex@npm:^0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex@npm:0.0.2"
-  dependencies:
-    mediaplex-android-arm64: "npm:0.0.2"
-    mediaplex-darwin-arm64: "npm:0.0.2"
-    mediaplex-darwin-universal: "npm:0.0.2"
-    mediaplex-darwin-x64: "npm:0.0.2"
-    mediaplex-freebsd-x64: "npm:0.0.2"
-    mediaplex-linux-arm-gnueabihf: "npm:0.0.2"
-    mediaplex-linux-x64-gnu: "npm:0.0.2"
-    mediaplex-win32-arm64-msvc: "npm:0.0.2"
-    mediaplex-win32-ia32-msvc: "npm:0.0.2"
-    mediaplex-win32-x64-msvc: "npm:0.0.2"
-  dependenciesMeta:
-    mediaplex-android-arm64:
-      optional: true
-    mediaplex-darwin-arm64:
-      optional: true
-    mediaplex-darwin-universal:
-      optional: true
-    mediaplex-darwin-x64:
-      optional: true
-    mediaplex-freebsd-x64:
-      optional: true
-    mediaplex-linux-arm-gnueabihf:
-      optional: true
-    mediaplex-linux-x64-gnu:
-      optional: true
-    mediaplex-win32-arm64-msvc:
-      optional: true
-    mediaplex-win32-ia32-msvc:
-      optional: true
-    mediaplex-win32-x64-msvc:
-      optional: true
-  checksum: f4d602eb6157c8639e277be4d5d485b4ec030e2ea901b2fe4b32e32a20b7f995b0a1f17483f4efea04309980b5e4970abb3438526f1e07174cd5f55c7d1f3b9e
+"mediaplex-win32-x64-msvc@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-win32-x64-msvc@npm:0.0.9"
+  conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
@@ -8156,6 +8118,45 @@ __metadata:
     mediaplex-win32-x64-msvc:
       optional: true
   checksum: 54bdd39f199682007a8a0f641387c3e6b684cd51ba00a6ae073cc9f4882d59b217e6f66cc8b6bccb189585836fbcd2b7a5579a36aa7010dd21774c27cdeb666f
+  languageName: node
+  linkType: hard
+
+"mediaplex@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex@npm:0.0.9"
+  dependencies:
+    mediaplex-android-arm64: "npm:0.0.9"
+    mediaplex-darwin-arm64: "npm:0.0.9"
+    mediaplex-darwin-universal: "npm:0.0.9"
+    mediaplex-darwin-x64: "npm:0.0.9"
+    mediaplex-freebsd-x64: "npm:0.0.9"
+    mediaplex-linux-arm-gnueabihf: "npm:0.0.9"
+    mediaplex-linux-x64-gnu: "npm:0.0.9"
+    mediaplex-win32-arm64-msvc: "npm:0.0.9"
+    mediaplex-win32-ia32-msvc: "npm:0.0.9"
+    mediaplex-win32-x64-msvc: "npm:0.0.9"
+  dependenciesMeta:
+    mediaplex-android-arm64:
+      optional: true
+    mediaplex-darwin-arm64:
+      optional: true
+    mediaplex-darwin-universal:
+      optional: true
+    mediaplex-darwin-x64:
+      optional: true
+    mediaplex-freebsd-x64:
+      optional: true
+    mediaplex-linux-arm-gnueabihf:
+      optional: true
+    mediaplex-linux-x64-gnu:
+      optional: true
+    mediaplex-win32-arm64-msvc:
+      optional: true
+    mediaplex-win32-ia32-msvc:
+      optional: true
+    mediaplex-win32-x64-msvc:
+      optional: true
+  checksum: 1e922f7a0526369bf8c4755a7f225ae6135cd33f1d5712648c8773cb117c21ccc3a6d8e21a27058201acf56bdf3067596dee858ec8f9324f213daddf9d4fcb42
   languageName: node
   linkType: hard
 
@@ -8700,6 +8701,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"miniget@npm:^4.2.3":
+  version: 4.2.3
+  resolution: "miniget@npm:4.2.3"
+  checksum: fac25ed0b64e72d6383698f7416b6e1f23f91a48cd9a2abea8b4d284784329cc1442346ae0fddd3b69d2a846122997eb22af4b0b9176f25efed6d6dce9c1d6e0
+  languageName: node
+  linkType: hard
+
 "minimatch@npm:^3.0.4":
   version: 3.0.4
   resolution: "minimatch@npm:3.0.4"
@@ -8872,7 +8880,7 @@ __metadata:
     "@discord-player/extractor": "workspace:^"
     "@discord-player/utils": "workspace:^"
     "@discordjs/opus": "npm:^0.9.0"
-    "@distube/ytdl-core": "npm:^4.13.2"
+    "@distube/ytdl-core": "npm:^4.13.3"
     "@sapphire/discord.js-utilities": "npm:^6.0.3"
     "@sapphire/duration": "npm:^1.0.0"
     "@sapphire/framework": "npm:^4.2.1"
@@ -8889,7 +8897,7 @@ __metadata:
     colorette: "npm:^2.0.19"
     discord-api-types: "npm:^0.37.35"
     discord-player: "workspace:^"
-    mediaplex: "npm:^0.0.2"
+    mediaplex: "npm:^0.0.9"
     npm-run-all: "npm:^4.1.5"
     opusscript: "npm:^0.0.8"
     play-dl: "npm:^1.9.7"

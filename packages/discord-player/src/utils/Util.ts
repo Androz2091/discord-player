@@ -1,16 +1,40 @@
 import { StageChannel, VoiceChannel } from 'discord.js';
 import { TimeData } from '../types/types';
 import { setTimeout } from 'node:timers/promises';
-import { GuildQueue } from '../manager';
+import { GuildQueue } from '../queue';
 import { Playlist, Track } from '../fabric';
 import { Exceptions } from '../errors';
 import { randomInt } from 'node:crypto';
+
+export type RuntimeType = 'node' | 'deno' | 'bun' | 'unknown';
+
+export interface Runtime {
+    name: RuntimeType;
+    version: string;
+}
 
 class Util {
     /**
      * Utils
      */
     private constructor() {} // eslint-disable-line @typescript-eslint/no-empty-function
+
+    /**
+     * Gets the runtime information
+     */
+    static getRuntime(): Runtime {
+        const version = typeof navigator !== 'undefined' ? navigator.userAgent : null;
+
+        // @ts-ignore
+        if (typeof Deno !== 'undefined' && Deno.version) return { name: 'deno', version: Deno.version.deno };
+
+        // @ts-ignore
+        if (typeof Bun !== 'undefined' && Bun.version) return { name: 'bun', version: Bun.version };
+
+        if (typeof process !== 'undefined' && process.version) return { name: 'node', version: process.version };
+
+        return { name: 'unknown', version: version ?? 'unknown' };
+    }
 
     /**
      * Creates duration string

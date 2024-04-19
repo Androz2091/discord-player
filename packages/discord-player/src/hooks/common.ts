@@ -1,6 +1,6 @@
 import { Guild } from 'discord.js';
 import type { Player } from '../Player';
-import { GuildQueue, NodeResolvable } from '../manager';
+import { GuildQueue, NodeResolvable } from '../queue';
 import { instances } from '../utils/__internal__';
 import { Exceptions } from '../errors';
 import { useContext } from './context/async-context';

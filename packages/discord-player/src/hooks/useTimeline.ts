@@ -1,4 +1,4 @@
-import { NodeResolvable } from '../manager';
+import { NodeResolvable } from '../queue';
 import { getQueue, useHooksContext } from './common';
 
 export interface TimelineDispatcherOptions {
