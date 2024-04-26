@@ -302,8 +302,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     /**
      * Remove the given track from queue
      * @param track The track to remove
+     * @param emitEvent Whether or not to emit the event @defaultValue true
      */
-    public remove(track: TrackResolvable) {
+    public remove(track: TrackResolvable, emitEvent = true) {
         const foundTrack = this.queue.tracks.find((t, idx) => {
             if (track instanceof Track || typeof track === 'string') {
                 return (typeof track === 'string' ? track : track.id) === t.id;
@@ -315,7 +316,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
         this.queue.tracks.removeOne((t) => t.id === foundTrack.id);
 
-        this.queue.emit(GuildQueueEvent.audioTrackRemove, this.queue, foundTrack);
+        if(emitEvent) this.queue.emit(GuildQueueEvent.audioTrackRemove, this.queue, foundTrack);
 
         return foundTrack;
     }
@@ -325,7 +326,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
      * @param track The track to jump to without removing other tracks
      */
     public jump(track: TrackResolvable) {
-        const removed = this.remove(track);
+        const removed = this.remove(track, false);
         if (!removed) return false;
         this.queue.tracks.store.unshift(removed);
         return this.skip({
