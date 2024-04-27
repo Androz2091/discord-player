@@ -45,9 +45,9 @@ export const ShowcaseResource: IShowcase = {
             },
             {
                 name: 'Discord Player Bot',
-                description: 'Feature rich & configurable discord music bot with a cool dynamic website',
-                version: 'v6.3.1',
-                url: 'https://github.com/L0SER8228/discord-player-bot'
+                description: 'Feature rich discord music bot with a cool dynamic website',
+                version: 'v6.6.8',
+                url: 'https://github.com/LakhindarPal/discord-player-bot'
             },
             {
                 name: 'Naybor',
