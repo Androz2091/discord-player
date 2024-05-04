@@ -1,5 +1,6 @@
 /* eslint-disable */
-const { createDocumentation } = require('typedoc-nextra');
+// @ts-check
+const { createDocumentation } = require('micro-docgen');
 const { writeFile } = require('fs-extra');
 const path = require('path');
 
@@ -9,7 +10,7 @@ async function main() {
     console.log('Generating documentation...');
 
     const res = await createDocumentation({
-        input: `${__dirname}/../`,
+        input: ['.'],
         markdown: false,
         noEmit: true,
         print: false

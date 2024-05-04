@@ -1,7 +1,7 @@
 import { FFmpeg } from '@discord-player/ffmpeg';
 import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, GuildVoiceChannelResolvable, version as djsVersion } from 'discord.js';
 import { Playlist, Track, SearchResult } from './fabric';
-import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions, GuildQueueEvent } from './manager';
+import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions, GuildQueueEvent } from './queue';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
 import { QueryResolver, ResolvedQuery } from './utils/QueryResolver';
@@ -15,6 +15,9 @@ import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
 import { Exceptions } from './errors';
 import { defaultVoiceStateHandler } from './DefaultVoiceStateHandler';
 import { IPRotator } from './utils/IPRotator';
+import { Context, createContext } from './hooks';
+import { HooksCtx } from './hooks/common';
+import { LrcLib } from './lrclib/LrcLib';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -43,16 +46,52 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     #lagMonitorTimeout!: NodeJS.Timeout;
     #lagMonitorInterval!: NodeJS.Timer;
     #onVoiceStateUpdate: VoiceStateHandler = defaultVoiceStateHandler;
+    #hooksCtx: Context<HooksCtx> | null = null;
+    /**
+     * The version of discord-player
+     */
     public static readonly version: string = '[VI]{{inject}}[/VI]';
     public static _singletonKey = kSingleton;
+    /**
+     * The unique identifier of this player instance
+     */
     public readonly id = SnowflakeUtil.generate().toString();
+    /**
+     * The discord.js client
+     */
     public readonly client!: Client;
+    /**
+     * The player options
+     */
     public readonly options!: PlayerInitOptions;
+    /**
+     * The player nodes (queue) manager
+     */
     public nodes = new GuildNodeManager(this);
+    /**
+     * The voice api utilities
+     */
     public readonly voiceUtils = new VoiceUtils(this);
+    /**
+     * The extractors manager
+     */
     public extractors = new ExtractorExecutionContext(this);
+    /**
+     * The player events channel
+     */
     public events = new PlayerEventsEmitter<GuildQueueEvents>(['error', 'playerError']);
+    /**
+     * The route planner
+     */
     public routePlanner: IPRotator | null = null;
+    /**
+     * The player version
+     */
+    public readonly version = Player.version;
+    /**
+     * The lyrics api
+     */
+    public readonly lyrics = new LrcLib(this);
 
     /**
      * Creates new Discord Player
@@ -120,6 +159,17 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 enumerable: false
             });
         }
+    }
+
+    /**
+     * The hooks context for this player instance.
+     */
+    public get context() {
+        if (!this.#hooksCtx) {
+            this.#hooksCtx = createContext();
+        }
+
+        return this.#hooksCtx;
     }
 
     /**

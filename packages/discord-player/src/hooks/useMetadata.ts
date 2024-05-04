@@ -1,15 +1,19 @@
 import { TypeUtil } from '../utils/TypeUtil';
-import { NodeResolvable } from '../manager';
-import { getQueue } from './common';
+import { NodeResolvable } from '../queue';
+import { getQueue, useHooksContext } from './common';
 
-type SetterFN<T, P> = (previous: P) => T;
+export type SetterFN<T, P> = (previous: P) => T;
+export type MetadataDispatch<T> = readonly [() => T, (metadata: T | SetterFN<T, T>) => void];
 
 /**
  * Fetch or manipulate guild queue metadata
  * @param node Guild queue node resolvable
  */
-export function useMetadata<T = unknown>(node: NodeResolvable) {
-    const queue = getQueue<T>(node);
+export function useMetadata<T = unknown>(): MetadataDispatch<T>;
+export function useMetadata<T = unknown>(node: NodeResolvable): MetadataDispatch<T>;
+export function useMetadata<T = unknown>(node?: NodeResolvable): MetadataDispatch<T> {
+    const _node = node ?? useHooksContext('useMetadata').guild;
+    const queue = getQueue<T>(_node);
     const setter = (metadata: T | SetterFN<T, T>) => {
         if (queue) {
             if (TypeUtil.isFunction(metadata)) return queue.setMetadata(metadata(queue.metadata));

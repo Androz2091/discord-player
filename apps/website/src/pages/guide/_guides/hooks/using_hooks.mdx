@@ -4,51 +4,53 @@ Discord-Player has a lot of useful hooks, that can be used anywhere once the Pla
 
 Here are few examples on how to use them :
 
-# Stream Hooks
-
-Stream hooks are middleware which has the ability to modify the streaming behavior. There are two types of stream hooks in Discord Player:
-
-### onBeforeCreateStream
-
-Discord Player by default uses registered extractors to stream audio. If you need to override what needs to be streamed, you can use this hook.
-
-> Sample Use Case : If you have local files for commonly played songs, then you can use `onBeforeCreateStream` to use the local file rather than fetching it from some online source.
-
-```js
-const { onBeforeCreateStream } = require("discord-player");
-const fs = require('fs');
-const queue = player.nodes.create(..., {
-    ...,
-    async onBeforeCreateStream(track, source, _queue) {
-        if (track.title === 'some title') {
-            return fs.createReadStream('./playThisInstead.mp3');
-        }
-    }
-});
-```
-
-`<GuildQueue>.onBeforeCreateStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
-streams. `source` here will be a track source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and sent to `onAfterCreateStream` hook.
-
-### onAfterCreateStream
-
-This hook can be used to post-process pcm stream. This is the final step before creating audio resource. Example:
-
-```js
-const { onAfterCreateStream } = require("discord-player");
-const queue = player.nodes.create(..., {
-    ...,
-    async onAfterCreateStream(pcmStream, queue) {
-        const encoder = new OpusEncoder();
-        return {
-            stream: encoder.encode(pcmStream),
-            type: StreamType.Opus
-        };
-    }
-});
-```
-
 # General Hooks
+
+These hooks provide access to the player instance, queue, history, metadata, timeline, player node, etc. There are two ways to use these hooks:
+
+1. **Using the hooks with `NodeResolvable` argument**: This mode allows you to use hooks anywhere by providing node resolvable as an argument (like guild object or guild id, etc.). An example of this is shown below:
+
+```js
+const { useQueue } = require('discord-player');
+
+// your command
+export async function execute(interaction) {
+    // here we are passing the guild id as an argument
+    const queue = useQueue(interaction.guild.id);
+}
+```
+
+2. **Using the hooks without arguments**: This mode allows you to use hooks only inside the `HooksContextProvider`. This is useful when you want to use hooks in the command handler or similar places without having to pass the node resolvable every time. An example of this is shown below:
+
+First of all, your command handler needs to provide context to `HooksContextProvider`:
+
+```js
+const { useMainPlayer } = require('discord-player');
+
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isCommand()) return;
+
+    const player = useMainPlayer();
+
+    // assuming the following code is your target command to be executed
+    const command = getCommandSomehow(); // shape is roughly { execute: Function }
+
+    const context = { guild: interaction.guild };
+
+    // provide context and execute the command
+    await player.context.provide(context, () => command.execute(interaction));
+});
+```
+
+```js
+const { useQueue } = require('discord-player');
+
+// your command
+export async function execute(interaction) {
+    // here we are not passing any arguments, discord-player will automatically resolve correct queue based on the context
+    const queue = useQueue();
+}
+```
 
 ## useMainPlayer (Fetch the player instance)
 
@@ -134,4 +136,48 @@ setVolume(200);
 
 // `setPosition()` seeks the current track. Takes timestamp in ms as input.
 await setPosition(18400);
+```
+
+# Stream Hooks
+
+Stream hooks are middleware which has the ability to modify the streaming behavior. There are two types of stream hooks in Discord Player:
+
+### onBeforeCreateStream
+
+Discord Player by default uses registered extractors to stream audio. If you need to override what needs to be streamed, you can use this hook.
+
+> Sample Use Case : If you have local files for commonly played songs, then you can use `onBeforeCreateStream` to use the local file rather than fetching it from some online source.
+
+```js
+const { onBeforeCreateStream } = require("discord-player");
+const fs = require('fs');
+const queue = player.nodes.create(..., {
+    ...,
+    async onBeforeCreateStream(track, source, _queue) {
+        if (track.title === 'some title') {
+            return fs.createReadStream('./playThisInstead.mp3');
+        }
+    }
+});
+```
+
+`<GuildQueue>.onBeforeCreateStream` is called before actually downloading the stream. It is a different concept from extractors, where you are **just** downloading
+streams. `source` here will be a track source. Streams from `onBeforeCreateStream` are then piped to `FFmpeg` and sent to `onAfterCreateStream` hook.
+
+### onAfterCreateStream
+
+This hook can be used to post-process pcm stream. This is the final step before creating audio resource. Example:
+
+```js
+const { onAfterCreateStream } = require("discord-player");
+const queue = player.nodes.create(..., {
+    ...,
+    async onAfterCreateStream(pcmStream, queue) {
+        const encoder = new OpusEncoder();
+        return {
+            stream: encoder.encode(pcmStream),
+            type: StreamType.Opus
+        };
+    }
+});
 ```

@@ -2,7 +2,7 @@ import { User, escapeMarkdown, SnowflakeUtil, GuildVoiceChannelResolvable, APIUs
 import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
 import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
 import { Playlist } from './Playlist';
-import { GuildQueue } from '../manager/GuildQueue';
+import { GuildQueue } from '../queue/GuildQueue';
 import { BaseExtractor } from '../extractors/BaseExtractor';
 import { Collection } from '@discord-player/utils';
 import { TypeUtil } from '../utils/TypeUtil';

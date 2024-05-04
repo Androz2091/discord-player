@@ -1,5 +1,5 @@
-import { NodeResolvable } from '../manager';
-import { getQueue } from './common';
+import { NodeResolvable } from '../queue';
+import { getQueue, useHooksContext } from './common';
 
 export interface TimelineDispatcherOptions {
     ignoreFilters: boolean;
@@ -10,8 +10,9 @@ export interface TimelineDispatcherOptions {
  * @param node Guild queue node resolvable
  * @param options Options for timeline dispatcher
  */
-export function useTimeline(node: NodeResolvable, options?: Partial<TimelineDispatcherOptions>) {
-    const queue = getQueue(node);
+export function useTimeline(node?: NodeResolvable, options?: Partial<TimelineDispatcherOptions>) {
+    const _node = node ?? useHooksContext('useTimeline').guild;
+    const queue = getQueue(_node);
     if (!queue) return null;
 
     return Object.preventExtensions({

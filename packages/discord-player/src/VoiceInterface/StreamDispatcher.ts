@@ -17,8 +17,8 @@ import { EventEmitter } from '@discord-player/utils';
 import { Track } from '../fabric/Track';
 import { Util } from '../utils/Util';
 import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
-import { GuildQueue, GuildQueueEvent, PostProcessedResult } from '../manager';
-import { VoiceReceiverNode } from '../manager/VoiceReceiverNode';
+import { GuildQueue, GuildQueueEvent, PostProcessedResult } from '../queue';
+import { VoiceReceiverNode } from '../queue/VoiceReceiverNode';
 import { Exceptions } from '../errors';
 
 export interface CreateStreamOps {

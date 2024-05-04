@@ -2,7 +2,7 @@ import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
 import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus, AudioPlayer } from 'discord-voip';
 import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
-import { GuildQueue } from '../manager';
+import { GuildQueue } from '../queue';
 import type { Player } from '../Player';
 import { Exceptions } from '../errors';
 

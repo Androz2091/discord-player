@@ -1,9 +1,9 @@
 {
     "$schema": "https://typedoc.org/schema.json",
     "entryPointStrategy": "packages",
+    // prettier-ignore
     "entryPoints": [
         "packages/discord-player",
-        "packages/downloader",
         "packages/equalizer",
         "packages/extractor",
         "packages/utils",

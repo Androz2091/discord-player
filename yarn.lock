@@ -87,10 +87,10 @@ __metadata:
     esbuild-plugin-version-injector: "npm:^1.0.2"
     eslint: "npm:^8.21.0"
     fs-extra: "npm:^11.1.0"
+    micro-docgen: "npm:^0.2.0"
     prettier: "npm:^2.8.2"
     rimraf: "npm:^4.1.2"
     turbo: "npm:1.10.16"
-    typedoc-nextra: "npm:0.1.5"
     typescript: "npm:^5.2.2"
     vitest: "npm:^0.34.6"
   languageName: unknown
@@ -325,16 +325,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@distube/ytdl-core@npm:^4.13.2":
-  version: 4.13.2
-  resolution: "@distube/ytdl-core@npm:4.13.2"
+"@distube/ytdl-core@npm:^4.13.3":
+  version: 4.13.3
+  resolution: "@distube/ytdl-core@npm:4.13.3"
   dependencies:
     http-cookie-agent: "npm:^5.0.4"
     m3u8stream: "npm:^0.8.6"
+    miniget: "npm:^4.2.3"
     sax: "npm:^1.2.4"
     tough-cookie: "npm:^4.1.3"
     undici: "npm:^5.25.2"
-  checksum: e142c9180c8123a0e599cb724a236595e21aa8728f3966c609b7e7c39ed2bc5fafdc71cc160d267a4b6e6e742d8cbbf42b1d68d95c6a10349c067e595e69e424
+  checksum: b7c8080274346aeafa44d61204324d450c29dd8f000340e637467396a8ba0191984721ca83c564b3c2b221ce9b781bad09e7bd82e017b45bacdae718c3780877
   languageName: node
   linkType: hard
 
@@ -3774,6 +3775,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ansi-sequence-parser@npm:^1.1.0":
+  version: 1.1.1
+  resolution: "ansi-sequence-parser@npm:1.1.1"
+  checksum: 9ce30f257badc2ef62cac8028a7e26c368d22bf26650427192e8ffd102da42e377e3affe90fae58062eecc963b0b055f510dde3b677c7e0c433c67069b5a8ee5
+  languageName: node
+  linkType: hard
+
 "ansi-styles@npm:^3.2.1":
   version: 3.2.1
   resolution: "ansi-styles@npm:3.2.1"
@@ -4888,8 +4896,8 @@ __metadata:
     discord-api-types: "npm:^0.37.0"
     discord-voip: "npm:^0.1.3"
     discord.js: "npm:^14.1.2"
-    ip: "npm:^1.1.8"
-    libsodium-wrappers: "npm:^0.7.10"
+    ip: "npm:^2.0.1"
+    libsodium-wrappers: "npm:^0.7.13"
     opusscript: "npm:^0.0.8"
     tsup: "npm:^7.2.0"
     typescript: "npm:^5.2.2"
@@ -6935,17 +6943,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ip@npm:^1.1.8":
-  version: 1.1.8
-  resolution: "ip@npm:1.1.8"
-  checksum: 52975ebf84a090162d561fc6948fbc4c53775a8054c05371f09cfcb40e30a53aa225b4efb624f630cff5af2dd8124c82dd68e4df065dc1d1ca91d04e850e9cde
-  languageName: node
-  linkType: hard
-
 "ip@npm:^2.0.0":
   version: 2.0.0
   resolution: "ip@npm:2.0.0"
   checksum: 1270b11e534a466fb4cf4426cbcc3a907c429389f7f4e4e3b288b42823562e88d6a509ceda8141a507de147ca506141f745005c0aa144569d94cf24a54eb52bc
+  languageName: node
+  linkType: hard
+
+"ip@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "ip@npm:2.0.1"
+  checksum: d6dd154e1bc5e8725adfdd6fb92218635b9cbe6d873d051bd63b178f009777f751a5eea4c67021723a7056325fc3052f8b6599af0a2d56f042c93e684b4a0349
   languageName: node
   linkType: hard
 
@@ -7437,19 +7445,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libsodium-wrappers@npm:^0.7.10":
-  version: 0.7.10
-  resolution: "libsodium-wrappers@npm:0.7.10"
+"libsodium-wrappers@npm:^0.7.13":
+  version: 0.7.13
+  resolution: "libsodium-wrappers@npm:0.7.13"
   dependencies:
-    libsodium: "npm:^0.7.0"
-  checksum: 7bba87d464bc914d57bec85c9901529746b706083ffdba1642f2860a11a4f71351fecb94406330c5c0cc6ec493ebc019a706a70d976ba508831d63a93236c44f
+    libsodium: "npm:^0.7.13"
+  checksum: e5f7f5baf37095a764e3f5037ab47d65343db0c0efca4add80a5c2037ac2cb9fb05f00646f7b75220bd4f30bccc02e9742603ceb8eb97e5c305103cd4f86392d
   languageName: node
   linkType: hard
 
-"libsodium@npm:^0.7.0":
-  version: 0.7.9
-  resolution: "libsodium@npm:0.7.9"
-  checksum: 3ad30dc469fad658d716f4160a8b2143e9f7337bbaef6fe9a983b6611f2f68f6f2fc094b53e73dc79a3b1e810fafff768609ab885f151469cff5a4372ae4a586
+"libsodium@npm:^0.7.13":
+  version: 0.7.13
+  resolution: "libsodium@npm:0.7.13"
+  checksum: 0105523135c1ed1c4ee853a36cd3b3b562ed150f5888ae61be4b2945f0b1010e7ecaad4cdc9333beac034a88bdf470a93f22609877a06f15f5d690a9591e0d7c
   languageName: node
   linkType: hard
 
@@ -7702,12 +7710,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^4.2.5":
-  version: 4.2.12
-  resolution: "marked@npm:4.2.12"
+"marked@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "marked@npm:4.3.0"
   bin:
     marked: bin/marked.js
-  checksum: 5f718731a0e0c5c5a016414456b90709f03ad766209c86a3841cdd50851e0fc12ef5b796590de5d086a6467775a3f5af9abe5677d8fdca6de5e9c8159671b30d
+  checksum: c830bb4cb3705b754ca342b656e8a582d7428706b2678c898b856f6030c134ce2d1e19136efa3e6a1841f7330efbd24963d6bdeddc57d2938e906250f99895d0
   languageName: node
   linkType: hard
 
@@ -7934,13 +7942,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-android-arm64@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-android-arm64@npm:0.0.2"
-  conditions: os=android & cpu=arm64
-  languageName: node
-  linkType: hard
-
 "mediaplex-android-arm64@npm:0.0.7":
   version: 0.0.7
   resolution: "mediaplex-android-arm64@npm:0.0.7"
@@ -7948,10 +7949,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-arm64@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-darwin-arm64@npm:0.0.2"
-  conditions: os=darwin & cpu=arm64
+"mediaplex-android-arm64@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-android-arm64@npm:0.0.9"
+  conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -7962,10 +7963,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-universal@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-darwin-universal@npm:0.0.2"
-  conditions: os=darwin
+"mediaplex-darwin-arm64@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-darwin-arm64@npm:0.0.9"
+  conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -7976,10 +7977,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-x64@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-darwin-x64@npm:0.0.2"
-  conditions: os=darwin & cpu=x64
+"mediaplex-darwin-universal@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-darwin-universal@npm:0.0.9"
+  conditions: os=darwin
   languageName: node
   linkType: hard
 
@@ -7990,10 +7991,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-freebsd-x64@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-freebsd-x64@npm:0.0.2"
-  conditions: os=freebsd & cpu=x64
+"mediaplex-darwin-x64@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-darwin-x64@npm:0.0.9"
+  conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
@@ -8004,10 +8005,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-linux-arm-gnueabihf@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.2"
-  conditions: os=linux & cpu=arm
+"mediaplex-freebsd-x64@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-freebsd-x64@npm:0.0.9"
+  conditions: os=freebsd & cpu=x64
   languageName: node
   linkType: hard
 
@@ -8018,10 +8019,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-linux-x64-gnu@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-linux-x64-gnu@npm:0.0.2"
-  conditions: os=linux & cpu=x64 & libc=glibc
+"mediaplex-linux-arm-gnueabihf@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.9"
+  conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
@@ -8032,10 +8033,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-win32-arm64-msvc@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-win32-arm64-msvc@npm:0.0.2"
-  conditions: os=win32 & cpu=arm64
+"mediaplex-linux-x64-gnu@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-linux-x64-gnu@npm:0.0.9"
+  conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
@@ -8046,10 +8047,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-win32-ia32-msvc@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-win32-ia32-msvc@npm:0.0.2"
-  conditions: os=win32 & cpu=ia32
+"mediaplex-win32-arm64-msvc@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-win32-arm64-msvc@npm:0.0.9"
+  conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -8060,10 +8061,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-win32-x64-msvc@npm:0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex-win32-x64-msvc@npm:0.0.2"
-  conditions: os=win32 & cpu=x64
+"mediaplex-win32-ia32-msvc@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-win32-ia32-msvc@npm:0.0.9"
+  conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
@@ -8074,42 +8075,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex@npm:^0.0.2":
-  version: 0.0.2
-  resolution: "mediaplex@npm:0.0.2"
-  dependencies:
-    mediaplex-android-arm64: "npm:0.0.2"
-    mediaplex-darwin-arm64: "npm:0.0.2"
-    mediaplex-darwin-universal: "npm:0.0.2"
-    mediaplex-darwin-x64: "npm:0.0.2"
-    mediaplex-freebsd-x64: "npm:0.0.2"
-    mediaplex-linux-arm-gnueabihf: "npm:0.0.2"
-    mediaplex-linux-x64-gnu: "npm:0.0.2"
-    mediaplex-win32-arm64-msvc: "npm:0.0.2"
-    mediaplex-win32-ia32-msvc: "npm:0.0.2"
-    mediaplex-win32-x64-msvc: "npm:0.0.2"
-  dependenciesMeta:
-    mediaplex-android-arm64:
-      optional: true
-    mediaplex-darwin-arm64:
-      optional: true
-    mediaplex-darwin-universal:
-      optional: true
-    mediaplex-darwin-x64:
-      optional: true
-    mediaplex-freebsd-x64:
-      optional: true
-    mediaplex-linux-arm-gnueabihf:
-      optional: true
-    mediaplex-linux-x64-gnu:
-      optional: true
-    mediaplex-win32-arm64-msvc:
-      optional: true
-    mediaplex-win32-ia32-msvc:
-      optional: true
-    mediaplex-win32-x64-msvc:
-      optional: true
-  checksum: f4d602eb6157c8639e277be4d5d485b4ec030e2ea901b2fe4b32e32a20b7f995b0a1f17483f4efea04309980b5e4970abb3438526f1e07174cd5f55c7d1f3b9e
+"mediaplex-win32-x64-msvc@npm:0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex-win32-x64-msvc@npm:0.0.9"
+  conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
@@ -8152,6 +8121,45 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mediaplex@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "mediaplex@npm:0.0.9"
+  dependencies:
+    mediaplex-android-arm64: "npm:0.0.9"
+    mediaplex-darwin-arm64: "npm:0.0.9"
+    mediaplex-darwin-universal: "npm:0.0.9"
+    mediaplex-darwin-x64: "npm:0.0.9"
+    mediaplex-freebsd-x64: "npm:0.0.9"
+    mediaplex-linux-arm-gnueabihf: "npm:0.0.9"
+    mediaplex-linux-x64-gnu: "npm:0.0.9"
+    mediaplex-win32-arm64-msvc: "npm:0.0.9"
+    mediaplex-win32-ia32-msvc: "npm:0.0.9"
+    mediaplex-win32-x64-msvc: "npm:0.0.9"
+  dependenciesMeta:
+    mediaplex-android-arm64:
+      optional: true
+    mediaplex-darwin-arm64:
+      optional: true
+    mediaplex-darwin-universal:
+      optional: true
+    mediaplex-darwin-x64:
+      optional: true
+    mediaplex-freebsd-x64:
+      optional: true
+    mediaplex-linux-arm-gnueabihf:
+      optional: true
+    mediaplex-linux-x64-gnu:
+      optional: true
+    mediaplex-win32-arm64-msvc:
+      optional: true
+    mediaplex-win32-ia32-msvc:
+      optional: true
+    mediaplex-win32-x64-msvc:
+      optional: true
+  checksum: 1e922f7a0526369bf8c4755a7f225ae6135cd33f1d5712648c8773cb117c21ccc3a6d8e21a27058201acf56bdf3067596dee858ec8f9324f213daddf9d4fcb42
+  languageName: node
+  linkType: hard
+
 "memorystream@npm:^0.3.1":
   version: 0.3.1
   resolution: "memorystream@npm:0.3.1"
@@ -8170,6 +8178,18 @@ __metadata:
   version: 1.4.1
   resolution: "merge2@npm:1.4.1"
   checksum: 7268db63ed5169466540b6fb947aec313200bcf6d40c5ab722c22e242f651994619bcd85601602972d3c85bd2cc45a358a4c61937e9f11a061919a1da569b0c2
+  languageName: node
+  linkType: hard
+
+"micro-docgen@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "micro-docgen@npm:0.2.0"
+  dependencies:
+    common-tags: "npm:^1.8.2"
+    tmp: "npm:^0.2.1"
+    typedoc: "npm:^0.25.4"
+    typescript: "npm:^5.3.2"
+  checksum: bcb290dfd1a9cb2f01c9f2e1f3bc4fb05d58269af085116dcd4ce9085c4061eeb660b05667217f33097881dcef993c0b278a6682fcea63c48ee927c5753f96b8
   languageName: node
   linkType: hard
 
@@ -8681,6 +8701,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"miniget@npm:^4.2.3":
+  version: 4.2.3
+  resolution: "miniget@npm:4.2.3"
+  checksum: fac25ed0b64e72d6383698f7416b6e1f23f91a48cd9a2abea8b4d284784329cc1442346ae0fddd3b69d2a846122997eb22af4b0b9176f25efed6d6dce9c1d6e0
+  languageName: node
+  linkType: hard
+
 "minimatch@npm:^3.0.4":
   version: 3.0.4
   resolution: "minimatch@npm:3.0.4"
@@ -8708,12 +8735,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^5.1.2":
-  version: 5.1.6
-  resolution: "minimatch@npm:5.1.6"
+"minimatch@npm:^9.0.3":
+  version: 9.0.4
+  resolution: "minimatch@npm:9.0.4"
   dependencies:
     brace-expansion: "npm:^2.0.1"
-  checksum: 126b36485b821daf96d33b5c821dac600cc1ab36c87e7a532594f9b1652b1fa89a1eebcaad4dff17c764dce1a7ac1531327f190fed5f97d8f6e5f889c116c429
+  checksum: 4cdc18d112b164084513e890d6323370db14c22249d536ad1854539577a895e690a27513dc346392f61a4a50afbbd8abc88f3f25558bfbbbb862cd56508b20f5
   languageName: node
   linkType: hard
 
@@ -8853,7 +8880,7 @@ __metadata:
     "@discord-player/extractor": "workspace:^"
     "@discord-player/utils": "workspace:^"
     "@discordjs/opus": "npm:^0.9.0"
-    "@distube/ytdl-core": "npm:^4.13.2"
+    "@distube/ytdl-core": "npm:^4.13.3"
     "@sapphire/discord.js-utilities": "npm:^6.0.3"
     "@sapphire/duration": "npm:^1.0.0"
     "@sapphire/framework": "npm:^4.2.1"
@@ -8870,7 +8897,7 @@ __metadata:
     colorette: "npm:^2.0.19"
     discord-api-types: "npm:^0.37.35"
     discord-player: "workspace:^"
-    mediaplex: "npm:^0.0.2"
+    mediaplex: "npm:^0.0.9"
     npm-run-all: "npm:^4.1.5"
     opusscript: "npm:^0.0.8"
     play-dl: "npm:^1.9.7"
@@ -8880,6 +8907,7 @@ __metadata:
     tsx: "npm:^3.12.7"
     typescript: "npm:^5.2.2"
     vitest: "npm:^0.34.6"
+    youtube-ext: "npm:^1.1.23"
   languageName: unknown
   linkType: soft
 
@@ -10363,7 +10391,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rimraf@npm:^3.0.0, rimraf@npm:^3.0.2":
+"rimraf@npm:^3.0.2":
   version: 3.0.2
   resolution: "rimraf@npm:3.0.2"
   dependencies:
@@ -10650,14 +10678,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shiki@npm:^0.12.1":
-  version: 0.12.1
-  resolution: "shiki@npm:0.12.1"
+"shiki@npm:^0.14.7":
+  version: 0.14.7
+  resolution: "shiki@npm:0.14.7"
   dependencies:
+    ansi-sequence-parser: "npm:^1.1.0"
     jsonc-parser: "npm:^3.2.0"
     vscode-oniguruma: "npm:^1.7.0"
     vscode-textmate: "npm:^8.0.0"
-  checksum: ae0900e72f12189f6b2e9e43b380d67135de08af211f191686081ef4f00abef81f13ca5896d4fb0d85f2b5c26163a5763181413c664dbee436d744db1c53ff30
+  checksum: be3f2444c65bd0c57802026f171cb42ad571d361ee885be0c292b60785f68c70f19b69310f5ffe7f7a93db4c5ef50211e0a0248794bc6bb48d242bc43fe72a62
   languageName: node
   linkType: hard
 
@@ -11341,11 +11370,9 @@ __metadata:
   linkType: hard
 
 "tmp@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "tmp@npm:0.2.1"
-  dependencies:
-    rimraf: "npm:^3.0.0"
-  checksum: 445148d72df3ce99356bc89a7857a0c5c3b32958697a14e50952c6f7cf0a8016e746ababe9a74c1aa52f04c526661992f14659eba34d3c6701d49ba2f3cf781b
+  version: 0.2.3
+  resolution: "tmp@npm:0.2.3"
+  checksum: 7b13696787f159c9754793a83aa79a24f1522d47b87462ddb57c18ee93ff26c74cbb2b8d9138f571d2e0e765c728fb2739863a672b280528512c6d83d511c6fa
   languageName: node
   linkType: hard
 
@@ -11700,30 +11727,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedoc-nextra@npm:0.1.5":
-  version: 0.1.5
-  resolution: "typedoc-nextra@npm:0.1.5"
-  dependencies:
-    common-tags: "npm:^1.8.2"
-    tmp: "npm:^0.2.1"
-    typedoc: "npm:^0.23.24"
-  checksum: 3196120b2e84a47b5c20de8bd4d1d3c9191a6b57166657a3a0f0c88448556e4181f452255d556166cfd41c7e3435ed5cfaa6c82a55da08451ec6622b42a1df5c
-  languageName: node
-  linkType: hard
-
-"typedoc@npm:^0.23.24":
-  version: 0.23.24
-  resolution: "typedoc@npm:0.23.24"
+"typedoc@npm:^0.25.4":
+  version: 0.25.12
+  resolution: "typedoc@npm:0.25.12"
   dependencies:
     lunr: "npm:^2.3.9"
-    marked: "npm:^4.2.5"
-    minimatch: "npm:^5.1.2"
-    shiki: "npm:^0.12.1"
+    marked: "npm:^4.3.0"
+    minimatch: "npm:^9.0.3"
+    shiki: "npm:^0.14.7"
   peerDependencies:
-    typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x
+    typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x
   bin:
     typedoc: bin/typedoc
-  checksum: abb6813de8bd19499b88c304807cf7dafb8ac78c92710e6ca10e9101042a8c8d9d3360943076239e5074857409a0ac2adf6546fe2756e2a82fa1ab570a7cad7f
+  checksum: eb02b35a6fd1f8c3f9bb2b42b379139cce5b72b3797e983e58f61578b23610c1ee770dc442286981ab13d2949bdb746a84c38bcd856f09ac50a7a861cca56fd8
   languageName: node
   linkType: hard
 
@@ -11757,6 +11773,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript@npm:^5.3.2":
+  version: 5.4.3
+  resolution: "typescript@npm:5.4.3"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: de4c69f49a7ad4b1ea66a6dcc8b055ac34eb56af059a069d8988dd811c5e649be07e042e5bf573e8d0ac3ec2f30e6c999aa651cd09f6e9cbc6113749e8b6be20
+  languageName: node
+  linkType: hard
+
 "typescript@patch:typescript@npm%3A5.1.3#optional!builtin<compat/typescript>":
   version: 5.1.3
   resolution: "typescript@patch:typescript@npm%3A5.1.3#optional!builtin<compat/typescript>::version=5.1.3&hash=5da071"
@@ -11784,6 +11810,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: f79cc2ba802c94c2b78dbb00d767a10adb67368ae764709737dc277273ec148aa4558033a03ce901406b35fddf4eac46dabc94a1e1d12d2587e2b9cfe5707b4a
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A^5.3.2#optional!builtin<compat/typescript>":
+  version: 5.4.3
+  resolution: "typescript@patch:typescript@npm%3A5.4.3#optional!builtin<compat/typescript>::version=5.4.3&hash=e012d7"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 3abea475798fdf7ee46e75dafc50c85f30fd1e7061559ec2af61646f23d16c91742703f04f0ac55be52f58ca05c02f77404b7b94bbad16278c9a54c9eeb4f4ea
   languageName: node
   linkType: hard
 
@@ -11837,6 +11873,13 @@ __metadata:
   version: 5.8.0
   resolution: "undici@npm:5.8.0"
   checksum: d8c7f13085e5a18aa0a5201f75e0e3534acafe0f4f3400b0440a428ae17bb77a4da643dcd3049a80f9738f9f3927886b05afccc668ddc8af7463df4174f2847f
+  languageName: node
+  linkType: hard
+
+"undici@npm:^6.11.1":
+  version: 6.13.0
+  resolution: "undici@npm:6.13.0"
+  checksum: 4ec2038e95779d4f1114a5dcf5bc74ec59c7fc76f6287f8a6bea6d69113f0190e6d41cc6e14409b5d912b0a92ce910b33bfa05808f40b6bf2b802b58b427f2cf
   languageName: node
   linkType: hard
 
@@ -12480,6 +12523,15 @@ __metadata:
   dependencies:
     axios: "npm:^1.5.0"
   checksum: 6825baea5a222d444a7b7214ba121b80b244435816ca068dd551a595cb47a13e4ed92d4ee959e480847c1c6123fbfd4272ba9c6ce156808cb2499b9f2563ff22
+  languageName: node
+  linkType: hard
+
+"youtube-ext@npm:^1.1.23":
+  version: 1.1.23
+  resolution: "youtube-ext@npm:1.1.23"
+  dependencies:
+    undici: "npm:^6.11.1"
+  checksum: 3a8bb7612327d869914f895b22d6b0fcd00af857d38b0cc78a966cdf4d2ff386e7ff9c10b333baf43edb7ba486d657e2cb1cd6c07c5e623e9fc088778781e356
   languageName: node
   linkType: hard
 

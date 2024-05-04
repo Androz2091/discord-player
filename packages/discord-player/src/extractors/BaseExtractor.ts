@@ -6,7 +6,7 @@ import { PlayerEvents, SearchQueryType } from '../types/types';
 import { ExtractorExecutionContext } from './ExtractorExecutionContext';
 import type { RequestOptions } from 'http';
 import { Exceptions } from '../errors';
-import type { GuildQueueHistory } from '../manager';
+import type { GuildQueueHistory } from '../queue';
 
 export type ExtractorStreamable =
     | Readable

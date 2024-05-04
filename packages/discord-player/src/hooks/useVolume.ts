@@ -1,15 +1,19 @@
 import { TypeUtil } from '../utils/TypeUtil';
-import { NodeResolvable } from '../manager';
-import { getQueue } from './common';
+import { NodeResolvable } from '../queue';
+import { getQueue, useHooksContext } from './common';
 
 type SetterFN = (previous: number) => number;
+type VolumeDispatch = readonly [() => number, (volume: number | SetterFN) => boolean | undefined];
 
 /**
  * Fetch or manipulate player volume
  * @param node Guild queue node resolvable
  */
-export function useVolume(node: NodeResolvable) {
-    const queue = getQueue(node);
+export function useVolume(): VolumeDispatch;
+export function useVolume(node: NodeResolvable): VolumeDispatch;
+export function useVolume(node?: NodeResolvable): VolumeDispatch {
+    const _node = node ?? useHooksContext('useVolume').guild;
+    const queue = getQueue(_node);
     const setter = (volume: number | SetterFN) => {
         if (queue) {
             if (TypeUtil.isFunction(volume)) return queue.node.setVolume(volume(queue.node.volume));

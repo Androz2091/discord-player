@@ -1,12 +1,16 @@
-import { NodeResolvable } from '../manager';
-import { getQueue } from './common';
+import { GuildQueueHistory, NodeResolvable } from '../queue';
+import { getQueue, useHooksContext } from './common';
 
 /**
  * Fetch guild queue history
  * @param node guild queue node resolvable
  */
-export function useHistory<Meta = unknown>(node: NodeResolvable) {
-    const queue = getQueue<Meta>(node);
+export function useHistory<Meta = unknown>(): GuildQueueHistory<Meta> | null;
+export function useHistory<Meta = unknown>(node: NodeResolvable): GuildQueueHistory<Meta> | null;
+export function useHistory<Meta = unknown>(node?: NodeResolvable): GuildQueueHistory<Meta> | null {
+    const _node = node ?? useHooksContext('useHistory').guild;
+
+    const queue = getQueue<Meta>(_node);
     if (!queue) return null;
 
     return queue.history;

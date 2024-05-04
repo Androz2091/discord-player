@@ -134,6 +134,17 @@ const pages = [
         ]
     },
     {
+        name: 'hooks',
+        displayName: 'Hooks',
+        pages: [
+            {
+                name: 'using-hooks',
+                displayName: 'Using Hooks',
+                component: lazy(() => import('../_guides/hooks/using_hooks.mdx'))
+            }
+        ]
+    },
+    {
         name: 'extractors',
         displayName: 'Extractors',
         pages: [
@@ -191,17 +202,7 @@ const pages = [
             }
         ]
     },
-    {
-        name: 'hooks',
-        displayName: 'Hooks',
-        pages: [
-            {
-                name: 'using-hooks',
-                displayName: 'Using Hooks',
-                component: lazy(() => import('../_guides/hooks/using_hooks.mdx'))
-            }
-        ]
-    },
+
     {
         name: 'migrating',
         displayName: 'Migrating',
