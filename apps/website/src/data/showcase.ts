@@ -76,7 +76,7 @@ export const ShowcaseResource: IShowcase = {
             {
                 name: 'Jappan',
                 description: "A simple discord bot made to make someone's life easier. Currently features Music Playback, Fun Commands, Leveling System & Moderation Tools",
-                version: 'v6.6.7',
+                version: 'v6.6.8',
                 url: 'https://github.com/febkosq8/Jappan'
             },
             {
