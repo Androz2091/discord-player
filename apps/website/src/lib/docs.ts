@@ -59,19 +59,19 @@ const EXTERNAL_LINKS = {
     RequestOptions: 'https://nodejs.org/dist/latest/docs/api/http.html#http_http_request_options_callback',
     Response: 'https://developer.mozilla.org/en-US/docs/Web/API/Response',
     YTDLDownloadOptions: 'https://github.com/fent/node-ytdl-core#ytdlurl-options',
-    Client: 'https://old.discordjs.dev/#/docs/discord.js/main/class/Client',
-    Message: 'https://old.discordjs.dev/#/docs/discord.js/main/class/Message',
-    VoiceChannel: 'https://old.discordjs.dev/#/docs/discord.js/main/class/VoiceChannel',
-    StageChannel: 'https://old.discordjs.dev/#/docs/discord.js/main/class/StageChannel',
-    VoiceConnection: 'https://discord.js.org/docs/packages/voice/main/VoiceConnection:Class',
-    Snowflake: 'https://old.discordjs.dev/#/docs/discord.js/main/stable/typedef/Snowflake',
-    User: 'https://old.discordjs.dev/#/docs/discord.js/main/class/User',
-    GuildResolvable: 'https://old.discordjs.dev/#/docs/discord.js/main/stable/typedef/GuildResolvable',
-    UserResolvable: 'https://old.discordjs.dev/#/docs/discord.js/main/stable/typedef/UserResolvable',
-    Guild: 'https://old.discordjs.dev/#/docs/discord.js/main/class/Guild',
-    VoiceBasedChannelTypes: 'https://old.discordjs.dev/#/docs/discord.js/main/typedef/VoiceBasedChannelTypes',
-    VoiceState: 'https://old.discordjs.dev/#/docs/discord.js/main/class/VoiceState',
-    GuildVoiceChannelResolvable: 'https://old.discordjs.dev/#/docs/discord.js/main/typedef/GuildVoiceChannelResolvable'
+    Client: 'https://discord.js.org/docs#/docs/discord.js/main/class/Client',
+    Message: 'https://discord.js.org/docs#/docs/discord.js/main/class/Message',
+    VoiceChannel: 'https://discord.js.org/docs#/docs/discord.js/main/class/VoiceChannel',
+    StageChannel: 'https://discord.js.org/docs#/docs/discord.js/main/class/StageChannel',
+    VoiceConnection: 'https://discord.js.org/docs#/docs/voice/main/class/VoiceConnection',
+    Snowflake: 'https://discord.js.org/docs#/docs/discord.js/main/typedef/Snowflake',
+    User: 'https://discord.js.org/docs#/docs/discord.js/main/class/User',
+    GuildResolvable: 'https://discord.js.org/docs#/docs/discord.js/main/typedef/GuildResolvable',
+    UserResolvable: 'https://discord.js.org/docs#/docs/discord.js/main/typedef/UserResolvable',
+    Guild: 'https://discord.js.org/docs#/docs/discord.js/main/class/Guild',
+    VoiceBasedChannelTypes: 'https://discord.js.org/docs#/docs/discord.js/main/typedef/VoiceBasedChannelTypes',
+    VoiceState: 'https://discord.js.org/docs#/docs/discord.js/main/class/VoiceState',
+    GuildVoiceChannelResolvable: 'https://discord.js.org/docs#/docs/discord.js/main/typedef/GuildVoiceChannelResolvable'
 };
 
 export const docsLink = (() => {
