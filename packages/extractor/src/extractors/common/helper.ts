@@ -277,6 +277,10 @@ export async function loadYtdl(options?: any, force = false) {
             } else if (_ytLibName === 'yt-stream') {
                 const dl = lib as typeof import('yt-stream');
 
+                const cookie = options?.requestOptions?.headers?.cookie;
+
+                if(cookie && typeof cookie === "string") dl.cookie = cookie
+
                 // @ts-ignore Default lib did not provide types for this function
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const decipher: any = await import('yt-stream/src/stream/decipher.js');
