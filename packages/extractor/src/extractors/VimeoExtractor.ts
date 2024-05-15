@@ -50,8 +50,7 @@ export class VimeoExtractor extends BaseExtractor {
                     metadata: trackInfo,
                     async requestMetadata() {
                         return trackInfo;
-                    },
-                    cleanTitle: trackInfo.title
+                    }
                 });
 
                 track.extractor = this;

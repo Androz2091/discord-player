@@ -199,8 +199,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                         metadata: trackInfo,
                         requestMetadata: async () => {
                             return trackInfo;
-                        },
-                        cleanTitle: trackInfo.title
+                        }
                     });
 
                     track.extractor = this;

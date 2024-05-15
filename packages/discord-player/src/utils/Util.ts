@@ -5,6 +5,8 @@ import { GuildQueue } from '../queue';
 import { Playlist, Track } from '../fabric';
 import { Exceptions } from '../errors';
 import { randomInt } from 'node:crypto';
+import { createFilter, createSpotifyFilter, fixTrackSuffix, removeLive, removeRemastered, youtube } from '@web-scrobbler/metadata-filter';
+import { TrackSource } from '../../dist';
 
 export type RuntimeType = 'node' | 'deno' | 'bun' | 'unknown';
 
@@ -100,6 +102,31 @@ class Util {
      */
     static isVoiceEmpty(channel: VoiceChannel | StageChannel) {
         return channel && channel.members.filter((member) => !member.user.bot).size === 0;
+    }
+
+    static cleanTitle(title: string, source: TrackSource) {
+        const filterOpts = {
+            track: [
+                removeRemastered,
+                removeLive,
+                fixTrackSuffix
+            ]
+        }
+
+        switch(source) {
+            case "youtube":
+                return youtube(title)
+            case "spotify":
+                const spotifyFilter = createFilter(filterOpts)
+
+                spotifyFilter.extend(createSpotifyFilter())
+
+                return spotifyFilter.filterField("track", title)
+            default:
+                const defaultFilter = createFilter(filterOpts)
+
+                return defaultFilter.filterField("track", title)
+        }
     }
 
     /**

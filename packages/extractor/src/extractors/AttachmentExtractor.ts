@@ -100,8 +100,7 @@ export class AttachmentExtractor extends BaseExtractor {
                     metadata: trackInfo,
                     async requestMetadata() {
                         return trackInfo;
-                    },
-                    cleanTitle: trackInfo.title
+                    }
                 });
 
                 track.extractor = this;
@@ -174,7 +173,6 @@ export class AttachmentExtractor extends BaseExtractor {
                     engine: trackInfo.url,
                     queryType: context.type,
                     metadata: trackInfo,
-                    cleanTitle: trackInfo.title,
                     async requestMetadata() {
                         return trackInfo;
                     }
