@@ -8,6 +8,7 @@ import { Collection } from '@discord-player/utils';
 import { TypeUtil } from '../utils/TypeUtil';
 import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
 import { Exceptions } from '../errors';
+import { youtube } from "@web-scrobbler/metadata-filter"
 
 export type TrackResolvable = Track | string | number;
 
@@ -36,6 +37,7 @@ export class Track<T = unknown> {
     public readonly id = SnowflakeUtil.generate().toString();
     private __metadata: T | null = null;
     private __reqMetadataFn: () => Promise<T | null>;
+    public cleanTitle: string;
 
     /**
      * Track constructor
@@ -56,6 +58,7 @@ export class Track<T = unknown> {
         this.raw = Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data);
         this.__metadata = data.metadata ?? null;
         this.__reqMetadataFn = data.requestMetadata || (() => Promise.resolve<T | null>(null));
+        this.cleanTitle = data.cleanTitle ?? youtube(this.title)
     }
 
     /**

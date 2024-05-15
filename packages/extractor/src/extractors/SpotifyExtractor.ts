@@ -90,6 +90,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                                 source: spotifyData,
                                 bridge: null
                             },
+                            cleanTitle: spotifyData.title,
                             requestMetadata: async () => {
                                 return {
                                     source: spotifyData,
@@ -122,6 +123,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                         source: spotifyData,
                         bridge: null
                     },
+                    cleanTitle: spotifyData.title,
                     requestMetadata: async () => {
                         return {
                             source: spotifyData,
@@ -220,6 +222,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                             playlist,
                             source: 'spotify',
                             queryType: 'spotifySong',
+                            cleanTitle: m.title,
                             metadata: {
                                 source: m,
                                 bridge: null
@@ -279,6 +282,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                                 source: spotifyData,
                                 bridge: null
                             },
+                            cleanTitle: spotifyData.title,
                             requestMetadata: async () => {
                                 return {
                                     source: spotifyData,
@@ -316,6 +320,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                         const data: Track = new Track(this.context.player, {
                             title: m.title ?? '',
                             description: m.title ?? '',
+                            cleanTitle: m.title,
                             author: m.subtitle ?? 'Unknown Artist',
                             url: m.uid ? `https://open.spotify.com/tracks/${m.uid}` : query,
                             thumbnail: 'https://www.scdn.co/i/_global/twitter_card-default.jpg',

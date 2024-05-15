@@ -87,7 +87,8 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                                     source: m,
                                     bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                                 };
-                            }
+                            },
+                            cleanTitle: m.title
                         });
 
                         track.extractor = this;
@@ -128,6 +129,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                             duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
                             thumbnail: m.thumbnail,
                             title: m.title,
+                            cleanTitle: m.title,
                             url: m.url,
                             views: 0,
                             source: 'apple_music',
@@ -196,7 +198,8 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                                     source: m,
                                     bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                                 };
-                            }
+                            },
+                            cleanTitle: m.title
                         });
 
                         track.playlist = playlist;
@@ -232,7 +235,8 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                             source: info,
                             bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                         };
-                    }
+                    },
+                    cleanTitle: info.title
                 });
 
                 track.extractor = this;

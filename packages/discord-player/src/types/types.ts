@@ -124,6 +124,10 @@ export interface RawTrackData {
      * The query type
      */
     queryType?: SearchQueryType;
+    /**
+     * The seralised title
+     */
+    cleanTitle?: string
 }
 
 export interface TimeData {

@@ -76,7 +76,8 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                         metadata: trackInfo,
                         requestMetadata: async () => {
                             return trackInfo;
-                        }
+                        },
+                        cleanTitle: trackInfo.title
                     });
 
                     newTrack.extractor = this;
@@ -112,7 +113,8 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                     metadata: trackInfo,
                     requestMetadata: async () => {
                         return trackInfo;
-                    }
+                    },
+                    cleanTitle: trackInfo.title
                 });
 
                 track.extractor = this;
@@ -156,7 +158,8 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                         metadata: song,
                         requestMetadata: async () => {
                             return song;
-                        }
+                        },
+                        cleanTitle: song.title
                     });
                     track.extractor = this;
                     track.playlist = res;
@@ -196,7 +199,8 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                         metadata: trackInfo,
                         requestMetadata: async () => {
                             return trackInfo;
-                        }
+                        },
+                        cleanTitle: trackInfo.title
                     });
 
                     track.extractor = this;
