@@ -161,7 +161,7 @@ export const ShowcaseResource: IShowcase = {
             {
                 name: 'Elite Music',
                 description: 'An open-source & feature-packed Discord music bot, complete with a large selection of commands, effects, customisability, Docker & Plex support and much more! 🚀💪',
-                version: 'v6.6.4',
+                version: 'v6.6.8',
                 url: 'https://github.com/ThatGuyJacobee/Elite-Music'
             },
             {
@@ -189,6 +189,11 @@ export const ShowcaseResource: IShowcase = {
             name: 'discord-player-yandexmusic',
             description: 'Unofficial discord-player extractor for Yandex Music.',
             url: 'https://npm.im/discord-player-yandexmusic'
+        },
+         {
+            name: 'discord-player-tidal',
+            description: 'An unofficial discord-player extractor to add support for tidal source.',
+            url: 'https://npm.im/discord-player-tidal'
         }
     ])
 };
