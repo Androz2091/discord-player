@@ -111,21 +111,18 @@ class Util {
                 removeLive,
                 fixTrackSuffix
             ]
-        }
+        };
+        const spotifyFilter = createFilter(filterOpts);
+        spotifyFilter.extend(createSpotifyFilter());
+        const defaultFilter = createFilter(filterOpts);
 
         switch(source) {
             case "youtube":
-                return youtube(title)
+                return youtube(title);
             case "spotify":
-                const spotifyFilter = createFilter(filterOpts)
-
-                spotifyFilter.extend(createSpotifyFilter())
-
-                return spotifyFilter.filterField("track", title)
+                return spotifyFilter.filterField("track", title);
             default:
-                const defaultFilter = createFilter(filterOpts)
-
-                return defaultFilter.filterField("track", title)
+                return defaultFilter.filterField("track", title);
         }
     }
 
