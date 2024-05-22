@@ -279,7 +279,7 @@ export async function loadYtdl(options?: any, force = false) {
 
                 const cookie = options?.requestOptions?.headers?.cookie;
 
-                if(cookie && typeof cookie === "string") dl.cookie = cookie
+                if(cookie && typeof cookie === "string") dl.cookie = cookie;
 
                 // @ts-ignore Default lib did not provide types for this function
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -232,7 +232,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                             source: info,
                             bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                         };
-                    }
+                    },
                 });
 
                 track.extractor = this;
