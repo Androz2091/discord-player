@@ -316,7 +316,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
         this.queue.tracks.removeOne((t) => t.id === foundTrack.id);
 
-        if(emitEvent) this.queue.emit(GuildQueueEvent.audioTrackRemove, this.queue, foundTrack);
+        if (emitEvent) this.queue.emit(GuildQueueEvent.audioTrackRemove, this.queue, foundTrack);
 
         return foundTrack;
     }
@@ -644,11 +644,21 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
             if (this.queue.hasDebugger) this.queue.debug(`Preparing final stream config: ${JSON.stringify(trackStreamConfig, null, 2)}`);
 
-            const resource = await this.queue.dispatcher.createStream(finalStream, trackStreamConfig.dispatcherConfig);
+            const dispatcher = this.queue.dispatcher;
 
-            this.queue.setTransitioning(!!options.transitionMode);
+            if (!dispatcher) {
+                if (this.queue.hasDebugger) {
+                    this.queue.debug('Dispatcher is not available, this is most likely due to the queue being deleted in the middle of operation. Cancelling the stream...');
+                }
 
-            await this.#performPlay(resource);
+                finalStream.destroy();
+            } else {
+                const resource = await dispatcher.createStream(finalStream, trackStreamConfig.dispatcherConfig);
+
+                this.queue.setTransitioning(!!options.transitionMode);
+
+                await this.#performPlay(resource);
+            }
         } catch (e) {
             if (this.queue.hasDebugger) this.queue.debug(`Failed to initialize audio player: ${e}`);
             throw e;
@@ -669,9 +679,15 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     }
 
     async #performPlay(resource: AudioResource<Track>) {
-        if (this.queue.hasDebugger) this.queue.debug('Initializing audio player...');
-        await this.queue.dispatcher!.playStream(resource);
-        if (this.queue.hasDebugger) this.queue.debug('Dispatching audio...');
+        if (!this.queue.dispatcher) {
+            if (this.queue.hasDebugger) {
+                this.queue.debug('Dispatcher is not available, this is most likely due to the queue being deleted in the middle of operation. Cancelling the stream...');
+            }
+        } else {
+            if (this.queue.hasDebugger) this.queue.debug('Initializing audio player...');
+            await this.queue.dispatcher.playStream(resource);
+            if (this.queue.hasDebugger) this.queue.debug('Dispatching audio...');
+        }
     }
 
     async #createGenericStream(track: Track) {

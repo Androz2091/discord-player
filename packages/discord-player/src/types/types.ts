@@ -127,7 +127,7 @@ export interface RawTrackData {
     /**
      * The seralised title
      */
-    cleanTitle?: string
+    cleanTitle?: string;
 }
 
 export interface TimeData {

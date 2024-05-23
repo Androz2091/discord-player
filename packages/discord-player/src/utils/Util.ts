@@ -5,7 +5,18 @@ import { GuildQueue } from '../queue';
 import { Playlist, Track } from '../fabric';
 import { Exceptions } from '../errors';
 import { randomInt } from 'node:crypto';
-import { createFilter, createSpotifyFilter, fixTrackSuffix, removeLive, removeRemastered, youtube } from '@web-scrobbler/metadata-filter';
+import {
+    createFilter,
+    createSpotifyFilter,
+    fixTrackSuffix,
+    removeLive,
+    removeRemastered,
+    youtube,
+    removeZeroWidth,
+    replaceNbsp,
+    replaceSmartQuotes,
+    removeCleanExplicit
+} from '@web-scrobbler/metadata-filter';
 import { TrackSource } from '../../dist';
 
 export type RuntimeType = 'node' | 'deno' | 'bun' | 'unknown';
@@ -85,6 +96,14 @@ class Util {
     }
 
     /**
+     * Formats duration
+     * @param {number} duration The duration in ms
+     */
+    static formatDuration(duration: number) {
+        return this.buildTimeCode(this.parseMS(duration));
+    }
+
+    /**
      * Picks last item of the given array
      * @param {any[]} arr The array
      * @returns {any}
@@ -104,25 +123,40 @@ class Util {
         return channel && channel.members.filter((member) => !member.user.bot).size === 0;
     }
 
+    /**
+     * Cleans the track title
+     * @param title The title
+     * @param source The source
+     * @returns Cleaned title
+     */
     static cleanTitle(title: string, source: TrackSource) {
-        const filterOpts = {
-            track: [
-                removeRemastered,
-                removeLive,
-                fixTrackSuffix
-            ]
-        };
-        const spotifyFilter = createFilter(filterOpts);
-        spotifyFilter.extend(createSpotifyFilter());
-        const defaultFilter = createFilter(filterOpts);
+        try {
+            const filterOpts = {
+                // prettier-ignore
+                track: [
+                    removeRemastered,
+                    removeLive,
+                    fixTrackSuffix,
+                    removeZeroWidth,
+                    replaceNbsp,
+                    replaceSmartQuotes,
+                    removeCleanExplicit
+                ]
+            };
+            const spotifyFilter = createFilter(filterOpts);
+            spotifyFilter.extend(createSpotifyFilter());
+            const defaultFilter = createFilter(filterOpts);
 
-        switch(source) {
-            case "youtube":
-                return youtube(title);
-            case "spotify":
-                return spotifyFilter.filterField("track", title);
-            default:
-                return defaultFilter.filterField("track", title);
+            switch (source) {
+                case 'youtube':
+                    return youtube(title);
+                case 'spotify':
+                    return spotifyFilter.filterField('track', title);
+                default:
+                    return defaultFilter.filterField('track', title);
+            }
+        } catch {
+            return title;
         }
     }
 

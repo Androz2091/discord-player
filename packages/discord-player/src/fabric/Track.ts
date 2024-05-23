@@ -7,7 +7,7 @@ import { BaseExtractor } from '../extractors/BaseExtractor';
 import { Collection } from '@discord-player/utils';
 import { TypeUtil } from '../utils/TypeUtil';
 import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
-import { Exceptions } from '../errors';   
+import { Exceptions } from '../errors';
 import { Util } from '../utils/Util';
 
 export type TrackResolvable = Track | string | number;

@@ -118,7 +118,7 @@ const client = new Discord.Client({
 // this is the entrypoint for discord-player based application
 const player = new Player(client);
 
-// Now, lets load all the default extractors, except 'YouTubeExtractor'. You can remove the filter if you want to load all the extractors.
+// Now, lets load all the default extractors, except 'YouTubeExtractor'. You can remove the filter if you want to include youtube.
 await player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
 ```
 
@@ -128,7 +128,7 @@ Discord Player is mostly events based. It emits different events based on the co
 // this event is emitted whenever discord-player starts to play a track
 player.events.on('playerStart', (queue, track) => {
     // we will later define queue.metadata object while creating the queue
-    queue.metadata.channel.send(`Started playing **${track.title}**!`);
+    queue.metadata.channel.send(`Started playing **${track.cleanTitle}**!`);
 });
 ```
 
@@ -154,7 +154,7 @@ export async function execute(interaction) {
             }
         });
 
-        return interaction.followUp(`**${track.title}** enqueued!`);
+        return interaction.followUp(`**${track.cleanTitle}** enqueued!`);
     } catch (e) {
         // let's return error if something failed
         return interaction.followUp(`Something went wrong: ${e}`);

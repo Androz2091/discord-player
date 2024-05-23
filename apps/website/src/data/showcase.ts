@@ -190,7 +190,7 @@ export const ShowcaseResource: IShowcase = {
             description: 'Unofficial discord-player extractor for Yandex Music.',
             url: 'https://npm.im/discord-player-yandexmusic'
         },
-         {
+        {
             name: 'discord-player-tidal',
             description: 'An unofficial discord-player extractor to add support for tidal source.',
             url: 'https://npm.im/discord-player-tidal'
