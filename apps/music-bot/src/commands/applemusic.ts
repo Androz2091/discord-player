@@ -74,7 +74,7 @@ export class AppleMusicCommand extends Command {
 
 			await interaction.editReply({
 				content: `${this.container.client.dev.success} | Successfully enqueued${
-					res.track.playlist ? ` **multiple tracks** from: **${res.track.playlist.title}**` : `: **${res.track.title}**`
+					res.track.playlist ? ` **multiple tracks** from: **${res.track.playlist.title}**` : `: **${res.track.cleanTitle}**`
 				}`
 			});
 		} catch (error: any) {

@@ -93,7 +93,7 @@ export class PlayCommand extends Command {
 
 			return interaction.editReply({
 				content: `${this.container.client.dev.success} | Successfully enqueued${
-					res.track.playlist ? ` **track(s)** from: **${res.track.playlist.title}**` : `: **${res.track.title}**`
+					res.track.playlist ? ` **track(s)** from: **${res.track.playlist.title}**` : `: **${res.track.cleanTitle}**`
 				}`
 			});
 		} catch (error: any) {

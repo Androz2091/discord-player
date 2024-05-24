@@ -35,7 +35,7 @@ export class NowPlayingCommand extends Command {
 			})
 			.setColor('Red')
 			.setTitle('💿 Now Playing')
-			.setDescription(`[${track.title}](${track.url})`)
+			.setDescription(`[${track.cleanTitle}](${track.url})`)
 			.setThumbnail(track.thumbnail ?? interaction.user.displayAvatarURL())
 			.addFields([
 				{ name: 'Author', value: track.author },

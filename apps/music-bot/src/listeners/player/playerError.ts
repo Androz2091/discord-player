@@ -17,6 +17,6 @@ export class PlayerEvent extends Listener {
 
 		console.log(error);
 
-		return queue.metadata.channel.send(`${queue.metadata.client.dev.error} | There was an error with **${track.title}:**`);
+		return queue.metadata.channel.send(`${queue.metadata.client.dev.error} | There was an error with **${track.cleanTitle}:**`);
 	}
 }
