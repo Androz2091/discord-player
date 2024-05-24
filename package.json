@@ -38,7 +38,7 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "homepage": "https://github.com/Androz2091/discord-player#readme",
-  "packageManager": "yarn@4.0.2",
+  "packageManager": "yarn@4.2.2",
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",

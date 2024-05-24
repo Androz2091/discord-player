@@ -28,7 +28,7 @@ export class QueueCommand extends Command {
 		let pagesNum = Math.ceil(queue.tracks.size / 5);
 		if (pagesNum <= 0) pagesNum = 1;
 
-		const tracks = queue.tracks.map((track, idx) => `**${++idx})** [${track.title}](${track.url})`);
+		const tracks = queue.tracks.map((track, idx) => `**${++idx})** [${track.cleanTitle}](${track.url})`);
 		const paginatedMessage = new PaginatedMessage();
 
 		// handle error if pages exceed 25 pages

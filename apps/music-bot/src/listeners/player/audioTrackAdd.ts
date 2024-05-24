@@ -26,7 +26,7 @@ export class PlayerEvent extends Listener {
 			embeds: [
 				{
 					title: 'Track Added!',
-					description: `🎵 | Track **${track.title || 'Unknown Title'}** added to the queue!`,
+					description: `🎵 | Track **${track.cleanTitle || 'Unknown Title'}** added to the queue!`,
 					color: 0xffaaaa,
 					footer: {
 						text: `Extractor: ${track.extractor?.identifier || 'N/A'}`

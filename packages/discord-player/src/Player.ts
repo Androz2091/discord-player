@@ -110,10 +110,21 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
          */
         this.client = client;
 
-        const ibf = this.client.options.intents instanceof IntentsBitField ? this.client.options.intents : new IntentsBitField(this.client.options.intents);
+        try {
+            if (!(client instanceof Client)) {
+                Util.warn(
+                    `Client is not an instance of discord.js@${djsVersion} client, some things may not work correctly. This can happen due to corrupt dependencies or having multiple installations of discord.js.`,
+                    'InvalidClientInstance'
+                );
+            }
 
-        if (!ibf.has(IntentsBitField.Flags.GuildVoiceStates)) {
-            Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
+            const ibf = this.client.options.intents instanceof IntentsBitField ? this.client.options.intents : new IntentsBitField(this.client.options.intents);
+
+            if (!ibf.has(IntentsBitField.Flags.GuildVoiceStates)) {
+                Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
+            }
+        } catch {
+            // noop
         }
 
         this.options = {

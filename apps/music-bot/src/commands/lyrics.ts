@@ -1,5 +1,5 @@
 import { Command } from '@sapphire/framework';
-import { useQueue, useMainPlayer } from 'discord-player';
+import { useQueue, useMainPlayer, Util } from 'discord-player';
 import { EmbedBuilder } from 'discord.js';
 
 export class LyricsCommand extends Command {
@@ -16,7 +16,7 @@ export class LyricsCommand extends Command {
 				.setName(this.name)
 				.setDescription(this.description)
 				.addStringOption((option) => {
-					return option.setName('name').setDescription('The track of the lyrics to search');
+					return option.setName('name').setDescription('The track of the lyrics to search').setRequired(false);
 				});
 		});
 	}
@@ -24,7 +24,7 @@ export class LyricsCommand extends Command {
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		const player = useMainPlayer();
 		const queue = useQueue(interaction.guild!.id);
-		const track = interaction.options.getString('name') || (queue?.currentTrack?.title as string);
+		const track = interaction.options.getString('name') || (queue?.currentTrack?.cleanTitle as string);
 
 		await interaction.deferReply();
 
@@ -37,22 +37,23 @@ export class LyricsCommand extends Command {
 			});
 
 		const lyrics = results?.[0];
-		console.log(lyrics);
-		if (!lyrics?.plainLyrics)
-			return interaction.reply({ content: `${this.container.client.dev.error} | There are **no** lyrics for this track`, ephemeral: true });
 
-		const syncedLyrics = queue?.syncedLyrics(lyrics);
+		if (!lyrics?.syncedLyrics && !lyrics?.plainLyrics)
+			return interaction.editReply({ content: `${this.container.client.dev.error} | No lyrics found for this track` });
 
-		syncedLyrics?.onChange(async (lyrics, timestamp) => {
-			console.log(timestamp, lyrics);
-			await interaction.channel?.send({
-				content: `[${timestamp}]: ${lyrics}`
+		if (lyrics.syncedLyrics) {
+			const syncedLyrics = queue?.syncedLyrics(lyrics);
+
+			syncedLyrics?.onChange(async (lyrics, timestamp) => {
+				await interaction.channel?.send({
+					content: `[${Util.formatDuration(timestamp)}]: ${lyrics}`
+				});
 			});
-		});
 
-		syncedLyrics?.subscribe();
+			syncedLyrics?.subscribe();
+		}
 
-		const trimmedLyrics = lyrics.plainLyrics.substring(0, 1997);
+		const trimmedLyrics = (lyrics.plainLyrics || lyrics.syncedLyrics || '').substring(0, 1997);
 
 		const embed = new EmbedBuilder()
 			.setTitle(lyrics.trackName)

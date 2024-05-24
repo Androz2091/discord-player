@@ -35,7 +35,7 @@ export class HistoryCommand extends Command {
 			pagesNum = 1;
 		}
 
-		const tracks = history.tracks.map((track, idx) => `**${++idx})** [${track.title}](${track.url})`);
+		const tracks = history.tracks.map((track, idx) => `**${++idx})** [${track.cleanTitle}](${track.url})`);
 
 		const paginatedMessage = new PaginatedMessage();
 
