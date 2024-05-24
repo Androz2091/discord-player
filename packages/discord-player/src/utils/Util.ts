@@ -17,7 +17,7 @@ import {
     replaceSmartQuotes,
     removeCleanExplicit
 } from '@web-scrobbler/metadata-filter';
-import { TrackSource } from '../../dist';
+import { TrackSource } from '../types/types';
 
 export type RuntimeType = 'node' | 'deno' | 'bun' | 'unknown';
 
