@@ -141,7 +141,7 @@ __metadata:
     vitest: "npm:^0.34.6"
     youtube-ext: "npm:^1.1.14"
     youtube-sr: "npm:^4.3.9"
-    yt-stream: "npm:^1.4.8"
+    yt-stream: "npm:^1.4.14"
     ytdl-core: "npm:^4.11.4"
   languageName: unknown
   linkType: soft
@@ -8908,14 +8908,13 @@ __metadata:
     mediaplex: "npm:^0.0.9"
     npm-run-all: "npm:^4.1.5"
     opusscript: "npm:^0.0.8"
-    play-dl: "npm:^1.9.7"
     prettier: "npm:^2.8.4"
     tsc-watch: "npm:^6.0.0"
     tsup: "npm:^7.2.0"
     tsx: "npm:^3.12.7"
     typescript: "npm:^5.2.2"
     vitest: "npm:^0.34.6"
-    youtube-ext: "npm:^1.1.23"
+    yt-stream: "npm:^1.4.14"
   languageName: unknown
   linkType: soft
 
@@ -9705,15 +9704,6 @@ __metadata:
   dependencies:
     play-audio: "npm:^0.5.2"
   checksum: 4c3d9e9c51edca71d5effdf1d1ef8610558cb60d8c9835d4c4a35669c1729cbced6e550a4e3e48ba798da6bb2198035601669818306d296bbf5e18f5cd497968
-  languageName: node
-  linkType: hard
-
-"play-dl@npm:^1.9.7":
-  version: 1.9.7
-  resolution: "play-dl@npm:1.9.7"
-  dependencies:
-    play-audio: "npm:^0.5.2"
-  checksum: 6187e04dbd1f5f41beb6ff995bb746c78152f038f9a84963f1fbdd2ecb48ff8a5a713ad2985108a1d3cd7d01c9b689eee6ff2bb4a61176e4a988729a2438bca2
   languageName: node
   linkType: hard
 
@@ -11884,13 +11874,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^6.11.1":
-  version: 6.13.0
-  resolution: "undici@npm:6.13.0"
-  checksum: 4ec2038e95779d4f1114a5dcf5bc74ec59c7fc76f6287f8a6bea6d69113f0190e6d41cc6e14409b5d912b0a92ce910b33bfa05808f40b6bf2b802b58b427f2cf
-  languageName: node
-  linkType: hard
-
 "unfetch@npm:^5.0.0":
   version: 5.0.0
   resolution: "unfetch@npm:5.0.0"
@@ -12534,15 +12517,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"youtube-ext@npm:^1.1.23":
-  version: 1.1.23
-  resolution: "youtube-ext@npm:1.1.23"
-  dependencies:
-    undici: "npm:^6.11.1"
-  checksum: 3a8bb7612327d869914f895b22d6b0fcd00af857d38b0cc78a966cdf4d2ff386e7ff9c10b333baf43edb7ba486d657e2cb1cd6c07c5e623e9fc088778781e356
-  languageName: node
-  linkType: hard
-
 "youtube-sr@npm:^4.3.9":
   version: 4.3.9
   resolution: "youtube-sr@npm:4.3.9"
@@ -12550,10 +12524,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yt-stream@npm:^1.4.8":
-  version: 1.4.8
-  resolution: "yt-stream@npm:1.4.8"
-  checksum: 18fe099e9037287cdab899ee3c9448f79ff2b86992ff1bb7fff6dc0525c00addba2ae02f3c8998bd53b86b087b637bd8421c84a23c6e6a9922805ddb1a9b5cac
+"yt-stream@npm:^1.4.14":
+  version: 1.4.14
+  resolution: "yt-stream@npm:1.4.14"
+  checksum: 52dc166fe58024a74cd957ca09bbc09b2596708e5e8e1fdb8e723a132c3e7cd887f4de7a6b97bbc8c267131fe9dbea1a8f9cc9b6b6bd05a659624706735dfcc1
   languageName: node
   linkType: hard
 

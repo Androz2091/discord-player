@@ -22,8 +22,7 @@
     "discord-player": "workspace:^",
     "mediaplex": "^0.0.9",
     "opusscript": "^0.0.8",
-    "play-dl": "^1.9.7",
-    "youtube-ext": "^1.1.23"
+    "yt-stream": "^1.4.14"
   },
   "devDependencies": {
     "@sapphire/prettier-config": "^1.4.5",

@@ -21,7 +21,7 @@ export class PlayerEvent extends Listener {
 			embeds: [
 				{
 					title: 'Now Playing',
-					description: `🎵 | **${track.title || 'Unknown Title'}**`,
+					description: `🎵 | **${track.cleanTitle || track.title || 'Unknown Title'}**`,
 					color: 0xaaaaff,
 					footer: {
 						text: `Extractor: ${track.extractor?.identifier || 'N/A'}`

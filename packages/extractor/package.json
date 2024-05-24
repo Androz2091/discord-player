@@ -44,7 +44,7 @@
     "typescript": "^5.2.2",
     "vitest": "^0.34.6",
     "youtube-ext": "^1.1.14",
-    "yt-stream": "^1.4.8",
+    "yt-stream": "^1.4.14",
     "ytdl-core": "^4.11.4"
   },
   "dependencies": {

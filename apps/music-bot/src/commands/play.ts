@@ -35,7 +35,7 @@ export class PlayCommand extends Command {
 		let tracks;
 		tracks = results!.tracks
 			.map((t) => ({
-				name: t.title,
+				name: t.cleanTitle || t.title,
 				value: t.url
 			}))
 			.slice(0, 10);
