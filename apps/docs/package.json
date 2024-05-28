@@ -4,8 +4,7 @@
   "description": "Discord Player documentation",
   "main": "index.js",
   "scripts": {
-    "dev": "mintlify dev",
-    "install": "mintlify install"
+    "dev": "mintlify dev"
   },
   "repository": {
     "type": "git",
