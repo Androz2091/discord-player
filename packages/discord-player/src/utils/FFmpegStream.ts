@@ -13,58 +13,41 @@ export interface FFmpegStreamOptions {
 
 const getFFmpegProvider = (legacy = false) => (legacy ? (prism as typeof prism & { default: typeof prism }).default?.FFmpeg || prism.FFmpeg : FFmpeg);
 
+const resolveArgs = (config: Record<string, string | number | null | undefined>): string[] => {
+    return Object.entries(config).reduce((acc, [key, value]) => {
+        if (value == null) return acc;
+        acc.push(`-${key}`, String(value));
+        return acc;
+    }, [] as string[]);
+};
+
 export function FFMPEG_ARGS_STRING(stream: string, fmt?: string, cookies?: string) {
-    const args = [
-        '-reconnect',
-        '1',
-        '-reconnect_streamed',
-        '1',
-        '-reconnect_delay_max',
-        '5',
-        '-i',
-        stream,
-        '-analyzeduration',
-        '0',
-        '-loglevel',
-        '0',
-        '-ar',
-        '48000',
-        '-ac',
-        '2',
-        '-f',
-        `${typeof fmt === 'string' ? fmt : 's16le'}`
-    ];
-
-    if (fmt === 'opus') {
-        args.push('-acodec', 'libopus');
-    }
-
-    if (typeof cookies === 'string') {
-        // https://ffmpeg.org/ffmpeg-protocols.html#HTTP-Cookies
-        args.push('-cookies', cookies.startsWith('"') ? cookies : `"${cookies}"`);
-    }
+    const args = resolveArgs({
+        reconnect: 1,
+        reconnect_streamed: 1,
+        reconnect_delay_max: 5,
+        i: stream,
+        analyzeduration: 0,
+        loglevel: 0,
+        ar: 48000,
+        ac: 2,
+        f: `${typeof fmt === 'string' ? fmt : 's16le'}`,
+        acodec: fmt === 'opus' ? 'libopus' : null,
+        cookies: typeof cookies === 'string' ? (!cookies.includes(' ') ? cookies : `"${cookies}"`) : null
+    });
 
     return args;
 }
 
 export function FFMPEG_ARGS_PIPED(fmt?: string) {
-    // prettier-ignore
-    const args = [
-        '-analyzeduration',
-        '0',
-        '-loglevel',
-        '0',
-        '-ar',
-        '48000',
-        '-ac',
-        '2',
-        '-f',
-        `${typeof fmt === 'string' ? fmt : 's16le'}`,
-    ];
-
-    if (fmt === 'opus') {
-        args.push('-acodec', 'libopus');
-    }
+    const args = resolveArgs({
+        analyzeduration: 0,
+        loglevel: 0,
+        ar: 48000,
+        ac: 2,
+        f: `${typeof fmt === 'string' ? fmt : 's16le'}`,
+        acodec: fmt === 'opus' ? 'libopus' : null
+    });
 
     return args;
 }
