@@ -45,8 +45,8 @@ export const ShowcaseResource: IShowcase = {
             },
             {
                 name: 'Discord Player Bot',
-                description: 'Feature rich discord music bot with a cool dynamic website',
-                version: 'v6.6.8',
+                description: 'A feature-rich, open-source Discord music bot that supports multiple streaming platforms, has no payment restrictions, and is easy to self-host with Docker.',
+                version: 'v6.6.10',
                 url: 'https://github.com/LakhindarPal/discord-player-bot'
             },
             {
