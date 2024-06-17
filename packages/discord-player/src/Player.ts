@@ -1,15 +1,12 @@
-import type { IAdapter } from './adapter';
-import { setPlayerAdapterContext } from './context';
+import type { Adapter } from './Adapter';
 
 export class Player<T> {
-    public readonly adapter: IAdapter<T>;
-    public constructor(adapter: PlayerAdapterInterface<T>) {
-        this.adapter = setPlayerAdapterContext(this, adapter);
+    public constructor(public readonly adapter: Adapter<T>) {
+        this.adapter = adapter;
+        this.adapter.setPlayer(this);
     }
 }
 
-export type PlayerAdapterInterface<T> = () => IAdapter<T>;
-
-export function createPlayer<T>(adapter: PlayerAdapterInterface<IAdapter<T>>) {
+export function createPlayer<T>(adapter: Adapter<T>) {
     return new Player(adapter);
 }

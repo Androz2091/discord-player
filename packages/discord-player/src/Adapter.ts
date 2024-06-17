@@ -1,6 +1,5 @@
 import { unsafe } from './common/types';
-import { getPlayerAdapterContext } from './context';
-import { Player } from './player';
+import { Player } from './Player';
 
 export type OnGatewayPacket = (packet: unsafe) => void;
 
@@ -38,9 +37,11 @@ export interface AdapterImpl {
 }
 
 export class Adapter<T> implements AdapterImpl {
-    public readonly player: Player<T>;
-    public constructor(private readonly config: IAdapter<T>) {
-        this.player = getPlayerAdapterContext<T>();
+    private player!: Player<T>;
+    public constructor(private readonly config: IAdapter<T>) {}
+
+    public setPlayer(player: Player<T>): void {
+        this.player = player;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
