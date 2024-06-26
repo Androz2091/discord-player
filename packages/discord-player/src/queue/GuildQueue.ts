@@ -77,119 +77,150 @@ export const GuildQueueEvent = {
      * Emitted when audio track is added to the queue
      */
     audioTrackAdd: 'audioTrackAdd',
+    AudioTrackAdd: 'audioTrackAdd',
     /**
      * Emitted when audio tracks were added to the queue
      */
     audioTracksAdd: 'audioTracksAdd',
+    AudioTracksAdd: 'audioTracksAdd',
     /**
      * Emitted when audio track is removed from the queue
      */
     audioTrackRemove: 'audioTrackRemove',
+    AudioTrackRemove: 'audioTrackRemove',
     /**
      * Emitted when audio tracks are removed from the queue
      */
     audioTracksRemove: 'audioTracksRemove',
+    AudioTracksRemove: 'audioTracksRemove',
     /**
      * Emitted when a connection is created
      */
     connection: 'connection',
+    Connection: 'connection',
     /**
      * Emitted when a voice connection is destroyed
      */
     connectionDestroyed: 'connectionDestroyed',
+    ConnectionDestroyed: 'connectionDestroyed',
     /**
      * Emitted when the bot is disconnected from the channel
      */
     disconnect: 'disconnect',
+    Disconnect: 'disconnect',
     /**
      * Emitted when the queue sends a debug info
      */
     debug: 'debug',
+    Debug: 'debug',
     /**
      * Emitted when the queue encounters error
      */
     error: 'error',
+    Error: 'error',
     /**
      * Emitted when the voice channel is empty
      */
     emptyChannel: 'emptyChannel',
+    EmptyChannel: 'emptyChannel',
     /**
      * Emitted when the queue is empty
      */
     emptyQueue: 'emptyQueue',
+    EmptyQueue: 'emptyQueue',
     /**
      * Emitted when the audio player starts streaming audio track
      */
     playerStart: 'playerStart',
+    PlayerStart: 'playerStart',
     /**
      * Emitted when the audio player errors while streaming audio track
      */
     playerError: 'playerError',
+    PlayerError: 'playerError',
     /**
      * Emitted when the audio player finishes streaming audio track
      */
     playerFinish: 'playerFinish',
+    PlayerFinish: 'playerFinish',
     /**
      * Emitted when the audio player skips current track
      */
     playerSkip: 'playerSkip',
+    PlayerSkip: 'playerSkip',
     /**
      * Emitted when the audio player is triggered
      */
     playerTrigger: 'playerTrigger',
+    PlayerTrigger: 'playerTrigger',
     /**
      * Emitted when the voice state is updated. Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
      */
     voiceStateUpdate: 'voiceStateUpdate',
+    VoiceStateUpdate: 'voiceStateUpdate',
     /**
      * Emitted when volume is updated
      */
     volumeChange: 'volumeChange',
+    VolumeChange: 'volumeChange',
     /**
      * Emitted when player is paused
      */
     playerPause: 'playerPause',
+    PlayerPause: 'playerPause',
     /**
      * Emitted when player is resumed
      */
     playerResume: 'playerResume',
+    PlayerResume: 'playerResume',
     /**
      * Biquad Filters Update
      */
     biquadFiltersUpdate: 'biquadFiltersUpdate',
+    BiquadFiltersUpdate: 'biquadFiltersUpdate',
     /**
      * Equalizer Update
      */
     equalizerUpdate: 'equalizerUpdate',
+    EqualizerUpdate: 'equalizerUpdate',
     /**
      * DSP update
      */
     dspUpdate: 'dspUpdate',
+    DSPUpdate: 'dspUpdate',
     /**
      * Audio Filters Update
      */
     audioFiltersUpdate: 'audioFiltersUpdate',
+    AudioFiltersUpdate: 'audioFiltersUpdate',
     /**
      * Audio player will play next track
      */
     willPlayTrack: 'willPlayTrack',
+    WillPlayTrack: 'willPlayTrack',
     /**
      * Emitted when a voice channel is repopulated
      */
     channelPopulate: 'channelPopulate',
+    ChannelPopulate: 'channelPopulate',
     /**
      * Emitted when a queue is successfully created
      */
     queueCreate: 'queueCreate',
+    QueueCreate: 'queueCreate',
     /**
      * Emitted when a queue is deleted
      */
     queueDelete: 'queueDelete',
+    QueueDelete: 'queueDelete',
     /**
      * Emitted when a queue is trying to add similar track for autoplay
      */
-    willAutoPlay: 'willAutoPlay'
+    willAutoPlay: 'willAutoPlay',
+    WillAutoPlay: 'willAutoPlay'
 } as const;
+
+export type GuildQueueEvent = (typeof GuildQueueEvent)[keyof typeof GuildQueueEvent];
 
 export enum TrackSkipReason {
     NoStream = 'ERR_NO_STREAM',
@@ -207,81 +238,81 @@ export interface GuildQueueEvents<Meta = any> {
      * @param queue The queue where this event occurred
      * @param track The track
      */
-    audioTrackAdd: (queue: GuildQueue<Meta>, track: Track) => unknown;
+    [GuildQueueEvent.AudioTrackAdd]: (queue: GuildQueue<Meta>, track: Track) => unknown;
     /**
      * Emitted when audio tracks were added to the queue
      * @param queue The queue where this event occurred
      * @param tracks The tracks array
      */
-    audioTracksAdd: (queue: GuildQueue<Meta>, track: Track[]) => unknown;
+    [GuildQueueEvent.AudioTracksAdd]: (queue: GuildQueue<Meta>, track: Track[]) => unknown;
     /**
      * Emitted when audio track is removed from the queue
      * @param queue The queue where this event occurred
      * @param track The track
      */
-    audioTrackRemove: (queue: GuildQueue<Meta>, track: Track) => unknown;
+    [GuildQueueEvent.AudioTrackRemove]: (queue: GuildQueue<Meta>, track: Track) => unknown;
     /**
      * Emitted when audio tracks are removed from the queue
      * @param queue The queue where this event occurred
      * @param track The track
      */
-    audioTracksRemove: (queue: GuildQueue<Meta>, track: Track[]) => unknown;
+    [GuildQueueEvent.AudioTracksRemove]: (queue: GuildQueue<Meta>, track: Track[]) => unknown;
     /**
      * Emitted when a connection is created
      * @param queue The queue where this event occurred
      */
-    connection: (queue: GuildQueue<Meta>) => unknown;
+    [GuildQueueEvent.Connection]: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when a connection is destroyed
      * @param queue The queue where this event occurred
      */
-    connectionDestroyed: (queue: GuildQueue<Meta>) => unknown;
+    [GuildQueueEvent.ConnectionDestroyed]: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when the bot is disconnected from the channel
      * @param queue The queue where this event occurred
      */
-    disconnect: (queue: GuildQueue<Meta>) => unknown;
+    [GuildQueueEvent.Disconnect]: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when the queue sends a debug info
      * @param queue The queue where this event occurred
      * @param message The debug message
      */
-    debug: (queue: GuildQueue<Meta>, message: string) => unknown;
+    [GuildQueueEvent.Debug]: (queue: GuildQueue<Meta>, message: string) => unknown;
     /**
      * Emitted when the queue encounters error
      * @param queue The queue where this event occurred
      * @param error The error
      */
-    error: (queue: GuildQueue<Meta>, error: Error) => unknown;
+    [GuildQueueEvent.Error]: (queue: GuildQueue<Meta>, error: Error) => unknown;
     /**
      * Emitted when the voice channel is empty
      * @param queue The queue where this event occurred
      */
-    emptyChannel: (queue: GuildQueue<Meta>) => unknown;
+    [GuildQueueEvent.EmptyChannel]: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when the queue is empty
      * @param queue The queue where this event occurred
      */
-    emptyQueue: (queue: GuildQueue<Meta>) => unknown;
+    [GuildQueueEvent.EmptyQueue]: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when the audio player starts streaming audio track
      * @param queue The queue where this event occurred
      * @param track The track that is being streamed
      */
-    playerStart: (queue: GuildQueue<Meta>, track: Track) => unknown;
+    [GuildQueueEvent.PlayerStart]: (queue: GuildQueue<Meta>, track: Track) => unknown;
     /**
      * Emitted when the audio player errors while streaming audio track
      * @param queue The queue where this event occurred
      * @param error The error
      * @param track The track that is being streamed
      */
-    playerError: (queue: GuildQueue<Meta>, error: Error, track: Track) => unknown;
+    [GuildQueueEvent.PlayerError]: (queue: GuildQueue<Meta>, error: Error, track: Track) => unknown;
     /**
      * Emitted when the audio player finishes streaming audio track
      * @param queue The queue where this event occurred
      * @param track The track that was being streamed
      */
-    playerFinish: (queue: GuildQueue<Meta>, track: Track) => unknown;
+    [GuildQueueEvent.PlayerFinish]: (queue: GuildQueue<Meta>, track: Track) => unknown;
     /**
      * Emitted when the audio player skips current track
      * @param queue The queue where this event occurred
@@ -289,65 +320,65 @@ export interface GuildQueueEvents<Meta = any> {
      * @param reason The reason for skipping
      * @param description The description for skipping
      */
-    playerSkip: (queue: GuildQueue<Meta>, track: Track, reason: TrackSkipReason, description: string) => unknown;
+    [GuildQueueEvent.PlayerSkip]: (queue: GuildQueue<Meta>, track: Track, reason: TrackSkipReason, description: string) => unknown;
     /**
      * Emitted when the audio player is triggered
      * @param queue The queue where this event occurred
      * @param track The track which was played in this event
      */
-    playerTrigger: (queue: GuildQueue<Meta>, track: Track, reason: PlayerTriggeredReason) => unknown;
+    [GuildQueueEvent.PlayerTrigger]: (queue: GuildQueue<Meta>, track: Track, reason: PlayerTriggeredReason) => unknown;
     /**
      * Emitted when the voice state is updated. Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
      * @param queue The queue where this event occurred
      * @param oldState The old voice state
      * @param newState The new voice state
      */
-    voiceStateUpdate: (queue: GuildQueue<Meta>, oldState: VoiceState, newState: VoiceState) => unknown;
+    [GuildQueueEvent.VoiceStateUpdate]: (queue: GuildQueue<Meta>, oldState: VoiceState, newState: VoiceState) => unknown;
     /**
      * Emitted when audio player is paused
      * @param queue The queue where this event occurred
      */
-    playerPause: (queue: GuildQueue<Meta>) => unknown;
+    [GuildQueueEvent.PlayerPause]: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when audio player is resumed
      * @param queue The queue where this event occurred
      */
-    playerResume: (queue: GuildQueue<Meta>) => unknown;
+    [GuildQueueEvent.PlayerResume]: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when audio player's volume is changed
      * @param queue The queue where this event occurred
      * @param oldVolume The old volume
      * @param newVolume The updated volume
      */
-    volumeChange: (queue: GuildQueue<Meta>, oldVolume: number, newVolume: number) => unknown;
+    [GuildQueueEvent.VolumeChange]: (queue: GuildQueue<Meta>, oldVolume: number, newVolume: number) => unknown;
     /**
      * Emitted when equalizer config is updated
      * @param queue The queue where this event occurred
      * @param oldFilters Old filters
      * @param newFilters New filters
      */
-    equalizerUpdate: (queue: GuildQueue<Meta>, oldFilters: EqualizerBand[], newFilters: EqualizerBand[]) => unknown;
+    [GuildQueueEvent.EqualizerUpdate]: (queue: GuildQueue<Meta>, oldFilters: EqualizerBand[], newFilters: EqualizerBand[]) => unknown;
     /**
      * Emitted when biquad filters is updated
      * @param queue The queue where this event occurred
      * @param oldFilters Old filters
      * @param newFilters New filters
      */
-    biquadFiltersUpdate: (queue: GuildQueue<Meta>, oldFilters: BiquadFilters | null, newFilters: BiquadFilters | null) => unknown;
+    [GuildQueueEvent.BiquadFiltersUpdate]: (queue: GuildQueue<Meta>, oldFilters: BiquadFilters | null, newFilters: BiquadFilters | null) => unknown;
     /**
      * Emitted when dsp filters is updated
      * @param queue The queue where this event occurred
      * @param oldFilters Old filters
      * @param newFilters New filters
      */
-    dspUpdate: (queue: GuildQueue<Meta>, oldFilters: PCMFilters[], newFilters: PCMFilters[]) => unknown;
+    [GuildQueueEvent.DSPUpdate]: (queue: GuildQueue<Meta>, oldFilters: PCMFilters[], newFilters: PCMFilters[]) => unknown;
     /**
      * Emitted when ffmpeg audio filters is updated
      * @param queue The queue where this event occurred
      * @param oldFilters Old filters
      * @param newFilters New filters
      */
-    audioFiltersUpdate: (queue: GuildQueue<Meta>, oldFilters: FiltersName[], newFilters: FiltersName[]) => unknown;
+    [GuildQueueEvent.AudioFiltersUpdate]: (queue: GuildQueue<Meta>, oldFilters: FiltersName[], newFilters: FiltersName[]) => unknown;
 
     /**
      * Emitted before streaming an audio track. This event can be used to modify stream config before playing a track.
@@ -357,29 +388,29 @@ export interface GuildQueueEvents<Meta = any> {
      * @param config Configurations for streaming
      * @param done Done callback
      */
-    willPlayTrack: (queue: GuildQueue<Meta>, track: Track<unknown>, config: StreamConfig, done: () => void) => unknown;
+    [GuildQueueEvent.WillPlayTrack]: (queue: GuildQueue<Meta>, track: Track<unknown>, config: StreamConfig, done: () => void) => unknown;
     /**
      * Emitted when a voice channel is populated
      * @param queue The queue where this event occurred
      */
-    channelPopulate: (queue: GuildQueue<Meta>) => unknown;
+    [GuildQueueEvent.ChannelPopulate]: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when a queue is successfully created
      * @param queue The queue where this event occurred
      */
-    queueCreate: (queue: GuildQueue<Meta>) => unknown;
+    [GuildQueueEvent.QueueCreate]: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when a queue is successfully deleted
      * @param queue The queue where this event occurred
      */
-    queueDelete: (queue: GuildQueue<Meta>) => unknown;
+    [GuildQueueEvent.QueueDelete]: (queue: GuildQueue<Meta>) => unknown;
     /**
      * Emitted when a queue is trying to add similar track for autoplay
      * @param queue The queue where this event occurred
      * @param tracks The similar tracks that were found
      * @param done Done callback
      */
-    willAutoPlay: (queue: GuildQueue<Meta>, tracks: Track[], done: (track: Track | null) => void) => unknown;
+    [GuildQueueEvent.WillAutoPlay]: (queue: GuildQueue<Meta>, tracks: Track[], done: (track: Track | null) => void) => unknown;
 }
 
 export class GuildQueue<Meta = unknown> {

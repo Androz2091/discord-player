@@ -134,12 +134,12 @@ export class FFmpegFilterer<Meta = unknown> {
      * Set ffmpeg filters
      * @param filters The filters
      */
-    public setFilters(filters: Filters[] | Record<Filters, boolean> | boolean) {
+    public setFilters(filters: Filters[] | Record<Filters, boolean> | string[] | boolean) {
         let _filters: Filters[] = [];
         if (typeof filters === 'boolean') {
             _filters = !filters ? [] : (Object.keys(AudioFilters.filters) as Filters[]);
         } else if (Array.isArray(filters)) {
-            _filters = filters;
+            _filters = filters as Filters[];
         } else {
             _filters = Object.entries(filters)
                 .filter((res) => res[1] === true)

@@ -243,11 +243,15 @@ export interface PlayerEvents {
     voiceStateUpdate: (queue: GuildQueue, oldState: VoiceState, newState: VoiceState) => any;
 }
 
-export enum PlayerEvent {
-    debug = 'debug',
-    error = 'error',
-    voiceStateUpdate = 'voiceStateUpdate'
-}
+export const PlayerEvent = {
+    debug: 'debug',
+    Debug: 'debug',
+    error: 'error',
+    Error: 'error',
+    voiceStateUpdate: 'voiceStateUpdate',
+    VoiceStateUpdate: 'voiceStateUpdate'
+} as const;
+export type PlayerEvent = (typeof PlayerEvent)[keyof typeof PlayerEvent];
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

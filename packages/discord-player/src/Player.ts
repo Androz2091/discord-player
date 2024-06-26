@@ -1,9 +1,9 @@
 import { FFmpeg } from '@discord-player/ffmpeg';
-import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, GuildVoiceChannelResolvable, version as djsVersion } from 'discord.js';
+import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, GuildVoiceChannelResolvable, version as djsVersion, Events } from 'discord.js';
 import { Playlist, Track, SearchResult } from './fabric';
 import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions, GuildQueueEvent } from './queue';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
-import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType } from './types/types';
+import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType, PlayerEvent } from './types/types';
 import { QueryResolver, ResolvedQuery } from './utils/QueryResolver';
 import { Util } from './utils/Util';
 import { generateDependencyReport, version as dVoiceVersion } from 'discord-voip';
@@ -79,7 +79,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     /**
      * The player events channel
      */
-    public events = new PlayerEventsEmitter<GuildQueueEvents>(['error', 'playerError']);
+    public events = new PlayerEventsEmitter<GuildQueueEvents>([GuildQueueEvent.Error, GuildQueueEvent.PlayerError]);
     /**
      * The route planner
      */
@@ -102,7 +102,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!options.ignoreInstance && kSingleton in Player) return (<any>Player)[kSingleton] as Player;
 
-        super(['error']);
+        super([PlayerEvent.Error]);
 
         /**
          * The discord.js client
@@ -144,7 +144,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             }
         } as PlayerInitOptions;
 
-        this.client.on('voiceStateUpdate', this.#voiceStateUpdateListener);
+        this.client.setMaxListeners(this.client.getMaxListeners() + 1);
+        this.client.on(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
             this.#lagMonitorInterval = setInterval(() => {
@@ -295,7 +296,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      */
     public async destroy() {
         this.nodes.cache.forEach((node) => node.delete());
-        this.client.off('voiceStateUpdate', this.#voiceStateUpdateListener);
+        this.client.off(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
+        this.client.setMaxListeners(this.client.getMaxListeners() - 1);
         this.removeAllListeners();
         this.events.removeAllListeners();
         await this.extractors.unregisterAll();

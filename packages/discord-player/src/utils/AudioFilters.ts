@@ -77,11 +77,11 @@ export class AudioFilters {
      * @param filter The filter name
      * @returns
      */
-    public static create<K extends FiltersName>(filters?: K[]) {
+    public static create<K extends FiltersName>(filters?: (K | string)[]) {
         if (!filters || !Array.isArray(filters)) return this.toString();
         return filters
             .filter((predicate) => typeof predicate === 'string')
-            .map((m) => this.get(m))
+            .map((m) => this.get(m as K))
             .join(',');
     }
 
