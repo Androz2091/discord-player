@@ -1,0 +1,17 @@
+{
+    "name": "@discord-player/youtube",
+    "version": "0.0.1-beta",
+    "dependencies": {
+        "@discord-player/extractor": "workspace:^",
+        "@discord-player/tsconfig": "workspace:^",
+        "discord-player": "workspace:^",
+        "youtubei.js": "^10.0.0"
+    },
+    "scripts": {
+        "build": "tsup"
+    },
+    "main": "dist/index.ts",
+    "devDependencies": {
+        "tsup": "^8.1.0"
+    }
+}
