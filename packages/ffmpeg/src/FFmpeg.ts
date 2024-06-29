@@ -1,18 +1,19 @@
-import childProcess from 'child_process';
-import { Duplex, DuplexOptions } from 'stream';
+import { ChildProcessWithoutNullStreams, spawn, spawnSync } from 'node:child_process';
+import { Duplex, DuplexOptions } from 'node:stream';
 
-type Callback<Args extends Array<unknown>> = (...args: Args) => unknown;
+export type FFmpegLib = 'ffmpeg' | './ffmpeg' | 'avconv' | './avconv' | 'ffmpeg-static' | '@ffmpeg-installer/ffmpeg' | '@node-ffmpeg/node-ffmpeg-installer' | 'ffmpeg-binaries';
 
-const validatePathParam = (t: unknown, name?: string) => {
-    if (typeof t !== 'string' || !t) throw new TypeError(`Expected ${name ? name.concat(' to be ') : ''}a string, got ${t}`);
-    return t;
-};
+export type FFmpegCallback<Args extends Array<unknown>> = (...args: Args) => unknown;
 
-export interface FFmpegInfo {
-    command: string | null;
-    metadata: string | null;
-    version: string | null;
-    isStatic: boolean;
+export interface FFmpegSource {
+    name: FFmpegLib;
+    module: boolean;
+}
+
+export interface ResolvedFFmpegSource extends FFmpegSource {
+    path: string;
+    version: string;
+    command: string;
 }
 
 export interface FFmpegOptions extends DuplexOptions {
@@ -20,93 +21,120 @@ export interface FFmpegOptions extends DuplexOptions {
     shell?: boolean;
 }
 
-const ffmpegInfo: FFmpegInfo = {
-    command: null,
-    metadata: null,
-    version: null,
-    isStatic: false
+const VERSION_REGEX = /version (.+) Copyright/im;
+
+const validatePathParam = (path: string, displayName: string) => {
+    if (!path) throw new Error(`Failed to resolve ${displayName}`);
+    return path;
 };
-
-interface FFmpegLocation {
-    displayName: string;
-    getPath: () => string;
-}
-
-const isWindows = process.platform === 'win32';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-// prettier-ignore
-export const FFmpegPossibleLocations: FFmpegLocation[] = [
-    {
-        getPath() {
-            return validatePathParam(process.env.FFMPEG_PATH, this.displayName);
-        },
-        displayName: 'spawn process.env.FFMPEG_PATH'
-    },
-    {
-        getPath() {
-            return 'ffmpeg';
-        },
-        displayName: 'spawn ffmpeg'
-    },
-    {
-        getPath() {
-            return 'avconv';
-        },
-        displayName: 'spawn avconv'
-    },
-    {
-        getPath() {
-            const loc = './ffmpeg';
-            if (isWindows) return loc.concat('.exe');
-            return loc;
-        },
-        displayName: 'spawn ./ffmpeg'
-    },
-    {
-        getPath() {
-            const loc = './avconv';
-            if (isWindows) return loc.concat('.exe');
-            return loc;
-        },
-        displayName: 'spawn ./avconv'
-    },
-    {
-        getPath() {
-            const mod = require('@ffmpeg-installer/ffmpeg');
-            return validatePathParam(mod.default?.path || mod.path || mod, this.displayName);
-        },
-        displayName: 'require("@ffmpeg-installer/ffmpeg")'
-    },
-    {
-        getPath() {
-            const mod = require('ffmpeg-static');
-            return validatePathParam(mod.default?.path || mod.path || mod, this.displayName);
-        },
-        displayName: 'require("ffmpeg-static")'
-    },
-    {
-        getPath() {
-            const mod = require('@node-ffmpeg/node-ffmpeg-installer');
-            return validatePathParam(mod.default?.path || mod.path || mod, this.displayName);
-        },
-        displayName: 'require("@node-ffmpeg/node-ffmpeg-installer")'
-    },
-    {
-        getPath() {
-            const mod = require('ffmpeg-binaries');
-            return validatePathParam(mod.default || mod, this.displayName);
-        },
-        displayName: 'require("ffmpeg-binaries")'
-    }
-];
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 export class FFmpeg extends Duplex {
     /**
-     * FFmpeg version regex
+     * Cached FFmpeg source.
      */
-    public static VersionRegex = /version (.+) Copyright/im;
+    private static cached: ResolvedFFmpegSource | null = null;
+    /**
+     * Supported FFmpeg sources.
+     */
+    public static sources: FFmpegSource[] = [
+        // paths
+        { name: 'ffmpeg', module: false },
+        { name: './ffmpeg', module: false },
+        { name: 'avconv', module: false },
+        { name: './avconv', module: false },
+        // modules
+        { name: 'ffmpeg-static', module: true },
+        { name: '@ffmpeg-installer/ffmpeg', module: true },
+        { name: '@node-ffmpeg/node-ffmpeg-installer', module: true },
+        { name: 'ffmpeg-binaries', module: true }
+    ];
+
+    /**
+     * Checks if FFmpeg is loaded.
+     */
+    public static isLoaded() {
+        return FFmpeg.cached != null;
+    }
+
+    /**
+     * Adds a new FFmpeg source.
+     * @param source FFmpeg source
+     */
+    public static addSource(source: FFmpegSource) {
+        if (FFmpeg.sources.some((s) => s.name === source.name)) return false;
+        FFmpeg.sources.push(source);
+        return true;
+    }
+
+    /**
+     * Removes a FFmpeg source.
+     * @param source FFmpeg source
+     */
+    public static removeSource(source: FFmpegSource) {
+        const index = FFmpeg.sources.findIndex((s) => s.name === source.name);
+        if (index === -1) return false;
+        FFmpeg.sources.splice(index, 1);
+        return true;
+    }
+
+    /**
+     * Resolves FFmpeg path. Throws an error if it fails to resolve.
+     * @param force if it should relocate the command
+     */
+    public static resolve(force = false) {
+        if (!force && FFmpeg.cached) return FFmpeg.cached;
+
+        const errors: string[] = [];
+
+        for (const source of FFmpeg.sources) {
+            try {
+                let path: string;
+
+                if (source.module) {
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    const mod = require(source.name);
+                    path = validatePathParam(mod.default?.path || mod.path || mod, source.name);
+                } else {
+                    path = source.name;
+                }
+
+                const result = spawnSync(path, ['-v'], { windowsHide: true });
+
+                const resolved: ResolvedFFmpegSource = {
+                    command: path,
+                    module: source.module,
+                    name: source.name,
+                    path,
+                    version: VERSION_REGEX.exec(result.stderr.toString())?.[1] ?? 'unknown'
+                };
+
+                FFmpeg.cached = resolved;
+
+                errors.length = 0;
+
+                return resolved;
+            } catch (e) {
+                const err = e && e instanceof Error ? e.message : `${e}`;
+                const msg = `Failed to load ffmpeg using ${source.module ? `require('${source.name}')` : `spawn('${source.name}')`}. Error: ${err}`;
+
+                errors.push(msg);
+            }
+        }
+
+        throw new Error(`Could not load ffmpeg. Errors:\n${errors.join('\n')}`);
+    }
+
+    /**
+     * Resolves FFmpeg path safely. Returns null if it fails to resolve.
+     * @param force if it should relocate the command
+     */
+    public static resolveSafe(force = false) {
+        try {
+            return FFmpeg.resolve(force);
+        } catch {
+            return null;
+        }
+    }
 
     /**
      * Spawns ffmpeg process
@@ -114,74 +142,13 @@ export class FFmpeg extends Duplex {
      */
     public static spawn({ args = [] as string[], shell = false } = {}) {
         if (!args.includes('-i')) args.unshift('-i', '-');
-
-        return childProcess.spawn(this.locate()!.command!, args.concat(['pipe:1']), { windowsHide: true, shell });
-    }
-
-    /**
-     * Check if ffmpeg is available
-     */
-    public static isAvailable() {
-        return typeof this.locateSafe(false)?.command === 'string';
-    }
-
-    /**
-     * Safe locate ffmpeg
-     * @param force if it should relocate the command
-     */
-    public static locateSafe(force = false) {
-        try {
-            return this.locate(force);
-        } catch {
-            return null;
-        }
-    }
-
-    /**
-     * Locate ffmpeg command. Throws error if ffmpeg is not found.
-     * @param force Forcefully reload
-     */
-    public static locate(force = false): FFmpegInfo | undefined {
-        if (ffmpegInfo.command && !force) return ffmpegInfo;
-
-        const errStacks: Error[] = new Array(FFmpegPossibleLocations.length);
-
-        for (const locator of FFmpegPossibleLocations) {
-            if (locator == null) continue;
-            try {
-                const command = locator.getPath();
-
-                const result = childProcess.spawnSync(command, ['-h'], {
-                    windowsHide: true
-                });
-
-                if (result.error) throw result.error;
-
-                ffmpegInfo.command = command;
-                ffmpegInfo.metadata = Buffer.concat(result.output.filter(Boolean) as Buffer[]).toString();
-                ffmpegInfo.isStatic = locator.displayName.startsWith('require("');
-                ffmpegInfo.version = FFmpeg.VersionRegex.exec(ffmpegInfo.metadata || '')?.[1] || null;
-
-                return ffmpegInfo;
-            } catch (e) {
-                errStacks.push(e as Error);
-            }
-        }
-
-        // prettier-ignore
-        throw new Error([
-            'Could not locate ffmpeg. Tried:\n',
-            ...FFmpegPossibleLocations.map((loc, i) => `  ${++i}. ${loc.displayName}`),
-            '\n',
-            `${'='.repeat(5)}Full Stacktrace${'='.repeat(5)}`,
-            ...errStacks.map((e) => e.stack || e.message)
-        ].join('\n'));
+        return spawn(FFmpeg.resolve().command, args.concat(['pipe:1']), { windowsHide: true, shell });
     }
 
     /**
      * Current FFmpeg process
      */
-    public process: childProcess.ChildProcessWithoutNullStreams;
+    public process: ChildProcessWithoutNullStreams;
 
     /**
      * Create FFmpeg duplex stream
@@ -250,12 +217,12 @@ export class FFmpeg extends Duplex {
         }
     }
 
-    public _destroy(err: Error | null, cb: Callback<[Error | null]>) {
+    public _destroy(err: Error | null, cb: FFmpegCallback<[Error | null]>) {
         this._cleanup();
         if (cb) return cb(err);
     }
 
-    public _final(cb: Callback<[]>) {
+    public _final(cb: FFmpegCallback<[]>) {
         this._cleanup();
         cb();
     }
@@ -266,15 +233,7 @@ export class FFmpeg extends Duplex {
                 //
             });
             this.process.kill('SIGKILL');
-            this.process = null as unknown as childProcess.ChildProcessWithoutNullStreams;
+            this.process = null as unknown as ChildProcessWithoutNullStreams;
         }
     }
-
-    public toString() {
-        if (!ffmpegInfo.metadata) return 'FFmpeg';
-
-        return ffmpegInfo.metadata;
-    }
 }
-
-export const findFFmpeg = FFmpeg.locate;

@@ -52,6 +52,7 @@
   "dependencies": {
     "@discord-player/equalizer": "workspace:^",
     "@discord-player/ffmpeg": "workspace:^",
+    "@discord-player/node": "workspace:^",
     "@discord-player/utils": "workspace:^",
     "@web-scrobbler/metadata-filter": "^3.1.0",
     "discord-voip": "^0.1.3",

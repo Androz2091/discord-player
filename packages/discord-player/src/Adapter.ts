@@ -1,20 +1,7 @@
 import { unsafe } from './common/types';
-import { Player } from './Player';
+import type { Player } from './Player';
 
 export type OnGatewayPacket = (packet: unsafe) => void;
-
-export interface IAdapter<T> {
-    metadata: T;
-    sendPacket: (packet: unsafe) => void;
-    resolveGuild(guild: string): string;
-    resolveGuildByChannel(channel: string): string;
-    resolveChannel(channel: string): string;
-    resolveUser(user: string): string;
-    setRequestToSpeak(guild: string, channel: string, value: boolean): void;
-    isVoiceChannel(guild: string, channel: string): boolean;
-    isStageChannel(guild: string, channel: string): boolean;
-    getVoiceChannelMembersCount(guild: string, channel: string): number;
-}
 
 export interface IVoiceStateUpdateData {
     guild: string;
@@ -37,24 +24,57 @@ export interface AdapterImpl {
 }
 
 export class Adapter<T> implements AdapterImpl {
-    private player!: Player<T>;
-    public constructor(private readonly config: IAdapter<T>) {}
+    protected player!: Player;
 
-    public setPlayer(player: Player<T>): void {
+    public constructor(protected readonly metadata: T) {}
+
+    public setPlayer(player: Player): void {
         this.player = player;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     public onPacket(packet: unsafe): void {
         throw new Error('Not implemented');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public handleVoiceStateUpdate(oldState: IVoiceStateUpdateData, newState: IVoiceStateUpdateData): void {
         throw new Error('Not implemented');
     }
-}
 
-export function createAdapter<T>(adapterConfig: IAdapter<T>): Adapter<T> {
-    return new Adapter<T>(adapterConfig);
+    public getVoiceChannelMembersCount(guild: string, channel: string): number {
+        throw new Error('Not implemented');
+    }
+
+    public isStageChannel(guild: string, channel: string): boolean {
+        throw new Error('Not implemented');
+    }
+
+    public isVoiceChannel(guild: string, channel: string): boolean {
+        throw new Error('Not implemented');
+    }
+
+    public resolveChannel(channel: string): string {
+        throw new Error('Not implemented');
+    }
+
+    public resolveGuild(guild: string): string {
+        throw new Error('Not implemented');
+    }
+
+    public resolveGuildByChannel(channel: string): string {
+        throw new Error('Not implemented');
+    }
+
+    public resolveUser(user: string): string {
+        throw new Error('Not implemented');
+    }
+
+    public setRequestToSpeak(guild: string, channel: string, value: boolean): void {
+        throw new Error('Not implemented');
+    }
+
+    public sendPacket(packet: unsafe): void {
+        throw new Error('Not implemented');
+    }
+    /* eslint-enable @typescript-eslint/no-unused-vars */
 }
