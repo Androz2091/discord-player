@@ -3,10 +3,11 @@
 
 import type { Buffer } from 'node:buffer';
 import { pipeline, type Readable } from 'node:stream';
-import prism from 'prism-media';
 import { noop } from '../util/util';
 import { SILENCE_FRAME, type AudioPlayer } from './AudioPlayer';
 import { findPipeline, StreamType, TransformerType, type Edge } from './TransformerGraph';
+import { OggDemuxer, OpusDecoder, OpusEncoder, WebmDemuxer } from '@discord-player/opus';
+import { VolumeTransformer } from '@discord-player/equalizer';
 
 /**
  * Options that are set when creating a new audio resource.
@@ -66,13 +67,13 @@ export class AudioResource<Metadata = unknown> {
      * If the resource was created with inline volume transformation enabled, then this will be a
      * prism-media VolumeTransformer. You can use this to alter the volume of the stream.
      */
-    public readonly volume?: prism.VolumeTransformer;
+    public readonly volume?: VolumeTransformer;
 
     /**
      * If using an Opus encoder to create this audio resource, then this will be a prism-media opus.Encoder.
      * You can use this to control settings such as bitrate, FEC, PLP.
      */
-    public readonly encoder?: prism.opus.Encoder;
+    public readonly encoder?: OpusEncoder;
 
     /**
      * The audio player that the resource is subscribed to, if any.
@@ -106,9 +107,9 @@ export class AudioResource<Metadata = unknown> {
         this.silencePaddingFrames = silencePaddingFrames;
 
         for (const stream of streams) {
-            if (stream instanceof prism.VolumeTransformer) {
+            if (stream instanceof VolumeTransformer) {
                 this.volume = stream;
-            } else if (stream instanceof prism.opus.Encoder) {
+            } else if (stream instanceof OpusEncoder) {
                 this.encoder = stream;
             }
         }
@@ -183,15 +184,15 @@ export function inferStreamType(stream: Readable): {
     hasVolume: boolean;
     streamType: StreamType;
 } {
-    if (stream instanceof prism.opus.Encoder) {
+    if (stream instanceof OpusEncoder) {
         return { streamType: StreamType.Opus, hasVolume: false };
-    } else if (stream instanceof prism.opus.Decoder) {
+    } else if (stream instanceof OpusDecoder) {
         return { streamType: StreamType.Raw, hasVolume: false };
-    } else if (stream instanceof prism.VolumeTransformer) {
+    } else if (stream instanceof VolumeTransformer) {
         return { streamType: StreamType.Raw, hasVolume: true };
-    } else if (stream instanceof prism.opus.OggDemuxer) {
+    } else if (stream instanceof OggDemuxer) {
         return { streamType: StreamType.Opus, hasVolume: false };
-    } else if (stream instanceof prism.opus.WebmDemuxer) {
+    } else if (stream instanceof WebmDemuxer) {
         return { streamType: StreamType.Opus, hasVolume: false };
     }
 

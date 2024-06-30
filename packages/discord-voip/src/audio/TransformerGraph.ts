@@ -250,7 +250,7 @@ function findPath(from: Node, constraints: (path: Edge[]) => boolean, goal = get
  * @param step - The first step of the path
  */
 function constructPipeline(step: Step) {
-    const edges = [];
+    const edges: Edge[] = [];
     let current: Step | undefined = step;
     while (current?.edge) {
         edges.push(current.edge);
