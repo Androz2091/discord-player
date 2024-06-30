@@ -18,5 +18,9 @@
   "homepage": "https://github.com/Androz2091/discord-player#readme",
   "dependencies": {
     "mintlify": "^4.0.160"
+  },
+  "devDependencies": {
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.2"
   }
 }

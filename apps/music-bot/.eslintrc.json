@@ -1,7 +1,0 @@
-{
-    "extends": "@sapphire",
-    "ignorePatterns": ["src/ignore"],
-    "rules": {
-        // "no-return-await": "off"
-    }
-}

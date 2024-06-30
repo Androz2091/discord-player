@@ -42,8 +42,8 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
-    "tsup": "^7.2.0",
-    "typescript": "^5.2.2",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.2",
     "vitest": "^0.34.6"
   },
   "typedoc": {

@@ -5,7 +5,6 @@
     "entryPoints": [
         "packages/discord-player",
         "packages/equalizer",
-        "packages/extractor",
         "packages/utils",
         "packages/ffmpeg",
         "packages/opus"
