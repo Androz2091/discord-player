@@ -82,6 +82,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@discord-player/core@workspace:packages/core":
+  version: 0.0.0-use.local
+  resolution: "@discord-player/core@workspace:packages/core"
+  dependencies:
+    "@discord-player/tsconfig": "workspace:^"
+    "@discord-player/utils": "workspace:^"
+    discord-voip: "workspace:^"
+  languageName: unknown
+  linkType: soft
+
 "@discord-player/discord-player@workspace:.":
   version: 0.0.0-use.local
   resolution: "@discord-player/discord-player@workspace:."
@@ -134,7 +144,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@discord-player/opus@npm:^0.1.2, @discord-player/opus@workspace:packages/opus":
+"@discord-player/opus@npm:^0.1.2, @discord-player/opus@workspace:^, @discord-player/opus@workspace:packages/opus":
   version: 0.0.0-use.local
   resolution: "@discord-player/opus@workspace:packages/opus"
   dependencies:
@@ -5288,11 +5298,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-voip@workspace:packages/discord-voip":
+"discord-voip@workspace:^, discord-voip@workspace:packages/discord-voip":
   version: 0.0.0-use.local
   resolution: "discord-voip@workspace:packages/discord-voip"
   dependencies:
+    "@discord-player/ffmpeg": "workspace:^"
+    "@discord-player/opus": "workspace:^"
     "@discord-player/tsconfig": "workspace:^"
+    "@discord-player/utils": "workspace:^"
     tsup: "npm:^7.2.0"
     typescript: "npm:^5.2.2"
   languageName: unknown
