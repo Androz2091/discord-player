@@ -1,4 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import type { Connector } from './connector/Connector';
+import { IPC } from './connector/IPC';
+import { TCP } from './connector/TCP';
 
 /**
  * Represents a player node object.
@@ -24,6 +27,10 @@ export interface PlayerNodeOptions {
      * The password of this node.
      */
     password: string;
+    /**
+     * Whether this node is an IPC node.
+     */
+    ipc: boolean;
 }
 
 /**
@@ -49,6 +56,11 @@ export interface PlayerNodeInit {
  * The protocol for discord player nodes.
  */
 export const DISCORD_PLAYER_PROTOCOL = 'discord-player:';
+
+/**
+ * The hostname for discord player IPC nodes.
+ */
+export const DISCORD_PLAYER_IPC_HOSTNAME = 'ipc.discord-player.js.org';
 
 function validateNodeOptions(node: PlayerNodeOptions): PlayerNodeOptions {
     const required = ['host', 'clientId', 'password'] as const;
@@ -85,6 +97,16 @@ export class PlayerNode {
     private readonly node: PlayerNodeOptions;
 
     /**
+     * Whether this player node uses IPC.
+     */
+    #isIPC = false;
+
+    /**
+     * The connector for this player node.
+     */
+    private readonly connector: Connector;
+
+    /**
      * Creates a new player node.
      * @param node - The node config or node string to use
      * @param options - The player node options
@@ -95,17 +117,31 @@ export class PlayerNode {
         } else {
             this.node = validateNodeOptions(node);
         }
+
+        this.#isIPC = this.node.ipc;
+        this.connector = this.#isIPC ? new IPC(this) : new TCP(this);
+    }
+
+    /**
+     * Whether this player node is an IPC node.
+     */
+    public get isIPCNode() {
+        return this.#isIPC;
     }
 
     /**
      * Connects to this player node.
      */
-    public async connect() {}
+    public async connect() {
+        await this.connector.connect();
+    }
 
     /**
      * Destroy this player node.
      */
-    public async delete() {}
+    public async delete() {
+        await this.connector.disconnect();
+    }
 
     /**
      * Sends a packet to the player node.
@@ -166,13 +202,15 @@ export class PlayerNode {
         }
 
         const isSecure = searchParams.get('secure') === 'true';
+        const isIpc = hostname === DISCORD_PLAYER_IPC_HOSTNAME;
 
         return {
             host: hostname,
             port: port ? Number(port) : null,
             secure: isSecure,
             clientId: username,
-            password
+            password,
+            ipc: isIpc
         };
     }
 }
