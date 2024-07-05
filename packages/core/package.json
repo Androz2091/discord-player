@@ -1,9 +1,16 @@
 {
   "name": "@discord-player/core",
   "version": "0.1.0",
-  "description": "Discord Player core components",
+  "description": "A complete framework to simplify the implementation of music commands for Discord bots",
   "keywords": [
-    "discord-player"
+    "discord-player",
+    "music",
+    "bot",
+    "discord.js",
+    "javascript",
+    "voip",
+    "lavalink",
+    "lavaplayer"
   ],
   "author": "Androz2091 <androz2091@gmail.com>",
   "homepage": "https://discord-player.js.org",
@@ -11,10 +18,6 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "directories": {
-    "dist": "dist",
-    "src": "src"
-  },
   "files": [
     "dist"
   ],
@@ -24,20 +27,19 @@
   },
   "scripts": {
     "build": "tsup",
-    "build:check": "tsc --noEmit"
+    "build:check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts --fix",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
+  "devDependencies": {
+    "@discord-player/tsconfig": "workspace:^"
+  },
   "dependencies": {
     "@discord-player/utils": "workspace:^",
-    "discord-api-types": "^0.37.2",
-    "discord-voip": "^0.1.2"
-  },
-  "devDependencies": {
-    "@discord-player/tsconfig": "workspace:^",
-    "tsup": "^7.2.0",
-    "typescript": "^5.2.2",
-    "vitest": "^0.34.6"
+    "discord-voip": "workspace:^"
   }
 }
