@@ -82,13 +82,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discord-player/core@workspace:packages/core":
+"@discord-player/core@workspace:^, @discord-player/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@discord-player/core@workspace:packages/core"
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
     "@discord-player/utils": "workspace:^"
+    discord-api-types: "npm:^0.37.92"
     discord-voip: "workspace:^"
+    tsup: "npm:^8.1.0"
   languageName: unknown
   linkType: soft
 
@@ -135,9 +137,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@discord-player/node@workspace:^, @discord-player/node@workspace:packages/node":
+"@discord-player/node@workspace:^, @discord-player/node@workspace:packages/client":
   version: 0.0.0-use.local
-  resolution: "@discord-player/node@workspace:packages/node"
+  resolution: "@discord-player/node@workspace:packages/client"
   dependencies:
     "@discord-player/tsconfig": "workspace:^"
     tsup: "npm:^8.1.0"
@@ -154,6 +156,15 @@ __metadata:
     tsup: "npm:^8.1.0"
     typescript: "npm:^5.5.2"
     vitest: "npm:^0.34.6"
+  languageName: unknown
+  linkType: soft
+
+"@discord-player/server@workspace:packages/server":
+  version: 0.0.0-use.local
+  resolution: "@discord-player/server@workspace:packages/server"
+  dependencies:
+    "@discord-player/core": "workspace:^"
+    "@discord-player/tsconfig": "workspace:^"
   languageName: unknown
   linkType: soft
 
@@ -5151,6 +5162,13 @@ __metadata:
   version: 0.37.91
   resolution: "discord-api-types@npm:0.37.91"
   checksum: 10/046c2f42161e65bdd26d68869c4ceae4aa0937d6535f5ba62ab0e8ea0bcacbfa93f35d9b8cbccd5929ab0fb094e5f82d2600cc931637295030ebca5cd4d9647e
+  languageName: node
+  linkType: hard
+
+"discord-api-types@npm:^0.37.92":
+  version: 0.37.92
+  resolution: "discord-api-types@npm:0.37.92"
+  checksum: 10/94666e98e4b74d51d443c0ea6b4704aceeed55681a7362a6bc0770fa7509d0cf7035d68f47c9cbd8f1c9c08fe7ba27f4d0edf074476591c6302e72e3547f5102
   languageName: node
   linkType: hard
 

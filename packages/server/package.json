@@ -1,5 +1,5 @@
 {
-  "name": "@discord-player/core",
+  "name": "@discord-player/server",
   "version": "0.1.0",
   "description": "A complete framework to simplify the implementation of music commands for Discord bots",
   "keywords": [
@@ -36,12 +36,9 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "devDependencies": {
-    "@discord-player/tsconfig": "workspace:^",
-    "tsup": "^8.1.0"
+    "@discord-player/tsconfig": "workspace:^"
   },
   "dependencies": {
-    "@discord-player/utils": "workspace:^",
-    "discord-api-types": "^0.37.92",
-    "discord-voip": "workspace:^"
+    "@discord-player/core": "workspace:^"
   }
 }

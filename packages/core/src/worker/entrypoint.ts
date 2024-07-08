@@ -1,25 +1,13 @@
-import { isMainThread, parentPort } from 'node:worker_threads';
+import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { WorkerAckOp, WorkerOp } from '../common/constants';
 import { AudioNodeManager } from './node/AudioNodeManager';
-import { VoiceConnectionCreateOptions } from './node/AudioNode';
+import { WorkerMessage, WorkerMessageAck, WorkerMessagePayload } from '../common/types';
 
-interface WorkerMessage<T> {
-    op: WorkerOp;
-    d: T;
-}
-
-interface WorkerMessageAck<T> {
-    op: WorkerAckOp;
-    d: T;
-}
-
-interface WorkerMessagePayload {
-    [WorkerOp.OP_PING]: null;
-    [WorkerOp.OP_JOIN_VOICE_CHANNEL]: VoiceConnectionCreateOptions;
-}
+const { STATS_DISPATCH_INTERVAL, KEEP_ALIVE } = workerData;
 
 export class WorkerListener {
     private readonly audioNodes: AudioNodeManager;
+    private statsClock: NodeJS.Timeout | null = null;
 
     public constructor() {
         if (!parentPort) throw new Error('This script must be run as a worker');
@@ -34,6 +22,29 @@ export class WorkerListener {
                 //
             }
         });
+
+        this.createStatsClock();
+    }
+
+    private createStatsClock() {
+        // ignore invalid cases
+        if (typeof STATS_DISPATCH_INTERVAL !== 'number' || Number.isNaN(STATS_DISPATCH_INTERVAL)) return;
+
+        if (this.statsClock) clearInterval(this.statsClock);
+
+        this.statsClock = setInterval(() => {
+            this.send({
+                t: WorkerAckOp.OP_EVT_STATS,
+                d: {
+                    memoryUsed: process.memoryUsage().heapUsed,
+                    subscriptions: this.audioNodes.nodes.size,
+                },
+            });
+        }, STATS_DISPATCH_INTERVAL);
+
+        if (KEEP_ALIVE !== true) {
+            this.statsClock.unref();
+        }
     }
 
     private validate(message: WorkerMessage<unknown>) {
@@ -50,9 +61,21 @@ export class WorkerListener {
     private async handleMessage(message: WorkerMessage<unknown>) {
         switch (true) {
             case assertPayload(message, WorkerOp.OP_PING):
-                return this.send({ op: WorkerAckOp.OP_ACK_PING, d: null });
+                return this.send({ t: WorkerAckOp.OP_ACK_PING, d: null });
             case assertPayload(message, WorkerOp.OP_JOIN_VOICE_CHANNEL):
                 return this.audioNodes.connect(message.d);
+            case assertPayload(message, WorkerOp.OP_VOICE_SERVER_UPDATE): {
+                const adapter = this.audioNodes.transmitters.get(message.d.guild_id);
+                if (!adapter) return;
+                adapter.onVoiceServerUpdate(message.d);
+                return;
+            }
+            case assertPayload(message, WorkerOp.OP_VOICE_STATE_UPDATE): {
+                const adapter = this.audioNodes.transmitters.get(message.d.guild_id as string);
+                if (!adapter) return;
+                adapter.onVoiceStateUpdate(message.d);
+                return;
+            }
         }
     }
 }
