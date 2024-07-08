@@ -9,7 +9,10 @@ export type ArgPrimitive = string | number;
  * @example createFFmpegArgs({ i: 'input.mp3', af: ['bass=g=10','acompressor'] }, './out.mp3');
  * // => ['-i', 'input.mp3', '-af', 'bass=g=10,acompressor', './out.mp3']
  */
-export const createFFmpegArgs = (input: Record<string, ArgPrimitive | ArgPrimitive[]>, post?: string | string[]): string[] => {
+export const createFFmpegArgs = (
+    input: Record<string, ArgPrimitive | ArgPrimitive[]>,
+    post?: string | string[],
+): string[] => {
     const args = [];
 
     for (const [key, value] of Object.entries(input)) {

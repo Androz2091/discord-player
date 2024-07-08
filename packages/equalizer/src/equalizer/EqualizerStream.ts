@@ -22,9 +22,9 @@ export class EqualizerStream extends PCMTransformer {
             {},
             {
                 bandMultiplier: [],
-                channels: 1
+                channels: 1,
             },
-            options || {}
+            options || {},
         );
 
         this.equalizer = new Equalizer(options.channels || 1, this.bandMultipliers);
@@ -33,7 +33,10 @@ export class EqualizerStream extends PCMTransformer {
 
     public _processBands(multiplier: EqualizerBand[]) {
         for (const mul of multiplier) {
-            if (mul.band > Equalizer.BAND_COUNT - 1 || mul.band < 0) throw new RangeError(`Band value out of range. Expected >0 & <${Equalizer.BAND_COUNT - 1}, received "${mul.band}"`);
+            if (mul.band > Equalizer.BAND_COUNT - 1 || mul.band < 0)
+                throw new RangeError(
+                    `Band value out of range. Expected >0 & <${Equalizer.BAND_COUNT - 1}, received "${mul.band}"`,
+                );
             this.equalizer.setGain(mul.band, mul.gain);
         }
 
@@ -52,8 +55,8 @@ export class EqualizerStream extends PCMTransformer {
                 extremum: this.extremum,
                 readInt: (b, idx) => this._readInt(b, idx),
                 writeInt: (b, i, idx) => this._writeInt(b, i, idx),
-                bytes: this.bytes
-            }
+                bytes: this.bytes,
+            },
         ]);
 
         this.push(chunk);
@@ -64,7 +67,7 @@ export class EqualizerStream extends PCMTransformer {
     public getEQ() {
         return this.bandMultipliers.map((m, i) => ({
             band: i,
-            gain: m
+            gain: m,
         })) as EqualizerBand[];
     }
 
@@ -76,13 +79,13 @@ export class EqualizerStream extends PCMTransformer {
         this._processBands(
             Array.from(
                 {
-                    length: Equalizer.BAND_COUNT
+                    length: Equalizer.BAND_COUNT,
                 },
                 (_, i) => ({
                     band: i,
-                    gain: 0
-                })
-            )
+                    gain: 0,
+                }),
+            ),
         );
     }
 }

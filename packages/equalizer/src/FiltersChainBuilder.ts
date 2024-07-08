@@ -49,7 +49,9 @@ export class FiltersChain {
         if (biquadStream) biquadStream.onUpdate = this.onUpdate;
         if (volumeTransformer) volumeTransformer.onUpdate = this.onUpdate;
 
-        const chains = [src, equalizerStream, dspStream, biquadStream, volumeTransformer].filter(Boolean) as Readonly<Readable[]>;
+        const chains = [src, equalizerStream, dspStream, biquadStream, volumeTransformer].filter(Boolean) as Readonly<
+            Readable[]
+        >;
 
         if (!chains.length) return src;
 

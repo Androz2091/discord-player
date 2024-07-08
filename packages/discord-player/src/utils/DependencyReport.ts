@@ -103,30 +103,30 @@ export const DependencyReport = {
         if (ffmpeg) {
             ffmpegReport[ffmpeg.name] = {
                 hasLibopus: ffmpeg.command.includes('--enable-libopus'),
-                version: ffmpeg.version
+                version: ffmpeg.version,
             };
         }
 
         return {
             core: {
                 'discord-player': DependencyReport.version('discord-player') as string,
-                'discord-voip': DependencyReport.version('discord-voip') as string
+                'discord-voip': DependencyReport.version('discord-voip') as string,
             },
             libopus: {
                 mediaplex: DependencyReport.version('mediaplex'),
                 '@discordjs/opus': DependencyReport.version('@discordjs/opus'),
                 '@evan/opus': DependencyReport.version('@evan/opus'),
                 opusscript: DependencyReport.version('opusscript'),
-                'node-opus': DependencyReport.version('node-opus')
+                'node-opus': DependencyReport.version('node-opus'),
             },
             libsodium: {
                 'sodium-native': DependencyReport.version('sodium-native'),
                 sodium: DependencyReport.version('sodium'),
                 'libsodium-wrappers': DependencyReport.version('libsodium-wrappers'),
                 tweetnacl: DependencyReport.version('tweetnacl'),
-                'sodium-javascript': DependencyReport.version('sodium-javascript')
+                'sodium-javascript': DependencyReport.version('sodium-javascript'),
             },
-            ffmpeg: ffmpegReport
+            ffmpeg: ffmpegReport,
         };
     },
     /**
@@ -163,5 +163,5 @@ export const DependencyReport = {
         output.push(line);
 
         return output.join('\n');
-    }
+    },
 };

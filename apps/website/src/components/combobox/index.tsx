@@ -2,7 +2,18 @@
 
 import * as React from 'react';
 import { Check, ChevronsUpDown } from 'lucide-react';
-import { cn, Button, Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Popover, PopoverContent, PopoverTrigger } from '@edge-ui/react';
+import {
+    cn,
+    Button,
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@edge-ui/react';
 
 interface IProps {
     onSelect: (value: string) => void;

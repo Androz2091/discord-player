@@ -21,7 +21,7 @@ export class PlayerNodeManager {
         const init = new PlayerNode(node, {
             send: (packet) => {
                 return this.player.adapter.sendPacket(packet);
-            }
+            },
         });
 
         this.store.set(init.id, init);
@@ -64,7 +64,7 @@ export class PlayerNodeManager {
             this.store.map(async (node) => {
                 await node.connect();
                 return node;
-            })
+            }),
         );
         return nodes;
     }

@@ -20,7 +20,7 @@ import {
     TableRow,
     TableCell,
     cn,
-    Loader
+    Loader,
 } from '@edge-ui/react';
 import { VscBook } from 'react-icons/vsc';
 import { PanelRightClose } from 'lucide-react';
@@ -37,9 +37,9 @@ const pages = [
             {
                 name: 'welcome',
                 displayName: 'Welcome',
-                component: lazy(() => import('../_guides/welcome/welcome.mdx'))
-            }
-        ]
+                component: lazy(() => import('../_guides/welcome/welcome.mdx')),
+            },
+        ],
     },
     {
         name: 'faq',
@@ -48,34 +48,34 @@ const pages = [
             {
                 name: 'attachment-metadata',
                 displayName: 'Attachments Metadata',
-                component: lazy(() => import('../_guides/faq/attachment_metadata.mdx'))
+                component: lazy(() => import('../_guides/faq/attachment_metadata.mdx')),
             },
             {
                 name: 'common-errors',
                 displayName: 'Common Errors',
-                component: lazy(() => import('../_guides/faq/common_errors.mdx'))
+                component: lazy(() => import('../_guides/faq/common_errors.mdx')),
             },
             {
                 name: 'disable-youtube',
                 displayName: 'Disabling YouTube',
-                component: lazy(() => import('../_guides/faq/disable_youtube.mdx'))
+                component: lazy(() => import('../_guides/faq/disable_youtube.mdx')),
             },
             {
                 name: 'how-to-access-player',
                 displayName: 'How To Access Player',
-                component: lazy(() => import('../_guides/faq/how_to_access_player.mdx'))
+                component: lazy(() => import('../_guides/faq/how_to_access_player.mdx')),
             },
             {
                 name: 'performance-optimization',
                 displayName: 'Performance Optimizations',
-                component: lazy(() => import('../_guides/faq/performance_optimization.mdx'))
+                component: lazy(() => import('../_guides/faq/performance_optimization.mdx')),
             },
             {
                 name: 'serialization-and-deserialization',
                 displayName: 'Serialization and Deserialization',
-                component: lazy(() => import('../_guides/faq/serialization_and_deserialization.mdx'))
-            }
-        ]
+                component: lazy(() => import('../_guides/faq/serialization_and_deserialization.mdx')),
+            },
+        ],
     },
     {
         name: 'examples',
@@ -84,54 +84,54 @@ const pages = [
             {
                 name: 'adding-events',
                 displayName: 'Adding Events',
-                component: lazy(() => import('../_guides/examples/adding_events.mdx'))
+                component: lazy(() => import('../_guides/examples/adding_events.mdx')),
             },
             {
                 name: 'autocomplete-search',
                 displayName: 'Autocomplete Search',
-                component: lazy(() => import('../_guides/examples/autocomplete_search.mdx'))
+                component: lazy(() => import('../_guides/examples/autocomplete_search.mdx')),
             },
             {
                 name: 'common-actions',
                 displayName: 'Common Actions',
-                component: lazy(() => import('../_guides/examples/common_actions.mdx'))
+                component: lazy(() => import('../_guides/examples/common_actions.mdx')),
             },
             {
                 name: 'creating-custom-hooks',
                 displayName: 'Creating Custom Hooks',
-                component: lazy(() => import('../_guides/examples/creating_custom_hooks.mdx'))
+                component: lazy(() => import('../_guides/examples/creating_custom_hooks.mdx')),
             },
             {
                 name: 'getting-lyrics',
                 displayName: 'Getting Lyrics',
-                component: lazy(() => import('../_guides/examples/getting_lyrics.mdx'))
+                component: lazy(() => import('../_guides/examples/getting_lyrics.mdx')),
             },
             {
                 name: 'playing-local-file',
                 displayName: 'Playing Local File',
-                component: lazy(() => import('../_guides/examples/playing_local_file.mdx'))
+                component: lazy(() => import('../_guides/examples/playing_local_file.mdx')),
             },
             {
                 name: 'playing-raw-resource',
                 displayName: 'Playing Raw Resource',
-                component: lazy(() => import('../_guides/examples/playing_raw_resource.mdx'))
+                component: lazy(() => import('../_guides/examples/playing_raw_resource.mdx')),
             },
             {
                 name: 'shared-audio-player',
                 displayName: 'Shared Audio Player',
-                component: lazy(() => import('../_guides/examples/shared_audio_player.mdx'))
+                component: lazy(() => import('../_guides/examples/shared_audio_player.mdx')),
             },
             {
                 name: 'using-existing-voice-connection',
                 displayName: 'Using Existing Voice Connection',
-                component: lazy(() => import('../_guides/examples/using_existing_voice_connection.mdx'))
+                component: lazy(() => import('../_guides/examples/using_existing_voice_connection.mdx')),
             },
             {
                 name: 'voice-recording',
                 displayName: 'Voice Recording',
-                component: lazy(() => import('../_guides/examples/voice_recording.mdx'))
-            }
-        ]
+                component: lazy(() => import('../_guides/examples/voice_recording.mdx')),
+            },
+        ],
     },
     {
         name: 'hooks',
@@ -140,9 +140,9 @@ const pages = [
             {
                 name: 'using-hooks',
                 displayName: 'Using Hooks',
-                component: lazy(() => import('../_guides/hooks/using_hooks.mdx'))
-            }
-        ]
+                component: lazy(() => import('../_guides/hooks/using_hooks.mdx')),
+            },
+        ],
     },
     {
         name: 'extractors',
@@ -151,19 +151,19 @@ const pages = [
             {
                 name: 'creating-extractor',
                 displayName: 'Creating Extractor',
-                component: lazy(() => import('../_guides/extractors/creating_extractor.mdx'))
+                component: lazy(() => import('../_guides/extractors/creating_extractor.mdx')),
             },
             {
                 name: 'set-bridge-source',
                 displayName: 'Setting Bridge Source',
-                component: lazy(() => import('../_guides/extractors/set_bridge_source.mdx'))
+                component: lazy(() => import('../_guides/extractors/set_bridge_source.mdx')),
             },
             {
                 name: 'stream-sources',
                 displayName: 'Stream Sources',
-                component: lazy(() => import('../_guides/extractors/stream_sources.mdx'))
-            }
-        ]
+                component: lazy(() => import('../_guides/extractors/stream_sources.mdx')),
+            },
+        ],
     },
     {
         name: 'youtube',
@@ -172,19 +172,19 @@ const pages = [
             {
                 name: 'cookies',
                 displayName: 'Using Cookies',
-                component: lazy(() => import('../_guides/youtube/cookies.mdx'))
+                component: lazy(() => import('../_guides/youtube/cookies.mdx')),
             },
             {
                 name: 'ip-rotation',
                 displayName: 'IP Rotation',
-                component: lazy(() => import('../_guides/youtube/ip_rotation.mdx'))
+                component: lazy(() => import('../_guides/youtube/ip_rotation.mdx')),
             },
             {
                 name: 'proxy',
                 displayName: 'Using Proxy',
-                component: lazy(() => import('../_guides/youtube/proxy.mdx'))
-            }
-        ]
+                component: lazy(() => import('../_guides/youtube/proxy.mdx')),
+            },
+        ],
     },
     {
         name: 'filters',
@@ -193,14 +193,14 @@ const pages = [
             {
                 name: 'audio-filters',
                 displayName: 'Audio Filters',
-                component: lazy(() => import('../_guides/filters/audio_filters.mdx'))
+                component: lazy(() => import('../_guides/filters/audio_filters.mdx')),
             },
             {
                 name: 'custom-filters',
                 displayName: 'Custom Filters',
-                component: lazy(() => import('../_guides/filters/custom_filters.mdx'))
-            }
-        ]
+                component: lazy(() => import('../_guides/filters/custom_filters.mdx')),
+            },
+        ],
     },
 
     {
@@ -210,10 +210,10 @@ const pages = [
             {
                 name: 'migrating-from-v5',
                 displayName: 'Migrating from v5',
-                component: lazy(() => import('../_guides/migrating/migrating.mdx'))
-            }
-        ]
-    }
+                component: lazy(() => import('../_guides/migrating/migrating.mdx')),
+            },
+        ],
+    },
 ];
 
 const lgn = (p: string) => {
@@ -233,7 +233,14 @@ const mdxComponents = {
     ul: (props: any) => <List {...props} />,
     li: (props: any) => <ListItem {...props} />,
     pre: (props: any) => <div {...props} />,
-    a: (props: any) => <Link className="underline font-semibold text-teal-500 hover:text-teal-600" target="_blank" rel="noopener noreferrer" {...props} />,
+    a: (props: any) => (
+        <Link
+            className="underline font-semibold text-teal-500 hover:text-teal-600"
+            target="_blank"
+            rel="noopener noreferrer"
+            {...props}
+        />
+    ),
     table: (props: any) => <Table {...props} className={cn(props.className, 'border')} />,
     thead: (props: any) => <TableHeader {...props} className={cn(props.className, 'bg-secondary')} />,
     th: (props: any) => <TableHead {...props} />,
@@ -244,7 +251,7 @@ const mdxComponents = {
             <Code {...props} className="bg-zinc-600/80 text-gray-200" />
         ) : (
             <CodeBlock lines={props.children.trim().includes('\n')} language={lgn(props.className)} {...props} />
-        )
+        ),
 };
 /* eslint-enable */
 
@@ -261,7 +268,7 @@ export default function Guide() {
         return {
             component: p.component,
             topic: t.displayName,
-            page: p.displayName
+            page: p.displayName,
         };
     }, [topic, page]);
 
@@ -273,7 +280,7 @@ export default function Guide() {
             data={page.pages.map((m) => {
                 return {
                     name: m.displayName,
-                    id: m.name
+                    id: m.name,
                 };
             })}
             link={(doc) => {
@@ -286,8 +293,16 @@ export default function Guide() {
     return (
         <Container>
             <HeadingMeta
-                title={currentPage?.topic && currentPage.page ? `${currentPage.page} - ${currentPage.topic}` : 'Discord Player'}
-                description={currentPage?.topic && currentPage.page ? `This guide explains about ${currentPage.page} on the topic ${currentPage.topic}.` : `The official guidebook of Discord Player.`}
+                title={
+                    currentPage?.topic && currentPage.page
+                        ? `${currentPage.page} - ${currentPage.topic}`
+                        : 'Discord Player'
+                }
+                description={
+                    currentPage?.topic && currentPage.page
+                        ? `This guide explains about ${currentPage.page} on the topic ${currentPage.topic}.`
+                        : `The official guidebook of Discord Player.`
+                }
             />
             <div className="flex flex-row items-start w-full gap-5 mt-2">
                 <div className="lg:border lg:p-2 rounded-lg lg:w-[20%] mb-5 gap-5">

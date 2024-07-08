@@ -9,7 +9,7 @@ describe('Player', () => {
     });
 
     const client = new Client({
-        intents: [IntentsBitField.Flags.GuildVoiceStates]
+        intents: [IntentsBitField.Flags.GuildVoiceStates],
     });
 
     it('should create player', () => {

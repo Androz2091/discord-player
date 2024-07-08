@@ -16,9 +16,16 @@ export function Type({ types, prefix }: { types: string[]; prefix?: string }) {
             if (!mod) {
                 if (!(type in docsLink.external)) {
                     resolved.push(
-                        <span key={`${i}-${type}-unresolved`} className={cn('font-semibold', ['keyof', 'typeof', ';', '{', ':'].includes(type) ? 'mr-2' : type === '|' ? 'mx-1' : '', 'text-sm')}>
+                        <span
+                            key={`${i}-${type}-unresolved`}
+                            className={cn(
+                                'font-semibold',
+                                ['keyof', 'typeof', ';', '{', ':'].includes(type) ? 'mr-2' : type === '|' ? 'mx-1' : '',
+                                'text-sm',
+                            )}
+                        >
                             {type}
-                        </span>
+                        </span>,
                     );
                     continue;
                 }
@@ -32,17 +39,24 @@ export function Type({ types, prefix }: { types: string[]; prefix?: string }) {
                         target="_blank"
                     >
                         <span>{type}</span>
-                    </Link>
+                    </Link>,
                 );
             } else {
                 resolved.push(
                     <Link
                         href={mod.href}
                         key={`${i}-${type}-${mod}`}
-                        className={cn('font-semibold text-sm', mod.type === 'class' ? 'text-yellow-600' : mod.type === 'function' ? 'text-purple-600' : 'text-sky-600')}
+                        className={cn(
+                            'font-semibold text-sm',
+                            mod.type === 'class'
+                                ? 'text-yellow-600'
+                                : mod.type === 'function'
+                                ? 'text-purple-600'
+                                : 'text-sky-600',
+                        )}
                     >
                         <span>{mod.target}</span>
-                    </Link>
+                    </Link>,
                 );
             }
         }

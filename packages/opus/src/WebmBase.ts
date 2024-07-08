@@ -13,7 +13,7 @@ export class WebmBaseDemuxer extends Transform {
         d7: false, // TrackNumber
         '83': false, // TrackType
         a3: false, // SimpleBlock
-        '63a2': false
+        '63a2': false,
     };
 
     public static readonly TOO_SHORT = Symbol('TOO_SHORT');
@@ -97,7 +97,7 @@ export class WebmBaseDemuxer extends Transform {
         if (idLength === WebmBaseDemuxer.TOO_SHORT) return WebmBaseDemuxer.TOO_SHORT;
         return {
             id: chunk.subarray(offset, offset + idLength),
-            offset: offset + idLength
+            offset: offset + idLength,
         };
     }
 

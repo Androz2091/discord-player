@@ -21,7 +21,7 @@ export class GuildQueueManager {
      */
     public create(guild: string, options: DeepPartial<Omit<GuildQueueOptions, 'guild'>>) {
         const effects: GuildQueueAudioEffects = {
-            volume: options.effects?.volume ?? 50
+            volume: options.effects?.volume ?? 50,
         };
 
         const queue = new GuildQueue(this.player, {
@@ -30,11 +30,11 @@ export class GuildQueueManager {
             effects,
             history: {
                 maxSize: options.history?.maxSize ?? 0,
-                throwOnFull: options.history?.throwOnFull ?? false
+                throwOnFull: options.history?.throwOnFull ?? false,
             },
             queue: {
                 maxSize: options.queue?.maxSize ?? 0,
-                throwOnFull: options.queue?.throwOnFull ?? false
+                throwOnFull: options.queue?.throwOnFull ?? false,
             },
             plugins: {
                 allowed: options.plugins?.allowed ?? [],
@@ -44,8 +44,8 @@ export class GuildQueueManager {
                     options.plugins?.validate ??
                     (() => {
                         return Promise.resolve(true);
-                    })
-            }
+                    }),
+            },
         });
 
         this.store.set(guild, queue);

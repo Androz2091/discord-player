@@ -210,7 +210,7 @@ export class PlayerNode {
             secure: isSecure,
             clientId: username,
             password,
-            ipc: isIpc
+            ipc: isIpc,
         };
     }
 }

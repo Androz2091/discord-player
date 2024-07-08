@@ -27,8 +27,8 @@ export function createJoinVoiceChannelPayload(config: JoinConfig) {
             guild_id: config.guildId,
             channel_id: config.channelId,
             self_deaf: config.selfDeaf,
-            self_mute: config.selfMute
-        }
+            self_mute: config.selfMute,
+        },
     };
 }
 

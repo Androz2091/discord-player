@@ -89,13 +89,13 @@ export class GuildQueue {
         this.tracks = new Queue({
             name: 'TracksQueue',
             maxSize: this.options.queue.maxSize,
-            throwOnFull: this.options.queue.throwOnFull
+            throwOnFull: this.options.queue.throwOnFull,
         });
 
         this.history = new Stack({
             name: 'QueueHistory',
             maxSize: this.options.history.maxSize,
-            throwOnFull: this.options.history.throwOnFull
+            throwOnFull: this.options.history.throwOnFull,
         });
     }
 

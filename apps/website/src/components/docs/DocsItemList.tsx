@@ -32,7 +32,11 @@ export function DocsItemList({ data, name, link, icon }: IProps) {
                         <h1
                             className={cn(
                                 'text-base font-normal text-muted-foreground cursor-pointer',
-                                item.lib === router.query.package && item.name === router.query.target && item.type === router.query.type ? 'font-medium text-secondary' : ''
+                                item.lib === router.query.package &&
+                                    item.name === router.query.target &&
+                                    item.type === router.query.type
+                                    ? 'font-medium text-secondary'
+                                    : '',
                             )}
                         >
                             {item.name}

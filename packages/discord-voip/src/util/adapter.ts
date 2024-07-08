@@ -51,4 +51,6 @@ export interface DiscordGatewayAdapterImplementerMethods {
  * the implementer will return some methods that the library can call - e.g. to send messages on
  * the gateway, or to signal that the adapter can be removed.
  */
-export type DiscordGatewayAdapterCreator = (methods: DiscordGatewayAdapterLibraryMethods) => DiscordGatewayAdapterImplementerMethods;
+export type DiscordGatewayAdapterCreator = (
+    methods: DiscordGatewayAdapterLibraryMethods,
+) => DiscordGatewayAdapterImplementerMethods;

@@ -17,7 +17,7 @@ export {
     type VoiceConnectionDisconnectedWebSocketState,
     VoiceConnectionDisconnectReason,
     type VoiceConnectionReadyState,
-    type VoiceConnectionSignallingState
+    type VoiceConnectionSignallingState,
 } from './VoiceConnection';
 
 export { type JoinConfig, getVoiceConnection, getVoiceConnections, getGroups } from './DataStore';

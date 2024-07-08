@@ -1,7 +1,15 @@
 import { ChildProcessWithoutNullStreams, spawn, spawnSync } from 'node:child_process';
 import { Duplex, DuplexOptions } from 'node:stream';
 
-export type FFmpegLib = 'ffmpeg' | './ffmpeg' | 'avconv' | './avconv' | 'ffmpeg-static' | '@ffmpeg-installer/ffmpeg' | '@node-ffmpeg/node-ffmpeg-installer' | 'ffmpeg-binaries';
+export type FFmpegLib =
+    | 'ffmpeg'
+    | './ffmpeg'
+    | 'avconv'
+    | './avconv'
+    | 'ffmpeg-static'
+    | '@ffmpeg-installer/ffmpeg'
+    | '@node-ffmpeg/node-ffmpeg-installer'
+    | 'ffmpeg-binaries';
 
 export type FFmpegCallback<Args extends Array<unknown>> = (...args: Args) => unknown;
 
@@ -46,7 +54,7 @@ export class FFmpeg extends Duplex {
         { name: 'ffmpeg-static', module: true },
         { name: '@ffmpeg-installer/ffmpeg', module: true },
         { name: '@node-ffmpeg/node-ffmpeg-installer', module: true },
-        { name: 'ffmpeg-binaries', module: true }
+        { name: 'ffmpeg-binaries', module: true },
     ];
 
     /**
@@ -105,7 +113,7 @@ export class FFmpeg extends Duplex {
                     module: source.module,
                     name: source.name,
                     path,
-                    version: VERSION_REGEX.exec(result.stderr.toString())?.[1] ?? 'unknown'
+                    version: VERSION_REGEX.exec(result.stderr.toString())?.[1] ?? 'unknown',
                 };
 
                 FFmpeg.cached = resolved;
@@ -115,7 +123,9 @@ export class FFmpeg extends Duplex {
                 return resolved;
             } catch (e) {
                 const err = e && e instanceof Error ? e.message : `${e}`;
-                const msg = `Failed to load ffmpeg using ${source.module ? `require('${source.name}')` : `spawn('${source.name}')`}. Error: ${err}`;
+                const msg = `Failed to load ffmpeg using ${
+                    source.module ? `require('${source.name}')` : `spawn('${source.name}')`
+                }. Error: ${err}`;
 
                 errors.push(msg);
             }
@@ -181,7 +191,7 @@ export class FFmpeg extends Duplex {
             end: this._reader,
             unpipe: this._reader,
             finish: this._writer,
-            drain: this._writer
+            drain: this._writer,
         } as const;
 
         // @ts-expect-error
@@ -194,7 +204,8 @@ export class FFmpeg extends Duplex {
 
         for (const method of ['on', 'once', 'removeListener', 'removeAllListeners', 'listeners'] as const) {
             // @ts-expect-error
-            this[method] = (ev, fn) => (EVENTS[ev] ? EVENTS[ev][method](ev, fn) : Duplex.prototype[method].call(this, ev, fn));
+            this[method] = (ev, fn) =>
+                EVENTS[ev] ? EVENTS[ev][method](ev, fn) : Duplex.prototype[method].call(this, ev, fn);
         }
 
         const processError = (error: Error) => this.emit('error', error);

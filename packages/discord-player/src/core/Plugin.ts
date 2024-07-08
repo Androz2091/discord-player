@@ -16,7 +16,7 @@ export const PluginType = {
     /**
      * A plugin that provides audio effects for the given track stream.
      */
-    AudioEffect: 'AudioEffect'
+    AudioEffect: 'AudioEffect',
 } as const;
 
 export type PluginType = (typeof PluginType)[keyof typeof PluginType];

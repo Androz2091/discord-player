@@ -58,11 +58,11 @@ export function joinVoiceChannel(options: CreateVoiceConnectionOptions & JoinVoi
         selfDeaf: true,
         selfMute: false,
         group: 'default',
-        ...options
+        ...options,
     };
 
     return createVoiceConnection(joinConfig, {
         adapterCreator: options.adapterCreator,
-        debug: options.debug
+        debug: options.debug,
     });
 }

@@ -11,7 +11,7 @@ export {
     type AudioPlayerIdleState,
     type AudioPlayerPausedState,
     type AudioPlayerPlayingState,
-    type CreateAudioPlayerOptions
+    type CreateAudioPlayerOptions,
 } from './AudioPlayer';
 
 export { AudioPlayerError } from './AudioPlayerError';

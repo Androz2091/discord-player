@@ -19,7 +19,10 @@ export function HeadingMeta(props: IProps) {
             <link rel="icon" href="/icon.png" type="image/png" />
             <title>{title}</title>
             <meta name="description" content={description} />
-            <meta name="keywords" content="discord-player,voip,discord,api,discord.js,music,bot,ffmpeg,npm,nodejs,javascript,typescript" />
+            <meta
+                name="keywords"
+                content="discord-player,voip,discord,api,discord.js,music,bot,ffmpeg,npm,nodejs,javascript,typescript"
+            />
             <meta name="theme-color" content="#0d9488" />
         </Head>
     );

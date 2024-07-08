@@ -71,8 +71,10 @@ export class EventEmitter<L extends ListenerSignature<L> = DefaultListener> exte
             // eslint-disable-next-line no-console
             console.error(...args);
             process.emitWarning(
-                `No event listener found for event "${String(name)}". Events ${this.requiredEvents.map((m) => `"${String(m)}"`).join(', ')} must have event listeners.`,
-                'UnhandledEventsWarning'
+                `No event listener found for event "${String(name)}". Events ${this.requiredEvents
+                    .map((m) => `"${String(m)}"`)
+                    .join(', ')} must have event listeners.`,
+                'UnhandledEventsWarning',
             );
             return false;
         }

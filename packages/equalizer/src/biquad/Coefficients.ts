@@ -8,7 +8,7 @@ export const FilterType = {
     AllPass: 6,
     LowShelf: 7,
     HighShelf: 8,
-    PeakingEQ: 9
+    PeakingEQ: 9,
 } as const;
 
 export type BiquadFilters = keyof typeof FilterType | (typeof FilterType)[keyof typeof FilterType];
@@ -65,7 +65,7 @@ export class Coefficients {
                     a2: 0.0,
                     b0: alpha,
                     b1: 0.0,
-                    b2: 0.0
+                    b2: 0.0,
                 });
             }
             case FilterType.SinglePoleLowPass: {
@@ -77,7 +77,7 @@ export class Coefficients {
                     a2: 0.0,
                     b0: omega_t / a0,
                     b1: omega_t / a0,
-                    b2: 0.0
+                    b2: 0.0,
                 });
             }
             case FilterType.LowPass: {
@@ -99,7 +99,7 @@ export class Coefficients {
                     a2: a2 * div,
                     b0: b0 * div,
                     b1: b1 * div,
-                    b2: b2 * div
+                    b2: b2 * div,
                 });
             }
             case FilterType.HighPass: {
@@ -121,7 +121,7 @@ export class Coefficients {
                     a2: a2 * div,
                     b0: b0 * div,
                     b1: b1 * div,
-                    b2: b2 * div
+                    b2: b2 * div,
                 });
             }
             case FilterType.Notch: {
@@ -143,7 +143,7 @@ export class Coefficients {
                     a2: a2 * div,
                     b0: b0 * div,
                     b1: b1 * div,
-                    b2: b2 * div
+                    b2: b2 * div,
                 });
             }
             case FilterType.BandPass: {
@@ -165,7 +165,7 @@ export class Coefficients {
                     a2: a2 * div,
                     b0: b0 * div,
                     b1: b1 * div,
-                    b2: b2 * div
+                    b2: b2 * div,
                 });
             }
             case FilterType.AllPass: {
@@ -185,7 +185,7 @@ export class Coefficients {
                     a2: a2 / a0,
                     b0: b0 / a0,
                     b1: b1 / a0,
-                    b2: b2 / a0
+                    b2: b2 / a0,
                 });
             }
             case FilterType.LowShelf: {
@@ -206,7 +206,7 @@ export class Coefficients {
                     a2: a2 / a0,
                     b0: b0 / a0,
                     b1: b1 / a0,
-                    b2: b2 / a0
+                    b2: b2 / a0,
                 });
             }
             case FilterType.HighShelf: {
@@ -227,7 +227,7 @@ export class Coefficients {
                     a2: a2 / a0,
                     b0: b0 / a0,
                     b1: b1 / a0,
-                    b2: b2 / a0
+                    b2: b2 / a0,
                 });
             }
             case FilterType.PeakingEQ: {
@@ -248,7 +248,7 @@ export class Coefficients {
                     a2: a2 / a0,
                     b0: b0 / a0,
                     b1: b1 / a0,
-                    b2: b2 / a0
+                    b2: b2 / a0,
                 });
             }
             default:

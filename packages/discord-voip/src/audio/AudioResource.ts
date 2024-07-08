@@ -100,7 +100,12 @@ export class AudioResource<Metadata = unknown> {
      */
     public silenceRemaining = -1;
 
-    public constructor(edges: readonly Edge[], streams: readonly Readable[], metadata: Metadata, silencePaddingFrames: number) {
+    public constructor(
+        edges: readonly Edge[],
+        streams: readonly Readable[],
+        metadata: Metadata,
+        silencePaddingFrames: number,
+    ) {
         this.edges = edges;
         this.playStream = streams.length > 1 ? (pipeline(streams, noop) as unknown as Readable) : streams[0]!;
         this.metadata = metadata;
@@ -214,7 +219,13 @@ export function inferStreamType(stream: Readable): {
  */
 export function createAudioResource<Metadata>(
     input: Readable | string,
-    options: CreateAudioResourceOptions<Metadata> & Pick<Metadata extends null | undefined ? CreateAudioResourceOptions<Metadata> : Required<CreateAudioResourceOptions<Metadata>>, 'metadata'>
+    options: CreateAudioResourceOptions<Metadata> &
+        Pick<
+            Metadata extends null | undefined
+                ? CreateAudioResourceOptions<Metadata>
+                : Required<CreateAudioResourceOptions<Metadata>>,
+            'metadata'
+        >,
 ): AudioResource<Metadata extends null | undefined ? null : Metadata>;
 
 /**
@@ -230,7 +241,10 @@ export function createAudioResource<Metadata>(
  * @param options - Configurable options for creating the resource
  * @typeParam Metadata - the type for the metadata (if any) of the audio resource
  */
-export function createAudioResource<Metadata extends null | undefined>(input: Readable | string, options?: Omit<CreateAudioResourceOptions<Metadata>, 'metadata'>): AudioResource<null>;
+export function createAudioResource<Metadata extends null | undefined>(
+    input: Readable | string,
+    options?: Omit<CreateAudioResourceOptions<Metadata>, 'metadata'>,
+): AudioResource<null>;
 
 /**
  * Creates an audio resource that can be played by audio players.
@@ -245,7 +259,10 @@ export function createAudioResource<Metadata extends null | undefined>(input: Re
  * @param options - Configurable options for creating the resource
  * @typeParam Metadata - the type for the metadata (if any) of the audio resource
  */
-export function createAudioResource<Metadata>(input: Readable | string, options: CreateAudioResourceOptions<Metadata> = {}): AudioResource<Metadata> {
+export function createAudioResource<Metadata>(
+    input: Readable | string,
+    options: CreateAudioResourceOptions<Metadata> = {},
+): AudioResource<Metadata> {
     let inputType = options.inputType;
     let needsInlineVolume = Boolean(options.inlineVolume);
 
@@ -263,11 +280,21 @@ export function createAudioResource<Metadata>(input: Readable | string, options:
     if (transformerPipeline.length === 0) {
         if (typeof input === 'string') throw new Error(`Invalid pipeline constructed for string resource '${input}'`);
         // No adjustments required
-        return new AudioResource<Metadata>([], [input], (options.metadata ?? null) as Metadata, options.silencePaddingFrames ?? 5);
+        return new AudioResource<Metadata>(
+            [],
+            [input],
+            (options.metadata ?? null) as Metadata,
+            options.silencePaddingFrames ?? 5,
+        );
     }
 
     const streams = transformerPipeline.map((edge) => edge.transformer(input));
     if (typeof input !== 'string') streams.unshift(input);
 
-    return new AudioResource<Metadata>(transformerPipeline, streams, (options.metadata ?? null) as Metadata, options.silencePaddingFrames ?? 5);
+    return new AudioResource<Metadata>(
+        transformerPipeline,
+        streams,
+        (options.metadata ?? null) as Metadata,
+        options.silencePaddingFrames ?? 5,
+    );
 }

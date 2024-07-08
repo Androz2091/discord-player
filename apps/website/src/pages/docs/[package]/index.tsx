@@ -15,7 +15,13 @@ export default function DocumentationEntryPoint() {
 
         const name = pkg.name;
         const type = pkg.classes.length ? 'class' : pkg.types.length ? 'type' : pkg.functions.length ? 'function' : '';
-        const target = pkg.classes.length ? pkg.classes[0].data.name : pkg.types.length ? pkg.types[0].data.name : pkg.functions.length ? pkg.functions[0].data.name : '';
+        const target = pkg.classes.length
+            ? pkg.classes[0].data.name
+            : pkg.types.length
+            ? pkg.types[0].data.name
+            : pkg.functions.length
+            ? pkg.functions[0].data.name
+            : '';
 
         if (!target || !type) return;
 

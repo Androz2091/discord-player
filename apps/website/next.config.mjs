@@ -13,13 +13,13 @@ const withMDX = nextMDX({
                     showCopyButton: true,
                     theme: 'github-dark-dimmed',
                     autoImport: true,
-                    autoLink: true
-                }
+                    autoLink: true,
+                },
             ],
-            remarkGfm
+            remarkGfm,
         ],
-        providerImportSource: '@mdx-js/react'
-    }
+        providerImportSource: '@mdx-js/react',
+    },
 });
 
 /** @type {import('next').NextConfig} */
@@ -27,12 +27,12 @@ const nextConfig = {
     reactStrictMode: false,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     typescript: {
-        ignoreBuildErrors: true
+        ignoreBuildErrors: true,
     },
     eslint: {
-        ignoreDuringBuilds: true
+        ignoreDuringBuilds: true,
     },
-    swcMinify: true
+    swcMinify: true,
     // experimental: {
     //     mdxRs: true
     // }

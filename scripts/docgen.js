@@ -13,7 +13,7 @@ async function main() {
         input: ['.'],
         markdown: false,
         noEmit: true,
-        print: false
+        print: false,
     });
 
     await writeFile(path.join(docs_destination, 'docs.json'), JSON.stringify(res));

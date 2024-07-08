@@ -16,7 +16,7 @@ interface WorkerInfo {
 export enum WorkerDistributionMode {
     Balanced = 'balanced',
     LeastLoad = 'least-load',
-    Random = 'random'
+    Random = 'random',
 }
 
 export interface WorkerConfig {
@@ -76,9 +76,9 @@ export class WorkerManager extends EventEmitter<WorkerEvents> {
             estimatedClients: 0,
             stats: {
                 memoryUsed: 0,
-                subscriptions: 0
+                subscriptions: 0,
             },
-            lastAccess: Date.now()
+            lastAccess: Date.now(),
         };
 
         this.workers.set(thread.threadId, workerInfo);

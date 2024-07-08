@@ -28,7 +28,7 @@ const libs = {
         random: (num: number, buffer: Buffer = Buffer.allocUnsafe(num)) => {
             sodium.randombytes_buf(buffer);
             return buffer;
-        }
+        },
     }),
     sodium: (sodium: unsafe): Methods => ({
         open: sodium.api.crypto_secretbox_open_easy,
@@ -36,18 +36,18 @@ const libs = {
         random: (num: number, buffer: Buffer = Buffer.allocUnsafe(num)) => {
             sodium.api.randombytes_buf(buffer);
             return buffer;
-        }
+        },
     }),
     'libsodium-wrappers': (sodium: unsafe): Methods => ({
         open: sodium.crypto_secretbox_open_easy,
         close: sodium.crypto_secretbox_easy,
-        random: sodium.randombytes_buf
+        random: sodium.randombytes_buf,
     }),
     tweetnacl: (tweetnacl: unsafe): Methods => ({
         open: tweetnacl.secretbox.open,
         close: tweetnacl.secretbox,
-        random: tweetnacl.randomBytes
-    })
+        random: tweetnacl.randomBytes,
+    }),
 };
 
 // @ts-ignore
@@ -58,14 +58,14 @@ const fallbackError = () => {
     throw new Error(
         `Cannot play audio as no valid encryption package is installed.
 - Install one of the following packages: ${libsName}
-- Use the console.log(DependencyReport.generateString()) function for more information.\n`
+- Use the console.log(DependencyReport.generateString()) function for more information.\n`,
     );
 };
 
 const methods: Methods = {
     open: fallbackError,
     close: fallbackError,
-    random: fallbackError
+    random: fallbackError,
 };
 
 void (async () => {

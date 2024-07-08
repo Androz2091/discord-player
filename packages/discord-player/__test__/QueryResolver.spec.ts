@@ -108,7 +108,8 @@ describe('QueryResolver', () => {
     });
 
     it('should be appleMusicAlbum', () => {
-        const query = 'https://music.apple.com/us/album/whenever-you-need-somebody-deluxe-edition-2022-remaster/1615678477';
+        const query =
+            'https://music.apple.com/us/album/whenever-you-need-somebody-deluxe-edition-2022-remaster/1615678477';
         expect(qr.resolve(query).type).toBe(QueryType.APPLE_MUSIC_ALBUM);
     });
 

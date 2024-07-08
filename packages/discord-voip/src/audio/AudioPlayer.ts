@@ -33,7 +33,7 @@ export enum NoSubscriberBehavior {
     /**
      * The player stops and enters the Idle state.
      */
-    Stop = 'stop'
+    Stop = 'stop',
 }
 
 export enum AudioPlayerStatus {
@@ -60,7 +60,7 @@ export enum AudioPlayerStatus {
     /**
      * When the player is actively playing an audio resource.
      */
-    Playing = 'playing'
+    Playing = 'playing',
 }
 
 /**
@@ -150,7 +150,11 @@ export interface AudioPlayerPausedState {
 /**
  * The various states that the player can be in.
  */
-export type AudioPlayerState = AudioPlayerBufferingState | AudioPlayerIdleState | AudioPlayerPausedState | AudioPlayerPlayingState;
+export type AudioPlayerState =
+    | AudioPlayerBufferingState
+    | AudioPlayerIdleState
+    | AudioPlayerPausedState
+    | AudioPlayerPlayingState;
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface AudioPlayer extends EventEmitter {
@@ -183,7 +187,10 @@ export interface AudioPlayer extends EventEmitter {
      *
      * @eventProperty
      */
-    on<Event extends AudioPlayerStatus>(event: Event, listener: (oldState: AudioPlayerState, newState: AudioPlayerState & { status: Event }) => void): this;
+    on<Event extends AudioPlayerStatus>(
+        event: Event,
+        listener: (oldState: AudioPlayerState, newState: AudioPlayerState & { status: Event }) => void,
+    ): this;
 }
 
 /**
@@ -195,7 +202,7 @@ function stringifyState(state: AudioPlayerState) {
     return JSON.stringify({
         ...state,
         resource: Reflect.has(state, 'resource'),
-        stepTimeout: Reflect.has(state, 'stepTimeout')
+        stepTimeout: Reflect.has(state, 'stepTimeout'),
     });
 }
 
@@ -244,7 +251,7 @@ export class AudioPlayer extends EventEmitter {
         this.behaviors = {
             noSubscriber: NoSubscriberBehavior.Pause,
             maxMissedFrames: 5,
-            ...options.behaviors
+            ...options.behaviors,
         };
         this.debug = options.debug === false ? null : (message: string) => this.emit('debug', message);
     }
@@ -253,7 +260,9 @@ export class AudioPlayer extends EventEmitter {
      * A list of subscribed voice connections that can currently receive audio to play.
      */
     public get playable() {
-        return this.subscribers.filter(({ connection }) => connection.state.status === VoiceConnectionStatus.Ready).map(({ connection }) => connection);
+        return this.subscribers
+            .filter(({ connection }) => connection.state.status === VoiceConnectionStatus.Ready)
+            .map(({ connection }) => connection);
     }
 
     /**
@@ -322,7 +331,10 @@ export class AudioPlayer extends EventEmitter {
         }
 
         // When leaving the Buffering state (or buffering a new resource), then remove the event listeners from it
-        if (oldState.status === AudioPlayerStatus.Buffering && (newState.status !== AudioPlayerStatus.Buffering || newState.resource !== oldState.resource)) {
+        if (
+            oldState.status === AudioPlayerStatus.Buffering &&
+            (newState.status !== AudioPlayerStatus.Buffering || newState.resource !== oldState.resource)
+        ) {
             oldState.resource.playStream.off('end', oldState.onFailureCallback);
             oldState.resource.playStream.off('close', oldState.onFailureCallback);
             oldState.resource.playStream.off('finish', oldState.onFailureCallback);
@@ -341,7 +353,10 @@ export class AudioPlayer extends EventEmitter {
         }
 
         // playing -> playing state changes should still transition if a resource changed (seems like it would be useful!)
-        const didChangeResources = oldState.status !== AudioPlayerStatus.Idle && newState.status === AudioPlayerStatus.Playing && oldState.resource !== newState.resource;
+        const didChangeResources =
+            oldState.status !== AudioPlayerStatus.Idle &&
+            newState.status === AudioPlayerStatus.Playing &&
+            oldState.resource !== newState.resource;
 
         this._state = newState;
 
@@ -390,7 +405,7 @@ export class AudioPlayer extends EventEmitter {
 
             if (this.state.status !== AudioPlayerStatus.Idle && this.state.resource === resource) {
                 this.state = {
-                    status: AudioPlayerStatus.Idle
+                    status: AudioPlayerStatus.Idle,
                 };
             }
         };
@@ -403,7 +418,7 @@ export class AudioPlayer extends EventEmitter {
                 missedFrames: 0,
                 playbackDuration: 0,
                 resource,
-                onStreamError
+                onStreamError,
             };
         } else {
             const onReadableCallback = () => {
@@ -413,7 +428,7 @@ export class AudioPlayer extends EventEmitter {
                         missedFrames: 0,
                         playbackDuration: 0,
                         resource,
-                        onStreamError
+                        onStreamError,
                     };
                 }
             };
@@ -421,7 +436,7 @@ export class AudioPlayer extends EventEmitter {
             const onFailureCallback = () => {
                 if (this.state.status === AudioPlayerStatus.Buffering && this.state.resource === resource) {
                     this.state = {
-                        status: AudioPlayerStatus.Idle
+                        status: AudioPlayerStatus.Idle,
                     };
                 }
             };
@@ -437,7 +452,7 @@ export class AudioPlayer extends EventEmitter {
                 resource,
                 onReadableCallback,
                 onFailureCallback,
-                onStreamError
+                onStreamError,
             };
         }
     }
@@ -453,7 +468,7 @@ export class AudioPlayer extends EventEmitter {
         this.state = {
             ...this.state,
             status: AudioPlayerStatus.Paused,
-            silencePacketsRemaining: interpolateSilence ? 5 : 0
+            silencePacketsRemaining: interpolateSilence ? 5 : 0,
         };
         return true;
     }
@@ -468,7 +483,7 @@ export class AudioPlayer extends EventEmitter {
         this.state = {
             ...this.state,
             status: AudioPlayerStatus.Playing,
-            missedFrames: 0
+            missedFrames: 0,
         };
         return true;
     }
@@ -484,7 +499,7 @@ export class AudioPlayer extends EventEmitter {
         if (this.state.status === AudioPlayerStatus.Idle) return false;
         if (force || this.state.resource.silencePaddingFrames === 0) {
             this.state = {
-                status: AudioPlayerStatus.Idle
+                status: AudioPlayerStatus.Idle,
             };
         } else if (this.state.resource.silenceRemaining === -1) {
             this.state.resource.silenceRemaining = this.state.resource.silencePaddingFrames;
@@ -505,7 +520,7 @@ export class AudioPlayer extends EventEmitter {
         // If the stream has been destroyed or is no longer readable, then transition to the Idle state.
         if (!state.resource.readable) {
             this.state = {
-                status: AudioPlayerStatus.Idle
+                status: AudioPlayerStatus.Idle,
             };
             return false;
         }
@@ -551,7 +566,7 @@ export class AudioPlayer extends EventEmitter {
             this.state = {
                 ...state,
                 status: AudioPlayerStatus.Playing,
-                missedFrames: 0
+                missedFrames: 0,
             };
         }
 
@@ -575,7 +590,7 @@ export class AudioPlayer extends EventEmitter {
                 this.state = {
                     ...state,
                     status: AudioPlayerStatus.AutoPaused,
-                    silencePacketsRemaining: 5
+                    silencePacketsRemaining: 5,
                 };
                 return;
             } else if (this.behaviors.noSubscriber === NoSubscriberBehavior.Stop) {
@@ -621,7 +636,11 @@ export class AudioPlayer extends EventEmitter {
      * @param packet - The Opus packet to be prepared by each receiver
      * @param receivers - The connections that should play this packet
      */
-    private _preparePacket(packet: Buffer, receivers: VoiceConnection[], state: AudioPlayerPausedState | AudioPlayerPlayingState) {
+    private _preparePacket(
+        packet: Buffer,
+        receivers: VoiceConnection[],
+        state: AudioPlayerPausedState | AudioPlayerPlayingState,
+    ) {
         state.playbackDuration += 20;
         for (const connection of receivers) {
             connection.prepareAudioPacket(packet);

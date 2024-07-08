@@ -2,7 +2,7 @@ import { cn } from '@edge-ui/react';
 
 export function Container({
     children,
-    className
+    className,
 }: React.PropsWithChildren<{
     className?: string;
 }>) {
