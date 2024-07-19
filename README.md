@@ -87,6 +87,8 @@ $ npm install --save ffmpeg-binaries
 
 YouTube streaming is not supported without installing one of the following package. If you want to add support for YouTube playback, you need to install a streaming library. This step is not needed if you do not plan on using youtube source.
 
+*The default Youtube streaming appears to be unstable due to recent changes. It is recommend to install [`discord-player-youtubei`](https://npm.im/discord-player-youtubei)*
+
 ```bash
 $ npm install --save youtube-ext
 # or

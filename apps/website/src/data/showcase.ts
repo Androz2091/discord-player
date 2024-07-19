@@ -194,6 +194,11 @@ export const ShowcaseResource: IShowcase = {
             name: 'discord-player-tidal',
             description: 'An unofficial discord-player extractor to add support for tidal source.',
             url: 'https://npm.im/discord-player-tidal'
+        },
+        {
+            name: "discord-player-youtube", 
+            description: "Super charging your bot. dpy is a tiny extractor module to test the validity of youtubei.js in discord-player version 7.",
+            url: "https://npm.im/discord-player-youtubei"
         }
     ])
 };
