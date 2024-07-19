@@ -196,8 +196,8 @@ export const ShowcaseResource: IShowcase = {
             url: 'https://npm.im/discord-player-tidal'
         },
         {
-            name: "discord-player-youtube", 
-            description: "Super charging your bot. dpy is a tiny extractor module to test the validity of youtubei.js in discord-player version 7.",
+            name: "discord-player-youtubei", 
+            description: "Discord Player Youtubei is module that uses the Innertube API to extractor your songs providing more stability and better speeds.",
             url: "https://npm.im/discord-player-youtubei"
         }
     ])
