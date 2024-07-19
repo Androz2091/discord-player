@@ -46,6 +46,8 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
             this._ytLibName = name;
         }
 
+        process.emitWarning("YoutubeExtractor uses scraping-based streaming libraries which is known to be unstable at times.\nAn alternative is to use discord-player-youtubei https://github.com/retrouser955/discord-player-youtubei")
+
         YoutubeExtractor.instance = this;
     }
 
