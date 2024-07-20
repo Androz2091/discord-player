@@ -6,7 +6,7 @@ export class Stack<T> extends ArrayList<T> {
     }
 
     public next(): T | undefined {
-        return this.shift();
+        return this.pop();
     }
 
     public peek(): T | undefined {
