@@ -3,6 +3,7 @@ import {
     BaseExtractor,
     ExtractorInfo,
     ExtractorSearchContext,
+    ExtractorStreamable,
     type GuildQueueHistory,
     Playlist,
     QueryType,
@@ -221,5 +222,19 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
         if (!url) throw new Error('Could not extract stream from this track source');
 
         return url;
+    }
+
+    public async bridge(track: Track, sourceExtractor: BaseExtractor | null): Promise<ExtractorStreamable | null> {
+        if (sourceExtractor?.identifier === this.identifier) {
+            return this.stream(track);
+        }
+
+        const info = await this.handle(track.url, {
+            requestedBy: track.requestedBy
+        });
+
+        if (!info.tracks.length) return null;
+
+        return this.stream(info.tracks[0]);
     }
 }

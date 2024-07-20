@@ -46,7 +46,9 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
             this._ytLibName = name;
         }
 
-        process.emitWarning("YoutubeExtractor uses scraping-based streaming libraries which is known to be unstable at times.\nAn alternative is to use discord-player-youtubei https://npm.im/discord-player-youtubei\nView this GitHub issue for more information: https://github.com/Androz2091/discord-player/issues/1922")
+        process.emitWarning(
+            'YoutubeExtractor uses scraping-based streaming libraries which is known to be unstable at times.\nAn alternative is to use discord-player-youtubei https://npm.im/discord-player-youtubei\nView this GitHub issue for more information: https://github.com/Androz2091/discord-player/issues/1922'
+        );
 
         YoutubeExtractor.instance = this;
     }
@@ -259,6 +261,20 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
         url = url.includes('youtube.com') ? url.replace(/(m(usic)?|gaming)\./, '') : url;
 
         return this._stream(url, this, this.supportsDemux);
+    }
+
+    public async bridge(track: Track, sourceExtractor: BaseExtractor | null): Promise<ExtractorStreamable | null> {
+        if (sourceExtractor?.identifier === this.identifier) {
+            return this.stream(track);
+        }
+
+        const info = await this.handle(track.url, {
+            requestedBy: track.requestedBy
+        });
+
+        if (!info.tracks.length) return null;
+
+        return this.stream(info.tracks[0]);
     }
 
     public static validateURL(link: string) {

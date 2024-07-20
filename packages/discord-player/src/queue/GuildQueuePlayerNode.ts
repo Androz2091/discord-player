@@ -603,8 +603,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 const opusStream = $fmt === StreamType.Opus ?
                     stream :
                     $fmt === StreamType.OggOpus ?
-                    stream.pipe(new prism.opus.OggDemuxer()) :
-                    stream.pipe(new prism.opus.WebmDemuxer());
+                    stream.pipe(new prism.opus.OggDemuxer() as any) :
+                    stream.pipe(new prism.opus.WebmDemuxer() as any);
 
                 if (shouldPCM) {
                     // if we have any filters enabled, we need to decode the opus stream to pcm

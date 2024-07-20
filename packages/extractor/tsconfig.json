@@ -1,6 +1,4 @@
 {
     "extends": "@discord-player/tsconfig/base.json",
-    "include": [
-        "src/**/*"
-, "../discord-player/src/utils/IPRotator.ts"    ]
+    "include": ["src/**/*"]
 }

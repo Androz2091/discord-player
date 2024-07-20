@@ -1,9 +1,10 @@
 import { Player } from '../Player';
 import { Collection } from '@discord-player/utils';
-import { BaseExtractor } from './BaseExtractor';
+import { BaseExtractor, ExtractorStreamable } from './BaseExtractor';
 import { Util } from '../utils/Util';
 import { PlayerEventsEmitter } from '../utils/PlayerEventsEmitter';
 import { TypeUtil } from '../utils/TypeUtil';
+import { Track } from '../fabric';
 
 // prettier-ignore
 const knownExtractorKeys = [
@@ -219,6 +220,32 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
                 error: err,
                 result: false
             } as ExtractorExecutionResult<false>;
+    }
+
+    /**
+     * Request bridge for a track
+     * @param track The track to request bridge for
+     * @param sourceExtractor The source extractor of the track
+     */
+    public async requestBridge(track: Track, sourceExtractor: BaseExtractor | null = track.extractor) {
+        return this.run<ExtractorStreamable>(async (ext) => {
+            if (sourceExtractor && ext.identifier === sourceExtractor.identifier) return false;
+            const result = await ext.bridge(track, sourceExtractor);
+            if (!result) return false;
+            return result;
+        });
+    }
+
+    /**
+     * Request bridge from the specified extractor
+     * @param track The track to request bridge for
+     * @param sourceExtractor The source extractor of the track
+     * @param targetExtractor The target extractor to bridge to
+     */
+    public async requestBridgeFrom(track: Track, sourceExtractor: BaseExtractor | null, targetExtractor: ExtractorResolvable) {
+        const target = this.resolve(targetExtractor);
+        if (!target) return null;
+        return target.bridge(track, sourceExtractor);
     }
 
     /**
