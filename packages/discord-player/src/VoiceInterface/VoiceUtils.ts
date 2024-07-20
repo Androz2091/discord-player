@@ -56,6 +56,12 @@ class VoiceUtils {
             group?: string;
         }
     ) {
+        const existingConnection = this.getConnection(channel.guild.id, options?.group);
+
+        if (existingConnection?.joinConfig.channelId === channel?.id && existingConnection.state.status !== VoiceConnectionStatus.Destroyed) {
+            return existingConnection;
+        }
+
         const conn = joinVoiceChannel({
             guildId: channel.guild.id,
             channelId: channel.id,

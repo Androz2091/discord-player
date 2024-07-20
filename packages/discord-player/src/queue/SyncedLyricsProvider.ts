@@ -10,7 +10,7 @@ export type LyricsAt = { timestamp: number; line: string };
 const timestampPattern = /\[(\d{2}):(\d{2})\.(\d{2})\]/;
 
 export class SyncedLyricsProvider {
-    #loop: NodeJS.Timer | null = null;
+    #loop: NodeJS.Timeout | null = null;
     #callback: LyricsCallback | null = null;
     #onUnsubscribe: Unsubscribe | null = null;
 
@@ -116,7 +116,7 @@ export class SyncedLyricsProvider {
         const hasLoop = this.#loop !== null;
 
         if (hasLoop) {
-            clearInterval(this.#loop as NodeJS.Timer);
+            clearInterval(this.#loop!);
             this.#loop = null;
         }
 

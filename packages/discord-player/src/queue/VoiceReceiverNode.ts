@@ -1,5 +1,5 @@
 import { UserResolvable } from 'discord.js';
-import { PassThrough, type Readable } from 'stream';
+import { PassThrough, type Readable } from 'node:stream';
 import { EndBehaviorType } from 'discord-voip';
 import * as prism from 'prism-media';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
@@ -81,6 +81,7 @@ export class VoiceReceiverNode {
                 setImmediate(async () => {
                     if (options.mode === 'pcm') {
                         const pcm = receiveStream.pipe(
+                            // @ts-ignore
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             new (prism.opus || (<any>prism).default.opus).Decoder({
                                 channels: 2,
@@ -88,8 +89,10 @@ export class VoiceReceiverNode {
                                 rate: 48000
                             })
                         );
+                        // @ts-ignore
                         return pcm.pipe(passThrough);
                     } else {
+                        // @ts-ignore
                         return receiveStream.pipe(passThrough);
                     }
                 }).unref();

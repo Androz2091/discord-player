@@ -44,7 +44,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     #lastLatency = -1;
     #voiceStateUpdateListener = this.handleVoiceState.bind(this);
     #lagMonitorTimeout!: NodeJS.Timeout;
-    #lagMonitorInterval!: NodeJS.Timer;
+    #lagMonitorInterval!: NodeJS.Timeout;
     #onVoiceStateUpdate: VoiceStateHandler = defaultVoiceStateHandler;
     #hooksCtx: Context<HooksCtx> | null = null;
     /**
@@ -144,7 +144,9 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             }
         } as PlayerInitOptions;
 
-        this.client.setMaxListeners(this.client.getMaxListeners() + 1);
+        // @ts-ignore private method
+        this.client.incrementMaxListeners();
+
         this.client.on(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
@@ -297,7 +299,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     public async destroy() {
         this.nodes.cache.forEach((node) => node.delete());
         this.client.off(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
-        this.client.setMaxListeners(this.client.getMaxListeners() - 1);
+        // @ts-ignore private method
+        this.client.decrementMaxListeners();
         this.removeAllListeners();
         this.events.removeAllListeners();
         await this.extractors.unregisterAll();

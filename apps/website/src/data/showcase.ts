@@ -194,6 +194,11 @@ export const ShowcaseResource: IShowcase = {
             name: 'discord-player-tidal',
             description: 'An unofficial discord-player extractor to add support for tidal source.',
             url: 'https://npm.im/discord-player-tidal'
+        },
+        {
+            name: "discord-player-youtubei", 
+            description: "Discord Player Youtubei is module that uses the Innertube API to extractor your songs providing more stability and better speeds.",
+            url: "https://npm.im/discord-player-youtubei"
         }
     ])
 };

@@ -232,7 +232,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                             source: info,
                             bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
                         };
-                    },
+                    }
                 });
 
                 track.extractor = this;
@@ -251,17 +251,27 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
             return stream;
         }
 
-        const provider = this.bridgeProvider;
-        if (!provider) throw new Error(`Could not find bridge provider for '${this.constructor.name}'`);
+        // legacy
+        if (!('requestBridge' in this.context)) {
+            const provider = this.bridgeProvider;
+            if (!provider) throw new Error(`Could not find bridge provider for '${this.constructor.name}'`);
 
-        const data = await provider.resolve(this, info);
-        if (!data) throw new Error('Failed to bridge this track');
+            const data = await provider.resolve(this, info);
+            if (!data) throw new Error('Failed to bridge this track');
 
-        info.setMetadata({
-            ...(info.metadata || {}),
-            bridge: data.data
-        });
+            info.setMetadata({
+                ...(info.metadata || {}),
+                bridge: data.data
+            });
 
-        return await provider.stream(data);
+            return await provider.stream(data);
+        }
+
+        // new api
+        const result = await this.context.requestBridge(info, this);
+
+        if (!result?.result) throw new Error('Could not bridge this track');
+
+        return result.result;
     }
 }

@@ -163,6 +163,16 @@ export class BaseExtractor<T extends object = object> {
     public get supportsDemux() {
         return !!this.context.player.options.skipFFmpeg;
     }
+
+    /**
+     * Handle stream extraction for another extractor
+     * @param track The track to bridge
+     * @param sourceExtractor The source extractor
+     */
+    public async bridge(track: Track, sourceExtractor: BaseExtractor | null): Promise<ExtractorStreamable | null> {
+        void sourceExtractor;
+        return null;
+    }
 }
 
 export type NextFunction = (error?: Error | null, stream?: Readable) => void;

@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/extractor",
-  "version": "4.4.7",
+  "version": "4.5.0",
   "description": "Extractors for discord-player",
   "keywords": [
     "discord-player",
@@ -36,7 +36,7 @@
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
     "@distube/ytdl-core": "^4.13.0",
-    "@types/node": "^18.11.18",
+    "@types/node": "^20.14.11",
     "discord-player": "workspace:^",
     "mediaplex": "^0.0.7",
     "play-dl": "^1.9.6",
