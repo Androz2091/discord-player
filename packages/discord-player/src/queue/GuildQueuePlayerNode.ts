@@ -148,7 +148,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         const prefersBridgedMetadata = this.queue.options.preferBridgedMetadata;
         const track = this.queue.currentTrack;
 
-        if (prefersBridgedMetadata && track?.metadata != null && typeof track.metadata === 'object' && 'bridge' in track.metadata) {
+        if (prefersBridgedMetadata && track?.metadata != null && typeof track.metadata === 'object' && 'bridge' in track.metadata && track.metadata.bridge != null) {
             const duration = (
                 track as Track<{
                     bridge: {
