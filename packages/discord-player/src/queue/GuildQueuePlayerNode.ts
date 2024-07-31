@@ -603,7 +603,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 const opusStream = $fmt === StreamType.Opus ?
                     stream :
                     $fmt === StreamType.OggOpus ?
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     stream.pipe(new prism.opus.OggDemuxer() as any) :
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     stream.pipe(new prism.opus.WebmDemuxer() as any);
 
                 if (shouldPCM) {

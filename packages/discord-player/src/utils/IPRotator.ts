@@ -1,4 +1,22 @@
-import ip from 'ip';
+import { Util } from './Util';
+import { Exceptions } from '../errors';
+
+// @ts-ignore
+let ip: typeof import('ip');
+
+function ensureIp() {
+    if (ip) return ip;
+
+    const { error, module } = Util.require('ip');
+
+    if (error) {
+        throw Exceptions.ERR_NOT_EXISTING_MODULE('ip', 'ip package is required to use IPRotator.');
+    }
+
+    ip = module;
+
+    return ip;
+}
 
 export class IPBlock {
     public usage = 0;
@@ -6,14 +24,14 @@ export class IPBlock {
     public readonly cidrSize: number;
 
     public constructor(public block: string) {
-        if (ip.isV4Format(block.split('/')[0]) && !block.includes('/')) {
+        if (ensureIp().isV4Format(block.split('/')[0]) && !block.includes('/')) {
             block += '/32';
-        } else if (ip.isV6Format(block.split('/')[0]) && !block.includes('/')) {
+        } else if (ensureIp().isV6Format(block.split('/')[0]) && !block.includes('/')) {
             block += '/128';
         }
 
-        this.cidr = ip.cidr(this.block);
-        this.cidrSize = ip.cidrSubnet(this.block).subnetMaskLength;
+        this.cidr = ensureIp().cidr(this.block);
+        this.cidrSize = ensureIp().cidrSubnet(this.block).subnetMaskLength;
     }
 
     public consume() {
@@ -67,7 +85,7 @@ export class IPRotator {
 
         this.#retries = 0;
         block.consume();
-        return { ip: random, family: ip.isV4Format(random) ? 4 : 6 };
+        return { ip: random, family: ensureIp().isV4Format(random) ? 4 : 6 };
     }
 
     public isFailedOrExcluded(ip: string) {
@@ -84,7 +102,7 @@ export class IPRotator {
         // Author: Jesse Tane <jesse.tane@gmail.com>
         // NPMJS: https://npmjs.org/random-ip
 
-        const bytes = ip.toBuffer(address);
+        const bytes = ensureIp().toBuffer(address);
         const ipv6 = bytes.length === 16;
         const bytesize = 8;
 
