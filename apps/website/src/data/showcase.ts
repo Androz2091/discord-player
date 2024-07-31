@@ -75,7 +75,7 @@ export const ShowcaseResource: IShowcase = {
             {
                 name: 'Botanique',
                 description: 'Typescript bot running on Docker, using discord-player for music and lyrics.',
-                version: 'v6.6.4',
+                version: 'v6.7.1',
                 url: 'https://git.mylloon.fr/ConfrerieDuKassoulait/Botanique',
             },
             {
