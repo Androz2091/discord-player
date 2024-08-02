@@ -268,12 +268,13 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
             return this.stream(track);
         }
 
-        const info = await this.handle(track.url, {
-            requestedBy: track.requestedBy
+        const query = sourceExtractor?.createBridgeQuery(track) ?? `${track.author} - ${track.title}`;
+        const info = await this.handle(query, {
+            requestedBy: track.requestedBy,
+            type: QueryType.YOUTUBE
         });
 
         if (!info.tracks.length) return null;
-
         return this.stream(info.tracks[0]);
     }
 
