@@ -218,6 +218,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
     }
 
     public async stream(info: Track) {
+        
         const url = await this.internal.util.streamLink(info.url).catch(Util.noop);
         if (!url) throw new Error('Could not extract stream from this track source');
 
@@ -229,8 +230,11 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
             return this.stream(track);
         }
 
-        const info = await this.handle(track.url, {
-            requestedBy: track.requestedBy
+        const query = sourceExtractor?.createBridgeQuery(track) ?? `${track.author} - ${track.title}`
+
+        const info = await this.handle(query, {
+            requestedBy: track.requestedBy,
+            type: QueryType.SOUNDCLOUD_SEARCH
         });
 
         if (!info.tracks.length) return null;
