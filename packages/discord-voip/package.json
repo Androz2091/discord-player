@@ -35,15 +35,15 @@
     },
     "devDependencies": {
         "@discord-player/tsconfig": "workspace:^",
-        "tsup": "^7.2.0",
-        "typescript": "^5.2.2"
+        "tsup": "^8.2.4",
+        "typescript": "^5.5.4"
     },
     "dependencies": {
         "@discord-player/ffmpeg": "workspace:^",
         "@discord-player/opus": "workspace:^",
         "@discord-player/utils": "workspace:^",
         "@types/ws": "^8.5.10",
-        "tsup": "^8.1.0",
-        "typescript": "^5.5.2"
+        "tsup": "^8.2.4",
+        "typescript": "^5.5.4"
     }
 }

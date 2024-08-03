@@ -10,15 +10,15 @@
   ],
   "scripts": {
     "bootstrap": "node ./scripts/bootstrap.js",
-    "build": "turbo run build --color --filter=!website --filter=!music-bot",
+    "build": "yarn workspaces foreach -Apti --exclude=\"./apps/{website,docs}\" run build",
     "docs": "node ./scripts/docgen.js",
-    "build:check": "turbo run build:check --color",
-    "lint": "turbo run lint --color",
+    "build:check": "yarn workspaces foreach -Apti run build:check",
+    "lint": "yarn workspaces foreach -Apti run lint",
     "format": "prettier --write \"{packages,scripts,examples,apps}/**/*.{js,ts,mjs,mts,jsx,tsx}\"",
-    "dev:web": "turbo run dev --filter=website",
-    "build:web": "turbo run build --filter=website",
-    "start:web": "turbo run preview --filter=website",
-    "test": "turbo run test --color",
+    "dev:web": "yarn workspaces foreach -Apti run dev",
+    "build:web": "yarn workspace website run build",
+    "start:web": "yarn workspace website run preview",
+    "test": "yarn workspaces foreach -Apti run test",
     "bot": "yarn workspace music-bot start"
   },
   "repository": {
@@ -38,7 +38,7 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "homepage": "https://github.com/Androz2091/discord-player#readme",
-  "packageManager": "yarn@4.2.2",
+  "packageManager": "yarn@4.4.0",
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
@@ -50,8 +50,7 @@
     "micro-docgen": "^0.2.0",
     "prettier": "^2.8.2",
     "rimraf": "^4.1.2",
-    "turbo": "1.10.16",
-    "typescript": "^5.2.2",
+    "typescript": "^5.5.4",
     "vitest": "^0.34.6"
   }
 }

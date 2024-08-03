@@ -205,6 +205,7 @@ export class FFmpeg extends Duplex {
         for (const method of ['on', 'once', 'removeListener', 'removeAllListeners', 'listeners'] as const) {
             // @ts-expect-error
             this[method] = (ev, fn) =>
+                // @ts-expect-error
                 EVENTS[ev] ? EVENTS[ev][method](ev, fn) : Duplex.prototype[method].call(this, ev, fn);
         }
 
