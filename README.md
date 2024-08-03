@@ -85,6 +85,10 @@ $ npm install --save ffmpeg-binaries
 
 #### Streaming Library
 
+**The following method is deprecated and will be removed in the future. Please switch to [discord-player-youtubei](https://npmjs.com/discord-player-youtubei).**
+
+**Not recommended**:
+
 YouTube streaming is not supported without installing one of the following package. If you want to add support for YouTube playback, you need to install a streaming library. This step is not needed if you do not plan on using youtube source.
 
 ```bash
@@ -98,8 +102,6 @@ $ npm install --save yt-stream
 # or
 $ npm install --save ytdl-core
 ```
-
-We recommend using `youtube-ext` for better performance.
 
 Once you have completed these installations, let's proceed with writing a simple music bot.
 
