@@ -105,7 +105,6 @@ export class AttachmentExtractor extends BaseExtractor {
 
                 track.extractor = this;
 
-                // @ts-expect-error
                 track.raw.isFile = false;
 
                 return { playlist: null, tracks: [track] };
@@ -180,7 +179,6 @@ export class AttachmentExtractor extends BaseExtractor {
 
                 track.extractor = this;
 
-                // @ts-expect-error
                 track.raw.isFile = true;
 
                 return { playlist: null, tracks: [track] };
@@ -196,7 +194,7 @@ export class AttachmentExtractor extends BaseExtractor {
 
     public async stream(info: Track) {
         const engine = info.raw.engine as string;
-        // @ts-expect-error
+
         const isFile = info.raw.isFile as boolean;
 
         if (!engine) throw new Error('Could not find stream source');

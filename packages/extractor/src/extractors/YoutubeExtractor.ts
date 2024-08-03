@@ -119,7 +119,8 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
                         metadata: video,
                         async requestMetadata() {
                             return video;
-                        }
+                        },
+                        live: video.live
                     });
 
                     track.extractor = this;
@@ -153,7 +154,8 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
                     metadata: video,
                     async requestMetadata() {
                         return video;
-                    }
+                    },
+                    live: video.live
                 });
 
                 track.extractor = this;
@@ -193,7 +195,8 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
                 metadata: video,
                 async requestMetadata() {
                     return video;
-                }
+                },
+                live: video.live
             });
 
             track.extractor = this;
@@ -237,7 +240,8 @@ export class YoutubeExtractor extends BaseExtractor<YoutubeExtractorInit> {
                 metadata: video,
                 async requestMetadata() {
                     return video;
-                }
+                },
+                live: video.live
             });
 
             t.extractor = this;
