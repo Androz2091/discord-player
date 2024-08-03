@@ -32,6 +32,7 @@ const DomainsMap = {
 // prettier-ignore
 const redirectDomains = new Set([
     /^https?:\/\/spotify.link\/[A-Za-z0-9]+$/,
+    /^https:\/\/on\.soundcloud\.com\/[a-zA-Z1-9]{0,17}$/
 ]);
 
 export interface ResolvedQuery {
@@ -58,7 +59,7 @@ class QueryResolver {
             appleMusicSongRegex,
             soundcloudTrackRegex,
             soundcloudPlaylistRegex,
-            youtubePlaylistRegex
+            youtubePlaylistRegex,
         };
     }
 
