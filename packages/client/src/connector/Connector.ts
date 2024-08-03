@@ -1,5 +1,6 @@
 import { EventEmitter } from '@discord-player/utils';
 import type { PlayerNode } from '../PlayerNode';
+import { ClientMessage } from '@discord-player/server';
 
 export interface ConnectorEvents {
     ready: () => Awaited<unknown>;
@@ -33,5 +34,5 @@ export abstract class Connector extends EventEmitter<ConnectorEvents> {
      * @param data - The data to send
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public abstract send(data: any): Promise<void>;
+    public abstract send(data: ClientMessage): Promise<void>;
 }

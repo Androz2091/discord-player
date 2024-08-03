@@ -53,6 +53,8 @@ export interface WorkerEvents {
     debug: (data: string) => void;
 }
 
+export type AnyWorkerPayload = IWorkerMessage<WorkerMessage<WorkerMessagePayload[keyof WorkerMessagePayload]>>;
+
 const WorkerCreatable = new Set([WorkerOp.OP_JOIN_VOICE_CHANNEL]);
 const STATS_DISPATCH_INTERVAL = 5000;
 
@@ -124,7 +126,7 @@ export class WorkerManager extends EventEmitter<WorkerEvents> {
             },
         });
 
-        thread.on('message', this.handleMessage.bind(this));
+        thread.on('message', this.handleWorkerMessage.bind(this));
 
         thread.on('online', () => {
             this.debug(`Worker ${thread.threadId} is online`);
@@ -158,7 +160,7 @@ export class WorkerManager extends EventEmitter<WorkerEvents> {
      * Handle a message from the worker.
      * @param message The message to handle.
      */
-    public handleMessage(message: WorkerMessageAck<WorkerMessagePayloadAck>) {
+    public handleWorkerMessage(message: WorkerMessageAck<WorkerMessagePayloadAck>) {
         switch (true) {
             case assertPayload(message, WorkerAckOp.OP_EVT_GATEWAY_DISPATCH):
                 return this.emit('payload', message);

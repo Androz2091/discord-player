@@ -41,6 +41,10 @@ export class Adapter<T> implements AdapterImpl {
         throw new Error('Not implemented');
     }
 
+    public getClientId(): string {
+        throw new Error('Not Implemented');
+    }
+
     public getVoiceChannelMembersCount(guild: string, channel: string): number {
         throw new Error('Not implemented');
     }

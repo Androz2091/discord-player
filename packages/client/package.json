@@ -1,5 +1,5 @@
 {
-  "name": "@discord-player/node",
+  "name": "@discord-player/client",
   "version": "0.1.0",
   "description": "A complete framework to simplify the implementation of music commands for Discord bots",
   "keywords": [
@@ -37,7 +37,12 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
+    "@types/ws": "^8",
     "tsup": "^8.2.4",
     "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@discord-player/server": "workspace:^",
+    "ws": "^8.18.0"
   }
 }

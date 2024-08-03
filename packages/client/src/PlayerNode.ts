@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Connector } from './connector/Connector';
-import { IPC } from './connector/IPC';
-import { TCP } from './connector/TCP';
+import { WebSocketConnector } from './connector/WebSocketConnector';
 
 /**
  * Represents a player node object.
@@ -104,7 +103,7 @@ export class PlayerNode {
     /**
      * The connector for this player node.
      */
-    private readonly connector: Connector;
+    public readonly connector: Connector;
 
     /**
      * Creates a new player node.
@@ -118,8 +117,15 @@ export class PlayerNode {
             this.node = validateNodeOptions(node);
         }
 
-        this.#isIPC = this.node.ipc;
-        this.connector = this.#isIPC ? new IPC(this) : new TCP(this);
+        this.connector = new WebSocketConnector(this);
+    }
+
+    /**
+     * The player node options.
+     * @returns The player node options.
+     */
+    public getConfig() {
+        return this.node;
     }
 
     /**
@@ -165,6 +171,19 @@ export class PlayerNode {
         }
 
         return url;
+    }
+
+    /**
+     *  The WebSocket URL for this player node.
+     * @returns The WebSocket URL for this player node.
+     */
+    public getWebSocketURL(): string {
+        const { secure, host, port } = this.node;
+
+        const protocol = secure ? 'wss' : 'ws';
+        const hostname = port != null ? `${host}:${port}` : host;
+
+        return `${protocol}://${hostname}`;
     }
 
     /**

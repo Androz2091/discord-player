@@ -1,9 +1,9 @@
-import type { PlayerNodeLike } from '@discord-player/node';
+import type { PlayerNodeLike } from '@discord-player/client';
 import type { Adapter } from './Adapter';
 import type { unsafe } from './common/types';
-import { PlayerNodeManager } from './core/manager/PlayerNodeManager';
-import { GuildQueueManager } from './core/manager/GuildQueueManager';
-import { PluginsManager } from './core/manager/PluginsManager';
+import { PlayerNodeManager } from './core/managers/PlayerNodeManager';
+import { GuildQueueManager } from './core/managers/GuildQueueManager';
+import { PluginsManager } from './core/managers/PluginsManager';
 
 /**
  * Represents the options for the player manager.

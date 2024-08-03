@@ -50,9 +50,9 @@
   },
   "homepage": "https://discord-player.js.org",
   "dependencies": {
+    "@discord-player/client": "workspace:^",
     "@discord-player/equalizer": "workspace:^",
     "@discord-player/ffmpeg": "workspace:^",
-    "@discord-player/node": "workspace:^",
     "@discord-player/utils": "workspace:^"
   },
   "devDependencies": {

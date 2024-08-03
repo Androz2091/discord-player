@@ -1,9 +1,14 @@
+import { ClientMessage, WsIncomingCodes } from '@discord-player/server';
 import { unsafe } from '../common/types';
 import { Player } from '../Player';
 import { ArrayListLimitOptions } from '../structures/ArrayList';
 import { Queue } from '../structures/Queue';
 import { Stack } from '../structures/Stack';
 import type { Plugin } from './Plugin';
+import { AnyWorkerPayload, WorkerOp, VoiceConnectionCreateOptions } from '@discord-player/core';
+import { PlayerNode } from '@discord-player/client';
+
+export interface ConnectOptions extends Omit<VoiceConnectionCreateOptions, 'guildId' | 'clientId'> {}
 
 export interface GuildQueueAudioEffects {
     /**
@@ -77,6 +82,11 @@ export class GuildQueue {
     public readonly history: Stack<unsafe>;
 
     /**
+     * The associated node of this queue
+     */
+    public node: PlayerNode | null = null;
+
+    /**
      * Creates a new guild queue.
      * @param player The player to create the queue for
      * @param options The options to use
@@ -96,6 +106,58 @@ export class GuildQueue {
             name: 'QueueHistory',
             maxSize: this.options.history.maxSize,
             throwOnFull: this.options.history.throwOnFull,
+        });
+    }
+
+    /**
+     * Send a message to the associated node
+     * @param data The message payload
+     */
+    public send(data: AnyWorkerPayload) {
+        if (!this.node) {
+            const node = this.player.nodes.getOptimalNode();
+
+            if (!node) throw new Error('Could not find a player node.');
+
+            this.node = node;
+        }
+
+        const request: ClientMessage<unsafe> = {
+            op: WsIncomingCodes.Request,
+            d: data,
+        };
+
+        return this.node.connector.send(request);
+    }
+
+    /**
+     * Connect to a voice channel
+     * @param options The connection options
+     */
+    public connect(options: ConnectOptions) {
+        const guild = this.options.guild;
+        const adapter = this.player.adapter;
+        const channel = adapter.resolveChannel(options.channelId);
+
+        if (!adapter.isVoiceChannel(guild, channel) && !adapter.isStageChannel(guild, channel)) {
+            throw new TypeError('Expected voice based channel');
+        }
+
+        return this.send({
+            metadata: {
+                channelId: channel,
+                guildId: guild,
+                clientId: channel,
+            },
+            payload: {
+                op: WorkerOp.OP_JOIN_VOICE_CHANNEL,
+                d: {
+                    ...options,
+                    channelId: channel,
+                    guildId: guild,
+                    clientId: adapter.getClientId(),
+                } satisfies VoiceConnectionCreateOptions,
+            },
         });
     }
 

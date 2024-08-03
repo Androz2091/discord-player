@@ -1,4 +1,4 @@
-import { PlayerNode, PlayerNodeLike } from '@discord-player/node';
+import { PlayerNode, PlayerNodeLike } from '@discord-player/client';
 import { Collection } from '@discord-player/utils';
 import type { Player } from '../../Player';
 
