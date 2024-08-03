@@ -30,14 +30,13 @@ export class Track<T = unknown> {
     public requestedBy: User | null = null;
     public playlist?: Playlist;
     public queryType: SearchQueryType | null | undefined = null;
-    public raw: RawTrackData = {
-        source: 'arbitrary'
-    } as RawTrackData;
+    public raw: any;
     public extractor: BaseExtractor | null = null;
     public readonly id = SnowflakeUtil.generate().toString();
     private __metadata: T | null = null;
     private __reqMetadataFn: () => Promise<T | null>;
     public cleanTitle: string;
+    public live: boolean = false
 
     /**
      * Track constructor
@@ -59,6 +58,7 @@ export class Track<T = unknown> {
         this.__metadata = data.metadata ?? null;
         this.__reqMetadataFn = data.requestMetadata || (() => Promise.resolve<T | null>(null));
         this.cleanTitle = data.cleanTitle ?? Util.cleanTitle(this.title, this.source);
+        this.live = data.live ?? false
     }
 
     /**
