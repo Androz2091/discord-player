@@ -20,7 +20,7 @@
     "start:web": "turbo run preview --filter=website",
     "test": "turbo run test --color",
     "start:bot": "yarn workspace music-bot start",
-    "build:bot": "turbo run build --filter=music-bot"
+    "build:bot": "yarn workspace music-bot build"
   },
   "repository": {
     "type": "git",
