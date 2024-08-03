@@ -196,9 +196,9 @@ export const ShowcaseResource: IShowcase = {
             url: 'https://npm.im/discord-player-tidal'
         },
         {
-            name: "discord-player-youtubei", 
-            description: "Discord Player Youtubei is module that uses the Innertube API to extractor your songs providing more stability and better speeds.",
-            url: "https://npm.im/discord-player-youtubei"
+            name: 'discord-player-youtubei',
+            description: 'Discord Player Youtubei is module that uses the Innertube API to extractor your songs providing more stability and better speeds.',
+            url: 'https://npm.im/discord-player-youtubei'
         }
     ])
 };
