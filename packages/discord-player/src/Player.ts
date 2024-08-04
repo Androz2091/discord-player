@@ -108,13 +108,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         if(options.ffmpegPath) {
             if(typeof options.ffmpegPath !== "string") throw new TypeError(`Expected type "string" for options.ffmpegPath. Got ${typeof options.ffmpegPath} instead`)
-            if(!existsSync(options.ffmpegPath)) throw new Error(`The pathway provided for options.ffmpegPath does not exists.`)
-
-            try {
-                spawnSync(options.ffmpegPath, ['--help'])
-            } catch (error) {
-                throw new Error(`Cannot find FFmpeg at the given pathway.\n\n${error}`)
-            }
 
             process.env.FFMPEG_PATH = options.ffmpegPath
         }

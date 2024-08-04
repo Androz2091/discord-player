@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, test } from 'vitest';
 import { Player, SearchResult } from '../src/index';
 import { Client, IntentsBitField } from 'discord.js';
 
@@ -38,4 +38,14 @@ describe('Player', () => {
 
         expect(response).toBeInstanceOf(SearchResult);
     });
+
+    test("should set process.env.FFMPEG_PATH to given path", () => {
+        // not actual ffmpeg path. just dummy
+        new Player(client, {
+            ffmpegPath: "./packages/ffmpeg",
+            ignoreInstance: true
+        })
+      
+        expect(process.env.FFMPEG_PATH).toBe("./packages/ffmpeg")
+    })
 });
