@@ -104,6 +104,12 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         super([PlayerEvent.Error]);
 
+        if(options.ffmpegPath) {
+            if(typeof options.ffmpegPath !== "string") throw new TypeError(`Expected type "string" for options.ffmpegPath. Got ${typeof options.ffmpegPath} instead`)
+
+            process.env.FFMPEG_PATH = options.ffmpegPath
+        }
+
         /**
          * The discord.js client
          * @type {Client}

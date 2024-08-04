@@ -531,4 +531,8 @@ export interface PlayerInitOptions {
      * The probe timeout in milliseconds. Defaults to 5000.
      */
     probeTimeout?: number;
+    /**
+     * Configure ffmpeg path
+     */
+    ffmpegPath?: string;
 }
