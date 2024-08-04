@@ -18,8 +18,6 @@ import { IPRotator } from './utils/IPRotator';
 import { Context, createContext } from './hooks';
 import { HooksCtx } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
-import { existsSync } from 'fs';
-import { spawnSync } from 'child_process';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
