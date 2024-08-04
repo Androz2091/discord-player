@@ -18,6 +18,7 @@ import { IPRotator } from './utils/IPRotator';
 import { Context, createContext } from './hooks';
 import { HooksCtx } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
+import { existsSync } from 'fs';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -172,6 +173,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 configurable: true,
                 enumerable: false
             });
+        }
+
+        if(options.ffmpegPath) {
+            if(typeof options.ffmpegPath !== "string") throw new TypeError(`Expected type "string" for options.ffmpegPath. Got ${typeof options.ffmpegPath} instead`)
+            if(!existsSync(options.ffmpegPath)) throw new Error(`The pathway provided for options.ffmpegPath does not exists.`)
+
+            process.env.FFMPEG_PATH = options.ffmpegPath
         }
     }
 
