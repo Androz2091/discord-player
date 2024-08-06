@@ -195,6 +195,13 @@ export const ShowcaseResource: IShowcase = {
                 version: 'v6.7.1',
                 url: 'https://github.com/iTsMaaT/WD-40',
             },
+            {
+                name: 'Zibot',
+                description:
+                    'Ziji-bot is a versatile Discord bot offering music playback, and interactive commands to enhance user engagement.',
+                version: 'v6.7.1',
+                url: 'https://github.com/zijipia/Ziji-bot-discord',
+            },
         ].sort((a, b) => semver.rcompare(a.version, b.version)),
     ),
     extractors: PromotedList.extractors.concat([
