@@ -50,8 +50,7 @@ client.on('messageCreate', async (message) => {
                 requestedBy: message.author.id,
                 nodeOptions: {
                     metadata: { channel: message.channel.id },
-                    volume: 50,
-                    defaultFFmpegFilters: ['lofi', 'bassboost_low', 'normalizer']
+                    volume: 50
                 }
             });
 
@@ -80,6 +79,17 @@ client.on('messageCreate', async (message) => {
             queue.delete();
 
             return client.createMessage(message.channel.id, 'Stopped the queue!');
+        }
+        case 'volume': {
+            const queue = player.queues.get(message.guildID);
+            if (!queue) return client.createMessage(message.channel.id, 'No queue found!');
+
+            const volume = parseInt(args[0], 10);
+            if (isNaN(volume)) return client.createMessage(message.channel.id, 'Invalid volume!');
+
+            queue.node.setVolume(volume);
+
+            return client.createMessage(message.channel.id, `Set the volume to: ${volume}`);
         }
     }
 });
