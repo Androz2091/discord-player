@@ -25,6 +25,9 @@ Discord Player is a robust framework for developing Discord Music bots using Jav
 -   Out-of-the-box voice states handling
 -   IP Rotation support
 -   Easy serialization and deserialization
+-   Limited support for [Eris](https://npmjs.com/eris)
+
+> Eris compat mode does not support `VoiceStateUpdate` handler. You need to handle it manually.
 
 ## Installation
 
@@ -132,6 +135,16 @@ player.events.on('playerStart', (queue, track) => {
     // we will later define queue.metadata object while creating the queue
     queue.metadata.channel.send(`Started playing **${track.cleanTitle}**!`);
 });
+```
+
+## Eris Setup
+
+Discord Player has limited support for Eris. You can use the following code to set up Discord Player with Eris:
+
+```js index.js
+const { Player, createErisCompat } = require('discord-player');
+
+const player = new Player(createErisCompat(client));
 ```
 
 Let's move on to the command part. You can define the command as per your requirements. We will only focus on the command part:

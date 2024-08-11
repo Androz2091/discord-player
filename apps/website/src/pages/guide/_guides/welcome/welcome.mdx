@@ -32,6 +32,9 @@ Discord Player is a robust framework for developing Discord Music bots using Jav
 -   Offers easy debugging methods
 -   Out-of-the-box voice states handling
 -   IP Rotation support
+-   Limited support for [Eris](https://npmjs.com/eris)
+
+> Eris compat mode does not support `VoiceStateUpdate` handler. You need to handle it manually.
 
 ## Installation
 
@@ -94,7 +97,7 @@ $ npm install --save ffmpeg-binaries
 
 YouTube streaming is not supported without installing one of the following package. If you want to add support for YouTube playback, you need to install a streaming library. This step is not needed if you do not plan on using youtube source.
 
-* The default Youtube streaming appears to be unstable due to recent changes. It is recommend to install [`discord-player-youtubei`](https://npm.im/discord-player-youtubei)*
+-   The default Youtube streaming appears to be unstable due to recent changes. It is recommend to install [`discord-player-youtubei`](https://npm.im/discord-player-youtubei)\*
 
 ```bash
 $ npm install --save youtube-ext
@@ -131,6 +134,20 @@ const player = new Player(client);
 
 // Now, lets load all the default extractors, except 'YouTubeExtractor'. You can remove the filter if you want to load all the extractors.
 await player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
+```
+
+</CH.Code>
+
+## Eris Setup
+
+Discord Player has limited support for Eris. You can use the following code to set up Discord Player with Eris:
+
+<CH.Code>
+
+```js index.js
+const { Player, createErisCompat } = require('discord-player');
+
+const player = new Player(createErisCompat(client));
 ```
 
 </CH.Code>
