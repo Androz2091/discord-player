@@ -80,9 +80,21 @@ client.on('messageCreate', async (message) => {
 
             return client.createMessage(message.channel.id, 'Stopped the queue!');
         }
+        case 'skip': {
+            const queue = player.queues.get(message.guildID);
+            if (!queue) return client.createMessage(message.channel.id, 'No queue found!');
+
+            const success = queue.node.skip();
+
+            if (!success) return client.createMessage(message.channel.id, 'Cannot skip the track!');
+
+            return client.createMessage(message.channel.id, 'Skipped the track!');
+        }
         case 'volume': {
             const queue = player.queues.get(message.guildID);
             if (!queue) return client.createMessage(message.channel.id, 'No queue found!');
+
+            if (!args.length) return client.createMessage(message.channel.id, `Current volume: ${queue.node.volume}`);
 
             const volume = parseInt(args[0], 10);
             if (isNaN(volume)) return client.createMessage(message.channel.id, 'Invalid volume!');
