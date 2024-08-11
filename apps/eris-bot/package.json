@@ -1,0 +1,23 @@
+{
+  "name": "eris-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.2.0",
+    "tsx": "^4.17.0"
+  },
+  "dependencies": {
+    "@discord-player/extractor": "workspace:^",
+    "discord-player": "workspace:^",
+    "dotenv": "^16.4.5",
+    "eris": "^0.17.2",
+    "mediaplex": "^0.0.9"
+  }
+}

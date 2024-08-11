@@ -18,6 +18,7 @@ import { IPRotator } from './utils/IPRotator';
 import { Context, createContext } from './hooks';
 import { HooksCtx } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
+import { getCompatName, isClientProxy } from './compat/createErisCompat';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -104,11 +105,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         super([PlayerEvent.Error]);
 
-        if(options.ffmpegPath) {
-            if(typeof options.ffmpegPath !== "string") throw new TypeError(`Expected type "string" for options.ffmpegPath. Got ${typeof options.ffmpegPath} instead`)
+        if (options.ffmpegPath) {
+            if (typeof options.ffmpegPath !== 'string') throw new TypeError(`Expected type "string" for options.ffmpegPath. Got ${typeof options.ffmpegPath} instead`);
 
-            process.env.FFMPEG_PATH = options.ffmpegPath
+            process.env.FFMPEG_PATH = options.ffmpegPath;
         }
+
+        const isCompatMode = isClientProxy(client);
 
         /**
          * The discord.js client
@@ -116,21 +119,23 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
          */
         this.client = client;
 
-        try {
-            if (!(client instanceof Client)) {
-                Util.warn(
-                    `Client is not an instance of discord.js@${djsVersion} client, some things may not work correctly. This can happen due to corrupt dependencies or having multiple installations of discord.js.`,
-                    'InvalidClientInstance'
-                );
-            }
+        if (!isCompatMode) {
+            try {
+                if (!(client instanceof Client)) {
+                    Util.warn(
+                        `Client is not an instance of discord.js@${djsVersion} client, some things may not work correctly. This can happen due to corrupt dependencies or having multiple installations of discord.js.`,
+                        'InvalidClientInstance'
+                    );
+                }
 
-            const ibf = this.client.options.intents instanceof IntentsBitField ? this.client.options.intents : new IntentsBitField(this.client.options.intents);
+                const ibf = this.client.options.intents instanceof IntentsBitField ? this.client.options.intents : new IntentsBitField(this.client.options.intents);
 
-            if (!ibf.has(IntentsBitField.Flags.GuildVoiceStates)) {
-                Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
+                if (!ibf.has(IntentsBitField.Flags.GuildVoiceStates)) {
+                    Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
+                }
+            } catch {
+                // noop
             }
-        } catch {
-            // noop
         }
 
         this.options = {
@@ -150,10 +155,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             }
         } as PlayerInitOptions;
 
-        // @ts-ignore private method
-        this.client.incrementMaxListeners();
-
-        this.client.on(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
+        if (!isCompatMode) {
+            // @ts-ignore private method
+            this.client.incrementMaxListeners();
+            this.client.on(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
+        }
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
             this.#lagMonitorInterval = setInterval(() => {
@@ -296,6 +302,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     }
 
     /**
+     * Whether the player is in compatibility mode. Compatibility mode is enabled when non-discord.js client is used.
+     */
+    public isCompatMode() {
+        return isClientProxy(this.client);
+    }
+
+    /**
      * Destroy every single queues managed by this master player instance
      * @example ```typescript
      * // use me when you want to immediately terminate every single queues in existence 🔪
@@ -304,9 +317,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      */
     public async destroy() {
         this.nodes.cache.forEach((node) => node.delete());
-        this.client.off(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
-        // @ts-ignore private method
-        this.client.decrementMaxListeners();
+
+        if (!this.isCompatMode()) {
+            this.client.off(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
+            // @ts-ignore private method
+            this.client.decrementMaxListeners();
+        }
+
         this.removeAllListeners();
         this.events.removeAllListeners();
         await this.extractors.unregisterAll();
@@ -648,7 +665,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         const depsReport = [
             'Discord Player',
             line,
-            `- discord-player: ${Player.version}`,
+            `- discord-player: ${Player.version}${this.isCompatMode() ? ` (${getCompatName(this.client)} compatibility mode)` : ''}`,
             `- discord-voip: ${dVoiceVersion}`,
             `- discord.js: ${djsVersion}`,
             `- Node version: ${process.version} (Detected Runtime: ${runtime}, Platform: ${process.platform} [${process.arch}])`,

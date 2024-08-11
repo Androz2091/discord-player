@@ -1,5 +1,4 @@
-import { version as djsVersion } from 'discord.js';
-
+export { createErisCompat, isErisProxy } from './compat/createErisCompat';
 export * from './utils/PlayerEventsEmitter';
 export * from './utils/AudioFilters';
 export * from './extractors/BaseExtractor';
@@ -34,11 +33,7 @@ export {
     AF_VAPORWAVE_RATE,
     FiltersChain
 } from '@discord-player/equalizer';
-export { createAudioPlayer, AudioPlayer, type CreateAudioPlayerOptions } from 'discord-voip';
+export { createAudioPlayer, AudioPlayer, getVoiceConnection, getVoiceConnections, type CreateAudioPlayerOptions } from 'discord-voip';
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
 export const version: string = '[VI]{{inject}}[/VI]';
-
-if (!djsVersion.startsWith('14')) {
-    process.emitWarning(`Discord.js v${djsVersion} is incompatible with Discord Player v${version}! Please use >=v14.x of Discord.js`);
-}
