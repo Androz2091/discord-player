@@ -1,3 +1,4 @@
+import { Util } from "../utils/Util";
 import { ClientType } from "./IClientAdapter";
 
 export interface ValidPackagesStructure {
@@ -38,7 +39,7 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
                 return false;
             }
         },
-        testClient(client) {
+        async testClient(client: unknown) {
             try {
                 const { module } = Util.require('eris') as { module: typeof import('eris') };
 
@@ -56,7 +57,7 @@ export async function detectClientMode(client: unknown): Promise<ClientType> {
 
         if (!isValid) continue;
 
-        const isInstance = pkg.testClient(client);
+        const isInstance = await pkg.testClient(client);
 
         if (isInstance) return pkg.name;
     }
