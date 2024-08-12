@@ -19,9 +19,9 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
         },
         async testClient(client: unknown) {
             try {
-                const { Client } = await import("discord.js");
+                const { module } = Util.require('discord.js') as { module: typeof import('discord.js') };
 
-                return client instanceof Client;
+                return client instanceof module.Client;
             } catch {
 
                 return false;
@@ -38,25 +38,28 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
                 return false;
             }
         },
-        async testClient(client) {
+        testClient(client) {
             try {
-                const { Client } = await import("eris");
+                const { module } = Util.require('eris') as { module: typeof import('eris') };
 
-                return client instanceof Client;
+                return client instanceof module.Client;
             } catch {
                 return false;
             }
-        },
+        }
     }
 ];
 
 export async function detectClientMode(client: unknown): Promise<ClientType> {
     for (const pkg of VALID_PACKAGES) {
-        const isValid = await pkg.test();
-        const isInstance = await pkg.testClient(client);
+        const isValid = pkg.test();
 
-        if (isValid && isInstance) return pkg.name;
+        if (!isValid) continue;
+
+        const isInstance = pkg.testClient(client);
+
+        if (isInstance) return pkg.name;
     }
 
-    return "unknown";
+    return 'unknown';
 }
