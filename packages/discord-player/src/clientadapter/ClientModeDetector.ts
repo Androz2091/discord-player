@@ -3,24 +3,24 @@ import { ClientType } from "./IClientAdapter";
 
 export interface ValidPackagesStructure {
     name: ClientType;
-    test: () => boolean;
-    testClient: (client: SupportedClient) => boolean
+    test: () => Promise<boolean>;
+    testClient: (client: SupportedClient) => Promise<boolean>
 }
 
 export const VALID_PACKAGES: ValidPackagesStructure[] = [
     {
         name: "discord.js",
-        test() {
+        async test() {
             try {
-                require("discord.js");
-                return true;
+                await import("discord.js")
+                return true
             } catch {
                 return false;
             }
         },
-        testClient(client: SupportedClient) {
+        async testClient(client: SupportedClient) {
             try {
-                const { Client } = require("discord.js");
+                const { Client } = await import("discord.js")
 
                 return client instanceof Client;
             } catch {
@@ -30,17 +30,17 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
     },
     {
         name: "eris",
-        test() {
+        async test() {
             try {
-                require("eris");
-                return true;
+                await import("eris")
+                return true
             } catch {
                 return false;
             }
         },
-        testClient(client) {
+        async testClient(client) {
             try {
-                const { Client } = require("eris");
+                const { Client } = await import("eris")
 
                 return client instanceof Client;
             } catch {
@@ -50,10 +50,10 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
     }
 ];
 
-export function detectClientMode(client: SupportedClient): ClientType {
-    for (const pkg of VALID_PACKAGES) {
-        const isValid = pkg.test();
-        const isInstance = pkg.testClient(client);
+export async function detectClientMode(client: SupportedClient): Promise<ClientType> {
+    for(const pkg of VALID_PACKAGES) {
+        const isValid = await pkg.test()
+        const isInstance = await pkg.testClient(client)
 
         if (isValid && isInstance) return pkg.name;
     }
