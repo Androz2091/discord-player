@@ -11,7 +11,6 @@ import {
     VoiceConnectionStatus,
     VoiceConnectionDisconnectReason
 } from 'discord-voip';
-import { StageChannel, VoiceChannel } from 'discord.js';
 import type { Readable } from 'stream';
 import { EventEmitter } from '@discord-player/utils';
 import { Track } from '../fabric/Track';
@@ -20,6 +19,7 @@ import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord
 import { GuildQueue, GuildQueueEvent, PostProcessedResult } from '../queue';
 import { VoiceReceiverNode } from '../queue/VoiceReceiverNode';
 import { Exceptions } from '../errors';
+import { VoiceBasedChannel } from '../clientadapter/IClientAdapter';
 
 export interface CreateStreamOps {
     type?: StreamType;
@@ -57,7 +57,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public voiceConnection: VoiceConnection;
     public audioPlayer: AudioPlayer;
     public receiver = new VoiceReceiverNode(this);
-    public channel: VoiceChannel | StageChannel;
+    public channel: VoiceBasedChannel;
     public audioResource?: AudioResource<Track> | null;
     public dsp = new FiltersChain();
 
@@ -67,7 +67,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {VoiceChannel|StageChannel} channel The connected channel
      * @private
      */
-    constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel, public queue: GuildQueue, public readonly connectionTimeout: number = 20000, audioPlayer?: AudioPlayer) {
+    constructor(connection: VoiceConnection, channel: VoiceBasedChannel, public queue: GuildQueue, public readonly connectionTimeout: number = 20000, audioPlayer?: AudioPlayer) {
         super();
 
         /**
@@ -248,38 +248,38 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
         if (!ops?.disableFilters && this.queue.hasDebugger) this.queue.debug('Initiating DSP filters pipeline...');
         const stream = !ops?.disableFilters
             ? this.dsp.create(src, {
-                  dsp: {
-                      filters: ops?.defaultFilters,
-                      disabled: ops?.disableFilters
-                  },
-                  biquad: ops?.biquadFilter
-                      ? {
-                            filter: ops.biquadFilter,
-                            disabled: ops?.disableBiquad
-                        }
-                      : undefined,
-                  resampler: {
-                      targetSampleRate: ops?.sampleRate,
-                      disabled: ops?.disableResampler
-                  },
-                  equalizer: {
-                      bandMultiplier: ops?.eq,
-                      disabled: ops?.disableEqualizer
-                  },
-                  volume: {
-                      volume: ops?.volume,
-                      disabled: ops?.disableVolume
-                  }
-              })
+                dsp: {
+                    filters: ops?.defaultFilters,
+                    disabled: ops?.disableFilters
+                },
+                biquad: ops?.biquadFilter
+                    ? {
+                        filter: ops.biquadFilter,
+                        disabled: ops?.disableBiquad
+                    }
+                    : undefined,
+                resampler: {
+                    targetSampleRate: ops?.sampleRate,
+                    disabled: ops?.disableResampler
+                },
+                equalizer: {
+                    bandMultiplier: ops?.eq,
+                    disabled: ops?.disableEqualizer
+                },
+                volume: {
+                    volume: ops?.volume,
+                    disabled: ops?.disableVolume
+                }
+            })
             : src;
 
         if (this.queue.hasDebugger) this.queue.debug('Executing onAfterCreateStream hook...');
         const postStream = await this.queue.onAfterCreateStream?.(stream, this.queue).catch(
             () =>
-                ({
-                    stream: stream,
-                    type: ops?.type ?? StreamType.Arbitrary
-                } as PostProcessedResult)
+            ({
+                stream: stream,
+                type: ops?.type ?? StreamType.Arbitrary
+            } as PostProcessedResult)
         );
 
         if (this.queue.hasDebugger) this.queue.debug('Preparing AudioResource...');
@@ -325,7 +325,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
         try {
             if (this.audioPlayer) this.audioPlayer.stop(true);
             if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
-        } catch {} // eslint-disable-line no-empty
+        } catch { } // eslint-disable-line no-empty
     }
 
     /**
@@ -333,8 +333,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     public destroy() {
         this.disconnect();
-        this.audioPlayer.removeAllListeners();
-        this.voiceConnection.removeAllListeners();
+        //this.audioPlayer.removeAllListeners();
+        //this.voiceConnection.removeAllListeners();
         this.dsp.destroy();
         this.audioResource = null;
         this.emit('destroyed');

@@ -1,11 +1,11 @@
 import { EqualizerBand, PCMFilters, BiquadFilters } from '@discord-player/equalizer';
 import { Collection, QueueStrategy } from '@discord-player/utils';
-import { GuildResolvable } from 'discord.js';
 import { Player } from '../Player';
 import { GuildQueue, OnAfterCreateStreamHandler, OnBeforeCreateStreamHandler } from './GuildQueue';
 import { FiltersName, QueueRepeatMode } from '../types/types';
 import { getGlobalRegistry } from '../utils/__internal__';
 import { Exceptions } from '../errors';
+import { Guild } from '../clientadapter/IClientAdapter';
 
 export interface GuildNodeCreateOptions<T = unknown> {
     strategy?: QueueStrategy;
@@ -41,7 +41,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
     disableResampler?: boolean;
 }
 
-export type NodeResolvable = GuildQueue | GuildResolvable;
+export type NodeResolvable = GuildQueue | Guild;
 
 export class GuildNodeManager<Meta = unknown> {
     public cache = new Collection<string, GuildQueue>();
@@ -52,14 +52,14 @@ export class GuildNodeManager<Meta = unknown> {
      * @param guild The guild which will be the owner of the queue
      * @param options Queue initializer options
      */
-    public create<T = Meta>(guild: GuildResolvable, options: GuildNodeCreateOptions<T> = {}): GuildQueue<T> {
-        const server = this.player.client.guilds.resolve(guild); // TODO: USE CLIENTADAPTER
-        if (!server) {
+    public create<T = Meta>(guildId: string, options: GuildNodeCreateOptions<T> = {}): GuildQueue<T> {
+        const guild = this.player.clientAdapter.getGuild(guildId);
+        if (!guild) {
             throw Exceptions.ERR_NO_GUILD('Invalid or unknown guild');
         }
 
-        if (this.cache.has(server.id)) {
-            return this.cache.get(server.id) as GuildQueue<T>;
+        if (this.cache.has(guild.id)) {
+            return this.cache.get(guild.id) as GuildQueue<T>;
         }
 
         options.strategy ??= 'FIFO';
@@ -97,7 +97,7 @@ export class GuildNodeManager<Meta = unknown> {
         }
 
         const queue = new GuildQueue<T>(this.player, {
-            guild: server,
+            guild: guild,
             queueStrategy: options.strategy,
             volume: options.volume,
             equalizer: options.equalizer,
@@ -131,7 +131,7 @@ export class GuildNodeManager<Meta = unknown> {
             disableVolume: options.disableVolume
         });
 
-        this.cache.set(server.id, queue);
+        this.cache.set(guild.id, queue);
 
         return queue;
     }
@@ -152,8 +152,7 @@ export class GuildNodeManager<Meta = unknown> {
      * @param node Queue resolvable
      */
     public has(node: NodeResolvable) {
-        const id = node instanceof GuildQueue ? node.id : this.player.client.guilds.resolveId(node)!; // TODO: USE CLIENTADAPTER
-        return this.cache.has(id);
+        return this.cache.has(node.id);
     }
 
     /**
@@ -168,7 +167,7 @@ export class GuildNodeManager<Meta = unknown> {
 
         queue.setTransitioning(true);
         queue.node.stop(true);
-        queue.connection?.removeAllListeners();
+        //queue.connection?.removeAllListeners();
         queue.dispatcher?.removeAllListeners();
         queue.dispatcher?.disconnect();
         queue.timeouts.forEach((tm) => clearTimeout(tm));
@@ -187,7 +186,7 @@ export class GuildNodeManager<Meta = unknown> {
             return node;
         }
 
-        return this.cache.get(this.player.client.guilds.resolveId(node)!) as GuildQueue<T> | undefined; // TODO: USE CLIENTADAPTER
+        return this.cache.get(node.id) as GuildQueue<T> | undefined;
     }
 
     /**

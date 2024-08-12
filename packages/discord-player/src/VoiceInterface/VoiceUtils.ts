@@ -1,10 +1,10 @@
-import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
 import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus, AudioPlayer } from 'discord-voip';
 import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
 import { GuildQueue } from '../queue';
 import type { Player } from '../Player';
 import { Exceptions } from '../errors';
+import { VoiceBasedChannel } from '../clientadapter/IClientAdapter';
 
 class VoiceUtils {
     /**
@@ -13,12 +13,12 @@ class VoiceUtils {
      * It only exists for compatibility reasons.
      * @deprecated
      */
-    public cache: Collection<Snowflake, StreamDispatcher> = new Collection<Snowflake, StreamDispatcher>();
+    public cache: Collection<string, StreamDispatcher> = new Collection<string, StreamDispatcher>();
 
     /**
      * The voice utils constructor
      */
-    constructor(public player: Player) {}
+    constructor(public player: Player) { }
 
     /**
      * Joins a voice channel, creating basic stream dispatch manager
@@ -27,7 +27,7 @@ class VoiceUtils {
      * @returns {Promise<StreamDispatcher>}
      */
     public async connect(
-        channel: VoiceChannel | StageChannel,
+        channel: VoiceBasedChannel,
         options?: {
             deaf?: boolean;
             maxTime?: number;
@@ -49,7 +49,7 @@ class VoiceUtils {
      * @returns {VoiceConnection}
      */
     public async join(
-        channel: VoiceChannel | StageChannel,
+        channel: VoiceBasedChannel,
         options?: {
             deaf?: boolean;
             maxTime?: number;
@@ -65,7 +65,7 @@ class VoiceUtils {
         const conn = joinVoiceChannel({
             guildId: channel.guild.id,
             channelId: channel.id,
-            adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
+            adapterCreator: channel.guild.voiceAdapterCreator as DiscordGatewayAdapterCreator,
             selfDeaf: Boolean(options?.deaf),
             debug: this.player.events.listenerCount('debug') > 0,
             group: options?.group
@@ -91,11 +91,11 @@ class VoiceUtils {
 
     /**
      * Returns Discord Player voice connection
-     * @param {Snowflake} guild The guild id
+     * @param {string} guildId The guild id
      * @returns {StreamDispatcher}
      */
-    public getConnection(guild: Snowflake, group?: string) {
-        return getVoiceConnection(guild, group);
+    public getConnection(guildId: string, group?: string) {
+        return getVoiceConnection(guildId, group);
     }
 }
 

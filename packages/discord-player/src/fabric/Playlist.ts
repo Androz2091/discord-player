@@ -2,7 +2,6 @@ import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } 
 import { Track } from './Track';
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';
 import { Util } from '../utils/Util';
-import { GuildVoiceChannelResolvable } from 'discord.js';
 import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
 import { TypeUtil } from '../utils/TypeUtil';
 import { Exceptions } from '../errors';
@@ -192,9 +191,9 @@ export class Playlist {
      * @param channel Voice channel on which this playlist shall be played
      * @param options Node initialization options
      */
-    public async play<T = unknown>(channel: GuildVoiceChannelResolvable, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
+    public async play<T = unknown>(channelId: string, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
         const fn = this.player.play.bind(this.player);
 
-        return await fn(channel, this, options);
+        return await fn(channelId, this, options);
     }
 }

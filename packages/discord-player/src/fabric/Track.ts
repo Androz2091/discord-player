@@ -1,4 +1,3 @@
-import { User, escapeMarkdown, SnowflakeUtil, GuildVoiceChannelResolvable, APIUser } from 'discord.js';
 import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
 import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
 import { Playlist } from './Playlist';
@@ -8,7 +7,8 @@ import { Collection } from '@discord-player/utils';
 import { TypeUtil } from '../utils/TypeUtil';
 import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
 import { Exceptions } from '../errors';
-import { Util } from '../utils/Util';
+import { escapeMarkdown, generateRandomId, Util } from '../utils/Util';
+import { User } from '../clientadapter/IClientAdapter';
 
 export type TrackResolvable = Track | string | number;
 
@@ -30,9 +30,10 @@ export class Track<T = unknown> {
     public requestedBy: User | null = null;
     public playlist?: Playlist;
     public queryType: SearchQueryType | null | undefined = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public raw: any;
     public extractor: BaseExtractor | null = null;
-    public readonly id = SnowflakeUtil.generate().toString();
+    public readonly id = generateRandomId();
     private __metadata: T | null = null;
     private __reqMetadataFn: () => Promise<T | null>;
     public cleanTitle: string;
@@ -169,7 +170,7 @@ export class Track<T = unknown> {
             thumbnail: TypeUtil.isString(this.thumbnail) ? this.thumbnail : tryIntoThumbnailString(this.thumbnail),
             duration: this.duration,
             views: this.views ?? 0,
-            requested_by: this.requestedBy?.toJSON() ?? null,
+            requested_by: this.requestedBy,
             source: this.source,
             live: false,
             query_type: this.queryType,
@@ -191,14 +192,10 @@ export class Track<T = unknown> {
             ...data,
             requestedBy: data.requested_by
                 ? (() => {
-                    const res = data.requested_by as APIUser;
+                    const user = data.requested_by as User;
                     try {
-                        const resolved = player.client.users.resolve(res.id); // TODO: USE CLIENTADAPTER
-                        if (resolved) return resolved;
-                        if (player.client.users.cache.has(res.id)) return player.client.users.cache.get(res.id)!; // TODO: USE CLIENTADAPTER
-                        // @ts-expect-error
-                        const user = new User(player.client, res);
-                        return user;
+                        const resolvedUser = player.clientAdapter.getUser(user.id);
+                        return resolvedUser;
                     } catch {
                         return null;
                     }
@@ -226,9 +223,9 @@ export class Track<T = unknown> {
      * @param channel Voice channel on which this track shall be played
      * @param options Node initialization options
      */
-    public async play<T = unknown>(channel: GuildVoiceChannelResolvable, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
+    public async play<T = unknown>(channelId: string, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
         const fn = this.player.play.bind(this.player);
 
-        return await fn(channel, this, options);
+        return await fn(channelId, this, options);
     }
 }

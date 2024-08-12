@@ -1,4 +1,3 @@
-import { UserResolvable } from 'discord.js';
 import { PassThrough, type Readable } from 'node:stream';
 import { EndBehaviorType } from 'discord-voip';
 import * as prism from 'prism-media';
@@ -6,6 +5,7 @@ import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
 import { Track } from '../fabric/Track';
 import { RawTrackData } from '../types/types';
 import { Exceptions } from '../errors';
+import { User } from '../clientadapter/IClientAdapter';
 
 export interface VoiceReceiverOptions {
     mode?: 'opus' | 'pcm';
@@ -55,15 +55,14 @@ export class VoiceReceiverNode {
      * @param options Recording options
      */
     public recordUser(
-        user: UserResolvable,
+        user: User,
         options: VoiceReceiverOptions = {
             end: EndBehaviorType.AfterSilence,
             mode: 'pcm',
             silenceDuration: 1000
         }
     ) {
-        const _user = this.dispatcher.queue.player.client.users.resolveId(user); // TODO: USE CLIENTADAPTER
-        //const _user = this.dispatcher.queue.player.clientAdapter.getUserId(user);
+        const recordedUserId = user.id;
 
         const passThrough = new PassThrough();
         const receiver = this.dispatcher.voiceConnection.receiver;
@@ -71,8 +70,8 @@ export class VoiceReceiverNode {
         if (!receiver) throw Exceptions.ERR_NO_RECEIVER();
 
         receiver.speaking.on('start', (userId) => {
-            if (userId === _user) {
-                const receiveStream = receiver.subscribe(_user, {
+            if (userId === recordedUserId) {
+                const receiveStream = receiver.subscribe(recordedUserId, {
                     end: {
                         behavior: options.end || EndBehaviorType.AfterSilence,
                         duration: options.silenceDuration ?? 1000

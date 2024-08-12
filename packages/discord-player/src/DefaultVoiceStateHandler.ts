@@ -1,7 +1,8 @@
-import { ChannelType, VoiceState } from 'discord.js';
 import { GuildQueue, GuildQueueEvent } from './queue';
 import { Player } from './Player';
 import { Util } from './utils/Util';
+import { ChannelType, VoiceState } from 'discord.js';
+import { VoiceBasedChannel } from './clientadapter/IClientAdapter';
 
 export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue, oldState: VoiceState, newState: VoiceState) {
     if (!queue || !queue.connection || !queue.channel) return;
@@ -50,7 +51,7 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
         if (!Util.isVoiceEmpty(queue.channel)) return;
         const timeout = setTimeout(() => {
             if (!Util.isVoiceEmpty(queue.channel!)) return;
-            if (!player.nodes.has(queue.guild.id)) return;
+            if (!player.nodes.has(queue.guild)) return;
             if (queue.options.leaveOnEmpty) queue.delete();
             player.events.emit(GuildQueueEvent.emptyChannel, queue);
         }, queue.options.leaveOnEmptyCooldown || 0).unref();
@@ -69,9 +70,9 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
 
     if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
         if (newState.member?.id === newState.guild.members.me?.id) {
-            if (queue.connection && newState.member?.id === newState.guild.members.me?.id) queue.channel = newState.channel!;
+            if (queue.connection && newState.member?.id === newState.guild.members.me?.id) queue.channel! = newState.channel as unknown as VoiceBasedChannel;
             const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
-            const channelEmpty = Util.isVoiceEmpty(queue.channel);
+            const channelEmpty = Util.isVoiceEmpty(queue.channel!);
             if (!channelEmpty && emptyTimeout) {
                 clearTimeout(emptyTimeout);
                 queue.timeouts.delete(`empty_${oldState.guild.id}`);
@@ -79,7 +80,7 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
             } else {
                 const timeout = setTimeout(() => {
                     if (queue.connection && !Util.isVoiceEmpty(queue.channel!)) return;
-                    if (!player.nodes.has(queue.guild.id)) return;
+                    if (!player.nodes.has(queue.guild)) return;
                     if (queue.options.leaveOnEmpty) queue.delete();
                     player.events.emit(GuildQueueEvent.emptyChannel, queue);
                 }, queue.options.leaveOnEmptyCooldown || 0).unref();
@@ -92,7 +93,7 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
                 if (queue.timeouts.has(`empty_${oldState.guild.id}`)) return;
                 const timeout = setTimeout(() => {
                     if (!Util.isVoiceEmpty(queue.channel!)) return;
-                    if (!player.nodes.has(queue.guild.id)) return;
+                    if (!player.nodes.has(queue.guild)) return;
                     if (queue.options.leaveOnEmpty) queue.delete();
                     player.events.emit(GuildQueueEvent.emptyChannel, queue);
                 }, queue.options.leaveOnEmptyCooldown || 0).unref();

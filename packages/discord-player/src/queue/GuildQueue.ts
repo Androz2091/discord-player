@@ -1,5 +1,4 @@
 import { Player, PlayerNodeInitializerOptions, TrackLike } from '../Player';
-import { ChannelType, Guild, GuildVoiceChannelResolvable, VoiceBasedChannel, VoiceState } from 'discord.js';
 import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Track, TrackResolvable } from '../fabric/Track';
@@ -19,6 +18,7 @@ import { AsyncQueue } from '../utils/AsyncQueue';
 import { Exceptions } from '../errors';
 import { SyncedLyricsProvider } from './SyncedLyricsProvider';
 import { LrcGetResult, LrcSearchResult } from '../lrclib/LrcLib';
+import { ChannelType, Guild, VoiceBasedChannel, VoiceState } from '../clientadapter/IClientAdapter';
 
 export interface GuildNodeInit<Meta = unknown> {
     guild: Guild;
@@ -801,7 +801,7 @@ export class GuildQueue<Meta = unknown> {
             throw Exceptions.ERR_VOICE_CONNECTION_DESTROYED();
         }
 
-        const channel = this.player.client.channels.cache.get(connection.joinConfig.channelId!); // TODO: USE CLIENTADAPTER
+        const channel = this.player.clientAdapter.getChannel(connection.joinConfig.channelId!);
         if (!channel) throw Exceptions.ERR_NO_VOICE_CHANNEL();
         if (!channel.isVoiceBased()) throw Exceptions.ERR_INVALID_ARG_TYPE('channel', `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`, String(channel?.type));
 
@@ -811,7 +811,7 @@ export class GuildQueue<Meta = unknown> {
             this.dispatcher = null;
         }
 
-        this.dispatcher = new StreamDispatcher(connection, channel, this, options.timeout ?? this.options.connectionTimeout, options.audioPlayer);
+        this.dispatcher = new StreamDispatcher(connection, channel as VoiceBasedChannel, this, options.timeout ?? this.options.connectionTimeout, options.audioPlayer);
     }
 
     /**
@@ -819,8 +819,8 @@ export class GuildQueue<Meta = unknown> {
      * @param channelResolvable The voice channel to connect to
      * @param options Join config
      */
-    public async connect(channelResolvable: GuildVoiceChannelResolvable, options: VoiceConnectConfig = {}) {
-        const channel = this.player.client.channels.resolve(channelResolvable); // TODO: USE CLIENTADAPTER
+    public async connect(channelId: string, options: VoiceConnectConfig = {}) {
+        const channel = this.player.clientAdapter.getChannel(channelId);
         if (!channel || !channel.isVoiceBased()) {
             throw Exceptions.ERR_INVALID_ARG_TYPE('channel', `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`, String(channel?.type));
         }
@@ -834,20 +834,22 @@ export class GuildQueue<Meta = unknown> {
             this.dispatcher = null;
         }
 
-        this.dispatcher = await this.player.voiceUtils.connect(channel, {
+        this.dispatcher = await this.player.voiceUtils.connect(channel as VoiceBasedChannel, {
             deaf: options.deaf ?? this.options.selfDeaf ?? true,
             maxTime: options?.timeout ?? this.options.connectionTimeout ?? 120_000,
             queue: this,
             audioPlayer: options?.audioPlayer,
-            group: options.group ?? this.player.client.user?.id // TODO: USE CLIENTADAPTER
+            group: options.group ?? this.player.clientAdapter.getClientUserId()
         });
 
         this.emit(GuildQueueEvent.connection, this);
 
         if (this.channel!.type === ChannelType.GuildStageVoice) {
-            await this.channel!.guild.members.me!.voice.setSuppressed(false).catch(async () => {
-                return await this.channel!.guild.members.me!.voice.setRequestToSpeak(true).catch(Util.noop);
-            });
+            try {
+                await this.channel?.clientUser.setSuppressed(false);
+            } catch {
+                return await this.channel?.clientUser.requestToSpeak();
+            }
         }
 
         this.#attachListeners(this.dispatcher);
@@ -912,7 +914,7 @@ export class GuildQueue<Meta = unknown> {
      * Delete this queue
      */
     public delete() {
-        if (this.player.nodes.delete(this.id)) {
+        if (this.player.nodes.delete(this)) {
             this.#deleted = true;
             this.player.events.emit(GuildQueueEvent.queueDelete, this);
             this.node.tasksQueue.cancelAll();
@@ -925,7 +927,7 @@ export class GuildQueue<Meta = unknown> {
      * @returns
      */
     public revive() {
-        if (!this.deleted || this.player.nodes.has(this.id)) return;
+        if (!this.deleted || this.player.nodes.has(this)) return;
         this.#deleted = false;
         this.setTransitioning(false);
         this.player.nodes.cache.set(this.id, this);
@@ -938,7 +940,7 @@ export class GuildQueue<Meta = unknown> {
      * @param reason Reason
      */
     public setSelfDeaf(mode?: boolean, reason?: string) {
-        return this.guild.members.me!.voice.setDeaf(mode, reason);
+        return this.guild.clientUser.setSelfDeaf(mode, reason);
     }
 
     /**
@@ -947,7 +949,7 @@ export class GuildQueue<Meta = unknown> {
      * @param reason Reason
      */
     public setSelfMute(mode?: boolean, reason?: string) {
-        return this.guild.members.me!.voice.setMute(mode, reason);
+        return this.guild.clientUser.setSelfMute(mode, reason);
     }
 
     /**
@@ -958,7 +960,7 @@ export class GuildQueue<Meta = unknown> {
     public async play(track: TrackLike, options?: PlayerNodeInitializerOptions<Meta>) {
         if (!this.channel) throw Exceptions.ERR_NO_VOICE_CONNECTION();
 
-        return this.player.play(this.channel, track, options);
+        return this.player.play(this.channel.id, track, options);
     }
 
     /**

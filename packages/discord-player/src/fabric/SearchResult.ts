@@ -1,4 +1,4 @@
-import { User } from 'discord.js';
+import { User } from '../clientadapter/IClientAdapter';
 import { BaseExtractor } from '../extractors/BaseExtractor';
 import { Player } from '../Player';
 import { QueryExtractorSearch, QueryType, SearchQueryType } from '../types/types';
@@ -141,7 +141,7 @@ export class SearchResult {
             playlist: this.playlist?.toJSON(false) || null,
             tracks: this.tracks.map((m) => m.toJSON(true)),
             extractor: this.extractor?.identifier || null,
-            requestedBy: this.requestedBy?.toJSON() || null
+            requestedBy: this.requestedBy
         };
     }
 }

@@ -1,4 +1,3 @@
-import { StageChannel, VoiceChannel } from 'discord.js';
 import { TimeData } from '../types/types';
 import { setTimeout } from 'node:timers/promises';
 import { GuildQueue } from '../queue';
@@ -18,6 +17,7 @@ import {
     removeCleanExplicit
 } from '@web-scrobbler/metadata-filter';
 import { TrackSource } from '../types/types';
+import { VoiceBasedChannel } from '../clientadapter/IClientAdapter';
 
 export type RuntimeType = 'node' | 'deno' | 'bun' | 'unknown';
 
@@ -30,7 +30,7 @@ class Util {
     /**
      * Utils
      */
-    private constructor() {} // eslint-disable-line @typescript-eslint/no-empty-function
+    private constructor() { } // eslint-disable-line @typescript-eslint/no-empty-function
 
     /**
      * Gets the runtime information
@@ -119,8 +119,8 @@ class Util {
      * @param {VoiceChannel|StageChannel} channel The voice channel
      * @returns {boolean}
      */
-    static isVoiceEmpty(channel: VoiceChannel | StageChannel) {
-        return channel && channel.members.filter((member) => !member.user.bot).size === 0;
+    static isVoiceEmpty(channel: VoiceBasedChannel) {
+        return channel.members?.size === 0;
     }
 
     /**
@@ -191,7 +191,7 @@ class Util {
         return setTimeout(time, undefined, { ref: false });
     }
 
-    static noop() {} // eslint-disable-line @typescript-eslint/no-empty-function
+    static noop() { } // eslint-disable-line @typescript-eslint/no-empty-function
 
     static async getFetch() {
         if ('fetch' in globalThis) return globalThis.fetch;
@@ -245,6 +245,14 @@ export const VALIDATE_QUEUE_CAP = (queue: GuildQueue, items: Playlist | Track | 
     if (maxCap < tracks.length) {
         throw Exceptions.ERR_OUT_OF_SPACE('tracks queue', maxCap, tracks.length);
     }
+};
+
+export const generateRandomId = (length = 10) => {
+    return Math.random().toString(36).substring(2, length + 2);
+};
+
+export const escapeMarkdown = (text: string) => {
+    return text.replace(/([*_~`|])/g, '\\$1');
 };
 
 export { Util };

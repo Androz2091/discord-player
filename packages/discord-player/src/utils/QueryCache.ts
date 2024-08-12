@@ -1,7 +1,7 @@
 import { Player } from '../Player';
+import { User } from '../clientadapter/IClientAdapter';
 import { SearchResult } from '../fabric/SearchResult';
 import { Track } from '../fabric/Track';
-import { User } from 'discord.js';
 import { SearchQueryType } from '../types/types';
 
 export interface QueryCacheOptions {

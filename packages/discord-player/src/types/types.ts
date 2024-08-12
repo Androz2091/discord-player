@@ -1,4 +1,3 @@
-import type { User, UserResolvable, VoiceState } from 'discord.js';
 import type { GuildQueue } from '../queue';
 import type { Track } from '../fabric/Track';
 import type { Playlist } from '../fabric/Playlist';
@@ -8,6 +7,7 @@ import type { IPRotationConfig } from '../utils/IPRotator';
 
 // @ts-ignore
 import type { BridgeProvider } from '@discord-player/extractor';
+import { User, VoiceState } from '../clientadapter/IClientAdapter';
 
 export type FiltersName = keyof QueueFilters;
 
@@ -280,7 +280,7 @@ export interface SearchOptions {
     /**
      * The user who requested this search
      */
-    requestedBy?: UserResolvable;
+    requestedBy?: User;
     /**
      * The query search engine, can be extractor name to target specific one (custom)
      */

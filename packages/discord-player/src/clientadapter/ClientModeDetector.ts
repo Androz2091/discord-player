@@ -1,15 +1,14 @@
-import { type SupportedClient } from "./ClientAdapterFactory";
 import { ClientType } from "./IClientAdapter";
 
 export interface ValidPackagesStructure {
     name: ClientType;
     test: () => Promise<boolean>;
-    testClient: (client: SupportedClient) => Promise<boolean>
+    testClient: (client: unknown) => Promise<boolean>
 }
 
 export const VALID_PACKAGES: ValidPackagesStructure[] = [
     {
-        name: "discord.js",
+        name: ClientType.DiscordJS,
         async test() {
             try {
                 await import("discord.js");
@@ -18,18 +17,19 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
                 return false;
             }
         },
-        async testClient(client: SupportedClient) {
+        async testClient(client: unknown) {
             try {
                 const { Client } = await import("discord.js");
 
                 return client instanceof Client;
             } catch {
+
                 return false;
             }
         }
     },
     {
-        name: "eris",
+        name: ClientType.Eris,
         async test() {
             try {
                 await import("eris");
@@ -50,7 +50,7 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
     }
 ];
 
-export async function detectClientMode(client: SupportedClient): Promise<ClientType> {
+export async function detectClientMode(client: unknown): Promise<ClientType> {
     for (const pkg of VALID_PACKAGES) {
         const isValid = await pkg.test();
         const isInstance = await pkg.testClient(client);

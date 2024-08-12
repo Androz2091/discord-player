@@ -1,5 +1,4 @@
 import { FFmpeg } from '@discord-player/ffmpeg';
-import { Client, VoiceState, User, GuildVoiceChannelResolvable } from 'discord.js';
 import { Playlist, Track, SearchResult } from './fabric';
 import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions, GuildQueueEvent } from './queue';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
@@ -17,8 +16,10 @@ import { IPRotator } from './utils/IPRotator';
 import { Context, createContext } from './hooks';
 import { HooksCtx } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
-import type { IClientAdapter } from './clientadapter/IClientAdapter';
-import { ClientAdapterFactory, SupportedClient } from './clientadapter/ClientAdapterFactory';
+import { Guild, type IClientAdapter } from './clientadapter/IClientAdapter';
+import { createClientAdapter } from './clientadapter/ClientAdapterFactory';
+import { generateRandomId } from './utils/Util';
+import { VoiceState } from 'discord.js';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -56,15 +57,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     /**
      * The unique identifier of this player instance
      */
-    public readonly id = Math.random().toString(36).substring(2, 10);
+    public readonly id = generateRandomId();
     /**
-     * The discord.js client
+     * The client adapter for the Discord API client used (e.g. discord.js, Eris)
      */
-    public readonly client!: Client;
-    /**
-     * The discord.js client
-     */
-    public readonly clientAdapter!: IClientAdapter;
+    public clientAdapter!: IClientAdapter;
     /**
      * The player options
      */
@@ -100,10 +97,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
     /**
      * Creates new Discord Player
-     * @param {SupportedClient} client The Discord API Client (e.g. discord.js, Eris)
+     * @param {unknown} client The Discord API Client (e.g. discord.js, Eris)
      * @param {PlayerInitOptions} [options] The player init options
      */
-    public constructor(client: SupportedClient, options: PlayerInitOptions = {}) {
+    public constructor(client: unknown, options: PlayerInitOptions = {}) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!options.ignoreInstance && kSingleton in Player) return (<any>Player)[kSingleton] as Player;
 
@@ -114,19 +111,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
             process.env.FFMPEG_PATH = options.ffmpegPath;
         }
-
-        /**
-         * The Discord API client (e.g. discord.js, Eris)
-         * @type {Client}
-         */
-        this.client = client as Client;
-
-        /**
-         * The Discord API client adapter (e.g discord.js, Eris)
-         * @type {IClientAdapter}
-         */
-        this.clientAdapter = ClientAdapterFactory.createClientAdapter(client);
-        this.clientAdapter.validateIntents();
 
         this.options = {
             lockVoiceStateHandler: false,
@@ -144,9 +128,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 ...options.ytdlOptions
             }
         } as PlayerInitOptions;
-
-        this.clientAdapter.incrementMaxListeners();
-        this.clientAdapter.addVoiceStateUpdateListener(this.#voiceStateUpdateListener); // Use common events no djs specific
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
             this.#lagMonitorInterval = setInterval(() => {
@@ -172,6 +153,17 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 enumerable: false
             });
         }
+
+        this.createAdapter(client);
+    }
+
+    public createAdapter(client: unknown) {
+        (async () => {
+            this.clientAdapter = await createClientAdapter(client);
+            this.clientAdapter.validateIntents();
+            this.clientAdapter.incrementMaxListeners();
+            this.clientAdapter.addVoiceStateUpdateListener(this.#voiceStateUpdateListener);
+        })();
     }
 
     /**
@@ -202,7 +194,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param client The client that instantiated player
      * @param options Player initializer options
      */
-    public static singleton(client: SupportedClient, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
+    public static singleton(client: unknown, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
         return new Player(client, {
             ...options,
             ignoreInstance: false
@@ -214,7 +206,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param client The client that instantiated player
      * @param options Player initializer options
      */
-    public static create(client: SupportedClient, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
+    public static create(client: unknown, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
         return new Player(client, {
             ...options,
             ignoreInstance: true
@@ -310,11 +302,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     }
 
     private _handleVoiceState(oldState: VoiceState, newState: VoiceState) {
-        const queue = this.nodes.get(oldState.guild.id);
+        const queue = this.nodes.get(oldState.guild as unknown as Guild);
         if (!queue || !queue.connection || !queue.channel) return;
 
         // dispatch voice state update
-        const wasHandled = this.events.emit(GuildQueueEvent.voiceStateUpdate, queue, oldState, newState);
+        const wasHandled = this.events.emit(GuildQueueEvent.voiceStateUpdate, queue, oldState as any, newState as any);
         // if the event was handled, return assuming the listener implemented all of the logic below
         if (wasHandled && !this.options.lockVoiceStateHandler) return;
 
@@ -377,9 +369,9 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * }
      * ```
      */
-    public async play<T = unknown>(channel: GuildVoiceChannelResolvable, query: TrackLike, options: PlayerNodeInitializerOptions<T> = {}): Promise<PlayerNodeInitializationResult<T>> {
-        const vc = this.client.channels.resolve(channel); // TODO: USE CLIENTADAPTER
-        if (!vc?.isVoiceBased()) throw Exceptions.ERR_INVALID_ARG_TYPE('channel', 'VoiceBasedChannel', !vc ? 'undefined' : `channel type ${vc.type}`);
+    public async play<T = unknown>(channelId: string, query: TrackLike, options: PlayerNodeInitializerOptions<T> = {}): Promise<PlayerNodeInitializationResult<T>> {
+        const channel = this.clientAdapter.getChannel(channelId);
+        if (!channel?.isVoiceBased()) throw Exceptions.ERR_INVALID_ARG_TYPE('channel', 'VoiceBasedChannel', !channel ? 'undefined' : `channel type ${channel.type}`);
 
         const originalResult = query instanceof SearchResult ? query : await this.search(query, options);
         const result = (await options.afterSearch?.(originalResult)) || originalResult;
@@ -387,7 +379,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             throw Exceptions.ERR_NO_RESULT(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
         }
 
-        const queue = this.nodes.create(vc.guild, options.nodeOptions);
+        const queue = this.nodes.create(channel.guild.id, options.nodeOptions);
 
         if (this.hasDebugger) this.debug(`[AsyncQueue] Acquiring an entry...`);
         const entry = queue.tasksQueue.acquire({ signal: options.signal });
@@ -398,7 +390,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         if (this.hasDebugger) this.debug(`[AsyncQueue] Entry ${entry.id} was resolved!`);
 
         try {
-            if (!queue.channel) await queue.connect(vc, options.connectionOptions);
+            if (!queue.channel) await queue.connect(channel.id, options.connectionOptions);
 
             if (!result.playlist) {
                 queue.addTrack(result.tracks[0]);
@@ -434,7 +426,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     public async search(searchQuery: string | Track | Track[] | Playlist | SearchResult, options: SearchOptions = {}): Promise<SearchResult> {
         if (searchQuery instanceof SearchResult) return searchQuery;
 
-        if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!; // TODO: USE CLIENTADAPTER
+        if (options.requestedBy != null) options.requestedBy = this.clientAdapter.getUser(options.requestedBy.id)!;
         options.blockExtractors ??= this.options.blockExtractors;
         options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 
@@ -562,7 +554,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         const res = await extractor
             .handle(query, {
                 type: queryType as SearchQueryType,
-                requestedBy: options.requestedBy as User,
+                requestedBy: options.requestedBy,
                 requestOptions: options.requestOptions,
                 protocol
             })
@@ -594,7 +586,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 (await ext.validate(query)) &&
                 ext.handle(query, {
                     type: queryType as SearchQueryType,
-                    requestedBy: options.requestedBy as User,
+                    requestedBy: options.requestedBy,
                     requestOptions: options.requestOptions,
                     protocol
                 })

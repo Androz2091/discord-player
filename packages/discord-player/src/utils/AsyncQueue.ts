@@ -1,4 +1,4 @@
-import { SnowflakeUtil } from 'discord.js';
+import { generateRandomId } from "./Util";
 
 export interface AsyncQueueAcquisitionOptions {
     /**
@@ -98,7 +98,7 @@ export class AsyncQueue {
 }
 
 export class AsyncQueueEntry {
-    public readonly id = SnowflakeUtil.generate().toString();
+    public readonly id = generateRandomId();
     private readonly promise: Promise<void>;
     public signal: AbortSignal | null = null;
     public onAbort: (() => void) | null = null;

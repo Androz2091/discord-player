@@ -1,4 +1,3 @@
-import { User } from 'discord.js';
 import { Readable } from 'stream';
 import { Playlist } from '../fabric/Playlist';
 import { Track } from '../fabric/Track';
@@ -7,14 +6,15 @@ import { ExtractorExecutionContext } from './ExtractorExecutionContext';
 import type { RequestOptions } from 'http';
 import { Exceptions } from '../errors';
 import type { GuildQueueHistory } from '../queue';
+import { User } from '../clientadapter/IClientAdapter';
 
 export type ExtractorStreamable =
     | Readable
     | string
     | {
-          $fmt: string;
-          stream: Readable;
-      };
+        $fmt: string;
+        stream: Readable;
+    };
 
 export class BaseExtractor<T extends object = object> {
     /**
@@ -43,7 +43,7 @@ export class BaseExtractor<T extends object = object> {
      * @param context Context that instantiated this extractor
      * @param options Initialization options for this extractor
      */
-    public constructor(public context: ExtractorExecutionContext, public options: T = <T>{}) {}
+    public constructor(public context: ExtractorExecutionContext, public options: T = <T>{}) { }
 
     /**
      * Identifier of this extractor
