@@ -17,7 +17,6 @@ import { IPRotator } from './utils/IPRotator';
 import { Context, createContext } from './hooks';
 import { HooksCtx } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
-import { getCompatName, isClientProxy } from './compat/createErisCompat';
 import type { IClientAdapter } from './clientadapter/IClientAdapter';
 import { ClientAdapterFactory, SupportedClient } from './clientadapter/ClientAdapterFactory';
 

@@ -142,9 +142,9 @@ player.events.on('playerStart', (queue, track) => {
 Discord Player has limited support for Eris. You can use the following code to set up Discord Player with Eris:
 
 ```js index.js
-const { Player, createErisCompat } = require('discord-player');
+const { Player } = require('discord-player');
 
-const player = new Player(createErisCompat(client));
+const player = new Player(client);
 ```
 
 Let's move on to the command part. You can define the command as per your requirements. We will only focus on the command part:

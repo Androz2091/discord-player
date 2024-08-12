@@ -1,4 +1,3 @@
-export { createErisCompat, isErisProxy } from './compat/createErisCompat';
 export * from './utils/PlayerEventsEmitter';
 export * from './utils/AudioFilters';
 export * from './extractors/BaseExtractor';

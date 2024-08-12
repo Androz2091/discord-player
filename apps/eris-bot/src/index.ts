@@ -1,13 +1,13 @@
 /* eslint-disable no-console */
 import 'dotenv/config';
 import Eris from 'eris';
-import { Player, createErisCompat } from 'discord-player';
+import { Player } from 'discord-player';
 
 const client = Eris(process.env.DISCORD_TOKEN!, {
     intents: ['all']
 });
 
-const player = new Player(createErisCompat(client));
+const player = new Player(client);
 
 player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
 

@@ -12,15 +12,15 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
         name: "discord.js",
         async test() {
             try {
-                await import("discord.js")
-                return true
+                await import("discord.js");
+                return true;
             } catch {
                 return false;
             }
         },
         async testClient(client: SupportedClient) {
             try {
-                const { Client } = await import("discord.js")
+                const { Client } = await import("discord.js");
 
                 return client instanceof Client;
             } catch {
@@ -32,15 +32,15 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
         name: "eris",
         async test() {
             try {
-                await import("eris")
-                return true
+                await import("eris");
+                return true;
             } catch {
                 return false;
             }
         },
         async testClient(client) {
             try {
-                const { Client } = await import("eris")
+                const { Client } = await import("eris");
 
                 return client instanceof Client;
             } catch {
@@ -51,9 +51,9 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
 ];
 
 export async function detectClientMode(client: SupportedClient): Promise<ClientType> {
-    for(const pkg of VALID_PACKAGES) {
-        const isValid = await pkg.test()
-        const isInstance = await pkg.testClient(client)
+    for (const pkg of VALID_PACKAGES) {
+        const isValid = await pkg.test();
+        const isInstance = await pkg.testClient(client);
 
         if (isValid && isInstance) return pkg.name;
     }
