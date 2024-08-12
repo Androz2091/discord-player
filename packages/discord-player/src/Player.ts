@@ -1,11 +1,10 @@
 import { FFmpeg } from '@discord-player/ffmpeg';
-import { Client, SnowflakeUtil, VoiceState, IntentsBitField, User, GuildVoiceChannelResolvable, version as djsVersion, Events } from 'discord.js';
+import { Client, VoiceState, User, GuildVoiceChannelResolvable } from 'discord.js';
 import { Playlist, Track, SearchResult } from './fabric';
 import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions, GuildQueueEvent } from './queue';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType, PlayerEvent } from './types/types';
 import { QueryResolver, ResolvedQuery } from './utils/QueryResolver';
-import { Util } from './utils/Util';
 import { generateDependencyReport, version as dVoiceVersion } from 'discord-voip';
 import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
 import { BaseExtractor } from './extractors/BaseExtractor';
@@ -20,7 +19,7 @@ import { HooksCtx } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
 import { getCompatName, isClientProxy } from './compat/createErisCompat';
 import type { IClientAdapter } from './clientadapter/IClientAdapter';
-import { ClientAdapterFactory } from './clientadapter/ClientAdapterFactory';
+import { ClientAdapterFactory, SupportedClient } from './clientadapter/ClientAdapterFactory';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -58,7 +57,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     /**
      * The unique identifier of this player instance
      */
-    public readonly id = SnowflakeUtil.generate().toString();
+    public readonly id = Math.random().toString(36).substring(2, 10);
     /**
      * The discord.js client
      */
@@ -102,10 +101,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
     /**
      * Creates new Discord Player
-     * @param {Client} client The Discord Client
+     * @param {SupportedClient} client The Discord API Client (e.g. discord.js, Eris)
      * @param {PlayerInitOptions} [options] The player init options
      */
-    public constructor(client: Client, options: PlayerInitOptions = {}) {
+    public constructor(client: SupportedClient, options: PlayerInitOptions = {}) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!options.ignoreInstance && kSingleton in Player) return (<any>Player)[kSingleton] as Player;
 
@@ -117,39 +116,20 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             process.env.FFMPEG_PATH = options.ffmpegPath;
         }
 
-        const isCompatMode = isClientProxy(client);
+        //const isCompatMode = isClientProxy(client);
 
         /**
-         * The discord.js client
+         * The Discord API client (e.g. discord.js, Eris)
          * @type {Client}
          */
-        this.client = client;
+        this.client = client as Client;
 
         /**
-         * The api client adapter (discord.js or eris)
+         * The Discord API client adapter (e.g discord.js, Eris)
          * @type {IClientAdapter}
          */
         this.clientAdapter = ClientAdapterFactory.createClientAdapter(client);
-
-
-        if (!isCompatMode) {
-            try {
-                if (!(client instanceof Client)) {
-                    Util.warn(
-                        `Client is not an instance of discord.js@${djsVersion} client, some things may not work correctly. This can happen due to corrupt dependencies or having multiple installations of discord.js.`,
-                        'InvalidClientInstance'
-                    );
-                }
-
-                const ibf = this.client.options.intents instanceof IntentsBitField ? this.client.options.intents : new IntentsBitField(this.client.options.intents); // TODO: USE CLIENTADAPTER
-
-                if (!ibf.has(IntentsBitField.Flags.GuildVoiceStates)) {
-                    Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
-                }
-            } catch {
-                // noop
-            }
-        }
+        this.clientAdapter.validateIntents();
 
         this.options = {
             lockVoiceStateHandler: false,
@@ -168,11 +148,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             }
         } as PlayerInitOptions;
 
-        if (!isCompatMode) {
-            // @ts-ignore private method
-            this.clientAdapter.incrementMaxListeners(); // TODO: USE CLIENTADAPTER
-            this.clientAdapter.addListener(Events.VoiceStateUpdate, this.#voiceStateUpdateListener); // TODO: USE CLIENTADAPTER
-        }
+        this.clientAdapter.incrementMaxListeners();
+        this.clientAdapter.addVoiceStateUpdateListener(this.#voiceStateUpdateListener); // Use common events no djs specific
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
             this.#lagMonitorInterval = setInterval(() => {
@@ -228,7 +205,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param client The client that instantiated player
      * @param options Player initializer options
      */
-    public static singleton(client: Client, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
+    public static singleton(client: SupportedClient, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
         return new Player(client, {
             ...options,
             ignoreInstance: false
@@ -240,7 +217,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param client The client that instantiated player
      * @param options Player initializer options
      */
-    public static create(client: Client, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
+    public static create(client: SupportedClient, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
         return new Player(client, {
             ...options,
             ignoreInstance: true
@@ -332,8 +309,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         this.nodes.cache.forEach((node) => node.delete());
 
         if (!this.isCompatMode()) {
-            this.clientAdapter.removeListener(Events.VoiceStateUpdate, this.#voiceStateUpdateListener); // TODO: USE CLIENTADAPTER
-            this.clientAdapter.decrementMaxListeners(); // TODO: USE CLIENTADAPTER
+            this.clientAdapter.removeVoiceStateUpdateListener(this.#voiceStateUpdateListener);
+            this.clientAdapter.decrementMaxListeners();
         }
 
         this.removeAllListeners();
@@ -674,12 +651,14 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     public scanDeps() {
         const line = '-'.repeat(50);
         const runtime = 'Bun' in globalThis ? 'Bun' : 'Deno' in globalThis ? 'Deno' : 'Node';
+        const clientName = this.clientAdapter.getClientName();
+        const clientVersion = this.clientAdapter.getClientVersion();
         const depsReport = [
             'Discord Player',
             line,
             `- discord-player: ${Player.version}${this.isCompatMode() ? ` (${getCompatName(this.client)} compatibility mode)` : ''}`,
             `- discord-voip: ${dVoiceVersion}`,
-            `- discord.js: ${djsVersion}`,
+            `- ${clientName}: ${clientVersion}`,
             `- Node version: ${process.version} (Detected Runtime: ${runtime}, Platform: ${process.platform} [${process.arch}])`,
             (() => {
                 if (this.options.useLegacyFFmpeg) return '- ffmpeg: N/A (using legacy ffmpeg)';

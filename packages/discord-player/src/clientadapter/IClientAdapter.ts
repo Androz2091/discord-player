@@ -26,11 +26,14 @@ export enum ClientType {
 
 export interface IClientAdapter {
     clientType: ClientType;
+    validateIntents(): void;
+    getClientName(): string;
+    getClientVersion(): string;
     getUserId(user: User): string | null;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    addListener(event: string, listener: (...args: any[]) => void): void;
+    addVoiceStateUpdateListener(listener: (...args: any[]) => void): void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    removeListener(event: string, listener: (...args: any[]) => void): void;
+    removeVoiceStateUpdateListener(listener: (...args: any[]) => void): void;
     decrementMaxListeners(): void;
     incrementMaxListeners(): void;
 }
