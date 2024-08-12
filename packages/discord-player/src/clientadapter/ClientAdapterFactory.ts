@@ -14,7 +14,7 @@ export class ClientAdapterFactory {
         try {
             switch(libType) {
                 case "discord.js":
-                    new DiscordJsClientAdapter(client as DiscordJsClient)
+                    return new DiscordJsClientAdapter(client as DiscordJsClient)
                 case "eris": {
                     Util.warn(
                         `You are using an Eris client, some things may not work correctly. This is currently under experimental support and it is still recommended to use a discord.js client.`,
