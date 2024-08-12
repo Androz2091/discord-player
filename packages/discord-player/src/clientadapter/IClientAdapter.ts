@@ -22,7 +22,7 @@ export const ClientType = {
     DiscordJS: "discord.js",
     Eris: "eris",
     Unknown: "unknown"
-} as const
+} as const;
 
 export type ClientType = typeof ClientType[keyof typeof ClientType]
 
