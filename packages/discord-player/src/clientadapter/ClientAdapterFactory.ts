@@ -1,16 +1,10 @@
 import { Client as DiscordJsClient } from 'discord.js';
 import { Client as ErisClient } from 'eris';
 import { DiscordJsClientAdapter } from './DiscordJsClientAdapter';
-import { IClientAdapter } from './IClientAdapter';
+import { ClientType, IClientAdapter } from './IClientAdapter';
 import { Util } from '../utils/Util';
 
-enum ClientType {
-    DiscordJs = 'DjsClient',
-    Eris = 'ErisClient',
-    Unknown = 'Unknown'
-}
-
-type SupportedClient = DiscordJsClient | ErisClient;
+export type SupportedClient = DiscordJsClient | ErisClient;
 
 export class ClientAdapterFactory {
     static createClientAdapter(client: SupportedClient): IClientAdapter {

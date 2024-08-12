@@ -170,8 +170,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         if (!isCompatMode) {
             // @ts-ignore private method
-            this.client.incrementMaxListeners(); // TODO: USE CLIENTADAPTER
-            this.client.on(Events.VoiceStateUpdate, this.#voiceStateUpdateListener); // TODO: USE CLIENTADAPTER
+            this.clientAdapter.incrementMaxListeners(); // TODO: USE CLIENTADAPTER
+            this.clientAdapter.addListener(Events.VoiceStateUpdate, this.#voiceStateUpdateListener); // TODO: USE CLIENTADAPTER
         }
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
@@ -329,12 +329,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * ```
      */
     public async destroy() {
-        this.nodes.cache.forEach((node) => node.delete()); // TODO: USE CLIENTADAPTER
+        this.nodes.cache.forEach((node) => node.delete());
 
         if (!this.isCompatMode()) {
-            this.client.off(Events.VoiceStateUpdate, this.#voiceStateUpdateListener); // TODO: USE CLIENTADAPTER
-            // @ts-ignore private method
-            this.client.decrementMaxListeners(); // TODO: USE CLIENTADAPTER
+            this.clientAdapter.removeListener(Events.VoiceStateUpdate, this.#voiceStateUpdateListener); // TODO: USE CLIENTADAPTER
+            this.clientAdapter.decrementMaxListeners(); // TODO: USE CLIENTADAPTER
         }
 
         this.removeAllListeners();

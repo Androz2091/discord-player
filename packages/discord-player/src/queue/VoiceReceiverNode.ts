@@ -63,6 +63,7 @@ export class VoiceReceiverNode {
         }
     ) {
         const _user = this.dispatcher.queue.player.client.users.resolveId(user); // TODO: USE CLIENTADAPTER
+        //const _user = this.dispatcher.queue.player.clientAdapter.getUserId(user);
 
         const passThrough = new PassThrough();
         const receiver = this.dispatcher.voiceConnection.receiver;
