@@ -3,15 +3,17 @@ import { User as ErisUser } from "eris";
 
 type User = DjsUserResolvable | ErisUser;
 
-enum ChannelType {
-    Text = 0,
-    DM = 1,
-    GuildVoice = 2,
-    GroupDM = 3
+export const ChannelType = {
+    Text: 0,
+    DM: 1,
+    GuildVoice: 2,
+    GroupDM: 3
     // ...
-}
+} as const
 
-type Channel = {
+export type ChannelType = typeof ChannelType[keyof typeof ChannelType]
+
+export type Channel = {
     id: string;
     name: string;
     isSpeakable: boolean;

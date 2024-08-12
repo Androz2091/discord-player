@@ -52,9 +52,12 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
 export function detectClientMode(client: SupportedClient): ClientType {
     for (const pkg of VALID_PACKAGES) {
         const isValid = pkg.test();
+
+        if(!isValid) continue;
+
         const isInstance = pkg.testClient(client);
 
-        if (isValid && isInstance) return pkg.name;
+        if (isInstance) return pkg.name;
     }
 
     return 'unknown';
