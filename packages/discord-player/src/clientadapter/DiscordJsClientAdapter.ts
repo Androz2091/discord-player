@@ -4,7 +4,7 @@ import { ClientType, IClientAdapter } from "./IClientAdapter";
 export class DiscordJsClientAdapter implements IClientAdapter {
     private client: Client;
 
-    public clientType: ClientType = ClientType.DiscordJs;
+    public clientType: ClientType = ClientType.DiscordJS;
 
     constructor(client: Client) {
         this.client = client;
