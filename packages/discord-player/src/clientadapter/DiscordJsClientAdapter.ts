@@ -6,7 +6,7 @@ export class DiscordJsClientAdapter implements IClientAdapter {
     private client: Client;
     private name = 'discord.js';
 
-    public clientType: ClientType = ClientType.DiscordJs;
+    public clientType: ClientType = ClientType.DiscordJS;
 
     constructor(client: Client) {
         this.client = client;

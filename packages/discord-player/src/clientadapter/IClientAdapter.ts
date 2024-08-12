@@ -18,11 +18,13 @@ type Channel = {
     type: ChannelType;
 }
 
-export enum ClientType {
-    DiscordJs = 'DjsClient',
-    Eris = 'ErisClient',
-    Unknown = 'Unknown'
-}
+export const ClientType = {
+    DiscordJS: "discord.js",
+    Eris: "eris",
+    Unknown: "unknown"
+} as const
+
+export type ClientType = typeof ClientType[keyof typeof ClientType]
 
 export interface IClientAdapter {
     clientType: ClientType;
