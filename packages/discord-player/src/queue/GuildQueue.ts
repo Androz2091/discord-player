@@ -801,7 +801,7 @@ export class GuildQueue<Meta = unknown> {
             throw Exceptions.ERR_VOICE_CONNECTION_DESTROYED();
         }
 
-        const channel = this.player.client.channels.cache.get(connection.joinConfig.channelId!);
+        const channel = this.player.client.channels.cache.get(connection.joinConfig.channelId!); // TODO: USE CLIENTADAPTER
         if (!channel) throw Exceptions.ERR_NO_VOICE_CHANNEL();
         if (!channel.isVoiceBased()) throw Exceptions.ERR_INVALID_ARG_TYPE('channel', `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`, String(channel?.type));
 
@@ -820,7 +820,7 @@ export class GuildQueue<Meta = unknown> {
      * @param options Join config
      */
     public async connect(channelResolvable: GuildVoiceChannelResolvable, options: VoiceConnectConfig = {}) {
-        const channel = this.player.client.channels.resolve(channelResolvable);
+        const channel = this.player.client.channels.resolve(channelResolvable); // TODO: USE CLIENTADAPTER
         if (!channel || !channel.isVoiceBased()) {
             throw Exceptions.ERR_INVALID_ARG_TYPE('channel', `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`, String(channel?.type));
         }
@@ -839,7 +839,7 @@ export class GuildQueue<Meta = unknown> {
             maxTime: options?.timeout ?? this.options.connectionTimeout ?? 120_000,
             queue: this,
             audioPlayer: options?.audioPlayer,
-            group: options.group ?? this.player.client.user?.id
+            group: options.group ?? this.player.client.user?.id // TODO: USE CLIENTADAPTER
         });
 
         this.emit(GuildQueueEvent.connection, this);
@@ -1138,9 +1138,9 @@ export class GuildQueue<Meta = unknown> {
                 resolver(
                     tracks.length
                         ? (() => {
-                              const unique = tracks.filter((tr) => !this.history.tracks.find((t) => t.url === tr.url));
-                              return unique?.[0] ?? Util.randomChoice(tracks.slice(0, 5));
-                          })()
+                            const unique = tracks.filter((tr) => !this.history.tracks.find((t) => t.url === tr.url));
+                            return unique?.[0] ?? Util.randomChoice(tracks.slice(0, 5));
+                        })()
                         : null
                 );
             }

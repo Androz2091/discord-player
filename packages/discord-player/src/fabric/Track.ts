@@ -191,18 +191,18 @@ export class Track<T = unknown> {
             ...data,
             requestedBy: data.requested_by
                 ? (() => {
-                      const res = data.requested_by as APIUser;
-                      try {
-                          const resolved = player.client.users.resolve(res.id);
-                          if (resolved) return resolved;
-                          if (player.client.users.cache.has(res.id)) return player.client.users.cache.get(res.id)!;
-                          // @ts-expect-error
-                          const user = new User(player.client, res);
-                          return user;
-                      } catch {
-                          return null;
-                      }
-                  })()
+                    const res = data.requested_by as APIUser;
+                    try {
+                        const resolved = player.client.users.resolve(res.id); // TODO: USE CLIENTADAPTER
+                        if (resolved) return resolved;
+                        if (player.client.users.cache.has(res.id)) return player.client.users.cache.get(res.id)!; // TODO: USE CLIENTADAPTER
+                        // @ts-expect-error
+                        const user = new User(player.client, res);
+                        return user;
+                    } catch {
+                        return null;
+                    }
+                })()
                 : null,
             queryType: data.query_type ?? undefined
         });

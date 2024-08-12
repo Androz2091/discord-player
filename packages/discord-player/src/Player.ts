@@ -19,6 +19,8 @@ import { Context, createContext } from './hooks';
 import { HooksCtx } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
 import { getCompatName, isClientProxy } from './compat/createErisCompat';
+import type { IClientAdapter } from './clientadapter/IClientAdapter';
+import { ClientAdapterFactory } from './clientadapter/ClientAdapterFactory';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -61,6 +63,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * The discord.js client
      */
     public readonly client!: Client;
+    /**
+     * The discord.js client
+     */
+    public readonly clientAdapter!: IClientAdapter;
     /**
      * The player options
      */
@@ -119,6 +125,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
          */
         this.client = client;
 
+        /**
+         * The api client adapter (discord.js or eris)
+         * @type {IClientAdapter}
+         */
+        this.clientAdapter = ClientAdapterFactory.createClientAdapter(client);
+
+
         if (!isCompatMode) {
             try {
                 if (!(client instanceof Client)) {
@@ -128,7 +141,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                     );
                 }
 
-                const ibf = this.client.options.intents instanceof IntentsBitField ? this.client.options.intents : new IntentsBitField(this.client.options.intents);
+                const ibf = this.client.options.intents instanceof IntentsBitField ? this.client.options.intents : new IntentsBitField(this.client.options.intents); // TODO: USE CLIENTADAPTER
 
                 if (!ibf.has(IntentsBitField.Flags.GuildVoiceStates)) {
                     Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
@@ -157,8 +170,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
         if (!isCompatMode) {
             // @ts-ignore private method
-            this.client.incrementMaxListeners();
-            this.client.on(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
+            this.client.incrementMaxListeners(); // TODO: USE CLIENTADAPTER
+            this.client.on(Events.VoiceStateUpdate, this.#voiceStateUpdateListener); // TODO: USE CLIENTADAPTER
         }
 
         if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
@@ -316,12 +329,12 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * ```
      */
     public async destroy() {
-        this.nodes.cache.forEach((node) => node.delete());
+        this.nodes.cache.forEach((node) => node.delete()); // TODO: USE CLIENTADAPTER
 
         if (!this.isCompatMode()) {
-            this.client.off(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
+            this.client.off(Events.VoiceStateUpdate, this.#voiceStateUpdateListener); // TODO: USE CLIENTADAPTER
             // @ts-ignore private method
-            this.client.decrementMaxListeners();
+            this.client.decrementMaxListeners(); // TODO: USE CLIENTADAPTER
         }
 
         this.removeAllListeners();
@@ -401,7 +414,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * ```
      */
     public async play<T = unknown>(channel: GuildVoiceChannelResolvable, query: TrackLike, options: PlayerNodeInitializerOptions<T> = {}): Promise<PlayerNodeInitializationResult<T>> {
-        const vc = this.client.channels.resolve(channel);
+        const vc = this.client.channels.resolve(channel); // TODO: USE CLIENTADAPTER
         if (!vc?.isVoiceBased()) throw Exceptions.ERR_INVALID_ARG_TYPE('channel', 'VoiceBasedChannel', !vc ? 'undefined' : `channel type ${vc.type}`);
 
         const originalResult = query instanceof SearchResult ? query : await this.search(query, options);
@@ -457,7 +470,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     public async search(searchQuery: string | Track | Track[] | Playlist | SearchResult, options: SearchOptions = {}): Promise<SearchResult> {
         if (searchQuery instanceof SearchResult) return searchQuery;
 
-        if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
+        if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!; // TODO: USE CLIENTADAPTER
         options.blockExtractors ??= this.options.blockExtractors;
         options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 

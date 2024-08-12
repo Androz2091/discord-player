@@ -146,7 +146,7 @@ function erisChannelsProxy(client: Eris.Client, eris: typeof import('eris')) {
         },
         resolve(resolvable: string | ErisChannelResolvable) {
             if (typeof resolvable === 'string') {
-                return erisResolvedChannelProxy(this.client.getChannel(resolvable) as Eris.GuildChannel, client);
+                return erisResolvedChannelProxy(this.client.getChannel(resolvable) as Eris.GuildChannel, client); // TODO: USE CLIENTADAPTER
             }
 
             if (resolvable instanceof eris.GuildChannel) {

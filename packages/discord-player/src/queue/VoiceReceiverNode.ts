@@ -17,7 +17,7 @@ export interface VoiceReceiverOptions {
 export type RawTrackInit = Partial<Omit<RawTrackData, 'author' | 'playlist' | 'source' | 'engine' | 'raw' | 'queryType' | 'description' | 'views'>>;
 
 export class VoiceReceiverNode {
-    public constructor(public dispatcher: StreamDispatcher) {}
+    public constructor(public dispatcher: StreamDispatcher) { }
 
     public createRawTrack(stream: Readable, data: RawTrackInit = {}) {
         data.title ??= `Recording ${Date.now()}`;
@@ -62,7 +62,7 @@ export class VoiceReceiverNode {
             silenceDuration: 1000
         }
     ) {
-        const _user = this.dispatcher.queue.player.client.users.resolveId(user);
+        const _user = this.dispatcher.queue.player.client.users.resolveId(user); // TODO: USE CLIENTADAPTER
 
         const passThrough = new PassThrough();
         const receiver = this.dispatcher.voiceConnection.receiver;

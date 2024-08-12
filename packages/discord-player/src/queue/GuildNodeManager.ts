@@ -45,7 +45,7 @@ export type NodeResolvable = GuildQueue | GuildResolvable;
 
 export class GuildNodeManager<Meta = unknown> {
     public cache = new Collection<string, GuildQueue>();
-    public constructor(public player: Player) {}
+    public constructor(public player: Player) { }
 
     /**
      * Create guild queue if it does not exist
@@ -53,7 +53,7 @@ export class GuildNodeManager<Meta = unknown> {
      * @param options Queue initializer options
      */
     public create<T = Meta>(guild: GuildResolvable, options: GuildNodeCreateOptions<T> = {}): GuildQueue<T> {
-        const server = this.player.client.guilds.resolve(guild);
+        const server = this.player.client.guilds.resolve(guild); // TODO: USE CLIENTADAPTER
         if (!server) {
             throw Exceptions.ERR_NO_GUILD('Invalid or unknown guild');
         }
@@ -152,7 +152,7 @@ export class GuildNodeManager<Meta = unknown> {
      * @param node Queue resolvable
      */
     public has(node: NodeResolvable) {
-        const id = node instanceof GuildQueue ? node.id : this.player.client.guilds.resolveId(node)!;
+        const id = node instanceof GuildQueue ? node.id : this.player.client.guilds.resolveId(node)!; // TODO: USE CLIENTADAPTER
         return this.cache.has(id);
     }
 
@@ -187,7 +187,7 @@ export class GuildNodeManager<Meta = unknown> {
             return node;
         }
 
-        return this.cache.get(this.player.client.guilds.resolveId(node)!) as GuildQueue<T> | undefined;
+        return this.cache.get(this.player.client.guilds.resolveId(node)!) as GuildQueue<T> | undefined; // TODO: USE CLIENTADAPTER
     }
 
     /**
