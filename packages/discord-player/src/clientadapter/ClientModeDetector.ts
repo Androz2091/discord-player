@@ -12,19 +12,19 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
         name: "discord.js",
         test() {
             try {
-                require("discord.js")
-                return true
+                require("discord.js");
+                return true;
             } catch {
-                return false
+                return false;
             }
         },
         testClient(client: SupportedClient) {
             try {
-                const { Client } = require("discord.js")
+                const { Client } = require("discord.js");
 
-                return client instanceof Client
+                return client instanceof Client;
             } catch {
-                return false
+                return false;
             }
         }
     },
@@ -32,31 +32,31 @@ export const VALID_PACKAGES: ValidPackagesStructure[] = [
         name: "eris",
         test() {
             try {
-                require("eris")
-                return true
+                require("eris");
+                return true;
             } catch {
-                return false
+                return false;
             }
         },
         testClient(client) {
             try {
-                const { Client } = require("eris")
+                const { Client } = require("eris");
 
-                return client instanceof Client
+                return client instanceof Client;
             } catch {
-                return false
+                return false;
             }
         },
     }
-]
+];
 
 export function detectClientMode(client: SupportedClient): ClientType {
-    for(const pkg of VALID_PACKAGES) {
-        const isValid = pkg.test()
-        const isInstance = pkg.testClient(client)
+    for (const pkg of VALID_PACKAGES) {
+        const isValid = pkg.test();
+        const isInstance = pkg.testClient(client);
 
-        if(isValid && isInstance) return pkg.name
+        if (isValid && isInstance) return pkg.name;
     }
 
-    return "unknown"
+    return "unknown";
 }
