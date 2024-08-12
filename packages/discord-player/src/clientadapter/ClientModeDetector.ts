@@ -1,62 +1,61 @@
-import { type SupportedClient } from "./ClientAdapterFactory";
-import { ClientType } from "./IClientAdapter";
+import { Util } from '../utils/Util';
+import { type SupportedClient } from './ClientAdapterFactory';
+import { ClientType } from './IClientAdapter';
 
 export interface ValidPackagesStructure {
     name: ClientType;
-    test: () => Promise<boolean>;
-    testClient: (client: SupportedClient) => Promise<boolean>
+    test: () => boolean;
+    testClient: (client: SupportedClient) => boolean;
 }
 
 export const VALID_PACKAGES: ValidPackagesStructure[] = [
     {
-        name: "discord.js",
-        async test() {
-            try {
-                await import("discord.js");
-                return true;
-            } catch {
-                return false;
-            }
-        },
-        async testClient(client: SupportedClient) {
-            try {
-                const { Client } = await import("discord.js");
+        name: 'discord.js',
+        test() {
+            const { error } = Util.require('discord.js');
 
-                return client instanceof Client;
+            if (error) return false;
+
+            return true;
+        },
+        testClient(client: SupportedClient) {
+            try {
+                const { module } = Util.require('discord.js') as { module: typeof import('discord.js') };
+
+                return client instanceof module.Client;
             } catch {
                 return false;
             }
         }
     },
     {
-        name: "eris",
-        async test() {
-            try {
-                await import("eris");
-                return true;
-            } catch {
-                return false;
-            }
-        },
-        async testClient(client) {
-            try {
-                const { Client } = await import("eris");
+        name: 'eris',
+        test() {
+            const { error } = Util.require('eris');
 
-                return client instanceof Client;
+            if (error) return false;
+
+            return true;
+        },
+        testClient(client) {
+            try {
+                const { module } = Util.require('eris') as { module: typeof import('eris') };
+
+                return client instanceof module.Client;
             } catch {
                 return false;
             }
-        },
+        }
     }
 ];
 
-export async function detectClientMode(client: SupportedClient): Promise<ClientType> {
+export function detectClientMode(client: SupportedClient): ClientType {
     for (const pkg of VALID_PACKAGES) {
-        const isValid = await pkg.test();
-        const isInstance = await pkg.testClient(client);
+        const isValid = pkg.test();
+        const isInstance = pkg.testClient(client);
 
         if (isValid && isInstance) return pkg.name;
     }
 
-    return "unknown";
+    return 'unknown';
 }
