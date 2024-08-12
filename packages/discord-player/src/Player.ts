@@ -116,8 +116,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             process.env.FFMPEG_PATH = options.ffmpegPath;
         }
 
-        //const isCompatMode = isClientProxy(client);
-
         /**
          * The Discord API client (e.g. discord.js, Eris)
          * @type {Client}
@@ -292,13 +290,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     }
 
     /**
-     * Whether the player is in compatibility mode. Compatibility mode is enabled when non-discord.js client is used.
-     */
-    public isCompatMode() {
-        return isClientProxy(this.client);
-    }
-
-    /**
      * Destroy every single queues managed by this master player instance
      * @example ```typescript
      * // use me when you want to immediately terminate every single queues in existence 🔪
@@ -308,10 +299,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     public async destroy() {
         this.nodes.cache.forEach((node) => node.delete());
 
-        if (!this.isCompatMode()) {
-            this.clientAdapter.removeVoiceStateUpdateListener(this.#voiceStateUpdateListener);
-            this.clientAdapter.decrementMaxListeners();
-        }
+        this.clientAdapter.removeVoiceStateUpdateListener(this.#voiceStateUpdateListener);
+        this.clientAdapter.decrementMaxListeners();
 
         this.removeAllListeners();
         this.events.removeAllListeners();
@@ -656,7 +645,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         const depsReport = [
             'Discord Player',
             line,
-            `- discord-player: ${Player.version}${this.isCompatMode() ? ` (${getCompatName(this.client)} compatibility mode)` : ''}`,
+            `- discord-player: ${Player.version}`,
             `- discord-voip: ${dVoiceVersion}`,
             `- ${clientName}: ${clientVersion}`,
             `- Node version: ${process.version} (Detected Runtime: ${runtime}, Platform: ${process.platform} [${process.arch}])`,
