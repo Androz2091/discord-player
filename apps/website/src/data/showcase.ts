@@ -152,8 +152,8 @@ export const ShowcaseResource: IShowcase = {
                 name: 'DumBot',
                 description:
                     'Open source bot made using discord.js and discord-player that contains dice rolling and music playing functionality.',
-                version: 'v5.4.0',
-                url: 'https://github.com/Mateo-Wallace/MP2-Discord-DumBot-V2',
+                version: 'v6.7.1',
+                url: 'https://github.com/Mateo-Wallace/Discord-DumBot',
             },
             {
                 name: 'Flowease',
