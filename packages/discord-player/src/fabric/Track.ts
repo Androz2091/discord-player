@@ -1,4 +1,5 @@
 import { Collection } from '@discord-player/utils';
+import { Snowflake } from 'discord-api-types/globals';
 import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
 import { User } from '../clientadapter/IClientAdapter';
 import { Exceptions } from '../errors';
