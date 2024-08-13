@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord-api-types/globals';
 import { ChannelType, GatewayVoiceState } from 'discord-api-types/v10';
 import { Channel } from './clientadapter/IClientAdapter';
 import { Player } from './Player';
@@ -15,7 +16,7 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
     handleChannelPopulationAndDeletion(oldState, newState, queue, player);
 }
 
-function handleDisconnection(clientUserId: string, oldState: GatewayVoiceState, newState: GatewayVoiceState, queue: GuildQueue, player: Player) {
+function handleDisconnection(clientUserId: Snowflake, oldState: GatewayVoiceState, newState: GatewayVoiceState, queue: GuildQueue, player: Player) {
     if (oldState.channel_id && !newState.channel_id && newState.member?.user?.id === clientUserId) {
         try {
             queue.delete();
@@ -43,7 +44,7 @@ function handlePauseOnEmptyState(queue: GuildQueue) {
     }
 }
 
-function handleVoiceChannelUpdates(player: Player, clientUserId: string, oldState: GatewayVoiceState, newState: GatewayVoiceState, queue: GuildQueue) {
+function handleVoiceChannelUpdates(player: Player, clientUserId: Snowflake, oldState: GatewayVoiceState, newState: GatewayVoiceState, queue: GuildQueue) {
     const newStateChannel = player.clientAdapter.getChannel(newState.channel_id!);
     if (!newStateChannel) return;
 

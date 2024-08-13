@@ -1,4 +1,5 @@
 import { Collection } from '@discord-player/utils';
+import { Snowflake } from 'discord-api-types/globals';
 import { AudioPlayer, DiscordGatewayAdapterCreator, getVoiceConnection, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from 'discord-voip';
 import type { Player } from '../Player';
 import { VoiceBasedChannel } from '../clientadapter/IClientAdapter';
@@ -91,10 +92,10 @@ class VoiceUtils {
 
     /**
      * Returns Discord Player voice connection
-     * @param {string} guildId The guild id
+     * @param {Snowflake} guildId The guild id
      * @returns {StreamDispatcher}
      */
-    public getConnection(guildId: string, group?: string) {
+    public getConnection(guildId: Snowflake, group?: string) {
         return getVoiceConnection(guildId, group);
     }
 }

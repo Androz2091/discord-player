@@ -33,7 +33,7 @@ export class DiscordJsClientAdapter implements IClientAdapter {
         }
     }
 
-    public getUser(userId: string): User | null {
+    public getUser(userId: Snowflake): User | null {
         const user = this.client.users.cache.get(userId);
         if (!user) return null;
 
@@ -64,7 +64,7 @@ export class DiscordJsClientAdapter implements IClientAdapter {
         };
     }
 
-    getChannel(channelId: string): Channel | null {
+    getChannel(channelId: Snowflake): Channel | null {
         const channel = this.client.channels.cache.get(channelId);
         if (!channel) return null;
 

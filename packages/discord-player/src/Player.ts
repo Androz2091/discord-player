@@ -1,4 +1,5 @@
 import { FFmpeg } from '@discord-player/ffmpeg';
+import { Snowflake } from 'discord-api-types/globals';
 import { GatewayVoiceState } from 'discord-api-types/v10';
 import { version as dVoiceVersion, generateDependencyReport } from 'discord-voip';
 import { createClientAdapter } from './clientadapter/ClientAdapterFactory';
@@ -371,7 +372,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * }
      * ```
      */
-    public async play<T = unknown>(channelId: string, query: TrackLike, options: PlayerNodeInitializerOptions<T> = {}): Promise<PlayerNodeInitializationResult<T>> {
+    public async play<T = unknown>(channelId: Snowflake, query: TrackLike, options: PlayerNodeInitializerOptions<T> = {}): Promise<PlayerNodeInitializationResult<T>> {
         const channel = this.clientAdapter.getChannel(channelId);
         if (!channel?.isVoiceBased()) throw Exceptions.ERR_INVALID_ARG_TYPE('channel', 'VoiceBasedChannel', !channel ? 'undefined' : `channel type ${channel.type}`);
 

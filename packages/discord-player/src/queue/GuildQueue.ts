@@ -1,5 +1,6 @@
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
+import { Snowflake } from 'discord-api-types/globals';
 import { ChannelType } from 'discord-api-types/v10';
 import { type AudioPlayer, AudioResource, StreamType, VoiceConnection, VoiceConnectionStatus } from 'discord-voip';
 import { Readable } from 'stream';
@@ -820,7 +821,7 @@ export class GuildQueue<Meta = unknown> {
      * @param channelResolvable The voice channel to connect to
      * @param options Join config
      */
-    public async connect(channelId: string, options: VoiceConnectConfig = {}) {
+    public async connect(channelId: Snowflake, options: VoiceConnectConfig = {}) {
         const channel = this.player.clientAdapter.getChannel(channelId);
         if (!channel || !channel.isVoiceBased()) {
             throw Exceptions.ERR_INVALID_ARG_TYPE('channel', `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`, String(channel?.type));

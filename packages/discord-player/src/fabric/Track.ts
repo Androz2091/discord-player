@@ -223,7 +223,7 @@ export class Track<T = unknown> {
      * @param channel Voice channel on which this track shall be played
      * @param options Node initialization options
      */
-    public async play<T = unknown>(channelId: string, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
+    public async play<T = unknown>(channelId: Snowflake, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
         const fn = this.player.play.bind(this.player);
 
         return await fn(channelId, this, options);

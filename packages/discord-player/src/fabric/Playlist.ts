@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord-api-types/globals';
 import { Exceptions } from '../errors';
 import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';
@@ -191,7 +192,7 @@ export class Playlist {
      * @param channel Voice channel on which this playlist shall be played
      * @param options Node initialization options
      */
-    public async play<T = unknown>(channelId: string, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
+    public async play<T = unknown>(channelId: Snowflake, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
         const fn = this.player.play.bind(this.player);
 
         return await fn(channelId, this, options);
