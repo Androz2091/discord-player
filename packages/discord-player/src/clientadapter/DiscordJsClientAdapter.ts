@@ -1,6 +1,7 @@
 import { Client, Events, GuildChannel, IntentsBitField, version } from "discord.js";
-import { Channel, ChannelType, ClientType, Guild, IClientAdapter, User, VoiceBasedChannel } from './IClientAdapter';
+import { Channel, ClientType, Guild, IClientAdapter, User, VoiceBasedChannel } from './IClientAdapter';
 import { Util } from "../utils/Util";
+import { Snowflake } from "discord-api-types/globals";
 
 export class DiscordJsClientAdapter implements IClientAdapter {
     private client: Client;
@@ -43,7 +44,7 @@ export class DiscordJsClientAdapter implements IClientAdapter {
         };
     }
 
-    public getGuild(guildId: string): Guild {
+    public getGuild(guildId: Snowflake): Guild {
         const guild = this.client.guilds.cache.get(guildId);
         if (!guild) throw new Error('Guild not found');
 
@@ -71,7 +72,7 @@ export class DiscordJsClientAdapter implements IClientAdapter {
             return {
                 id: channel.id,
                 name: channel.name,
-                type: (channel.type as unknown as ChannelType),
+                type: (channel.type),
                 guild: this.getGuild(channel.guild.id),
                 clientUser: {
                     id: this.client.user!.id,
@@ -92,7 +93,7 @@ export class DiscordJsClientAdapter implements IClientAdapter {
         return {
             id: channel.id,
             name: '', // mock
-            type: channel.type as unknown as ChannelType,
+            type: channel.type,
             guild: {
                 id: guildChannel.guild.id,
                 name: guildChannel.guild.name,
@@ -117,7 +118,7 @@ export class DiscordJsClientAdapter implements IClientAdapter {
                 requestToSpeak: async () => { },
             },
             isVoiceBased: () => false
-        };
+        } as Channel;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -18,7 +18,8 @@ import { AsyncQueue } from '../utils/AsyncQueue';
 import { Exceptions } from '../errors';
 import { SyncedLyricsProvider } from './SyncedLyricsProvider';
 import { LrcGetResult, LrcSearchResult } from '../lrclib/LrcLib';
-import { ChannelType, Guild, VoiceBasedChannel, VoiceState } from '../clientadapter/IClientAdapter';
+import { Guild, VoiceBasedChannel, VoiceState } from '../clientadapter/IClientAdapter';
+import { ChannelType } from 'discord-api-types/v10';
 
 export interface GuildNodeInit<Meta = unknown> {
     guild: Guild;
@@ -914,7 +915,7 @@ export class GuildQueue<Meta = unknown> {
      * Delete this queue
      */
     public delete() {
-        if (this.player.nodes.delete(this)) {
+        if (this.player.nodes.delete(this.id)) {
             this.#deleted = true;
             this.player.events.emit(GuildQueueEvent.queueDelete, this);
             this.node.tasksQueue.cancelAll();
@@ -927,7 +928,7 @@ export class GuildQueue<Meta = unknown> {
      * @returns
      */
     public revive() {
-        if (!this.deleted || this.player.nodes.has(this)) return;
+        if (!this.deleted || this.player.nodes.has(this.id)) return;
         this.#deleted = false;
         this.setTransitioning(false);
         this.player.nodes.cache.set(this.id, this);

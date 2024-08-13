@@ -1,4 +1,5 @@
-import { ChannelType } from 'discord-api-types/v9';
+import { Snowflake } from 'discord-api-types/globals';
+import { ChannelType } from 'discord-api-types/v10';
 import { AudioPlayerState, DiscordGatewayAdapterCreator } from "discord-voip";
 
 export const ClientType = {
@@ -51,11 +52,12 @@ export interface IClientAdapter {
     clientType: ClientType;
     getClientName(): string;
     getClientVersion(): string;
+    getClientUser(): string;
     getClientUserId(): string;
     validateIntents(): void;
-    getUser(userId: string): User | null;
-    getGuild(guildId: string): Guild | null;
-    getChannel(channelId: string): Channel | null;
+    getUser(userId: Snowflake): User | null;
+    getGuild(guildId: Snowflake): Guild | null;
+    getChannel(channelId: Snowflake): Channel | null;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     addVoiceStateUpdateListener(listener: (...args: any[]) => void): void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

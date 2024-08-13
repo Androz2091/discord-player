@@ -5,7 +5,7 @@ import { GuildQueue, OnAfterCreateStreamHandler, OnBeforeCreateStreamHandler } f
 import { FiltersName, QueueRepeatMode } from '../types/types';
 import { getGlobalRegistry } from '../utils/__internal__';
 import { Exceptions } from '../errors';
-import { Guild } from '../clientadapter/IClientAdapter';
+import { Snowflake } from 'discord-api-types/globals';
 
 export interface GuildNodeCreateOptions<T = unknown> {
     strategy?: QueueStrategy;
@@ -41,7 +41,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
     disableResampler?: boolean;
 }
 
-export type NodeResolvable = GuildQueue | Guild;
+export type NodeResolvable = Snowflake;
 
 export class GuildNodeManager<Meta = unknown> {
     public cache = new Collection<string, GuildQueue>();
@@ -52,7 +52,7 @@ export class GuildNodeManager<Meta = unknown> {
      * @param guild The guild which will be the owner of the queue
      * @param options Queue initializer options
      */
-    public create<T = Meta>(guildId: string, options: GuildNodeCreateOptions<T> = {}): GuildQueue<T> {
+    public create<T = Meta>(guildId: Snowflake, options: GuildNodeCreateOptions<T> = {}): GuildQueue<T> {
         const guild = this.player.clientAdapter.getGuild(guildId);
         if (!guild) {
             throw Exceptions.ERR_NO_GUILD('Invalid or unknown guild');
@@ -144,7 +144,7 @@ export class GuildNodeManager<Meta = unknown> {
         const queue = this.resolve(node);
         if (!queue) return null;
 
-        return (this.cache.get(queue.id) as GuildQueue<T>) || null;
+        return (this.cache.get(node) as GuildQueue<T>) || null;
     }
 
     /**
@@ -152,7 +152,7 @@ export class GuildNodeManager<Meta = unknown> {
      * @param node Queue resolvable
      */
     public has(node: NodeResolvable) {
-        return this.cache.has(node.id);
+        return this.cache.has(node);
     }
 
     /**
@@ -182,11 +182,7 @@ export class GuildNodeManager<Meta = unknown> {
      * @param node Queue resolvable
      */
     public resolve<T = Meta>(node: NodeResolvable) {
-        if (node instanceof GuildQueue) {
-            return node;
-        }
-
-        return this.cache.get(node.id) as GuildQueue<T> | undefined;
+        return this.cache.get(node) as GuildQueue<T> | undefined;
     }
 
     /**

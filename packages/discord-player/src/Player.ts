@@ -16,10 +16,10 @@ import { IPRotator } from './utils/IPRotator';
 import { Context, createContext } from './hooks';
 import { HooksCtx } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
-import { Guild, type IClientAdapter } from './clientadapter/IClientAdapter';
+import { IClientAdapter } from './clientadapter/IClientAdapter';
 import { createClientAdapter } from './clientadapter/ClientAdapterFactory';
 import { generateRandomId } from './utils/Util';
-import { VoiceState } from 'discord.js';
+import { GatewayVoiceState } from 'discord-api-types/v9';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -40,7 +40,7 @@ export interface PlayerNodeInitializerOptions<T> extends SearchOptions {
     afterSearch?: (result: SearchResult) => Promise<SearchResult>;
 }
 
-export type VoiceStateHandler = (player: Player, queue: GuildQueue, oldVoiceState: VoiceState, newVoiceState: VoiceState) => Awaited<void>;
+export type VoiceStateHandler = (player: Player, queue: GuildQueue, oldVoiceState: GatewayVoiceState, newVoiceState: GatewayVoiceState) => Awaited<void>;
 
 export class Player extends PlayerEventsEmitter<PlayerEvents> {
     #lastLatency = -1;
@@ -301,11 +301,13 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         _internals.clearPlayer(this);
     }
 
-    private _handleVoiceState(oldState: VoiceState, newState: VoiceState) {
-        const queue = this.nodes.get(oldState.guild as unknown as Guild);
+    private _handleVoiceState(oldState: GatewayVoiceState, newState: GatewayVoiceState) {
+        if (!newState.guild_id) return;
+        const queue = this.nodes.get(newState.guild_id);
         if (!queue || !queue.connection || !queue.channel) return;
 
         // dispatch voice state update
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const wasHandled = this.events.emit(GuildQueueEvent.voiceStateUpdate, queue, oldState as any, newState as any);
         // if the event was handled, return assuming the listener implemented all of the logic below
         if (wasHandled && !this.options.lockVoiceStateHandler) return;
@@ -327,7 +329,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * });
      * ```
      */
-    public handleVoiceState(oldState: VoiceState, newState: VoiceState): void {
+    public handleVoiceState(oldState: GatewayVoiceState, newState: GatewayVoiceState): void {
         this._handleVoiceState(oldState, newState);
     }
 

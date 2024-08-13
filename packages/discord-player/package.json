@@ -58,9 +58,7 @@
     "libsodium-wrappers": "^0.7.13"
   },
   "peerDependencies": {
-    "@discord-player/extractor": "workspace:^",
-    "discord.js": "^14.15.3",
-    "eris": "^0.17.2"
+    "@discord-player/extractor": "workspace:^"
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
@@ -68,6 +66,8 @@
     "@types/node": "^20.14.11",
     "@types/ws": "^8.5.3",
     "discord-api-types": "^0.37.0",
+    "discord.js": "^14.15.3",
+    "eris": "^0.17.2",
     "opusscript": "^0.0.8",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2",
