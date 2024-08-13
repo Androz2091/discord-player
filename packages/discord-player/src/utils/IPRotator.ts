@@ -1,5 +1,5 @@
-import { Util } from './Util';
 import { Exceptions } from '../errors';
+import { Util } from './Util';
 
 // @ts-ignore
 let ip: typeof import('ip');

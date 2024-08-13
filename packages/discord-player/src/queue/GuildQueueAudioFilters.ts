@@ -1,10 +1,10 @@
+import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Readable } from 'stream';
+import { Exceptions } from '../errors';
 import { FiltersName, QueueFilters } from '../types/types';
 import { AudioFilters } from '../utils/AudioFilters';
-import { GuildQueue, GuildQueueEvent } from './GuildQueue';
-import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { FFmpegStreamOptions, createFFmpegStream } from '../utils/FFmpegStream';
-import { Exceptions } from '../errors';
+import { GuildQueue, GuildQueueEvent } from './GuildQueue';
 
 type Filters = keyof typeof AudioFilters.filters;
 
@@ -65,7 +65,7 @@ export const EqualizerConfigurationPreset: Readonly<EQPreset> = Object.freeze({
 export class FFmpegFilterer<Meta = unknown> {
     #ffmpegFilters: Filters[] = [];
     #inputArgs: string[] = [];
-    public constructor(public af: GuildQueueAudioFilters<Meta>) {}
+    public constructor(public af: GuildQueueAudioFilters<Meta>) { }
 
     /**
      * Indicates whether ffmpeg may be skipped
@@ -346,7 +346,7 @@ export class GuildQueueAudioFilters<Meta = unknown> {
 }
 
 export class AFilterGraph<Meta = unknown> {
-    public constructor(public af: GuildQueueAudioFilters<Meta>) {}
+    public constructor(public af: GuildQueueAudioFilters<Meta>) { }
 
     public get ffmpeg() {
         return this.af.ffmpeg?.filters ?? [];

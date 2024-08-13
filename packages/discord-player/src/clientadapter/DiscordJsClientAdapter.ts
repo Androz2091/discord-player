@@ -1,7 +1,7 @@
-import { Client, Events, GuildChannel, IntentsBitField, version } from "discord.js";
-import { Channel, ClientType, Guild, IClientAdapter, User, VoiceBasedChannel } from './IClientAdapter';
-import { Util } from "../utils/Util";
 import { Snowflake } from "discord-api-types/globals";
+import { Client, Events, GuildChannel, IntentsBitField, version } from "discord.js";
+import { Util } from "../utils/Util";
+import { Channel, ClientType, Guild, IClientAdapter, User, VoiceBasedChannel } from './IClientAdapter';
 
 export class DiscordJsClientAdapter implements IClientAdapter {
     private client: Client;

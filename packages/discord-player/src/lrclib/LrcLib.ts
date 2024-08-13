@@ -1,7 +1,7 @@
 import { Exceptions } from '../errors';
 import type { Player } from '../Player';
-import { Util } from '../utils/Util';
 import { SequentialBucket } from '../utils/SequentialBucket';
+import { Util } from '../utils/Util';
 
 export interface LrcSearchParams {
     /**
@@ -103,7 +103,7 @@ export class LrcLib {
      * Creates a new LrcLib instance
      * @param {Player} player The player instance
      */
-    public constructor(public readonly player: Player) {}
+    public constructor(public readonly player: Player) { }
 
     /**
      * Sets the request timeout

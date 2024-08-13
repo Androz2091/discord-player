@@ -16,13 +16,13 @@ export type ClientUser = {
 } & User;
 
 export type User = {
-    id: string;
+    id: Snowflake;
     username: string;
     isBot: boolean;
 };
 
 export type Guild = {
-    id: string;
+    id: Snowflake;
     name: string;
     clientUser: ClientUser;
     voiceAdapterCreator: DiscordGatewayAdapterCreator;
@@ -36,7 +36,7 @@ export type VoiceBasedChannel = {
 } & Channel;
 
 export type Channel = {
-    id: string;
+    id: Snowflake;
     name: string;
     type: ChannelType;
     guild: Guild;
@@ -52,7 +52,6 @@ export interface IClientAdapter {
     clientType: ClientType;
     getClientName(): string;
     getClientVersion(): string;
-    getClientUser(): string;
     getClientUserId(): string;
     validateIntents(): void;
     getUser(userId: Snowflake): User | null;

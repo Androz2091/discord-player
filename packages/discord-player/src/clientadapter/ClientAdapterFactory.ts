@@ -1,7 +1,7 @@
-import { DiscordJsClientAdapter } from './DiscordJsClientAdapter';
-import { IClientAdapter } from './IClientAdapter';
 import { Util } from '../utils/Util';
 import { detectClientMode } from './ClientModeDetector';
+import { DiscordJsClientAdapter } from './DiscordJsClientAdapter';
+import { IClientAdapter } from './IClientAdapter';
 
 export const createClientAdapter = async (client: unknown): Promise<IClientAdapter> => {
     const clientLibraryType = await detectClientMode(client);
@@ -23,6 +23,6 @@ export const createClientAdapter = async (client: unknown): Promise<IClientAdapt
             }
         }
     } catch (error) {
-        throw new Error(`Failed to create client adapter\n\n${error}`);
+        throw new Error(`Failed to create client adapter, error:\n\n${error}`);
     }
 };

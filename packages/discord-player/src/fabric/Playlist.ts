@@ -1,10 +1,10 @@
+import { Exceptions } from '../errors';
 import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
-import { Track } from './Track';
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';
-import { Util } from '../utils/Util';
 import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
 import { TypeUtil } from '../utils/TypeUtil';
-import { Exceptions } from '../errors';
+import { Util } from '../utils/Util';
+import { Track } from './Track';
 
 export type SerializedPlaylist = ReturnType<Playlist['serialize']>;
 

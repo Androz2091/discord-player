@@ -1,23 +1,22 @@
-import { TimeData } from '../types/types';
-import { setTimeout } from 'node:timers/promises';
-import { GuildQueue } from '../queue';
-import { Playlist, Track } from '../fabric';
-import { Exceptions } from '../errors';
-import { randomInt } from 'node:crypto';
 import {
     createFilter,
     createSpotifyFilter,
     fixTrackSuffix,
+    removeCleanExplicit,
     removeLive,
     removeRemastered,
-    youtube,
     removeZeroWidth,
     replaceNbsp,
     replaceSmartQuotes,
-    removeCleanExplicit
+    youtube
 } from '@web-scrobbler/metadata-filter';
-import { TrackSource } from '../types/types';
+import { randomInt } from 'node:crypto';
+import { setTimeout } from 'node:timers/promises';
 import { VoiceBasedChannel } from '../clientadapter/IClientAdapter';
+import { Exceptions } from '../errors';
+import { Playlist, Track } from '../fabric';
+import { GuildQueue } from '../queue';
+import { TimeData, TrackSource } from '../types/types';
 
 export type RuntimeType = 'node' | 'deno' | 'bun' | 'unknown';
 

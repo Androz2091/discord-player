@@ -1,14 +1,14 @@
-import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
-import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
-import { Playlist } from './Playlist';
-import { GuildQueue } from '../queue/GuildQueue';
-import { BaseExtractor } from '../extractors/BaseExtractor';
 import { Collection } from '@discord-player/utils';
-import { TypeUtil } from '../utils/TypeUtil';
-import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
-import { Exceptions } from '../errors';
-import { escapeMarkdown, generateRandomId, Util } from '../utils/Util';
+import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
 import { User } from '../clientadapter/IClientAdapter';
+import { Exceptions } from '../errors';
+import { BaseExtractor } from '../extractors/BaseExtractor';
+import { GuildQueue } from '../queue/GuildQueue';
+import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
+import { TypeUtil } from '../utils/TypeUtil';
+import { escapeMarkdown, generateRandomId, Util } from '../utils/Util';
+import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
+import { Playlist } from './Playlist';
 
 export type TrackResolvable = Track | string | number;
 

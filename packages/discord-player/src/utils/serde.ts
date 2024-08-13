@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Exceptions } from '../errors';
-import { Playlist, type SerializedTrack, Track, SerializedPlaylist } from '../fabric';
-import { TypeUtil } from './TypeUtil';
 import { Buffer } from 'buffer';
+import { Exceptions } from '../errors';
+import { Playlist, SerializedPlaylist, type SerializedTrack, Track } from '../fabric';
 import { Player } from '../Player';
+import { TypeUtil } from './TypeUtil';
 
 export enum SerializedType {
     Track = 'track',

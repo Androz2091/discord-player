@@ -1,12 +1,12 @@
+import type { RequestOptions } from 'http';
 import { Readable } from 'stream';
+import { User } from '../clientadapter/IClientAdapter';
+import { Exceptions } from '../errors';
 import { Playlist } from '../fabric/Playlist';
 import { Track } from '../fabric/Track';
+import type { GuildQueueHistory } from '../queue';
 import { PlayerEvents, SearchQueryType } from '../types/types';
 import { ExtractorExecutionContext } from './ExtractorExecutionContext';
-import type { RequestOptions } from 'http';
-import { Exceptions } from '../errors';
-import type { GuildQueueHistory } from '../queue';
-import { User } from '../clientadapter/IClientAdapter';
 
 export type ExtractorStreamable =
     | Readable

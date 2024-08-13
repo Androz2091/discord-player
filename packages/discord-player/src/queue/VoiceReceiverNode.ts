@@ -1,11 +1,11 @@
-import { PassThrough, type Readable } from 'node:stream';
 import { EndBehaviorType } from 'discord-voip';
+import { PassThrough, type Readable } from 'node:stream';
 import * as prism from 'prism-media';
 import { StreamDispatcher } from '../VoiceInterface/StreamDispatcher';
+import { User } from '../clientadapter/IClientAdapter';
+import { Exceptions } from '../errors';
 import { Track } from '../fabric/Track';
 import { RawTrackData } from '../types/types';
-import { Exceptions } from '../errors';
-import { User } from '../clientadapter/IClientAdapter';
 
 export interface VoiceReceiverOptions {
     mode?: 'opus' | 'pcm';

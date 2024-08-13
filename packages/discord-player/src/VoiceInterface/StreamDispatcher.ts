@@ -1,3 +1,5 @@
+import { BiquadFilters, EqualizerBand, FiltersChain, PCMFilters } from '@discord-player/equalizer';
+import { EventEmitter } from '@discord-player/utils';
 import {
     AudioPlayer,
     AudioPlayerError,
@@ -8,18 +10,16 @@ import {
     entersState,
     StreamType,
     VoiceConnection,
-    VoiceConnectionStatus,
-    VoiceConnectionDisconnectReason
+    VoiceConnectionDisconnectReason,
+    VoiceConnectionStatus
 } from 'discord-voip';
 import type { Readable } from 'stream';
-import { EventEmitter } from '@discord-player/utils';
+import { VoiceBasedChannel } from '../clientadapter/IClientAdapter';
+import { Exceptions } from '../errors';
 import { Track } from '../fabric/Track';
-import { Util } from '../utils/Util';
-import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
 import { GuildQueue, GuildQueueEvent, PostProcessedResult } from '../queue';
 import { VoiceReceiverNode } from '../queue/VoiceReceiverNode';
-import { Exceptions } from '../errors';
-import { VoiceBasedChannel } from '../clientadapter/IClientAdapter';
+import { Util } from '../utils/Util';
 
 export interface CreateStreamOps {
     type?: StreamType;

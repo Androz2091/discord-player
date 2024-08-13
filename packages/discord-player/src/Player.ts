@@ -1,25 +1,25 @@
 import { FFmpeg } from '@discord-player/ffmpeg';
-import { Playlist, Track, SearchResult } from './fabric';
-import { GuildQueueEvents, VoiceConnectConfig, GuildNodeCreateOptions, GuildNodeManager, GuildQueue, ResourcePlayOptions, GuildQueueEvent } from './queue';
-import { VoiceUtils } from './VoiceInterface/VoiceUtils';
-import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType, PlayerEvent } from './types/types';
-import { QueryResolver, ResolvedQuery } from './utils/QueryResolver';
-import { generateDependencyReport, version as dVoiceVersion } from 'discord-voip';
-import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
-import { BaseExtractor } from './extractors/BaseExtractor';
-import * as _internals from './utils/__internal__';
-import { QueryCache } from './utils/QueryCache';
-import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
-import { Exceptions } from './errors';
+import { GatewayVoiceState } from 'discord-api-types/v10';
+import { version as dVoiceVersion, generateDependencyReport } from 'discord-voip';
+import { createClientAdapter } from './clientadapter/ClientAdapterFactory';
+import { IClientAdapter } from './clientadapter/IClientAdapter';
 import { defaultVoiceStateHandler } from './DefaultVoiceStateHandler';
-import { IPRotator } from './utils/IPRotator';
+import { Exceptions } from './errors';
+import { BaseExtractor } from './extractors/BaseExtractor';
+import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
+import { Playlist, SearchResult, Track } from './fabric';
 import { Context, createContext } from './hooks';
 import { HooksCtx } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
-import { IClientAdapter } from './clientadapter/IClientAdapter';
-import { createClientAdapter } from './clientadapter/ClientAdapterFactory';
+import { GuildNodeCreateOptions, GuildNodeManager, GuildQueue, GuildQueueEvent, GuildQueueEvents, ResourcePlayOptions, VoiceConnectConfig } from './queue';
+import { PlayerEvent, PlayerEvents, PlayerInitOptions, PlaylistInitData, QueryType, SearchOptions, SearchQueryType } from './types/types';
+import * as _internals from './utils/__internal__';
+import { IPRotator } from './utils/IPRotator';
+import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
+import { QueryCache } from './utils/QueryCache';
+import { QueryResolver, ResolvedQuery } from './utils/QueryResolver';
 import { generateRandomId } from './utils/Util';
-import { GatewayVoiceState } from 'discord-api-types/v9';
+import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -157,7 +157,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         this.createAdapter(client);
     }
 
-    public createAdapter(client: unknown) {
+    private createAdapter(client: unknown) {
         (async () => {
             this.clientAdapter = await createClientAdapter(client);
             this.clientAdapter.validateIntents();

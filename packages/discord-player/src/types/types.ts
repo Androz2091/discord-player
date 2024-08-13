@@ -1,9 +1,9 @@
-import type { GuildQueue } from '../queue';
-import type { Track } from '../fabric/Track';
-import type { Playlist } from '../fabric/Playlist';
 import type { downloadOptions } from 'ytdl-core';
-import type { QueryCacheProvider } from '../utils/QueryCache';
+import type { Playlist } from '../fabric/Playlist';
+import type { Track } from '../fabric/Track';
+import type { GuildQueue } from '../queue';
 import type { IPRotationConfig } from '../utils/IPRotator';
+import type { QueryCacheProvider } from '../utils/QueryCache';
 
 // @ts-ignore
 import type { BridgeProvider } from '@discord-player/extractor';

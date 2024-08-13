@@ -1,10 +1,10 @@
-import { Player } from '../Player';
 import { Collection } from '@discord-player/utils';
-import { BaseExtractor, ExtractorStreamable } from './BaseExtractor';
-import { Util } from '../utils/Util';
+import { Track } from '../fabric';
+import { Player } from '../Player';
 import { PlayerEventsEmitter } from '../utils/PlayerEventsEmitter';
 import { TypeUtil } from '../utils/TypeUtil';
-import { Track } from '../fabric';
+import { Util } from '../utils/Util';
+import { BaseExtractor, ExtractorStreamable } from './BaseExtractor';
 
 // prettier-ignore
 const knownExtractorKeys = [

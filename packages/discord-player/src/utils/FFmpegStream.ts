@@ -1,6 +1,6 @@
-import type { Duplex, Readable } from 'stream';
-import * as prism from 'prism-media';
 import { FFmpeg } from '@discord-player/ffmpeg';
+import * as prism from 'prism-media';
+import { type Duplex, type Readable } from 'stream';
 
 export interface FFmpegStreamOptions {
     fmt?: string;
@@ -73,7 +73,10 @@ export function createFFmpegStream(stream: Readable | Duplex | string, options?:
 
     if (typeof stream !== 'string') {
         stream.on('error', () => transcoder.destroy());
-        stream.pipe(transcoder);
+        if (typeof stream !== 'string') {
+            stream.on('error', () => transcoder.destroy());
+            stream.pipe(transcoder as unknown as NodeJS.WritableStream);
+        }
     }
 
     return transcoder;

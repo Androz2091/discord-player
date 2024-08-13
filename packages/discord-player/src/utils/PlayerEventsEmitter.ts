@@ -1,6 +1,4 @@
-import { DefaultListener } from '@discord-player/utils';
-import { ListenerSignature } from '@discord-player/utils';
-import { EventEmitter } from '@discord-player/utils';
+import { DefaultListener, EventEmitter, ListenerSignature } from '@discord-player/utils';
 import { Util } from './Util';
 
 export class PlayerEventsEmitter<L extends ListenerSignature<L> = DefaultListener> extends EventEmitter<L> {

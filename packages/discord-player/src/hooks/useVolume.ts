@@ -1,5 +1,5 @@
-import { TypeUtil } from '../utils/TypeUtil';
 import { NodeResolvable } from '../queue';
+import { TypeUtil } from '../utils/TypeUtil';
 import { getQueue, useHooksContext } from './common';
 
 type SetterFN = (previous: number) => number;

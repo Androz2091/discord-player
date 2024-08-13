@@ -1,11 +1,11 @@
-import { EqualizerBand, PCMFilters, BiquadFilters } from '@discord-player/equalizer';
+import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Collection, QueueStrategy } from '@discord-player/utils';
+import { Snowflake } from 'discord-api-types/globals';
+import { Exceptions } from '../errors';
 import { Player } from '../Player';
-import { GuildQueue, OnAfterCreateStreamHandler, OnBeforeCreateStreamHandler } from './GuildQueue';
 import { FiltersName, QueueRepeatMode } from '../types/types';
 import { getGlobalRegistry } from '../utils/__internal__';
-import { Exceptions } from '../errors';
-import { Snowflake } from 'discord-api-types/globals';
+import { GuildQueue, OnAfterCreateStreamHandler, OnBeforeCreateStreamHandler } from './GuildQueue';
 
 export interface GuildNodeCreateOptions<T = unknown> {
     strategy?: QueueStrategy;

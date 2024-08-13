@@ -1,18 +1,18 @@
-import { AudioResource, StreamType } from 'discord-voip';
-import { Readable } from 'stream';
-import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
-import { QueryResolver } from '../utils/QueryResolver';
-import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
-import { Track, TrackResolvable } from '../fabric/Track';
-import { GuildQueue, GuildQueueEvent, TrackSkipReason } from './GuildQueue';
-import { setTimeout as waitFor } from 'timers/promises';
-import { AsyncQueue } from '../utils/AsyncQueue';
-import { Exceptions } from '../errors';
-import { TypeUtil } from '../utils/TypeUtil';
-import { CreateStreamOps } from '../VoiceInterface/StreamDispatcher';
-import { ExtractorStreamable } from '../extractors/BaseExtractor';
-import * as prism from 'prism-media';
 import { OpusDecoder } from '@discord-player/opus';
+import { AudioResource, StreamType } from 'discord-voip';
+import * as prism from 'prism-media';
+import { Readable } from 'stream';
+import { setTimeout as waitFor } from 'timers/promises';
+import { Exceptions } from '../errors';
+import { ExtractorStreamable } from '../extractors/BaseExtractor';
+import { Track, TrackResolvable } from '../fabric/Track';
+import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
+import { AsyncQueue } from '../utils/AsyncQueue';
+import { QueryResolver } from '../utils/QueryResolver';
+import { TypeUtil } from '../utils/TypeUtil';
+import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
+import { CreateStreamOps } from '../VoiceInterface/StreamDispatcher';
+import { GuildQueue, GuildQueueEvent, TrackSkipReason } from './GuildQueue';
 
 export const FFMPEG_SRATE_REGEX = /asetrate=\d+\*(\d(\.\d)?)/;
 
@@ -603,10 +603,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 const opusStream = $fmt === StreamType.Opus ?
                     stream :
                     $fmt === StreamType.OggOpus ?
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    stream.pipe(new prism.opus.OggDemuxer() as any) :
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    stream.pipe(new prism.opus.WebmDemuxer() as any);
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        stream.pipe(new prism.opus.OggDemuxer() as any) :
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        stream.pipe(new prism.opus.WebmDemuxer() as any);
 
                 if (shouldPCM) {
                     // if we have any filters enabled, we need to decode the opus stream to pcm

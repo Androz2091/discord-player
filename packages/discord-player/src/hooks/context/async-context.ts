@@ -11,7 +11,7 @@ export type ContextReceiver<R> = () => R;
 export class Context<T> {
     private storage = new AsyncLocalStorage<T>();
 
-    public constructor(private defaultValue?: T) {}
+    public constructor(private defaultValue?: T) { }
 
     /**
      * Exit out of this context

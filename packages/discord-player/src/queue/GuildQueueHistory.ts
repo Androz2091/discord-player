@@ -5,7 +5,7 @@ import { GuildQueue, TrackSkipReason } from './GuildQueue';
 
 export class GuildQueueHistory<Meta = unknown> {
     public tracks = new Queue<Track>('LIFO');
-    public constructor(public queue: GuildQueue<Meta>) {}
+    public constructor(public queue: GuildQueue<Meta>) { }
 
     /**
      * Current track in the queue

@@ -1,10 +1,10 @@
-import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus, AudioPlayer } from 'discord-voip';
-import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
-import { GuildQueue } from '../queue';
+import { AudioPlayer, DiscordGatewayAdapterCreator, getVoiceConnection, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from 'discord-voip';
 import type { Player } from '../Player';
-import { Exceptions } from '../errors';
 import { VoiceBasedChannel } from '../clientadapter/IClientAdapter';
+import { Exceptions } from '../errors';
+import { GuildQueue } from '../queue';
+import { StreamDispatcher } from './StreamDispatcher';
 
 class VoiceUtils {
     /**

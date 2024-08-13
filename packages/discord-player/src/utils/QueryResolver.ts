@@ -1,7 +1,7 @@
+import { fetch } from 'undici';
+import { Exceptions } from '../errors';
 import { QueryType } from '../types/types';
 import { TypeUtil } from './TypeUtil';
-import { Exceptions } from '../errors';
-import { fetch } from 'undici';
 
 // #region scary things below *sigh*
 const spotifySongRegex = /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(intl-([a-z]|[A-Z])+\/)?(?:track\/|\?uri=spotify:track:)((\w|-){22})(\?si=.+)?$/;
@@ -44,7 +44,7 @@ class QueryResolver {
     /**
      * Query resolver
      */
-    private constructor() {} // eslint-disable-line @typescript-eslint/no-empty-function
+    private constructor() { } // eslint-disable-line @typescript-eslint/no-empty-function
 
     static get regex() {
         return {

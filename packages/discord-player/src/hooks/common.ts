@@ -1,9 +1,9 @@
+import { Guild } from '../clientadapter/IClientAdapter';
+import { Exceptions } from '../errors';
 import type { Player } from '../Player';
 import { GuildQueue, NodeResolvable } from '../queue';
 import { instances } from '../utils/__internal__';
-import { Exceptions } from '../errors';
 import { useContext } from './context/async-context';
-import { Guild } from '../clientadapter/IClientAdapter';
 
 const preferredInstanceKey = '__discord_player_hook_instance_cache__';
 
