@@ -1,6 +1,6 @@
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Collection, QueueStrategy } from '@discord-player/utils';
-import { Snowflake } from 'discord-api-types/globals';
+import { type Snowflake } from 'discord-api-types/globals';
 import { Exceptions } from '../errors';
 import { Player } from '../Player';
 import { FiltersName, QueueRepeatMode } from '../types/types';

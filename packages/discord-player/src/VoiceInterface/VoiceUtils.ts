@@ -1,5 +1,5 @@
 import { Collection } from '@discord-player/utils';
-import { Snowflake } from 'discord-api-types/globals';
+import { type Snowflake } from 'discord-api-types/globals';
 import { AudioPlayer, DiscordGatewayAdapterCreator, getVoiceConnection, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from 'discord-voip';
 import type { Player } from '../Player';
 import { VoiceBasedChannel } from '../clientadapter/IClientAdapter';

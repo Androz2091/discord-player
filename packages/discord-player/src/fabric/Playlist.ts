@@ -1,4 +1,4 @@
-import { Snowflake } from 'discord-api-types/globals';
+import { type Snowflake } from 'discord-api-types/globals';
 import { Exceptions } from '../errors';
 import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
 import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';

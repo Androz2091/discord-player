@@ -1,4 +1,4 @@
-import { Snowflake } from 'discord-api-types/globals';
+import { type Snowflake } from 'discord-api-types/globals';
 import { ChannelType } from 'discord-api-types/v10';
 import { AudioPlayerState, DiscordGatewayAdapterCreator } from "discord-voip";
 

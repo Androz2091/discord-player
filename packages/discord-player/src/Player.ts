@@ -1,5 +1,5 @@
 import { FFmpeg } from '@discord-player/ffmpeg';
-import { Snowflake } from 'discord-api-types/globals';
+import { type Snowflake } from 'discord-api-types/globals';
 import { GatewayVoiceState } from 'discord-api-types/v10';
 import { version as dVoiceVersion, generateDependencyReport } from 'discord-voip';
 import { createClientAdapter } from './clientadapter/ClientAdapterFactory';

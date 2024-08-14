@@ -1,6 +1,6 @@
 import { BiquadFilters, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
-import { Snowflake } from 'discord-api-types/globals';
+import { type Snowflake } from 'discord-api-types/globals';
 import { ChannelType } from 'discord-api-types/v10';
 import { type AudioPlayer, AudioResource, StreamType, VoiceConnection, VoiceConnectionStatus } from 'discord-voip';
 import { Readable } from 'stream';
