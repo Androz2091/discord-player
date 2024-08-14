@@ -9,9 +9,9 @@ export const ClientType = {
 };
 
 export type ClientUser = {
-    setSelfDeaf(state?: boolean, reason?: string): Promise<void>;
-    setSelfMute(state?: boolean, reason?: string): Promise<void>;
-    setSuppressed(state?: boolean): Promise<void>;
+    setSelfDeaf(state: boolean, reason?: string): Promise<void>;
+    setSelfMute(state: boolean, reason?: string): Promise<void>;
+    setSuppressed(state: boolean): Promise<void>;
     requestToSpeak(): Promise<void>;
 } & User;
 

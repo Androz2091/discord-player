@@ -941,7 +941,7 @@ export class GuildQueue<Meta = unknown> {
      * @param mode On/Off state
      * @param reason Reason
      */
-    public setSelfDeaf(mode?: boolean, reason?: string) {
+    public setSelfDeaf(mode: boolean, reason?: string) {
         return this.guild.clientUser.setSelfDeaf(mode, reason);
     }
 
@@ -950,7 +950,7 @@ export class GuildQueue<Meta = unknown> {
      * @param mode On/Off state
      * @param reason Reason
      */
-    public setSelfMute(mode?: boolean, reason?: string) {
+    public setSelfMute(mode: boolean, reason?: string) {
         return this.guild.clientUser.setSelfMute(mode, reason);
     }
 

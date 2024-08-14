@@ -85,7 +85,7 @@ export class DiscordJsClientAdapter implements IClientAdapter {
                 },
                 isVoiceBased: () => true,
                 bitrate: channel.bitrate,
-            } as VoiceBasedChannel;
+            } as unknown as VoiceBasedChannel;
         }
 
         const guildChannel = channel as GuildChannel;
