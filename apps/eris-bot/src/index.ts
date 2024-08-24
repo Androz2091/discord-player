@@ -9,9 +9,9 @@ const client = Eris(process.env.DISCORD_TOKEN!, {
 
 const player = new Player(createErisCompat(client));
 
-player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
-
 player.on('debug', console.log).events.on('debug', (queue, msg) => console.log(`[${queue.guild.name}] ${msg}`));
+
+player.extractors.loadDefault();
 
 client.once('ready', () => {
     console.log('Ready!');
@@ -21,13 +21,13 @@ client.once('ready', () => {
 player.events.on('playerStart', async (queue, track) => {
     const meta = queue.metadata as { channel: string };
 
-    await client.createMessage(meta.channel, `Now playing: ${track.title}`);
+    await client.createMessage(meta.channel, `Now playing: ${track.title} (Extractor: \`${track.extractor?.identifier}\`/Bridge: \`${track.bridgedExtractor?.identifier}\`)`);
 });
 
 player.events.on('playerFinish', async (queue, track) => {
     const meta = queue.metadata as { channel: string };
 
-    await client.createMessage(meta.channel, `Finished track: ${track.title}`);
+    await client.createMessage(meta.channel, `Finished track: ${track.title} (Extractor: \`${track.extractor?.identifier}\`)/Bridge: \`${track.bridgedExtractor?.identifier}\`)`);
 });
 
 client.on('messageCreate', async (message) => {
@@ -54,7 +54,7 @@ client.on('messageCreate', async (message) => {
                 }
             });
 
-            return client.createMessage(message.channel.id, `Loaded: ${track.title}`);
+            return client.createMessage(message.channel.id, `Loaded: ${track.title} (Extractor: \`${track.extractor?.identifier}\`)/Bridge: \`${track.bridgedExtractor?.identifier}\`)`);
         }
         case 'pause': {
             const queue = player.queues.get(message.guildID);

@@ -30,6 +30,7 @@ export class Track<T = unknown> {
     public requestedBy: User | null = null;
     public playlist?: Playlist;
     public queryType: SearchQueryType | null | undefined = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public raw: any;
     public extractor: BaseExtractor | null = null;
     public readonly id = SnowflakeUtil.generate().toString();
@@ -37,6 +38,8 @@ export class Track<T = unknown> {
     private __reqMetadataFn: () => Promise<T | null>;
     public cleanTitle: string;
     public live: boolean = false;
+    public bridgedExtractor: BaseExtractor | null = null;
+    public bridgedTrack: Track | null = null;
 
     /**
      * Track constructor

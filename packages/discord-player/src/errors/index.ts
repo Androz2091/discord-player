@@ -115,28 +115,35 @@ const DiscordPlayerErrors = {
         name: 'ERR_SERIALIZATION_FAILED',
         type: Error,
         createError() {
-            return `[${this.constructor.name}]` + "Don't know how to serialize this data";
+            return `[${this.type.name}]` + "Don't know how to serialize this data";
         }
     },
     ERR_DESERIALIZATION_FAILED: {
         name: 'ERR_DESERIALIZATION_FAILED',
         type: Error,
         createError() {
-            return `[${this.constructor.name}]` + "Don't know how to deserialize this data";
+            return `[${this.type.name}]` + "Don't know how to deserialize this data";
         }
     },
     ERR_ILLEGAL_HOOK_INVOCATION: {
         name: 'ERR_ILLEGAL_HOOK_INVOCATION',
         type: Error,
         createError(target: string, message?: string) {
-            return `[${this.constructor.name}]` + `Illegal invocation of ${target} hook.${message ? ` ${message}` : ''}`;
+            return `[${this.type.name}]` + `Illegal invocation of ${target} hook.${message ? ` ${message}` : ''}`;
         }
     },
     ERR_NOT_EXISTING_MODULE: {
         name: 'ERR_NOT_EXISTING_MODULE',
         type: Error,
         createError(target: string, description = '') {
-            return `[${this.constructor.name}]` + `${target} module does not exist. Install it with \`npm install ${target}\`.${description ? ' ' + description : ''}`;
+            return `[${this.type.name}]` + `${target} module does not exist. Install it with \`npm install ${target}\`.${description ? ' ' + description : ''}`;
+        }
+    },
+    ERR_BRIDGE_FAILED: {
+        name: 'ERR_BRIDGE_FAILED',
+        type: Error,
+        createError(id: string | null, error: string) {
+            return `[${this.type.name}]` + `${id ? `(Extractor Execution Context ID is ${id})` : ''}Failed to bridge this query:\n${error}`;
         }
     }
 } as const;
@@ -160,8 +167,7 @@ const handler: ProxyHandler<typeof target> = {
         return (...args: Parameters<(typeof err)['createError']>) => {
             // @ts-expect-error
             const exception = new err.type(err.createError(...args));
-            const originalName = exception.name;
-            exception.name = `${err.name} [${originalName}]`;
+            exception.name = err.name;
 
             return exception;
         };

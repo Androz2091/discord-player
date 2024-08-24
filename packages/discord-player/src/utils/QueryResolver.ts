@@ -59,7 +59,7 @@ class QueryResolver {
             appleMusicSongRegex,
             soundcloudTrackRegex,
             soundcloudPlaylistRegex,
-            youtubePlaylistRegex,
+            youtubePlaylistRegex
         };
     }
 

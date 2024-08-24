@@ -39,6 +39,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
     disableFilterer?: boolean;
     disableBiquad?: boolean;
     disableResampler?: boolean;
+    disableFallbackStream?: boolean;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
@@ -87,6 +88,7 @@ export class GuildNodeManager<Meta = unknown> {
         options.disableFilterer ??= false;
         options.disableVolume ??= false;
         options.disableResampler ??= true;
+        options.disableFallbackStream ??= false;
 
         if (getGlobalRegistry().has('@[onBeforeCreateStream]') && !options.onBeforeCreateStream) {
             options.onBeforeCreateStream = getGlobalRegistry().get('@[onBeforeCreateStream]') as OnBeforeCreateStreamHandler;
@@ -128,7 +130,8 @@ export class GuildNodeManager<Meta = unknown> {
             disableEqualizer: options.disableEqualizer,
             disableFilterer: options.disableFilterer,
             disableResampler: options.disableResampler,
-            disableVolume: options.disableVolume
+            disableVolume: options.disableVolume,
+            disableFallbackStream: options.disableFallbackStream
         });
 
         this.cache.set(server.id, queue);
@@ -168,6 +171,7 @@ export class GuildNodeManager<Meta = unknown> {
 
         queue.setTransitioning(true);
         queue.node.stop(true);
+        // @ts-ignore
         queue.connection?.removeAllListeners();
         queue.dispatcher?.removeAllListeners();
         queue.dispatcher?.disconnect();

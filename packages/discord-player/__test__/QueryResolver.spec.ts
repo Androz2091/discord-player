@@ -49,11 +49,11 @@ describe('QueryResolver', () => {
         expect(qr.resolve(query).type).toBe(QueryType.VIMEO);
     });
 
-    it("should be soundcloud", async () => {
-        const query = "https://on.soundcloud.com/YVLyjzk2mmp5TJF99"
-        const rediected = await qr.preResolve(query)
-        expect(rediected).toMatch(qr.regex.soundcloudTrackRegex)
-    })
+    it('should be soundcloud', async () => {
+        const query = 'https://on.soundcloud.com/YVLyjzk2mmp5TJF99';
+        const rediected = await qr.preResolve(query);
+        expect(rediected).toMatch(qr.regex.soundcloudTrackRegex);
+    });
 
     it('should be soundcloudTrack', () => {
         const query = 'https://soundcloud.com/rick-astley-official/never-gonna-give-you-up-4';

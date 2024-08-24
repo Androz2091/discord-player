@@ -53,6 +53,7 @@ export interface GuildNodeInit<Meta = unknown> {
     disableFilterer: boolean;
     disableBiquad: boolean;
     disableResampler: boolean;
+    disableFallbackStream: boolean;
 }
 
 export interface VoiceConnectConfig {

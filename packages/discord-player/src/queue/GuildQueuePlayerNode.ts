@@ -148,16 +148,23 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         const prefersBridgedMetadata = this.queue.options.preferBridgedMetadata;
         const track = this.queue.currentTrack;
 
-        if (prefersBridgedMetadata && track?.metadata != null && typeof track.metadata === 'object' && 'bridge' in track.metadata && track.metadata.bridge != null) {
-            const duration = (
-                track as Track<{
-                    bridge: {
-                        duration: number;
-                    };
-                }>
-            ).metadata?.bridge.duration;
+        if (prefersBridgedMetadata) {
+            const trackHasLegacyMetadata = track?.metadata != null && typeof track.metadata === 'object' && 'bridge' in track.metadata && track.metadata.bridge != null;
+            const trackHasMetadata = track?.bridgedTrack != null;
 
-            if (TypeUtil.isNumber(duration)) return duration;
+            if (trackHasLegacyMetadata || trackHasMetadata) {
+                const duration =
+                    track.bridgedTrack?.durationMS ??
+                    (
+                        track as Track<{
+                            bridge: {
+                                duration: number;
+                            };
+                        }>
+                    ).metadata?.bridge.duration;
+
+                if (TypeUtil.isNumber(duration)) return duration;
+            }
         }
 
         return track?.durationMS ?? 0;
@@ -516,21 +523,29 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             // default behavior when 'onBeforeCreateStream' did not panic
             if (!streamSrc.stream) {
                 if (this.queue.hasDebugger) this.queue.debug('Failed to get stream from onBeforeCreateStream!');
-                await this.#createGenericStream(track).then(
-                    (r) => {
-                        if (r?.result) {
-                            streamSrc.stream = <Readable>r.result;
-                            return;
-                        }
-
-                        if (r?.error) {
-                            streamSrc.error = r.error;
-                            return;
-                        }
-
-                        streamSrc.stream = streamSrc.error = null;
+                await this.queue.player.extractors.context.provide(
+                    {
+                        id: crypto.randomUUID(),
+                        attemptedExtractors: new Set<string>(),
+                        bridgeAttemptedExtractors: new Set<string>()
                     },
-                    (e: Error) => (streamSrc.error = e)
+                    () =>
+                        this.#createGenericStream(track).then(
+                            (r) => {
+                                if (r?.result) {
+                                    streamSrc.stream = <Readable>r.result;
+                                    return;
+                                }
+
+                                if (r?.error) {
+                                    streamSrc.error = r.error;
+                                    return;
+                                }
+
+                                streamSrc.stream = streamSrc.error = null;
+                            },
+                            (e: Error) => (streamSrc.error = e)
+                        )
                 );
             }
 
@@ -694,14 +709,28 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
     async #createGenericStream(track: Track) {
         if (this.queue.hasDebugger) this.queue.debug(`Attempting to extract stream for Track { title: ${track.title}, url: ${track.url} } using registered extractors`);
+
+        const attemptedExtractors = this.queue.player.extractors.getContext()?.attemptedExtractors || new Set<string>();
+
         const streamInfo = await this.queue.player.extractors.run(async (extractor) => {
             if (this.queue.player.options.blockStreamFrom?.some((ext) => ext === extractor.identifier)) return false;
+            if (attemptedExtractors.has(extractor.identifier)) return false;
+            attemptedExtractors.add(extractor.identifier);
             const canStream = await extractor.validate(track.url, track.queryType || QueryResolver.resolve(track.url).type);
             if (!canStream) return false;
             return await extractor.stream(track);
         }, false);
+
         if (!streamInfo || !streamInfo.result) {
-            if (this.queue.hasDebugger) this.queue.debug(`Failed to extract stream for Track { title: ${track.title}, url: ${track.url} } using registered extractors`);
+            if (this.queue.hasDebugger) {
+                this.queue.debug(`Failed to extract stream for Track { title: ${track.title}, url: ${track.url} } using registered extractors`);
+            }
+
+            if (!this.queue.options.disableFallbackStream) {
+                if (this.queue.hasDebugger) this.queue.debug(`Generic stream extraction failed and fallback stream extraction is enabled`);
+                return this.#createFallbackStream(track);
+            }
+
             return streamInfo || null;
         }
 
@@ -709,6 +738,41 @@ export class GuildQueuePlayerNode<Meta = unknown> {
             this.queue.debug(`Stream extraction was successful for Track { title: ${track.title}, url: ${track.url} } (Extractor: ${streamInfo.extractor?.identifier || 'N/A'})`);
 
         return streamInfo;
+    }
+
+    async #createFallbackStream(track: Track) {
+        if (this.queue.hasDebugger) this.queue.debug(`Attempting to extract stream for Track { title: ${track.title}, url: ${track.url} } using fallback streaming method...`);
+
+        const fallbackStream = await this.queue.player.extractors.run(async (extractor) => {
+            if (extractor.identifier === track.extractor?.identifier) return false;
+            if (this.queue.player.options.blockStreamFrom?.some((ext) => ext === extractor.identifier)) return false;
+
+            const query = `${track.title} ${track.author}`;
+            const fallbackTracks = await extractor.handle(query, {
+                requestedBy: track.requestedBy
+            });
+
+            const fallbackTrack = fallbackTracks.tracks[0];
+
+            if (!fallbackTrack) return false;
+
+            const stream = await extractor.stream(fallbackTrack);
+
+            if (!stream) return false;
+
+            track.bridgedTrack = fallbackTrack;
+
+            return stream;
+        }, true);
+
+        if (!fallbackStream || !fallbackStream.result) {
+            if (this.queue.hasDebugger) this.queue.debug(`Failed to extract stream for Track { title: ${track.title}, url: ${track.url} } using fallback streaming method`);
+            return fallbackStream || null;
+        }
+
+        track.bridgedExtractor = fallbackStream.extractor;
+
+        return fallbackStream;
     }
 
     #createFFmpegStream(stream: Readable | string, track: Track, seek = 0, cookies?: string, opus?: boolean) {

@@ -39,13 +39,13 @@ describe('Player', () => {
         expect(response).toBeInstanceOf(SearchResult);
     });
 
-    test("should set process.env.FFMPEG_PATH to given path", () => {
+    test('should set process.env.FFMPEG_PATH to given path', () => {
         // not actual ffmpeg path. just dummy
         new Player(client, {
-            ffmpegPath: "./packages/ffmpeg",
+            ffmpegPath: './packages/ffmpeg',
             ignoreInstance: true
-        })
-      
-        expect(process.env.FFMPEG_PATH).toBe("./packages/ffmpeg")
-    })
+        });
+
+        expect(process.env.FFMPEG_PATH).toBe('./packages/ffmpeg');
+    });
 });

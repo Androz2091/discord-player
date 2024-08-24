@@ -5,6 +5,8 @@ import { Util } from '../utils/Util';
 import { PlayerEventsEmitter } from '../utils/PlayerEventsEmitter';
 import { TypeUtil } from '../utils/TypeUtil';
 import { Track } from '../fabric';
+import { createContext } from '../hooks';
+import { Exceptions } from '../errors';
 
 // prettier-ignore
 const knownExtractorKeys = [
@@ -22,6 +24,12 @@ export type ExtractorLoaderOptionDict = {
     // @ts-ignore types
     [K in (typeof knownExtractorKeys)[number]]?: ConstructorParameters<typeof import('@discord-player/extractor')[K]>[1];
 };
+
+export interface ExtractorSession {
+    id: string;
+    attemptedExtractors: Set<string>;
+    bridgeAttemptedExtractors: Set<string>;
+}
 
 export interface ExtractorExecutionEvents {
     /**
@@ -62,8 +70,24 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      */
     public store = new Collection<string, BaseExtractor>();
 
+    public readonly context = createContext<ExtractorSession>();
+
     public constructor(public player: Player) {
         super(['error']);
+    }
+
+    /**
+     * Get the current execution id
+     */
+    public getExecutionId(): string | null {
+        return this.context.consume()?.id ?? null;
+    }
+
+    /**
+     * Get the current execution context
+     */
+    public getContext() {
+        return this.context.consume() ?? null;
     }
 
     /**
@@ -228,12 +252,26 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      * @param sourceExtractor The source extractor of the track
      */
     public async requestBridge(track: Track, sourceExtractor: BaseExtractor | null = track.extractor) {
-        return this.run<ExtractorStreamable>(async (ext) => {
+        const previouslyAttempted = this.getContext()?.bridgeAttemptedExtractors ?? new Set<string>();
+
+        const result = await this.run<ExtractorStreamable>(async (ext) => {
             if (sourceExtractor && ext.identifier === sourceExtractor.identifier) return false;
+            if (previouslyAttempted.has(ext.identifier)) return false;
+
+            previouslyAttempted.add(ext.identifier);
+
             const result = await ext.bridge(track, sourceExtractor);
+
             if (!result) return false;
+
             return result;
         });
+
+        if (!result?.result) throw Exceptions.ERR_BRIDGE_FAILED(this.getExecutionId(), result?.error?.stack || result?.error?.message || 'No extractors available to bridge');
+
+        track.bridgedExtractor = result.extractor;
+
+        return result;
     }
 
     /**

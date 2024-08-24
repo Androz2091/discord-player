@@ -238,6 +238,13 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
 
         if (!info.tracks.length) return null;
 
-        return this.stream(info.tracks[0]);
+        const result = await this.stream(info.tracks[0]);
+
+        if (result) {
+            track.bridgedTrack = info.tracks[0];
+            track.bridgedExtractor = this;
+        }
+
+        return result;
     }
 }
