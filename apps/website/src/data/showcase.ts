@@ -125,9 +125,8 @@ export const ShowcaseResource: IShowcase = {
             },
             {
                 name: 'Bhop Music Bot',
-                description:
-                    'There were not many bots made with discord-player 6.0.0 and discord.js 14.7.1, I was bored and made a simple one. We are using discord-player to listen music while bhopping. 🐇',
-                version: 'v6.6.4',
+                description: 'We are using discord-player to listen music while bhopping. 🐇',
+                version: 'v6.7.1',
                 url: 'https://github.com/akanora/bhop-music-bot',
             },
             {
