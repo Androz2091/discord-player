@@ -4,7 +4,7 @@ Discord Player provides two different methods for getting lyrics of a song. The 
 
 ## New Method
 
-This method is built into discord-player itself and provides both plaintext and synced lyrics. This method is more robust and reliable than the old method. It is powered by [lrclib](https://liclib.net).
+This method is built into discord-player itself and provides both plaintext and synced lyrics. This method is more robust and reliable than the old method. It is powered by [lrclib](https://lrclib.net).
 
 #### Plain Lyrics
 
@@ -18,14 +18,7 @@ if (!lyrics.length) return interaction.followUp({ content: 'No lyrics found', ep
 const trimmedLyrics = lyrics[0].plainLyrics.substring(0, 1997);
 
 const embed = new EmbedBuilder()
-    .setTitle(lyrics[0].title)
-    .setURL(lyrics[0].url)
-    .setThumbnail(lyrics[0].thumbnail)
-    .setAuthor({
-        name: lyrics[0].artist.name,
-        iconURL: lyrics[0].artist.image,
-        url: lyrics[0].artist.url
-    })
+    .setTitle(`${lyrics[0].trackName} - ${lyrics[0].artistName}`)
     .setDescription(trimmedLyrics.length === 1997 ? `${trimmedLyrics}...` : trimmedLyrics)
     .setColor('Yellow');
 
@@ -46,7 +39,7 @@ if (!first.syncedLyrics) {
 }
 
 // load raw lyrics to the queue
-const syncedLyrics = queue.syncedLyrics(lyrics);
+const syncedLyrics = queue.syncedLyrics(first);
 
 syncedLyrics.at(timestampInMilliseconds); // manually get a line at a specific timestamp
 
