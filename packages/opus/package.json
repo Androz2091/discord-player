@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/opus",
-  "version": "0.1.2",
+  "version": "7.0.0-dev.0",
   "description": "A complete framework to simplify the implementation of music commands for Discord bots",
   "keywords": [
     "discord-player",
@@ -12,6 +12,9 @@
     "lavalink",
     "lavaplayer"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "Androz2091 <androz2091@gmail.com>",
   "homepage": "https://discord-player.js.org",
   "license": "MIT",

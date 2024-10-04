@@ -33,7 +33,7 @@ export {
     AF_VAPORWAVE_RATE,
     FiltersChain
 } from '@discord-player/equalizer';
-export { createAudioPlayer, AudioPlayer, getVoiceConnection, getVoiceConnections, type CreateAudioPlayerOptions } from 'discord-voip';
+export { createAudioPlayer, AudioPlayer, getVoiceConnection, getVoiceConnections, joinVoiceChannel, type JoinConfig, type JoinVoiceChannelOptions, type CreateAudioPlayerOptions } from 'discord-voip';
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
 export const version: string = '[VI]{{inject}}[/VI]';

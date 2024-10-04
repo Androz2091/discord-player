@@ -73,7 +73,8 @@ export function createFFmpegStream(stream: Readable | Duplex | string, options?:
 
     if (typeof stream !== 'string') {
         stream.on('error', () => transcoder.destroy());
-        stream.pipe(transcoder);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        stream.pipe(transcoder as any);
     }
 
     return transcoder;

@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/equalizer",
-  "version": "0.2.3",
+  "version": "7.0.0-dev.0",
   "description": "PCM Equalizer implementation for Discord Player",
   "keywords": [
     "discord-player",
@@ -20,6 +20,9 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "directories": {
     "dist": "dist",
     "src": "src"

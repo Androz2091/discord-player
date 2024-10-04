@@ -671,10 +671,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             `- Node version: ${process.version} (Detected Runtime: ${runtime}, Platform: ${process.platform} [${process.arch}])`,
             (() => {
                 if (this.options.useLegacyFFmpeg) return '- ffmpeg: N/A (using legacy ffmpeg)';
-                const info = FFmpeg.locateSafe();
+                const info = FFmpeg.resolveSafe();
                 if (!info) return 'FFmpeg/Avconv not found';
 
-                return [`- ffmpeg: ${info.version}`, `- command: ${info.command}`, `- static: ${info.isStatic}`, `- libopus: ${info.metadata!.includes('--enable-libopus')}`].join('\n');
+                return [`- ffmpeg: ${info.version}`, `- command: ${info.command}`, `- static: ${info.module}`, `- libopus: ${info.result!.includes('--enable-libopus')}`].join('\n');
             })(),
             '\n',
             'Loaded Extractors:',

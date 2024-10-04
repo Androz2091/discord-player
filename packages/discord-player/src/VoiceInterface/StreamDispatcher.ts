@@ -18,7 +18,6 @@ import { Track } from '../fabric/Track';
 import { Util } from '../utils/Util';
 import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
 import { GuildQueue, GuildQueueEvent, PostProcessedResult } from '../queue';
-import { VoiceReceiverNode } from '../queue/VoiceReceiverNode';
 import { Exceptions } from '../errors';
 
 export interface CreateStreamOps {
@@ -56,7 +55,6 @@ export interface VoiceEvents {
 class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public voiceConnection: VoiceConnection;
     public audioPlayer: AudioPlayer;
-    public receiver = new VoiceReceiverNode(this);
     public channel: VoiceChannel | StageChannel;
     public audioResource?: AudioResource<Track> | null;
     public dsp = new FiltersChain();
@@ -333,7 +331,9 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      */
     public destroy() {
         this.disconnect();
+        // @ts-ignore
         this.audioPlayer.removeAllListeners();
+        // @ts-ignore
         this.voiceConnection.removeAllListeners();
         this.dsp.destroy();
         this.audioResource = null;

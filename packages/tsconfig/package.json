@@ -1,11 +1,14 @@
 {
   "name": "@discord-player/tsconfig",
-  "version": "0.0.1",
+  "version": "7.0.0-dev.0",
   "description": "TSConfig for discord-player monorepo",
   "author": "twlite",
   "homepage": "https://discord-player.js.org",
   "license": "MIT",
   "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "index.js",
     "base.json"
