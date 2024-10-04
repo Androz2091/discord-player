@@ -6,7 +6,7 @@ import { VoiceUtils } from './VoiceInterface/VoiceUtils';
 import { PlayerEvents, QueryType, SearchOptions, PlayerInitOptions, PlaylistInitData, SearchQueryType, PlayerEvent } from './types/types';
 import { QueryResolver, ResolvedQuery } from './utils/QueryResolver';
 import { Util } from './utils/Util';
-import { generateDependencyReport, version as dVoiceVersion } from 'discord-voip';
+import { version as dVoiceVersion } from 'discord-voip';
 import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
 import { BaseExtractor } from './extractors/BaseExtractor';
 import * as _internals from './utils/__internal__';
@@ -19,6 +19,7 @@ import { Context, createContext } from './hooks';
 import { HooksCtx } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
 import { getCompatName, isClientProxy } from './compat/createErisCompat';
+import { DependencyReportGenerator } from './utils/DependencyReportGenerator';
 
 const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
@@ -685,7 +686,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 })
                 .join('\n') || 'N/A',
             '\n\ndiscord-voip',
-            generateDependencyReport()
+            DependencyReportGenerator.generateString()
         ];
 
         return depsReport.join('\n');

@@ -17,7 +17,10 @@ export {
     type VoiceConnectionDisconnectedWebSocketState,
     VoiceConnectionDisconnectReason,
     type VoiceConnectionReadyState,
-    type VoiceConnectionSignallingState,
+    type VoiceConnectionSignallingState
 } from './VoiceConnection';
 
 export { type JoinConfig, getVoiceConnection, getVoiceConnections, getGroups } from './DataStore';
+
+// eslint-disable-next-line @typescript-eslint/no-inferrable-types
+export const version: string = '[VI]{{inject}}[/VI]';

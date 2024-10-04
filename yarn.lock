@@ -140,13 +140,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@discord-player/ffmpeg@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@discord-player/ffmpeg@npm:0.1.0"
-  checksum: 10/a4cb89a64d8e19b116175998be46d0870995c365a8ec602c211f34073f34616f959f61e925c1be56a168abba28b521bc1c3ede038915d5d8c7b206a9b21ab0f7
-  languageName: node
-  linkType: hard
-
 "@discord-player/ffmpeg@workspace:^, @discord-player/ffmpeg@workspace:packages/ffmpeg":
   version: 0.0.0-use.local
   resolution: "@discord-player/ffmpeg@workspace:packages/ffmpeg"
@@ -158,13 +151,6 @@ __metadata:
     vitest: "npm:^0.34.6"
   languageName: unknown
   linkType: soft
-
-"@discord-player/opus@npm:^0.1.2":
-  version: 0.1.2
-  resolution: "@discord-player/opus@npm:0.1.2"
-  checksum: 10/91ad76c6fb15d3f11968ac03340659e19bbc0145031079b7739e17abc344a33b6c03da7314eb844186dbe1c419cd690a99a9ad8e7be20c8f1a1d05fd0fc3722f
-  languageName: node
-  linkType: hard
 
 "@discord-player/opus@workspace:^, @discord-player/opus@workspace:packages/opus":
   version: 0.0.0-use.local
@@ -6505,13 +6491,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:^0.37.50":
-  version: 0.37.52
-  resolution: "discord-api-types@npm:0.37.52"
-  checksum: 10/c9212437192cbd782441bc1da7c8caf4114ada6241fd9673eda70df6f8b3003acf3fbe9c59d5be22cf9bb941ac5c3f234895be79f1476f9a1ce0096e2d52367e
-  languageName: node
-  linkType: hard
-
 "discord-player@workspace:^, discord-player@workspace:packages/discord-player":
   version: 0.0.0-use.local
   resolution: "discord-player@workspace:packages/discord-player"
@@ -6525,11 +6504,12 @@ __metadata:
     "@types/ws": "npm:^8.5.3"
     "@web-scrobbler/metadata-filter": "npm:^3.1.0"
     discord-api-types: "npm:^0.37.0"
-    discord-voip: "npm:^0.1.3"
+    discord-voip: "workspace:^"
     discord.js: "npm:^14.15.3"
     eris: "npm:^0.17.2"
     libsodium-wrappers: "npm:^0.7.13"
     opusscript: "npm:^0.0.8"
+    prism-media: "npm:^1.3.5"
     tsup: "npm:^7.2.0"
     typescript: "npm:^5.2.2"
     vitest: "npm:^0.34.6"
@@ -6538,22 +6518,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"discord-voip@npm:^0.1.3":
-  version: 0.1.3
-  resolution: "discord-voip@npm:0.1.3"
-  dependencies:
-    "@discord-player/ffmpeg": "npm:^0.1.0"
-    "@discord-player/opus": "npm:^0.1.2"
-    "@types/ws": "npm:^8.5.5"
-    discord-api-types: "npm:^0.37.50"
-    prism-media: "npm:^1.3.5"
-    tslib: "npm:^2.6.1"
-    ws: "npm:^8.13.0"
-  checksum: 10/640db80b7ceb5be392b30d3f801fa9eaa2207204eaaa04fd265404f26d17fad4d7976de9c3d14a6c525b8bf23a3b69ac307300230e01bdd5f4689e3740961426
-  languageName: node
-  linkType: hard
-
-"discord-voip@workspace:packages/discord-voip":
+"discord-voip@workspace:^, discord-voip@workspace:packages/discord-voip":
   version: 0.0.0-use.local
   resolution: "discord-voip@workspace:packages/discord-voip"
   dependencies:
@@ -15134,13 +15099,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.6.1":
-  version: 2.6.1
-  resolution: "tslib@npm:2.6.1"
-  checksum: 10/5cf1aa7ea4ca7ee9b8aa3d80eb7ee86634b307fbefcb948a831c2b13728e21e156ef7fb9edcbe21f05c08f65e4cf4480587086f31133491ba1a49c9e0b28fc75
-  languageName: node
-  linkType: hard
-
 "tslib@npm:^2.6.2":
   version: 2.6.3
   resolution: "tslib@npm:2.6.3"
@@ -16379,21 +16337,6 @@ __metadata:
   version: 1.0.2
   resolution: "wrappy@npm:1.0.2"
   checksum: 10/159da4805f7e84a3d003d8841557196034155008f817172d4e986bd591f74aa82aa7db55929a54222309e01079a65a92a9e6414da5a6aa4b01ee44a511ac3ee5
-  languageName: node
-  linkType: hard
-
-"ws@npm:^8.13.0":
-  version: 8.13.0
-  resolution: "ws@npm:8.13.0"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 10/1769532b6fdab9ff659f0b17810e7501831d34ecca23fd179ee64091dd93a51f42c59f6c7bb4c7a384b6c229aca8076fb312aa35626257c18081511ef62a161d
   languageName: node
   linkType: hard
 
