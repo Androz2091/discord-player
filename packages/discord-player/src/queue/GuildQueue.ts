@@ -496,13 +496,6 @@ export class GuildQueue<Meta = unknown> {
     }
 
     /**
-     * The voice receiver for this queue
-     */
-    public get voiceReceiver() {
-        return this.dispatcher?.receiver ?? null;
-    }
-
-    /**
      * The sync lyrics provider for this queue.
      * @example const lyrics = await player.lyrics.search({ q: 'Alan Walker Faded' });
      * const syncedLyrics = queue.syncedLyrics(lyrics[0]);

@@ -11,8 +11,7 @@ import { Exceptions } from '../errors';
 import { TypeUtil } from '../utils/TypeUtil';
 import { CreateStreamOps } from '../VoiceInterface/StreamDispatcher';
 import { ExtractorStreamable } from '../extractors/BaseExtractor';
-import * as prism from 'prism-media';
-import { OpusDecoder } from '@discord-player/opus';
+import { OggDemuxer, OpusDecoder, WebmDemuxer } from '@discord-player/opus';
 
 export const FFMPEG_SRATE_REGEX = /asetrate=\d+\*(\d(\.\d)?)/;
 
@@ -619,9 +618,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                     stream :
                     $fmt === StreamType.OggOpus ?
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    stream.pipe(new prism.opus.OggDemuxer() as any) :
+                    stream.pipe(new OggDemuxer() as any) :
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    stream.pipe(new prism.opus.WebmDemuxer() as any);
+                    stream.pipe(new WebmDemuxer() as any);
 
                 if (shouldPCM) {
                     // if we have any filters enabled, we need to decode the opus stream to pcm

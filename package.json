@@ -9,6 +9,8 @@
     "apps/*"
   ],
   "scripts": {
+    "bump": "node ./scripts/set-version.mjs",
+    "publish-packages": "yarn build && node ./scripts/publish.mjs",
     "bootstrap": "node ./scripts/bootstrap.js",
     "build": "turbo run build --color --filter=!website --filter=!music-bot",
     "docs": "node ./scripts/docgen.js",

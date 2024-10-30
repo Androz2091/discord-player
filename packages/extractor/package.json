@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/extractor",
-  "version": "4.6.0-dev.0",
+  "version": "7.0.0-dev.0",
   "description": "Extractors for discord-player",
   "keywords": [
     "discord-player",
@@ -18,6 +18,9 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist"
   ],

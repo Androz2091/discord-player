@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/ffmpeg",
-  "version": "0.1.0",
+  "version": "7.0.0-dev.0",
   "description": "FFmpeg stream abstraction for discord-player",
   "keywords": [
     "discord-player",
@@ -18,6 +18,9 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist"
   ],
