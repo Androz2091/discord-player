@@ -3658,15 +3658,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ip@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@types/ip@npm:1.1.0"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10/2d949112aae75480db13b23282986e516ec5db1c0fcd965f2484c19431f6b0fef55bb7e4372316346b287b1ca9c33aabca6913de3d1e9ac575f60037a7e34bd9
-  languageName: node
-  linkType: hard
-
 "@types/js-yaml@npm:^4.0.0":
   version: 4.0.9
   resolution: "@types/js-yaml@npm:4.0.9"
@@ -5607,7 +5598,6 @@ __metadata:
     "@discord-player/ffmpeg": "workspace:^"
     "@discord-player/tsconfig": "workspace:^"
     "@discord-player/utils": "workspace:^"
-    "@types/ip": "npm:^1.1.0"
     "@types/node": "npm:^20.14.11"
     "@types/ws": "npm:^8.5.3"
     "@web-scrobbler/metadata-filter": "npm:^3.1.0"
