@@ -151,13 +151,6 @@ export class BaseExtractor<T extends object = object> {
     }
 
     /**
-     * IP rotator instance, if available
-     */
-    public get routePlanner() {
-        return this.context.player.routePlanner;
-    }
-
-    /**
      * A flag to indicate `Demuxable` stream support for `opus`/`ogg/opus`/`webm/opus` formats.
      */
     public get supportsDemux() {
