@@ -1,52 +1,52 @@
 {
-    "name": "discord-voip",
-    "version": "7.0.0-dev.1",
-    "description": "Discord VoIP library used by discord-player",
-    "keywords": [
-        "discord-player",
-        "music",
-        "bot",
-        "discord.js",
-        "javascript",
-        "voip",
-        "lavalink",
-        "lavaplayer"
-    ],
-    "author": "Twilight <hello@twlite.dev>",
-    "homepage": "https://discord-player.js.org",
-    "license": "MIT",
-    "main": "dist/index.js",
-    "module": "dist/index.mjs",
-    "types": "dist/index.d.ts",
-    "files": [
-        "dist"
-    ],
-    "publishConfig": {
-        "access": "public"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Androz2091/discord-player.git"
-    },
-    "scripts": {
-        "build": "tsup && node ./scripts/esm-shim.cjs",
-        "build:check": "tsc --noEmit",
-        "lint": "eslint src --ext .ts --fix"
-    },
-    "bugs": {
-        "url": "https://github.com/Androz2091/discord-player/issues"
-    },
-    "devDependencies": {
-        "@discord-player/tsconfig": "workspace:^",
-        "tsup": "^8.2.4",
-        "typescript": "^5.5.4"
-    },
-    "dependencies": {
-        "@discord-player/ffmpeg": "workspace:^",
-        "@discord-player/opus": "workspace:^",
-        "@discord-player/utils": "workspace:^",
-        "@types/ws": "^8.5.10",
-        "tsup": "^8.2.4",
-        "typescript": "^5.5.4"
-    }
+  "name": "discord-voip",
+  "version": "7.0.0-dev.2",
+  "description": "Discord VoIP library used by discord-player",
+  "keywords": [
+    "discord-player",
+    "music",
+    "bot",
+    "discord.js",
+    "javascript",
+    "voip",
+    "lavalink",
+    "lavaplayer"
+  ],
+  "author": "Twilight <hello@twlite.dev>",
+  "homepage": "https://discord-player.js.org",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "scripts": {
+    "build": "tsup && node ./scripts/esm-shim.cjs",
+    "build:check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts --fix"
+  },
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "devDependencies": {
+    "@discord-player/tsconfig": "workspace:^",
+    "tsup": "^8.2.4",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@discord-player/ffmpeg": "workspace:^",
+    "@discord-player/opus": "workspace:^",
+    "@discord-player/utils": "workspace:^",
+    "@types/ws": "^8.5.10",
+    "tsup": "^8.2.4",
+    "typescript": "^5.5.4"
+  }
 }

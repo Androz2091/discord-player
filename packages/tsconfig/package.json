@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/tsconfig",
-  "version": "7.0.0-dev.0",
+  "version": "7.0.0-dev.2",
   "description": "TSConfig for discord-player monorepo",
   "author": "Twilight <hello@twlite.dev>",
   "homepage": "https://discord-player.js.org",
