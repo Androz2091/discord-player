@@ -1,16 +1,13 @@
-import { ExtractorInfo, ExtractorSearchContext, ExtractorStreamable, GuildQueueHistory, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
+import { ExtractorInfo, ExtractorSearchContext, ExtractorStreamable, GuildQueueHistory, Playlist, QueryType, SearchQueryType, Track, Util, BaseExtractor } from 'discord-player';
 import { AppleMusic } from '../internal';
 import { Readable } from 'stream';
-import { StreamFN, pullYTMetadata } from './common/helper';
-import { BridgeProvider } from './common/BridgeProvider';
-import { BridgedExtractor } from './BridgedExtractor';
+import { StreamFN } from '../types/common';
 
 export interface AppleMusicExtractorInit {
-    createStream?: (ext: AppleMusicExtractor, url: string) => Promise<Readable | string>;
-    bridgeProvider?: BridgeProvider;
+    createStream?: (ext: AppleMusicExtractor, url: string, track: Track) => Promise<Readable | string>;
 }
 
-export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorInit> {
+export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> {
     public static identifier = 'com.discord-player.applemusicextractor' as const;
     private _stream!: StreamFN;
 
@@ -19,8 +16,8 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
         const fn = this.options.createStream;
 
         if (typeof fn === 'function') {
-            this._stream = (q: string) => {
-                return fn(this, q);
+            this._stream = (q: string, t: Track) => {
+                return fn(this, q, t);
             };
         }
     }
@@ -85,7 +82,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
+                                    bridge: null
                                 };
                             }
                         });
@@ -140,7 +137,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                             requestMetadata: async () => {
                                 return {
                                     source: info,
-                                    bridge: (await this.options.bridgeProvider?.resolve(this, track))?.data
+                                    bridge: null
                                 };
                             }
                         });
@@ -194,7 +191,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
+                                    bridge: null
                                 };
                             }
                         });
@@ -230,7 +227,7 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
                     requestMetadata: async () => {
                         return {
                             source: info,
-                            bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, track)).data : await pullYTMetadata(this, track)
+                            bridge: null
                         };
                     }
                 });
@@ -246,25 +243,9 @@ export class AppleMusicExtractor extends BridgedExtractor<AppleMusicExtractorIni
 
     public async stream(info: Track): Promise<ExtractorStreamable> {
         if (this._stream) {
-            const stream = await this._stream(info.url, this);
+            const stream = await this._stream(info.url, info);
             if (typeof stream === 'string') return stream;
             return stream;
-        }
-
-        // legacy
-        if (!('requestBridge' in this.context)) {
-            const provider = this.bridgeProvider;
-            if (!provider) throw new Error(`Could not find bridge provider for '${this.constructor.name}'`);
-
-            const data = await provider.resolve(this, info);
-            if (!data) throw new Error('Failed to bridge this track');
-
-            info.setMetadata({
-                ...(info.metadata || {}),
-                bridge: data.data
-            });
-
-            return await provider.stream(data);
         }
 
         // new api

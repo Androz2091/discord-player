@@ -1,10 +1,9 @@
-import { ExtractorInfo, ExtractorSearchContext, ExtractorStreamable, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
+import { BaseExtractor, ExtractorInfo, ExtractorSearchContext, ExtractorStreamable, Playlist, QueryType, SearchQueryType, Track, Util } from 'discord-player';
 import type { Readable } from 'stream';
-import { StreamFN, fetch, pullYTMetadata } from './common/helper';
+import { fetch } from '../internal/helper';
 import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
 import { SpotifyAPI } from '../internal';
-import { BridgeProvider } from './common/BridgeProvider';
-import { BridgedExtractor } from './BridgedExtractor';
+import { StreamFN } from '../types/common';
 
 const re = /^(?:https:\/\/open\.spotify\.com\/(intl-([a-z]|[A-Z]){0,3}\/)?(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track)(?:[/:])([A-Za-z0-9]+).*$/;
 
@@ -12,10 +11,9 @@ export interface SpotifyExtractorInit {
     clientId?: string | null;
     clientSecret?: string | null;
     createStream?: (ext: SpotifyExtractor, url: string) => Promise<Readable | string>;
-    bridgeProvider?: BridgeProvider;
 }
 
-export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
+export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
     public static identifier = 'com.discord-player.spotifyextractor' as const;
     private _stream!: StreamFN;
     private _lib!: Spotify;
@@ -93,7 +91,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: spotifyData,
-                                    bridge: (await this.options.bridgeProvider?.resolve(this, track))?.data
+                                    bridge: null
                                 };
                             }
                         });
@@ -125,7 +123,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                     requestMetadata: async () => {
                         return {
                             source: spotifyData,
-                            bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, spotifyTrack)).data : await pullYTMetadata(this, spotifyTrack)
+                            bridge: null
                         };
                     }
                 });
@@ -177,7 +175,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: spotifyData,
-                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, data)).data : await pullYTMetadata(this, data)
+                                    bridge: null
                                 };
                             }
                         });
@@ -227,7 +225,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, data)).data : await pullYTMetadata(this, data)
+                                    bridge: null
                                 };
                             }
                         });
@@ -282,7 +280,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: spotifyData,
-                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, data)).data : await pullYTMetadata(this, data)
+                                    bridge: null
                                 };
                             }
                         });
@@ -332,7 +330,7 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: this.options.bridgeProvider ? (await this.options.bridgeProvider.resolve(this, data)).data : await pullYTMetadata(this, data)
+                                    bridge: null
                                 };
                             }
                         });
@@ -351,25 +349,9 @@ export class SpotifyExtractor extends BridgedExtractor<SpotifyExtractorInit> {
 
     public async stream(info: Track): Promise<ExtractorStreamable> {
         if (this._stream) {
-            const stream = await this._stream(info.url, this);
+            const stream = await this._stream(info.url, info);
             if (typeof stream === 'string') return stream;
             return stream;
-        }
-
-        // legacy api
-        if (!('requestBridge' in this.context)) {
-            const provider = this.bridgeProvider;
-            if (!provider) throw new Error(`Could not find bridge provider for '${this.constructor.name}'`);
-
-            const data = await provider.resolve(this, info);
-            if (!data) throw new Error('Failed to bridge this track');
-
-            info.setMetadata({
-                ...(info.metadata || {}),
-                bridge: data.data
-            });
-
-            return await provider.stream(data);
         }
 
         // new api

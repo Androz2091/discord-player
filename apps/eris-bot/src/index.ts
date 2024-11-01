@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import 'dotenv/config';
 import Eris from 'eris';
 import { Player, createErisCompat } from 'discord-player';
 

@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "tsx src/index.ts"
+    "start": "tsx --env-file=.env src/index.ts"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Twilight <hello@twlite.dev>",
+  "license": "MIT",
   "description": "",
   "devDependencies": {
     "@types/node": "^22.2.0",

@@ -1,4 +1,4 @@
-import { fetch, UA } from '../extractors';
+import { fetch, UA } from './helper';
 
 const SP_ANON_TOKEN_URL = 'https://open.spotify.com/get_access_token?reason=transport&productType=embed';
 const SP_ACCESS_TOKEN_URL = 'https://accounts.spotify.com/api/token?grant_type=client_credentials';

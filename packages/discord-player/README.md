@@ -86,28 +86,6 @@ $ npm install --save ffmpeg-binaries
 
 > Use `FFMPEG_PATH` environment variable to load ffmpeg from custom path.
 
-#### Streaming Library
-
-**The following method is deprecated and will be removed in the future. Please switch to [discord-player-youtubei](https://npmjs.com/discord-player-youtubei).**
-
-**Not recommended**:
-
-YouTube streaming is not supported without installing one of the following package. If you want to add support for YouTube playback, you need to install a streaming library. This step is not needed if you do not plan on using youtube source.
-
-```bash
-$ npm install --save youtube-ext
-# or
-$ npm install --save play-dl
-# or
-$ npm install --save @distube/ytdl-core
-# or
-$ npm install --save yt-stream
-# or
-$ npm install --save ytdl-core
-```
-
-Once you have completed these installations, let's proceed with writing a simple music bot.
-
 ### Setup
 
 Let's create a main player instance. This instance handles and keeps track of all the queues and its components.
@@ -147,13 +125,31 @@ const { Player, createErisCompat } = require('discord-player');
 const player = new Player(createErisCompat(client));
 ```
 
+Before you add the command, make sure to provide the context to the commands if you wish to use discord-player's hooks (like `useMainPlayer`).
+
+### Before
+
+```js index.js
+// execute the command
+await command.execute(interaction);
+```
+
+### After
+
+```js index.js
+// execute the command
+await player.context.provide({ guild: interaction.guild }, () => command.execute(interaction));
+```
+
+This allows discord-player to automatically know the current guild and the queue, resulting in cleaner code and seamless integration. This eradicates the need to pass the player instance to the command or use hacks like `client.player = player`.
+
 Let's move on to the command part. You can define the command as per your requirements. We will only focus on the command part:
 
 ```js play.js
 const { useMainPlayer } = require('discord-player');
 
 export async function execute(interaction) {
-    const player = useMainPlayer();
+    const player = useMainPlayer(); // get player instance
     const channel = interaction.member.voice.channel;
     if (!channel) return interaction.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
     const query = interaction.options.getString('query', true); // we need input/query to play

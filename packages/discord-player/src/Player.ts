@@ -9,19 +9,15 @@ import { Util } from './utils/Util';
 import { version as dVoiceVersion } from 'discord-voip';
 import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
 import { BaseExtractor } from './extractors/BaseExtractor';
-import * as _internals from './utils/__internal__';
 import { QueryCache } from './utils/QueryCache';
 import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
 import { Exceptions } from './errors';
 import { defaultVoiceStateHandler } from './DefaultVoiceStateHandler';
-import { IPRotator } from './utils/IPRotator';
 import { Context, createContext } from './hooks';
-import { HooksCtx } from './hooks/common';
+import { HooksCtx, SUPER_CONTEXT } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
 import { getCompatName, isClientProxy } from './compat/createErisCompat';
 import { DependencyReportGenerator } from './utils/DependencyReportGenerator';
-
-const kSingleton = Symbol('InstanceDiscordPlayerSingleton');
 
 export interface PlayerNodeInitializationResult<T = unknown> {
     track: Track;
@@ -53,7 +49,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * The version of discord-player
      */
     public static readonly version: string = '[VI]{{inject}}[/VI]';
-    public static _singletonKey = kSingleton;
     /**
      * The unique identifier of this player instance
      */
@@ -83,10 +78,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      */
     public events = new PlayerEventsEmitter<GuildQueueEvents>([GuildQueueEvent.Error, GuildQueueEvent.PlayerError]);
     /**
-     * The route planner
-     */
-    public routePlanner: IPRotator | null = null;
-    /**
      * The player version
      */
     public readonly version = Player.version;
@@ -101,9 +92,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      * @param {PlayerInitOptions} [options] The player init options
      */
     public constructor(client: Client, options: PlayerInitOptions = {}) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (!options.ignoreInstance && kSingleton in Player) return (<any>Player)[kSingleton] as Player;
-
         super([PlayerEvent.Error]);
 
         if (options.ffmpegPath) {
@@ -149,11 +137,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             useLegacyFFmpeg: false,
             skipFFmpeg: true,
             probeTimeout: 5000,
-            ...options,
-            ytdlOptions: {
-                highWaterMark: 1 << 25,
-                ...options.ytdlOptions
-            }
+            ...options
         } as PlayerInitOptions;
 
         if (!isCompatMode) {
@@ -171,21 +155,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
                 }, 0).unref();
             }, this.options.lagMonitor).unref();
         }
-
-        if (this.options.ipconfig) {
-            this.routePlanner = new IPRotator(this.options.ipconfig);
-        }
-
-        _internals.addPlayer(this);
-
-        if (!(kSingleton in Player)) {
-            Object.defineProperty(Player, kSingleton, {
-                value: this,
-                writable: true,
-                configurable: true,
-                enumerable: false
-            });
-        }
     }
 
     /**
@@ -194,6 +163,16 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     public get context() {
         if (!this.#hooksCtx) {
             this.#hooksCtx = createContext();
+
+            const originalProvider = this.#hooksCtx.provide.bind(this.#hooksCtx);
+
+            this.#hooksCtx.provide = (value, receiver) => {
+                return SUPER_CONTEXT.provide(this, () => {
+                    return originalProvider(value, () => {
+                        return receiver();
+                    });
+                });
+            };
         }
 
         return this.#hooksCtx;
@@ -212,41 +191,12 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     }
 
     /**
-     * Creates discord-player singleton instance.
-     * @param client The client that instantiated player
-     * @param options Player initializer options
-     */
-    public static singleton(client: Client, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
-        return new Player(client, {
-            ...options,
-            ignoreInstance: false
-        });
-    }
-
-    /**
      * Creates new discord-player instance.
      * @param client The client that instantiated player
      * @param options Player initializer options
      */
-    public static create(client: Client, options: Omit<PlayerInitOptions, 'ignoreInstance'> = {}) {
-        return new Player(client, {
-            ...options,
-            ignoreInstance: true
-        });
-    }
-
-    /**
-     * Get all active master player instances
-     */
-    public static getAllPlayers() {
-        return _internals.getPlayers();
-    }
-
-    /**
-     * Clear all master player instances
-     */
-    public static clearAllPlayers() {
-        return _internals.instances.clear();
+    public static create(client: Client, options: PlayerInitOptions = {}) {
+        return new Player(client, options);
     }
 
     /**
@@ -281,7 +231,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      *
      * // outputs something like
      * // {
-     * //   instances: number,
      * //   queuesCount: number,
      * //   queryCacheEnabled: boolean,
      * //   queues: [
@@ -295,7 +244,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
      */
     public generateStatistics() {
         return {
-            instances: _internals.instances.size,
             queuesCount: this.queues.cache.size,
             queryCacheEnabled: this.queryCache != null,
             queues: this.queues.cache.map((m) => m.stats.generate())
@@ -330,7 +278,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         await this.extractors.unregisterAll();
         if (this.#lagMonitorInterval) clearInterval(this.#lagMonitorInterval);
         if (this.#lagMonitorTimeout) clearInterval(this.#lagMonitorTimeout);
-        _internals.clearPlayer(this);
     }
 
     private _handleVoiceState(oldState: VoiceState, newState: VoiceState) {

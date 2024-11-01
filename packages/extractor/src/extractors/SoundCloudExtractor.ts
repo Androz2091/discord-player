@@ -12,7 +12,7 @@ import {
     Util
 } from 'discord-player';
 import * as SoundCloud from 'soundcloud.ts';
-import { filterSoundCloudPreviews } from './common/helper';
+import { filterSoundCloudPreviews } from '../internal/helper';
 
 export interface SoundCloudExtractorInit {
     clientId?: string;
