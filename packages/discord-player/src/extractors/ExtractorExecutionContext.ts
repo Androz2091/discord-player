@@ -13,7 +13,6 @@ const knownExtractorKeys = [
     'SpotifyExtractor',
     'AppleMusicExtractor',
     'SoundCloudExtractor',
-    'YouTubeExtractor',
     'VimeoExtractor',
     'ReverbnationExtractor',
     'AttachmentExtractor'

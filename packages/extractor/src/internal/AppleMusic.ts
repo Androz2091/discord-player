@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { QueryResolver } from 'discord-player';
 import { parse, HTMLElement } from 'node-html-parser';
-import { UA, fetch } from '../extractors/common/helper';
+import { UA, fetch } from './helper';
 
 function getHTML(link: string): Promise<HTMLElement | null> {
     return fetch(link, {

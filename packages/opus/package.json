@@ -15,7 +15,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "author": "Androz2091 <androz2091@gmail.com>",
+  "author": "Twilight <hello@twlite.dev>",
   "homepage": "https://discord-player.js.org",
   "license": "MIT",
   "main": "dist/index.js",

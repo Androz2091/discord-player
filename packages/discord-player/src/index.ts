@@ -19,7 +19,6 @@ export * from './utils/QueryResolver';
 export * from '@discord-player/ffmpeg';
 export * from './Player';
 export * from './hooks';
-export * from './utils/IPRotator';
 export * from './utils/serde';
 export * from './utils/DependencyReportGenerator';
 export {

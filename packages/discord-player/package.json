@@ -65,7 +65,6 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
-    "@types/ip": "^1.1.0",
     "@types/node": "^20.14.11",
     "@types/ws": "^8.5.3",
     "discord-api-types": "^0.37.0",

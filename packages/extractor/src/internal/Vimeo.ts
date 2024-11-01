@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import http from 'http';
 import https from 'https';
-import { fetch } from '../extractors/common/helper';
+import { fetch } from './helper';
 
 class Vimeo {
     constructor() {

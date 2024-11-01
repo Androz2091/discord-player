@@ -556,9 +556,6 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 this.#progress = 0;
             }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const cookies = track.raw?.source === 'youtube' ? (<any>this.queue.player.options.ytdlOptions?.requestOptions)?.headers?.cookie : undefined;
-
             const trackStreamConfig: StreamConfig = {
                 dispatcherConfig: {
                     disableBiquad: this.queue.options.disableBiquad,
@@ -643,8 +640,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
                 finalStream = this.#createFFmpegStream(
                     streamSrc.stream instanceof Readable || typeof streamSrc.stream === 'string' ? streamSrc.stream : streamSrc.stream.stream,
                     track,
-                    options.seek ?? 0,
-                    cookies
+                    options.seek ?? 0
                     // opus
                 );
                 trackStreamConfig.dispatcherConfig.type = StreamType.Raw;
@@ -774,13 +770,12 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         return fallbackStream;
     }
 
-    #createFFmpegStream(stream: Readable | string, track: Track, seek = 0, cookies?: string, opus?: boolean) {
+    #createFFmpegStream(stream: Readable | string, track: Track, seek = 0, opus?: boolean) {
         const ffmpegStream = this.queue.filters.ffmpeg
             .createStream(stream, {
                 encoderArgs: this.queue.filters.ffmpeg.args,
                 seek: seek / 1000,
                 fmt: opus ? 'opus' : 's16le',
-                cookies,
                 useLegacyFFmpeg: !!this.queue.player.options.useLegacyFFmpeg
             })
             .on('error', (err) => {

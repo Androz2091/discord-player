@@ -1,15 +1,13 @@
-import { GuildQueue, NodeResolvable } from '../queue';
-import { getQueue, useHooksContext } from './common';
+import { GuildQueue } from '../queue';
+import { useHooksContext } from './common';
 
 /**
  * Fetch guild queue
  * @param node Guild queue node resolvable
  */
-export function useQueue<Meta = unknown>(): GuildQueue<Meta> | null;
-export function useQueue<Meta = unknown>(node: NodeResolvable): GuildQueue<Meta> | null;
-export function useQueue<Meta = unknown>(node?: NodeResolvable): GuildQueue<Meta> | null {
-    const _node = node ?? useHooksContext('useQueue').guild;
-    const queue = getQueue<Meta>(_node);
+export function useQueue<Meta = unknown>(): GuildQueue<Meta> | null {
+    const { context, player } = useHooksContext('useQueue');
+    const queue = player.queues.get<Meta>(context.guild.id);
     if (!queue) return null;
 
     return queue;

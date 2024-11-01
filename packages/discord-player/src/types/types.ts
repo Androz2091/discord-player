@@ -2,9 +2,7 @@ import type { User, UserResolvable, VoiceState } from 'discord.js';
 import type { GuildQueue } from '../queue';
 import type { Track } from '../fabric/Track';
 import type { Playlist } from '../fabric/Playlist';
-import type { downloadOptions } from 'ytdl-core';
 import type { QueryCacheProvider } from '../utils/QueryCache';
-import type { IPRotationConfig } from '../utils/IPRotator';
 
 // @ts-ignore
 import type { BridgeProvider } from '@discord-player/extractor';
@@ -479,10 +477,6 @@ export interface PlaylistJSON {
 
 export interface PlayerInitOptions {
     /**
-     * The options passed to `ytdl-core`.
-     */
-    ytdlOptions?: downloadOptions;
-    /**
      * The voice connection timeout
      */
     connectionTimeout?: number;
@@ -508,10 +502,6 @@ export interface PlayerInitOptions {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     queryCache?: QueryCacheProvider<any> | null;
     /**
-     * Ignore player instance
-     */
-    ignoreInstance?: boolean;
-    /**
      * Use legacy version of ffmpeg
      */
     useLegacyFFmpeg?: boolean;
@@ -519,10 +509,6 @@ export interface PlayerInitOptions {
      * Set bridge provider
      */
     bridgeProvider?: BridgeProvider;
-    /**
-     * IP rotator config
-     */
-    ipconfig?: IPRotationConfig;
     /**
      * Skip ffmpeg process when possible
      */

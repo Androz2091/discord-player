@@ -1,50 +1,23 @@
 {
   "name": "music-bot",
   "version": "1.0.0",
-  "main": "dist/index.js",
-  "author": "Androz2091 <androz2091@gmail.com>",
-  "license": "MIT",
-  "dependencies": {
-    "@discord-player/equalizer": "workspace:^",
-    "@discord-player/extractor": "workspace:^",
-    "@discord-player/utils": "workspace:^",
-    "@discordjs/opus": "^0.9.0",
-    "@distube/ytdl-core": "^4.13.3",
-    "@sapphire/discord.js-utilities": "^6.0.3",
-    "@sapphire/duration": "^1.0.0",
-    "@sapphire/framework": "^4.2.1",
-    "@sapphire/plugin-api": "^5.0.1",
-    "@sapphire/plugin-hmr": "^2.0.0",
-    "@sapphire/plugin-logger": "^3.0.1",
-    "@skyra/env-utilities": "^1.1.0",
-    "colorette": "^2.0.19",
-    "discord-api-types": "^0.37.35",
-    "discord-player": "workspace:^",
-    "mediaplex": "^0.0.9",
-    "opusscript": "^0.0.8",
-    "play-dl": "^1.9.7",
-    "youtube-ext": "^1.1.23"
-  },
-  "devDependencies": {
-    "@sapphire/prettier-config": "^1.4.5",
-    "@sapphire/ts-config": "^3.3.4",
-    "@swc/cli": "^0.1.62",
-    "@swc/core": "^1.3.37",
-    "@types/node": "^18.14.6",
-    "@types/ws": "^8.5.4",
-    "npm-run-all": "^4.1.5",
-    "prettier": "^2.8.4",
-    "tsc-watch": "^6.0.0",
-    "tsup": "^7.2.0",
-    "tsx": "^3.12.7",
-    "typescript": "^5.2.2",
-    "vitest": "^0.34.6"
-  },
+  "description": "Test music bot",
+  "main": "src/index.ts",
+  "type": "module",
   "scripts": {
-    "build": "tsup",
-    "start": "tsup && node dist/index.js",
-    "dev": "tsx ./src/index.ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "start": "tsx --env-file=.env ./src/index.ts"
   },
-  "prettier": "@sapphire/prettier-config"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "author": "twilight <hello@twlite.dev>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "homepage": "https://github.com/Androz2091/discord-player#readme",
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
 }

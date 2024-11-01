@@ -7,4 +7,3 @@ export * from './useMetadata';
 export * from './useTimeline';
 export * from './stream';
 export * from './useVolume';
-export { createHook, type HookDeclaration, type HookDeclarationContext } from './common';
