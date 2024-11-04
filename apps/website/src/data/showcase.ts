@@ -176,6 +176,12 @@ export const ShowcaseResource: IShowcase = {
                 description: 'An open-source Discord music bot with an interative dashboard, only plays music, nothing else.',
                 version: 'v6.6.7',
                 url: 'https://muusik.app'
+            },
+            {
+                name: 'WD-40',
+                description: 'A music, utility & fun discord bot made in JavaScript ',
+                version: 'v6.7.1',
+                url: 'https://github.com/iTsMaaT/WD-40'
             }
         ].sort((a, b) => semver.rcompare(a.version, b.version))
     ),
