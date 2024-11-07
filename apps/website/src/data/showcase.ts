@@ -24,7 +24,7 @@ const PromotedList: IShowcase = {
             url: 'https://github.com/twlite/music-bot'
         },
         {
-            name: 'Cadence',
+            name: 'Cadence [Deprecated]',
             description: "A Free Discord Music Bot. No locked functionality, no premium tier, no ads; everything's free, always!",
             version: '(Promoted)',
             url: 'https://github.com/mariusbegby/cadence-discord-bot'
