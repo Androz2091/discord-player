@@ -687,7 +687,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         this.queue.emit(GuildQueueEvent.playerError, this.queue, streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault, track);
         const nextTrack = this.queue.tracks.dispatch();
         if (nextTrack) return void this.play(nextTrack, { queue: false });
-        this.queue.dispatcher.emit('finish');
+        this.queue.dispatcher.emit("finish");
         return;
     }
 
