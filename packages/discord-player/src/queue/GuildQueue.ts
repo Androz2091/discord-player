@@ -1052,13 +1052,15 @@ export class GuildQueue<Meta = unknown> {
                 })} was marked as finished`
             );
 
-        if (track && !this.isTransitioning()) {
+        if (!this.isTransitioning()) {
             this.syncedLyricsProvider.unsubscribe();
             this.syncedLyricsProvider.lyrics.clear();
             if (this.hasDebugger) this.debug('Adding track to history and emitting finish event since transition mode is disabled...');
-            this.history.push(track);
-            this.node.resetProgress();
-            this.emit(GuildQueueEvent.playerFinish, this, track);
+            if (track) {
+                this.history.push(track);
+                this.node.resetProgress();
+                this.emit(GuildQueueEvent.playerFinish, this, track);
+            }
             if (this.#deleted) return this.#emitEnd();
             if (this.tracks.size < 1 && this.repeatMode === QueueRepeatMode.OFF) {
                 if (this.hasDebugger) this.debug('No more tracks left in the queue to play and repeat mode is off, initiating #emitEnd()');
@@ -1073,7 +1075,7 @@ export class GuildQueue<Meta = unknown> {
                     if (this.hasDebugger) this.debug('Repeat mode is set to queue, moving last track from the history to current queue...');
                     this.tracks.add(this.history.tracks.dispatch() || track);
                 }
-                if (!this.tracks.size) {
+                if (!this.tracks.size && track) {
                     if (this.repeatMode === QueueRepeatMode.AUTOPLAY) {
                         if (this.hasDebugger) this.debug('Repeat mode is set to autoplay, initiating autoplay handler...');
                         this.#handleAutoplay(track);

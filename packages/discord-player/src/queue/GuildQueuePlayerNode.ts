@@ -686,8 +686,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         this.queue.emit(GuildQueueEvent.playerSkip, this.queue, track, TrackSkipReason.NoStream, streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault.message);
         this.queue.emit(GuildQueueEvent.playerError, this.queue, streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault, track);
         const nextTrack = this.queue.tracks.dispatch();
-        if (nextTrack) this.play(nextTrack, { queue: false });
-        return;
+        if (nextTrack) return void this.play(nextTrack, { queue: false });
+        this.queue.dispatcher.emit("finish");
     }
 
     async #performPlay(resource: AudioResource<Track>) {
