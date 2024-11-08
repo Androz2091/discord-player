@@ -688,7 +688,6 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         const nextTrack = this.queue.tracks.dispatch();
         if (nextTrack) return void this.play(nextTrack, { queue: false });
         this.queue.dispatcher.emit("finish");
-        return;
     }
 
     async #performPlay(resource: AudioResource<Track>) {
