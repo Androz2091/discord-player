@@ -187,6 +187,11 @@ export const ShowcaseResource: IShowcase = {
     ),
     extractors: PromotedList.extractors.concat([
         {
+            name: 'discord-player-youtubei',
+            description: 'An alternative unofficial youtube extractor for discord-player with better stability and performance.',
+            url: 'https://github.com/retrouser955/discord-player-youtubei'
+        },
+        {
             name: 'discord-player-deezer',
             description: 'An official extractor for discord-player to add support for deezer source.',
             url: 'https://npm.im/discord-player-deezer'
