@@ -26,6 +26,7 @@ export interface DependenciesReport {
         'libsodium-wrappers': MaybeNull<string>;
         'sodium-javascript': MaybeNull<string>;
         '@stablelib/xchacha20poly1305': MaybeNull<string>;
+        '@nobel/ciphers': MaybeNull<string>;
     };
     ffmpeg: FFmpegReport;
 }
@@ -103,30 +104,31 @@ export const DependencyReportGenerator = {
         if (ffmpeg) {
             ffmpegReport[ffmpeg.name] = {
                 hasLibopus: ffmpeg.command.includes('--enable-libopus'),
-                version: ffmpeg.version
+                version: ffmpeg.version,
             };
         }
 
         return {
             core: {
                 'discord-player': DependencyReportGenerator.version('discord-player') as string,
-                'discord-voip': DependencyReportGenerator.version('discord-voip') as string
+                'discord-voip': DependencyReportGenerator.version('discord-voip') as string,
             },
             libopus: {
                 mediaplex: DependencyReportGenerator.version('mediaplex'),
                 '@discordjs/opus': DependencyReportGenerator.version('@discordjs/opus'),
                 '@evan/opus': DependencyReportGenerator.version('@evan/opus'),
                 opusscript: DependencyReportGenerator.version('opusscript'),
-                'node-opus': DependencyReportGenerator.version('node-opus')
+                'node-opus': DependencyReportGenerator.version('node-opus'),
             },
             libsodium: {
                 'sodium-native': DependencyReportGenerator.version('sodium-native'),
                 sodium: DependencyReportGenerator.version('sodium'),
                 'libsodium-wrappers': DependencyReportGenerator.version('libsodium-wrappers'),
                 '@stablelib/xchacha20poly1305': DependencyReportGenerator.version('@stablelib/xchacha20poly1305'),
-                'sodium-javascript': DependencyReportGenerator.version('sodium-javascript')
+                'sodium-javascript': DependencyReportGenerator.version('sodium-javascript'),
+                '@nobel/ciphers': DependencyReportGenerator.version('@nobel/ciphers'),
             },
-            ffmpeg: ffmpegReport
+            ffmpeg: ffmpegReport,
         };
     },
     /**
@@ -163,5 +165,5 @@ export const DependencyReportGenerator = {
         output.push(line);
 
         return output.join('\n');
-    }
+    },
 };

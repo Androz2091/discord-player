@@ -42,7 +42,7 @@ export class AudioFilters {
         fadein: 'afade=t=in:ss=0:d=10',
         dim: `afftfilt="'real=re * (1-clip((b/nb)*b,0,1))':imag='im * (1-clip((b/nb)*b,0,1))'"`,
         earrape: 'channelsplit,sidechaingate=level_in=64',
-        silenceremove: 'silenceremove=1:0:-50dB'
+        silenceremove: 'silenceremove=1:0:-50dB',
     };
 
     public static get<K extends FiltersName>(name: K) {

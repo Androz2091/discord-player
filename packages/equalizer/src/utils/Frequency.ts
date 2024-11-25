@@ -1,6 +1,7 @@
 export class Frequency {
     public constructor(private __val: number) {
-        if (typeof __val !== 'number' || isNaN(__val) || __val === Infinity) throw new TypeError('Frequency value must be a number');
+        if (typeof __val !== 'number' || isNaN(__val) || __val === Infinity)
+            throw new TypeError('Frequency value must be a number');
         if (this.__val < 0) throw new Error(`Frequency value cannot be negative (${__val})`);
     }
 

@@ -16,8 +16,8 @@ export class SpotifyAPI {
     public constructor(
         public credentials: { clientId: string | null; clientSecret: string | null } = {
             clientId: null,
-            clientSecret: null
-        }
+            clientSecret: null,
+        },
     ) {}
 
     public get authorizationKey() {
@@ -36,8 +36,8 @@ export class SpotifyAPI {
                 headers: {
                     'User-Agent': UA,
                     Authorization: `Basic ${key}`,
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
             });
 
             const body = await res.json();
@@ -47,7 +47,7 @@ export class SpotifyAPI {
             const data = {
                 token: body.access_token as string,
                 expiresAfter: body.expires_in as number,
-                type: 'Bearer' as const
+                type: 'Bearer' as const,
             };
 
             return (this.accessToken = data);
@@ -61,8 +61,8 @@ export class SpotifyAPI {
             const res = await fetch(SP_ANON_TOKEN_URL, {
                 headers: {
                     'User-Agent': UA,
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
             });
 
             if (!res.ok) throw 'not_ok';
@@ -74,7 +74,7 @@ export class SpotifyAPI {
             const data = {
                 token: body.accessToken as string,
                 expiresAfter: body.accessTokenExpirationTimestampMs as number,
-                type: 'Bearer' as const
+                type: 'Bearer' as const,
             };
 
             return (this.accessToken = data);
@@ -99,8 +99,8 @@ export class SpotifyAPI {
                 headers: {
                     'User-Agent': UA,
                     Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
             });
 
             if (!res.ok) return null;
@@ -112,7 +112,7 @@ export class SpotifyAPI {
                 duration: m.duration_ms,
                 artist: m.artists.map((m) => m.name).join(', '),
                 url: m.external_urls?.spotify || `https://open.spotify.com/track/${m.id}`,
-                thumbnail: m.album.images?.[0]?.url || null
+                thumbnail: m.album.images?.[0]?.url || null,
             }));
         } catch {
             return null;
@@ -130,8 +130,8 @@ export class SpotifyAPI {
                 headers: {
                     'User-Agent': UA,
                     Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
             });
             if (!res.ok) return null;
 
@@ -159,8 +159,8 @@ export class SpotifyAPI {
                         headers: {
                             'User-Agent': UA,
                             Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
-                            'Content-Type': 'application/json'
-                        }
+                            'Content-Type': 'application/json',
+                        },
                     });
                     if (!res.ok) break;
                     const nextPage: { items: { track: SpotifyTrack }[]; next?: string } = await res.json();
@@ -179,7 +179,7 @@ export class SpotifyAPI {
                 duration: m.duration_ms,
                 artist: m.artists.map((m) => m.name).join(', '),
                 url: m.external_urls?.spotify || `https://open.spotify.com/track/${m.id}`,
-                thumbnail: m.album.images?.[0]?.url || null
+                thumbnail: m.album.images?.[0]?.url || null,
             }));
 
             if (!tracks.length) return null;
@@ -189,7 +189,7 @@ export class SpotifyAPI {
                 thumbnail: data.images?.[0]?.url || null,
                 id: data.id,
                 url: data.external_urls.spotify || `https://open.spotify.com/playlist/${id}`,
-                tracks
+                tracks,
             };
         } catch {
             return null;
@@ -207,8 +207,8 @@ export class SpotifyAPI {
                 headers: {
                     'User-Agent': UA,
                     Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
             });
             if (!res.ok) return null;
 
@@ -236,8 +236,8 @@ export class SpotifyAPI {
                         headers: {
                             'User-Agent': UA,
                             Authorization: `${this.accessToken.type} ${this.accessToken.token}`,
-                            'Content-Type': 'application/json'
-                        }
+                            'Content-Type': 'application/json',
+                        },
                     });
                     if (!res.ok) break;
                     const nextPage: { items: SpotifyTrack[]; next?: string } = await res.json();
@@ -256,7 +256,7 @@ export class SpotifyAPI {
                 duration: m.duration_ms,
                 artist: m.artists.map((m) => m.name).join(', '),
                 url: m.external_urls?.spotify || `https://open.spotify.com/track/${m.id}`,
-                thumbnail: data.images?.[0]?.url || null
+                thumbnail: data.images?.[0]?.url || null,
             }));
 
             if (!tracks.length) return null;
@@ -266,7 +266,7 @@ export class SpotifyAPI {
                 thumbnail: data.images?.[0]?.url || null,
                 id: data.id,
                 url: data.external_urls.spotify || `https://open.spotify.com/album/${id}`,
-                tracks
+                tracks,
             };
         } catch {
             return null;

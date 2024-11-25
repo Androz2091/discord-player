@@ -23,8 +23,8 @@ export class QueryCache implements QueryCacheProvider<Track> {
     public constructor(
         public player: Player,
         public options: QueryCacheOptions = {
-            checkInterval: DEFAULT_EXPIRY_TIMEOUT
-        }
+            checkInterval: DEFAULT_EXPIRY_TIMEOUT,
+        },
     ) {
         this.timer = setInterval(this.cleanup.bind(this), this.checkInterval).unref();
     }
@@ -62,7 +62,7 @@ export class QueryCache implements QueryCacheProvider<Track> {
             return new SearchResult(this.player, {
                 query: context.query,
                 requestedBy: context.requestedBy,
-                queryType: context.queryType
+                queryType: context.queryType,
             });
 
         return new SearchResult(this.player, {
@@ -70,7 +70,7 @@ export class QueryCache implements QueryCacheProvider<Track> {
             tracks: [result.data],
             playlist: null,
             queryType: context.queryType,
-            requestedBy: context.requestedBy
+            requestedBy: context.requestedBy,
         });
     }
 }

@@ -3,7 +3,8 @@ import { SoundCloudExtractor } from '../extractors/SoundCloudExtractor';
 import unfetch from 'isomorphic-unfetch';
 import type * as SoundCloud from 'soundcloud.ts';
 
-export const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49';
+export const UA =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49';
 export const fetch = unfetch;
 
 export async function makeSCSearch(query: string) {
@@ -15,7 +16,7 @@ export async function makeSCSearch(query: string) {
     try {
         const info = await instance.internal.tracks.searchV2({
             q: query,
-            limit: 5
+            limit: 5,
         });
 
         data = info.collection;

@@ -78,7 +78,8 @@ export class VoiceWebSocket extends EventEmitter {
         this.ws = new WebSocket(address);
         this.ws.onmessage = (err) => this.onMessage(err);
         this.ws.onopen = (err) => this.emit('open', err);
-        this.ws.onerror = (err: Error | WebSocket.ErrorEvent) => this.emit('error', err instanceof Error ? err : err.error);
+        this.ws.onerror = (err: Error | WebSocket.ErrorEvent) =>
+            this.emit('error', err instanceof Error ? err : err.error);
         this.ws.onclose = (err) => this.emit('close', err);
 
         this.lastHeartbeatAck = 0;
@@ -156,7 +157,7 @@ export class VoiceWebSocket extends EventEmitter {
         this.sendPacket({
             op: VoiceOpcodes.Heartbeat,
             // eslint-disable-next-line id-length
-            d: nonce
+            d: nonce,
         });
     }
 

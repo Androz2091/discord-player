@@ -106,7 +106,7 @@ export class SearchResult {
     public async execute() {
         return this.player.search(this.query, {
             searchEngine: this.queryType,
-            requestedBy: this.requestedBy!
+            requestedBy: this.requestedBy!,
         });
     }
 
@@ -141,7 +141,7 @@ export class SearchResult {
             playlist: this.playlist?.toJSON(false) || null,
             tracks: this.tracks.map((m) => m.toJSON(true)),
             extractor: this.extractor?.identifier || null,
-            requestedBy: this.requestedBy?.toJSON() || null
+            requestedBy: this.requestedBy?.toJSON() || null,
         };
     }
 }

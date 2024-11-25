@@ -85,7 +85,7 @@ export class GuildQueueHistory<Meta = unknown> {
 
         this.queue.node.skip({
             reason: TrackSkipReason.HistoryNext,
-            description: 'Skipped by GuildQueueHistory.next()'
+            description: 'Skipped by GuildQueueHistory.next()',
         });
     }
 

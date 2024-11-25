@@ -19,7 +19,12 @@ const CHANNELS = 2;
 const TIMESTAMP_INC = (48_000 / 100) * CHANNELS;
 const MAX_NONCE_SIZE = 2 ** 32 - 1;
 
-export const SUPPORTED_ENCRYPTION_MODES = ['aead_aes256_gcm_rtpsize', 'aead_xchacha20_poly1305_rtpsize'];
+export const SUPPORTED_ENCRYPTION_MODES = ['aead_xchacha20_poly1305_rtpsize'];
+
+// Just in case there's some system that doesn't come with aes-256-gcm, conditionally add it as supported
+if (crypto.getCiphers().includes('aes-256-gcm')) {
+    SUPPORTED_ENCRYPTION_MODES.unshift('aead_aes256_gcm_rtpsize');
+}
 
 /**
  * The different statuses that a networking instance can hold. The order
@@ -33,7 +38,7 @@ export enum NetworkingStatusCode {
     SelectingProtocol,
     Ready,
     Resuming,
-    Closed
+    Closed,
 }
 
 /**
@@ -179,7 +184,7 @@ function stringifyState(state: NetworkingState) {
     return JSON.stringify({
         ...state,
         ws: Reflect.has(state, 'ws'),
-        udp: Reflect.has(state, 'udp')
+        udp: Reflect.has(state, 'udp'),
     });
 }
 
@@ -236,7 +241,7 @@ export class Networking extends EventEmitter {
         this._state = {
             code: NetworkingStatusCode.OpeningWs,
             ws: this.createWebSocket(options.endpoint),
-            connectionOptions: options
+            connectionOptions: options,
         };
     }
 
@@ -245,7 +250,7 @@ export class Networking extends EventEmitter {
      */
     public destroy() {
         this.state = {
-            code: NetworkingStatusCode.Closed
+            code: NetworkingStatusCode.Closed,
         };
     }
 
@@ -329,13 +334,13 @@ export class Networking extends EventEmitter {
                     server_id: this.state.connectionOptions.serverId,
                     user_id: this.state.connectionOptions.userId,
                     session_id: this.state.connectionOptions.sessionId,
-                    token: this.state.connectionOptions.token
-                }
+                    token: this.state.connectionOptions.token,
+                },
             };
             this.state.ws.sendPacket(packet);
             this.state = {
                 ...this.state,
-                code: NetworkingStatusCode.Identifying
+                code: NetworkingStatusCode.Identifying,
             };
         } else if (this.state.code === NetworkingStatusCode.Resuming) {
             const packet = {
@@ -343,8 +348,8 @@ export class Networking extends EventEmitter {
                 d: {
                     server_id: this.state.connectionOptions.serverId,
                     session_id: this.state.connectionOptions.sessionId,
-                    token: this.state.connectionOptions.token
-                }
+                    token: this.state.connectionOptions.token,
+                },
             };
             this.state.ws.sendPacket(packet);
         }
@@ -363,7 +368,7 @@ export class Networking extends EventEmitter {
             this.state = {
                 ...this.state,
                 code: NetworkingStatusCode.Resuming,
-                ws: this.createWebSocket(this.state.connectionOptions.endpoint)
+                ws: this.createWebSocket(this.state.connectionOptions.endpoint),
             };
         } else if (this.state.code !== NetworkingStatusCode.Closed) {
             this.destroy();
@@ -379,7 +384,7 @@ export class Networking extends EventEmitter {
             this.state = {
                 ...this.state,
                 code: NetworkingStatusCode.Resuming,
-                ws: this.createWebSocket(this.state.connectionOptions.endpoint)
+                ws: this.createWebSocket(this.state.connectionOptions.endpoint),
             };
         }
     }
@@ -409,13 +414,13 @@ export class Networking extends EventEmitter {
                             data: {
                                 address: localConfig.ip,
                                 port: localConfig.port,
-                                mode: chooseEncryptionMode(modes)
-                            }
-                        }
+                                mode: chooseEncryptionMode(modes),
+                            },
+                        },
                     });
                     this.state = {
                         ...this.state,
-                        code: NetworkingStatusCode.SelectingProtocol
+                        code: NetworkingStatusCode.SelectingProtocol,
                     };
                 })
                 .catch((error: Error) => this.emit('error', error));
@@ -425,10 +430,13 @@ export class Networking extends EventEmitter {
                 code: NetworkingStatusCode.UdpHandshaking,
                 udp,
                 connectionData: {
-                    ssrc
-                }
+                    ssrc,
+                },
             };
-        } else if (packet.op === VoiceOpcodes.SessionDescription && this.state.code === NetworkingStatusCode.SelectingProtocol) {
+        } else if (
+            packet.op === VoiceOpcodes.SessionDescription &&
+            this.state.code === NetworkingStatusCode.SelectingProtocol
+        ) {
             const { mode: encryptionMode, secret_key: secretKey } = packet.d;
             this.state = {
                 ...this.state,
@@ -442,13 +450,13 @@ export class Networking extends EventEmitter {
                     nonce: 0,
                     nonceBuffer: encryptionMode === 'aead_aes256_gcm_rtpsize' ? Buffer.alloc(12) : Buffer.alloc(24),
                     speaking: false,
-                    packetsPlayed: 0
-                }
+                    packetsPlayed: 0,
+                },
             };
         } else if (packet.op === VoiceOpcodes.Resumed && this.state.code === NetworkingStatusCode.Resuming) {
             this.state = {
                 ...this.state,
-                code: NetworkingStatusCode.Ready
+                code: NetworkingStatusCode.Ready,
             };
             this.state.connectionData.speaking = false;
         }
@@ -539,8 +547,8 @@ export class Networking extends EventEmitter {
             d: {
                 speaking: speaking ? 1 : 0,
                 delay: 0,
-                ssrc: state.connectionData.ssrc
-            }
+                ssrc: state.connectionData.ssrc,
+            },
         });
     }
 
@@ -583,7 +591,7 @@ export class Networking extends EventEmitter {
         connectionData.nonceBuffer.writeUInt32BE(connectionData.nonce, 0);
 
         // 4 extra bytes of padding on the end of the encrypted packet
-        const noncePadding = connectionData.nonceBuffer.slice(0, 4);
+        const noncePadding = connectionData.nonceBuffer.subarray(0, 4);
 
         let encrypted;
         switch (encryptionMode) {
@@ -599,7 +607,12 @@ export class Networking extends EventEmitter {
                 return [encrypted, noncePadding];
             }
             case 'aead_xchacha20_poly1305_rtpsize': {
-                encrypted = secretbox.methods.crypto_aead_xchacha20poly1305_ietf_encrypt(opusPacket, data, connectionData.nonceBuffer, secretKey);
+                encrypted = secretbox.methods.crypto_aead_xchacha20poly1305_ietf_encrypt(
+                    opusPacket,
+                    data,
+                    connectionData.nonceBuffer,
+                    secretKey,
+                );
 
                 return [encrypted, noncePadding];
             }

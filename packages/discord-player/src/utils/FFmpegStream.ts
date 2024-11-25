@@ -13,7 +13,8 @@ export interface FFmpegStreamOptions {
     useLegacyFFmpeg?: boolean;
 }
 
-const getFFmpegProvider = (legacy = false) => (legacy ? (prism as typeof prism & { default: typeof prism }).default?.FFmpeg || prism.FFmpeg : FFmpeg);
+const getFFmpegProvider = (legacy = false) =>
+    legacy ? (prism as typeof prism & { default: typeof prism }).default?.FFmpeg || prism.FFmpeg : FFmpeg;
 
 const resolveArgs = (config: Record<string, string | number | null | undefined>): string[] => {
     return Object.entries(config).reduce((acc, [key, value]) => {
@@ -35,7 +36,7 @@ export function FFMPEG_ARGS_STRING(stream: string, fmt?: string, cookies?: strin
         ac: 2,
         f: `${typeof fmt === 'string' ? fmt : 's16le'}`,
         acodec: fmt === 'opus' ? 'libopus' : null,
-        cookies: typeof cookies === 'string' ? (!cookies.includes(' ') ? cookies : `"${cookies}"`) : null
+        cookies: typeof cookies === 'string' ? (!cookies.includes(' ') ? cookies : `"${cookies}"`) : null,
     });
 
     return args;
@@ -48,7 +49,7 @@ export function FFMPEG_ARGS_PIPED(fmt?: string) {
         ar: 48000,
         ac: 2,
         f: `${typeof fmt === 'string' ? fmt : 's16le'}`,
-        acodec: fmt === 'opus' ? 'libopus' : null
+        acodec: fmt === 'opus' ? 'libopus' : null,
     });
 
     return args;
@@ -62,7 +63,10 @@ export function FFMPEG_ARGS_PIPED(fmt?: string) {
 export function createFFmpegStream(stream: Readable | Duplex | string, options?: FFmpegStreamOptions) {
     if (options?.skip && typeof stream !== 'string') return stream;
     options ??= {};
-    const args = typeof stream === 'string' ? FFMPEG_ARGS_STRING(stream, options.fmt, options.cookies) : FFMPEG_ARGS_PIPED(options.fmt);
+    const args =
+        typeof stream === 'string'
+            ? FFMPEG_ARGS_STRING(stream, options.fmt, options.cookies)
+            : FFMPEG_ARGS_PIPED(options.fmt);
 
     if (!Number.isNaN(options.seek)) args.unshift('-ss', String(options.seek));
     if (Array.isArray(options.encoderArgs)) args.push(...options.encoderArgs);

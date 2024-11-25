@@ -8,7 +8,7 @@ import { Player } from '../Player';
 
 export enum SerializedType {
     Track = 'track',
-    Playlist = 'playlist'
+    Playlist = 'playlist',
 }
 
 export type Encodable = SerializedTrack | SerializedPlaylist;

@@ -11,12 +11,12 @@ type Filters = keyof typeof AudioFilters.filters;
 const makeBands = (arr: number[]) => {
     return Array.from(
         {
-            length: Equalizer.BAND_COUNT
+            length: Equalizer.BAND_COUNT,
         },
         (_, i) => ({
             band: i,
-            gain: arr[i] ? arr[i] / 30 : 0
-        })
+            gain: arr[i] ? arr[i] / 30 : 0,
+        }),
     ) as EqualizerBand[];
 };
 
@@ -43,7 +43,9 @@ type EQPreset = {
 
 export const EqualizerConfigurationPreset: Readonly<EQPreset> = Object.freeze({
     Flat: makeBands([]),
-    Classical: makeBands([-1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -7.2, -7.2, -7.2, -9.6]),
+    Classical: makeBands([
+        -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -7.2, -7.2, -7.2, -9.6,
+    ]),
     Club: makeBands([-1.11022e-15, -1.11022e-15, 8.0, 5.6, 5.6, 5.6, 3.2, -1.11022e-15, -1.11022e-15, -1.11022e-15]),
     Dance: makeBands([9.6, 7.2, 2.4, -1.11022e-15, -1.11022e-15, -5.6, -7.2, -7.2, -1.11022e-15, -1.11022e-15]),
     FullBass: makeBands([-8.0, 9.6, 9.6, 5.6, 1.6, -4.0, -8.0, -10.4, -11.2, -11.2]),
@@ -52,14 +54,19 @@ export const EqualizerConfigurationPreset: Readonly<EQPreset> = Object.freeze({
     Headphones: makeBands([4.8, 11.2, 5.6, -3.2, -2.4, 1.6, 4.8, 9.6, 12.8, 14.4]),
     LargeHall: makeBands([10.4, 10.4, 5.6, 5.6, -1.11022e-15, -4.8, -4.8, -4.8, -1.11022e-15, -1.11022e-15]),
     Live: makeBands([-4.8, -1.11022e-15, 4.0, 5.6, 5.6, 5.6, 4.0, 2.4, 2.4, 2.4]),
-    Party: makeBands([7.2, 7.2, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, 7.2, 7.2]),
+    Party: makeBands([
+        7.2, 7.2, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, -1.11022e-15, 7.2, 7.2,
+    ]),
     Pop: makeBands([-1.6, 4.8, 7.2, 8.0, 5.6, -1.11022e-15, -2.4, -2.4, -1.6, -1.6]),
-    Reggae: makeBands([-1.11022e-15, -1.11022e-15, -1.11022e-15, -5.6, -1.11022e-15, 6.4, 6.4, -1.11022e-15, -1.11022e-15, -1.11022e-15]),
+    Reggae: makeBands([
+        -1.11022e-15, -1.11022e-15, -1.11022e-15, -5.6, -1.11022e-15, 6.4, 6.4, -1.11022e-15, -1.11022e-15,
+        -1.11022e-15,
+    ]),
     Rock: makeBands([8.0, 4.8, -5.6, -8.0, -3.2, 4.0, 8.8, 11.2, 11.2, 11.2]),
     Ska: makeBands([-2.4, -4.8, -4.0, -1.11022e-15, 4.0, 5.6, 8.8, 9.6, 11.2, 9.6]),
     Soft: makeBands([4.8, 1.6, -1.11022e-15, -2.4, -1.11022e-15, 4.0, 8.0, 9.6, 11.2, 12.0]),
     SoftRock: makeBands([4.0, 4.0, 2.4, -1.11022e-15, -4.0, -5.6, -3.2, -1.11022e-15, 2.4, 8.8]),
-    Techno: makeBands([8.0, 5.6, -1.11022e-15, -5.6, -4.8, -1.11022e-15, 8.0, 9.6, 9.6, 8.8])
+    Techno: makeBands([8.0, 5.6, -1.11022e-15, -5.6, -4.8, -1.11022e-15, 8.0, 9.6, 9.6, 8.8]),
 });
 
 export class FFmpegFilterer<Meta = unknown> {
@@ -77,8 +84,14 @@ export class FFmpegFilterer<Meta = unknown> {
     #setFilters(filters: Filters[]) {
         const { queue } = this.af;
         // skip if filters are the same
-        if (filters.every((f) => this.#ffmpegFilters.includes(f)) && this.#ffmpegFilters.every((f) => filters.includes(f))) return Promise.resolve(false);
-        const ignoreFilters = this.filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave') && !filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave');
+        if (
+            filters.every((f) => this.#ffmpegFilters.includes(f)) &&
+            this.#ffmpegFilters.every((f) => filters.includes(f))
+        )
+            return Promise.resolve(false);
+        const ignoreFilters =
+            this.filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave') &&
+            !filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave');
         const seekTime = queue.node.getTimestamp(ignoreFilters)?.current.value || 0;
         const prev = this.#ffmpegFilters.slice();
         this.#ffmpegFilters = [...new Set(filters)];
@@ -93,7 +106,8 @@ export class FFmpegFilterer<Meta = unknown> {
      * Set input args for FFmpeg
      */
     public setInputArgs(args: string[]) {
-        if (!args.every((arg) => typeof arg === 'string')) throw Exceptions.ERR_INVALID_ARG_TYPE('args', 'Array<string>', 'invalid item(s)');
+        if (!args.every((arg) => typeof arg === 'string'))
+            throw Exceptions.ERR_INVALID_ARG_TYPE('args', 'Array<string>', 'invalid item(s)');
         this.#inputArgs = args;
     }
 
@@ -265,7 +279,7 @@ export class GuildQueueAudioFilters<Meta = unknown> {
         equalizer: [],
         filters: [],
         volume: 100,
-        sampleRate: -1
+        sampleRate: -1,
     };
     public constructor(public queue: GuildQueue<Meta>) {
         if (typeof this.queue.options.volume === 'number') {
@@ -334,7 +348,7 @@ export class GuildQueueAudioFilters<Meta = unknown> {
             await this.queue.node.play(this.queue.currentTrack, {
                 queue: false,
                 seek,
-                transitionMode: true
+                transitionMode: true,
             });
             this.queue.node.tasksQueue.release();
             return true;
@@ -355,7 +369,7 @@ export class AFilterGraph<Meta = unknown> {
     public get equalizer() {
         return (this.af.equalizer?.bandMultipliers || []).map((m, i) => ({
             band: i,
-            gain: m
+            gain: m,
         })) as EqualizerBand[];
     }
 
@@ -382,7 +396,7 @@ export class AFilterGraph<Meta = unknown> {
             biquad: this.biquad,
             filters: this.filters,
             sampleRate: this.resampler?.targetSampleRate || this.resampler?.sampleRate || 48000,
-            volume: this.volume?.volume ?? 100
+            volume: this.volume?.volume ?? 100,
         };
     }
 }

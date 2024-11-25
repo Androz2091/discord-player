@@ -1,6 +1,13 @@
 import { searchDocs } from '@/lib/docs';
 import { Button, cn, useDebounce } from '@edge-ui/react';
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/cmdk/CommandDialog';
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/cmdk/CommandDialog';
 import { Search } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { VscSymbolClass, VscSymbolInterface, VscSymbolMethod, VscSymbolProperty } from 'react-icons/vsc';
@@ -43,7 +50,13 @@ export function SearchBox() {
 
     return (
         <>
-            <Button variant="outline" className={cn('relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64 hidden lg:inline-flex')} onClick={() => setOpen(true)}>
+            <Button
+                variant="outline"
+                className={cn(
+                    'relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64 hidden lg:inline-flex',
+                )}
+                onClick={() => setOpen(true)}
+            >
                 <span className="hidden lg:inline-flex">Search documentation...</span>
                 <kbd className="pointer-events-none absolute right-1.5 top-2.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
                     <span className="text-xs">⌘</span>K
@@ -58,7 +71,11 @@ export function SearchBox() {
                     setValue('');
                 }}
             >
-                <CommandInput placeholder="Search documentation or command..." value={value} onValueChange={onValueChange} />
+                <CommandInput
+                    placeholder="Search documentation or command..."
+                    value={value}
+                    onValueChange={onValueChange}
+                />
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
                     <CommandGroup heading={`Total ${result.length} results`}>
@@ -79,7 +96,8 @@ export function SearchBox() {
                                     ) : (
                                         <VscSymbolInterface className="h-4 w-4 mr-2 text-blue-600" />
                                     )}
-                                    {res.displayName} (<span className="text-muted-foreground text-sm">{res.module}</span>)
+                                    {res.displayName} (
+                                    <span className="text-muted-foreground text-sm">{res.module}</span>)
                                 </CommandItem>
                             );
                         })}

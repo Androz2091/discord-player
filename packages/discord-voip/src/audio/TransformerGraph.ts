@@ -11,7 +11,7 @@ const FFMPEG_PCM_ARGUMENTS = createFFmpegArgs({
     loglevel: '0',
     f: 's16le',
     ar: '48000',
-    ac: '2'
+    ac: '2',
 });
 
 const FFMPEG_OPUS_ARGUMENTS = createFFmpegArgs({
@@ -20,7 +20,7 @@ const FFMPEG_OPUS_ARGUMENTS = createFFmpegArgs({
     acodec: 'libopus',
     f: 'opus',
     ar: '48000',
-    ac: '2'
+    ac: '2',
 });
 
 /**
@@ -46,7 +46,7 @@ export enum StreamType {
     /**
      * The stream at this point is Opus audio encoded in a WebM wrapper.
      */
-    WebmOpus = 'webm/opus'
+    WebmOpus = 'webm/opus',
 }
 
 /**
@@ -59,7 +59,7 @@ export enum TransformerType {
     OggOpusDemuxer = 'ogg/opus demuxer',
     OpusDecoder = 'opus decoder',
     OpusEncoder = 'opus encoder',
-    WebmOpusDemuxer = 'webm/opus demuxer'
+    WebmOpusDemuxer = 'webm/opus demuxer',
 }
 
 /**
@@ -129,28 +129,28 @@ function initializeNodes(): Map<StreamType, Node> {
         type: TransformerType.OpusEncoder,
         to: nodes.get(StreamType.Opus)!,
         cost: 1.5,
-        transformer: () => new OpusEncoder({ rate: 48_000, channels: 2, frameSize: 960 })
+        transformer: () => new OpusEncoder({ rate: 48_000, channels: 2, frameSize: 960 }),
     });
 
     nodes.get(StreamType.Opus)!.addEdge({
         type: TransformerType.OpusDecoder,
         to: nodes.get(StreamType.Raw)!,
         cost: 1.5,
-        transformer: () => new OpusDecoder({ rate: 48_000, channels: 2, frameSize: 960 })
+        transformer: () => new OpusDecoder({ rate: 48_000, channels: 2, frameSize: 960 }),
     });
 
     nodes.get(StreamType.OggOpus)!.addEdge({
         type: TransformerType.OggOpusDemuxer,
         to: nodes.get(StreamType.Opus)!,
         cost: 1,
-        transformer: () => new OggDemuxer()
+        transformer: () => new OggDemuxer(),
     });
 
     nodes.get(StreamType.WebmOpus)!.addEdge({
         type: TransformerType.WebmOpusDemuxer,
         to: nodes.get(StreamType.Opus)!,
         cost: 1,
-        transformer: () => new WebmDemuxer()
+        transformer: () => new WebmDemuxer(),
     });
 
     const FFMPEG_PCM_EDGE: Omit<Edge, 'from'> = {
@@ -159,8 +159,8 @@ function initializeNodes(): Map<StreamType, Node> {
         cost: 2,
         transformer: (input) =>
             new FFmpeg({
-                args: ['-i', typeof input === 'string' ? input : '-', ...FFMPEG_PCM_ARGUMENTS]
-            })
+                args: ['-i', typeof input === 'string' ? input : '-', ...FFMPEG_PCM_ARGUMENTS],
+            }),
     };
 
     nodes.get(StreamType.Arbitrary)!.addEdge(FFMPEG_PCM_EDGE);
@@ -171,7 +171,7 @@ function initializeNodes(): Map<StreamType, Node> {
         type: TransformerType.InlineVolume,
         to: nodes.get(StreamType.Raw)!,
         cost: 0.5,
-        transformer: () => new VolumeTransformer({ type: 's16le' })
+        transformer: () => new VolumeTransformer({ type: 's16le' }),
     });
 
     if (canEnableFFmpegOptimizations()) {
@@ -181,8 +181,8 @@ function initializeNodes(): Map<StreamType, Node> {
             cost: 2,
             transformer: (input) =>
                 new FFmpeg({
-                    args: ['-i', typeof input === 'string' ? input : '-', ...FFMPEG_OPUS_ARGUMENTS]
-                })
+                    args: ['-i', typeof input === 'string' ? input : '-', ...FFMPEG_OPUS_ARGUMENTS],
+                }),
         };
         nodes.get(StreamType.Arbitrary)!.addEdge(FFMPEG_OGG_EDGE);
         // Include Ogg and WebM as well in case they have different sampling rates or are mono instead of stereo
@@ -224,7 +224,13 @@ interface Step {
  * @param path - The running path
  * @param depth - The number of remaining recursions
  */
-function findPath(from: Node, constraints: (path: Edge[]) => boolean, goal = getNode(StreamType.Opus), path: Edge[] = [], depth = 5): Step {
+function findPath(
+    from: Node,
+    constraints: (path: Edge[]) => boolean,
+    goal = getNode(StreamType.Opus),
+    path: Edge[] = [],
+    depth = 5,
+): Step {
     if (from === goal && constraints(path)) {
         return { cost: 0 };
     } else if (depth === 0) {

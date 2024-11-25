@@ -27,7 +27,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
     public internal = new SoundCloud.default({
         clientId: this.options.clientId,
         oauthToken: this.options.oauthToken,
-        proxy: this.options.proxy
+        proxy: this.options.proxy,
     });
 
     public async activate(): Promise<void> {
@@ -57,7 +57,9 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
         if (track.queryType === QueryType.SOUNDCLOUD_TRACK) {
             const data = await this.internal.tracks.relatedV2(track.url, 5);
 
-            const unique = filterSoundCloudPreviews(data).filter((t) => !history.tracks.some((h) => h.url === t.permalink_url));
+            const unique = filterSoundCloudPreviews(data).filter(
+                (t) => !history.tracks.some((h) => h.url === t.permalink_url),
+            );
 
             return this.createResponse(
                 null,
@@ -78,13 +80,13 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                         requestMetadata: async () => {
                             return trackInfo;
                         },
-                        cleanTitle: trackInfo.title
+                        cleanTitle: trackInfo.title,
                     });
 
                     newTrack.extractor = this;
 
                     return newTrack;
-                })
+                }),
             );
         }
 
@@ -115,7 +117,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                     requestMetadata: async () => {
                         return trackInfo;
                     },
-                    cleanTitle: trackInfo.title
+                    cleanTitle: trackInfo.title,
                 });
 
                 track.extractor = this;
@@ -134,12 +136,12 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                     source: 'soundcloud',
                     author: {
                         name: data.user.username,
-                        url: data.user.permalink_url
+                        url: data.user.permalink_url,
                     },
                     tracks: [],
                     id: `${data.id}`,
                     url: data.permalink_url,
-                    rawPlaylist: data
+                    rawPlaylist: data,
                 });
 
                 for (const song of data.tracks) {
@@ -160,7 +162,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                         requestMetadata: async () => {
                             return song;
                         },
-                        cleanTitle: song.title
+                        cleanTitle: song.title,
                     });
                     track.extractor = this;
                     track.playlist = res;
@@ -200,7 +202,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
                         metadata: trackInfo,
                         requestMetadata: async () => {
                             return trackInfo;
-                        }
+                        },
                     });
 
                     track.extractor = this;
@@ -233,7 +235,7 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
 
         const info = await this.handle(query, {
             requestedBy: track.requestedBy,
-            type: QueryType.SOUNDCLOUD_SEARCH
+            type: QueryType.SOUNDCLOUD_SEARCH,
         });
 
         if (!info.tracks.length) return null;

@@ -30,9 +30,12 @@ export class BiquadStream extends PCMTransformer {
         if ('gain' in options) this.gain = options.gain!;
         if ('Q' in options) this.Q = options.Q!;
         if ('biquadFilter' in options) {
-            if (typeof options.biquadFilter === 'string' || typeof options.biquadFilter === 'number') this.biquadFilter = options.filter!;
+            if (typeof options.biquadFilter === 'string' || typeof options.biquadFilter === 'number')
+                this.biquadFilter = options.filter!;
             if (this.biquadFilter != null) {
-                this.biquad = new BiquadFilter(Coefficients.from(this.biquadFilter, this.sampleRate, this.cutoff, this.Q, this.gain));
+                this.biquad = new BiquadFilter(
+                    Coefficients.from(this.biquadFilter, this.sampleRate, this.cutoff, this.Q, this.gain),
+                );
             }
         }
     }
@@ -62,7 +65,9 @@ export class BiquadStream extends PCMTransformer {
         if ('filter' in options) this.biquadFilter = options.filter!;
 
         if (this.biquadFilter != null) {
-            this.biquad = new BiquadFilter(Coefficients.from(this.biquadFilter, this.sampleRate, this.cutoff, this.Q, this.gain));
+            this.biquad = new BiquadFilter(
+                Coefficients.from(this.biquadFilter, this.sampleRate, this.cutoff, this.Q, this.gain),
+            );
         }
 
         this.onUpdate?.();

@@ -21,7 +21,10 @@ export function Properties({ entity }: { entity: DocumentedClassProperty }) {
                     </Paragraph>
                 ) : null}
                 <div className="my-2">
-                    <Type types={entity.rawType || entity.type ? makeTypeParams(entity.type!) : ['any']} prefix="Type:" />
+                    <Type
+                        types={entity.rawType || entity.type ? makeTypeParams(entity.type!) : ['any']}
+                        prefix="Type:"
+                    />
                 </div>
             </div>
         </div>

@@ -68,7 +68,11 @@ export interface PostProcessedResult {
     type: StreamType;
 }
 
-export type OnBeforeCreateStreamHandler = (track: Track, queryType: SearchQueryType, queue: GuildQueue) => Promise<Readable | null>;
+export type OnBeforeCreateStreamHandler = (
+    track: Track,
+    queryType: SearchQueryType,
+    queue: GuildQueue,
+) => Promise<Readable | null>;
 export type OnAfterCreateStreamHandler = (stream: Readable, queue: GuildQueue) => Promise<PostProcessedResult | null>;
 
 export type PlayerTriggeredReason = 'filters' | 'normal';
@@ -218,7 +222,7 @@ export const GuildQueueEvent = {
      * Emitted when a queue is trying to add similar track for autoplay
      */
     willAutoPlay: 'willAutoPlay',
-    WillAutoPlay: 'willAutoPlay'
+    WillAutoPlay: 'willAutoPlay',
 } as const;
 
 export type GuildQueueEvent = (typeof GuildQueueEvent)[keyof typeof GuildQueueEvent];
@@ -229,7 +233,7 @@ export enum TrackSkipReason {
     SEEK_OVER_THRESHOLD = 'SEEK_OVER_THRESHOLD',
     Jump = 'JUMPED_TO_ANOTHER_TRACK',
     SkipTo = 'SKIP_TO_ANOTHER_TRACK',
-    HistoryNext = 'HISTORY_NEXT_TRACK'
+    HistoryNext = 'HISTORY_NEXT_TRACK',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -321,7 +325,12 @@ export interface GuildQueueEvents<Meta = any> {
      * @param reason The reason for skipping
      * @param description The description for skipping
      */
-    [GuildQueueEvent.PlayerSkip]: (queue: GuildQueue<Meta>, track: Track, reason: TrackSkipReason, description: string) => unknown;
+    [GuildQueueEvent.PlayerSkip]: (
+        queue: GuildQueue<Meta>,
+        track: Track,
+        reason: TrackSkipReason,
+        description: string,
+    ) => unknown;
     /**
      * Emitted when the audio player is triggered
      * @param queue The queue where this event occurred
@@ -334,7 +343,11 @@ export interface GuildQueueEvents<Meta = any> {
      * @param oldState The old voice state
      * @param newState The new voice state
      */
-    [GuildQueueEvent.VoiceStateUpdate]: (queue: GuildQueue<Meta>, oldState: VoiceState, newState: VoiceState) => unknown;
+    [GuildQueueEvent.VoiceStateUpdate]: (
+        queue: GuildQueue<Meta>,
+        oldState: VoiceState,
+        newState: VoiceState,
+    ) => unknown;
     /**
      * Emitted when audio player is paused
      * @param queue The queue where this event occurred
@@ -358,28 +371,44 @@ export interface GuildQueueEvents<Meta = any> {
      * @param oldFilters Old filters
      * @param newFilters New filters
      */
-    [GuildQueueEvent.EqualizerUpdate]: (queue: GuildQueue<Meta>, oldFilters: EqualizerBand[], newFilters: EqualizerBand[]) => unknown;
+    [GuildQueueEvent.EqualizerUpdate]: (
+        queue: GuildQueue<Meta>,
+        oldFilters: EqualizerBand[],
+        newFilters: EqualizerBand[],
+    ) => unknown;
     /**
      * Emitted when biquad filters is updated
      * @param queue The queue where this event occurred
      * @param oldFilters Old filters
      * @param newFilters New filters
      */
-    [GuildQueueEvent.BiquadFiltersUpdate]: (queue: GuildQueue<Meta>, oldFilters: BiquadFilters | null, newFilters: BiquadFilters | null) => unknown;
+    [GuildQueueEvent.BiquadFiltersUpdate]: (
+        queue: GuildQueue<Meta>,
+        oldFilters: BiquadFilters | null,
+        newFilters: BiquadFilters | null,
+    ) => unknown;
     /**
      * Emitted when dsp filters is updated
      * @param queue The queue where this event occurred
      * @param oldFilters Old filters
      * @param newFilters New filters
      */
-    [GuildQueueEvent.DSPUpdate]: (queue: GuildQueue<Meta>, oldFilters: PCMFilters[], newFilters: PCMFilters[]) => unknown;
+    [GuildQueueEvent.DSPUpdate]: (
+        queue: GuildQueue<Meta>,
+        oldFilters: PCMFilters[],
+        newFilters: PCMFilters[],
+    ) => unknown;
     /**
      * Emitted when ffmpeg audio filters is updated
      * @param queue The queue where this event occurred
      * @param oldFilters Old filters
      * @param newFilters New filters
      */
-    [GuildQueueEvent.AudioFiltersUpdate]: (queue: GuildQueue<Meta>, oldFilters: FiltersName[], newFilters: FiltersName[]) => unknown;
+    [GuildQueueEvent.AudioFiltersUpdate]: (
+        queue: GuildQueue<Meta>,
+        oldFilters: FiltersName[],
+        newFilters: FiltersName[],
+    ) => unknown;
 
     /**
      * Emitted before streaming an audio track. This event can be used to modify stream config before playing a track.
@@ -389,7 +418,12 @@ export interface GuildQueueEvents<Meta = any> {
      * @param config Configurations for streaming
      * @param done Done callback
      */
-    [GuildQueueEvent.WillPlayTrack]: (queue: GuildQueue<Meta>, track: Track<unknown>, config: StreamConfig, done: () => void) => unknown;
+    [GuildQueueEvent.WillPlayTrack]: (
+        queue: GuildQueue<Meta>,
+        track: Track<unknown>,
+        config: StreamConfig,
+        done: () => void,
+    ) => unknown;
     /**
      * Emitted when a voice channel is populated
      * @param queue The queue where this event occurred
@@ -411,7 +445,11 @@ export interface GuildQueueEvents<Meta = any> {
      * @param tracks The similar tracks that were found
      * @param done Done callback
      */
-    [GuildQueueEvent.WillAutoPlay]: (queue: GuildQueue<Meta>, tracks: Track[], done: (track: Track | null) => void) => unknown;
+    [GuildQueueEvent.WillAutoPlay]: (
+        queue: GuildQueue<Meta>,
+        tracks: Track[],
+        done: (track: Track | null) => void,
+    ) => unknown;
 }
 
 export class GuildQueue<Meta = unknown> {
@@ -427,7 +465,7 @@ export class GuildQueue<Meta = unknown> {
     public onBeforeCreateStream: OnBeforeCreateStreamHandler = async () => null;
     public onAfterCreateStream: OnAfterCreateStreamHandler = async (stream) => ({
         stream,
-        type: StreamType.Raw
+        type: StreamType.Raw,
     });
     public repeatMode = QueueRepeatMode.OFF;
     public timeouts = new Collection<string, NodeJS.Timeout>();
@@ -471,13 +509,18 @@ export class GuildQueue<Meta = unknown> {
         }
 
         if (!TypeUtil.isNumber(options.maxHistorySize)) {
-            throw Exceptions.ERR_INVALID_ARG_TYPE('[GuildNodeInit.maxHistorySize]', 'number', typeof options.maxHistorySize);
+            throw Exceptions.ERR_INVALID_ARG_TYPE(
+                '[GuildNodeInit.maxHistorySize]',
+                'number',
+                typeof options.maxHistorySize,
+            );
         }
 
         if (options.maxSize < 1) options.maxSize = Infinity;
         if (options.maxHistorySize < 1) options.maxHistorySize = Infinity;
 
-        if (this.hasDebugger) this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
+        if (this.hasDebugger)
+            this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
         this.emit(GuildQueueEvent.queueCreate, this);
     }
 
@@ -790,14 +833,22 @@ export class GuildQueue<Meta = unknown> {
      * Create stream dispatcher from the given connection
      * @param connection The connection to use
      */
-    public createDispatcher(connection: VoiceConnection, options: Pick<VoiceConnectConfig, 'audioPlayer' | 'timeout'> = {}) {
+    public createDispatcher(
+        connection: VoiceConnection,
+        options: Pick<VoiceConnectConfig, 'audioPlayer' | 'timeout'> = {},
+    ) {
         if (connection.state.status === VoiceConnectionStatus.Destroyed) {
             throw Exceptions.ERR_VOICE_CONNECTION_DESTROYED();
         }
 
         const channel = this.player.client.channels.cache.get(connection.joinConfig.channelId!);
         if (!channel) throw Exceptions.ERR_NO_VOICE_CHANNEL();
-        if (!channel.isVoiceBased()) throw Exceptions.ERR_INVALID_ARG_TYPE('channel', `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`, String(channel?.type));
+        if (!channel.isVoiceBased())
+            throw Exceptions.ERR_INVALID_ARG_TYPE(
+                'channel',
+                `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`,
+                String(channel?.type),
+            );
 
         if (this.dispatcher) {
             this.#removeListeners(this.dispatcher);
@@ -805,7 +856,13 @@ export class GuildQueue<Meta = unknown> {
             this.dispatcher = null;
         }
 
-        this.dispatcher = new StreamDispatcher(connection, channel, this, options.timeout ?? this.options.connectionTimeout, options.audioPlayer);
+        this.dispatcher = new StreamDispatcher(
+            connection,
+            channel,
+            this,
+            options.timeout ?? this.options.connectionTimeout,
+            options.audioPlayer,
+        );
     }
 
     /**
@@ -816,10 +873,19 @@ export class GuildQueue<Meta = unknown> {
     public async connect(channelResolvable: GuildVoiceChannelResolvable, options: VoiceConnectConfig = {}) {
         const channel = this.player.client.channels.resolve(channelResolvable);
         if (!channel || !channel.isVoiceBased()) {
-            throw Exceptions.ERR_INVALID_ARG_TYPE('channel', `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`, String(channel?.type));
+            throw Exceptions.ERR_INVALID_ARG_TYPE(
+                'channel',
+                `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`,
+                String(channel?.type),
+            );
         }
 
-        if (this.hasDebugger) this.debug(`Connecting to ${channel.type === ChannelType.GuildStageVoice ? 'stage' : 'voice'} channel ${channel.name} (ID: ${channel.id})`);
+        if (this.hasDebugger)
+            this.debug(
+                `Connecting to ${channel.type === ChannelType.GuildStageVoice ? 'stage' : 'voice'} channel ${
+                    channel.name
+                } (ID: ${channel.id})`,
+            );
 
         if (this.dispatcher && channel.id !== this.dispatcher.channel.id) {
             if (this.hasDebugger) this.debug('Destroying old connection');
@@ -833,7 +899,7 @@ export class GuildQueue<Meta = unknown> {
             maxTime: options?.timeout ?? this.options.connectionTimeout ?? 120_000,
             queue: this,
             audioPlayer: options?.audioPlayer,
-            group: options.group ?? this.player.client.user?.id
+            group: options.group ?? this.player.client.user?.id,
         });
 
         this.emit(GuildQueueEvent.connection, this);
@@ -960,7 +1026,10 @@ export class GuildQueue<Meta = unknown> {
      * @param event The event to emit
      * @param args The args for the event
      */
-    public emit<K extends keyof GuildQueueEvents<Meta>>(event: K, ...args: Parameters<GuildQueueEvents<Meta>[K]>): boolean {
+    public emit<K extends keyof GuildQueueEvents<Meta>>(
+        event: K,
+        ...args: Parameters<GuildQueueEvents<Meta>[K]>
+    ): boolean {
         if (this.deleted) return false;
         return this.player.events.emit(event, ...args);
     }
@@ -993,7 +1062,8 @@ export class GuildQueue<Meta = unknown> {
             this.filters._lastFiltersCache.equalizer = f;
         });
         dispatcher.on('volume', (f) => {
-            if (this.filters._lastFiltersCache.volume !== f) this.emit(GuildQueueEvent.volumeChange, this, this.filters._lastFiltersCache.volume, f);
+            if (this.filters._lastFiltersCache.volume !== f)
+                this.emit(GuildQueueEvent.volumeChange, this, this.filters._lastFiltersCache.volume, f);
             this.filters._lastFiltersCache.volume = f;
         });
     }
@@ -1014,8 +1084,8 @@ export class GuildQueue<Meta = unknown> {
             this.debug(
                 `Player triggered for Track ${JSON.stringify({
                     title: track?.title,
-                    reason
-                })}`
+                    reason,
+                })}`,
             );
 
         this.emit(GuildQueueEvent.playerTrigger, this, track!, reason);
@@ -1048,14 +1118,15 @@ export class GuildQueue<Meta = unknown> {
             this.debug(
                 `Track ${JSON.stringify({
                     title: track?.title,
-                    isTransitionMode: this.isTransitioning()
-                })} was marked as finished`
+                    isTransitionMode: this.isTransitioning(),
+                })} was marked as finished`,
             );
 
         if (!this.isTransitioning()) {
             this.syncedLyricsProvider.unsubscribe();
             this.syncedLyricsProvider.lyrics.clear();
-            if (this.hasDebugger) this.debug('Adding track to history and emitting finish event since transition mode is disabled...');
+            if (this.hasDebugger)
+                this.debug('Adding track to history and emitting finish event since transition mode is disabled...');
             if (track) {
                 this.history.push(track);
                 this.node.resetProgress();
@@ -1063,21 +1134,30 @@ export class GuildQueue<Meta = unknown> {
             }
             if (this.#deleted) return this.#emitEnd();
             if (this.tracks.size < 1 && this.repeatMode === QueueRepeatMode.OFF) {
-                if (this.hasDebugger) this.debug('No more tracks left in the queue to play and repeat mode is off, initiating #emitEnd()');
+                if (this.hasDebugger)
+                    this.debug(
+                        'No more tracks left in the queue to play and repeat mode is off, initiating #emitEnd()',
+                    );
                 this.#emitEnd();
             } else {
                 if (this.repeatMode === QueueRepeatMode.TRACK) {
-                    if (this.hasDebugger) this.debug('Repeat mode is set to track, repeating last track from the history...');
+                    if (this.hasDebugger)
+                        this.debug('Repeat mode is set to track, repeating last track from the history...');
                     this.__current = this.history.tracks.dispatch() || track;
                     return this.node.play(this.__current!, { queue: false });
                 }
                 if (this.repeatMode === QueueRepeatMode.QUEUE) {
-                    if (this.hasDebugger) this.debug('Repeat mode is set to queue, moving last track from the history to current queue...');
-                    this.tracks.add(this.history.tracks.dispatch() || track);
+                    if (this.hasDebugger)
+                        this.debug(
+                            'Repeat mode is set to queue, moving last track from the history to current queue...',
+                        );
+                    const next = this.history.tracks.dispatch() || track;
+                    if (next) this.tracks.add(next);
                 }
                 if (!this.tracks.size && track) {
                     if (this.repeatMode === QueueRepeatMode.AUTOPLAY) {
-                        if (this.hasDebugger) this.debug('Repeat mode is set to autoplay, initiating autoplay handler...');
+                        if (this.hasDebugger)
+                            this.debug('Repeat mode is set to autoplay, initiating autoplay handler...');
                         this.#handleAutoplay(track);
                         return;
                     }
@@ -1085,7 +1165,7 @@ export class GuildQueue<Meta = unknown> {
                     if (this.hasDebugger) this.debug('Initializing next track of the queue...');
                     this.__current = this.#getNextTrack()!;
                     this.node.play(this.__current, {
-                        queue: false
+                        queue: false,
                     });
                 }
             }
@@ -1105,7 +1185,12 @@ export class GuildQueue<Meta = unknown> {
 
     async #handleAutoplay(track: Track) {
         try {
-            if (this.hasDebugger) this.debug(`Autoplay >> Finding related tracks for Track ${track.title} (${track.url}) [ext:${track.extractor?.identifier || 'N/A'}]`);
+            if (this.hasDebugger)
+                this.debug(
+                    `Autoplay >> Finding related tracks for Track ${track.title} (${track.url}) [ext:${
+                        track.extractor?.identifier || 'N/A'
+                    }]`,
+                );
             const tracks =
                 (await track.extractor?.getRelatedTracks(track, this.history))?.tracks ||
                 (
@@ -1113,11 +1198,13 @@ export class GuildQueue<Meta = unknown> {
                         if (this.hasDebugger) this.debug(`Autoplay >> Querying extractor ${ext.identifier}`);
                         const res = await ext.getRelatedTracks(track, this.history);
                         if (!res.tracks.length) {
-                            if (this.hasDebugger) this.debug(`Autoplay >> Extractor ${ext.identifier} failed to provide results.`);
+                            if (this.hasDebugger)
+                                this.debug(`Autoplay >> Extractor ${ext.identifier} failed to provide results.`);
                             return false;
                         }
 
-                        if (this.hasDebugger) this.debug(`Autoplay >> Extractor ${ext.identifier} successfully returned results.`);
+                        if (this.hasDebugger)
+                            this.debug(`Autoplay >> Extractor ${ext.identifier} successfully returned results.`);
 
                         return res.tracks;
                     })
@@ -1137,7 +1224,7 @@ export class GuildQueue<Meta = unknown> {
                               const unique = tracks.filter((tr) => !this.history.tracks.find((t) => t.url === tr.url));
                               return unique?.[0] ?? Util.randomChoice(tracks.slice(0, 5));
                           })()
-                        : null
+                        : null,
                 );
             }
 
@@ -1151,7 +1238,7 @@ export class GuildQueue<Meta = unknown> {
             await this.node.play(nextTrack, {
                 queue: false,
                 seek: 0,
-                transitionMode: false
+                transitionMode: false,
             });
         } catch {
             return this.#emitEnd();

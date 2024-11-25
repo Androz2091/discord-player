@@ -156,7 +156,7 @@ export class Track<T = unknown> {
             durationMS: this.durationMS,
             views: this.views,
             requestedBy: this.requestedBy?.id || null,
-            playlist: hidePlaylist ? null : this.playlist?.toJSON() ?? null
+            playlist: hidePlaylist ? null : this.playlist?.toJSON() ?? null,
         } as TrackJSON;
     }
 
@@ -179,7 +179,7 @@ export class Track<T = unknown> {
             extractor: this.extractor?.identifier ?? null,
             metadata: this.metadata,
             $type: SerializedType.Track,
-            $encoder_version: '[VI]{{inject}}[/VI]'
+            $encoder_version: '[VI]{{inject}}[/VI]',
         };
     }
 
@@ -189,7 +189,8 @@ export class Track<T = unknown> {
      * @param data Serialized data
      */
     public static fromSerialized(player: Player, data: ReturnType<Track['serialize']>) {
-        if (data.$type !== SerializedType.Track) throw Exceptions.ERR_INVALID_ARG_TYPE('data', 'SerializedTrack', 'malformed data');
+        if (data.$type !== SerializedType.Track)
+            throw Exceptions.ERR_INVALID_ARG_TYPE('data', 'SerializedTrack', 'malformed data');
         const track = new Track(player, {
             ...data,
             requestedBy: data.requested_by
@@ -207,7 +208,7 @@ export class Track<T = unknown> {
                       }
                   })()
                 : null,
-            queryType: data.query_type ?? undefined
+            queryType: data.query_type ?? undefined,
         });
 
         track.setMetadata(data.metadata);
@@ -229,7 +230,10 @@ export class Track<T = unknown> {
      * @param channel Voice channel on which this track shall be played
      * @param options Node initialization options
      */
-    public async play<T = unknown>(channel: GuildVoiceChannelResolvable, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
+    public async play<T = unknown>(
+        channel: GuildVoiceChannelResolvable,
+        options?: PlayerNodeInitializerOptions<T>,
+    ): Promise<PlayerNodeInitializationResult<T>> {
         const fn = this.player.play.bind(this.player);
 
         return await fn(channel, this, options);

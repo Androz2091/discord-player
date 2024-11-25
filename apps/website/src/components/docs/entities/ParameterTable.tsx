@@ -30,7 +30,13 @@ export function ParameterTable({ parameters }: { parameters: DocumentedParameter
                                 </Paragraph>
                             </TableCell>
                         ) : null}
-                        <TableCell>{param.optional ? <CheckCircle className="text-green-500" /> : <XCircle className="text-destructive" />}</TableCell>
+                        <TableCell>
+                            {param.optional ? (
+                                <CheckCircle className="text-green-500" />
+                            ) : (
+                                <XCircle className="text-destructive" />
+                            )}
+                        </TableCell>
                     </TableRow>
                 ))}
             </TableBody>

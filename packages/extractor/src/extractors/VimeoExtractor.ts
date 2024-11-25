@@ -30,7 +30,7 @@ export class VimeoExtractor extends BaseExtractor {
                     query
                         .split('/')
                         .filter((x) => !!x)
-                        .pop()!
+                        .pop()!,
                 ).catch(Util.noop);
 
                 if (!trackInfo) return this.emptyResponse();
@@ -50,7 +50,7 @@ export class VimeoExtractor extends BaseExtractor {
                     metadata: trackInfo,
                     async requestMetadata() {
                         return trackInfo;
-                    }
+                    },
                 });
 
                 track.extractor = this;
@@ -76,7 +76,7 @@ export class VimeoExtractor extends BaseExtractor {
         if (!track || !track.stream) throw new Error('Could not extract stream from this source');
 
         info.raw.engine = {
-            streamURL: track.stream
+            streamURL: track.stream,
         };
 
         return track.stream;

@@ -155,7 +155,11 @@ export class LrcLib {
      */
     public search(params: LrcSearchParams) {
         if (!params.q && !params.trackName) {
-            throw Exceptions.ERR_INVALID_ARG_TYPE('one of q or trackName', 'string', [String(params.q), String(params.trackName)].join(', '));
+            throw Exceptions.ERR_INVALID_ARG_TYPE(
+                'one of q or trackName',
+                'string',
+                [String(params.q), String(params.trackName)].join(', '),
+            );
         }
 
         const path = `search?${createQuery(params)}`;
@@ -190,8 +194,8 @@ export class LrcLib {
                 headers: {
                     'User-Agent': `Discord-Player/${this.player.version} ${runtimeVersion ?? ''}`.trimEnd(),
                     'Content-Type': 'application/json',
-                    ...options?.headers
-                }
+                    ...options?.headers,
+                },
             };
 
             this.player.debug(`[LrcLib] Requesting ${path}`);

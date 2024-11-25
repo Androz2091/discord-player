@@ -152,7 +152,8 @@ export class SyncedLyricsProvider {
 
             if (!lyrics) return;
 
-            if (lastValue !== null && lyrics.line === lastValue.line && lyrics.timestamp === lastValue.timestamp) return;
+            if (lastValue !== null && lyrics.line === lastValue.line && lyrics.timestamp === lastValue.timestamp)
+                return;
 
             lastValue = lyrics;
 

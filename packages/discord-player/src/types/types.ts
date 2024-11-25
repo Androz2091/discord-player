@@ -229,7 +229,7 @@ export const QueryType = {
     APPLE_MUSIC_PLAYLIST: 'appleMusicPlaylist',
     APPLE_MUSIC_SEARCH: 'appleMusicSearch',
     FILE: 'file',
-    AUTO_SEARCH: 'autoSearch'
+    AUTO_SEARCH: 'autoSearch',
 } as const;
 
 export type SearchQueryType = keyof typeof QueryType | (typeof QueryType)[keyof typeof QueryType];
@@ -247,7 +247,7 @@ export const PlayerEvent = {
     error: 'error',
     Error: 'error',
     voiceStateUpdate: 'voiceStateUpdate',
-    VoiceStateUpdate: 'voiceStateUpdate'
+    VoiceStateUpdate: 'voiceStateUpdate',
 } as const;
 export type PlayerEvent = (typeof PlayerEvent)[keyof typeof PlayerEvent];
 
@@ -325,7 +325,7 @@ export enum QueueRepeatMode {
     /**
      * When last track ends, play similar tracks in the future if queue is empty.
      */
-    AUTOPLAY = 3
+    AUTOPLAY = 3,
 }
 
 export interface PlaylistInitData {
@@ -521,4 +521,8 @@ export interface PlayerInitOptions {
      * Configure ffmpeg path
      */
     ffmpegPath?: string;
+    /**
+     * Whether to override the fallback context. Defaults to `true`.
+     */
+    overrideFallbackContext?: boolean;
 }

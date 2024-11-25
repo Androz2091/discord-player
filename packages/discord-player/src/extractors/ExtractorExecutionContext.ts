@@ -8,22 +8,6 @@ import { Track } from '../fabric';
 import { createContext } from '../hooks';
 import { Exceptions } from '../errors';
 
-// prettier-ignore
-const knownExtractorKeys = [
-    'SpotifyExtractor',
-    'AppleMusicExtractor',
-    'SoundCloudExtractor',
-    'VimeoExtractor',
-    'ReverbnationExtractor',
-    'AttachmentExtractor'
-] as const;
-const knownExtractorLib = '@discord-player/extractor';
-
-export type ExtractorLoaderOptionDict = {
-    // @ts-ignore types
-    [K in (typeof knownExtractorKeys)[number]]?: ConstructorParameters<typeof import('@discord-player/extractor')[K]>[1];
-};
-
 export interface ExtractorSession {
     id: string;
     attemptedExtractors: Set<string>;
@@ -89,17 +73,28 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
         return this.context.consume() ?? null;
     }
 
-    /**
-     * Load default extractors from `@discord-player/extractor`
-     */
-    public async loadDefault(filter?: (ext: (typeof knownExtractorKeys)[number]) => boolean | null, options?: ExtractorLoaderOptionDict) {
-        const mod = await Util.import(knownExtractorLib);
-        if (mod.error) return { success: false, error: mod.error as Error };
+    public async loadDefault() {
+        const sample = `import { DefaultExtractors } from '@discord-player/extractor';\nawait player.extractors.loadMulti(DefaultExtractors);`;
 
-        (filter ? knownExtractorKeys.filter(filter) : knownExtractorKeys).forEach((key) => {
-            if (!mod.module[key]) return;
-            // @ts-ignore types
-            this.register(<typeof BaseExtractor>mod.module[key], options?.[key] || {});
+        throw new Error(
+            `extractors.loadDefault is no longer supported. Use extractors.loadMulti instead. Example:\n${sample}`,
+        );
+    }
+
+    /**
+     * Load a bundle of extractors.
+     * @example import { DefaultExtractors } from '@discord-player/extractor';
+     *
+     * await player.extractors.loadMulti(DefaultExtractors);
+     */
+    public async loadMulti<
+        O extends object,
+        T extends (typeof BaseExtractor<O>)[],
+        R extends Record<T[number]['identifier'], ConstructorParameters<T[number]>[1]>,
+    >(bundle: T, options: R = {} as R) {
+        bundle.forEach((ext) => {
+            // @ts-ignore
+            this.register(ext, options?.[ext.identifier] || {});
         });
 
         return { success: true, error: null };
@@ -133,7 +128,10 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      * @param _extractor The extractor to register
      * @param options Options supplied to the extractor
      */
-    public async register<O extends object, T extends typeof BaseExtractor<O>>(_extractor: T, options: ConstructorParameters<T>['1']): Promise<InstanceType<T> | null> {
+    public async register<O extends object, T extends typeof BaseExtractor<O>>(
+        _extractor: T,
+        options: ConstructorParameters<T>['1'],
+    ): Promise<InstanceType<T> | null> {
         if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return null;
         const extractor = new _extractor(this, options);
 
@@ -150,7 +148,8 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
             return extractor as unknown as InstanceType<T>;
         } catch (e) {
             this.store.delete(_extractor.identifier);
-            if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor failed to activate! Error: ${e}`);
+            if (this.player.hasDebugger)
+                this.player.debug(`${_extractor.identifier} extractor failed to activate! Error: ${e}`);
             this.emit('error', this, extractor, e as Error);
             return null;
         }
@@ -161,7 +160,8 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      * @param _extractor The extractor to unregister
      */
     public async unregister<K extends string | BaseExtractor>(_extractor: K) {
-        const extractor = typeof _extractor === 'string' ? this.store.get(_extractor) : this.store.find((r) => r === _extractor);
+        const extractor =
+            typeof _extractor === 'string' ? this.store.get(_extractor) : this.store.find((r) => r === _extractor);
         if (!extractor) return;
 
         try {
@@ -216,10 +216,11 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
                     return res;
                 },
                 (e) => {
-                    if (this.player.hasDebugger) this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
+                    if (this.player.hasDebugger)
+                        this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
 
                     return TypeUtil.isError(e) ? e : new Error(`${e}`);
-                }
+                },
             );
 
             lastExt = ext;
@@ -230,7 +231,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
                 return {
                     extractor: ext,
                     error: null,
-                    result
+                    result,
                 } as ExtractorExecutionResult<T>;
             } else if (TypeUtil.isError(result)) {
                 err = result;
@@ -241,7 +242,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
             return {
                 extractor: lastExt!,
                 error: err,
-                result: false
+                result: false,
             } as ExtractorExecutionResult<false>;
     }
 
@@ -266,7 +267,11 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
             return result;
         });
 
-        if (!result?.result) throw Exceptions.ERR_BRIDGE_FAILED(this.getExecutionId(), result?.error?.stack || result?.error?.message || 'No extractors available to bridge');
+        if (!result?.result)
+            throw Exceptions.ERR_BRIDGE_FAILED(
+                this.getExecutionId(),
+                result?.error?.stack || result?.error?.message || 'No extractors available to bridge',
+            );
 
         track.bridgedExtractor = result.extractor;
 
@@ -279,7 +284,11 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
      * @param sourceExtractor The source extractor of the track
      * @param targetExtractor The target extractor to bridge to
      */
-    public async requestBridgeFrom(track: Track, sourceExtractor: BaseExtractor | null, targetExtractor: ExtractorResolvable) {
+    public async requestBridgeFrom(
+        track: Track,
+        sourceExtractor: BaseExtractor | null,
+        targetExtractor: ExtractorResolvable,
+    ) {
         const target = this.resolve(targetExtractor);
         if (!target) return null;
         return target.bridge(track, sourceExtractor);

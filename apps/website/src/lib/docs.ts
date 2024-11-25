@@ -71,7 +71,8 @@ const EXTERNAL_LINKS = {
     Guild: 'https://discord.js.org/docs#/docs/discord.js/main/class/Guild',
     VoiceBasedChannelTypes: 'https://discord.js.org/docs#/docs/discord.js/main/typedef/VoiceBasedChannelTypes',
     VoiceState: 'https://discord.js.org/docs#/docs/discord.js/main/class/VoiceState',
-    GuildVoiceChannelResolvable: 'https://discord.js.org/docs#/docs/discord.js/main/typedef/GuildVoiceChannelResolvable'
+    GuildVoiceChannelResolvable:
+        'https://discord.js.org/docs#/docs/discord.js/main/typedef/GuildVoiceChannelResolvable',
 };
 
 export const docsLink = (() => {
@@ -92,24 +93,24 @@ export const docsLink = (() => {
                 module: mod.name,
                 href: `/docs/${encodeURIComponent(mod.name)}/class/${c.data.name}`,
                 target: c.data.name,
-                type: 'class'
-            })
+                type: 'class',
+            }),
         );
         mod.functions.forEach((c) =>
             entries.push({
                 module: mod.name,
                 href: `/docs/${encodeURIComponent(mod.name)}/function/${c.data.name}`,
                 target: c.data.name,
-                type: 'function'
-            })
+                type: 'function',
+            }),
         );
         mod.types.forEach((c) =>
             entries.push({
                 module: mod.name,
                 href: `/docs/${encodeURIComponent(mod.name)}/type/${c.data.name}`,
                 target: c.data.name,
-                type: 'type'
-            })
+                type: 'type',
+            }),
         );
     }
 
@@ -127,7 +128,7 @@ const seed: Doc[] = (() => {
                 href: `/docs/${encodeURIComponent(mod.name)}/class/${cls.data.name}`,
                 name: cls.data.name,
                 type: 'class',
-                displayName: cls.data.name
+                displayName: cls.data.name,
             });
 
             cls.data.methods.forEach((method) => {
@@ -136,7 +137,7 @@ const seed: Doc[] = (() => {
                     module: mod.name,
                     name: method.name,
                     type: 'function',
-                    displayName: `${cls.data.name}.${method.name}()`
+                    displayName: `${cls.data.name}.${method.name}()`,
                 });
             });
 
@@ -146,7 +147,7 @@ const seed: Doc[] = (() => {
                     module: mod.name,
                     name: prop.name,
                     type: 'property',
-                    displayName: `${cls.data.name}.${prop.name}`
+                    displayName: `${cls.data.name}.${prop.name}`,
                 });
             });
         });
@@ -157,8 +158,8 @@ const seed: Doc[] = (() => {
                 href: `/docs/${encodeURIComponent(mod.name)}/type/${cls.data.name}`,
                 name: cls.data.name,
                 type: 'type',
-                displayName: cls.data.name
-            })
+                displayName: cls.data.name,
+            }),
         );
 
         mod.functions.forEach((cls) =>
@@ -167,8 +168,8 @@ const seed: Doc[] = (() => {
                 href: `/docs/${encodeURIComponent(mod.name)}/function/${cls.data.name}`,
                 name: cls.data.name,
                 type: 'function',
-                displayName: cls.data.name
-            })
+                displayName: cls.data.name,
+            }),
         );
     }
 
@@ -181,7 +182,7 @@ const fuse = new Fuse(seed, {
     threshold: 0.5,
     location: 0,
     distance: 80,
-    minMatchCharLength: 1
+    minMatchCharLength: 1,
 });
 
 export function searchDocs(query: string) {

@@ -17,8 +17,12 @@ export function EntitySymbol({ type, children, id, link, source }: EntityProps) 
     let c: React.ReactNode;
 
     const href = useMemo(() => {
-        const entries = Object.entries(router.query).filter((f) => !['scrollTo', 'target', 'package', 'type'].includes(f[0]));
-        const href = `${router.asPath.split('?')[0]}${entries.map((m, i) => `${i === 0 ? '?' : ''}${m[0]}=${m[1]}`).join('&')}${entries.length ? '&' : '?'}scrollTo=${id}`;
+        const entries = Object.entries(router.query).filter(
+            (f) => !['scrollTo', 'target', 'package', 'type'].includes(f[0]),
+        );
+        const href = `${router.asPath.split('?')[0]}${entries
+            .map((m, i) => `${i === 0 ? '?' : ''}${m[0]}=${m[1]}`)
+            .join('&')}${entries.length ? '&' : '?'}scrollTo=${id}`;
 
         return href;
     }, []);

@@ -32,13 +32,13 @@ export class GuildQueueStatistics<Meta = unknown> {
         return {
             latency: {
                 eventLoop: this.queue.player.eventLoopLag,
-                voiceConnection: this.queue.ping
+                voiceConnection: this.queue.ping,
             },
             status: {
                 buffering: this.queue.node.isBuffering(),
                 playing: this.queue.node.isPlaying(),
                 paused: this.queue.node.isPaused(),
-                idle: this.queue.node.isIdle()
+                idle: this.queue.node.isIdle(),
             },
             tracksCount: this.queue.tracks.size,
             historySize: this.queue.history.tracks.size,
@@ -47,8 +47,8 @@ export class GuildQueueStatistics<Meta = unknown> {
             memoryUsage: process.memoryUsage(),
             versions: {
                 node: process.version,
-                player: '[VI]{{inject}}[/VI]'
-            }
+                player: '[VI]{{inject}}[/VI]',
+            },
         } as GuildQueueStatisticsMetadata;
     }
 }

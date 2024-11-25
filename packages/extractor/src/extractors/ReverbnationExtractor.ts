@@ -45,7 +45,7 @@ export class ReverbnationExtractor extends BaseExtractor {
                     metadata: trackInfo,
                     async requestMetadata() {
                         return trackInfo;
-                    }
+                    },
                 });
 
                 track.extractor = this;
@@ -71,7 +71,7 @@ export class ReverbnationExtractor extends BaseExtractor {
         if (!track || !track.streamURL) throw new Error('Could not extract stream from this source');
 
         info.raw.engine = {
-            streamURL: track.streamURL
+            streamURL: track.streamURL,
         };
 
         return track.streamURL;

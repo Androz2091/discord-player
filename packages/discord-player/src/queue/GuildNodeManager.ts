@@ -91,11 +91,15 @@ export class GuildNodeManager<Meta = unknown> {
         options.disableFallbackStream ??= false;
 
         if (getGlobalRegistry().has('@[onBeforeCreateStream]') && !options.onBeforeCreateStream) {
-            options.onBeforeCreateStream = getGlobalRegistry().get('@[onBeforeCreateStream]') as OnBeforeCreateStreamHandler;
+            options.onBeforeCreateStream = getGlobalRegistry().get(
+                '@[onBeforeCreateStream]',
+            ) as OnBeforeCreateStreamHandler;
         }
 
         if (getGlobalRegistry().has('@[onAfterCreateStream]') && !options.onAfterCreateStream) {
-            options.onAfterCreateStream = getGlobalRegistry().get('@[onAfterCreateStream]') as OnAfterCreateStreamHandler;
+            options.onAfterCreateStream = getGlobalRegistry().get(
+                '@[onAfterCreateStream]',
+            ) as OnAfterCreateStreamHandler;
         }
 
         const queue = new GuildQueue<T>(this.player, {
@@ -131,7 +135,7 @@ export class GuildNodeManager<Meta = unknown> {
             disableFilterer: options.disableFilterer,
             disableResampler: options.disableResampler,
             disableVolume: options.disableVolume,
-            disableFallbackStream: options.disableFallbackStream
+            disableFallbackStream: options.disableFallbackStream,
         });
 
         this.cache.set(server.id, queue);
@@ -186,12 +190,12 @@ export class GuildNodeManager<Meta = unknown> {
      * Resolve queue
      * @param node Queue resolvable
      */
-    public resolve<T = Meta>(node: NodeResolvable) {
+    public resolve<T = Meta>(node: NodeResolvable): GuildQueue<T> | undefined {
         if (node instanceof GuildQueue) {
-            return node;
+            return node as GuildQueue<T>;
         }
 
-        return this.cache.get(this.player.client.guilds.resolveId(node)!) as GuildQueue<T> | undefined;
+        return this.cache.get(this.player.client.guilds.resolveId(node)!) as GuildQueue<T>;
     }
 
     /**

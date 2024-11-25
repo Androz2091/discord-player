@@ -14,16 +14,26 @@ export default function Showcase() {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    const filteredBots = ShowcaseResource.bots.filter((bot) => bot.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
-    const filteredExtractors = ShowcaseResource.extractors.filter((extractor) => extractor.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
+    const filteredBots = ShowcaseResource.bots.filter((bot) =>
+        bot.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
+    );
+    const filteredExtractors = ShowcaseResource.extractors.filter((extractor) =>
+        extractor.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
+    );
 
     return (
         <Container>
-            <HeadingMeta title="Showcase | Discord Player" description="A curated list of resources like open-source music bots and extractors, built by the Discord Player community." />
+            <HeadingMeta
+                title="Showcase | Discord Player"
+                description="A curated list of resources like open-source music bots and extractors, built by the Discord Player community."
+            />
             <div className="mt-5 mb-10 space-y-5 w-full">
                 <div>
                     <Heading.H1>Showcase</Heading.H1>
-                    <Paragraph>A curated list of resources like open-source music bots and extractors, built by the Discord Player community.</Paragraph>
+                    <Paragraph>
+                        A curated list of resources like open-source music bots and extractors, built by the Discord
+                        Player community.
+                    </Paragraph>
                     <div className="mt-3">
                         <Link href={resURL} target="_blank" rel="noopener noreferrer">
                             <Button className="w-full md:w-auto gap-1">
@@ -35,7 +45,12 @@ export default function Showcase() {
                 </div>
 
                 <div className="py-5 felx justify-center">
-                    <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="max-w-xl" />
+                    <Input
+                        placeholder="Search..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="max-w-xl"
+                    />
                 </div>
 
                 {filteredExtractors.length > 0 && (
@@ -83,7 +98,9 @@ export default function Showcase() {
                     </div>
                 )}
 
-                {!filteredBots.length && !filteredExtractors.length && <Heading.H3 className="text-center">No result!</Heading.H3>}
+                {!filteredBots.length && !filteredExtractors.length && (
+                    <Heading.H3 className="text-center">No result!</Heading.H3>
+                )}
                 {/* <div>
                     <Heading.H2>Extractors</Heading.H2>
                     <Table className="border">

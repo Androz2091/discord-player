@@ -1,5 +1,12 @@
 import { VoiceChannel, StageChannel, Snowflake } from 'discord.js';
-import { DiscordGatewayAdapterCreator, joinVoiceChannel, VoiceConnection, getVoiceConnection, VoiceConnectionStatus, AudioPlayer } from 'discord-voip';
+import {
+    DiscordGatewayAdapterCreator,
+    joinVoiceChannel,
+    VoiceConnection,
+    getVoiceConnection,
+    VoiceConnectionStatus,
+    AudioPlayer,
+} from 'discord-voip';
 import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
 import { GuildQueue } from '../queue';
@@ -34,7 +41,7 @@ class VoiceUtils {
             queue: GuildQueue;
             audioPlayer?: AudioPlayer;
             group?: string;
-        }
+        },
     ): Promise<StreamDispatcher> {
         if (!options?.queue) throw Exceptions.ERR_NO_GUILD_QUEUE();
         const conn = await this.join(channel, options);
@@ -54,11 +61,14 @@ class VoiceUtils {
             deaf?: boolean;
             maxTime?: number;
             group?: string;
-        }
+        },
     ) {
         const existingConnection = this.getConnection(channel.guild.id, options?.group);
 
-        if (existingConnection?.joinConfig.channelId === channel?.id && existingConnection.state.status !== VoiceConnectionStatus.Destroyed) {
+        if (
+            existingConnection?.joinConfig.channelId === channel?.id &&
+            existingConnection.state.status !== VoiceConnectionStatus.Destroyed
+        ) {
             return existingConnection;
         }
 
@@ -68,7 +78,7 @@ class VoiceUtils {
             adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
             selfDeaf: Boolean(options?.deaf),
             debug: this.player.events.listenerCount('debug') > 0,
-            group: options?.group
+            group: options?.group,
         });
 
         return conn;

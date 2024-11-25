@@ -15,9 +15,9 @@ export const PlayCommand = async (message: Message, args: string[]) => {
     const result = await player.play(channel, query, {
         nodeOptions: {
             metadata: {
-                channel: message.channel
-            }
-        }
+                channel: message.channel,
+            },
+        },
     });
 
     await message.channel.send(`Playing ${result.track} in ${channel}`);

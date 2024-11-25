@@ -19,16 +19,41 @@ export default function Navbar() {
                             <TextMark className="h-10 w-10" />
                         </Link>
                         <nav className="flex items-center space-x-6 text-sm font-medium">
-                            <Link href="/docs" className={cn('transition-colors hover:text-foreground/80', pathname === '/docs' ? 'text-foreground font-bold' : 'text-foreground/60')}>
+                            <Link
+                                href="/docs"
+                                className={cn(
+                                    'transition-colors hover:text-foreground/80',
+                                    pathname === '/docs' ? 'text-foreground font-bold' : 'text-foreground/60',
+                                )}
+                            >
                                 Documentation
                             </Link>
-                            <Link href="/guide" className={cn('transition-colors hover:text-foreground/80', pathname?.startsWith('/guide') ? 'text-foreground font-bold' : 'text-foreground/60')}>
+                            <Link
+                                href="/guide"
+                                className={cn(
+                                    'transition-colors hover:text-foreground/80',
+                                    pathname?.startsWith('/guide') ? 'text-foreground font-bold' : 'text-foreground/60',
+                                )}
+                            >
                                 Guide
                             </Link>
-                            <Link href="/showcase" className={cn('transition-colors hover:text-foreground/80', pathname?.startsWith('/showcase') ? 'text-foreground font-bold' : 'text-foreground/60')}>
+                            <Link
+                                href="/showcase"
+                                className={cn(
+                                    'transition-colors hover:text-foreground/80',
+                                    pathname?.startsWith('/showcase')
+                                        ? 'text-foreground font-bold'
+                                        : 'text-foreground/60',
+                                )}
+                            >
                                 Showcase
                             </Link>
-                            <Link href={'https://github.com/androz2091/discord-player'} className={cn('hidden text-foreground/60 transition-colors hover:text-foreground/80 lg:block')}>
+                            <Link
+                                href={'https://github.com/androz2091/discord-player'}
+                                className={cn(
+                                    'hidden text-foreground/60 transition-colors hover:text-foreground/80 lg:block',
+                                )}
+                            >
                                 GitHub
                             </Link>
                         </nav>
@@ -80,7 +105,10 @@ function MobileNav() {
                                         setOpen(false);
                                     }}
                                     href="/"
-                                    className={cn('transition-colors hover:text-foreground/80', pathname === '/' ? 'text-foreground font-bold' : 'text-foreground/60')}
+                                    className={cn(
+                                        'transition-colors hover:text-foreground/80',
+                                        pathname === '/' ? 'text-foreground font-bold' : 'text-foreground/60',
+                                    )}
                                 >
                                     Home
                                 </Link>
@@ -89,7 +117,10 @@ function MobileNav() {
                                         setOpen(false);
                                     }}
                                     href="/docs"
-                                    className={cn('transition-colors hover:text-foreground/80', pathname === '/docs' ? 'text-foreground font-bold' : 'text-foreground/60')}
+                                    className={cn(
+                                        'transition-colors hover:text-foreground/80',
+                                        pathname === '/docs' ? 'text-foreground font-bold' : 'text-foreground/60',
+                                    )}
                                 >
                                     Documentation
                                 </Link>
@@ -98,7 +129,12 @@ function MobileNav() {
                                         setOpen(false);
                                     }}
                                     href="/guide"
-                                    className={cn('transition-colors hover:text-foreground/80', pathname?.startsWith('/guide') ? 'text-foreground font-bold' : 'text-foreground/60')}
+                                    className={cn(
+                                        'transition-colors hover:text-foreground/80',
+                                        pathname?.startsWith('/guide')
+                                            ? 'text-foreground font-bold'
+                                            : 'text-foreground/60',
+                                    )}
                                 >
                                     Guide
                                 </Link>
@@ -107,7 +143,12 @@ function MobileNav() {
                                         setOpen(false);
                                     }}
                                     href="/showcase"
-                                    className={cn('transition-colors hover:text-foreground/80', pathname?.startsWith('/showcase') ? 'text-foreground font-bold' : 'text-foreground/60')}
+                                    className={cn(
+                                        'transition-colors hover:text-foreground/80',
+                                        pathname?.startsWith('/showcase')
+                                            ? 'text-foreground font-bold'
+                                            : 'text-foreground/60',
+                                    )}
                                 >
                                     Showcase
                                 </Link>
@@ -132,7 +173,11 @@ function MobileNav() {
                                         <DiscordIcon className="h-5 w-5 cursor-pointer" />
                                     </Link>
                                     <button aria-label="Toggle Theme" onClick={theme.toggle}>
-                                        {theme.isDark ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+                                        {theme.isDark ? (
+                                            <SunIcon className="h-5 w-5" />
+                                        ) : (
+                                            <MoonIcon className="h-5 w-5" />
+                                        )}
                                     </button>
                                 </div>
                             </div>

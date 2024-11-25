@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/ffmpeg",
-  "version": "7.0.0-dev.2",
+  "version": "7.0.0-dev.3",
   "description": "FFmpeg stream abstraction for discord-player",
   "keywords": [
     "discord-player",

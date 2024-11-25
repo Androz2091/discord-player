@@ -54,8 +54,8 @@ class Vimeo {
                     id: json.video.owner.id,
                     name: json.video.owner.name,
                     url: json.video.owner.url,
-                    avatar: json.video.owner.img_2x || json.video.owner.img
-                }
+                    avatar: json.video.owner.img_2x || json.video.owner.img,
+                },
             };
 
             return obj;

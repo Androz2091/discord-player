@@ -23,11 +23,11 @@ type IMod = [
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (mod: any) => {
         Encoder: IEncoder;
-    }
+    },
 ];
 
 const loadModule = (
-    modules: IMod[]
+    modules: IMod[],
 ): {
     Encoder: IEncoder;
     name: string;
@@ -39,7 +39,7 @@ const loadModule = (
             return {
                 // eslint-disable-next-line @typescript-eslint/no-var-requires
                 ...fn(require(name)),
-                name
+                name,
             };
         } catch (e) {
             errors.push(`Failed to load ${name}: ${e}`);
@@ -47,13 +47,15 @@ const loadModule = (
         }
     }
 
-    throw new Error(`Could not load opus module, tried ${modules.length} different modules. Errors: ${errors.join('\n')}`);
+    throw new Error(
+        `Could not load opus module, tried ${modules.length} different modules. Errors: ${errors.join('\n')}`,
+    );
 };
 
 export const CTL = {
     BITRATE: 0xfa2,
     FEC: 0xfac,
-    PLP: 0xfae
+    PLP: 0xfae,
 } as const;
 
 const OPUS_MOD_REGISTRY: IMod[] = [
@@ -62,7 +64,7 @@ const OPUS_MOD_REGISTRY: IMod[] = [
         (mod) => {
             if (!mod.OpusEncoder) throw new Error('Unsupported mediaplex version');
             return { Encoder: mod.OpusEncoder };
-        }
+        },
     ],
     ['@discordjs/opus', (opus) => ({ Encoder: opus.OpusEncoder })],
     ['opusscript', (opus) => ({ Encoder: opus })],
@@ -85,8 +87,8 @@ const OPUS_MOD_REGISTRY: IMod[] = [
                         application: (<const>{
                             2048: 'voip',
                             2049: 'audio',
-                            2051: 'restricted_lowdelay'
-                        })[this._application]
+                            2051: 'restricted_lowdelay',
+                        })[this._application],
                     });
                 }
 
@@ -94,7 +96,7 @@ const OPUS_MOD_REGISTRY: IMod[] = [
                     if (this._decoder) return;
                     this._decoder = new Decoder({
                         channels: this._channels as 2,
-                        sample_rate: this._rate as 48000
+                        sample_rate: this._rate as 48000,
                     });
                 }
 
@@ -120,9 +122,9 @@ const OPUS_MOD_REGISTRY: IMod[] = [
             }
 
             return { Encoder: OpusEncoder };
-        }
+        },
     ],
-    ['node-opus', (opus) => ({ Encoder: opus.OpusEncoder })]
+    ['node-opus', (opus) => ({ Encoder: opus.OpusEncoder })],
 ];
 
 let Opus: { Encoder?: IEncoder; name?: string } = {};
@@ -194,7 +196,11 @@ export class OpusStream extends Transform {
      */
     constructor(options = {} as IOpusStreamInit) {
         if (!loadOpus().Encoder) {
-            throw Error(`Could not find an Opus module! Please install one of ${OPUS_MOD_REGISTRY.map((o) => o[0]).join(', ')}.`);
+            throw Error(
+                `Could not find an Opus module! Please install one of ${OPUS_MOD_REGISTRY.map((o) => o[0]).join(
+                    ', ',
+                )}.`,
+            );
         }
         super(Object.assign({ readableObjectMode: true }, options));
 
@@ -243,7 +249,10 @@ export class OpusStream extends Transform {
      * @public
      */
     setBitrate(bitrate: number) {
-        (this.encoder!.applyEncoderCTL! || this.encoder!.encoderCTL).apply(this.encoder!, [CTL.BITRATE, Math.min(128e3, Math.max(16e3, bitrate))]);
+        (this.encoder!.applyEncoderCTL! || this.encoder!.encoderCTL).apply(this.encoder!, [
+            CTL.BITRATE,
+            Math.min(128e3, Math.max(16e3, bitrate)),
+        ]);
     }
 
     /**
@@ -260,7 +269,10 @@ export class OpusStream extends Transform {
      * @param {number} [percentage] a percentage (represented between 0 and 1)
      */
     setPLP(percentage: number) {
-        (this.encoder!.applyEncoderCTL! || this.encoder!.encoderCTL).apply(this.encoder!, [CTL.PLP, Math.min(100, Math.max(0, percentage * 100))]);
+        (this.encoder!.applyEncoderCTL! || this.encoder!.encoderCTL).apply(this.encoder!, [
+            CTL.PLP,
+            Math.min(100, Math.max(0, percentage * 100)),
+        ]);
     }
 
     _final(cb: () => void) {
@@ -361,7 +373,7 @@ export class OpusDecoder extends OpusStream {
                 signed: true,
                 version: chunk.readUInt8(8),
                 preSkip: chunk.readUInt16LE(10),
-                gain: chunk.readUInt16LE(16)
+                gain: chunk.readUInt16LE(16),
             });
             return done();
         }

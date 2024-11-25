@@ -7,7 +7,12 @@ import type { Buffer } from 'node:buffer';
 import { EventEmitter } from 'node:events';
 import type { GatewayVoiceServerUpdateDispatchData, GatewayVoiceStateUpdateDispatchData } from 'discord-api-types/v10';
 import type { JoinConfig } from './DataStore';
-import { getVoiceConnection, createJoinVoiceChannelPayload, trackVoiceConnection, untrackVoiceConnection } from './DataStore';
+import {
+    getVoiceConnection,
+    createJoinVoiceChannelPayload,
+    trackVoiceConnection,
+    untrackVoiceConnection,
+} from './DataStore';
 import type { AudioPlayer } from './audio/AudioPlayer';
 import type { PlayerSubscription } from './audio/PlayerSubscription';
 import { Networking, NetworkingStatusCode, type NetworkingState } from './networking/Networking';
@@ -43,7 +48,7 @@ export enum VoiceConnectionStatus {
     /**
      * Sending a packet to the main Discord gateway to indicate we want to change our voice state.
      */
-    Signalling = 'signalling'
+    Signalling = 'signalling',
 }
 
 /**
@@ -78,7 +83,7 @@ export enum VoiceConnectionDisconnectReason {
     /**
      * When a manual disconnect was requested.
      */
-    Manual
+    Manual,
 }
 
 /**
@@ -116,7 +121,9 @@ export interface VoiceConnectionDisconnectedWebSocketState extends VoiceConnecti
  * The states that a VoiceConnection can be in when it is not connected to a Discord voice server nor is
  * it attempting to connect. You can manually attempt to connect using VoiceConnection#reconnect.
  */
-export type VoiceConnectionDisconnectedState = VoiceConnectionDisconnectedOtherState | VoiceConnectionDisconnectedWebSocketState;
+export type VoiceConnectionDisconnectedState =
+    | VoiceConnectionDisconnectedOtherState
+    | VoiceConnectionDisconnectedWebSocketState;
 
 /**
  * The state that a VoiceConnection will be in when it is establishing a connection to a Discord
@@ -152,7 +159,12 @@ export interface VoiceConnectionDestroyedState {
 /**
  * The various states that a voice connection can be in.
  */
-export type VoiceConnectionState = VoiceConnectionConnectingState | VoiceConnectionDestroyedState | VoiceConnectionDisconnectedState | VoiceConnectionReadyState | VoiceConnectionSignallingState;
+export type VoiceConnectionState =
+    | VoiceConnectionConnectingState
+    | VoiceConnectionDestroyedState
+    | VoiceConnectionDisconnectedState
+    | VoiceConnectionReadyState
+    | VoiceConnectionSignallingState;
 
 export interface VoiceConnection extends EventEmitter {
     /**
@@ -178,7 +190,10 @@ export interface VoiceConnection extends EventEmitter {
      *
      * @eventProperty
      */
-    on<Event extends VoiceConnectionStatus>(event: Event, listener: (oldState: VoiceConnectionState, newState: VoiceConnectionState & { status: Event }) => void): this;
+    on<Event extends VoiceConnectionStatus>(
+        event: Event,
+        listener: (oldState: VoiceConnectionState, newState: VoiceConnectionState & { status: Event }) => void,
+    ): this;
 }
 
 /**
@@ -237,14 +252,14 @@ export class VoiceConnection extends EventEmitter {
         const adapter = options.adapterCreator({
             onVoiceServerUpdate: (data) => this.addServerPacket(data),
             onVoiceStateUpdate: (data) => this.addStatePacket(data),
-            destroy: () => this.destroy(false)
+            destroy: () => this.destroy(false),
         });
 
         this._state = { status: VoiceConnectionStatus.Signalling, adapter };
 
         this.packets = {
             server: undefined,
-            state: undefined
+            state: undefined,
         };
 
         this.joinConfig = joinConfig;
@@ -284,7 +299,10 @@ export class VoiceConnection extends EventEmitter {
         }
 
         // If destroyed, the adapter can also be destroyed so it can be cleaned up by the user
-        if (oldState.status !== VoiceConnectionStatus.Destroyed && newState.status === VoiceConnectionStatus.Destroyed) {
+        if (
+            oldState.status !== VoiceConnectionStatus.Destroyed &&
+            newState.status === VoiceConnectionStatus.Destroyed
+        ) {
             oldState.adapter.destroy();
         }
 
@@ -314,7 +332,7 @@ export class VoiceConnection extends EventEmitter {
             this.state = {
                 ...this.state,
                 status: VoiceConnectionStatus.Disconnected,
-                reason: VoiceConnectionDisconnectReason.EndpointRemoved
+                reason: VoiceConnectionDisconnectReason.EndpointRemoved,
             };
         }
     }
@@ -359,9 +377,9 @@ export class VoiceConnection extends EventEmitter {
                 serverId: server.guild_id,
                 token: server.token,
                 sessionId: state.session_id,
-                userId: state.user_id
+                userId: state.user_id,
             },
-            Boolean(this.debug)
+            Boolean(this.debug),
         );
 
         networking.once('close', this.onNetworkingClose);
@@ -372,7 +390,7 @@ export class VoiceConnection extends EventEmitter {
         this.state = {
             ...this.state,
             status: VoiceConnectionStatus.Connecting,
-            networking
+            networking,
         };
     }
 
@@ -396,19 +414,19 @@ export class VoiceConnection extends EventEmitter {
                 ...this.state,
                 status: VoiceConnectionStatus.Disconnected,
                 reason: VoiceConnectionDisconnectReason.WebSocketClose,
-                closeCode: code
+                closeCode: code,
             };
         } else {
             this.state = {
                 ...this.state,
-                status: VoiceConnectionStatus.Signalling
+                status: VoiceConnectionStatus.Signalling,
             };
             this.rejoinAttempts++;
             if (!this.state.adapter.sendPayload(createJoinVoiceChannelPayload(this.joinConfig))) {
                 this.state = {
                     ...this.state,
                     status: VoiceConnectionStatus.Disconnected,
-                    reason: VoiceConnectionDisconnectReason.AdapterUnavailable
+                    reason: VoiceConnectionDisconnectReason.AdapterUnavailable,
                 };
             }
         }
@@ -422,17 +440,18 @@ export class VoiceConnection extends EventEmitter {
      */
     private onNetworkingStateChange(oldState: NetworkingState, newState: NetworkingState) {
         if (oldState.code === newState.code) return;
-        if (this.state.status !== VoiceConnectionStatus.Connecting && this.state.status !== VoiceConnectionStatus.Ready) return;
+        if (this.state.status !== VoiceConnectionStatus.Connecting && this.state.status !== VoiceConnectionStatus.Ready)
+            return;
 
         if (newState.code === NetworkingStatusCode.Ready) {
             this.state = {
                 ...this.state,
-                status: VoiceConnectionStatus.Ready
+                status: VoiceConnectionStatus.Ready,
             };
         } else if (newState.code !== NetworkingStatusCode.Closed) {
             this.state = {
                 ...this.state,
-                status: VoiceConnectionStatus.Connecting
+                status: VoiceConnectionStatus.Connecting,
             };
         }
     }
@@ -508,7 +527,7 @@ export class VoiceConnection extends EventEmitter {
         }
 
         this.state = {
-            status: VoiceConnectionStatus.Destroyed
+            status: VoiceConnectionStatus.Destroyed,
         };
     }
 
@@ -518,7 +537,10 @@ export class VoiceConnection extends EventEmitter {
      * @returns `true` if the connection was successfully disconnected
      */
     public disconnect() {
-        if (this.state.status === VoiceConnectionStatus.Destroyed || this.state.status === VoiceConnectionStatus.Signalling) {
+        if (
+            this.state.status === VoiceConnectionStatus.Destroyed ||
+            this.state.status === VoiceConnectionStatus.Signalling
+        ) {
             return false;
         }
 
@@ -528,7 +550,7 @@ export class VoiceConnection extends EventEmitter {
                 adapter: this.state.adapter,
                 subscription: this.state.subscription,
                 status: VoiceConnectionStatus.Disconnected,
-                reason: VoiceConnectionDisconnectReason.AdapterUnavailable
+                reason: VoiceConnectionDisconnectReason.AdapterUnavailable,
             };
             return false;
         }
@@ -536,7 +558,7 @@ export class VoiceConnection extends EventEmitter {
         this.state = {
             adapter: this.state.adapter,
             reason: VoiceConnectionDisconnectReason.Manual,
-            status: VoiceConnectionStatus.Disconnected
+            status: VoiceConnectionStatus.Disconnected,
         };
         return true;
     }
@@ -564,7 +586,7 @@ export class VoiceConnection extends EventEmitter {
             if (notReady) {
                 this.state = {
                     ...this.state,
-                    status: VoiceConnectionStatus.Signalling
+                    status: VoiceConnectionStatus.Signalling,
                 };
             }
 
@@ -575,7 +597,7 @@ export class VoiceConnection extends EventEmitter {
             adapter: this.state.adapter,
             subscription: this.state.subscription,
             status: VoiceConnectionStatus.Disconnected,
-            reason: VoiceConnectionDisconnectReason.AdapterUnavailable
+            reason: VoiceConnectionDisconnectReason.AdapterUnavailable,
         };
         return false;
     }
@@ -606,7 +628,7 @@ export class VoiceConnection extends EventEmitter {
 
         this.state = {
             ...this.state,
-            subscription
+            subscription,
         };
 
         return subscription;
@@ -621,16 +643,19 @@ export class VoiceConnection extends EventEmitter {
      * WebSocket connection and UDP socket must have had at least one ping-pong exchange.
      */
     public get ping() {
-        if (this.state.status === VoiceConnectionStatus.Ready && this.state.networking.state.code === NetworkingStatusCode.Ready) {
+        if (
+            this.state.status === VoiceConnectionStatus.Ready &&
+            this.state.networking.state.code === NetworkingStatusCode.Ready
+        ) {
             return {
                 ws: this.state.networking.state.ws.ping,
-                udp: this.state.networking.state.udp.ping
+                udp: this.state.networking.state.udp.ping,
             };
         }
 
         return {
             ws: undefined,
-            udp: undefined
+            udp: undefined,
         };
     }
 
@@ -643,7 +668,7 @@ export class VoiceConnection extends EventEmitter {
         if (this.state.status !== VoiceConnectionStatus.Destroyed && this.state.subscription === subscription) {
             this.state = {
                 ...this.state,
-                subscription: undefined
+                subscription: undefined,
             };
         }
     }
@@ -663,13 +688,13 @@ export function createVoiceConnection(joinConfig: JoinConfig, options: CreateVoi
             existing.rejoin({
                 channelId: joinConfig.channelId,
                 selfDeaf: joinConfig.selfDeaf,
-                selfMute: joinConfig.selfMute
+                selfMute: joinConfig.selfMute,
             });
         } else if (!existing.state.adapter.sendPayload(payload)) {
             existing.state = {
                 ...existing.state,
                 status: VoiceConnectionStatus.Disconnected,
-                reason: VoiceConnectionDisconnectReason.AdapterUnavailable
+                reason: VoiceConnectionDisconnectReason.AdapterUnavailable,
             };
         }
 
@@ -678,11 +703,14 @@ export function createVoiceConnection(joinConfig: JoinConfig, options: CreateVoi
 
     const voiceConnection = new VoiceConnection(joinConfig, options);
     trackVoiceConnection(voiceConnection);
-    if (voiceConnection.state.status !== VoiceConnectionStatus.Destroyed && !voiceConnection.state.adapter.sendPayload(payload)) {
+    if (
+        voiceConnection.state.status !== VoiceConnectionStatus.Destroyed &&
+        !voiceConnection.state.adapter.sendPayload(payload)
+    ) {
         voiceConnection.state = {
             ...voiceConnection.state,
             status: VoiceConnectionStatus.Disconnected,
-            reason: VoiceConnectionDisconnectReason.AdapterUnavailable
+            reason: VoiceConnectionDisconnectReason.AdapterUnavailable,
         };
     }
 

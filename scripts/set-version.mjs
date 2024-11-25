@@ -12,7 +12,9 @@ if (!version) {
 }
 
 if (!VERSION_PATTERN.test(version)) {
-    console.error('Invalid version format. Use semver format: <major>.<minor>.<patch> or <major>.<minor>.<patch>-<tag>.<patch>');
+    console.error(
+        'Invalid version format. Use semver format: <major>.<minor>.<patch> or <major>.<minor>.<patch>-<tag>.<patch>',
+    );
     process.exit(1);
 }
 

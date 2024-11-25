@@ -4,6 +4,6 @@ export default defineConfig({
     test: {
         dir: `${__dirname}/__test__`,
         passWithNoTests: true,
-        watch: false
-    }
+        watch: false,
+    },
 });

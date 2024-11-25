@@ -37,7 +37,8 @@ export class AttachmentExtractor extends BaseExtractor {
         switch (context.type) {
             case QueryType.ARBITRARY: {
                 const data = (await downloadStream(query, context.requestOptions)) as IncomingMessage;
-                if (!ATTACHMENT_HEADER.some((r) => !!data.headers['content-type']?.startsWith(r))) return this.emptyResponse();
+                if (!ATTACHMENT_HEADER.some((r) => !!data.headers['content-type']?.startsWith(r)))
+                    return this.emptyResponse();
 
                 const trackInfo = {
                     title: (
@@ -55,7 +56,7 @@ export class AttachmentExtractor extends BaseExtractor {
                     author: ((data as any).client?.servername as string) || 'Attachment',
                     // eslint-disable-next-line
                     description: ((data as any).client?.servername as string) || 'Attachment',
-                    url: data.url || query
+                    url: data.url || query,
                 };
 
                 try {
@@ -67,7 +68,7 @@ export class AttachmentExtractor extends BaseExtractor {
                         mediaplex.probeStream(data),
                         new Promise((_, r) => {
                             setTimeout(() => r(new Error('Timeout')), timeout);
-                        })
+                        }),
                     ])) as Awaited<ReturnType<typeof mediaplex.probeStream>>;
 
                     if (result) {
@@ -100,7 +101,7 @@ export class AttachmentExtractor extends BaseExtractor {
                     metadata: trackInfo,
                     async requestMetadata() {
                         return trackInfo;
-                    }
+                    },
                 });
 
                 track.extractor = this;
@@ -123,7 +124,7 @@ export class AttachmentExtractor extends BaseExtractor {
                     engine: query,
                     author: 'Attachment',
                     description: 'Attachment',
-                    url: query
+                    url: query,
                 };
 
                 try {
@@ -136,12 +137,12 @@ export class AttachmentExtractor extends BaseExtractor {
                         mediaplex.probeStream(
                             createReadStream(query, {
                                 start: 0,
-                                end: 1024 * 1024 * 10
-                            })
+                                end: 1024 * 1024 * 10,
+                            }),
                         ),
                         new Promise((_, r) => {
                             setTimeout(() => r(new Error('Timeout')), timeout);
-                        })
+                        }),
                     ])) as Awaited<ReturnType<typeof mediaplex.probeStream>>;
 
                     if (result) {
@@ -174,7 +175,7 @@ export class AttachmentExtractor extends BaseExtractor {
                     metadata: trackInfo,
                     async requestMetadata() {
                         return trackInfo;
-                    }
+                    },
                 });
 
                 track.extractor = this;

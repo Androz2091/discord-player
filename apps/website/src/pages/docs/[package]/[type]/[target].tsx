@@ -42,11 +42,27 @@ export default function DocsPage() {
                 const lib = libraries.find((libr) => libr.name === val)!;
                 if (!lib) return;
                 const navigationConfig = {
-                    type: lib.classes.length ? 'class' : lib.functions.length ? 'function' : lib.types.length ? 'type' : '',
-                    target: lib.classes.length ? lib.classes[0].data.name : lib.functions.length ? lib.functions[0].data.name : lib.types.length ? lib.types[0].data.name : ''
+                    type: lib.classes.length
+                        ? 'class'
+                        : lib.functions.length
+                        ? 'function'
+                        : lib.types.length
+                        ? 'type'
+                        : '',
+                    target: lib.classes.length
+                        ? lib.classes[0].data.name
+                        : lib.functions.length
+                        ? lib.functions[0].data.name
+                        : lib.types.length
+                        ? lib.types[0].data.name
+                        : '',
                 };
 
-                router.push(`/docs/${encodeURIComponent(lib.name)}/${encodeURIComponent(navigationConfig.type)}/${encodeURIComponent(navigationConfig.target)}`);
+                router.push(
+                    `/docs/${encodeURIComponent(lib.name)}/${encodeURIComponent(
+                        navigationConfig.type,
+                    )}/${encodeURIComponent(navigationConfig.target)}`,
+                );
             }}
             value={currentLib.name}
             options={libNames.map((l) => ({ label: l, value: l }))}
@@ -68,7 +84,7 @@ export default function DocsPage() {
                                             return {
                                                 lib: currentLib.name,
                                                 name: m.data.name,
-                                                type: 'class'
+                                                type: 'class',
                                             };
                                         })}
                                         link={(name) => {
@@ -84,7 +100,7 @@ export default function DocsPage() {
                                             return {
                                                 lib: currentLib.name,
                                                 name: m.data.name,
-                                                type: 'function'
+                                                type: 'function',
                                             };
                                         })}
                                         link={(name) => {
@@ -100,7 +116,7 @@ export default function DocsPage() {
                                             return {
                                                 lib: currentLib.name,
                                                 name: m.data.name,
-                                                type: 'type'
+                                                type: 'type',
                                             };
                                         })}
                                         link={(name) => {
@@ -129,11 +145,13 @@ export default function DocsPage() {
                                                         return {
                                                             lib: currentLib.name,
                                                             name: m.data.name,
-                                                            type: 'class'
+                                                            type: 'class',
                                                         };
                                                     })}
                                                     link={(name) => {
-                                                        return `/docs/${encodeURIComponent(currentLib.name)}/class/${name}`;
+                                                        return `/docs/${encodeURIComponent(
+                                                            currentLib.name,
+                                                        )}/class/${name}`;
                                                     }}
                                                     icon={<VscSymbolClass className="h-5 w-5" />}
                                                 />
@@ -145,11 +163,13 @@ export default function DocsPage() {
                                                         return {
                                                             lib: currentLib.name,
                                                             name: m.data.name,
-                                                            type: 'function'
+                                                            type: 'function',
                                                         };
                                                     })}
                                                     link={(name) => {
-                                                        return `/docs/${encodeURIComponent(currentLib.name)}/function/${name}`;
+                                                        return `/docs/${encodeURIComponent(
+                                                            currentLib.name,
+                                                        )}/function/${name}`;
                                                     }}
                                                     icon={<VscSymbolMethod className="h-5 w-5" />}
                                                 />
@@ -161,11 +181,13 @@ export default function DocsPage() {
                                                         return {
                                                             lib: currentLib.name,
                                                             name: m.data.name,
-                                                            type: 'type'
+                                                            type: 'type',
                                                         };
                                                     })}
                                                     link={(name) => {
-                                                        return `/docs/${encodeURIComponent(currentLib.name)}/type/${name}`;
+                                                        return `/docs/${encodeURIComponent(
+                                                            currentLib.name,
+                                                        )}/type/${name}`;
                                                     }}
                                                     icon={<VscSymbolInterface className="h-5 w-5" />}
                                                 />

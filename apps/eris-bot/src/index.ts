@@ -3,7 +3,7 @@ import Eris from 'eris';
 import { Player, createErisCompat } from 'discord-player';
 
 const client = Eris(process.env.DISCORD_TOKEN!, {
-    intents: ['all']
+    intents: ['all'],
 });
 
 const player = new Player(createErisCompat(client));
@@ -20,13 +20,19 @@ client.once('ready', () => {
 player.events.on('playerStart', async (queue, track) => {
     const meta = queue.metadata as { channel: string };
 
-    await client.createMessage(meta.channel, `Now playing: ${track.title} (Extractor: \`${track.extractor?.identifier}\`/Bridge: \`${track.bridgedExtractor?.identifier}\`)`);
+    await client.createMessage(
+        meta.channel,
+        `Now playing: ${track.title} (Extractor: \`${track.extractor?.identifier}\`/Bridge: \`${track.bridgedExtractor?.identifier}\`)`,
+    );
 });
 
 player.events.on('playerFinish', async (queue, track) => {
     const meta = queue.metadata as { channel: string };
 
-    await client.createMessage(meta.channel, `Finished track: ${track.title} (Extractor: \`${track.extractor?.identifier}\`)/Bridge: \`${track.bridgedExtractor?.identifier}\`)`);
+    await client.createMessage(
+        meta.channel,
+        `Finished track: ${track.title} (Extractor: \`${track.extractor?.identifier}\`)/Bridge: \`${track.bridgedExtractor?.identifier}\`)`,
+    );
 });
 
 client.on('messageCreate', async (message) => {
@@ -49,11 +55,14 @@ client.on('messageCreate', async (message) => {
                 requestedBy: message.author.id,
                 nodeOptions: {
                     metadata: { channel: message.channel.id },
-                    volume: 50
-                }
+                    volume: 50,
+                },
             });
 
-            return client.createMessage(message.channel.id, `Loaded: ${track.title} (Extractor: \`${track.extractor?.identifier}\`)/Bridge: \`${track.bridgedExtractor?.identifier}\`)`);
+            return client.createMessage(
+                message.channel.id,
+                `Loaded: ${track.title} (Extractor: \`${track.extractor?.identifier}\`)/Bridge: \`${track.bridgedExtractor?.identifier}\`)`,
+            );
         }
         case 'pause': {
             const queue = player.queues.get(message.guildID);

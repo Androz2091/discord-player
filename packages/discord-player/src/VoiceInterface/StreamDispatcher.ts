@@ -9,7 +9,7 @@ import {
     StreamType,
     VoiceConnection,
     VoiceConnectionStatus,
-    VoiceConnectionDisconnectReason
+    VoiceConnectionDisconnectReason,
 } from 'discord-voip';
 import { StageChannel, VoiceChannel } from 'discord.js';
 import type { Readable } from 'stream';
@@ -65,7 +65,13 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
      * @param {VoiceChannel|StageChannel} channel The connected channel
      * @private
      */
-    constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel, public queue: GuildQueue, public readonly connectionTimeout: number = 20000, audioPlayer?: AudioPlayer) {
+    constructor(
+        connection: VoiceConnection,
+        channel: VoiceChannel | StageChannel,
+        public queue: GuildQueue,
+        public readonly connectionTimeout: number = 20000,
+        audioPlayer?: AudioPlayer,
+    ) {
         super();
 
         /**
@@ -81,7 +87,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
         this.audioPlayer =
             audioPlayer ||
             createAudioPlayer({
-                debug: this.queue.hasDebugger
+                debug: this.queue.hasDebugger,
             });
 
         /**
@@ -115,7 +121,11 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
                 if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
                     try {
-                        await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, this.connectionTimeout);
+                        await entersState(
+                            this.voiceConnection,
+                            VoiceConnectionStatus.Connecting,
+                            this.connectionTimeout,
+                        );
                     } catch {
                         try {
                             if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.destroy();
@@ -248,26 +258,26 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             ? this.dsp.create(src, {
                   dsp: {
                       filters: ops?.defaultFilters,
-                      disabled: ops?.disableFilters
+                      disabled: ops?.disableFilters,
                   },
                   biquad: ops?.biquadFilter
                       ? {
                             filter: ops.biquadFilter,
-                            disabled: ops?.disableBiquad
+                            disabled: ops?.disableBiquad,
                         }
                       : undefined,
                   resampler: {
                       targetSampleRate: ops?.sampleRate,
-                      disabled: ops?.disableResampler
+                      disabled: ops?.disableResampler,
                   },
                   equalizer: {
                       bandMultiplier: ops?.eq,
-                      disabled: ops?.disableEqualizer
+                      disabled: ops?.disableEqualizer,
                   },
                   volume: {
                       volume: ops?.volume,
-                      disabled: ops?.disableVolume
-                  }
+                      disabled: ops?.disableVolume,
+                  },
               })
             : src;
 
@@ -276,8 +286,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             () =>
                 ({
                     stream: stream,
-                    type: ops?.type ?? StreamType.Arbitrary
-                } as PostProcessedResult)
+                    type: ops?.type ?? StreamType.Arbitrary,
+                } as PostProcessedResult),
         );
 
         if (this.queue.hasDebugger) this.queue.debug('Preparing AudioResource...');
@@ -285,7 +295,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             inputType: postStream?.type ?? ops?.type ?? StreamType.Arbitrary,
             metadata: ops?.data,
             // volume controls happen from AudioFilter DSP utility
-            inlineVolume: false
+            inlineVolume: false,
         });
 
         return this.audioResource;

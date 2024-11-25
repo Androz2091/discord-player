@@ -9,7 +9,7 @@ describe('Player', () => {
     });
 
     const client = new Client({
-        intents: [IntentsBitField.Flags.GuildVoiceStates]
+        intents: [IntentsBitField.Flags.GuildVoiceStates],
     });
 
     it('should create player', () => {
@@ -43,7 +43,7 @@ describe('Player', () => {
         // not actual ffmpeg path. just dummy
         new Player(client, {
             ffmpegPath: './packages/ffmpeg',
-            ignoreInstance: true
+            ignoreInstance: true,
         });
 
         expect(process.env.FFMPEG_PATH).toBe('./packages/ffmpeg');

@@ -15,7 +15,7 @@ import {
     removeZeroWidth,
     replaceNbsp,
     replaceSmartQuotes,
-    removeCleanExplicit
+    removeCleanExplicit,
 } from '@web-scrobbler/metadata-filter';
 import { TrackSource } from '../types/types';
 
@@ -73,7 +73,7 @@ class Util {
             days: round(milliseconds / 86400000),
             hours: round(milliseconds / 3600000) % 24,
             minutes: round(milliseconds / 60000) % 60,
-            seconds: round(milliseconds / 1000) % 60
+            seconds: round(milliseconds / 1000) % 60,
         } as TimeData;
     }
 
@@ -141,7 +141,7 @@ class Util {
                     replaceNbsp,
                     replaceSmartQuotes,
                     removeCleanExplicit
-                ]
+                ],
             };
             const spotifyFilter = createFilter(filterOpts);
             spotifyFilter.extend(createSpotifyFilter());
@@ -213,7 +213,7 @@ class Util {
     static warn(message: string, code = 'DeprecationWarning', detail?: string) {
         process.emitWarning(message, {
             code,
-            detail
+            detail,
         });
     }
 

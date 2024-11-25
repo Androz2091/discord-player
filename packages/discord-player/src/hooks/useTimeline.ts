@@ -1,20 +1,34 @@
+import { Track } from '../fabric';
+import { NodeResolvable, PlayerTimestamp } from '../queue';
 import { useHooksContext } from './common';
 
 export interface TimelineDispatcherOptions {
     ignoreFilters: boolean;
+    node: NodeResolvable;
+}
+
+export interface GuildQueueTimeline {
+    readonly timestamp: PlayerTimestamp;
+    readonly volume: number;
+    readonly paused: boolean;
+    readonly track: Track<unknown> | null;
+    pause(): boolean;
+    resume(): boolean;
+    setVolume(vol: number): boolean;
+    setPosition(time: number): Promise<boolean>;
 }
 
 /**
  * Fetch or manipulate current track
- * @param node Guild queue node resolvable
  * @param options Options for timeline dispatcher
  */
-export function useTimeline(options?: Partial<TimelineDispatcherOptions>) {
+export function useTimeline(): GuildQueueTimeline | null;
+export function useTimeline(options?: Partial<TimelineDispatcherOptions>): GuildQueueTimeline | null {
     const { context, player } = useHooksContext('useTimeline');
-    const queue = player.queues.get(context.guild.id);
+    const queue = player.queues.get(options?.node ?? context.guild.id);
     if (!queue) return null;
 
-    return Object.preventExtensions({
+    const timeline = Object.preventExtensions({
         get timestamp() {
             return queue.node.getTimestamp(options?.ignoreFilters)!;
         },
@@ -38,6 +52,8 @@ export function useTimeline(options?: Partial<TimelineDispatcherOptions>) {
         },
         async setPosition(time: number) {
             return queue.node.seek(time);
-        }
+        },
     });
+
+    return timeline;
 }

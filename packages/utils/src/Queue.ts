@@ -13,7 +13,7 @@ export class Queue<T = unknown> {
         Object.defineProperty(this, 'store', {
             writable: true,
             configurable: true,
-            enumerable: false
+            enumerable: false,
         });
     }
 
@@ -125,7 +125,7 @@ export class Queue<T = unknown> {
             showHidden: false,
             colors: true,
             depth: 1,
-            maxArrayLength: 5
+            maxArrayLength: 5,
         })}\n}`;
     }
 }

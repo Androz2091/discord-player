@@ -14,7 +14,7 @@ function getData(name) {
     return [
         { name: 'package.json', data: getPackageJSON(name) },
         { name: 'README.md', data: getReadMe(name) },
-        { name: 'tsconfig.json', data: getTSConfig() }
+        { name: 'tsconfig.json', data: getTSConfig() },
     ];
 }
 
@@ -22,10 +22,10 @@ function getTSConfig() {
     return JSON.stringify(
         {
             extends: '@discord-player/tsconfig/base.json',
-            include: ['src/**/*']
+            include: ['src/**/*'],
         },
         null,
-        4
+        4,
     );
 }
 
@@ -56,24 +56,24 @@ function getPackageJSON(name) {
             files: ['dist'],
             repository: {
                 type: 'git',
-                url: 'git+https://github.com/Androz2091/discord-player.git'
+                url: 'git+https://github.com/Androz2091/discord-player.git',
             },
             scripts: {
                 build: 'tsup',
                 'build:check': 'tsc --noEmit',
                 lint: 'eslint src --ext .ts --fix',
                 test: 'vitest',
-                coverage: 'vitest run --coverage'
+                coverage: 'vitest run --coverage',
             },
             bugs: {
-                url: 'https://github.com/Androz2091/discord-player/issues'
+                url: 'https://github.com/Androz2091/discord-player/issues',
             },
             devDependencies: {
-                '@discord-player/tsconfig': 'workspace:^'
-            }
+                '@discord-player/tsconfig': 'workspace:^',
+            },
         },
         null,
-        2
+        2,
     );
 
     return packageJson;
@@ -84,7 +84,8 @@ async function main() {
     const match = destName.match(DP_PKG);
     const name = match?.[1] || destName;
 
-    if (await exists(`${TARGET_DIR}/${name}`)) return console.log(chalk.redBright(`✘ Cannot create ${name} as it already exists.`));
+    if (await exists(`${TARGET_DIR}/${name}`))
+        return console.log(chalk.redBright(`✘ Cannot create ${name} as it already exists.`));
 
     console.log(chalk.cyanBright(`▲ Generating project...`));
     await ensureDir(`${TARGET_DIR}/${name}`);

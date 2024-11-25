@@ -6,13 +6,13 @@ import { UA, fetch } from './helper';
 function getHTML(link: string): Promise<HTMLElement | null> {
     return fetch(link, {
         headers: {
-            'User-Agent': UA
-        }
+            'User-Agent': UA,
+        },
     })
         .then((r) => r.text())
         .then(
             (txt) => parse(txt),
-            () => null
+            () => null,
         );
 }
 
@@ -33,13 +33,21 @@ function parseDuration(d: string) {
             r('hours', 'H'),
             r('minutes', 'M'),
             r('seconds', 'S'),
-            ')?' // end optional time
-        ].join('')
+            ')?', // end optional time
+        ].join(''),
     );
     const test = regex.exec(d);
     if (!test || !test.groups) return '0:00';
 
-    const dur = [test.groups.years, test.groups.months, test.groups.weeks, test.groups.days, test.groups.hours, test.groups.minutes, test.groups.seconds];
+    const dur = [
+        test.groups.years,
+        test.groups.months,
+        test.groups.weeks,
+        test.groups.days,
+        test.groups.hours,
+        test.groups.minutes,
+        test.groups.seconds,
+    ];
 
     return (
         dur
@@ -79,12 +87,12 @@ export class AppleMusic {
                     ? makeImage({
                           url: track.artwork.dictionary.url,
                           height: track.artwork.dictionary.height,
-                          width: track.artwork.dictionary.width
+                          width: track.artwork.dictionary.width,
                       })
                     : 'https://music.apple.com/assets/favicon/favicon-180.png',
                 artist: {
-                    name: track.subtitleLinks?.[0]?.title ?? 'Unknown Artist'
-                }
+                    name: track.subtitleLinks?.[0]?.title ?? 'Unknown Artist',
+                },
             }));
         } catch {
             return [];
@@ -96,9 +104,15 @@ export class AppleMusic {
             const metaTags = res.getElementsByTagName('meta');
             if (!metaTags.length) return null;
 
-            const title = metaTags.find((r) => r.getAttribute('name') === 'apple:title')?.getAttribute('content') || res.querySelector('title')?.innerText || name;
-            const contentId = metaTags.find((r) => r.getAttribute('name') === 'apple:content_id')?.getAttribute('content') || id;
-            const durationRaw = metaTags.find((r) => r.getAttribute('property') === 'music:song:duration')?.getAttribute('content');
+            const title =
+                metaTags.find((r) => r.getAttribute('name') === 'apple:title')?.getAttribute('content') ||
+                res.querySelector('title')?.innerText ||
+                name;
+            const contentId =
+                metaTags.find((r) => r.getAttribute('name') === 'apple:content_id')?.getAttribute('content') || id;
+            const durationRaw = metaTags
+                .find((r) => r.getAttribute('property') === 'music:song:duration')
+                ?.getAttribute('content');
 
             const song = {
                 id: contentId,
@@ -111,11 +125,12 @@ export class AppleMusic {
                 title,
                 url: link,
                 thumbnail:
-                    metaTags.find((r) => ['og:image:secure_url', 'og:image'].includes(r.getAttribute('property')!))?.getAttribute('content') ||
-                    'https://music.apple.com/assets/favicon/favicon-180.png',
+                    metaTags
+                        .find((r) => ['og:image:secure_url', 'og:image'].includes(r.getAttribute('property')!))
+                        ?.getAttribute('content') || 'https://music.apple.com/assets/favicon/favicon-180.png',
                 artist: {
-                    name: res.querySelector('.song-subtitles__artists>a')?.textContent?.trim() || 'Apple Music'
-                }
+                    name: res.querySelector('.song-subtitles__artists>a')?.textContent?.trim() || 'Apple Music',
+                },
             };
 
             return song;
@@ -140,7 +155,10 @@ export class AppleMusic {
 
         try {
             const datasrc =
-                res.getElementById('serialized-server-data')?.innerText || res.innerText.split('<script type="application/json" id="serialized-server-data">')?.[1]?.split('</script>')?.[0];
+                res.getElementById('serialized-server-data')?.innerText ||
+                res.innerText
+                    .split('<script type="application/json" id="serialized-server-data">')?.[1]
+                    ?.split('</script>')?.[0];
             if (!datasrc) throw 'not found';
             const data = JSON.parse(datasrc)[0].data.seoData;
             const song = data.ogSongs[0]?.attributes;
@@ -154,19 +172,19 @@ export class AppleMusic {
                     ? makeImage({
                           url: song.artwork.url,
                           height: song.artwork.height,
-                          width: song.artwork.width
+                          width: song.artwork.width,
                       })
                     : data.artworkUrl
                     ? makeImage({
                           height: data.height,
                           width: data.width,
                           url: data.artworkUrl,
-                          ext: data.fileType || 'jpg'
+                          ext: data.fileType || 'jpg',
                       })
                     : 'https://music.apple.com/assets/favicon/favicon-180.png',
                 artist: {
-                    name: song?.artistName || data.socialTitle || 'Apple Music'
-                }
+                    name: song?.artistName || data.socialTitle || 'Apple Music',
+                },
             };
         } catch {
             return this.getSongInfoFallback(res, name, id, link);
@@ -183,7 +201,10 @@ export class AppleMusic {
 
         try {
             const datasrc =
-                res.getElementById('serialized-server-data')?.innerText || res.innerText.split('<script type="application/json" id="serialized-server-data">')?.[1]?.split('</script>')?.[0];
+                res.getElementById('serialized-server-data')?.innerText ||
+                res.innerText
+                    .split('<script type="application/json" id="serialized-server-data">')?.[1]
+                    ?.split('</script>')?.[0];
             if (!datasrc) throw 'not found';
             const pl = JSON.parse(datasrc)[0].data.seoData;
             const thumbnail = pl.artworkUrl
@@ -191,7 +212,7 @@ export class AppleMusic {
                       height: pl.height,
                       width: pl.width,
                       url: pl.artworkUrl,
-                      ext: pl.fileType || 'jpg'
+                      ext: pl.fileType || 'jpg',
                   })
                 : 'https://music.apple.com/assets/favicon/favicon-180.png';
             return {
@@ -199,7 +220,7 @@ export class AppleMusic {
                 title: pl.appleTitle,
                 thumbnail,
                 artist: {
-                    name: pl.ogSongs?.[0]?.attributes?.artistName || 'Apple Music'
+                    name: pl.ogSongs?.[0]?.attributes?.artistName || 'Apple Music',
                 },
                 url: pl.url,
                 tracks:
@@ -215,14 +236,14 @@ export class AppleMusic {
                                 ? makeImage({
                                       url: song.artwork.url,
                                       height: song.artwork.height,
-                                      width: song.artwork.width
+                                      width: song.artwork.width,
                                   })
                                 : thumbnail,
                             artist: {
-                                name: song.artistName || 'Apple Music'
-                            }
+                                name: song.artistName || 'Apple Music',
+                            },
                         };
-                    }) || []
+                    }) || [],
             };
         } catch {
             return null;
@@ -239,7 +260,10 @@ export class AppleMusic {
 
         try {
             const datasrc =
-                res.getElementById('serialized-server-data')?.innerText || res.innerText.split('<script type="application/json" id="serialized-server-data">')?.[1]?.split('</script>')?.[0];
+                res.getElementById('serialized-server-data')?.innerText ||
+                res.innerText
+                    .split('<script type="application/json" id="serialized-server-data">')?.[1]
+                    ?.split('</script>')?.[0];
             if (!datasrc) throw 'not found';
             const pl = JSON.parse(datasrc)[0].data.seoData;
             const thumbnail = pl.artworkUrl
@@ -247,7 +271,7 @@ export class AppleMusic {
                       height: pl.height,
                       width: pl.width,
                       url: pl.artworkUrl,
-                      ext: pl.fileType || 'jpg'
+                      ext: pl.fileType || 'jpg',
                   })
                 : 'https://music.apple.com/assets/favicon/favicon-180.png';
             return {
@@ -255,7 +279,7 @@ export class AppleMusic {
                 title: pl.appleTitle,
                 thumbnail,
                 artist: {
-                    name: pl.ogSongs?.[0]?.attributes?.artistName || 'Apple Music'
+                    name: pl.ogSongs?.[0]?.attributes?.artistName || 'Apple Music',
                 },
                 url: pl.url,
                 tracks:
@@ -271,14 +295,14 @@ export class AppleMusic {
                                 ? makeImage({
                                       url: song.artwork.url,
                                       height: song.artwork.height,
-                                      width: song.artwork.width
+                                      width: song.artwork.width,
                                   })
                                 : thumbnail,
                             artist: {
-                                name: song.artistName || 'Apple Music'
-                            }
+                                name: song.artistName || 'Apple Music',
+                            },
                         };
-                    }) || []
+                    }) || [],
             };
         } catch {
             return null;

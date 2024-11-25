@@ -40,7 +40,11 @@ export class PCMTransformer extends Transform {
                 this.bits = 32;
                 break;
             default:
-                throw new TypeError(`Expected type to be one of ${(['s16be', 's16le', 's32be', 's32le'] as PCMType[]).join(', ')}, got "${options.type}"`);
+                throw new TypeError(
+                    `Expected type to be one of ${(['s16be', 's16le', 's32be', 's32le'] as PCMType[]).join(
+                        ', ',
+                    )}, got "${options.type}"`,
+                );
         }
 
         this.bytes = this.bits / 8;

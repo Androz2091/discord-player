@@ -3,7 +3,12 @@ import { GuildQueue, GuildQueueEvent } from './queue';
 import { Player } from './Player';
 import { Util } from './utils/Util';
 
-export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue, oldState: VoiceState, newState: VoiceState) {
+export async function defaultVoiceStateHandler(
+    player: Player,
+    queue: GuildQueue,
+    oldState: VoiceState,
+    newState: VoiceState,
+) {
     if (!queue || !queue.connection || !queue.channel) return;
 
     if (oldState.channelId && !newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
@@ -38,7 +43,11 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
     if (!oldState.channelId && newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
         if (newState.serverMute != null && oldState.serverMute !== newState.serverMute) {
             queue.node.setPaused(newState.serverMute);
-        } else if (newState.channel?.type === ChannelType.GuildStageVoice && newState.suppress != null && oldState.suppress !== newState.suppress) {
+        } else if (
+            newState.channel?.type === ChannelType.GuildStageVoice &&
+            newState.suppress != null &&
+            oldState.suppress !== newState.suppress
+        ) {
             queue.node.setPaused(newState.suppress);
             if (newState.suppress) {
                 newState.guild.members.me?.voice.setRequestToSpeak(true).catch(Util.noop);
@@ -69,7 +78,8 @@ export async function defaultVoiceStateHandler(player: Player, queue: GuildQueue
 
     if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
         if (newState.member?.id === newState.guild.members.me?.id) {
-            if (queue.connection && newState.member?.id === newState.guild.members.me?.id) queue.channel = newState.channel!;
+            if (queue.connection && newState.member?.id === newState.guild.members.me?.id)
+                queue.channel = newState.channel!;
             const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
             const channelEmpty = Util.isVoiceEmpty(queue.channel);
             if (!channelEmpty && emptyTimeout) {

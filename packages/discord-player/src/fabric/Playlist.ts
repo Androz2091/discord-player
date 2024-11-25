@@ -147,7 +147,7 @@ export class Playlist {
             type: this.type,
             source: this.source,
             author: this.author,
-            tracks: [] as TrackJSON[]
+            tracks: [] as TrackJSON[],
         };
 
         if (withTracks) payload.tracks = this.tracks.map((m) => m.toJSON(true));
@@ -170,7 +170,7 @@ export class Playlist {
             id: this.id,
             url: this.url,
             $type: SerializedType.Playlist,
-            $encoder_version: '[VI]{{inject}}[/VI]'
+            $encoder_version: '[VI]{{inject}}[/VI]',
         };
     }
 
@@ -180,10 +180,11 @@ export class Playlist {
      * @param data Serialized data
      */
     public static fromSerialized(player: Player, data: SerializedPlaylist) {
-        if (data.$type !== SerializedType.Playlist) throw Exceptions.ERR_INVALID_ARG_TYPE('data', 'SerializedPlaylist', 'malformed data');
+        if (data.$type !== SerializedType.Playlist)
+            throw Exceptions.ERR_INVALID_ARG_TYPE('data', 'SerializedPlaylist', 'malformed data');
         return new Playlist(player, {
             ...data,
-            tracks: data.tracks.map((m) => Track.fromSerialized(player, m))
+            tracks: data.tracks.map((m) => Track.fromSerialized(player, m)),
         });
     }
 
@@ -192,7 +193,10 @@ export class Playlist {
      * @param channel Voice channel on which this playlist shall be played
      * @param options Node initialization options
      */
-    public async play<T = unknown>(channel: GuildVoiceChannelResolvable, options?: PlayerNodeInitializerOptions<T>): Promise<PlayerNodeInitializationResult<T>> {
+    public async play<T = unknown>(
+        channel: GuildVoiceChannelResolvable,
+        options?: PlayerNodeInitializerOptions<T>,
+    ): Promise<PlayerNodeInitializationResult<T>> {
         const fn = this.player.play.bind(this.player);
 
         return await fn(channel, this, options);

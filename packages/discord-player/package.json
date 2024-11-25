@@ -1,6 +1,6 @@
 {
   "name": "discord-player",
-  "version": "7.0.0-dev.2",
+  "version": "7.0.0-dev.3",
   "description": "Complete framework to facilitate music commands using discord.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,4 +1,15 @@
-import { ExtractorInfo, ExtractorSearchContext, ExtractorStreamable, GuildQueueHistory, Playlist, QueryType, SearchQueryType, Track, Util, BaseExtractor } from 'discord-player';
+import {
+    ExtractorInfo,
+    ExtractorSearchContext,
+    ExtractorStreamable,
+    GuildQueueHistory,
+    Playlist,
+    QueryType,
+    SearchQueryType,
+    Track,
+    Util,
+    BaseExtractor,
+} from 'discord-player';
 import { AppleMusic } from '../internal';
 import { Readable } from 'stream';
 import { StreamFN } from '../types/common';
@@ -42,7 +53,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
         if (track.queryType === QueryType.APPLE_MUSIC_SONG) {
             const data = await this.handle(track.author || track.title, {
                 type: QueryType.APPLE_MUSIC_SEARCH,
-                requestedBy: track.requestedBy
+                requestedBy: track.requestedBy,
             });
 
             const unique = data.tracks.filter((t) => !history.tracks.some((h) => h.url === t.url));
@@ -67,7 +78,10 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                         const track: Track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
-                            duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
+                            duration:
+                                typeof m.duration === 'number'
+                                    ? Util.buildTimeCode(Util.parseMS(m.duration))
+                                    : m.duration,
                             thumbnail: m.thumbnail,
                             title: m.title,
                             url: m.url,
@@ -77,20 +91,20 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             queryType: 'appleMusicSong',
                             metadata: {
                                 source: m,
-                                bridge: null
+                                bridge: null,
                             },
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: null
+                                    bridge: null,
                                 };
-                            }
+                            },
                         });
 
                         track.extractor = this;
 
                         return track;
-                    }
+                    },
                 );
 
                 return this.createResponse(null, tracks);
@@ -102,7 +116,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                 const playlist = new Playlist(this.context.player, {
                     author: {
                         name: info.artist.name,
-                        url: ''
+                        url: '',
                     },
                     description: info.title,
                     id: info.id,
@@ -112,17 +126,20 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                     tracks: [],
                     type: 'album',
                     url: info.url,
-                    rawPlaylist: info
+                    rawPlaylist: info,
                 });
 
                 playlist.tracks = info.tracks.map(
                     (
-                        m: any // eslint-disable-line
+                        m: any, // eslint-disable-line
                     ) => {
                         const track: Track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
-                            duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
+                            duration:
+                                typeof m.duration === 'number'
+                                    ? Util.buildTimeCode(Util.parseMS(m.duration))
+                                    : m.duration,
                             thumbnail: m.thumbnail,
                             title: m.title,
                             url: m.url,
@@ -132,19 +149,19 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             queryType: 'appleMusicSong',
                             metadata: {
                                 source: info,
-                                bridge: null
+                                bridge: null,
                             },
                             requestMetadata: async () => {
                                 return {
                                     source: info,
-                                    bridge: null
+                                    bridge: null,
                                 };
-                            }
+                            },
                         });
                         track.playlist = playlist;
                         track.extractor = this;
                         return track;
-                    }
+                    },
                 );
 
                 return { playlist, tracks: playlist.tracks };
@@ -156,7 +173,7 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                 const playlist = new Playlist(this.context.player, {
                     author: {
                         name: info.artist.name,
-                        url: ''
+                        url: '',
                     },
                     description: info.title,
                     id: info.id,
@@ -166,17 +183,20 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                     tracks: [],
                     type: 'playlist',
                     url: info.url,
-                    rawPlaylist: info
+                    rawPlaylist: info,
                 });
 
                 playlist.tracks = info.tracks.map(
                     (
-                        m: any // eslint-disable-line
+                        m: any, // eslint-disable-line
                     ) => {
                         const track: Track = new Track(this.context.player, {
                             author: m.artist.name,
                             description: m.title,
-                            duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
+                            duration:
+                                typeof m.duration === 'number'
+                                    ? Util.buildTimeCode(Util.parseMS(m.duration))
+                                    : m.duration,
                             thumbnail: m.thumbnail,
                             title: m.title,
                             url: m.url,
@@ -186,21 +206,21 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                             queryType: 'appleMusicSong',
                             metadata: {
                                 source: m,
-                                bridge: null
+                                bridge: null,
                             },
                             requestMetadata: async () => {
                                 return {
                                     source: m,
-                                    bridge: null
+                                    bridge: null,
                                 };
-                            }
+                            },
                         });
 
                         track.playlist = playlist;
                         track.extractor = this;
 
                         return track;
-                    }
+                    },
                 );
 
                 return { playlist, tracks: playlist.tracks };
@@ -212,7 +232,10 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                 const track: Track = new Track(this.context.player, {
                     author: info.artist.name,
                     description: info.title,
-                    duration: typeof info.duration === 'number' ? Util.buildTimeCode(Util.parseMS(info.duration)) : info.duration,
+                    duration:
+                        typeof info.duration === 'number'
+                            ? Util.buildTimeCode(Util.parseMS(info.duration))
+                            : info.duration,
                     thumbnail: info.thumbnail,
                     title: info.title,
                     url: info.url,
@@ -222,14 +245,14 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
                     queryType: context.type,
                     metadata: {
                         source: info,
-                        bridge: null
+                        bridge: null,
                     },
                     requestMetadata: async () => {
                         return {
                             source: info,
-                            bridge: null
+                            bridge: null,
                         };
-                    }
+                    },
                 });
 
                 track.extractor = this;

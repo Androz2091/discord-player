@@ -4,7 +4,7 @@ import { Client, IntentsBitField } from 'discord.js';
 
 describe('hooks', () => {
     const client = new Client({
-        intents: [IntentsBitField.Flags.GuildVoiceStates]
+        intents: [IntentsBitField.Flags.GuildVoiceStates],
     });
 
     afterEach(() => {

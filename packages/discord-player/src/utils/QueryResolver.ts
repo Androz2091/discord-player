@@ -4,10 +4,14 @@ import { Exceptions } from '../errors';
 import { fetch } from 'undici';
 
 // #region scary things below *sigh*
-const spotifySongRegex = /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(intl-([a-z]|[A-Z])+\/)?(?:track\/|\?uri=spotify:track:)((\w|-){22})(\?si=.+)?$/;
-const spotifyPlaylistRegex = /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(intl-([a-z]|[A-Z])+\/)?(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})(\?si=.+)?$/;
-const spotifyAlbumRegex = /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(intl-([a-z]|[A-Z])+\/)?(?:album\/|\?uri=spotify:album:)((\w|-){22})(\?si=.+)?$/;
-const vimeoRegex = /^(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)$/;
+const spotifySongRegex =
+    /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(intl-([a-z]|[A-Z])+\/)?(?:track\/|\?uri=spotify:track:)((\w|-){22})(\?si=.+)?$/;
+const spotifyPlaylistRegex =
+    /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(intl-([a-z]|[A-Z])+\/)?(?:playlist\/|\?uri=spotify:playlist:)((\w|-){22})(\?si=.+)?$/;
+const spotifyAlbumRegex =
+    /^https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(intl-([a-z]|[A-Z])+\/)?(?:album\/|\?uri=spotify:album:)((\w|-){22})(\?si=.+)?$/;
+const vimeoRegex =
+    /^(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)$/;
 const reverbnationRegex = /^https:\/\/(www.)?reverbnation.com\/(.+)\/song\/(.+)$/;
 const attachmentRegex = /^https?:\/\/.+$/;
 const appleMusicSongRegex = /^https?:\/\/music\.apple\.com\/.+?\/(song|album)\/.+?(\/.+?\?i=|\/)([0-9]+)$/;
@@ -15,8 +19,10 @@ const appleMusicPlaylistRegex = /^https?:\/\/music\.apple\.com\/.+?\/playlist\/.
 const appleMusicAlbumRegex = /^https?:\/\/music\.apple\.com\/.+?\/album\/.+\/([0-9]+)$/;
 const soundcloudTrackRegex = /^https?:\/\/(m.|www.)?soundcloud.com\/(\w|-)+\/(\w|-)+(.+)?$/;
 const soundcloudPlaylistRegex = /^https?:\/\/(m.|www.)?soundcloud.com\/(\w|-)+\/sets\/(\w|-)+(.+)?$/;
-const youtubePlaylistRegex = /^https?:\/\/(www.)?youtube.com\/playlist\?list=((PL|FL|UU|LL|RD|OL)[a-zA-Z0-9-_]{16,41})$/;
-const youtubeVideoURLRegex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w-]+\?v=|embed\/|v\/)?)([\w-]+)(\S+)?$/;
+const youtubePlaylistRegex =
+    /^https?:\/\/(www.)?youtube.com\/playlist\?list=((PL|FL|UU|LL|RD|OL)[a-zA-Z0-9-_]{16,41})$/;
+const youtubeVideoURLRegex =
+    /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w-]+\?v=|embed\/|v\/)?)([\w-]+)(\S+)?$/;
 const youtubeVideoIdRegex = /^[a-zA-Z0-9-_]{11}$/;
 // #endregion scary things above *sigh*
 
@@ -26,7 +32,7 @@ const DomainsMap = {
     Vimeo: ['vimeo.com', 'player.vimeo.com'],
     ReverbNation: ['reverbnation.com'],
     SoundCloud: ['soundcloud.com'],
-    AppleMusic: ['music.apple.com']
+    AppleMusic: ['music.apple.com'],
 };
 
 // prettier-ignore
@@ -59,7 +65,7 @@ class QueryResolver {
             appleMusicSongRegex,
             soundcloudTrackRegex,
             soundcloudPlaylistRegex,
-            youtubePlaylistRegex
+            youtubePlaylistRegex,
         };
     }
 
@@ -74,7 +80,7 @@ class QueryResolver {
                 try {
                     const res = await fetch(query, {
                         method: 'GET',
-                        redirect: 'follow'
+                        redirect: 'follow',
                     });
 
                     if (!res.ok) break;
@@ -102,7 +108,10 @@ class QueryResolver {
      * Resolves the given search query
      * @param {string} query The query
      */
-    static resolve(query: string, fallbackSearchEngine: (typeof QueryType)[keyof typeof QueryType] = QueryType.AUTO_SEARCH): ResolvedQuery {
+    static resolve(
+        query: string,
+        fallbackSearchEngine: (typeof QueryType)[keyof typeof QueryType] = QueryType.AUTO_SEARCH,
+    ): ResolvedQuery {
         if (!TypeUtil.isString(query)) throw Exceptions.ERR_INVALID_ARG_TYPE(query, 'string', typeof query);
         if (!query.length) throw Exceptions.ERR_INFO_REQUIRED('query', String(query));
 
@@ -116,10 +125,15 @@ class QueryResolver {
                 const playlistId = url.searchParams.get('list');
                 const videoId = url.searchParams.get('v');
                 if (playlistId) {
-                    if (videoId && playlistId.startsWith('RD')) return resolver(QueryType.YOUTUBE_PLAYLIST, `https://www.youtube.com/watch?v=${videoId}&list=${playlistId}`);
+                    if (videoId && playlistId.startsWith('RD'))
+                        return resolver(
+                            QueryType.YOUTUBE_PLAYLIST,
+                            `https://www.youtube.com/watch?v=${videoId}&list=${playlistId}`,
+                        );
                     return resolver(QueryType.YOUTUBE_PLAYLIST, `https://www.youtube.com/playlist?list=${playlistId}`);
                 }
-                if (QueryResolver.validateId(query) || QueryResolver.validateURL(query)) return resolver(QueryType.YOUTUBE_VIDEO, query);
+                if (QueryResolver.validateId(query) || QueryResolver.validateURL(query))
+                    return resolver(QueryType.YOUTUBE_VIDEO, query);
                 return resolver(fallbackSearchEngine, query);
             } else if (DomainsMap.Spotify.includes(url.host)) {
                 query = query.replace(/intl-([a-zA-Z]+)\//, '');

@@ -84,7 +84,7 @@ export function createErisCompat(client: Eris.Client): Client {
                     // @ts-expect-error patching
                     return target[p];
             }
-        }
+        },
     });
 
     Reflect.set(erisProxy, DiscordPlayerClientSymbol, 'Eris');
@@ -141,7 +141,7 @@ function erisChannelsProxy(client: Eris.Client, eris: typeof import('eris')) {
                 },
                 has(id: string) {
                     return id in client.channelGuildMap;
-                }
+                },
             };
         },
         resolve(resolvable: string | ErisChannelResolvable) {
@@ -156,13 +156,16 @@ function erisChannelsProxy(client: Eris.Client, eris: typeof import('eris')) {
         resolveId(resolvable: ErisChannelResolvable) {
             const channel = this.resolve(resolvable);
             return channel?.id;
-        }
+        },
     };
 
     return handler;
 }
 
-function erisResolvedChannelProxy(channel: Eris.GuildChannel | undefined, client: Eris.Client): Eris.GuildChannel | undefined {
+function erisResolvedChannelProxy(
+    channel: Eris.GuildChannel | undefined,
+    client: Eris.Client,
+): Eris.GuildChannel | undefined {
     if (!channel) return;
 
     return new Proxy(channel, {
@@ -182,7 +185,7 @@ function erisResolvedChannelProxy(channel: Eris.GuildChannel | undefined, client
                     // @ts-expect-error patching
                     return target[p];
             }
-        }
+        },
     });
 }
 
@@ -197,7 +200,7 @@ function erisVoiceAdapterProxy(guild: Eris.Guild | undefined, client: Eris.Clien
 
             // @ts-expect-error patching
             return target[p];
-        }
+        },
     });
 }
 
@@ -221,7 +224,7 @@ function erisVoiceAdapterCreator(guild: Eris.Guild, client: Eris.Client): Discor
             },
             destroy() {
                 adapters.delete(guild.id);
-            }
+            },
         };
     };
 }
@@ -243,7 +246,12 @@ function erisGuildsProxy(client: Eris.Client, eris: typeof import('eris')) {
                         return resolvable;
                     }
 
-                    if (resolvable instanceof eris.Member || resolvable instanceof eris.Guild || resolvable instanceof eris.GuildChannel || resolvable instanceof eris.Role) {
+                    if (
+                        resolvable instanceof eris.Member ||
+                        resolvable instanceof eris.Guild ||
+                        resolvable instanceof eris.GuildChannel ||
+                        resolvable instanceof eris.Role
+                    ) {
                         return resolvable.guild;
                     }
                 };
@@ -260,7 +268,7 @@ function erisGuildsProxy(client: Eris.Client, eris: typeof import('eris')) {
 
             // @ts-expect-error patching
             return target[p];
-        }
+        },
     });
 }
 
@@ -298,6 +306,6 @@ function erisUsersProxy(client: Eris.Client, eris: typeof import('eris')) {
 
             // @ts-expect-error patching
             return target[p];
-        }
+        },
     });
 }

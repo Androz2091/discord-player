@@ -27,7 +27,10 @@ export class ChannelProcessor {
 
             const coefficients = Equalizer.Coefficients48000[bandIndex];
 
-            const bandResult = coefficients.alpha * (int - this.history[x + this.m2]) + coefficients.gamma * this.history[y + this.m1] - coefficients.beta * this.history[y + this.m2];
+            const bandResult =
+                coefficients.alpha * (int - this.history[x + this.m2]) +
+                coefficients.gamma * this.history[y + this.m1] -
+                coefficients.beta * this.history[y + this.m2];
 
             this.history[x + this.current] = int;
             this.history[y + this.current] = bandResult;
@@ -40,7 +43,13 @@ export class ChannelProcessor {
         return val;
     }
 
-    public process(samples: Buffer, extremum = 131072, bytes = 2, readInt?: ReadIntCallback, writeInt?: WriteIntCallback) {
+    public process(
+        samples: Buffer,
+        extremum = 131072,
+        bytes = 2,
+        readInt?: ReadIntCallback,
+        writeInt?: WriteIntCallback,
+    ) {
         const endIndex = Math.floor(samples.length / 2) * 2;
         for (let sampleIndex = 0; sampleIndex < endIndex; sampleIndex += bytes) {
             const sample = readInt?.(samples, sampleIndex) ?? samples.readInt16LE(sampleIndex);

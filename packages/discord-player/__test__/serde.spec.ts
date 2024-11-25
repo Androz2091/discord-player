@@ -4,7 +4,7 @@ import { decode, deserialize, encode, Player, Playlist, serialize, SerializedTyp
 
 describe('serde', () => {
     const client = new Client({
-        intents: [IntentsBitField.Flags.GuildVoiceStates]
+        intents: [IntentsBitField.Flags.GuildVoiceStates],
     });
 
     const player = new Player(client);
@@ -19,14 +19,14 @@ describe('serde', () => {
             url: 'https://example.com',
             views: 0,
             source: 'arbitrary',
-            thumbnail: 'https://example.com'
+            thumbnail: 'https://example.com',
         }),
         playlist: new Playlist(player, {
             title: 'test',
             description: 'test',
             author: {
                 name: 'test',
-                url: 'https://example.com'
+                url: 'https://example.com',
             },
             id: 'test',
             source: 'arbitrary',
@@ -43,12 +43,12 @@ describe('serde', () => {
                         url: 'https://example.com',
                         views: 0,
                         source: 'arbitrary',
-                        thumbnail: 'https://example.com'
-                    })
+                        thumbnail: 'https://example.com',
+                    }),
             ),
             type: 'album',
-            url: 'https://example.com'
-        })
+            url: 'https://example.com',
+        }),
     };
 
     it('should serialize and deserialize track', async () => {

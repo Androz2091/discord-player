@@ -33,7 +33,10 @@ export function GuideItemList({ data, name, id, link, icon }: IProps) {
                         <h1
                             className={cn(
                                 'text-base font-normal text-muted-foreground cursor-pointer',
-                                item.id === decodeURIComponent(router.query.page as string) && id === decodeURIComponent(router.query.topic as string) ? 'font-medium text-secondary' : ''
+                                item.id === decodeURIComponent(router.query.page as string) &&
+                                    id === decodeURIComponent(router.query.topic as string)
+                                    ? 'font-medium text-secondary'
+                                    : '',
                             )}
                         >
                             {item.name}

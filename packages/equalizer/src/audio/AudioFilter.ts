@@ -1,12 +1,20 @@
 import { TransformCallback } from 'stream';
 import { PCMTransformer, PCMTransformerOptions } from '../utils';
-import { AFPulsatorConfig, AFTremoloConfig, AFVibratoConfig, LR, applyPulsator, applyTremolo, applyVibrato } from './transformers';
+import {
+    AFPulsatorConfig,
+    AFTremoloConfig,
+    AFVibratoConfig,
+    LR,
+    applyPulsator,
+    applyTremolo,
+    applyVibrato,
+} from './transformers';
 import { EqualizerBand } from '../equalizer';
 
 export const AudioFilters = {
     '8D': '8D',
     Tremolo: 'Tremolo',
-    Vibrato: 'Vibrato'
+    Vibrato: 'Vibrato',
 } as const;
 
 export type PCMFilters = keyof typeof AudioFilters;
@@ -20,7 +28,7 @@ export const AF_VAPORWAVE_RATE = 0.8 as const;
 
 export const BASS_EQ_BANDS: EqualizerBand[] = Array.from({ length: 3 }, (_, i) => ({
     band: i,
-    gain: 0.25
+    gain: 0.25,
 }));
 
 // based on lavadsp
@@ -33,19 +41,19 @@ export class AudioFilter extends PCMTransformer {
     public pulsatorConfig: AFPulsatorConfig = {
         hz: 0.02,
         x: 0,
-        dI: 0.000003926990816987241
+        dI: 0.000003926990816987241,
     };
 
     public tremoloConfig: AFTremoloConfig = {
         phase: 0,
         depth: 0.5,
-        frequency: 5.0
+        frequency: 5.0,
     };
 
     public vibratoConfig: AFVibratoConfig = {
         phase: 0,
         depth: 0.5,
-        frequency: 5.0
+        frequency: 5.0,
     };
 
     public constructor(options?: PCMFiltererOptions) {
@@ -76,7 +84,11 @@ export class AudioFilter extends PCMTransformer {
         return this.pulsatorConfig.hz;
     }
 
-    public setTremolo({ depth = this.tremoloConfig.depth, frequency = this.tremoloConfig.frequency, phase = this.tremoloConfig.phase }: Partial<AFTremoloConfig>) {
+    public setTremolo({
+        depth = this.tremoloConfig.depth,
+        frequency = this.tremoloConfig.frequency,
+        phase = this.tremoloConfig.phase,
+    }: Partial<AFTremoloConfig>) {
         if (typeof depth === 'number') this.tremoloConfig.depth = depth;
         if (typeof frequency === 'number') this.tremoloConfig.frequency = frequency;
         if (typeof phase === 'number') this.tremoloConfig.phase = phase;
@@ -84,7 +96,11 @@ export class AudioFilter extends PCMTransformer {
         this.onUpdate?.();
     }
 
-    public setVibrato({ depth = this.vibratoConfig.depth, frequency = this.vibratoConfig.frequency, phase = this.vibratoConfig.phase }: Partial<AFVibratoConfig>) {
+    public setVibrato({
+        depth = this.vibratoConfig.depth,
+        frequency = this.vibratoConfig.frequency,
+        phase = this.vibratoConfig.phase,
+    }: Partial<AFVibratoConfig>) {
         if (typeof depth === 'number') this.vibratoConfig.depth = depth;
         if (typeof frequency === 'number') this.vibratoConfig.frequency = frequency;
         if (typeof phase === 'number') this.vibratoConfig.phase = phase;
