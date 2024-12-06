@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import Eris from 'eris';
 import { Player, createErisCompat } from 'discord-player';
+import { DefaultExtractors } from '@discord-player/extractor';
 
 const client = Eris(process.env.DISCORD_TOKEN!, {
     intents: ['all'],
@@ -10,7 +11,7 @@ const player = new Player(createErisCompat(client));
 
 player.on('debug', console.log).events.on('debug', (queue, msg) => console.log(`[${queue.guild.name}] ${msg}`));
 
-player.extractors.loadDefault();
+player.extractors.loadMulti(DefaultExtractors);
 
 client.once('ready', () => {
     console.log('Ready!');

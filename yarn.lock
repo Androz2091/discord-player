@@ -122,7 +122,7 @@ __metadata:
     discord-player: "workspace:^"
     file-type: "npm:^16.5.4"
     isomorphic-unfetch: "npm:^4.0.2"
-    mediaplex: "npm:^0.0.7"
+    mediaplex: "npm:^1.0.0"
     node-html-parser: "npm:^6.1.4"
     reverbnation-scraper: "npm:^2.0.0"
     soundcloud.ts: "npm:^0.5.2"
@@ -5862,7 +5862,7 @@ __metadata:
     discord-player: "workspace:^"
     dotenv: "npm:^16.4.5"
     eris: "npm:^0.17.2"
-    mediaplex: "npm:^0.0.9"
+    mediaplex: "npm:^1.0.0"
     tsx: "npm:^4.17.0"
   languageName: unknown
   linkType: soft
@@ -9293,161 +9293,141 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mediaplex-android-arm64@npm:0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex-android-arm64@npm:0.0.7"
+"mediaplex-android-arm-eabi@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-android-arm-eabi@npm:1.0.0"
+  conditions: os=android & cpu=arm
+  languageName: node
+  linkType: hard
+
+"mediaplex-android-arm64@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-android-arm64@npm:1.0.0"
   conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
 
-"mediaplex-android-arm64@npm:0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex-android-arm64@npm:0.0.9"
-  conditions: os=android & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"mediaplex-darwin-arm64@npm:0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex-darwin-arm64@npm:0.0.7"
+"mediaplex-darwin-arm64@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-darwin-arm64@npm:1.0.0"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-arm64@npm:0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex-darwin-arm64@npm:0.0.9"
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"mediaplex-darwin-universal@npm:0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex-darwin-universal@npm:0.0.7"
+"mediaplex-darwin-universal@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-darwin-universal@npm:1.0.0"
   conditions: os=darwin
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-universal@npm:0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex-darwin-universal@npm:0.0.9"
-  conditions: os=darwin
-  languageName: node
-  linkType: hard
-
-"mediaplex-darwin-x64@npm:0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex-darwin-x64@npm:0.0.7"
+"mediaplex-darwin-x64@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-darwin-x64@npm:1.0.0"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"mediaplex-darwin-x64@npm:0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex-darwin-x64@npm:0.0.9"
-  conditions: os=darwin & cpu=x64
-  languageName: node
-  linkType: hard
-
-"mediaplex-freebsd-x64@npm:0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex-freebsd-x64@npm:0.0.7"
+"mediaplex-freebsd-x64@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-freebsd-x64@npm:1.0.0"
   conditions: os=freebsd & cpu=x64
   languageName: node
   linkType: hard
 
-"mediaplex-freebsd-x64@npm:0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex-freebsd-x64@npm:0.0.9"
-  conditions: os=freebsd & cpu=x64
-  languageName: node
-  linkType: hard
-
-"mediaplex-linux-arm-gnueabihf@npm:0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.7"
+"mediaplex-linux-arm-gnueabihf@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-linux-arm-gnueabihf@npm:1.0.0"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"mediaplex-linux-arm-gnueabihf@npm:0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex-linux-arm-gnueabihf@npm:0.0.9"
+"mediaplex-linux-arm-musleabihf@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-linux-arm-musleabihf@npm:1.0.0"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"mediaplex-linux-x64-gnu@npm:0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex-linux-x64-gnu@npm:0.0.7"
+"mediaplex-linux-arm64-gnu@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-linux-arm64-gnu@npm:1.0.0"
+  conditions: os=linux & cpu=arm64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"mediaplex-linux-arm64-musl@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-linux-arm64-musl@npm:1.0.0"
+  conditions: os=linux & cpu=arm64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"mediaplex-linux-riscv64-gnu@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-linux-riscv64-gnu@npm:1.0.0"
+  conditions: os=linux & cpu=riscv64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"mediaplex-linux-x64-gnu@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-linux-x64-gnu@npm:1.0.0"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"mediaplex-linux-x64-gnu@npm:0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex-linux-x64-gnu@npm:0.0.9"
-  conditions: os=linux & cpu=x64 & libc=glibc
+"mediaplex-linux-x64-musl@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-linux-x64-musl@npm:1.0.0"
+  conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"mediaplex-win32-arm64-msvc@npm:0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex-win32-arm64-msvc@npm:0.0.7"
+"mediaplex-win32-arm64-msvc@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-win32-arm64-msvc@npm:1.0.0"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"mediaplex-win32-arm64-msvc@npm:0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex-win32-arm64-msvc@npm:0.0.9"
-  conditions: os=win32 & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"mediaplex-win32-ia32-msvc@npm:0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex-win32-ia32-msvc@npm:0.0.7"
+"mediaplex-win32-ia32-msvc@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-win32-ia32-msvc@npm:1.0.0"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"mediaplex-win32-ia32-msvc@npm:0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex-win32-ia32-msvc@npm:0.0.9"
-  conditions: os=win32 & cpu=ia32
-  languageName: node
-  linkType: hard
-
-"mediaplex-win32-x64-msvc@npm:0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex-win32-x64-msvc@npm:0.0.7"
+"mediaplex-win32-x64-msvc@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex-win32-x64-msvc@npm:1.0.0"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"mediaplex-win32-x64-msvc@npm:0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex-win32-x64-msvc@npm:0.0.9"
-  conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
-"mediaplex@npm:^0.0.7":
-  version: 0.0.7
-  resolution: "mediaplex@npm:0.0.7"
+"mediaplex@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "mediaplex@npm:1.0.0"
   dependencies:
-    mediaplex-android-arm64: "npm:0.0.7"
-    mediaplex-darwin-arm64: "npm:0.0.7"
-    mediaplex-darwin-universal: "npm:0.0.7"
-    mediaplex-darwin-x64: "npm:0.0.7"
-    mediaplex-freebsd-x64: "npm:0.0.7"
-    mediaplex-linux-arm-gnueabihf: "npm:0.0.7"
-    mediaplex-linux-x64-gnu: "npm:0.0.7"
-    mediaplex-win32-arm64-msvc: "npm:0.0.7"
-    mediaplex-win32-ia32-msvc: "npm:0.0.7"
-    mediaplex-win32-x64-msvc: "npm:0.0.7"
+    mediaplex-android-arm-eabi: "npm:1.0.0"
+    mediaplex-android-arm64: "npm:1.0.0"
+    mediaplex-darwin-arm64: "npm:1.0.0"
+    mediaplex-darwin-universal: "npm:1.0.0"
+    mediaplex-darwin-x64: "npm:1.0.0"
+    mediaplex-freebsd-x64: "npm:1.0.0"
+    mediaplex-linux-arm-gnueabihf: "npm:1.0.0"
+    mediaplex-linux-arm-musleabihf: "npm:1.0.0"
+    mediaplex-linux-arm64-gnu: "npm:1.0.0"
+    mediaplex-linux-arm64-musl: "npm:1.0.0"
+    mediaplex-linux-riscv64-gnu: "npm:1.0.0"
+    mediaplex-linux-x64-gnu: "npm:1.0.0"
+    mediaplex-linux-x64-musl: "npm:1.0.0"
+    mediaplex-win32-arm64-msvc: "npm:1.0.0"
+    mediaplex-win32-ia32-msvc: "npm:1.0.0"
+    mediaplex-win32-x64-msvc: "npm:1.0.0"
   dependenciesMeta:
+    mediaplex-android-arm-eabi:
+      optional: true
     mediaplex-android-arm64:
       optional: true
     mediaplex-darwin-arm64:
@@ -9460,7 +9440,17 @@ __metadata:
       optional: true
     mediaplex-linux-arm-gnueabihf:
       optional: true
+    mediaplex-linux-arm-musleabihf:
+      optional: true
+    mediaplex-linux-arm64-gnu:
+      optional: true
+    mediaplex-linux-arm64-musl:
+      optional: true
+    mediaplex-linux-riscv64-gnu:
+      optional: true
     mediaplex-linux-x64-gnu:
+      optional: true
+    mediaplex-linux-x64-musl:
       optional: true
     mediaplex-win32-arm64-msvc:
       optional: true
@@ -9468,46 +9458,7 @@ __metadata:
       optional: true
     mediaplex-win32-x64-msvc:
       optional: true
-  checksum: 10/54bdd39f199682007a8a0f641387c3e6b684cd51ba00a6ae073cc9f4882d59b217e6f66cc8b6bccb189585836fbcd2b7a5579a36aa7010dd21774c27cdeb666f
-  languageName: node
-  linkType: hard
-
-"mediaplex@npm:^0.0.9":
-  version: 0.0.9
-  resolution: "mediaplex@npm:0.0.9"
-  dependencies:
-    mediaplex-android-arm64: "npm:0.0.9"
-    mediaplex-darwin-arm64: "npm:0.0.9"
-    mediaplex-darwin-universal: "npm:0.0.9"
-    mediaplex-darwin-x64: "npm:0.0.9"
-    mediaplex-freebsd-x64: "npm:0.0.9"
-    mediaplex-linux-arm-gnueabihf: "npm:0.0.9"
-    mediaplex-linux-x64-gnu: "npm:0.0.9"
-    mediaplex-win32-arm64-msvc: "npm:0.0.9"
-    mediaplex-win32-ia32-msvc: "npm:0.0.9"
-    mediaplex-win32-x64-msvc: "npm:0.0.9"
-  dependenciesMeta:
-    mediaplex-android-arm64:
-      optional: true
-    mediaplex-darwin-arm64:
-      optional: true
-    mediaplex-darwin-universal:
-      optional: true
-    mediaplex-darwin-x64:
-      optional: true
-    mediaplex-freebsd-x64:
-      optional: true
-    mediaplex-linux-arm-gnueabihf:
-      optional: true
-    mediaplex-linux-x64-gnu:
-      optional: true
-    mediaplex-win32-arm64-msvc:
-      optional: true
-    mediaplex-win32-ia32-msvc:
-      optional: true
-    mediaplex-win32-x64-msvc:
-      optional: true
-  checksum: 10/1e922f7a0526369bf8c4755a7f225ae6135cd33f1d5712648c8773cb117c21ccc3a6d8e21a27058201acf56bdf3067596dee858ec8f9324f213daddf9d4fcb42
+  checksum: 10/88e00c5f3c71fb5821028ae7d7aa670db9cc0d0bcd28a38f14792ee707d0c4e255477cac1a3cc305876cf8cac461c9fb9a4d63f895749b4fcc2ed16565a12543
   languageName: node
   linkType: hard
 

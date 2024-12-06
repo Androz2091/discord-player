@@ -155,8 +155,9 @@ export const DependencyReportGenerator = {
 
             for (const _subKey of subKeys) {
                 const subKey = _subKey as keyof DependenciesReport[typeof key];
+                const value = report[key][subKey] ?? 'N/A';
 
-                output.push(`- ${subKey}: ${report[key][subKey] ?? 'N/A'}`);
+                output.push(`- ${subKey}: ${typeof value === 'object' ? JSON.stringify(value, null, 2) : value}`);
             }
 
             output.push('');

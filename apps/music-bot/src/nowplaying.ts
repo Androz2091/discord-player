@@ -14,5 +14,7 @@ export const NowPlayingCommand = async (message: Message) => {
         return message.channel.send('There is no track playing.');
     }
 
-    await message.channel.send(`Now playing: ${currentTrack.title} by ${currentTrack.author}`);
+    await message.channel.send(
+        `Now playing: ${currentTrack.title} by ${currentTrack.author}\n${queue.node.createProgressBar()}`,
+    );
 };

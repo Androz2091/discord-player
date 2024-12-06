@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { Player } from 'discord-player';
+import { DefaultExtractors } from '@discord-player/extractor';
 import { Client, Events, IntentsBitField } from 'discord.js';
 import { PlayCommand } from './play';
 import { NowPlayingCommand } from './nowplaying';
@@ -18,7 +19,7 @@ const client = new Client({
 const player = Player.create(client);
 
 client.once(Events.ClientReady, async () => {
-    await player.extractors.loadDefault();
+    await player.extractors.loadMulti(DefaultExtractors);
     console.log('Ready!');
 });
 

@@ -18,6 +18,6 @@
     "discord-player": "workspace:^",
     "dotenv": "^16.4.5",
     "eris": "^0.17.2",
-    "mediaplex": "^0.0.9"
+    "mediaplex": "^1.0.0"
   }
 }

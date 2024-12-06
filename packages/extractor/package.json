@@ -40,7 +40,7 @@
     "@discord-player/tsconfig": "workspace:^",
     "@types/node": "^20.14.11",
     "discord-player": "workspace:^",
-    "mediaplex": "^0.0.7",
+    "mediaplex": "^1.0.0",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"
