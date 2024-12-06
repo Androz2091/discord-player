@@ -42,8 +42,6 @@ $ npm install --save discord-player # main library
 $ npm install --save @discord-player/extractor # extractors provider
 ```
 
-> Discord Player recognizes `@discord-player/extractor` and loads it automatically by default. Just invoke `await player.extractors.loadDefault()`.
-
 #### Opus Library
 
 Since Discord only accepts opus packets, you need to install the opus library. Discord Player supports multiple opus libraries, such as:
@@ -92,17 +90,18 @@ Let's create a main player instance. This instance handles and keeps track of al
 
 ```js index.js
 const { Player } = require('discord-player');
+const { DefaultExtractors } = require('@discord-player/extractor');
 
 const client = new Discord.Client({
     // Make sure you have 'GuildVoiceStates' intent enabled
-    intents: ['GuildVoiceStates' /* Other intents */]
+    intents: ['GuildVoiceStates' /* Other intents */],
 });
 
 // this is the entrypoint for discord-player based application
 const player = new Player(client);
 
-// Now, lets load all the default extractors, except 'YouTubeExtractor'. You can remove the filter if you want to include youtube.
-await player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
+// load the default extractors
+player.extractors.loadMulti(DefaultExtractors);
 ```
 
 Discord Player is mostly events based. It emits different events based on the context and actions. Let's add a basic event listener to notify the user when a track starts to play:
@@ -161,8 +160,8 @@ export async function execute(interaction) {
         const { track } = await player.play(channel, query, {
             nodeOptions: {
                 // nodeOptions are the options for guild node (aka your queue in simple word)
-                metadata: interaction // we can access this metadata object using queue.metadata later on
-            }
+                metadata: interaction, // we can access this metadata object using queue.metadata later on
+            },
         });
 
         return interaction.followUp(`**${track.cleanTitle}** enqueued!`);

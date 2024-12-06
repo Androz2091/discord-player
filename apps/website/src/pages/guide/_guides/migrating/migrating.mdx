@@ -64,16 +64,17 @@ Let's create a master player instance, this should ideally be in your `index.js`
 
 ```js
 const { Player } = require('discord-player');
+const { DefaultExtractors } = require('@discord-player/extractor');
 const client = new Discord.Client({
     // Make sure you have 'GuildVoiceStates' intent enabled
-    intents: ['GuildVoiceStates' /* Other intents */]
+    intents: ['GuildVoiceStates' /* Other intents */],
 });
 
 // this is the entrypoint for discord-player based application
 const player = new Player(client);
 
 // This is to load the default extractors from the @discord-player/extractor package
-await player.extractors.loadDefault();
+await player.extractors.loadMulti(DefaultExtractors);
 ```
 
 > **Did You Know?** _Discord Player is by default a singleton._
@@ -111,8 +112,8 @@ async function execute(interaction) {
         try {
             await player.play(channel, searchResult, {
                 nodeOptions: {
-                    metadata: interaction // we can access this metadata object using queue.metadata later on
-                }
+                    metadata: interaction, // we can access this metadata object using queue.metadata later on
+                },
             });
             await interaction.editReply(`Loading your track`);
         } catch (e) {
@@ -366,7 +367,7 @@ try {
 // initialize receiver stream
 const stream = queue.voiceReceiver.recordUser(interaction.member.id, {
     mode: 'pcm', // record in pcm format
-    end: EndBehaviorType.AfterSilence // stop recording once user stops talking
+    end: EndBehaviorType.AfterSilence, // stop recording once user stops talking
 });
 
 const writer = stream.pipe(createWriteStream(`./recording-${interaction.member.id}.pcm`)); // write the stream to a file
@@ -415,7 +416,7 @@ v6 still supports v5's `metadata` object:
 
 ```js
 const queue = player.nodes.create(message.guild, {
-    metadata: message
+    metadata: message,
 });
 ```
 

@@ -1,15 +1,7 @@
 # Disabling YouTube Playback
 
-Streaming from youtube is against YouTube's terms of service. A lot of Discord Bots have been banned for streaming from YouTube. If you want to avoid getting banned, you should disable YouTube playback in your bot. Discord Player supports YouTube playback as long as you have Youtube Extractor registered. You can disable YouTube playback by not registering the Youtube Extractor.
+Streaming from youtube is against YouTube's terms of service. A lot of Discord Bots have been banned for streaming from YouTube. If you want to avoid getting banned, you should disable YouTube playback in your bot.
 
-Do not use
+Discord Player does not support YouTube unless you are using a third party extractor. Make sure you are selecting the right extractors to avoid any issues.
 
-```js
-await player.extractors.loadDefault();
-```
-
-as it loads all the extractors. Instead, filter out youtube extractor and you are done!
-
-```js
-await player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
-```
+Note that Discord Player still supports youtube url resolver (i.e. parsing your raw input to determine if it's a youtube url). This behavior does not violate YouTube's terms of service. You may use this feature to implement youtube detection and disable youtube playback.

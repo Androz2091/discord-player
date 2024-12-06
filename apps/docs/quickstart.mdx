@@ -39,7 +39,10 @@ Here's what each package does:
 -   `@discord-player/extractor`: A collection of audio/metadata extractors for Discord Player.
 -   `mediaplex`: Efficient alternative to `@discordjs/opus` and a library that provides various media utilities.
 
-<Note>If you are unable to install mediaplex on your system, you can install one of `@discordjs/opus`, `opusscript`, `@evan/opus` or `node-opus`.</Note>
+<Note>
+    If you are unable to install mediaplex on your system, you can install one of `@discordjs/opus`, `opusscript`,
+    `@evan/opus` or `node-opus`.
+</Note>
 
 ### Creating your first bot
 
@@ -74,7 +77,7 @@ const { Player } = require('discord-player');
 ```ts TypeScript
 const client = new Client({
     /* client options */
-    intents: ['GuildVoiceStates' /* other intents */]
+    intents: ['GuildVoiceStates' /* other intents */],
 });
 
 const player = new Player(client);
@@ -83,7 +86,7 @@ const player = new Player(client);
 ```js ES Modules
 const client = new Client({
     /* client options */
-    intents: ['GuildVoiceStates' /* other intents */]
+    intents: ['GuildVoiceStates' /* other intents */],
 });
 
 const player = new Player(client);
@@ -92,7 +95,7 @@ const player = new Player(client);
 ```js CommonJS
 const client = new Client({
     /* client options */
-    intents: ['GuildVoiceStates' /* other intents */]
+    intents: ['GuildVoiceStates' /* other intents */],
 });
 
 const player = new Player(client);
@@ -102,38 +105,20 @@ const player = new Player(client);
 
 <Note>The `Client` class is provided by discord.js</Note>
 
-<Info>**Good to know:** You don't need to add `client.player = ...`. Discord Player exposes various type-safe hooks to get around this situation.</Info>
+<Info>
+    **Good to know:** You don't need to add `client.player = ...`. Discord Player exposes various type-safe hooks to get
+    around this situation.
+</Info>
 
 #### 3. Register some extractors to the player.
 
 Discord Player by default cannot play audio or pull metadata. These extractors help Discord Player to fetch audio and metadata from various sources.
 
-<Warning>
-<b>Erm! I went to discord.js server but I was told <u>"we don't support tos violations"</u>. Is Discord Player dangerous to use?</b>
-
-First of all - No, Discord Player is not dangerous to use. The tos-violation was brought up to you because Discord Player by default loads all the extractors. Some of these extractors may violate the terms of service of the respective platforms, mainly `YouTubeExtractor`.
-
-In the example below, we are loading all the extractors exposed by `@discord-player/extractor` except the `YouTubeExtractor`. We recommend disabling `YouTubeExtractor` for tos-compliance reasons. This also disables youtube bridge functionality on `BridgedExtractor`s such as `SpotifyExtractor` and `AppleMusicExtractor`. Discord Player will try to make the use of other extractors in this scenario.
-
-</Warning>
-
-<CodeGroup>
-
-```ts TypeScript
-await player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
-```
-
-```js ES Modules
-await player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
-```
-
-```js CommonJS
-await player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
-```
-
-</CodeGroup>
-
-<Info>**Good to know:** Discord Player itself is not responsible for tos-violations/similar issues. The streaming behavior is entirely dependent on the extractors you load.</Info>
+<Info>
+    **Good to know:** Discord Player itself is not responsible for tos-violations/similar issues. The streaming behavior
+    is entirely dependent on the extractors you load, thus making it your responsibility to ensure that you are not
+    using any extractor that violates the terms of service of the respective platform.
+</Info>
 
 #### 4. Listen to the `playerStart` event
 
@@ -193,15 +178,15 @@ export async function execute(interaction: CommandInteraction) {
     }
 
     const queueMetadata = {
-        channel: interaction.channel
+        channel: interaction.channel,
     };
 
     try {
         // 3: Play the track
         const { track } = await player.play(voiceChannel, query, {
             nodeOptions: {
-                metadata: queueMetadata
-            }
+                metadata: queueMetadata,
+            },
         });
 
         return interaction.editReply(`Started playing **${track.title}** in ${voiceChannel}.`);
@@ -229,15 +214,15 @@ export async function execute(interaction) {
     }
 
     const queueMetadata = {
-        channel: interaction.channel
+        channel: interaction.channel,
     };
 
     try {
         // 3: Play the track
         const { track } = await player.play(voiceChannel, query, {
             nodeOptions: {
-                metadata: queueMetadata
-            }
+                metadata: queueMetadata,
+            },
         });
 
         return interaction.editReply(`Started playing **${track.title}** in ${voiceChannel}.`);
@@ -266,15 +251,15 @@ export async function execute(interaction) {
     }
 
     const queueMetadata = {
-        channel: interaction.channel
+        channel: interaction.channel,
     };
 
     try {
         // 3: Play the track
         const { track } = await player.play(voiceChannel, query, {
             nodeOptions: {
-                metadata: queueMetadata
-            }
+                metadata: queueMetadata,
+            },
         });
 
         return interaction.editReply(`Started playing **${track.title}** in ${voiceChannel}.`);

@@ -74,10 +74,10 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
     }
 
     public async loadDefault() {
-        const sample = `import { DefaultExtractors } from '@discord-player/extractor';\nawait player.extractors.loadMulti(DefaultExtractors);`;
+        const sample = `\timport { DefaultExtractors } from '@discord-player/extractor';\n\tawait player.extractors.loadMulti(DefaultExtractors);`;
 
         throw new Error(
-            `extractors.loadDefault is no longer supported. Use extractors.loadMulti instead. Example:\n${sample}`,
+            `extractors.loadDefault() is no longer supported. Use extractors.loadMulti instead. Example:\n${sample}\n`,
         );
     }
 
