@@ -29,12 +29,9 @@ export const baseOptions: BaseLayoutProps = {
             active: 'url',
         },
         {
-            text: 'GitHub',
-            url: 'https://github.com/Androz2091/discord-player',
-        },
-        {
             text: 'Discord',
             url: DISCORD_INVITE,
         },
     ],
+    githubUrl: 'https://github.com/Androz2091/discord-player',
 };
