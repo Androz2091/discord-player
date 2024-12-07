@@ -1,0 +1,15 @@
+---
+title: Playing Raw Resource
+description: Learn how to play a custom audio resource using Discord Player
+---
+
+Discord Player natively allows you to play custom audio resource.
+
+```js title="play-raw.js"
+import { createAudioResource } from 'discord-voip';
+
+const queue = player.nodes.create({...}); // create guild queue
+const resource = createAudioResource(...); // create audio resource
+
+await queue.node.playRaw(resource); // play that resource
+```
