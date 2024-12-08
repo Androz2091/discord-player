@@ -7,20 +7,20 @@ const path = require('path');
 const docs_destination = `${__dirname}/../apps/website/src/data`;
 
 async function main() {
-    console.log('Generating documentation...');
+  console.log('Generating documentation...');
 
-    const res = await createDocumentation({
-        input: ['.'],
-        markdown: false,
-        noEmit: true,
-        print: false,
-    });
+  const res = await createDocumentation({
+    input: ['.'],
+    markdown: false,
+    noEmit: true,
+    print: false,
+  });
 
-    await writeFile(path.join(docs_destination, 'docs.json'), JSON.stringify(res));
+  await writeFile(path.join(docs_destination, 'docs.json'), JSON.stringify(res));
 
-    return res.metadata.generationMs.toFixed(2);
+  return res.metadata.generationMs.toFixed(2);
 }
 
 main().then((r) => {
-    console.log(`Successfully generated documentation in ${r}ms`);
+  console.log(`Successfully generated documentation in ${r}ms`);
 }, console.error);

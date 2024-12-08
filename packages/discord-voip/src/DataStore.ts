@@ -6,11 +6,11 @@ import type { VoiceConnection } from './VoiceConnection';
 import type { AudioPlayer } from './audio/index';
 
 export interface JoinConfig {
-    channelId: string | null;
-    group: string;
-    guildId: string;
-    selfDeaf: boolean;
-    selfMute: boolean;
+  channelId: string | null;
+  group: string;
+  guildId: string;
+  selfDeaf: boolean;
+  selfMute: boolean;
 }
 
 /**
@@ -20,16 +20,16 @@ export interface JoinConfig {
  * @param config - The configuration to use when joining the voice channel
  */
 export function createJoinVoiceChannelPayload(config: JoinConfig) {
-    return {
-        op: GatewayOpcodes.VoiceStateUpdate,
-        // eslint-disable-next-line id-length
-        d: {
-            guild_id: config.guildId,
-            channel_id: config.channelId,
-            self_deaf: config.selfDeaf,
-            self_mute: config.selfMute,
-        },
-    };
+  return {
+    op: GatewayOpcodes.VoiceStateUpdate,
+    // eslint-disable-next-line id-length
+    d: {
+      guild_id: config.guildId,
+      channel_id: config.channelId,
+      self_deaf: config.selfDeaf,
+      self_mute: config.selfMute,
+    },
+  };
 }
 
 // Voice Connections
@@ -37,11 +37,11 @@ const groups = new Map<string, Map<string, VoiceConnection>>();
 groups.set('default', new Map());
 
 function getOrCreateGroup(group: string) {
-    const existing = groups.get(group);
-    if (existing) return existing;
-    const map = new Map<string, VoiceConnection>();
-    groups.set(group, map);
-    return map;
+  const existing = groups.get(group);
+  if (existing) return existing;
+  const map = new Map<string, VoiceConnection>();
+  groups.set(group, map);
+  return map;
 }
 
 /**
@@ -51,7 +51,7 @@ function getOrCreateGroup(group: string) {
  * @returns The group map
  */
 export function getGroups() {
-    return groups;
+  return groups;
 }
 
 /**
@@ -77,7 +77,7 @@ export function getVoiceConnections(group: string): Map<string, VoiceConnection>
  * @returns The map of voice connections
  */
 export function getVoiceConnections(group = 'default') {
-    return groups.get(group);
+  return groups.get(group);
 }
 
 /**
@@ -88,15 +88,15 @@ export function getVoiceConnections(group = 'default') {
  * @returns The voice connection, if it exists
  */
 export function getVoiceConnection(guildId: string, group = 'default') {
-    return getVoiceConnections(group)?.get(guildId);
+  return getVoiceConnections(group)?.get(guildId);
 }
 
 export function untrackVoiceConnection(voiceConnection: VoiceConnection) {
-    return getVoiceConnections(voiceConnection.joinConfig.group)?.delete(voiceConnection.joinConfig.guildId);
+  return getVoiceConnections(voiceConnection.joinConfig.group)?.delete(voiceConnection.joinConfig.guildId);
 }
 
 export function trackVoiceConnection(voiceConnection: VoiceConnection) {
-    return getOrCreateGroup(voiceConnection.joinConfig.group).set(voiceConnection.joinConfig.guildId, voiceConnection);
+  return getOrCreateGroup(voiceConnection.joinConfig.group).set(voiceConnection.joinConfig.guildId, voiceConnection);
 }
 
 // Audio Players
@@ -117,17 +117,17 @@ const audioPlayers: AudioPlayer[] = [];
  * the next audio frame.
  */
 function audioCycleStep() {
-    if (nextTime === -1) return;
+  if (nextTime === -1) return;
 
-    nextTime += FRAME_LENGTH;
-    const available = audioPlayers.filter((player) => player.checkPlayable());
+  nextTime += FRAME_LENGTH;
+  const available = audioPlayers.filter((player) => player.checkPlayable());
 
-    for (const player of available) {
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        player['_stepDispatch']();
-    }
+  for (const player of available) {
+    // eslint-disable-next-line @typescript-eslint/dot-notation
+    player['_stepDispatch']();
+  }
 
-    prepareNextAudioFrame(available);
+  prepareNextAudioFrame(available);
 }
 
 /**
@@ -135,21 +135,21 @@ function audioCycleStep() {
  * at the start of the next cycle.
  */
 function prepareNextAudioFrame(players: AudioPlayer[]) {
-    const nextPlayer = players.shift();
+  const nextPlayer = players.shift();
 
-    if (!nextPlayer) {
-        if (nextTime !== -1) {
-            audioCycleInterval = setTimeout(() => audioCycleStep(), nextTime - Date.now());
-        }
-
-        return;
+  if (!nextPlayer) {
+    if (nextTime !== -1) {
+      audioCycleInterval = setTimeout(() => audioCycleStep(), nextTime - Date.now());
     }
 
-    // eslint-disable-next-line @typescript-eslint/dot-notation
-    nextPlayer['_stepPrepare']();
+    return;
+  }
 
-    // setImmediate to avoid long audio player chains blocking other scheduled tasks
-    setImmediate(() => prepareNextAudioFrame(players));
+  // eslint-disable-next-line @typescript-eslint/dot-notation
+  nextPlayer['_stepPrepare']();
+
+  // setImmediate to avoid long audio player chains blocking other scheduled tasks
+  setImmediate(() => prepareNextAudioFrame(players));
 }
 
 /**
@@ -159,7 +159,7 @@ function prepareNextAudioFrame(players: AudioPlayer[]) {
  * @returns `true` if it is being tracked, `false` otherwise
  */
 export function hasAudioPlayer(target: AudioPlayer) {
-    return audioPlayers.includes(target);
+  return audioPlayers.includes(target);
 }
 
 /**
@@ -168,25 +168,25 @@ export function hasAudioPlayer(target: AudioPlayer) {
  * @param player - The player to track
  */
 export function addAudioPlayer(player: AudioPlayer) {
-    if (hasAudioPlayer(player)) return player;
-    audioPlayers.push(player);
-    if (audioPlayers.length === 1) {
-        nextTime = Date.now();
-        setImmediate(() => audioCycleStep());
-    }
+  if (hasAudioPlayer(player)) return player;
+  audioPlayers.push(player);
+  if (audioPlayers.length === 1) {
+    nextTime = Date.now();
+    setImmediate(() => audioCycleStep());
+  }
 
-    return player;
+  return player;
 }
 
 /**
  * Removes an audio player from the data store tracking list, if it is present there.
  */
 export function deleteAudioPlayer(player: AudioPlayer) {
-    const index = audioPlayers.indexOf(player);
-    if (index === -1) return;
-    audioPlayers.splice(index, 1);
-    if (audioPlayers.length === 0) {
-        nextTime = -1;
-        if (audioCycleInterval !== undefined) clearTimeout(audioCycleInterval);
-    }
+  const index = audioPlayers.indexOf(player);
+  if (index === -1) return;
+  audioPlayers.splice(index, 1);
+  if (audioPlayers.length === 0) {
+    nextTime = -1;
+    if (audioCycleInterval !== undefined) clearTimeout(audioCycleInterval);
+  }
 }

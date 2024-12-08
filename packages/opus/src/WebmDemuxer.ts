@@ -14,9 +14,9 @@ const OPUS_HEAD = Buffer.from([...'OpusHead'].map((x) => x.charCodeAt(0)));
  * // opus is now a ReadableStream in object mode outputting Opus packets
  */
 export class WebmDemuxer extends WebmBaseDemuxer {
-    _checkHead(data: Buffer) {
-        if (!data.subarray(0, 8).equals(OPUS_HEAD)) {
-            throw Error('Audio codec is not Opus!');
-        }
+  _checkHead(data: Buffer) {
+    if (!data.subarray(0, 8).equals(OPUS_HEAD)) {
+      throw Error('Audio codec is not Opus!');
     }
+  }
 }

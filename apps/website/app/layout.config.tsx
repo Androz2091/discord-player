@@ -9,29 +9,29 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
  * Docs Layout: app/docs/layout.tsx
  */
 export const baseOptions: BaseLayoutProps = {
-    nav: {
-        title: 'Discord Player',
+  nav: {
+    title: 'Discord Player',
+  },
+  links: [
+    {
+      text: 'Documentation',
+      url: '/docs',
+      active: 'nested-url',
     },
-    links: [
-        {
-            text: 'Documentation',
-            url: '/docs',
-            active: 'nested-url',
-        },
-        {
-            text: 'API Reference',
-            url: '/api',
-            active: 'nested-url',
-        },
-        {
-            text: 'Community',
-            url: '/community',
-            active: 'url',
-        },
-        {
-            text: 'Discord',
-            url: DISCORD_INVITE,
-        },
-    ],
-    githubUrl: 'https://github.com/Androz2091/discord-player',
+    {
+      text: 'API Reference',
+      url: '/api',
+      active: 'nested-url',
+    },
+    {
+      text: 'Community',
+      url: '/community',
+      active: 'url',
+    },
+    {
+      text: 'Discord',
+      url: DISCORD_INVITE,
+    },
+  ],
+  githubUrl: 'https://github.com/Androz2091/discord-player',
 };

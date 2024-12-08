@@ -3,16 +3,16 @@ import { remarkInstall } from 'fumadocs-docgen';
 import { remarkAdmonition } from 'fumadocs-core/mdx-plugins';
 
 export const { docs, meta } = defineDocs({
-    dir: ['content/docs'],
+  dir: ['content/docs'],
 });
 
 export const { docs: apiDocs, meta: apiMeta } = defineDocs({
-    dir: ['content/api'],
+  dir: ['content/api'],
 });
 
 export default defineConfig({
-    mdxOptions: {
-        // @ts-expect-error type issue
-        remarkPlugins: [remarkInstall, remarkAdmonition],
-    },
+  mdxOptions: {
+    // @ts-expect-error type issue
+    remarkPlugins: [remarkInstall, remarkAdmonition],
+  },
 });
