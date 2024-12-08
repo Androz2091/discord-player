@@ -11,18 +11,18 @@ type VolumeDispatch = readonly [() => number, (volume: number | SetterFN) => boo
  */
 export function useVolume(): VolumeDispatch;
 export function useVolume(node?: NodeResolvable): VolumeDispatch {
-    const { context, player } = useHooksContext('useVolume');
-    const queue = player.queues.get(node ?? context.guild.id);
-    const setter = (volume: number | SetterFN) => {
-        if (queue) {
-            if (TypeUtil.isFunction(volume)) return queue.node.setVolume(volume(queue.node.volume));
-            return queue.node.setVolume(volume);
-        }
-    };
+  const { context, player } = useHooksContext('useVolume');
+  const queue = player.queues.get(node ?? context.guild.id);
+  const setter = (volume: number | SetterFN) => {
+    if (queue) {
+      if (TypeUtil.isFunction(volume)) return queue.node.setVolume(volume(queue.node.volume));
+      return queue.node.setVolume(volume);
+    }
+  };
 
-    const getter = () => {
-        return queue?.node.volume as number;
-    };
+  const getter = () => {
+    return queue?.node.volume as number;
+  };
 
-    return [getter, setter] as const;
+  return [getter, setter] as const;
 }

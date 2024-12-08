@@ -7,9 +7,9 @@ import { useHooksContext } from './common';
  */
 export function usePlayer<Meta = unknown>(): GuildQueuePlayerNode<Meta> | null;
 export function usePlayer<Meta = unknown>(node?: NodeResolvable): GuildQueuePlayerNode<Meta> | null {
-    const { context, player } = useHooksContext('usePlayer');
-    const queue = player.queues.get<Meta>(node ?? context.guild.id);
-    if (!queue) return null;
+  const { context, player } = useHooksContext('usePlayer');
+  const queue = player.queues.get<Meta>(node ?? context.guild.id);
+  if (!queue) return null;
 
-    return queue.node;
+  return queue.node;
 }

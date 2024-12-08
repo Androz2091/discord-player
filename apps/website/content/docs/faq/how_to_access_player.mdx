@@ -1,0 +1,17 @@
+---
+title: Accessing main player instance
+description: Learn how to access the main player instance
+---
+
+We have seen a lot of examples where we could assign `Player` to `client.player` for easy access of the `Player` instance. But polluting client like this could be a bad idea:
+
+```js title="index.js"
+client.player = player;
+```
+
+This would remove intellisense as `client` does not have a property called `player`. To solve this issue, discord-player by default provides `useMainPlayer` hook which can be used to access the main player instance. Once you initialize Player, you can use `useMainPlayer` to access the main player instance:
+
+```js title="play.js"
+const { useMainPlayer } = require('discord-player');
+const player = useMainPlayer();
+```

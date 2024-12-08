@@ -9,49 +9,49 @@ type unsafe = any;
 export type ContextReceiver<R> = () => R;
 
 export class Context<T> {
-    private storage = new AsyncLocalStorage<T>();
+  private storage = new AsyncLocalStorage<T>();
 
-    public constructor(private defaultValue?: T) {}
+  public constructor(private defaultValue?: T) {}
 
-    /**
-     * Exit out of this context
-     */
-    public exit(scope: ContextReceiver<void>) {
-        this.storage.exit(scope);
+  /**
+   * Exit out of this context
+   */
+  public exit(scope: ContextReceiver<void>) {
+    this.storage.exit(scope);
+  }
+
+  /**
+   * Whether the context is lost
+   */
+  public get isLost() {
+    return this.storage.getStore() === undefined;
+  }
+
+  /**
+   * Get the current value of the context. If the context is lost and no default value is provided, undefined will be returned.
+   */
+  public consume(): T | undefined {
+    const data = this.storage.getStore();
+
+    if (data === undefined && this.defaultValue !== undefined) return this.defaultValue;
+
+    return data;
+  }
+
+  /**
+   * Run a function within the context of this provider
+   */
+  public provide<R = unsafe>(value: T, receiver: ContextReceiver<R>): R {
+    if (value === undefined) {
+      throw new Error('Context value may not be undefined');
     }
 
-    /**
-     * Whether the context is lost
-     */
-    public get isLost() {
-        return this.storage.getStore() === undefined;
+    if (typeof receiver !== 'function') {
+      throw new Error('Context receiver must be a function');
     }
 
-    /**
-     * Get the current value of the context. If the context is lost and no default value is provided, undefined will be returned.
-     */
-    public consume(): T | undefined {
-        const data = this.storage.getStore();
-
-        if (data === undefined && this.defaultValue !== undefined) return this.defaultValue;
-
-        return data;
-    }
-
-    /**
-     * Run a function within the context of this provider
-     */
-    public provide<R = unsafe>(value: T, receiver: ContextReceiver<R>): R {
-        if (value === undefined) {
-            throw new Error('Context value may not be undefined');
-        }
-
-        if (typeof receiver !== 'function') {
-            throw new Error('Context receiver must be a function');
-        }
-
-        return this.storage.run(value, receiver);
-    }
+    return this.storage.run(value, receiver);
+  }
 }
 
 /**
@@ -76,7 +76,7 @@ export class Context<T> {
  *  }
  */
 export function createContext<T = unsafe>(defaultValue?: T): Context<T> {
-    return new Context(defaultValue);
+  return new Context(defaultValue);
 }
 
 /**
@@ -85,5 +85,5 @@ export function createContext<T = unsafe>(defaultValue?: T): Context<T> {
  * @example const value = useContext(context);
  */
 export function useContext<T = unsafe>(context: Context<T>): T | undefined {
-    return context.consume();
+  return context.consume();
 }
