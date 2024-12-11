@@ -1,5 +1,5 @@
 export const add = (a: number, b: number) => {
-    return a + b;
+  return a + b;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types

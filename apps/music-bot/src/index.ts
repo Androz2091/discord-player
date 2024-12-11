@@ -6,8 +6,8 @@ import { PlayCommand } from './play';
 import { NowPlayingCommand } from './nowplaying';
 
 const client = new Client({
-    // prettier-ignore
-    intents: [
+  // prettier-ignore
+  intents: [
         IntentsBitField.Flags.Guilds,
         IntentsBitField.Flags.GuildVoiceStates,
         IntentsBitField.Flags.GuildMembers,
@@ -19,33 +19,33 @@ const client = new Client({
 const player = Player.create(client);
 
 client.once(Events.ClientReady, async () => {
-    await player.extractors.loadMulti(DefaultExtractors);
-    console.log('Ready!');
+  await player.extractors.loadMulti(DefaultExtractors);
+  console.log('Ready!');
 });
 
 client.on(Events.MessageCreate, async (message) => {
-    if (!message.guild || message.author.bot) return;
+  if (!message.guild || message.author.bot) return;
 
-    const prefix = '!';
-    if (!message.content.startsWith(prefix)) return;
+  const prefix = '!';
+  if (!message.content.startsWith(prefix)) return;
 
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
+  const args = message.content.slice(prefix.length).trim().split(/ +/);
 
-    const command = args.shift();
+  const command = args.shift();
 
-    try {
-        await player.context.provide({ guild: message.guild }, () => {
-            switch (command) {
-                case 'play':
-                    return PlayCommand(message, args);
-                case 'np':
-                    return NowPlayingCommand(message);
-            }
-        });
-    } catch (e) {
-        console.error(e);
-        message.channel.send('An error occurred while executing this command.');
-    }
+  try {
+    await player.context.provide({ guild: message.guild }, () => {
+      switch (command) {
+        case 'play':
+          return PlayCommand(message, args);
+        case 'np':
+          return NowPlayingCommand(message);
+      }
+    });
+  } catch (e) {
+    console.error(e);
+    message.channel.send('An error occurred while executing this command.');
+  }
 });
 
 client.login();

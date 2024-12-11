@@ -1,20 +1,16 @@
+import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-    darkMode: 'class',
-    content: [
-        './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-        './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-        './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-    ],
-    theme: {
-        container: {
-            center: true,
-            padding: '2rem',
-            screens: {
-                '2xl': '1520px',
-            },
-        },
-        extend: {},
-    },
-    plugins: [],
+const config = {
+  content: [
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './content/**/*.{md,mdx}',
+    './mdx-components.{ts,tsx}',
+    './node_modules/fumadocs-ui/dist/**/*.js',
+    '../../node_modules/fumadocs-ui/dist/**/*.js',
+  ],
+  presets: [createPreset()],
 };
+
+export default config;

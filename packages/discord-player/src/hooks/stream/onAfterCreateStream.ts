@@ -6,5 +6,5 @@ import { getGlobalRegistry } from '../../utils/__internal__';
  * @param handler The handler callback
  */
 export function onAfterCreateStream(handler: OnAfterCreateStreamHandler) {
-    getGlobalRegistry().set('@[onAfterCreateStream]', handler);
+  getGlobalRegistry().set('@[onAfterCreateStream]', handler);
 }

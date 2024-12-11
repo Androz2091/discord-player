@@ -10,20 +10,20 @@ export type ArgPrimitive = string | number;
  * // => ['-i', 'input.mp3', '-af', 'bass=g=10,acompressor', './out.mp3']
  */
 export const createFFmpegArgs = (
-    input: Record<string, ArgPrimitive | ArgPrimitive[]>,
-    post?: string | string[],
+  input: Record<string, ArgPrimitive | ArgPrimitive[]>,
+  post?: string | string[],
 ): string[] => {
-    const args = [];
+  const args = [];
 
-    for (const [key, value] of Object.entries(input)) {
-        args.push(`-${key}`, String(value));
-    }
+  for (const [key, value] of Object.entries(input)) {
+    args.push(`-${key}`, String(value));
+  }
 
-    if (post) {
-        Array.isArray(post) ? args.push(...post) : args.push(post);
-    }
+  if (post) {
+    Array.isArray(post) ? args.push(...post) : args.push(post);
+  }
 
-    return args;
+  return args;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
