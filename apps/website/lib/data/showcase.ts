@@ -228,5 +228,10 @@ export const ShowcaseResource: IShowcase = {
       description: 'An unofficial discord-player extractor to add support for tidal source.',
       url: 'https://npm.im/discord-player-tidal',
     },
+    {
+      name: 'discord-player-soundgasm',
+      description: 'An unofficial discord-player extractor to add support for Soundgasm. (because why not)',
+      url: 'https://npm.im/soundgasm-extractor',
+    },
   ]),
 };
