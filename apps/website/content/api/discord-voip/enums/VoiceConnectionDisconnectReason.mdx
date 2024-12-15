@@ -1,0 +1,17 @@
+---
+title: 'VoiceConnectionDisconnectReason'
+description: 'The reasons a voice connection can be in the disconnected state.'
+---
+
+## VoiceConnectionDisconnectReason
+
+The reasons a voice connection can be in the disconnected state.
+
+| Property           | Type | Value | Description                                                                                               |
+| ------------------ | ---- | ----- | --------------------------------------------------------------------------------------------------------- |
+| AdapterUnavailable | 1    | N/A   | When the adapter was unable to send a message requested by the VoiceConnection.                           |
+| EndpointRemoved    | 2    | N/A   | When a VOICE_SERVER_UPDATE packet is received with a null endpoint, causing the connection to be severed. |
+| Manual             | 3    | N/A   | When a manual disconnect was requested.                                                                   |
+| WebSocketClose     | 0    | N/A   | When the WebSocket connection has been closed.                                                            |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L67)

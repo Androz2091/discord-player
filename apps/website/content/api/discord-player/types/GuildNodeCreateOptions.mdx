@@ -1,0 +1,43 @@
+---
+title: 'GuildNodeCreateOptions'
+description: 'No description provided'
+---
+
+## GuildNodeCreateOptions
+
+| Property              | Type                                                                                                | Value |
+| --------------------- | --------------------------------------------------------------------------------------------------- | ----- |
+| a_filter              | Array\<'8D' \| 'Tremolo' \| 'Vibrato'>                                                              | N/A   |
+| biquad                | BiquadFilters                                                                                       | N/A   |
+| bufferingTimeout      | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| connectionTimeout     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| defaultFFmpegFilters  | Array\<keyof QueueFilters>                                                                          | N/A   |
+| disableBiquad         | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableEqualizer      | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableFallbackStream | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableFilterer       | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableHistory        | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableResampler      | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableVolume         | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| equalizer             | Array\<EqualizerBand>                                                                               | N/A   |
+| leaveOnEmpty          | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| leaveOnEmptyCooldown  | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| leaveOnEnd            | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| leaveOnEndCooldown    | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| leaveOnStop           | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| leaveOnStopCooldown   | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| maxHistorySize        | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| maxSize               | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| metadata              | null \| T                                                                                           | N/A   |
+| noEmitInsert          | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| onAfterCreateStream   | OnAfterCreateStreamHandler                                                                          | N/A   |
+| onBeforeCreateStream  | OnBeforeCreateStreamHandler                                                                         | N/A   |
+| pauseOnEmpty          | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| preferBridgedMetadata | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| repeatMode            | [QueueRepeatMode](/api/enums/QueueRepeatMode)                                                       | N/A   |
+| resampler             | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| selfDeaf              | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| strategy              | QueueStrategy                                                                                       | N/A   |
+| volume                | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildNodeManager.ts#L10)

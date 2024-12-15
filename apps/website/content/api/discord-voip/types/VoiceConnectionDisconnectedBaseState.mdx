@@ -1,0 +1,17 @@
+---
+title: 'VoiceConnectionDisconnectedBaseState'
+description: 'The state that a VoiceConnection will be in when it is not connected to a Discord voice server nor is it attempting to connect. You can manually attempt to reconnect using VoiceConnection#reconnect.'
+---
+
+## VoiceConnectionDisconnectedBaseState
+
+The state that a VoiceConnection will be in when it is not connected to a Discord voice server nor is
+it attempting to connect. You can manually attempt to reconnect using VoiceConnection#reconnect.
+
+| Property     | Type                                                                                                       | Value |
+| ------------ | ---------------------------------------------------------------------------------------------------------- | ----- |
+| adapter      | [DiscordGatewayAdapterImplementerMethods](/api/discord-voip/types/DiscordGatewayAdapterImplementerMethods) | N/A   |
+| status       | Disconnected                                                                                               | N/A   |
+| subscription | [PlayerSubscription](/api/discord-voip/classes/PlayerSubscription)                                         | N/A   |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L93)

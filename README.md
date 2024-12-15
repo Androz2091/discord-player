@@ -44,26 +44,10 @@ $ npm install --save @discord-player/extractor # extractors provider
 
 #### Opus Library
 
-Since Discord only accepts opus packets, you need to install the opus library. Discord Player supports multiple opus libraries, such as:
-
--   [mediaplex](https://npmjs.com/mediaplex)
--   [@discordjs/opus](https://npmjs.com/@discordjs/opus)
--   [opusscript](https://npmjs.com/opusscript)
--   [@evan/opus](https://npmjs.com/@evan/opus)
--   [node-opus](https://npmjs.com/node-opus)
-
-Among these, mediaplex is the recommended library as it adds more functionalities to discord-player than just libopus interface. You can install opus libraries by running:
+We recommend mediaplex for libopus. Mediaplex also helps with audio metadata extraction.
 
 ```bash
 $ npm install --save mediaplex
-# or
-$ npm install --save @discordjs/opus
-# or
-$ npm install --save opusscript
-# or
-$ npm install --save @evan/opus
-# or
-$ npm install --save node-opus
 ```
 
 #### FFmpeg or Avconv
@@ -100,8 +84,8 @@ const client = new Discord.Client({
 // this is the entrypoint for discord-player based application
 const player = new Player(client);
 
-// load the default extractors
-player.extractors.loadMulti(DefaultExtractors);
+// Now, lets load all the default extractors, except 'YouTubeExtractor'. You can remove the filter if you want to include youtube.
+await player.extractors.loadMulti(DefaultExtractors);
 ```
 
 Discord Player is mostly events based. It emits different events based on the context and actions. Let's add a basic event listener to notify the user when a track starts to play:

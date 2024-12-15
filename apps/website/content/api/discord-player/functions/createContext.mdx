@@ -1,0 +1,34 @@
+---
+title: 'createContext'
+description: 'Create a new context. The default value is optional.'
+---
+
+### createContext(defaultValue?): [Context](/api/classes/Context)\<T>
+
+Create a new context. The default value is optional.
+
+```ts
+const userContext = createContext();
+
+// the value to provide
+const user = {
+  id: 1,
+  name: 'John Doe',
+};
+
+// provide the context value to the receiver
+context.provide(user, handler);
+
+function handler() {
+  // get the context value
+  const { id, name } = useContext(context);
+
+  console.log(id, name); // 1, John Doe
+}
+```
+
+| Parameter    | Type | Optional | Description                      |
+| ------------ | ---- | -------- | -------------------------------- |
+| defaultValue | T    | ✅       | The default value of the context |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/hooks/context/async-context.ts#L78)

@@ -1,0 +1,19 @@
+---
+title: 'VoiceConnectionDisconnectedWebSocketState'
+description: 'The state that a VoiceConnection will be in when its WebSocket connection was closed. You can manually attempt to reconnect using VoiceConnection#reconnect.'
+---
+
+## VoiceConnectionDisconnectedWebSocketState
+
+The state that a VoiceConnection will be in when its WebSocket connection was closed.
+You can manually attempt to reconnect using VoiceConnection#reconnect.
+
+| Property     | Type                                                                                                       | Value | Description                                                             |
+| ------------ | ---------------------------------------------------------------------------------------------------------- | ----- | ----------------------------------------------------------------------- |
+| adapter      | [DiscordGatewayAdapterImplementerMethods](/api/discord-voip/types/DiscordGatewayAdapterImplementerMethods) | N/A   | N/A                                                                     |
+| closeCode    | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)          | N/A   | The close code of the WebSocket connection to the Discord voice server. |
+| reason       | WebSocketClose                                                                                             | N/A   | N/A                                                                     |
+| status       | Disconnected                                                                                               | N/A   | N/A                                                                     |
+| subscription | [PlayerSubscription](/api/discord-voip/classes/PlayerSubscription)                                         | N/A   | N/A                                                                     |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L111)

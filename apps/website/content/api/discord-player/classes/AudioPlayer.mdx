@@ -1,0 +1,71 @@
+---
+title: 'AudioPlayer'
+description: 'Used to play audio resources (i.e. tracks, streams) to voice connections.'
+---
+
+## AudioPlayer extends [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+
+Used to play audio resources (i.e. tracks, streams) to voice connections.
+
+```typescript
+new AudioPlayer(options);
+```
+
+| Parameter | Type                     | Optional |
+| --------- | ------------------------ | -------- |
+| options   | CreateAudioPlayerOptions | ✅       |
+
+## Properties
+
+### public playable: any
+
+A list of subscribed voice connections that can currently receive audio to play.
+
+### public state: any
+
+The state that the player is in.
+
+## Methods
+
+### public checkPlayable(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Checks whether the underlying resource (if any) is playable (readable)
+
+### public on(event, listener): this
+
+Emitted when there is an error emitted from the audio resource played by the audio player
+
+| Parameter | Type                                                                                                                              | Optional |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| event     | '[error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)'                                 | ❌       |
+| listener  | ( error: AudioPlayerError ) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌       |
+
+### public pause(interpolateSilence?): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Pauses playback of the current resource, if any.
+
+| Parameter          | Type                                                                                                | Optional | Description                                                                                |
+| ------------------ | --------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
+| interpolateSilence | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ✅       | If true, the player will play 5 packets of silence after pausing to prevent audio glitches |
+
+### public play(resource): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Plays a new resource on the player. If the player is already playing a resource, the existing resource is destroyed
+(it cannot be reused, even in another player) and is replaced with the new resource.
+
+| Parameter | Type                     | Optional | Description          |
+| --------- | ------------------------ | -------- | -------------------- |
+| resource  | AudioResource\<Metadata> | ❌       | The resource to play |
+
+### public stop(force?): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Stops playback of the current resource and destroys the resource. The player will either transition to the Idle state,
+or remain in its current state until the silence padding frames of the resource have been played.
+
+| Parameter | Type                                                                                                | Optional | Description                                                                                            |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| force     | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ✅       | If true, will force the player to enter the Idle state even if the resource has silence padding frames |
+
+### public unpause(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Unpauses playback of the current resource, if any.

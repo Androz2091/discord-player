@@ -1,0 +1,309 @@
+---
+title: 'ExtractorExecutionContext'
+description: 'No description provided'
+---
+
+## ExtractorExecutionContext extends PlayerEventsEmitter\<ExtractorExecutionEvents>
+
+```typescript
+new ExtractorExecutionContext(player);
+```
+
+| Parameter | Type   | Optional |
+| --------- | ------ | -------- |
+| player    | Player | ❌       |
+
+## Properties
+
+### public context: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L56)
+
+### public player: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L58)
+
+### public requiredEvents: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L8)
+
+### public store: any
+
+The extractors store
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L54)
+
+### public static defaultMaxListeners: any
+
+### public hasDebugger: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L70)
+
+### public size: any
+
+The size of registered extractors
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L114)
+
+## Methods
+
+### public addListener(name, listener): ExtractorExecutionContext
+
+| Parameter | Type                         | Optional |
+| --------- | ---------------------------- | -------- |
+| name      | K                            | ❌       |
+| listener  | ExtractorExecutionEvents\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L28)
+
+### public emit(name, args): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+| Parameter | Type                                      | Optional |
+| --------- | ----------------------------------------- | -------- |
+| name      | K                                         | ❌       |
+| args      | Parameters\<ExtractorExecutionEvents\[K]> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L54)
+
+### public eventNames(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<U>
+
+### public get(identifier): undefined | [BaseExtractor](/api/classes/BaseExtractor)\<[object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)>
+
+Get single extractor
+
+| Parameter  | Type                                                                                              | Optional | Description          |
+| ---------- | ------------------------------------------------------------------------------------------------- | -------- | -------------------- |
+| identifier | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | The extractor to get |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L122)
+
+### public getContext(): null | ExtractorSession
+
+Get the current execution context
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L72)
+
+### public getExecutionId(): null | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+Get the current execution id
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L65)
+
+### public getMaxListeners(): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+### public isDisabled(identifier): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Check if extractor is disabled
+
+| Parameter  | Type                                                                                              | Optional |
+| ---------- | ------------------------------------------------------------------------------------------------- | -------- |
+| identifier | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L299)
+
+### public isEnabled(identifier): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Check if extractor is enabled
+
+| Parameter  | Type                                                                                              | Optional |
+| ---------- | ------------------------------------------------------------------------------------------------- | -------- |
+| identifier | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L306)
+
+### public isRegistered(identifier): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Validate if the given extractor is registered
+
+| Parameter  | Type                                                                                              | Optional | Description              |
+| ---------- | ------------------------------------------------------------------------------------------------- | -------- | ------------------------ |
+| identifier | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | The extractor identifier |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L107)
+
+### public listenerCount(type): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type                           | Optional |
+| --------- | ------------------------------ | -------- |
+| type      | keyof ExtractorExecutionEvents | ❌       |
+
+### public listeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| type      | U    | ❌       |
+
+### public loadDefault(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L76)
+
+### public loadMulti(bundle, options): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<\{
+
+[error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) | : null | ;
+success | : [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ;
+}>
+Load a bundle of extractors.
+
+```ts
+import { DefaultExtractors } from '@discord-player/extractor';
+
+await player.extractors.loadMulti(DefaultExtractors);
+```
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| bundle    | T    | ❌       |
+| options   | R    | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L90)
+
+### public off(name, listener): ExtractorExecutionContext
+
+| Parameter | Type                         | Optional |
+| --------- | ---------------------------- | -------- |
+| name      | K                            | ❌       |
+| listener  | ExtractorExecutionEvents\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L36)
+
+### public on(name, listener): ExtractorExecutionContext
+
+| Parameter | Type                         | Optional |
+| --------- | ---------------------------- | -------- |
+| name      | K                            | ❌       |
+| listener  | ExtractorExecutionEvents\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L12)
+
+### public once(name, listener): ExtractorExecutionContext
+
+| Parameter | Type                         | Optional |
+| --------- | ---------------------------- | -------- |
+| name      | K                            | ❌       |
+| listener  | ExtractorExecutionEvents\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L20)
+
+### public prependListener(event, listener): this
+
+| Parameter | Type                         | Optional |
+| --------- | ---------------------------- | -------- |
+| event     | U                            | ❌       |
+| listener  | ExtractorExecutionEvents\[U] | ❌       |
+
+### public prependOnceListener(event, listener): this
+
+| Parameter | Type                         | Optional |
+| --------- | ---------------------------- | -------- |
+| event     | U                            | ❌       |
+| listener  | ExtractorExecutionEvents\[U] | ❌       |
+
+### public rawListeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<ExtractorExecutionEvents\[U]>
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| type      | U    | ❌       |
+
+### public register(\_extractor, options): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<null | InstanceType\<T>>
+
+Register single extractor
+
+| Parameter   | Type                            | Optional | Description                       |
+| ----------- | ------------------------------- | -------- | --------------------------------- |
+| \_extractor | T                               | ❌       | The extractor to register         |
+| options     | ConstructorParameters\<T>\['1'] | ❌       | Options supplied to the extractor |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L131)
+
+### public removeAllListeners(name?): ExtractorExecutionContext
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| name      | K    | ✅       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L48)
+
+### public removeListener(name, listener): ExtractorExecutionContext
+
+| Parameter | Type                         | Optional |
+| --------- | ---------------------------- | -------- |
+| name      | K                            | ❌       |
+| listener  | ExtractorExecutionEvents\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L42)
+
+### public requestBridge(track, sourceExtractor): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<ExtractorExecutionResult\<ExtractorStreamable>>
+
+Request bridge for a track
+
+| Parameter       | Type                                                                                                                                                    | Optional | Description                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------- |
+| track           | Track\<unknown>                                                                                                                                         | ❌       | The track to request bridge for   |
+| sourceExtractor | null \| [BaseExtractor](/api/classes/BaseExtractor)\<[object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)> | ❌       | The source extractor of the track |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L253)
+
+### public requestBridgeFrom(track, sourceExtractor, targetExtractor): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<null | ExtractorStreamable>
+
+Request bridge from the specified extractor
+
+| Parameter       | Type                                                                                                                                                    | Optional | Description                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------- |
+| track           | Track\<unknown>                                                                                                                                         | ❌       | The track to request bridge for   |
+| sourceExtractor | null \| [BaseExtractor](/api/classes/BaseExtractor)\<[object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)> | ❌       | The source extractor of the track |
+| targetExtractor | ExtractorResolvable                                                                                                                                     | ❌       | The target extractor to bridge to |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L286)
+
+### public resolve(resolvable): undefined | [BaseExtractor](/api/classes/BaseExtractor)\<[object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)>
+
+Resolve extractor
+
+| Parameter  | Type                | Optional |
+| ---------- | ------------------- | -------- |
+| resolvable | ExtractorResolvable | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L320)
+
+### public resolveId(resolvable): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+Resolve extractor identifier
+
+| Parameter  | Type                | Optional |
+| ---------- | ------------------- | -------- |
+| resolvable | ExtractorResolvable | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L313)
+
+### public run(fn, filterBlocked): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<undefined | ExtractorExecutionResult\<false>ExtractorExecutionResult\<T>>
+
+Run all the extractors
+
+| Parameter     | Type                                                                                                | Optional | Description               |
+| ------------- | --------------------------------------------------------------------------------------------------- | -------- | ------------------------- |
+| fn            | ExtractorExecutionFN\<T>                                                                            | ❌       | The runner function       |
+| filterBlocked | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌       | Filter blocked extractors |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L197)
+
+### public setMaxListeners(n): this
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| n         | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+### public unregister(\_extractor): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+
+Unregister single extractor
+
+| Parameter   | Type | Optional | Description                 |
+| ----------- | ---- | -------- | --------------------------- |
+| \_extractor | K    | ❌       | The extractor to unregister |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L162)
+
+### public unregisterAll(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+
+Unregister all extractors
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/extractors/ExtractorExecutionContext.ts#L184)

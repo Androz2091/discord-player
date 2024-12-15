@@ -1,0 +1,94 @@
+---
+title: 'FFmpeg'
+description: 'No description provided'
+---
+
+## FFmpeg extends [Duplex](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_duplex)
+
+```typescript
+new FFmpeg(options);
+```
+
+| Parameter | Type                                                     | Optional | Description                  |
+| --------- | -------------------------------------------------------- | -------- | ---------------------------- |
+| options   | [FFmpegOptions](/api/discord-player/types/FFmpegOptions) | ❌       | Options to initialize ffmpeg |
+
+## Properties
+
+### public process: any
+
+Current FFmpeg process
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/FFmpeg.ts#L163)
+
+### public static sources: any
+
+Supported FFmpeg sources.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/FFmpeg.ts#L48)
+
+### public \_reader: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/FFmpeg.ts#L220)
+
+### public \_writer: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/FFmpeg.ts#L223)
+
+## Methods
+
+### public static addSource(source): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Adds a new FFmpeg source.
+
+| Parameter | Type                                                   | Optional | Description   |
+| --------- | ------------------------------------------------------ | -------- | ------------- |
+| source    | [FFmpegSource](/api/discord-player/types/FFmpegSource) | ❌       | FFmpeg source |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/FFmpeg.ts#L72)
+
+### public static isLoaded(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Checks if FFmpeg is loaded.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/FFmpeg.ts#L64)
+
+### public static removeSource(source): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Removes a FFmpeg source.
+
+| Parameter | Type                                                   | Optional | Description   |
+| --------- | ------------------------------------------------------ | -------- | ------------- |
+| source    | [FFmpegSource](/api/discord-player/types/FFmpegSource) | ❌       | FFmpeg source |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/FFmpeg.ts#L82)
+
+### public static resolve(force): [ResolvedFFmpegSource](/api/discord-player/types/ResolvedFFmpegSource)
+
+Resolves FFmpeg path. Throws an error if it fails to resolve.
+
+| Parameter | Type                                                                                                | Optional | Description                       |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- | --------------------------------- |
+| force     | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌       | if it should relocate the command |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/FFmpeg.ts#L93)
+
+### public static resolveSafe(force): null | [ResolvedFFmpegSource](/api/discord-player/types/ResolvedFFmpegSource)
+
+Resolves FFmpeg path safely. Returns null if it fails to resolve.
+
+| Parameter | Type                                                                                                | Optional | Description                       |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- | --------------------------------- |
+| force     | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌       | if it should relocate the command |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/FFmpeg.ts#L143)
+
+### public static spawn(options): ChildProcessWithoutNullStreams
+
+Spawns ffmpeg process
+
+| Parameter | Type               | Optional | Description   |
+| --------- | ------------------ | -------- | ------------- |
+| options   | FFmpegSpawnOptions | ❌       | Spawn options |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/FFmpeg.ts#L155)

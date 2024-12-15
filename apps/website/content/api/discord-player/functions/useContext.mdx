@@ -1,0 +1,18 @@
+---
+title: 'useContext'
+description: 'Get the current value of the context. If the context is lost and no default value is provided, undefined will be returned.'
+---
+
+### useContext(context): T | undefined
+
+Get the current value of the context. If the context is lost and no default value is provided, undefined will be returned.
+
+```ts
+const value = useContext(context);
+```
+
+| Parameter | Type                                | Optional | Description                       |
+| --------- | ----------------------------------- | -------- | --------------------------------- |
+| context   | [Context](/api/classes/Context)\<T> | ❌       | The context to get the value from |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/hooks/context/async-context.ts#L87)

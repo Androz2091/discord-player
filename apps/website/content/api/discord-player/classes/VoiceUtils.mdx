@@ -1,0 +1,75 @@
+---
+title: 'VoiceUtils'
+description: 'No description provided'
+---
+
+## VoiceUtils
+
+```typescript
+new VoiceUtils(player);
+```
+
+| Parameter | Type                          | Optional |
+| --------- | ----------------------------- | -------- |
+| player    | [Player](/api/classes/Player) | ❌       |
+
+## Properties
+
+### public cache: any
+
+Voice connection cache to store voice connections of the Player components.
+This property is deprecated and will be removed in the future.
+It only exists for compatibility reasons.
+
+- **⚠️ Deprecated**
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L23)
+
+### public player: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L28)
+
+## Methods
+
+### public connect(channel, options?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[StreamDispatcher](/api/classes/StreamDispatcher)>
+
+Joins a voice channel, creating basic stream dispatch manager
+
+| Parameter | Type                         | Optional | Description       |
+| --------- | ---------------------------- | -------- | ----------------- |
+| channel   | VoiceChannel \| StageChannel | ❌       | The voice channel |
+| options   | JoinOptions                  | ✅       | Join options      |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L36)
+
+### public disconnect(connection): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Disconnects voice connection
+
+| Parameter  | Type                                                                 | Optional | Description          |
+| ---------- | -------------------------------------------------------------------- | -------- | -------------------- |
+| connection | [StreamDispatcher](/api/classes/StreamDispatcher) \| VoiceConnection | ❌       | The voice connection |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L92)
+
+### public getConnection(guild, group?): undefined | VoiceConnection
+
+Returns Discord Player voice connection
+
+| Parameter | Type                                                                                              | Optional | Description  |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ------------ |
+| guild     | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | The guild id |
+| group     | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ✅       | N/A          |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L107)
+
+### public join(channel?, options?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<VoiceConnection>
+
+Joins a voice channel
+
+| Parameter | Type                         | Optional | Description                     |
+| --------- | ---------------------------- | -------- | ------------------------------- |
+| channel   | VoiceChannel \| StageChannel | ✅       | The voice/stage channel to join |
+| options   | JoinOptions                  | ✅       | Join options                    |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/VoiceUtils.ts#L58)

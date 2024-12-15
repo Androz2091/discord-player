@@ -1,0 +1,137 @@
+---
+title: 'SearchResult'
+description: 'No description provided'
+---
+
+## SearchResult
+
+```typescript
+new SearchResult(player, _data);
+```
+
+| Parameter | Type                          | Optional |
+| --------- | ----------------------------- | -------- |
+| player    | [Player](/api/classes/Player) | ❌       |
+| \_data    | SearchResultData              | ❌       |
+
+## Properties
+
+### public player: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L18)
+
+### public extractor: any
+
+The extractor
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L78)
+
+### public playlist: any
+
+Playlist result
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L85)
+
+### public query: any
+
+The search query
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L64)
+
+### public queryType: any
+
+The search query type
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L71)
+
+### public requestedBy: any
+
+Requested by
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L99)
+
+### public tracks: any
+
+Tracks result
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L92)
+
+## Methods
+
+### public execute(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<SearchResult>
+
+Re-execute this search
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L106)
+
+### public hasPlaylist(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+If this search result has playlist
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L123)
+
+### public hasTracks(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+If this search result has tracks
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L130)
+
+### public isEmpty(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+If this search result is empty
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L116)
+
+### public setExtractor(extractor): SearchResult
+
+| Parameter | Type                                                                                                                                            | Optional |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| extractor | [BaseExtractor](/api/classes/BaseExtractor)\<[object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L38)
+
+### public setPlaylist(playlist): SearchResult
+
+| Parameter | Type                              | Optional |
+| --------- | --------------------------------- | -------- |
+| playlist  | [Playlist](/api/classes/Playlist) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L56)
+
+### public setQuery(query): SearchResult
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| query     | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L51)
+
+### public setQueryType(type): SearchResult
+
+| Parameter | Type                               | Optional |
+| --------- | ---------------------------------- | -------- |
+| type      | SearchQueryType\`ext:\$\{string}\` | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L25)
+
+### public setRequestedBy(user): SearchResult
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| user      | User | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L30)
+
+### public setTracks(tracks): SearchResult
+
+| Parameter | Type                                                                                                              | Optional |
+| --------- | ----------------------------------------------------------------------------------------------------------------- | -------- |
+| tracks    | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track\<unknown>> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L46)
+
+### public toJSON(): SearchResultJSON
+
+JSON representation of this search
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/SearchResult.ts#L137)

@@ -15,29 +15,29 @@ import { VolumeTransformer } from '@discord-player/equalizer';
  * @typeParam Metadata - the type for the metadata (if any) of the audio resource
  */
 export interface CreateAudioResourceOptions<Metadata> {
-    /**
-     * Whether or not inline volume should be enabled. If enabled, you will be able to change the volume
-     * of the stream on-the-fly. However, this also increases the performance cost of playback. Defaults to `false`.
-     */
-    inlineVolume?: boolean;
+  /**
+   * Whether or not inline volume should be enabled. If enabled, you will be able to change the volume
+   * of the stream on-the-fly. However, this also increases the performance cost of playback. Defaults to `false`.
+   */
+  inlineVolume?: boolean;
 
-    /**
-     * The type of the input stream. Defaults to `StreamType.Arbitrary`.
-     */
-    inputType?: StreamType;
+  /**
+   * The type of the input stream. Defaults to `StreamType.Arbitrary`.
+   */
+  inputType?: StreamType;
 
-    /**
-     * Optional metadata that can be attached to the resource (e.g. track title, random id).
-     * This is useful for identification purposes when the resource is passed around in events.
-     * See {@link AudioResource.metadata}
-     */
-    metadata?: Metadata;
+  /**
+   * Optional metadata that can be attached to the resource (e.g. track title, random id).
+   * This is useful for identification purposes when the resource is passed around in events.
+   * See {@link AudioResource.metadata}
+   */
+  metadata?: Metadata;
 
-    /**
-     * The number of silence frames to append to the end of the resource's audio stream, to prevent interpolation glitches.
-     * Defaults to 5.
-     */
-    silencePaddingFrames?: number;
+  /**
+   * The number of silence frames to append to the end of the resource's audio stream, to prevent interpolation glitches.
+   * Defaults to 5.
+   */
+  silencePaddingFrames?: number;
 }
 
 /**
@@ -46,129 +46,129 @@ export interface CreateAudioResourceOptions<Metadata> {
  * @typeParam Metadata - the type for the metadata (if any) of the audio resource
  */
 export class AudioResource<Metadata = unknown> {
-    /**
-     * An object-mode Readable stream that emits Opus packets. This is what is played by audio players.
-     */
-    public readonly playStream: Readable;
+  /**
+   * An object-mode Readable stream that emits Opus packets. This is what is played by audio players.
+   */
+  public readonly playStream: Readable;
 
-    /**
-     * The pipeline used to convert the input stream into a playable format. For example, this may
-     * contain an FFmpeg component for arbitrary inputs, and it may contain a VolumeTransformer component
-     * for resources with inline volume transformation enabled.
-     */
-    public readonly edges: readonly Edge[];
+  /**
+   * The pipeline used to convert the input stream into a playable format. For example, this may
+   * contain an FFmpeg component for arbitrary inputs, and it may contain a VolumeTransformer component
+   * for resources with inline volume transformation enabled.
+   */
+  public readonly edges: readonly Edge[];
 
-    /**
-     * Optional metadata that can be used to identify the resource.
-     */
-    public metadata: Metadata;
+  /**
+   * Optional metadata that can be used to identify the resource.
+   */
+  public metadata: Metadata;
 
-    /**
-     * If the resource was created with inline volume transformation enabled, then this will be a
-     * prism-media VolumeTransformer. You can use this to alter the volume of the stream.
-     */
-    public readonly volume?: VolumeTransformer;
+  /**
+   * If the resource was created with inline volume transformation enabled, then this will be a
+   * prism-media VolumeTransformer. You can use this to alter the volume of the stream.
+   */
+  public readonly volume?: VolumeTransformer;
 
-    /**
-     * If using an Opus encoder to create this audio resource, then this will be a prism-media opus.Encoder.
-     * You can use this to control settings such as bitrate, FEC, PLP.
-     */
-    public readonly encoder?: OpusEncoder;
+  /**
+   * If using an Opus encoder to create this audio resource, then this will be a prism-media opus.Encoder.
+   * You can use this to control settings such as bitrate, FEC, PLP.
+   */
+  public readonly encoder?: OpusEncoder;
 
-    /**
-     * The audio player that the resource is subscribed to, if any.
-     */
-    public audioPlayer?: AudioPlayer | undefined;
+  /**
+   * The audio player that the resource is subscribed to, if any.
+   */
+  public audioPlayer?: AudioPlayer | undefined;
 
-    /**
-     * The playback duration of this audio resource, given in milliseconds.
-     */
-    public playbackDuration = 0;
+  /**
+   * The playback duration of this audio resource, given in milliseconds.
+   */
+  public playbackDuration = 0;
 
-    /**
-     * Whether or not the stream for this resource has started (data has become readable)
-     */
-    public started = false;
+  /**
+   * Whether or not the stream for this resource has started (data has become readable)
+   */
+  public started = false;
 
-    /**
-     * The number of silence frames to append to the end of the resource's audio stream, to prevent interpolation glitches.
-     */
-    public readonly silencePaddingFrames: number;
+  /**
+   * The number of silence frames to append to the end of the resource's audio stream, to prevent interpolation glitches.
+   */
+  public readonly silencePaddingFrames: number;
 
-    /**
-     * The number of remaining silence frames to play. If -1, the frames have not yet started playing.
-     */
-    public silenceRemaining = -1;
+  /**
+   * The number of remaining silence frames to play. If -1, the frames have not yet started playing.
+   */
+  public silenceRemaining = -1;
 
-    public constructor(
-        edges: readonly Edge[],
-        streams: readonly Readable[],
-        metadata: Metadata,
-        silencePaddingFrames: number,
-    ) {
-        this.edges = edges;
-        this.playStream = streams.length > 1 ? (pipeline(streams, noop) as unknown as Readable) : streams[0]!;
-        this.metadata = metadata;
-        this.silencePaddingFrames = silencePaddingFrames;
+  public constructor(
+    edges: readonly Edge[],
+    streams: readonly Readable[],
+    metadata: Metadata,
+    silencePaddingFrames: number,
+  ) {
+    this.edges = edges;
+    this.playStream = streams.length > 1 ? (pipeline(streams, noop) as unknown as Readable) : streams[0]!;
+    this.metadata = metadata;
+    this.silencePaddingFrames = silencePaddingFrames;
 
-        for (const stream of streams) {
-            if (stream instanceof VolumeTransformer) {
-                this.volume = stream;
-            } else if (stream instanceof OpusEncoder) {
-                this.encoder = stream;
-            }
-        }
-
-        this.playStream.once('readable', () => (this.started = true));
+    for (const stream of streams) {
+      if (stream instanceof VolumeTransformer) {
+        this.volume = stream;
+      } else if (stream instanceof OpusEncoder) {
+        this.encoder = stream;
+      }
     }
 
-    /**
-     * Whether this resource is readable. If the underlying resource is no longer readable, this will still return true
-     * while there are silence padding frames left to play.
-     */
-    public get readable() {
-        if (this.silenceRemaining === 0) return false;
-        const real = this.playStream.readable;
-        if (!real) {
-            if (this.silenceRemaining === -1) this.silenceRemaining = this.silencePaddingFrames;
-            return this.silenceRemaining !== 0;
-        }
+    this.playStream.once('readable', () => (this.started = true));
+  }
 
-        return real;
+  /**
+   * Whether this resource is readable. If the underlying resource is no longer readable, this will still return true
+   * while there are silence padding frames left to play.
+   */
+  public get readable() {
+    if (this.silenceRemaining === 0) return false;
+    const real = this.playStream.readable;
+    if (!real) {
+      if (this.silenceRemaining === -1) this.silenceRemaining = this.silencePaddingFrames;
+      return this.silenceRemaining !== 0;
     }
 
-    /**
-     * Whether this resource has ended or not.
-     */
-    public get ended() {
-        return this.playStream.readableEnded || this.playStream.destroyed || this.silenceRemaining === 0;
+    return real;
+  }
+
+  /**
+   * Whether this resource has ended or not.
+   */
+  public get ended() {
+    return this.playStream.readableEnded || this.playStream.destroyed || this.silenceRemaining === 0;
+  }
+
+  /**
+   * Attempts to read an Opus packet from the audio resource. If a packet is available, the playbackDuration
+   * is incremented.
+   *
+   * @remarks
+   * It is advisable to check that the playStream is readable before calling this method. While no runtime
+   * errors will be thrown, you should check that the resource is still available before attempting to
+   * read from it.
+   * @internal
+   */
+  public read(): Buffer | null {
+    if (this.silenceRemaining === 0) {
+      return null;
+    } else if (this.silenceRemaining > 0) {
+      this.silenceRemaining--;
+      return SILENCE_FRAME;
     }
 
-    /**
-     * Attempts to read an Opus packet from the audio resource. If a packet is available, the playbackDuration
-     * is incremented.
-     *
-     * @remarks
-     * It is advisable to check that the playStream is readable before calling this method. While no runtime
-     * errors will be thrown, you should check that the resource is still available before attempting to
-     * read from it.
-     * @internal
-     */
-    public read(): Buffer | null {
-        if (this.silenceRemaining === 0) {
-            return null;
-        } else if (this.silenceRemaining > 0) {
-            this.silenceRemaining--;
-            return SILENCE_FRAME;
-        }
-
-        const packet = this.playStream.read() as Buffer | null;
-        if (packet) {
-            this.playbackDuration += 20;
-        }
-
-        return packet;
+    const packet = this.playStream.read() as Buffer | null;
+    if (packet) {
+      this.playbackDuration += 20;
     }
+
+    return packet;
+  }
 }
 
 /**
@@ -186,22 +186,22 @@ export const NO_CONSTRAINT = () => true;
  * @param stream - The stream to infer the type of
  */
 export function inferStreamType(stream: Readable): {
-    hasVolume: boolean;
-    streamType: StreamType;
+  hasVolume: boolean;
+  streamType: StreamType;
 } {
-    if (stream instanceof OpusEncoder) {
-        return { streamType: StreamType.Opus, hasVolume: false };
-    } else if (stream instanceof OpusDecoder) {
-        return { streamType: StreamType.Raw, hasVolume: false };
-    } else if (stream instanceof VolumeTransformer) {
-        return { streamType: StreamType.Raw, hasVolume: true };
-    } else if (stream instanceof OggDemuxer) {
-        return { streamType: StreamType.Opus, hasVolume: false };
-    } else if (stream instanceof WebmDemuxer) {
-        return { streamType: StreamType.Opus, hasVolume: false };
-    }
+  if (stream instanceof OpusEncoder) {
+    return { streamType: StreamType.Opus, hasVolume: false };
+  } else if (stream instanceof OpusDecoder) {
+    return { streamType: StreamType.Raw, hasVolume: false };
+  } else if (stream instanceof VolumeTransformer) {
+    return { streamType: StreamType.Raw, hasVolume: true };
+  } else if (stream instanceof OggDemuxer) {
+    return { streamType: StreamType.Opus, hasVolume: false };
+  } else if (stream instanceof WebmDemuxer) {
+    return { streamType: StreamType.Opus, hasVolume: false };
+  }
 
-    return { streamType: StreamType.Arbitrary, hasVolume: false };
+  return { streamType: StreamType.Arbitrary, hasVolume: false };
 }
 
 /**
@@ -218,14 +218,14 @@ export function inferStreamType(stream: Readable): {
  * @typeParam Metadata - the type for the metadata (if any) of the audio resource
  */
 export function createAudioResource<Metadata>(
-    input: Readable | string,
-    options: CreateAudioResourceOptions<Metadata> &
-        Pick<
-            Metadata extends null | undefined
-                ? CreateAudioResourceOptions<Metadata>
-                : Required<CreateAudioResourceOptions<Metadata>>,
-            'metadata'
-        >,
+  input: Readable | string,
+  options: CreateAudioResourceOptions<Metadata> &
+    Pick<
+      Metadata extends null | undefined
+        ? CreateAudioResourceOptions<Metadata>
+        : Required<CreateAudioResourceOptions<Metadata>>,
+      'metadata'
+    >,
 ): AudioResource<Metadata extends null | undefined ? null : Metadata>;
 
 /**
@@ -242,8 +242,8 @@ export function createAudioResource<Metadata>(
  * @typeParam Metadata - the type for the metadata (if any) of the audio resource
  */
 export function createAudioResource<Metadata extends null | undefined>(
-    input: Readable | string,
-    options?: Omit<CreateAudioResourceOptions<Metadata>, 'metadata'>,
+  input: Readable | string,
+  options?: Omit<CreateAudioResourceOptions<Metadata>, 'metadata'>,
 ): AudioResource<null>;
 
 /**
@@ -260,41 +260,41 @@ export function createAudioResource<Metadata extends null | undefined>(
  * @typeParam Metadata - the type for the metadata (if any) of the audio resource
  */
 export function createAudioResource<Metadata>(
-    input: Readable | string,
-    options: CreateAudioResourceOptions<Metadata> = {},
+  input: Readable | string,
+  options: CreateAudioResourceOptions<Metadata> = {},
 ): AudioResource<Metadata> {
-    let inputType = options.inputType;
-    let needsInlineVolume = Boolean(options.inlineVolume);
+  let inputType = options.inputType;
+  let needsInlineVolume = Boolean(options.inlineVolume);
 
-    // string inputs can only be used with FFmpeg
-    if (typeof input === 'string') {
-        inputType = StreamType.Arbitrary;
-    } else if (inputType === undefined) {
-        const analysis = inferStreamType(input);
-        inputType = analysis.streamType;
-        needsInlineVolume = needsInlineVolume && !analysis.hasVolume;
-    }
+  // string inputs can only be used with FFmpeg
+  if (typeof input === 'string') {
+    inputType = StreamType.Arbitrary;
+  } else if (inputType === undefined) {
+    const analysis = inferStreamType(input);
+    inputType = analysis.streamType;
+    needsInlineVolume = needsInlineVolume && !analysis.hasVolume;
+  }
 
-    const transformerPipeline = findPipeline(inputType, needsInlineVolume ? VOLUME_CONSTRAINT : NO_CONSTRAINT);
+  const transformerPipeline = findPipeline(inputType, needsInlineVolume ? VOLUME_CONSTRAINT : NO_CONSTRAINT);
 
-    if (transformerPipeline.length === 0) {
-        if (typeof input === 'string') throw new Error(`Invalid pipeline constructed for string resource '${input}'`);
-        // No adjustments required
-        return new AudioResource<Metadata>(
-            [],
-            [input],
-            (options.metadata ?? null) as Metadata,
-            options.silencePaddingFrames ?? 5,
-        );
-    }
-
-    const streams = transformerPipeline.map((edge) => edge.transformer(input));
-    if (typeof input !== 'string') streams.unshift(input);
-
+  if (transformerPipeline.length === 0) {
+    if (typeof input === 'string') throw new Error(`Invalid pipeline constructed for string resource '${input}'`);
+    // No adjustments required
     return new AudioResource<Metadata>(
-        transformerPipeline,
-        streams,
-        (options.metadata ?? null) as Metadata,
-        options.silencePaddingFrames ?? 5,
+      [],
+      [input],
+      (options.metadata ?? null) as Metadata,
+      options.silencePaddingFrames ?? 5,
     );
+  }
+
+  const streams = transformerPipeline.map((edge) => edge.transformer(input));
+  if (typeof input !== 'string') streams.unshift(input);
+
+  return new AudioResource<Metadata>(
+    transformerPipeline,
+    streams,
+    (options.metadata ?? null) as Metadata,
+    options.silencePaddingFrames ?? 5,
+  );
 }

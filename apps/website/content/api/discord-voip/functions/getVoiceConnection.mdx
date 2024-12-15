@@ -1,0 +1,15 @@
+---
+title: 'getVoiceConnection'
+description: 'Finds a voice connection with the given guild id and group. Defaults to the default group.'
+---
+
+### getVoiceConnection(guildId, group): undefined | [VoiceConnection](/api/discord-voip/classes/VoiceConnection)
+
+Finds a voice connection with the given guild id and group. Defaults to the 'default' group.
+
+| Parameter | Type                                                                                              | Optional | Description                                             |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------- |
+| guildId   | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | The guild id of the voice connection                    |
+| group     | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | the group that the voice connection was registered with |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/DataStore.ts#L90)

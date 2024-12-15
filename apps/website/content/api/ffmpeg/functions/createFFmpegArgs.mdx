@@ -1,0 +1,20 @@
+---
+title: 'createFFmpegArgs'
+description: 'Create FFmpeg arguments from an object.'
+---
+
+### createFFmpegArgs(input, post?): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)>
+
+Create FFmpeg arguments from an object.
+
+```ts
+createFFmpegArgs({ i: 'input.mp3', af: ['bass=g=10', 'acompressor'] }, './out.mp3');
+// => ['-i', 'input.mp3', '-af', 'bass=g=10,acompressor', './out.mp3']
+```
+
+| Parameter | Type                                                                                                      | Optional                                                                                                                                                                                            | Description                                                                                                                                               |
+| --------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ----------------- |
+| input     | Record\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | [ArgPrimitive](/api/discord-player/types/ArgPrimitive)                                                                                                                                              | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[ArgPrimitive](/api/discord-player/types/ArgPrimitive)>> | ❌  | The input object. |
+| post      | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)         | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)> | ✅                                                                                                                                                        | N/A |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/ffmpeg/src/index.ts#L12)

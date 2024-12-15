@@ -1,0 +1,87 @@
+---
+title: 'AudioPlayer'
+description: 'Used to play audio resources (i.e. tracks, streams) to voice connections.'
+---
+
+## AudioPlayer extends [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+
+Used to play audio resources (i.e. tracks, streams) to voice connections.
+
+```typescript
+new AudioPlayer(options);
+```
+
+| Parameter | Type                                                                           | Optional |
+| --------- | ------------------------------------------------------------------------------ | -------- |
+| options   | [CreateAudioPlayerOptions](/api/discord-player/types/CreateAudioPlayerOptions) | ❌       |
+
+## Properties
+
+### public playable: any
+
+A list of subscribed voice connections that can currently receive audio to play.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L262)
+
+### public state: any
+
+The state that the player is in.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L314)
+
+## Methods
+
+### public checkPlayable(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Checks whether the underlying resource (if any) is playable (readable)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L516)
+
+### public on(event, listener): this
+
+Emitted when there is an error emitted from the audio resource played by the audio player
+
+| Parameter | Type                                                                                                                              | Optional |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| event     | '[error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)'                                 | ❌       |
+| listener  | ( error: AudioPlayerError ) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L166)
+
+### public pause(interpolateSilence): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Pauses playback of the current resource, if any.
+
+| Parameter          | Type                                                                                                | Optional | Description                                                                                |
+| ------------------ | --------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
+| interpolateSilence | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌       | If true, the player will play 5 packets of silence after pausing to prevent audio glitches |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L466)
+
+### public play(resource): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Plays a new resource on the player. If the player is already playing a resource, the existing resource is destroyed
+(it cannot be reused, even in another player) and is replaced with the new resource.
+
+| Parameter | Type                     | Optional | Description          |
+| --------- | ------------------------ | -------- | -------------------- |
+| resource  | AudioResource\<Metadata> | ❌       | The resource to play |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L384)
+
+### public stop(force): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Stops playback of the current resource and destroys the resource. The player will either transition to the Idle state,
+or remain in its current state until the silence padding frames of the resource have been played.
+
+| Parameter | Type                                                                                                | Optional | Description                                                                                            |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| force     | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌       | If true, will force the player to enter the Idle state even if the resource has silence padding frames |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L498)
+
+### public unpause(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Unpauses playback of the current resource, if any.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L481)

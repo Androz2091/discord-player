@@ -11,18 +11,18 @@ export type MetadataDispatch<T> = readonly [() => T, (metadata: T | SetterFN<T, 
  */
 export function useMetadata<T = unknown>(): MetadataDispatch<T>;
 export function useMetadata<T = unknown>(node?: NodeResolvable): MetadataDispatch<T> {
-    const { context, player } = useHooksContext('useMetadata');
-    const queue = player.queues.get<T>(node ?? context.guild.id);
-    const setter = (metadata: T | SetterFN<T, T>) => {
-        if (queue) {
-            if (TypeUtil.isFunction(metadata)) return queue.setMetadata(metadata(queue.metadata));
-            return queue.setMetadata(metadata);
-        }
-    };
+  const { context, player } = useHooksContext('useMetadata');
+  const queue = player.queues.get<T>(node ?? context.guild.id);
+  const setter = (metadata: T | SetterFN<T, T>) => {
+    if (queue) {
+      if (TypeUtil.isFunction(metadata)) return queue.setMetadata(metadata(queue.metadata));
+      return queue.setMetadata(metadata);
+    }
+  };
 
-    const getter = () => {
-        return queue?.metadata as T;
-    };
+  const getter = () => {
+    return queue?.metadata as T;
+  };
 
-    return [getter, setter] as const;
+  return [getter, setter] as const;
 }

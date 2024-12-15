@@ -52,6 +52,8 @@
   "typedoc": {
     "entryPoint": "./src/index.ts",
     "readmeFile": "./README.md",
-    "tsconfig": "./tsconfig.json"
+    "tsconfig": "./tsconfig.json",
+    "excludeExternals": true,
+    "excludePrivate": true
   }
 }

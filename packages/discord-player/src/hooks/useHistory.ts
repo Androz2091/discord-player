@@ -7,10 +7,10 @@ import { useHooksContext } from './common';
  */
 export function useHistory<Meta = unknown>(): GuildQueueHistory<Meta> | null;
 export function useHistory<Meta = unknown>(node?: NodeResolvable): GuildQueueHistory<Meta> | null {
-    const { context, player } = useHooksContext('useHistory');
+  const { context, player } = useHooksContext('useHistory');
 
-    const queue = player.queues.get<Meta>(node ?? context.guild.id);
-    if (!queue) return null;
+  const queue = player.queues.get<Meta>(node ?? context.guild.id);
+  if (!queue) return null;
 
-    return queue.history;
+  return queue.history;
 }

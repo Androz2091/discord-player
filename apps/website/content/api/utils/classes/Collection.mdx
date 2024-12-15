@@ -1,0 +1,37 @@
+---
+title: 'Collection'
+description: 'No description provided'
+---
+
+## Collection extends Collection\<K, V>
+
+```typescript
+new Collection(entries);
+```
+
+| Parameter | Type                                      | Optional |
+| --------- | ----------------------------------------- | -------- |
+| entries   | null \| readonly Array\<readonly \[K, V]> | ✅       |
+
+## Methods
+
+### public array(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<V>
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/utils/src/Collection.ts#L9)
+
+### public delete(key): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| key       | K    | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/utils/src/Collection.ts#L21)
+
+### public set(key, value): this
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| key       | K    | ❌       |
+| value     | V    | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/utils/src/Collection.ts#L15)

@@ -1,0 +1,18 @@
+---
+title: 'StreamType'
+description: 'The different types of stream that can exist within the pipeline.'
+---
+
+## StreamType
+
+The different types of stream that can exist within the pipeline.
+
+| Property  | Type        | Value | Description                                                                                      |
+| --------- | ----------- | ----- | ------------------------------------------------------------------------------------------------ |
+| Arbitrary | 'arbitrary' | N/A   | The type of the stream at this point is unknown.                                                 |
+| OggOpus   | 'ogg/opus'  | N/A   | The stream at this point is Opus audio encoded in an Ogg wrapper.                                |
+| Opus      | 'opus'      | N/A   | The stream at this point is Opus audio, and the stream is in object-mode. This is ready to play. |
+| Raw       | 'raw'       | N/A   | The stream at this point is s16le PCM.                                                           |
+| WebmOpus  | 'webm/opus' | N/A   | The stream at this point is Opus audio encoded in a WebM wrapper.                                |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/TransformerGraph.ts#L29)

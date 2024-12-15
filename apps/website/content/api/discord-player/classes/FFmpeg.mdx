@@ -1,0 +1,73 @@
+---
+title: 'FFmpeg'
+description: 'No description provided'
+---
+
+## FFmpeg extends [Duplex](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_duplex)
+
+```typescript
+new FFmpeg(options);
+```
+
+| Parameter | Type          | Optional | Description                  |
+| --------- | ------------- | -------- | ---------------------------- |
+| options   | FFmpegOptions | ✅       | Options to initialize ffmpeg |
+
+## Properties
+
+### public process: any
+
+Current FFmpeg process
+
+### public static sources: any
+
+Supported FFmpeg sources.
+
+### public \_reader: any
+
+### public \_writer: any
+
+## Methods
+
+### public static addSource(source): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Adds a new FFmpeg source.
+
+| Parameter | Type         | Optional | Description   |
+| --------- | ------------ | -------- | ------------- |
+| source    | FFmpegSource | ❌       | FFmpeg source |
+
+### public static isLoaded(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Checks if FFmpeg is loaded.
+
+### public static removeSource(source): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Removes a FFmpeg source.
+
+| Parameter | Type         | Optional | Description   |
+| --------- | ------------ | -------- | ------------- |
+| source    | FFmpegSource | ❌       | FFmpeg source |
+
+### public static resolve(force?): ResolvedFFmpegSource
+
+Resolves FFmpeg path. Throws an error if it fails to resolve.
+
+| Parameter                                   | Type                                                                                                | Optional | Description                       |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------- | --------------------------------- |
+| force                                       | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ✅       | if it should relocate the command |
+| ### public static resolveSafe(force?): null | ResolvedFFmpegSource                                                                                |
+
+Resolves FFmpeg path safely. Returns null if it fails to resolve.
+
+| Parameter | Type                                                                                                | Optional | Description                       |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- | --------------------------------- |
+| force     | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ✅       | if it should relocate the command |
+
+### public static spawn(options?): ChildProcessWithoutNullStreams
+
+Spawns ffmpeg process
+
+| Parameter | Type                                                                                                                                                                                                                                                                                                                        | Optional | Description   |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------- |
+| options   | \{ args: [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)>; shell: [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean); } | ✅       | Spawn options |

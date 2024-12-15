@@ -1,0 +1,17 @@
+---
+title: 'CreateAudioResourceOptions'
+description: 'Options that are set when creating a new audio resource.'
+---
+
+## CreateAudioResourceOptions
+
+Options that are set when creating a new audio resource.
+
+| Property             | Type                                                                                                | Value | Description                                                                                                                                                                                                     |
+| -------------------- | --------------------------------------------------------------------------------------------------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| inlineVolume         | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   | Whether or not inline volume should be enabled. If enabled, you will be able to change the volume of the stream on-the-fly. However, this also increases the performance cost of playback. Defaults to `false`. |
+| inputType            | [StreamType](/api/discord-voip/enums/StreamType)                                                    | N/A   | The type of the input stream. Defaults to `StreamType.Arbitrary`.                                                                                                                                               |
+| metadata             | Metadata                                                                                            | N/A   | Optional metadata that can be attached to the resource (e.g. track title, random id). This is useful for identification purposes when the resource is passed around in events. See AudioResource.metadata       |
+| silencePaddingFrames | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   | The number of silence frames to append to the end of the resource's audio stream, to prevent interpolation glitches. Defaults to 5.                                                                             |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L17)

@@ -1,0 +1,26 @@
+---
+title: Classes
+description: Classes provided by opus
+---
+
+# Classes
+
+<Cards><Card title="OggDemuxer" description="Demuxes an Ogg stream (containing Opus audio) to output an Opus stream." href="/api/opus/classes/OggDemuxer" />
+
+<Card title="OpusDecoder" description="An Opus decoder stream.
+
+Note that any stream you pipe into this must be in
+[object mode](https://nodejs.org/api/stream.html#stream_object_mode) and should output Opus packets." href="/api/opus/classes/OpusDecoder" />
+
+<Card title="OpusEncoder" description="An Opus encoder stream.
+
+Outputs opus packets in [object mode.](https://nodejs.org/api/stream.html#stream_object_mode)" href="/api/opus/classes/OpusEncoder" />
+
+<Card
+  title="OpusStream"
+  description="Takes a stream of Opus data and outputs a stream of PCM data, or the inverse.
+**You shouldn't directly instantiate this class, see opus.Encoder and opus.Decoder instead!**"
+  href="/api/opus/classes/OpusStream"
+/>
+
+<Card title="WebmDemuxer" description="Demuxes a Webm stream (containing Opus audio) to output an Opus stream." href="/api/opus/classes/WebmDemuxer" /></Cards>

@@ -1,0 +1,26 @@
+---
+title: 'AudioPlayerError'
+description: 'An error emitted by an AudioPlayer. Contains an attached resource to aid with debugging and identifying where the error came from.'
+---
+
+## AudioPlayerError extends [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+
+An error emitted by an AudioPlayer. Contains an attached resource to aid with
+debugging and identifying where the error came from.
+
+```typescript
+new AudioPlayerError(error, resource);
+```
+
+| Parameter | Type                                                                                            | Optional |
+| --------- | ----------------------------------------------------------------------------------------------- | -------- |
+| error     | [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) | ❌       |
+| resource  | AudioResource\<unknown>                                                                         | ❌       |
+
+## Properties
+
+### public resource: any
+
+The resource associated with the audio player at the time the error was thrown.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayerError.ts#L14)

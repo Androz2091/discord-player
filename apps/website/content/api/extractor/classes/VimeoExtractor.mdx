@@ -1,0 +1,145 @@
+---
+title: 'VimeoExtractor'
+description: 'No description provided'
+---
+
+## VimeoExtractor extends [BaseExtractor](/api/discord-player/classes/BaseExtractor)
+
+```typescript
+new VimeoExtractor(context, options);
+```
+
+| Parameter | Type                                                                                              | Optional | Description                               |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------- |
+| context   | [ExtractorExecutionContext](/api/discord-player/classes/ExtractorExecutionContext)                | ❌       | Context that instantiated this extractor  |
+| options   | [object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) | ✅       | Initialization options for this extractor |
+
+## Properties
+
+### public context: any
+
+### public createBridgeQuery: any
+
+Handle bridge query creation
+
+### public options: any
+
+### public priority: any
+
+Priority of this extractor. Higher value means higher priority (will be executed first).
+
+### public protocols: any
+
+A list of query protocols that this extractor supports.
+
+### public static identifier: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/extractor/src/extractors/VimeoExtractor.ts#L14)
+
+### public identifier: any
+
+Identifier of this extractor
+
+### public supportsDemux: any
+
+A flag to indicate `Demuxable` stream support for `opus`/`ogg/opus`/`webm/opus` formats.
+
+## Methods
+
+### public activate(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+
+This method will be executed when this extractor is activated
+
+### public bridge(track, sourceExtractor): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<null | [ExtractorStreamable](/api/discord-player/types/ExtractorStreamable)>
+
+Handle stream extraction for another extractor
+
+| Parameter       | Type                                                                                                                                                                   | Optional | Description          |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------- |
+| track           | [Track](/api/discord-player/classes/Track)\<unknown>                                                                                                                   | ❌       | The track to bridge  |
+| sourceExtractor | null \| [BaseExtractor](/api/discord-player/classes/BaseExtractor)\<[object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)> | ❌       | The source extractor |
+
+### public createResponse(playlist?, tracks?): [ExtractorInfo](/api/discord-player/types/ExtractorInfo)
+
+Create extractor response
+
+| Parameter | Type                                                                                                                                                   | Optional | Description     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | --------------- |
+| playlist  | null \| [Playlist](/api/discord-player/classes/Playlist)                                                                                               | ✅       | The playlist    |
+| tracks    | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[Track](/api/discord-player/classes/Track)\<unknown>> | ✅       | The track array |
+
+### public deactivate(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+
+This method will be executed when this extractor is deactivated
+
+### public debug(message): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Write debug message
+
+| Parameter | Type                                                                                              | Optional | Description       |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ----------------- |
+| message   | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | The debug message |
+
+### public emit(event, args): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Dispatch an event to the player
+
+| Parameter | Type                                                                    | Optional | Description           |
+| --------- | ----------------------------------------------------------------------- | -------- | --------------------- |
+| event     | K                                                                       | ❌       | The event to dispatch |
+| args      | Parameters\<[PlayerEvents](/api/discord-player/types/PlayerEvents)\[K]> | ❌       | The data to dispatch  |
+
+### public emptyResponse(): [ExtractorInfo](/api/discord-player/types/ExtractorInfo)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/extractor/src/extractors/VimeoExtractor.ts#L65)
+
+### public getRelatedTracks(track): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[ExtractorInfo](/api/discord-player/types/ExtractorInfo)>
+
+| Parameter | Type                                                 | Optional |
+| --------- | ---------------------------------------------------- | -------- |
+| track     | [Track](/api/discord-player/classes/Track)\<unknown> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/extractor/src/extractors/VimeoExtractor.ts#L21)
+
+### public handle(query, context): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[ExtractorInfo](/api/discord-player/types/ExtractorInfo)>
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| query     | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       |
+| context   | [ExtractorSearchContext](/api/discord-player/types/ExtractorSearchContext)                        | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/extractor/src/extractors/VimeoExtractor.ts#L26)
+
+### public handlePostStream(stream, next): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+A stream middleware to handle streams before passing it to the player
+
+| Parameter | Type                                                                                         | Optional | Description         |
+| --------- | -------------------------------------------------------------------------------------------- | -------- | ------------------- |
+| stream    | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌       | The incoming stream |
+| next      | [NextFunction](/api/discord-player/types/NextFunction)                                       | ❌       | The next function   |
+
+### public reconfigure(options): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+
+Reconfigures this extractor
+
+| Parameter | Type                                                                                              | Optional | Description              |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ------------------------ |
+| options   | [object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) | ❌       | The new options to apply |
+
+### public stream(info): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)>
+
+| Parameter | Type                                                 | Optional |
+| --------- | ---------------------------------------------------- | -------- |
+| info      | [Track](/api/discord-player/classes/Track)\<unknown> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/extractor/src/extractors/VimeoExtractor.ts#L69)
+
+### public validate(query, type?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| query     | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       |
+| type      | null \| [SearchQueryType](/api/discord-player/types/SearchQueryType)                              | ✅       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/extractor/src/extractors/VimeoExtractor.ts#L16)

@@ -22,26 +22,26 @@ export * from './hooks';
 export * from './utils/serde';
 export * from './utils/DependencyReportGenerator';
 export {
-    AudioFilters as PCMAudioFilters,
-    type BiquadFilters,
-    FilterType as BiquadFilterType,
-    type PCMFilters,
-    Q_BUTTERWORTH,
-    VolumeTransformer,
-    BASS_EQ_BANDS,
-    AF_NIGHTCORE_RATE,
-    AF_VAPORWAVE_RATE,
-    FiltersChain,
+  AudioFilters as PCMAudioFilters,
+  type BiquadFilters,
+  FilterType as BiquadFilterType,
+  type PCMFilters,
+  Q_BUTTERWORTH,
+  VolumeTransformer,
+  BASS_EQ_BANDS,
+  AF_NIGHTCORE_RATE,
+  AF_VAPORWAVE_RATE,
+  FiltersChain,
 } from '@discord-player/equalizer';
 export {
-    createAudioPlayer,
-    AudioPlayer,
-    getVoiceConnection,
-    getVoiceConnections,
-    joinVoiceChannel,
-    type JoinConfig,
-    type JoinVoiceChannelOptions,
-    type CreateAudioPlayerOptions,
+  createAudioPlayer,
+  AudioPlayer,
+  getVoiceConnection,
+  getVoiceConnections,
+  joinVoiceChannel,
+  type JoinConfig,
+  type JoinVoiceChannelOptions,
+  type CreateAudioPlayerOptions,
 } from 'discord-voip';
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types

@@ -61,7 +61,8 @@
     "libsodium-wrappers": "^0.7.13"
   },
   "peerDependencies": {
-    "@discord-player/extractor": "workspace:^"
+    "@discord-player/extractor": "workspace:^",
+    "mediaplex": "^1"
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
@@ -79,6 +80,8 @@
   "typedoc": {
     "entryPoint": "./src/index.ts",
     "readmeFile": "./README.md",
-    "tsconfig": "./tsconfig.json"
+    "tsconfig": "./tsconfig.json",
+    "excludeExternals": true,
+    "excludePrivate": true
   }
 }

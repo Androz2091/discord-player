@@ -10,154 +10,153 @@ export type LyricsAt = { timestamp: number; line: string };
 const timestampPattern = /\[(\d{2}):(\d{2})\.(\d{2})\]/;
 
 export class SyncedLyricsProvider {
-    #loop: NodeJS.Timeout | null = null;
-    #callback: LyricsCallback | null = null;
-    #onUnsubscribe: Unsubscribe | null = null;
+  #loop: NodeJS.Timeout | null = null;
+  #callback: LyricsCallback | null = null;
+  #onUnsubscribe: Unsubscribe | null = null;
 
-    public interval = 100;
-    public readonly lyrics: LyricsData = new Map();
+  public interval = 100;
+  public readonly lyrics: LyricsData = new Map();
 
-    public constructor(public readonly queue: GuildQueue, public readonly raw?: LrcGetResult | LrcSearchResult) {
-        if (raw?.syncedLyrics) this.load(raw?.syncedLyrics);
+  public constructor(public readonly queue: GuildQueue, public readonly raw?: LrcGetResult | LrcSearchResult) {
+    if (raw?.syncedLyrics) this.load(raw?.syncedLyrics);
+  }
+
+  public isSubscribed() {
+    return this.#callback !== null;
+  }
+
+  public load(lyrics: string) {
+    if (!lyrics) throw Exceptions.ERR_NOT_EXISTING('syncedLyrics');
+
+    this.lyrics.clear();
+    this.unsubscribe();
+
+    const lines = lyrics.split('\n');
+
+    for (const line of lines) {
+      const match = line.match(timestampPattern);
+
+      if (match) {
+        const [, minutes, seconds, milliseconds] = match;
+        const timestamp = parseInt(minutes) * 60 * 1000 + parseInt(seconds) * 1000 + parseInt(milliseconds);
+
+        this.lyrics.set(timestamp, line.replace(timestampPattern, '').trim());
+      }
+    }
+  }
+
+  /**
+   * Returns the lyrics at a specific time or at the closest time (±2 seconds)
+   * @param time The time in milliseconds
+   */
+  public at(time: number): LyricsAt | null {
+    const lowestTime = this.lyrics.keys().next().value;
+    if (lowestTime == null || time < lowestTime) return null;
+    if (this.lyrics.has(time)) return { line: this.lyrics.get(time) as string, timestamp: time };
+
+    const keys = Array.from(this.lyrics.keys());
+
+    const closest = keys.reduce((a, b) => (Math.abs(b - time) < Math.abs(a - time) ? b : a));
+
+    if (closest > time) return null;
+
+    if (Math.abs(closest - time) > 2000) return null;
+
+    const line = this.lyrics.get(closest);
+
+    if (!line) return null;
+
+    return { timestamp: closest, line };
+  }
+
+  /**
+   * Callback for the lyrics change.
+   * @param callback The callback function
+   */
+  public onChange(callback: LyricsCallback) {
+    this.#callback = callback;
+  }
+
+  /**
+   * Callback to detect when the provider is unsubscribed.
+   * @param callback The callback function
+   */
+  public onUnsubscribe(callback: Unsubscribe) {
+    this.#onUnsubscribe = callback;
+  }
+
+  /**
+   * Unsubscribes from the queue.
+   */
+  public unsubscribe() {
+    if (this.#loop) clearInterval(this.#loop);
+    if (this.#onUnsubscribe) this.#onUnsubscribe();
+
+    this.#callback = null;
+    this.#onUnsubscribe = null;
+    this.#loop = null;
+  }
+
+  /**
+   * Subscribes to the queue to monitor the current time.
+   * @returns The unsubscribe function
+   */
+  public subscribe(): Unsubscribe {
+    if (this.#loop) return () => this.unsubscribe();
+
+    this.#createLoop();
+
+    return () => this.unsubscribe();
+  }
+
+  /**
+   * Pauses the lyrics provider.
+   */
+  public pause() {
+    const hasLoop = this.#loop !== null;
+
+    if (hasLoop) {
+      clearInterval(this.#loop!);
+      this.#loop = null;
     }
 
-    public isSubscribed() {
-        return this.#callback !== null;
-    }
+    return hasLoop;
+  }
 
-    public load(lyrics: string) {
-        if (!lyrics) throw Exceptions.ERR_NOT_EXISTING('syncedLyrics');
+  /**
+   * Resumes the lyrics provider.
+   */
+  public resume() {
+    const hasLoop = this.#loop !== null;
 
-        this.lyrics.clear();
-        this.unsubscribe();
+    if (!hasLoop) this.#createLoop();
 
-        const lines = lyrics.split('\n');
+    return !hasLoop;
+  }
 
-        for (const line of lines) {
-            const match = line.match(timestampPattern);
+  #createLoop() {
+    if (!this.#callback) return;
+    if (this.#loop) clearInterval(this.#loop);
 
-            if (match) {
-                const [, minutes, seconds, milliseconds] = match;
-                const timestamp = parseInt(minutes) * 60 * 1000 + parseInt(seconds) * 1000 + parseInt(milliseconds);
+    let lastValue: LyricsAt | null = null;
 
-                this.lyrics.set(timestamp, line.replace(timestampPattern, '').trim());
-            }
-        }
-    }
+    this.#loop = setInterval(() => {
+      if (this.queue.deleted) return this.unsubscribe();
 
-    /**
-     * Returns the lyrics at a specific time or at the closest time (±2 seconds)
-     * @param time The time in milliseconds
-     */
-    public at(time: number): LyricsAt | null {
-        const lowestTime = this.lyrics.keys().next().value;
-        if (lowestTime == null || time < lowestTime) return null;
-        if (this.lyrics.has(time)) return { line: this.lyrics.get(time) as string, timestamp: time };
+      if (!this.#callback || !this.queue.isPlaying()) return;
 
-        const keys = Array.from(this.lyrics.keys());
+      const time = this.queue.node.getTimestamp();
+      if (!time) return;
 
-        const closest = keys.reduce((a, b) => (Math.abs(b - time) < Math.abs(a - time) ? b : a));
+      const lyrics = this.at(time.current.value);
 
-        if (closest > time) return null;
+      if (!lyrics) return;
 
-        if (Math.abs(closest - time) > 2000) return null;
+      if (lastValue !== null && lyrics.line === lastValue.line && lyrics.timestamp === lastValue.timestamp) return;
 
-        const line = this.lyrics.get(closest);
+      lastValue = lyrics;
 
-        if (!line) return null;
-
-        return { timestamp: closest, line };
-    }
-
-    /**
-     * Callback for the lyrics change.
-     * @param callback The callback function
-     */
-    public onChange(callback: LyricsCallback) {
-        this.#callback = callback;
-    }
-
-    /**
-     * Callback to detect when the provider is unsubscribed.
-     * @param callback The callback function
-     */
-    public onUnsubscribe(callback: Unsubscribe) {
-        this.#onUnsubscribe = callback;
-    }
-
-    /**
-     * Unsubscribes from the queue.
-     */
-    public unsubscribe() {
-        if (this.#loop) clearInterval(this.#loop);
-        if (this.#onUnsubscribe) this.#onUnsubscribe();
-
-        this.#callback = null;
-        this.#onUnsubscribe = null;
-        this.#loop = null;
-    }
-
-    /**
-     * Subscribes to the queue to monitor the current time.
-     * @returns The unsubscribe function
-     */
-    public subscribe(): Unsubscribe {
-        if (this.#loop) return () => this.unsubscribe();
-
-        this.#createLoop();
-
-        return () => this.unsubscribe();
-    }
-
-    /**
-     * Pauses the lyrics provider.
-     */
-    public pause() {
-        const hasLoop = this.#loop !== null;
-
-        if (hasLoop) {
-            clearInterval(this.#loop!);
-            this.#loop = null;
-        }
-
-        return hasLoop;
-    }
-
-    /**
-     * Resumes the lyrics provider.
-     */
-    public resume() {
-        const hasLoop = this.#loop !== null;
-
-        if (!hasLoop) this.#createLoop();
-
-        return !hasLoop;
-    }
-
-    #createLoop() {
-        if (!this.#callback) return;
-        if (this.#loop) clearInterval(this.#loop);
-
-        let lastValue: LyricsAt | null = null;
-
-        this.#loop = setInterval(() => {
-            if (this.queue.deleted) return this.unsubscribe();
-
-            if (!this.#callback || !this.queue.isPlaying()) return;
-
-            const time = this.queue.node.getTimestamp();
-            if (!time) return;
-
-            const lyrics = this.at(time.current.value);
-
-            if (!lyrics) return;
-
-            if (lastValue !== null && lyrics.line === lastValue.line && lyrics.timestamp === lastValue.timestamp)
-                return;
-
-            lastValue = lyrics;
-
-            this.#callback(lyrics.line, lyrics.timestamp);
-        }, this.interval).unref();
-    }
+      this.#callback(lyrics.line, lyrics.timestamp);
+    }, this.interval).unref();
+  }
 }

@@ -1,0 +1,63 @@
+---
+title: 'WebmDemuxer'
+description: 'Demuxes a Webm stream (containing Opus audio) to output an Opus stream.'
+---
+
+## WebmDemuxer extends WebmBaseDemuxer
+
+Demuxes a Webm stream (containing Opus audio) to output an Opus stream.
+
+```typescript
+new WebmDemuxer(options);
+```
+
+| Parameter | Type | Optional | Description                                                |
+| --------- | ---- | -------- | ---------------------------------------------------------- |
+| options   | \{}  | ✅       | options that you would pass to a regular Transform stream. |
+
+## Properties
+
+### public static TAGS: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/WebmBase.ts#L6)
+
+### public static TOO_SHORT: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/WebmBase.ts#L19)
+
+## Methods
+
+### public \_checkHead(data): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                              | Optional |
+| --------- | --------------------------------------------------------------------------------- | -------- |
+| data      | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/WebmDemuxer.ts#L17)
+
+### public \_destroy(err, cb): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                                                                        | Optional |
+| --------- | --------------------------------------------------------------------------------------------------------------------------- | -------- |
+| err       | [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)                             | ❌       |
+| cb        | ( error: null,Error ) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/WebmBase.ts#L177)
+
+### public \_final(cb): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type              | Optional |
+| --------- | ----------------- | -------- |
+| cb        | TransformCallback | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/WebmBase.ts#L182)
+
+### public \_transform(chunk, encoding, done): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                              | Optional |
+| --------- | --------------------------------------------------------------------------------- | -------- |
+| chunk     | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer) | ❌       |
+| encoding  | BufferEncoding                                                                    | ❌       |
+| done      | TransformCallback                                                                 | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/WebmBase.ts#L48)

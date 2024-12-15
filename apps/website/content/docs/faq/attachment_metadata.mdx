@@ -1,0 +1,6 @@
+---
+title: Adding metadata support for attachments
+description: Learn how to add metadata support for attachments in Discord Player
+---
+
+By default, attachments like raw audio files or video files lack essential metadata such as `duration`, `title`, and `author`. However, you can enable metadata parsing for attachments by installing the [mediaplex](https://npm.im/mediaplex) package. Discord Player will automatically utilize mediaplex to probe metadata from attachments. It is important to note that while this approach can work in many cases, it may not be foolproof and might not always extract metadata successfully.

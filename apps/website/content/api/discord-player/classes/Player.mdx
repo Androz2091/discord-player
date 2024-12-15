@@ -1,0 +1,337 @@
+---
+title: 'Player'
+description: 'No description provided'
+---
+
+## Player extends PlayerEventsEmitter\<PlayerEvents>
+
+```typescript
+new Player(client, options);
+```
+
+| Parameter | Type              | Optional | Description             |
+| --------- | ----------------- | -------- | ----------------------- |
+| client    | Client\<boolean>  | ❌       | The Discord Client      |
+| options   | PlayerInitOptions | ✅       | The player init options |
+
+## Properties
+
+### public client: any
+
+The discord.js client
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L90)
+
+### public events: any
+
+The player events channel
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L110)
+
+### public extractors: any
+
+The extractors manager
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L106)
+
+### public id: any
+
+The unique identifier of this player instance
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L86)
+
+### public lyrics: any
+
+The lyrics api
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L118)
+
+### public nodes: any
+
+The player nodes (queue) manager
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L98)
+
+### public options: any
+
+The player options
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L94)
+
+### public requiredEvents: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L8)
+
+### public version: any
+
+The player version
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L114)
+
+### public voiceUtils: any
+
+The voice api utilities
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L102)
+
+### public static defaultMaxListeners: any
+
+### public static version: any
+
+The version of discord-player
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L82)
+
+### public context: any
+
+The hooks context for this player instance.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L203)
+
+### public eventLoopLag: any
+
+Event loop latency in ms. If your bot is laggy and this returns a number above 20ms for example,
+some expensive task is being executed on the current thread which is slowing down the event loop.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L261)
+
+### public hasDebugger: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L70)
+
+### public queryCache: any
+
+The current query cache provider in use
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L245)
+
+### public queues: any
+
+Alias to `Player.nodes`.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L252)
+
+## Methods
+
+### public \[iterator](): Generator\<[GuildQueue](/api/classes/GuildQueue)\<unknown>[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | unknown>
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L720)
+
+### public addListener(name, listener): Player
+
+| Parameter | Type             | Optional |
+| --------- | ---------------- | -------- |
+| name      | K                | ❌       |
+| listener  | PlayerEvents\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L28)
+
+### public createPlaylist(data): Playlist
+
+Creates `Playlist` instance
+
+| Parameter | Type             | Optional | Description                       |
+| --------- | ---------------- | -------- | --------------------------------- |
+| data      | PlaylistInitData | ❌       | The data to initialize a playlist |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L728)
+
+### public debug(m): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| m         | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L229)
+
+### public destroy(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+
+Destroy every single queues managed by this master player instance
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L307)
+
+### public emit(name, args): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+| Parameter | Type                          | Optional |
+| --------- | ----------------------------- | -------- |
+| name      | K                             | ❌       |
+| args      | Parameters\<PlayerEvents\[K]> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L54)
+
+### public eventNames(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<U>
+
+### public generateStatistics(): GuildQueueStatistics
+
+Generates statistics that could be useful. Statistics generator is still experimental.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L285)
+
+### public getMaxListeners(): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+### public handleVoiceState(oldState, newState): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Handles voice state update
+
+| Parameter | Type       | Optional | Description         |
+| --------- | ---------- | -------- | ------------------- |
+| oldState  | VoiceState | ❌       | The old voice state |
+| newState  | VoiceState | ❌       | The new voice state |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L349)
+
+### public isCompatMode(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Whether the player is in compatibility mode. Compatibility mode is enabled when non-discord.js client is used.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L296)
+
+### public isVoiceStateHandlerLocked(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Checks if voice state handler is locked.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L370)
+
+### public listenerCount(type): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type               | Optional |
+| --------- | ------------------ | -------- |
+| type      | keyof PlayerEvents | ❌       |
+
+### public listeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<PlayerEvents\[U]>
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| type      | U    | ❌       |
+
+### public lockVoiceStateHandler(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Lock voice state handler. When this method is called, discord-player will keep using the default voice state update handler, even if custom implementation exists.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L356)
+
+### public off(name, listener): Player
+
+| Parameter | Type             | Optional |
+| --------- | ---------------- | -------- |
+| name      | K                | ❌       |
+| listener  | PlayerEvents\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L36)
+
+### public on(name, listener): Player
+
+| Parameter | Type             | Optional |
+| --------- | ---------------- | -------- |
+| name      | K                | ❌       |
+| listener  | PlayerEvents\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L12)
+
+### public onVoiceStateUpdate(handler): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Override default voice state update handler
+
+| Parameter | Type              | Optional | Description          |
+| --------- | ----------------- | -------- | -------------------- |
+| handler   | VoiceStateHandler | ❌       | The handler callback |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L225)
+
+### public once(name, listener): Player
+
+| Parameter | Type             | Optional |
+| --------- | ---------------- | -------- |
+| name      | K                | ❌       |
+| listener  | PlayerEvents\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L20)
+
+### public play(channel, query, options): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<PlayerNodeInitializationResult\<T>>
+
+Initiate audio player
+
+| Parameter | Type                             | Optional | Description                                           |
+| --------- | -------------------------------- | -------- | ----------------------------------------------------- |
+| channel   | GuildVoiceChannelResolvable      | ❌       | The voice channel on which the music should be played |
+| query     | TrackLike                        | ❌       | The track or source to play                           |
+| options   | PlayerNodeInitializerOptions\<T> | ❌       | Options for player                                    |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L391)
+
+### public prependListener(event, listener): this
+
+| Parameter | Type             | Optional |
+| --------- | ---------------- | -------- |
+| event     | U                | ❌       |
+| listener  | PlayerEvents\[U] | ❌       |
+
+### public prependOnceListener(event, listener): this
+
+| Parameter | Type             | Optional |
+| --------- | ---------------- | -------- |
+| event     | U                | ❌       |
+| listener  | PlayerEvents\[U] | ❌       |
+
+### public rawListeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<PlayerEvents\[U]>
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| type      | U    | ❌       |
+
+### public removeAllListeners(name?): Player
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| name      | K    | ✅       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L48)
+
+### public removeListener(name, listener): Player
+
+| Parameter | Type             | Optional |
+| --------- | ---------------- | -------- |
+| name      | K                | ❌       |
+| listener  | PlayerEvents\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L42)
+
+### public scanDeps(): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+Generates a report of the dependencies used by the `discord-voip` module. Useful for debugging.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L681)
+
+### public search(searchQuery, options): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<SearchResult>
+
+Search tracks
+
+| Parameter   | Type                                                                                                                                                                                                                                                          | Optional | Description        |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------ |
+| searchQuery | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) \| Playlist \| Track\<unknown>[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<Track\<unknown>>SearchResult | ❌       | N/A                |
+| options     | SearchOptions                                                                                                                                                                                                                                                 | ❌       | The search options |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L456)
+
+### public setMaxListeners(n): this
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| n         | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+### public unlockVoiceStateHandler(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Unlock voice state handler. When this method is called, discord-player will stop using the default voice state update handler if custom implementation exists.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L363)
+
+### public static create(client, options): Player
+
+Creates new discord-player instance.
+
+| Parameter | Type                                                                                                         | Optional | Description                         |
+| --------- | ------------------------------------------------------------------------------------------------------------ | -------- | ----------------------------------- |
+| client    | Client\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)> | ❌       | The client that instantiated player |
+| options   | PlayerInitOptions                                                                                            | ❌       | Player initializer options          |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/Player.ts#L238)

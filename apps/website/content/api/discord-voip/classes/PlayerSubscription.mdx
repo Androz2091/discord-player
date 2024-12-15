@@ -1,0 +1,41 @@
+---
+title: 'PlayerSubscription'
+description: 'Represents a subscription of a voice connection to an audio player, allowing the audio player to play audio on the voice connection.'
+---
+
+## PlayerSubscription
+
+Represents a subscription of a voice connection to an audio player, allowing
+the audio player to play audio on the voice connection.
+
+```typescript
+new PlayerSubscription(connection, player);
+```
+
+| Parameter  | Type                                                   | Optional |
+| ---------- | ------------------------------------------------------ | -------- |
+| connection | VoiceConnection                                        | ❌       |
+| player     | [AudioPlayer](/api/discord-player/classes/AudioPlayer) | ❌       |
+
+## Properties
+
+### public connection: any
+
+The voice connection of this subscription.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/PlayerSubscription.ts#L16)
+
+### public player: any
+
+The audio player of this subscription.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/PlayerSubscription.ts#L21)
+
+## Methods
+
+### public unsubscribe(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Unsubscribes the connection from the audio player, meaning that the
+audio player cannot stream audio to it until a new subscription is made.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/PlayerSubscription.ts#L32)
