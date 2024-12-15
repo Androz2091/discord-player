@@ -1,0 +1,87 @@
+---
+title: 'VolumeTransformer'
+description: 'No description provided'
+---
+
+## VolumeTransformer extends PCMTransformer
+
+```typescript
+new VolumeTransformer(options);
+```
+
+| Parameter | Type                     | Optional |
+| --------- | ------------------------ | -------- |
+| options   | VolumeTransformerOptions | ✅       |
+
+## Properties
+
+### public bits: any
+
+### public bytes: any
+
+### public disabled: any
+
+### public extremum: any
+
+### public onUpdate: any
+
+### public sampleRate: any
+
+### public type: any
+
+### public volume: any
+
+### public volumeApprox: any
+
+## Methods
+
+### public \_readInt(buffer, index): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| buffer    | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer)                 | ❌       |
+| index     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+### public \_transform(chunk, encoding, callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                              | Optional |
+| --------- | --------------------------------------------------------------------------------- | -------- |
+| chunk     | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer) | ❌       |
+| encoding  | BufferEncoding                                                                    | ❌       |
+| callback  | TransformCallback                                                                 | ❌       |
+
+### public \_writeInt(buffer, int, index): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| buffer    | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer)                 | ❌       |
+| int       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+| index     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+### public clamp(val, max?, min?): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| val       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+| max       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ✅       |
+| min       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ✅       |
+
+### public disable(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+### public enable(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+### public setSampleRate(rate): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| rate      | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+### public setVolume(volume): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| volume    | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+### public toString(): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+### public toggle(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)

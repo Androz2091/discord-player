@@ -104,7 +104,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     this.dsp.onUpdate = () => {
       if (!this.dsp) return;
       if (this.dsp.filters?.filters) this.emit('dsp', this.dsp.filters?.filters);
-      if (this.dsp.biquad?.filter) this.emit('biquad', this.dsp.biquad?.filter);
+      if (this.dsp.biquad?.filters) this.emit('biquad', this.dsp.biquad?.filters);
       if (this.dsp.equalizer) this.emit('eqBands', this.dsp.equalizer.getEQ());
       if (this.dsp.volume) this.emit('volume', this.dsp.volume.volume);
       if (this.dsp.resampler) this.emit('sampleRate', this.dsp.resampler.targetSampleRate);

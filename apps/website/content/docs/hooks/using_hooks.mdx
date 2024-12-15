@@ -18,16 +18,16 @@ const { useMainPlayer } = require('discord-player');
 
 // Set up the context provider in your interaction handler
 client.on('interactionCreate', async (interaction) => {
-    if (!interaction.isCommand()) return;
+  if (!interaction.isCommand()) return;
 
-    const player = useMainPlayer();
-    const command = client.commands.get(interaction.commandName);
+  const player = useMainPlayer();
+  const command = client.commands.get(interaction.commandName);
 
-    // Create a context with the guild information
-    const context = { guild: interaction.guild };
+  // Create a context with the guild information
+  const context = { guild: interaction.guild };
 
-    // Execute the command within the provided context
-    await player.context.provide(context, () => command.execute(interaction));
+  // Execute the command within the provided context
+  await player.context.provide(context, () => command.execute(interaction));
 });
 ```
 
@@ -40,13 +40,13 @@ const { useQueue } = require('discord-player');
 
 // Example command showing direct hook usage
 export async function execute(interaction) {
-    // Directly pass the guild ID to resolve the queue
-    const queue = useQueue(interaction.guild.id);
+  // Directly pass the guild ID to resolve the queue
+  const queue = useQueue(interaction.guild.id);
 
-    // Now you can work with the queue
-    if (!queue) {
-        return interaction.reply('No active queue in this server!');
-    }
+  // Now you can work with the queue
+  if (!queue) {
+    return interaction.reply('No active queue in this server!');
+  }
 }
 ```
 
@@ -56,12 +56,12 @@ Then in your commands, you can use hooks without arguments:
 const { useQueue } = require('discord-player');
 
 export async function execute(interaction) {
-    // The hook automatically uses the context to find the right queue
-    const queue = useQueue();
+  // The hook automatically uses the context to find the right queue
+  const queue = useQueue();
 
-    if (!queue?.isPlaying()) {
-        return interaction.reply('Nothing is currently playing!');
-    }
+  if (!queue?.isPlaying()) {
+    return interaction.reply('Nothing is currently playing!');
+  }
 }
 ```
 
@@ -108,8 +108,8 @@ const queue = useQueue(interaction.guild.id);
 
 // Example: Display queue information
 if (queue) {
-    console.log(`Tracks in queue: ${queue.tracks.size}`);
-    console.log(`Current track: ${queue.currentTrack?.title}`);
+  console.log(`Tracks in queue: ${queue.tracks.size}`);
+  console.log(`Current track: ${queue.currentTrack?.title}`);
 }
 ```
 
@@ -126,7 +126,7 @@ const history = useHistory(interaction.guild.id);
 // Example: Show last played track
 const lastTrack = history.previousTrack;
 if (lastTrack) {
-    console.log(`Last played: ${lastTrack.title}`);
+  console.log(`Last played: ${lastTrack.title}`);
 }
 ```
 
@@ -181,16 +181,16 @@ const { onBeforeCreateStream } = require('discord-player');
 const fs = require('fs');
 
 const queue = player.nodes.create(channel, {
-    // Custom stream handling
-    async onBeforeCreateStream(track, source, _queue) {
-        // Example: Use local files for specific tracks
-        if (track.title === 'my_favorite_song') {
-            return fs.createReadStream('./local_songs/favorite.mp3');
-        }
+  // Custom stream handling
+  async onBeforeCreateStream(track, source, _queue) {
+    // Example: Use local files for specific tracks
+    if (track.title === 'my_favorite_song') {
+      return fs.createReadStream('./local_songs/favorite.mp3');
+    }
 
-        // Return undefined to use default streaming
-        return undefined;
-    },
+    // Return undefined to use default streaming
+    return undefined;
+  },
 });
 ```
 
@@ -202,15 +202,15 @@ Process the PCM stream before it's used as an audio resource:
 const { onAfterCreateStream, StreamType } = require('discord-player');
 
 const queue = player.nodes.create(channel, {
-    // Post-process the audio stream
-    async onAfterCreateStream(pcmStream, queue) {
-        // Example: Apply custom audio processing
-        const processedStream = someAudioProcessor.process(pcmStream);
+  // Post-process the audio stream
+  async onAfterCreateStream(pcmStream, queue) {
+    // Example: Apply custom audio processing
+    const processedStream = someAudioProcessor.process(pcmStream);
 
-        return {
-            stream: processedStream,
-            type: StreamType.Opus,
-        };
-    },
+    return {
+      stream: processedStream,
+      type: StreamType.Opus,
+    };
+  },
 });
 ```

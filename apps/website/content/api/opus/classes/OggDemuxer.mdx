@@ -1,0 +1,45 @@
+---
+title: 'OggDemuxer'
+description: 'Demuxes an Ogg stream (containing Opus audio) to output an Opus stream.'
+---
+
+## OggDemuxer extends [Transform](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_transform)
+
+Demuxes an Ogg stream (containing Opus audio) to output an Opus stream.
+
+```typescript
+new OggDemuxer(options);
+```
+
+| Parameter | Type | Optional | Description                                                |
+| --------- | ---- | -------- | ---------------------------------------------------------- |
+| options   | \{}  | ✅       | options that you would pass to a regular Transform stream. |
+
+## Methods
+
+### public \_destroy(err, cb): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                                                                        | Optional |
+| --------- | --------------------------------------------------------------------------------------------------------------------------- | -------- |
+| err       | [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)                             | ❌       |
+| cb        | ( error: null,Error ) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/OggDemuxer.ts#L115)
+
+### public \_final(cb): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type              | Optional |
+| --------- | ----------------- | -------- |
+| cb        | TransformCallback | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/OggDemuxer.ts#L120)
+
+### public \_transform(chunk, encoding, done): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                              | Optional |
+| --------- | --------------------------------------------------------------------------------- | -------- |
+| chunk     | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer) | ❌       |
+| encoding  | BufferEncoding                                                                    | ❌       |
+| done      | TransformCallback                                                                 | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/OggDemuxer.ts#L33)

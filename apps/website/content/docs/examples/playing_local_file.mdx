@@ -7,11 +7,11 @@ Wouldn't it be nice if you could play local files? Well, Discord Player got you 
 
 ## How does it work?
 
--   Discord Player will validate your search query against the registered extractors. When using the default extractors provided by discord-player, only `AttachmentExtractor` will respond to your query if your search engine value is set to `QueryType.FILE`.
--   If the extractor responds to your query, Discord Player will use it to get track metadata.
--   `AttachmentExtractor` will search for the file in your system and return the metadata if it finds the file.
--   If the file is found, Discord Player will again run validation against it to make sure the file is playable.
--   If the file is playable, Discord Player will load the file and play it.
+- Discord Player will validate your search query against the registered extractors. When using the default extractors provided by discord-player, only `AttachmentExtractor` will respond to your query if your search engine value is set to `QueryType.FILE`.
+- If the extractor responds to your query, Discord Player will use it to get track metadata.
+- `AttachmentExtractor` will search for the file in your system and return the metadata if it finds the file.
+- If the file is found, Discord Player will again run validation against it to make sure the file is playable.
+- If the file is playable, Discord Player will load the file and play it.
 
 ### Example
 
@@ -22,9 +22,9 @@ Wouldn't it be nice if you could play local files? Well, Discord Player got you 
 const filePath = 'E:/path/to/music.mp3';
 
 await player.play(channel, filePath, {
-    // in order to play local files, we need to explicitly tell discord-player to search that path in our file system
-    searchEngine: QueryType.FILE, // QueryType.FILE tells discord-player to play from our file system,
-    // ... (other options if you need)
+  // in order to play local files, we need to explicitly tell discord-player to search that path in our file system
+  searchEngine: QueryType.FILE, // QueryType.FILE tells discord-player to play from our file system,
+  // ... (other options if you need)
 });
 ```
 

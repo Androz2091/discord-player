@@ -5,7 +5,7 @@
 
 import { EventEmitter } from 'node:events';
 import { VoiceOpcodes } from 'discord-api-types/voice/v4';
-import WebSocket, { type MessageEvent } from 'ws';
+import { WebSocket } from 'ws';
 import { unsafe } from '../common/types';
 
 export interface VoiceWebSocket extends EventEmitter {
@@ -76,7 +76,7 @@ export class VoiceWebSocket extends EventEmitter {
   public constructor(address: string, debug: boolean) {
     super();
     this.ws = new WebSocket(address);
-    this.ws.onmessage = (err) => this.onMessage(err);
+    this.ws.onmessage = (err) => this.onMessage(err as unknown as MessageEvent);
     this.ws.onopen = (err) => this.emit('open', err);
     this.ws.onerror = (err: Error | WebSocket.ErrorEvent) => this.emit('error', err instanceof Error ? err : err.error);
     this.ws.onclose = (err) => this.emit('close', err);

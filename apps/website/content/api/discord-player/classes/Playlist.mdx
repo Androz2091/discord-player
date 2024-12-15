@@ -1,0 +1,117 @@
+---
+title: 'Playlist'
+description: 'No description provided'
+---
+
+## Playlist
+
+```typescript
+new Playlist(player, data);
+```
+
+| Parameter | Type                          | Optional | Description |
+| --------- | ----------------------------- | -------- | ----------- |
+| player    | [Player](/api/classes/Player) | ❌       | The player  |
+| data      | PlaylistInitData              | ❌       | The data    |
+
+## Properties
+
+### public author: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L20)
+
+### public description: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L16)
+
+### public id: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L24)
+
+### public player: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L13)
+
+### public rawPlaylist: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L26)
+
+### public source: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L19)
+
+### public thumbnail: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L17)
+
+### public title: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L15)
+
+### public tracks: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L14)
+
+### public type: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L18)
+
+### public url: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L25)
+
+### public durationFormatted: any
+
+Formatted estimated duration of this playlist
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L131)
+
+### public estimatedDuration: any
+
+Estimated duration of this playlist
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L124)
+
+## Methods
+
+### public \[iterator](): Generator\<Track\<unknown>[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | unknown>
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L117)
+
+### public play(channel, options?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<PlayerNodeInitializationResult\<T>>
+
+Play this playlist to the given voice channel. If queue exists and another track is being played, this playlist will be added to the queue.
+
+| Parameter | Type                             | Optional | Description                                          |
+| --------- | -------------------------------- | -------- | ---------------------------------------------------- |
+| channel   | GuildVoiceChannelResolvable      | ❌       | Voice channel on which this playlist shall be played |
+| options   | PlayerNodeInitializerOptions\<T> | ✅       | Node initialization options                          |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L196)
+
+### public serialize(): SerializedPlaylist
+
+Serialize this playlist into reconstructable data
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L161)
+
+### public toJSON(withTracks?): PlaylistJSON
+
+JSON representation of this playlist
+
+| Parameter  | Type                                                                                                | Optional | Description                         |
+| ---------- | --------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
+| withTracks | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ✅       | If it should build json with tracks |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L140)
+
+### public static fromSerialized(player, data): Playlist
+
+Deserialize this playlist from serialized data
+
+| Parameter | Type                          | Optional | Description     |
+| --------- | ----------------------------- | -------- | --------------- |
+| player    | [Player](/api/classes/Player) | ❌       | Player instance |
+| data      | SerializedPlaylist            | ❌       | Serialized data |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/fabric/Playlist.ts#L182)

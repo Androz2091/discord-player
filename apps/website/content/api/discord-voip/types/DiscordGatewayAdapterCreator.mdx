@@ -1,0 +1,17 @@
+---
+title: 'DiscordGatewayAdapterCreator'
+description: 'A function used to build adapters. It accepts a methods parameter that contains functions that'
+---
+
+## DiscordGatewayAdapterCreator
+
+A function used to build adapters. It accepts a methods parameter that contains functions that
+can be called by the implementer when new data is received on its gateway connection. In return,
+the implementer will return some methods that the library can call - e.g. to send messages on
+the gateway, or to signal that the adapter can be removed.
+
+- Type: (
+  methods: DiscordGatewayAdapterLibraryMethods
+  ) => DiscordGatewayAdapterImplementerMethods
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/util/adapter.ts#L54)

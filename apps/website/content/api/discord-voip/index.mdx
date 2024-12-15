@@ -1,44 +1,237 @@
 ---
 title: discord-voip
-description: Discord VoIP library used by discord-player
+description: Beginner friendly command & event handler for Discord.js
 ---
 
 # Classes
 
-<Cards>
+<Cards><Card title="AudioPlayer" description="Used to play audio resources (i.e. tracks, streams) to voice connections." href="/api/discord-voip/classes/AudioPlayer" />
 
-</Cards>
+<Card
+  title="AudioPlayerError"
+  description="An error emitted by an AudioPlayer. Contains an attached resource to aid with
+debugging and identifying where the error came from."
+  href="/api/discord-voip/classes/AudioPlayerError"
+/>
+
+<Card
+  title="AudioResource"
+  description="Represents an audio resource that can be played by an audio player."
+  href="/api/discord-voip/classes/AudioResource"
+/>
+
+<Card
+  title="PlayerSubscription"
+  description="Represents a subscription of a voice connection to an audio player, allowing
+the audio player to play audio on the voice connection."
+  href="/api/discord-voip/classes/PlayerSubscription"
+/>
+
+<Card title="VoiceConnection" description="A connection to the voice server of a Guild, can be used to play audio in voice channels." href="/api/discord-voip/classes/VoiceConnection" /></Cards>
+
+# Types
+
+<Cards><Card title="AudioPlayerBufferingState" description="The state that an AudioPlayer is in when it is waiting for a resource to become readable. Once this
+happens, the AudioPlayer will enter the Playing state. If the resource ends/errors before this, then
+it will re-enter the Idle state." href="/api/discord-voip/types/AudioPlayerBufferingState" />
+
+<Card
+  title="AudioPlayerIdleState"
+  description="The state that an AudioPlayer is in when it has no resource to play. This is the starting state."
+  href="/api/discord-voip/types/AudioPlayerIdleState"
+/>
+
+<Card
+  title="AudioPlayerPausedState"
+  description="The state that an AudioPlayer is in when it has either been explicitly paused by the user, or done
+automatically by the AudioPlayer itself if there are no available subscribers."
+  href="/api/discord-voip/types/AudioPlayerPausedState"
+/>
+
+<Card
+  title="AudioPlayerPlayingState"
+  description="The state that an AudioPlayer is in when it is actively playing an AudioResource. When playback ends,
+it will enter the Idle state."
+  href="/api/discord-voip/types/AudioPlayerPlayingState"
+/>
+
+<Card
+  title="CreateAudioPlayerOptions"
+  description="Options that can be passed when creating an audio player, used to specify its behavior."
+  href="/api/discord-voip/types/CreateAudioPlayerOptions"
+/>
+
+<Card
+  title="CreateAudioResourceOptions"
+  description="Options that are set when creating a new audio resource."
+  href="/api/discord-voip/types/CreateAudioResourceOptions"
+/>
+
+<Card
+  title="CreateVoiceConnectionOptions"
+  description="The options that can be given when creating a voice connection."
+  href="/api/discord-voip/types/CreateVoiceConnectionOptions"
+/>
+
+<Card
+  title="DiscordGatewayAdapterImplementerMethods"
+  description="Methods that are provided by the implementer of a Discord gateway DiscordGatewayAdapter."
+  href="/api/discord-voip/types/DiscordGatewayAdapterImplementerMethods"
+/>
+
+<Card
+  title="DiscordGatewayAdapterLibraryMethods"
+  description="Methods that are provided by the @discordjs/voice library to implementations of
+Discord gateway DiscordGatewayAdapters."
+  href="/api/discord-voip/types/DiscordGatewayAdapterLibraryMethods"
+/>
+
+<Card title="JoinConfig" description="Docs for type JoinConfig" href="/api/discord-voip/types/JoinConfig" />
+
+<Card
+  title="JoinVoiceChannelOptions"
+  description="The options that can be given when joining a voice channel."
+  href="/api/discord-voip/types/JoinVoiceChannelOptions"
+/>
+
+<Card
+  title="VoiceConnectionConnectingState"
+  description="The state that a VoiceConnection will be in when it is establishing a connection to a Discord
+voice server."
+  href="/api/discord-voip/types/VoiceConnectionConnectingState"
+/>
+
+<Card
+  title="VoiceConnectionDestroyedState"
+  description="The state that a VoiceConnection will be in when it has been permanently been destroyed by the
+user and untracked by the library. It cannot be reconnected, instead, a new VoiceConnection
+needs to be established."
+  href="/api/discord-voip/types/VoiceConnectionDestroyedState"
+/>
+
+<Card
+  title="VoiceConnectionDisconnectedBaseState"
+  description="The state that a VoiceConnection will be in when it is not connected to a Discord voice server nor is
+it attempting to connect. You can manually attempt to reconnect using VoiceConnection#reconnect."
+  href="/api/discord-voip/types/VoiceConnectionDisconnectedBaseState"
+/>
+
+<Card
+  title="VoiceConnectionDisconnectedOtherState"
+  description="The state that a VoiceConnection will be in when it is not connected to a Discord voice server nor is
+it attempting to connect. You can manually attempt to reconnect using VoiceConnection#reconnect."
+  href="/api/discord-voip/types/VoiceConnectionDisconnectedOtherState"
+/>
+
+<Card
+  title="VoiceConnectionDisconnectedWebSocketState"
+  description="The state that a VoiceConnection will be in when its WebSocket connection was closed.
+You can manually attempt to reconnect using VoiceConnection#reconnect."
+  href="/api/discord-voip/types/VoiceConnectionDisconnectedWebSocketState"
+/>
+
+<Card
+  title="VoiceConnectionReadyState"
+  description="The state that a VoiceConnection will be in when it has an active connection to a Discord
+voice server."
+  href="/api/discord-voip/types/VoiceConnectionReadyState"
+/>
+
+<Card
+  title="VoiceConnectionSignallingState"
+  description="The state that a VoiceConnection will be in when it is waiting to receive a VOICE_SERVER_UPDATE and
+VOICE_STATE_UPDATE packet from Discord, provided by the adapter."
+  href="/api/discord-voip/types/VoiceConnectionSignallingState"
+/>
+
+<Card
+  title="AudioPlayerState"
+  description="The various states that the player can be in."
+  href="/api/discord-voip/types/AudioPlayerState"
+/>
+
+<Card
+  title="DiscordGatewayAdapterCreator"
+  description="A function used to build adapters. It accepts a methods parameter that contains functions that
+can be called by the implementer when new data is received on its gateway connection. In return,
+the implementer will return some methods that the library can call - e.g. to send messages on
+the gateway, or to signal that the adapter can be removed."
+  href="/api/discord-voip/types/DiscordGatewayAdapterCreator"
+/>
+
+<Card
+  title="VoiceConnectionDisconnectedState"
+  description="The states that a VoiceConnection can be in when it is not connected to a Discord voice server nor is
+it attempting to connect. You can manually attempt to connect using VoiceConnection#reconnect."
+  href="/api/discord-voip/types/VoiceConnectionDisconnectedState"
+/>
+
+<Card title="VoiceConnectionState" description="The various states that a voice connection can be in." href="/api/discord-voip/types/VoiceConnectionState" /></Cards>
 
 # Functions
 
-<Cards>
+<Cards><Card title="createAudioPlayer" description="Creates a new AudioPlayer to be used." href="/api/discord-voip/functions/createAudioPlayer" />
 
+<Card
+  title="createAudioResource"
+  description="Creates an audio resource that can be played by audio players."
+  href="/api/discord-voip/functions/createAudioResource"
+/>
+
+<Card
+  title="entersState"
+  description="Allows a voice connection a specified amount of time to enter a given state, otherwise rejects with an error."
+  href="/api/discord-voip/functions/entersState"
+/>
+
+<Card
+  title="getGroups"
+  description="Retrieves the map of group names to maps of voice connections. By default, all voice connections
+are created under the 'default' group."
+  href="/api/discord-voip/functions/getGroups"
+/>
+
+<Card
+  title="getVoiceConnection"
+  description="Finds a voice connection with the given guild id and group. Defaults to the 'default' group."
+  href="/api/discord-voip/functions/getVoiceConnection"
+/>
+
+<Card
+  title="getVoiceConnections"
+  description="Retrieves all the voice connections under the 'default' group."
+  href="/api/discord-voip/functions/getVoiceConnections"
+/>
+
+<Card title="joinVoiceChannel" description="Creates a VoiceConnection to a Discord voice channel." href="/api/discord-voip/functions/joinVoiceChannel" /></Cards>
+
+# Variables
+
+<Cards>
+  <Card title="version" description="Docs for variable version" href="/api/discord-voip/variables/version" />
 </Cards>
 
 # Enums
 
-<Cards>
-<Card title="VoiceConnectionStatus" description="The various status codes a voice connection can hold at any one time." href="/api/discord-voip/enums/VoiceConnectionStatus" />
+<Cards><Card title="AudioPlayerStatus" description="Docs for enum AudioPlayerStatus" href="/api/discord-voip/enums/AudioPlayerStatus" />
 
-<Card title="VoiceConnectionDisconnectReason" description="The reasons a voice connection can be in the disconnected state." href="/api/discord-voip/enums/VoiceConnectionDisconnectReason" />
+<Card
+  title="NoSubscriberBehavior"
+  description="Describes the behavior of the player when an audio packet is played but there are no available
+voice connections to play to."
+  href="/api/discord-voip/enums/NoSubscriberBehavior"
+/>
 
-<Card title="NoSubscriberBehavior" description="Describes the behavior of the player when an audio packet is played but there are no available
-voice connections to play to." href="/api/discord-voip/enums/NoSubscriberBehavior" />
+<Card
+  title="StreamType"
+  description="The different types of stream that can exist within the pipeline."
+  href="/api/discord-voip/enums/StreamType"
+/>
 
-<Card title="AudioPlayerStatus" description="AudioPlayerStatus" href="/api/discord-voip/enums/AudioPlayerStatus" />
+<Card
+  title="VoiceConnectionDisconnectReason"
+  description="The reasons a voice connection can be in the disconnected state."
+  href="/api/discord-voip/enums/VoiceConnectionDisconnectReason"
+/>
 
-<Card title="StreamType" description="The different types of stream that can exist within the pipeline." href="/api/discord-voip/enums/StreamType" />
-
-<Card title="TransformerType" description="The different types of transformers that can exist within the pipeline." href="/api/discord-voip/enums/TransformerType" />
-
-<Card title="NetworkingStatusCode" description="The different statuses that a networking instance can hold. The order
-of the states between OpeningWs and Ready is chronological (first the
-instance enters OpeningWs, then it enters Identifying etc.)" href="/api/discord-voip/enums/NetworkingStatusCode" />
-
-</Cards>
-
-# Interfaces
-
-<Cards>
-
-</Cards>
+<Card title="VoiceConnectionStatus" description="The various status codes a voice connection can hold at any one time." href="/api/discord-voip/enums/VoiceConnectionStatus" /></Cards>

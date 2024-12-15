@@ -13,12 +13,12 @@ You can also create a custom hook to fulfill your need. This guide covers how to
 const { createHook } = require('discord-player');
 
 const useStats = createHook((context) => {
-    return (node) => {
-        const queue = context.getQueue(node);
-        if (!queue) return null;
+  return (node) => {
+    const queue = context.getQueue(node);
+    if (!queue) return null;
 
-        return queue.stats.generate();
-    };
+    return queue.stats.generate();
+  };
 });
 
 module.exports = useStats;
@@ -28,12 +28,12 @@ module.exports = useStats;
 const useStats = require('./hooks/useStats.js');
 
 async function execute(interaction) {
-    // use the hook you just created
-    const stats = useStats(interaction.guild);
-    if (!stats) {
-        console.log('no stats available');
-    } else {
-        console.log(stats); // {...}
-    }
+  // use the hook you just created
+  const stats = useStats(interaction.guild);
+  if (!stats) {
+    console.log('no stats available');
+  } else {
+    console.log(stats); // {...}
+  }
 }
 ```

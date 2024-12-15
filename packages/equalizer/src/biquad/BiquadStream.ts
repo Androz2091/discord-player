@@ -40,13 +40,11 @@ export class BiquadStream extends PCMTransformer {
     }
   }
 
-  // @ts-ignore
-  public get filter() {
+  public get filters() {
     return this.biquadFilter;
   }
 
-  // @ts-ignore
-  public set filter(f: BiquadFilters) {
+  public set filters(f: BiquadFilters) {
     if (f == null || typeof f === 'string' || typeof f === 'number') {
       this.update({ filter: f });
     } else {

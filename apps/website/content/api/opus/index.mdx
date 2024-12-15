@@ -1,28 +1,50 @@
 ---
 title: opus
-description: A complete framework to simplify the implementation of music commands for Discord bots
+description: Beginner friendly command & event handler for Discord.js
 ---
 
 # Classes
 
-<Cards>
+<Cards><Card title="OggDemuxer" description="Demuxes an Ogg stream (containing Opus audio) to output an Opus stream." href="/api/opus/classes/OggDemuxer" />
 
-</Cards>
+<Card title="OpusDecoder" description="An Opus decoder stream.
+
+Note that any stream you pipe into this must be in
+[object mode](https://nodejs.org/api/stream.html#stream_object_mode) and should output Opus packets." href="/api/opus/classes/OpusDecoder" />
+
+<Card title="OpusEncoder" description="An Opus encoder stream.
+
+Outputs opus packets in [object mode.](https://nodejs.org/api/stream.html#stream_object_mode)" href="/api/opus/classes/OpusEncoder" />
+
+<Card
+  title="OpusStream"
+  description="Takes a stream of Opus data and outputs a stream of PCM data, or the inverse.
+**You shouldn't directly instantiate this class, see opus.Encoder and opus.Decoder instead!**"
+  href="/api/opus/classes/OpusStream"
+/>
+
+<Card title="WebmDemuxer" description="Demuxes a Webm stream (containing Opus audio) to output an Opus stream." href="/api/opus/classes/WebmDemuxer" /></Cards>
+
+# Types
+
+<Cards><Card title="IOpusStreamInit" description="Docs for type IOpusStreamInit" href="/api/opus/types/IOpusStreamInit" />
+
+<Card title="IEncoder" description="Docs for type IEncoder" href="/api/opus/types/IEncoder" /></Cards>
 
 # Functions
 
-<Cards>
+<Cards><Card title="addLibopusProvider" description="Add a new Opus provider to the registry. This will be tried to load in order at runtime." href="/api/opus/functions/addLibopusProvider" />
 
-</Cards>
+<Card
+  title="removeLibopusProvider"
+  description="Remove an Opus provider from the registry."
+  href="/api/opus/functions/removeLibopusProvider"
+/>
 
-# Enums
+<Card title="setLibopusProvider" description="Set the Opus provider to use. This will override the automatic provider selection." href="/api/opus/functions/setLibopusProvider" /></Cards>
 
-<Cards>
+# Variables
 
-</Cards>
+<Cards><Card title="CTL" description="Docs for variable CTL" href="/api/opus/variables/CTL" />
 
-# Interfaces
-
-<Cards>
-
-</Cards>
+<Card title="version" description="Docs for variable version" href="/api/opus/variables/version" /></Cards>

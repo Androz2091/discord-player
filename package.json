@@ -13,10 +13,10 @@
     "publish-packages": "yarn build && node ./scripts/publish.mjs",
     "bootstrap": "node ./scripts/bootstrap.js",
     "build": "turbo run build --color --filter=!website --filter=!music-bot",
-    "docs": "node ./scripts/docgen.mjs",
+    "docs": "tsx ./scripts/docgen.ts",
     "build:check": "turbo run build:check --color",
     "lint": "turbo run lint --color",
-    "format": "prettier --write \"{packages,scripts,examples,apps}/**/*.{js,ts,mjs,mts,jsx,tsx}\"",
+    "format": "prettier --write \"{packages,scripts,examples,apps}/**/*.{js,ts,mjs,mts,jsx,tsx,mdx}\"",
     "dev:web": "turbo run dev --filter=website",
     "build:web": "turbo run build --filter=website",
     "start:web": "turbo run preview --filter=website",
@@ -51,10 +51,12 @@
     "eslint": "^8.21.0",
     "fs-extra": "^11.1.0",
     "fumadocs-typescript": "^3.0.2",
+    "micro-docgen": "^0.3.5",
     "prettier": "^2.8.2",
     "rimraf": "^4.1.2",
+    "tsx": "^4.19.2",
     "turbo": "1.10.16",
-    "typescript": "^5.2.2",
+    "typescript": "^5.7.2",
     "vitest": "^0.34.6"
   }
 }

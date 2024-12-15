@@ -7,7 +7,7 @@ import { Buffer } from 'node:buffer';
 import { EventEmitter } from 'node:events';
 import crypto from 'node:crypto';
 import { VoiceOpcodes } from 'discord-api-types/voice/v4';
-import type { CloseEvent } from 'ws';
+import { WebSocket } from 'ws';
 import * as secretbox from '../util/Secretbox';
 import { noop } from '../util/util';
 import { VoiceUDPSocket } from './VoiceUDPSocket';
@@ -362,7 +362,7 @@ export class Networking extends EventEmitter {
    *
    * @param code - The close code
    */
-  private onWsClose({ code }: CloseEvent) {
+  private onWsClose({ code }: WebSocket.CloseEvent) {
     const canResume = code === 4_015 || code < 4_000;
     if (canResume && this.state.code === NetworkingStatusCode.Ready) {
       this.state = {

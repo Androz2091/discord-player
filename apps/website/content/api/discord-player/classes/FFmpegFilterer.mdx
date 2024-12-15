@@ -1,0 +1,163 @@
+---
+title: 'FFmpegFilterer'
+description: 'No description provided'
+---
+
+## FFmpegFilterer
+
+```typescript
+new FFmpegFilterer(af);
+```
+
+| Parameter | Type                          | Optional |
+| --------- | ----------------------------- | -------- |
+| af        | GuildQueueAudioFilters\<Meta> | ❌       |
+
+## Properties
+
+### public af: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L74)
+
+### public args: any
+
+Get final ffmpeg args
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L129)
+
+### public encoderArgs: any
+
+Get encoder args
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L120)
+
+### public filters: any
+
+Currently active ffmpeg filters
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L165)
+
+### public inputArgs: any
+
+Get input args
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L113)
+
+### public skippable: any
+
+Indicates whether ffmpeg may be skipped
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L79)
+
+## Methods
+
+### public createStream(source, options): [Duplex](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_duplex) | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)
+
+Create ffmpeg stream
+
+| Parameter | Type                                                                                                                                                                                              | Optional | Description        |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------ |
+| source    | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) \| [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌       | The stream source  |
+| options   | FFmpegStreamOptions                                                                                                                                                                               | ❌       | The stream options |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L138)
+
+### public getFiltersDisabled(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<keyof \|QueueFilters>
+
+Get list of disabled filters
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L207)
+
+### public getFiltersEnabled(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<keyof \|QueueFilters>
+
+Get list of enabled filters
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L200)
+
+### public isDisabled(filter): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Check if the given filter is disabled
+
+| Parameter | Type | Optional | Description |
+| --------- | ---- | -------- | ----------- |
+| filter    | T    | ❌       | The filter  |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L223)
+
+### public isEnabled(filter): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Check if the given filter is enabled
+
+| Parameter | Type | Optional | Description |
+| --------- | ---- | -------- | ----------- |
+| filter    | T    | ❌       | The filter  |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L215)
+
+### public isValidFilter(filter): is | keyof \|QueueFilters
+
+Check if the given filter is a valid filter
+
+| Parameter | Type                                                                                              | Optional | Description        |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ------------------ |
+| filter    | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | The filter to test |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L231)
+
+### public setDefaults(ff): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Set default filters
+
+| Parameter | Type                                                                                                                    | Optional | Description  |
+| --------- | ----------------------------------------------------------------------------------------------------------------------- | -------- | ------------ |
+| ff        | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<keyof \| QueueFilters> | ❌       | Filters list |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L193)
+
+### public setFilters(filters): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
+
+Set ffmpeg filters
+
+| Parameter | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Optional | Description |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
+| filters   | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) \| [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)>[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<keyof QueueFilters>Record\<keyof QueueFilters \| [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)> | ❌       | The filters |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L147)
+
+### public setInputArgs(args): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Set input args for FFmpeg
+
+| Parameter | Type                                                                                                                                                                                                | Optional |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| args      | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L104)
+
+### public toArray(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)>
+
+Convert current filters to array
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L238)
+
+### public toJSON(): Record\<keyof \|QueueFilters | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)>
+
+Convert current filters to JSON object
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L245)
+
+### public toString(): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+String representation of current filters
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L256)
+
+### public toggle(filters): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
+
+Toggle given ffmpeg filter(s)
+
+| Parameter | Type                                                                                                                                       | Optional | Description   |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------- |
+| filters   | keyof QueueFilters \| [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<keyof QueueFilters> | ❌       | The filter(s) |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L177)

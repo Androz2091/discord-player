@@ -1,21 +1,25 @@
 {
-    "$schema": "https://typedoc.org/schema.json",
-    "entryPointStrategy": "packages",
-    // prettier-ignore
-    "entryPoints": [
-        "packages/discord-player",
-        "packages/equalizer",
-        "packages/extractor",
-        "packages/utils",
-        "packages/ffmpeg",
-        "packages/opus"
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPointStrategy": "packages",
+  // prettier-ignore
+  "entryPoints": [
+      "packages/discord-player",
+      "packages/discord-voip",
+      "packages/equalizer",
+      "packages/extractor",
+      "packages/utils",
+      "packages/ffmpeg",
+      "packages/opus"
     ],
-    "githubPages": false,
-    "readme": "none",
-    "skipErrorChecking": true,
-    "cleanOutputDir": true,
-    "name": "Discord Player",
-    "hideGenerator": true,
-    "excludePrivate": true,
-    "excludeExternals": true
+  "githubPages": false,
+  "readme": "none",
+  "skipErrorChecking": true,
+  "excludeInternal": true,
+  "exclude": ["node_modules", "dist", "__test__"],
+  "cleanOutputDir": true,
+  "name": "Discord Player",
+  "hideGenerator": true,
+  "excludePrivate": true,
+  "excludeExternals": true,
+  "excludeReferences": true
 }

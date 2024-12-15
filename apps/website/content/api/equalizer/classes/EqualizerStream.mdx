@@ -1,0 +1,137 @@
+---
+title: 'EqualizerStream'
+description: 'No description provided'
+---
+
+## EqualizerStream extends PCMTransformer
+
+```typescript
+new EqualizerStream(options);
+```
+
+| Parameter | Type                   | Optional |
+| --------- | ---------------------- | -------- |
+| options   | EqualizerStreamOptions | ✅       |
+
+## Properties
+
+### public bandMultipliers: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/EqualizerStream.ts#L16)
+
+### public bits: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L13)
+
+### public bytes: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L14)
+
+### public disabled: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L16)
+
+### public equalizer: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/EqualizerStream.ts#L17)
+
+### public extremum: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L15)
+
+### public sampleRate: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L17)
+
+### public type: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L12)
+
+## Methods
+
+### public \_processBands(multiplier): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter  | Type                                                                                                            | Optional |
+| ---------- | --------------------------------------------------------------------------------------------------------------- | -------- |
+| multiplier | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<EqualizerBand> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/EqualizerStream.ts#L34)
+
+### public \_readInt(buffer, index): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| buffer    | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer)                 | ❌       |
+| index     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L66)
+
+### public \_transform(chunk, encoding, callback): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                              | Optional |
+| --------- | --------------------------------------------------------------------------------- | -------- |
+| chunk     | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer) | ❌       |
+| encoding  | BufferEncoding                                                                    | ❌       |
+| callback  | TransformCallback                                                                 | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/EqualizerStream.ts#L46)
+
+### public \_writeInt(buffer, int, index): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| buffer    | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer)                 | ❌       |
+| int       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+| index     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L71)
+
+### public clamp(val, max, min): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| val       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+| max       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+| min       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L76)
+
+### public disable(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L54)
+
+### public enable(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L58)
+
+### public getEQ(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<EqualizerBand>
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/EqualizerStream.ts#L67)
+
+### public onUpdate(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L18)
+
+### public resetEQ(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/EqualizerStream.ts#L78)
+
+### public setEQ(bands): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                                                            | Optional |
+| --------- | --------------------------------------------------------------------------------------------------------------- | -------- |
+| bands     | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<EqualizerBand> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/EqualizerStream.ts#L74)
+
+### public setSampleRate(rate): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| rate      | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L80)
+
+### public toggle(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/utils/PCMTransformer.ts#L62)

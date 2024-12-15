@@ -1,0 +1,16 @@
+---
+title: 'entersState'
+description: 'Allows a voice connection a specified amount of time to enter a given state, otherwise rejects with an error.'
+---
+
+### entersState(target, status, timeoutOrSignal): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[VoiceConnection](/api/discord-voip/classes/VoiceConnection)>
+
+Allows a voice connection a specified amount of time to enter a given state, otherwise rejects with an error.
+
+| Parameter       | Type                                                                                              | Optional    | Description                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| target          | [VoiceConnection](/api/discord-voip/classes/VoiceConnection)                                      | ❌          | The voice connection that we want to observe the state change for |
+| status          | [VoiceConnectionStatus](/api/discord-voip/enums/VoiceConnectionStatus)                            | ❌          | The status that the voice connection should be in                 |
+| timeoutOrSignal | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | AbortSignal | ❌                                                                | The maximum time we are allowing for this to occur, or a signal that will abort the operation |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/util/entersState.ts#L16)

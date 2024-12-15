@@ -1,0 +1,91 @@
+---
+title: 'BiquadFilter'
+description: 'No description provided'
+---
+
+## BiquadFilter
+
+```typescript
+new BiquadFilter(coefficients);
+```
+
+| Parameter    | Type         | Optional |
+| ------------ | ------------ | -------- |
+| coefficients | Coefficients | ❌       |
+
+## Properties
+
+### public coefficients: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L18)
+
+### public s1: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L15)
+
+### public s2: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L16)
+
+### public x1: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L11)
+
+### public x2: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L12)
+
+### public y1: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L13)
+
+### public y2: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L14)
+
+## Methods
+
+### public replace(coefficients): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter    | Type         | Optional |
+| ------------ | ------------ | -------- |
+| coefficients | Coefficients | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L30)
+
+### public reset(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L34)
+
+### public run(input): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| input     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L43)
+
+### public runTransposed(input): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| input     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L56)
+
+### public setFilter(filter, options): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                     | Optional |
+| --------- | -------------------------------------------------------- | -------- |
+| filter    | [BiquadFilters](/api/discord-player/types/BiquadFilters) | ❌       |
+| options   | BiquadSetFilterProps                                     | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L20)
+
+### public update(coefficients): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter    | Type         | Optional |
+| ------------ | ------------ | -------- |
+| coefficients | Coefficients | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Biquad.ts#L26)

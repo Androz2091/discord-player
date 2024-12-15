@@ -1,0 +1,50 @@
+---
+title: 'Coefficients'
+description: 'No description provided'
+---
+
+## Coefficients
+
+```typescript
+new Coefficients(data);
+```
+
+| Parameter | Type             | Optional |
+| --------- | ---------------- | -------- |
+| data      | CoefficientsInit | ✅       |
+
+## Properties
+
+### public a1: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Coefficients.ts#L28)
+
+### public a2: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Coefficients.ts#L29)
+
+### public b0: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Coefficients.ts#L32)
+
+### public b1: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Coefficients.ts#L33)
+
+### public b2: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Coefficients.ts#L34)
+
+## Methods
+
+### public static from(filter, samplingFreq, cutoffFreq, Q, dbGain): Coefficients
+
+| Parameter    | Type                                                                                              | Optional |
+| ------------ | ------------------------------------------------------------------------------------------------- | -------- |
+| filter       | [BiquadFilters](/api/discord-player/types/BiquadFilters)                                          | ❌       |
+| samplingFreq | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+| cutoffFreq   | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+| Q            | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+| dbGain       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/biquad/Coefficients.ts#L46)

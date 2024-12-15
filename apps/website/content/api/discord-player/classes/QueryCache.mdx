@@ -1,0 +1,63 @@
+---
+title: 'QueryCache'
+description: 'No description provided'
+---
+
+## QueryCache implements QueryCacheProvider\<Track>
+
+```typescript
+new QueryCache(player, options);
+```
+
+| Parameter | Type                          | Optional |
+| --------- | ----------------------------- | -------- |
+| player    | [Player](/api/classes/Player) | ❌       |
+| options   | QueryCacheOptions             | ❌       |
+
+## Properties
+
+### public options: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/QueryCache.ts#L25)
+
+### public player: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/QueryCache.ts#L24)
+
+### public timer: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/QueryCache.ts#L22)
+
+### public checkInterval: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/QueryCache.ts#L32)
+
+## Methods
+
+### public addData(data): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+
+| Parameter | Type         | Optional |
+| --------- | ------------ | -------- |
+| data      | SearchResult | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/QueryCache.ts#L52)
+
+### public cleanup(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/QueryCache.ts#L36)
+
+### public clear(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)>
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/QueryCache.ts#L44)
+
+### public getData(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<[DiscordPlayerQueryResultCache](/api/classes/DiscordPlayerQueryResultCache)\<Track\<unknown>>>>
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/QueryCache.ts#L48)
+
+### public resolve(context): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<SearchResult>
+
+| Parameter | Type                      | Optional |
+| --------- | ------------------------- | -------- |
+| context   | QueryCacheResolverContext | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/QueryCache.ts#L59)

@@ -1,0 +1,44 @@
+---
+title: 'GuildNodeInit'
+description: 'No description provided'
+---
+
+## GuildNodeInit
+
+| Property              | Type                                                                                                | Value |
+| --------------------- | --------------------------------------------------------------------------------------------------- | ----- |
+| biquad                | undefined \| boolean \| BiquadFilters                                                               | N/A   |
+| bufferingTimeout      | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| connectionTimeout     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| disableBiquad         | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableEqualizer      | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableFallbackStream | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableFilterer       | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableHistory        | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableResampler      | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| disableVolume         | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| equalizer             | boolean \| Array\<EqualizerBand>                                                                    | N/A   |
+| ffmpegFilters         | Array\<keyof QueueFilters>                                                                          | N/A   |
+| filterer              | boolean \| Array\<'8D' \| 'Tremolo' \| 'Vibrato'>                                                   | N/A   |
+| guild                 | Guild                                                                                               | N/A   |
+| leaveOnEmpty          | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| leaveOnEmptyCooldown  | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| leaveOnEnd            | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| leaveOnEndCooldown    | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| leaveOnStop           | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| leaveOnStopCooldown   | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| maxHistorySize        | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| maxSize               | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   |
+| metadata              | null \| Meta                                                                                        | N/A   |
+| noEmitInsert          | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| onAfterCreateStream   | OnAfterCreateStreamHandler                                                                          | N/A   |
+| onBeforeCreateStream  | OnBeforeCreateStreamHandler                                                                         | N/A   |
+| pauseOnEmpty          | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| preferBridgedMetadata | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| queueStrategy         | QueueStrategy                                                                                       | N/A   |
+| repeatMode            | [QueueRepeatMode](/api/enums/QueueRepeatMode)                                                       | N/A   |
+| resampler             | number \| boolean                                                                                   | N/A   |
+| selfDeaf              | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   |
+| volume                | number \| boolean                                                                                   | N/A   |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueue.ts#L23)

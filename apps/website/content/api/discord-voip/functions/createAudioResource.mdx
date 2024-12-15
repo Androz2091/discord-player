@@ -1,0 +1,15 @@
+---
+title: 'createAudioResource'
+description: 'Creates an audio resource that can be played by audio players.'
+---
+
+### createAudioResource(input, options): [AudioResource](/api/discord-voip/classes/AudioResource)\<Metadata extends null | undefined ? null : Metadata>
+
+Creates an audio resource that can be played by audio players.
+
+| Parameter | Type                                                                                                                                                                                                                                                                                                                                                                   | Optional | Description                                    |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------- |
+| input     | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) \| [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable)                                                                                                                                                                      | ❌       | The resource to play                           |
+| options   | [CreateAudioResourceOptions](/api/discord-voip/types/CreateAudioResourceOptions)\<Metadata> & Pick\<Metadata extends undefined \| null ? [CreateAudioResourceOptions](/api/discord-voip/types/CreateAudioResourceOptions)\<Metadata\<Metadata>> : Required\<[CreateAudioResourceOptions](/api/discord-voip/types/CreateAudioResourceOptions)\<Metadata>>\['metadata']> | ❌       | Configurable options for creating the resource |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L220)

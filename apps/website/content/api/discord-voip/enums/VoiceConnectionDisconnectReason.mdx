@@ -1,83 +1,17 @@
 ---
-title: VoiceConnectionDisconnectReason
-description: The reasons a voice connection can be in the disconnected state
+title: 'VoiceConnectionDisconnectReason'
+description: 'The reasons a voice connection can be in the disconnected state.'
 ---
 
-The reasons a voice connection can be in the disconnected state.
-
-### VoiceConnectionDisconnectReason
+## VoiceConnectionDisconnectReason
 
 The reasons a voice connection can be in the disconnected state.
 
-<div className='*:border-b [&>*:last-child]:border-b-0'><div className='text-sm text-fd-muted-foreground py-4'>
+| Property           | Type | Value | Description                                                                                               |
+| ------------------ | ---- | ----- | --------------------------------------------------------------------------------------------------------- |
+| AdapterUnavailable | 1    | N/A   | When the adapter was unable to send a message requested by the VoiceConnection.                           |
+| EndpointRemoved    | 2    | N/A   | When a VOICE_SERVER_UPDATE packet is received with a null endpoint, causing the connection to be severed. |
+| Manual             | 3    | N/A   | When a manual disconnect was requested.                                                                   |
+| WebSocketClose     | 0    | N/A   | When the WebSocket connection has been closed.                                                            |
 
-<div className="flex flex-row items-center gap-4">
-  <code className="text-sm">toString</code>
-  <code className="text-fd-muted-foreground">{"(radix?: number | undefined) => string"}</code>
-</div>
-
-No Description
-
-
-
-</div>
-<div className='text-sm text-fd-muted-foreground py-4'>
-
-<div className="flex flex-row items-center gap-4">
-  <code className="text-sm">toFixed</code>
-  <code className="text-fd-muted-foreground">{"(fractionDigits?: number | undefined) => string"}</code>
-</div>
-
-No Description
-
-
-
-</div>
-<div className='text-sm text-fd-muted-foreground py-4'>
-
-<div className="flex flex-row items-center gap-4">
-  <code className="text-sm">toExponential</code>
-  <code className="text-fd-muted-foreground">{"(fractionDigits?: number | undefined) => string"}</code>
-</div>
-
-No Description
-
-
-
-</div>
-<div className='text-sm text-fd-muted-foreground py-4'>
-
-<div className="flex flex-row items-center gap-4">
-  <code className="text-sm">toPrecision</code>
-  <code className="text-fd-muted-foreground">{"(precision?: number | undefined) => string"}</code>
-</div>
-
-No Description
-
-
-
-</div>
-<div className='text-sm text-fd-muted-foreground py-4'>
-
-<div className="flex flex-row items-center gap-4">
-  <code className="text-sm">valueOf</code>
-  <code className="text-fd-muted-foreground">{"() => number"}</code>
-</div>
-
-No Description
-
-
-
-</div>
-<div className='text-sm text-fd-muted-foreground py-4'>
-
-<div className="flex flex-row items-center gap-4">
-  <code className="text-sm">toLocaleString</code>
-  <code className="text-fd-muted-foreground">{"{ (locales?: string | string[] | undefined, options?: NumberFormatOptions | undefined): string; (locales?: LocalesArgument, options?: NumberFormatOptions | undefined): string; }"}</code>
-</div>
-
-No Description
-
-
-
-</div></div>
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L67)

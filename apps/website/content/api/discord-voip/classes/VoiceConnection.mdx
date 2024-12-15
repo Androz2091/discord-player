@@ -1,0 +1,150 @@
+---
+title: 'VoiceConnection'
+description: 'A connection to the voice server of a Guild, can be used to play audio in voice channels.'
+---
+
+## VoiceConnection extends [EventEmitter](https://nodejs.org/dist/latest/docs/api/events.html#events_class_eventemitter)
+
+A connection to the voice server of a Guild, can be used to play audio in voice channels.
+
+```typescript
+new VoiceConnection(joinConfig, options);
+```
+
+| Parameter  | Type                                               | Optional | Description                                         |
+| ---------- | -------------------------------------------------- | -------- | --------------------------------------------------- |
+| joinConfig | [JoinConfig](/api/discord-player/types/JoinConfig) | ❌       | The data required to establish the voice connection |
+| options    | CreateVoiceConnectionOptions                       | ❌       | The options used to create this voice connection    |
+
+## Properties
+
+### public joinConfig: any
+
+A configuration storing all the data needed to reconnect to a Guild's voice server.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L219)
+
+### public rejoinAttempts: any
+
+The number of consecutive rejoin attempts. Initially 0, and increments for each rejoin.
+When a connection is successfully established, it resets to 0.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L207)
+
+### public ping: any
+
+The latest ping (in milliseconds) for the WebSocket connection and audio playback for this voice
+connection, if this data is available.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L642)
+
+### public state: any
+
+The current state of the voice connection.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L271)
+
+## Methods
+
+### public configureNetworking(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Attempts to configure a networking instance for this voice connection using the received packets.
+Both packets are required, and any existing networking instance will be destroyed.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L367)
+
+### public destroy(adapterAvailable): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Destroys the VoiceConnection, preventing it from connecting to voice again.
+This method should be called when you no longer require the VoiceConnection to
+prevent memory leaks.
+
+| Parameter        | Type                                                                                                | Optional | Description                     |
+| ---------------- | --------------------------------------------------------------------------------------------------- | -------- | ------------------------------- |
+| adapterAvailable | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌       | Whether the adapter can be used |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L513)
+
+### public disconnect(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Disconnects the VoiceConnection, allowing the possibility of rejoining later on.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L536)
+
+### public dispatchAudio(): undefined | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Dispatches the previously prepared audio packet (if any)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L488)
+
+### public on(event, listener): this
+
+Emitted when there is an error emitted from the voice connection
+
+| Parameter | Type                                                                                                                   | Optional |
+| --------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
+| event     | '[error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)'                      | ❌       |
+| listener  | ( error: Error ) => [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L175)
+
+### public onSubscriptionRemoved(subscription): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Called when a subscription of this voice connection to an audio player is removed.
+
+| Parameter    | Type                                                               | Optional | Description              |
+| ------------ | ------------------------------------------------------------------ | -------- | ------------------------ |
+| subscription | [PlayerSubscription](/api/discord-voip/classes/PlayerSubscription) | ❌       | The removed subscription |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L664)
+
+### public playOpusPacket(buffer): undefined | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Prepares an audio packet and dispatches it immediately.
+
+| Parameter | Type                                                                              | Optional | Description             |
+| --------- | --------------------------------------------------------------------------------- | -------- | ----------------------- |
+| buffer    | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer) | ❌       | The Opus packet to play |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L499)
+
+### public prepareAudioPacket(buffer): undefined | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer)
+
+Prepares an audio packet for dispatch.
+
+| Parameter | Type                                                                              | Optional | Description                |
+| --------- | --------------------------------------------------------------------------------- | -------- | -------------------------- |
+| buffer    | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer) | ❌       | The Opus packet to prepare |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L479)
+
+### public rejoin(joinConfig?): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Attempts to rejoin (better explanation soon:tm:)
+
+| Parameter  | Type                                                                      | Optional |
+| ---------- | ------------------------------------------------------------------------- | -------- |
+| joinConfig | Omit\<[JoinConfig](/api/discord-player/types/JoinConfig)'group''guildId'> | ✅       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L573)
+
+### public setSpeaking(enabled): false | [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Updates the speaking status of the voice connection. This is used when audio players are done playing audio,
+and need to signal that the connection is no longer playing audio.
+
+| Parameter | Type                                                                                                | Optional | Description                        |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- |
+| enabled   | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌       | Whether or not to show as speaking |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L608)
+
+### public subscribe(player): undefined | [PlayerSubscription](/api/discord-voip/classes/PlayerSubscription)
+
+Subscribes to an audio player, allowing the player to play audio on this voice connection.
+
+| Parameter | Type                                                   | Optional | Description                      |
+| --------- | ------------------------------------------------------ | -------- | -------------------------------- |
+| player    | [AudioPlayer](/api/discord-player/classes/AudioPlayer) | ❌       | The audio player to subscribe to |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L620)

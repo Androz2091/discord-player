@@ -1,0 +1,143 @@
+---
+title: Types
+description: Types provided by discord-voip
+---
+
+# Types
+
+<Cards><Card title="AudioPlayerBufferingState" description="The state that an AudioPlayer is in when it is waiting for a resource to become readable. Once this
+happens, the AudioPlayer will enter the Playing state. If the resource ends/errors before this, then
+it will re-enter the Idle state." href="/api/discord-voip/types/AudioPlayerBufferingState" />
+
+<Card
+  title="AudioPlayerIdleState"
+  description="The state that an AudioPlayer is in when it has no resource to play. This is the starting state."
+  href="/api/discord-voip/types/AudioPlayerIdleState"
+/>
+
+<Card
+  title="AudioPlayerPausedState"
+  description="The state that an AudioPlayer is in when it has either been explicitly paused by the user, or done
+automatically by the AudioPlayer itself if there are no available subscribers."
+  href="/api/discord-voip/types/AudioPlayerPausedState"
+/>
+
+<Card
+  title="AudioPlayerPlayingState"
+  description="The state that an AudioPlayer is in when it is actively playing an AudioResource. When playback ends,
+it will enter the Idle state."
+  href="/api/discord-voip/types/AudioPlayerPlayingState"
+/>
+
+<Card
+  title="CreateAudioPlayerOptions"
+  description="Options that can be passed when creating an audio player, used to specify its behavior."
+  href="/api/discord-voip/types/CreateAudioPlayerOptions"
+/>
+
+<Card
+  title="CreateAudioResourceOptions"
+  description="Options that are set when creating a new audio resource."
+  href="/api/discord-voip/types/CreateAudioResourceOptions"
+/>
+
+<Card
+  title="CreateVoiceConnectionOptions"
+  description="The options that can be given when creating a voice connection."
+  href="/api/discord-voip/types/CreateVoiceConnectionOptions"
+/>
+
+<Card
+  title="DiscordGatewayAdapterImplementerMethods"
+  description="Methods that are provided by the implementer of a Discord gateway DiscordGatewayAdapter."
+  href="/api/discord-voip/types/DiscordGatewayAdapterImplementerMethods"
+/>
+
+<Card
+  title="DiscordGatewayAdapterLibraryMethods"
+  description="Methods that are provided by the @discordjs/voice library to implementations of
+Discord gateway DiscordGatewayAdapters."
+  href="/api/discord-voip/types/DiscordGatewayAdapterLibraryMethods"
+/>
+
+<Card title="JoinConfig" description="Docs for type JoinConfig" href="/api/discord-voip/types/JoinConfig" />
+
+<Card
+  title="JoinVoiceChannelOptions"
+  description="The options that can be given when joining a voice channel."
+  href="/api/discord-voip/types/JoinVoiceChannelOptions"
+/>
+
+<Card
+  title="VoiceConnectionConnectingState"
+  description="The state that a VoiceConnection will be in when it is establishing a connection to a Discord
+voice server."
+  href="/api/discord-voip/types/VoiceConnectionConnectingState"
+/>
+
+<Card
+  title="VoiceConnectionDestroyedState"
+  description="The state that a VoiceConnection will be in when it has been permanently been destroyed by the
+user and untracked by the library. It cannot be reconnected, instead, a new VoiceConnection
+needs to be established."
+  href="/api/discord-voip/types/VoiceConnectionDestroyedState"
+/>
+
+<Card
+  title="VoiceConnectionDisconnectedBaseState"
+  description="The state that a VoiceConnection will be in when it is not connected to a Discord voice server nor is
+it attempting to connect. You can manually attempt to reconnect using VoiceConnection#reconnect."
+  href="/api/discord-voip/types/VoiceConnectionDisconnectedBaseState"
+/>
+
+<Card
+  title="VoiceConnectionDisconnectedOtherState"
+  description="The state that a VoiceConnection will be in when it is not connected to a Discord voice server nor is
+it attempting to connect. You can manually attempt to reconnect using VoiceConnection#reconnect."
+  href="/api/discord-voip/types/VoiceConnectionDisconnectedOtherState"
+/>
+
+<Card
+  title="VoiceConnectionDisconnectedWebSocketState"
+  description="The state that a VoiceConnection will be in when its WebSocket connection was closed.
+You can manually attempt to reconnect using VoiceConnection#reconnect."
+  href="/api/discord-voip/types/VoiceConnectionDisconnectedWebSocketState"
+/>
+
+<Card
+  title="VoiceConnectionReadyState"
+  description="The state that a VoiceConnection will be in when it has an active connection to a Discord
+voice server."
+  href="/api/discord-voip/types/VoiceConnectionReadyState"
+/>
+
+<Card
+  title="VoiceConnectionSignallingState"
+  description="The state that a VoiceConnection will be in when it is waiting to receive a VOICE_SERVER_UPDATE and
+VOICE_STATE_UPDATE packet from Discord, provided by the adapter."
+  href="/api/discord-voip/types/VoiceConnectionSignallingState"
+/>
+
+<Card
+  title="AudioPlayerState"
+  description="The various states that the player can be in."
+  href="/api/discord-voip/types/AudioPlayerState"
+/>
+
+<Card
+  title="DiscordGatewayAdapterCreator"
+  description="A function used to build adapters. It accepts a methods parameter that contains functions that
+can be called by the implementer when new data is received on its gateway connection. In return,
+the implementer will return some methods that the library can call - e.g. to send messages on
+the gateway, or to signal that the adapter can be removed."
+  href="/api/discord-voip/types/DiscordGatewayAdapterCreator"
+/>
+
+<Card
+  title="VoiceConnectionDisconnectedState"
+  description="The states that a VoiceConnection can be in when it is not connected to a Discord voice server nor is
+it attempting to connect. You can manually attempt to connect using VoiceConnection#reconnect."
+  href="/api/discord-voip/types/VoiceConnectionDisconnectedState"
+/>
+
+<Card title="VoiceConnectionState" description="The various states that a voice connection can be in." href="/api/discord-voip/types/VoiceConnectionState" /></Cards>

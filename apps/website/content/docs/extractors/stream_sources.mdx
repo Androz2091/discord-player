@@ -5,13 +5,13 @@ description: Learn about the supported stream sources in discord-player
 
 By default, discord-player **does not support anything** (including search operation and streaming). Luckily, discord-player supports the following sources with the help of [@discord-player/extractor](https://npm.im/@discord-player/extractor) which comes pre-installed with discord-player:
 
--   Local file (You must set the search engine to `QueryType.FILE` in order to play local files, backed by `attachment extractor`)
--   Raw attachments (backed by `attachment extractor`)
--   Spotify (backed by `spotify extractor`)
--   Apple Music (backed by `appleMusic extractor`)
--   Vimeo (backed by `vimeo extractor`)
--   Reverbnation (backed by `reverbnation extractor`)
--   SoundCloud (backed by `soundcloud extractor`)
+- Local file (You must set the search engine to `QueryType.FILE` in order to play local files, backed by `attachment extractor`)
+- Raw attachments (backed by `attachment extractor`)
+- Spotify (backed by `spotify extractor`)
+- Apple Music (backed by `appleMusic extractor`)
+- Vimeo (backed by `vimeo extractor`)
+- Reverbnation (backed by `reverbnation extractor`)
+- SoundCloud (backed by `soundcloud extractor`)
 
 If you dont want to stream from certain extractors, you can block them by passing `blockStreamFrom: [id, id, ...]` to player instantiation options.
 Disabling youtube streaming completely would be as easy as:
@@ -21,18 +21,18 @@ import { Player } from 'discord-player';
 import { Extractor } from 'some-extractor-lib';
 
 const player = new Player(client, {
-    blockStreamFrom: [
-        // now your bot will no longer be able to use
-        // this extractor to play audio even if the track was
-        // extracted by this extractor
-        Extractor.identifier,
-    ],
-    blockExtractors: [
-        // this will block the listed extractors from being
-        // able to query metadata (aka search results parsing)
-        // This example disables search via this extractor
-        Extractor.identifier,
-    ],
+  blockStreamFrom: [
+    // now your bot will no longer be able to use
+    // this extractor to play audio even if the track was
+    // extracted by this extractor
+    Extractor.identifier,
+  ],
+  blockExtractors: [
+    // this will block the listed extractors from being
+    // able to query metadata (aka search results parsing)
+    // This example disables search via this extractor
+    Extractor.identifier,
+  ],
 });
 ```
 
@@ -44,8 +44,8 @@ You can do so by using `ext:<EXTRACTOR_IDENTIFIER>` in `searchEngine` value. Exa
 import { SoundCloudExtractor } from '@discord-player/extractor';
 
 const result = await player.search(query, {
-    // always use soundcloud extractor
-    searchEngine: `ext:${SoundCloudExtractor.identifier}`,
+  // always use soundcloud extractor
+  searchEngine: `ext:${SoundCloudExtractor.identifier}`,
 });
 ```
 
@@ -57,12 +57,12 @@ In order to bypass this behavior, you can override `createStream` function of th
 ```js title="index.js"
 // The following concept is similar to global `OnBeforeCreateStream` hook, but applies to a particular extractor only
 await player.extractors.register(SpotifyExtractor, {
-    async createStream(extractor, trackUrl) {
-        // extractor refers to SpotifyExtractor instance
-        // trackUrl would be a spotify track url
-        // return a readable stream or a stream url
-        // unlike onBeforeCreateStream, returning nothing here will throw an error
-    },
+  async createStream(extractor, trackUrl) {
+    // extractor refers to SpotifyExtractor instance
+    // trackUrl would be a spotify track url
+    // return a readable stream or a stream url
+    // unlike onBeforeCreateStream, returning nothing here will throw an error
+  },
 });
 ```
 

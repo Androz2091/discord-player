@@ -1,58 +1,763 @@
 ---
 title: discord-player
-description: Complete framework to facilitate music commands using discord.js
+description: Beginner friendly command & event handler for Discord.js
 ---
 
 # Classes
 
-<Cards>
+<Cards><Card title="AFilterGraph" description="Docs for class AFilterGraph" href="/api/discord-player/classes/AFilterGraph" />
 
-</Cards>
+<Card title="AsyncQueue" description="Docs for class AsyncQueue" href="/api/discord-player/classes/AsyncQueue" />
+
+<Card
+  title="AsyncQueueEntry"
+  description="Docs for class AsyncQueueEntry"
+  href="/api/discord-player/classes/AsyncQueueEntry"
+/>
+
+<Card title="AudioFilters" description="Docs for class AudioFilters" href="/api/discord-player/classes/AudioFilters" />
+
+<Card
+  title="AudioPlayer"
+  description="Used to play audio resources (i.e. tracks, streams) to voice connections."
+  href="/api/discord-player/classes/AudioPlayer"
+/>
+
+<Card
+  title="BaseExtractor"
+  description="Docs for class BaseExtractor"
+  href="/api/discord-player/classes/BaseExtractor"
+/>
+
+<Card title="Context" description="Docs for class Context" href="/api/discord-player/classes/Context" />
+
+<Card
+  title="DiscordPlayerQueryResultCache"
+  description="Docs for class DiscordPlayerQueryResultCache"
+  href="/api/discord-player/classes/DiscordPlayerQueryResultCache"
+/>
+
+<Card
+  title="ExtractorExecutionContext"
+  description="Docs for class ExtractorExecutionContext"
+  href="/api/discord-player/classes/ExtractorExecutionContext"
+/>
+
+<Card title="FFmpeg" description="Docs for class FFmpeg" href="/api/discord-player/classes/FFmpeg" />
+
+<Card
+  title="FFmpegFilterer"
+  description="Docs for class FFmpegFilterer"
+  href="/api/discord-player/classes/FFmpegFilterer"
+/>
+
+<Card title="FiltersChain" description="Docs for class FiltersChain" href="/api/discord-player/classes/FiltersChain" />
+
+<Card
+  title="GuildNodeManager"
+  description="Docs for class GuildNodeManager"
+  href="/api/discord-player/classes/GuildNodeManager"
+/>
+
+<Card title="GuildQueue" description="Docs for class GuildQueue" href="/api/discord-player/classes/GuildQueue" />
+
+<Card
+  title="GuildQueueAudioFilters"
+  description="Docs for class GuildQueueAudioFilters"
+  href="/api/discord-player/classes/GuildQueueAudioFilters"
+/>
+
+<Card
+  title="GuildQueueHistory"
+  description="Docs for class GuildQueueHistory"
+  href="/api/discord-player/classes/GuildQueueHistory"
+/>
+
+<Card
+  title="GuildQueuePlayerNode"
+  description="Docs for class GuildQueuePlayerNode"
+  href="/api/discord-player/classes/GuildQueuePlayerNode"
+/>
+
+<Card
+  title="GuildQueueStatistics"
+  description="Docs for class GuildQueueStatistics"
+  href="/api/discord-player/classes/GuildQueueStatistics"
+/>
+
+<Card title="LrcLib" description="Docs for class LrcLib" href="/api/discord-player/classes/LrcLib" />
+
+<Card title="Player" description="Docs for class Player" href="/api/discord-player/classes/Player" />
+
+<Card
+  title="PlayerEventsEmitter"
+  description="Docs for class PlayerEventsEmitter"
+  href="/api/discord-player/classes/PlayerEventsEmitter"
+/>
+
+<Card title="Playlist" description="Docs for class Playlist" href="/api/discord-player/classes/Playlist" />
+
+<Card title="QueryCache" description="Docs for class QueryCache" href="/api/discord-player/classes/QueryCache" />
+
+<Card
+  title="QueryResolver"
+  description="Docs for class QueryResolver"
+  href="/api/discord-player/classes/QueryResolver"
+/>
+
+<Card title="SearchResult" description="Docs for class SearchResult" href="/api/discord-player/classes/SearchResult" />
+
+<Card
+  title="SequentialBucket"
+  description="Docs for class SequentialBucket"
+  href="/api/discord-player/classes/SequentialBucket"
+/>
+
+<Card
+  title="StreamDispatcher"
+  description="Docs for class StreamDispatcher"
+  href="/api/discord-player/classes/StreamDispatcher"
+/>
+
+<Card title="Track" description="Docs for class Track" href="/api/discord-player/classes/Track" />
+
+<Card title="TypeUtil" description="Docs for class TypeUtil" href="/api/discord-player/classes/TypeUtil" />
+
+<Card title="Util" description="Docs for class Util" href="/api/discord-player/classes/Util" />
+
+<Card title="VoiceUtils" description="Docs for class VoiceUtils" href="/api/discord-player/classes/VoiceUtils" />
+
+<Card title="VolumeTransformer" description="Docs for class VolumeTransformer" href="/api/discord-player/classes/VolumeTransformer" /></Cards>
+
+# Types
+
+<Cards><Card title="AsyncQueueAcquisitionOptions" description="Docs for type AsyncQueueAcquisitionOptions" href="/api/discord-player/types/AsyncQueueAcquisitionOptions" />
+
+<Card
+  title="CreateAudioPlayerOptions"
+  description="Options that can be passed when creating an audio player, used to specify its behavior."
+  href="/api/discord-player/types/CreateAudioPlayerOptions"
+/>
+
+<Card
+  title="CreateStreamOps"
+  description="Docs for type CreateStreamOps"
+  href="/api/discord-player/types/CreateStreamOps"
+/>
+
+<Card
+  title="DependenciesReport"
+  description="Docs for type DependenciesReport"
+  href="/api/discord-player/types/DependenciesReport"
+/>
+
+<Card
+  title="ExtractorExecutionEvents"
+  description="Docs for type ExtractorExecutionEvents"
+  href="/api/discord-player/types/ExtractorExecutionEvents"
+/>
+
+<Card
+  title="ExtractorExecutionResult"
+  description="Docs for type ExtractorExecutionResult"
+  href="/api/discord-player/types/ExtractorExecutionResult"
+/>
+
+<Card title="ExtractorInfo" description="Docs for type ExtractorInfo" href="/api/discord-player/types/ExtractorInfo" />
+
+<Card
+  title="ExtractorSearchContext"
+  description="Docs for type ExtractorSearchContext"
+  href="/api/discord-player/types/ExtractorSearchContext"
+/>
+
+<Card
+  title="ExtractorSession"
+  description="Docs for type ExtractorSession"
+  href="/api/discord-player/types/ExtractorSession"
+/>
+
+<Card title="FFmpegOptions" description="Docs for type FFmpegOptions" href="/api/discord-player/types/FFmpegOptions" />
+
+<Card title="FFmpegSource" description="Docs for type FFmpegSource" href="/api/discord-player/types/FFmpegSource" />
+
+<Card
+  title="FFmpegStreamOptions"
+  description="Docs for type FFmpegStreamOptions"
+  href="/api/discord-player/types/FFmpegStreamOptions"
+/>
+
+<Card title="FilterGraph" description="Docs for type FilterGraph" href="/api/discord-player/types/FilterGraph" />
+
+<Card
+  title="GuildNodeCreateOptions"
+  description="Docs for type GuildNodeCreateOptions"
+  href="/api/discord-player/types/GuildNodeCreateOptions"
+/>
+
+<Card title="GuildNodeInit" description="Docs for type GuildNodeInit" href="/api/discord-player/types/GuildNodeInit" />
+
+<Card
+  title="GuildQueueAFiltersCache"
+  description="Docs for type GuildQueueAFiltersCache"
+  href="/api/discord-player/types/GuildQueueAFiltersCache"
+/>
+
+<Card
+  title="GuildQueueEvents"
+  description="Docs for type GuildQueueEvents"
+  href="/api/discord-player/types/GuildQueueEvents"
+/>
+
+<Card
+  title="GuildQueueStatisticsMetadata"
+  description="Docs for type GuildQueueStatisticsMetadata"
+  href="/api/discord-player/types/GuildQueueStatisticsMetadata"
+/>
+
+<Card
+  title="GuildQueueTimeline"
+  description="Docs for type GuildQueueTimeline"
+  href="/api/discord-player/types/GuildQueueTimeline"
+/>
+
+<Card title="JoinConfig" description="Docs for type JoinConfig" href="/api/discord-player/types/JoinConfig" />
+
+<Card
+  title="JoinVoiceChannelOptions"
+  description="The options that can be given when joining a voice channel."
+  href="/api/discord-player/types/JoinVoiceChannelOptions"
+/>
+
+<Card title="LrcGetParams" description="Docs for type LrcGetParams" href="/api/discord-player/types/LrcGetParams" />
+
+<Card
+  title="LrcSearchParams"
+  description="Docs for type LrcSearchParams"
+  href="/api/discord-player/types/LrcSearchParams"
+/>
+
+<Card
+  title="LrcSearchResult"
+  description="Docs for type LrcSearchResult"
+  href="/api/discord-player/types/LrcSearchResult"
+/>
+
+<Card title="PackageJSON" description="Docs for type PackageJSON" href="/api/discord-player/types/PackageJSON" />
+
+<Card title="PlayOptions" description="Docs for type PlayOptions" href="/api/discord-player/types/PlayOptions" />
+
+<Card title="PlayerEvents" description="Docs for type PlayerEvents" href="/api/discord-player/types/PlayerEvents" />
+
+<Card
+  title="PlayerInitOptions"
+  description="Docs for type PlayerInitOptions"
+  href="/api/discord-player/types/PlayerInitOptions"
+/>
+
+<Card
+  title="PlayerNodeInitializationResult"
+  description="Docs for type PlayerNodeInitializationResult"
+  href="/api/discord-player/types/PlayerNodeInitializationResult"
+/>
+
+<Card
+  title="PlayerNodeInitializerOptions"
+  description="Docs for type PlayerNodeInitializerOptions"
+  href="/api/discord-player/types/PlayerNodeInitializerOptions"
+/>
+
+<Card
+  title="PlayerProgressbarOptions"
+  description="Docs for type PlayerProgressbarOptions"
+  href="/api/discord-player/types/PlayerProgressbarOptions"
+/>
+
+<Card
+  title="PlayerSearchResult"
+  description="Docs for type PlayerSearchResult"
+  href="/api/discord-player/types/PlayerSearchResult"
+/>
+
+<Card
+  title="PlayerTimestamp"
+  description="Docs for type PlayerTimestamp"
+  href="/api/discord-player/types/PlayerTimestamp"
+/>
+
+<Card
+  title="PlaylistInitData"
+  description="Docs for type PlaylistInitData"
+  href="/api/discord-player/types/PlaylistInitData"
+/>
+
+<Card title="PlaylistJSON" description="Docs for type PlaylistJSON" href="/api/discord-player/types/PlaylistJSON" />
+
+<Card
+  title="PostProcessedResult"
+  description="Docs for type PostProcessedResult"
+  href="/api/discord-player/types/PostProcessedResult"
+/>
+
+<Card
+  title="QueryCacheOptions"
+  description="Docs for type QueryCacheOptions"
+  href="/api/discord-player/types/QueryCacheOptions"
+/>
+
+<Card
+  title="QueryCacheProvider"
+  description="Docs for type QueryCacheProvider"
+  href="/api/discord-player/types/QueryCacheProvider"
+/>
+
+<Card
+  title="QueryCacheResolverContext"
+  description="Docs for type QueryCacheResolverContext"
+  href="/api/discord-player/types/QueryCacheResolverContext"
+/>
+
+<Card title="QueueFilters" description="Represents FFmpeg filters" href="/api/discord-player/types/QueueFilters" />
+
+<Card title="RawTrackData" description="Docs for type RawTrackData" href="/api/discord-player/types/RawTrackData" />
+
+<Card
+  title="ResolvedFFmpegSource"
+  description="Docs for type ResolvedFFmpegSource"
+  href="/api/discord-player/types/ResolvedFFmpegSource"
+/>
+
+<Card title="ResolvedQuery" description="Docs for type ResolvedQuery" href="/api/discord-player/types/ResolvedQuery" />
+
+<Card
+  title="ResourcePlayOptions"
+  description="Docs for type ResourcePlayOptions"
+  href="/api/discord-player/types/ResourcePlayOptions"
+/>
+
+<Card title="Runtime" description="Docs for type Runtime" href="/api/discord-player/types/Runtime" />
+
+<Card title="SearchOptions" description="Docs for type SearchOptions" href="/api/discord-player/types/SearchOptions" />
+
+<Card
+  title="SearchResultData"
+  description="Docs for type SearchResultData"
+  href="/api/discord-player/types/SearchResultData"
+/>
+
+<Card title="SkipOptions" description="Docs for type SkipOptions" href="/api/discord-player/types/SkipOptions" />
+
+<Card title="StreamConfig" description="Docs for type StreamConfig" href="/api/discord-player/types/StreamConfig" />
+
+<Card title="TimeData" description="Docs for type TimeData" href="/api/discord-player/types/TimeData" />
+
+<Card
+  title="TimelineDispatcherOptions"
+  description="Docs for type TimelineDispatcherOptions"
+  href="/api/discord-player/types/TimelineDispatcherOptions"
+/>
+
+<Card title="TrackJSON" description="Docs for type TrackJSON" href="/api/discord-player/types/TrackJSON" />
+
+<Card
+  title="VoiceConnectConfig"
+  description="Docs for type VoiceConnectConfig"
+  href="/api/discord-player/types/VoiceConnectConfig"
+/>
+
+<Card title="VoiceEvents" description="Docs for type VoiceEvents" href="/api/discord-player/types/VoiceEvents" />
+
+<Card title="ArgPrimitive" description="Docs for type ArgPrimitive" href="/api/discord-player/types/ArgPrimitive" />
+
+<Card
+  title="AsyncQueueExceptionHandler"
+  description="Docs for type AsyncQueueExceptionHandler"
+  href="/api/discord-player/types/AsyncQueueExceptionHandler"
+/>
+
+<Card title="BiquadFilters" description="Docs for type BiquadFilters" href="/api/discord-player/types/BiquadFilters" />
+
+<Card
+  title="ContextReceiver"
+  description="The receiver function that will be called when the context is provided"
+  href="/api/discord-player/types/ContextReceiver"
+/>
+
+<Card title="Encodable" description="Docs for type Encodable" href="/api/discord-player/types/Encodable" />
+
+<Card
+  title="ExtractorExecutionFN"
+  description="Docs for type ExtractorExecutionFN"
+  href="/api/discord-player/types/ExtractorExecutionFN"
+/>
+
+<Card
+  title="ExtractorResolvable"
+  description="Docs for type ExtractorResolvable"
+  href="/api/discord-player/types/ExtractorResolvable"
+/>
+
+<Card
+  title="ExtractorStreamable"
+  description="Docs for type ExtractorStreamable"
+  href="/api/discord-player/types/ExtractorStreamable"
+/>
+
+<Card
+  title="FFmpegCallback"
+  description="Docs for type FFmpegCallback"
+  href="/api/discord-player/types/FFmpegCallback"
+/>
+
+<Card title="FFmpegLib" description="Docs for type FFmpegLib" href="/api/discord-player/types/FFmpegLib" />
+
+<Card title="FFmpegReport" description="Docs for type FFmpegReport" href="/api/discord-player/types/FFmpegReport" />
+
+<Card title="FiltersName" description="Docs for type FiltersName" href="/api/discord-player/types/FiltersName" />
+
+<Card
+  title="GuildQueueEvent"
+  description="Docs for type GuildQueueEvent"
+  href="/api/discord-player/types/GuildQueueEvent"
+/>
+
+<Card title="LrcGetResult" description="Docs for type LrcGetResult" href="/api/discord-player/types/LrcGetResult" />
+
+<Card title="MaybeNull" description="Docs for type MaybeNull" href="/api/discord-player/types/MaybeNull" />
+
+<Card
+  title="MetadataDispatch"
+  description="Docs for type MetadataDispatch"
+  href="/api/discord-player/types/MetadataDispatch"
+/>
+
+<Card title="NextFunction" description="Docs for type NextFunction" href="/api/discord-player/types/NextFunction" />
+
+<Card
+  title="NodeResolvable"
+  description="Docs for type NodeResolvable"
+  href="/api/discord-player/types/NodeResolvable"
+/>
+
+<Card
+  title="OnAfterCreateStreamHandler"
+  description="Docs for type OnAfterCreateStreamHandler"
+  href="/api/discord-player/types/OnAfterCreateStreamHandler"
+/>
+
+<Card
+  title="OnBeforeCreateStreamHandler"
+  description="Docs for type OnBeforeCreateStreamHandler"
+  href="/api/discord-player/types/OnBeforeCreateStreamHandler"
+/>
+
+<Card title="PCMFilters" description="Docs for type PCMFilters" href="/api/discord-player/types/PCMFilters" />
+
+<Card title="PlayerEvent" description="Docs for type PlayerEvent" href="/api/discord-player/types/PlayerEvent" />
+
+<Card
+  title="PlayerTriggeredReason"
+  description="Docs for type PlayerTriggeredReason"
+  href="/api/discord-player/types/PlayerTriggeredReason"
+/>
+
+<Card
+  title="QueryExtractorSearch"
+  description="Docs for type QueryExtractorSearch"
+  href="/api/discord-player/types/QueryExtractorSearch"
+/>
+
+<Card title="RequestEntity" description="Docs for type RequestEntity" href="/api/discord-player/types/RequestEntity" />
+
+<Card title="RuntimeType" description="Docs for type RuntimeType" href="/api/discord-player/types/RuntimeType" />
+
+<Card
+  title="SearchQueryType"
+  description="Docs for type SearchQueryType"
+  href="/api/discord-player/types/SearchQueryType"
+/>
+
+<Card
+  title="SerializedPlaylist"
+  description="Docs for type SerializedPlaylist"
+  href="/api/discord-player/types/SerializedPlaylist"
+/>
+
+<Card
+  title="SerializedTrack"
+  description="Docs for type SerializedTrack"
+  href="/api/discord-player/types/SerializedTrack"
+/>
+
+<Card title="SetterFN" description="Docs for type SetterFN" href="/api/discord-player/types/SetterFN" />
+
+<Card title="TrackLike" description="Docs for type TrackLike" href="/api/discord-player/types/TrackLike" />
+
+<Card
+  title="TrackResolvable"
+  description="Docs for type TrackResolvable"
+  href="/api/discord-player/types/TrackResolvable"
+/>
+
+<Card
+  title="TrackSource"
+  description="The track source:
+- soundcloud
+- youtube
+- spotify
+- apple_music
+- arbitrary"
+  href="/api/discord-player/types/TrackSource"
+/>
+
+<Card
+  title="VoiceStateHandler"
+  description="Docs for type VoiceStateHandler"
+  href="/api/discord-player/types/VoiceStateHandler"
+/>
+
+<Card title="WithMetadata" description="Docs for type WithMetadata" href="/api/discord-player/types/WithMetadata" /></Cards>
 
 # Functions
 
-<Cards>
+<Cards><Card title="FFMPEG_ARGS_PIPED" description="Docs for function FFMPEG_ARGS_PIPED" href="/api/discord-player/functions/FFMPEG_ARGS_PIPED" />
 
-</Cards>
+<Card
+  title="FFMPEG_ARGS_STRING"
+  description="Docs for function FFMPEG_ARGS_STRING"
+  href="/api/discord-player/functions/FFMPEG_ARGS_STRING"
+/>
+
+<Card
+  title="VALIDATE_QUEUE_CAP"
+  description="Docs for function VALIDATE_QUEUE_CAP"
+  href="/api/discord-player/functions/VALIDATE_QUEUE_CAP"
+/>
+
+<Card
+  title="createAudioPlayer"
+  description="Creates a new AudioPlayer to be used."
+  href="/api/discord-player/functions/createAudioPlayer"
+/>
+
+<Card
+  title="createContext"
+  description="Create a new context. The default value is optional."
+  href="/api/discord-player/functions/createContext"
+/>
+
+<Card
+  title="createErisCompat"
+  description="Allows Eris clients to be used with discord-player. When this method is called, discord-player creates a proxy object that intercepts certain methods and properties to make it compatible with discord-player."
+  href="/api/discord-player/functions/createErisCompat"
+/>
+
+<Card
+  title="createFFmpegArgs"
+  description="Create FFmpeg arguments from an object."
+  href="/api/discord-player/functions/createFFmpegArgs"
+/>
+
+<Card
+  title="createFFmpegStream"
+  description="Creates FFmpeg stream"
+  href="/api/discord-player/functions/createFFmpegStream"
+/>
+
+<Card title="decode" description="Docs for function decode" href="/api/discord-player/functions/decode" />
+
+<Card
+  title="deserialize"
+  description="Docs for function deserialize"
+  href="/api/discord-player/functions/deserialize"
+/>
+
+<Card title="encode" description="Docs for function encode" href="/api/discord-player/functions/encode" />
+
+<Card
+  title="getVoiceConnection"
+  description="Finds a voice connection with the given guild id and group. Defaults to the 'default' group."
+  href="/api/discord-player/functions/getVoiceConnection"
+/>
+
+<Card
+  title="getVoiceConnections"
+  description="Retrieves all the voice connections under the 'default' group."
+  href="/api/discord-player/functions/getVoiceConnections"
+/>
+
+<Card
+  title="isErisProxy"
+  description="Docs for function isErisProxy"
+  href="/api/discord-player/functions/isErisProxy"
+/>
+
+<Card
+  title="joinVoiceChannel"
+  description="Creates a VoiceConnection to a Discord voice channel."
+  href="/api/discord-player/functions/joinVoiceChannel"
+/>
+
+<Card
+  title="onAfterCreateStream"
+  description="Global onAfterCreateStream handler"
+  href="/api/discord-player/functions/onAfterCreateStream"
+/>
+
+<Card
+  title="onBeforeCreateStream"
+  description="Global onBeforeCreateStream handler"
+  href="/api/discord-player/functions/onBeforeCreateStream"
+/>
+
+<Card title="serialize" description="Docs for function serialize" href="/api/discord-player/functions/serialize" />
+
+<Card
+  title="tryIntoThumbnailString"
+  description="Docs for function tryIntoThumbnailString"
+  href="/api/discord-player/functions/tryIntoThumbnailString"
+/>
+
+<Card
+  title="useContext"
+  description="Get the current value of the context. If the context is lost and no default value is provided, undefined will be returned."
+  href="/api/discord-player/functions/useContext"
+/>
+
+<Card title="useHistory" description="Fetch guild queue history" href="/api/discord-player/functions/useHistory" />
+
+<Card
+  title="useMainPlayer"
+  description="Fetch main player instance"
+  href="/api/discord-player/functions/useMainPlayer"
+/>
+
+<Card
+  title="useMetadata"
+  description="Fetch or manipulate guild queue metadata"
+  href="/api/discord-player/functions/useMetadata"
+/>
+
+<Card title="usePlayer" description="Fetch guild queue player node" href="/api/discord-player/functions/usePlayer" />
+
+<Card title="useQueue" description="Fetch guild queue." href="/api/discord-player/functions/useQueue" />
+
+<Card
+  title="useTimeline"
+  description="Fetch or manipulate current track"
+  href="/api/discord-player/functions/useTimeline"
+/>
+
+<Card title="useVolume" description="Fetch or manipulate player volume" href="/api/discord-player/functions/useVolume" /></Cards>
+
+# Variables
+
+<Cards><Card title="AF_NIGHTCORE_RATE" description="Docs for variable AF_NIGHTCORE_RATE" href="/api/discord-player/variables/AF_NIGHTCORE_RATE" />
+
+<Card
+  title="AF_VAPORWAVE_RATE"
+  description="Docs for variable AF_VAPORWAVE_RATE"
+  href="/api/discord-player/variables/AF_VAPORWAVE_RATE"
+/>
+
+<Card
+  title="BASS_EQ_BANDS"
+  description="Docs for variable BASS_EQ_BANDS"
+  href="/api/discord-player/variables/BASS_EQ_BANDS"
+/>
+
+<Card
+  title="BiquadFilterType"
+  description="Docs for variable BiquadFilterType"
+  href="/api/discord-player/variables/BiquadFilterType"
+/>
+
+<Card
+  title="DependencyReportGenerator"
+  description="A utility to generate a report of the dependencies used by the discord-player module."
+  href="/api/discord-player/variables/DependencyReportGenerator"
+/>
+
+<Card
+  title="EqualizerConfigurationPreset"
+  description="Docs for variable EqualizerConfigurationPreset"
+  href="/api/discord-player/variables/EqualizerConfigurationPreset"
+/>
+
+<Card
+  title="FFMPEG_SRATE_REGEX"
+  description="Docs for variable FFMPEG_SRATE_REGEX"
+  href="/api/discord-player/variables/FFMPEG_SRATE_REGEX"
+/>
+
+<Card
+  title="GuildQueueEvent"
+  description="Docs for variable GuildQueueEvent"
+  href="/api/discord-player/variables/GuildQueueEvent"
+/>
+
+<Card
+  title="PCMAudioFilters"
+  description="Docs for variable PCMAudioFilters"
+  href="/api/discord-player/variables/PCMAudioFilters"
+/>
+
+<Card
+  title="PlayerEvent"
+  description="Docs for variable PlayerEvent"
+  href="/api/discord-player/variables/PlayerEvent"
+/>
+
+<Card
+  title="Q_BUTTERWORTH"
+  description="Docs for variable Q_BUTTERWORTH"
+  href="/api/discord-player/variables/Q_BUTTERWORTH"
+/>
+
+<Card
+  title="QueryType"
+  description="The search query type
+This can be one of:
+- AUTO
+- YOUTUBE
+- YOUTUBE_PLAYLIST
+- SOUNDCLOUD_TRACK
+- SOUNDCLOUD_PLAYLIST
+- SOUNDCLOUD
+- SPOTIFY_SONG
+- SPOTIFY_ALBUM
+- SPOTIFY_PLAYLIST
+- SPOTIFY_SEARCH
+- FACEBOOK
+- VIMEO
+- ARBITRARY
+- REVERBNATION
+- YOUTUBE_SEARCH
+- YOUTUBE_VIDEO
+- SOUNDCLOUD_SEARCH
+- APPLE_MUSIC_SONG
+- APPLE_MUSIC_ALBUM
+- APPLE_MUSIC_PLAYLIST
+- APPLE_MUSIC_SEARCH
+- FILE
+- AUTO_SEARCH"
+  href="/api/discord-player/variables/QueryType"
+/>
+
+<Card title="version" description="Docs for variable version" href="/api/discord-player/variables/version" /></Cards>
 
 # Enums
 
-<Cards>
-<Card title="StreamType" description="The different types of stream that can exist within the pipeline." href="/api/discord-player/enums/StreamType" />
-
-<Card title="NoSubscriberBehavior" description="Describes the behavior of the player when an audio packet is played but there are no available
-voice connections to play to." href="/api/discord-player/enums/NoSubscriberBehavior" />
-
-<Card title="AudioPlayerStatus" description="AudioPlayerStatus" href="/api/discord-player/enums/AudioPlayerStatus" />
-
-<Card title="VoiceConnectionStatus" description="The various status codes a voice connection can hold at any one time." href="/api/discord-player/enums/VoiceConnectionStatus" />
-
-<Card title="VoiceConnectionDisconnectReason" description="The reasons a voice connection can be in the disconnected state." href="/api/discord-player/enums/VoiceConnectionDisconnectReason" />
-
-<Card title="TrackSkipReason" description="TrackSkipReason" href="/api/discord-player/enums/TrackSkipReason" />
-
-<Card title="SerializedType" description="SerializedType" href="/api/discord-player/enums/SerializedType" />
-
-<Card title="QueueRepeatMode" description="The queue repeat mode. This can be one of:
+<Cards><Card title="QueueRepeatMode" description="The queue repeat mode. This can be one of:
 - OFF
 - TRACK
 - QUEUE
 - AUTOPLAY" href="/api/discord-player/enums/QueueRepeatMode" />
 
-<Card title="TrackSkipReason" description="TrackSkipReason" href="/api/discord-player/enums/TrackSkipReason" />
+<Card
+  title="SerializedType"
+  description="Docs for enum SerializedType"
+  href="/api/discord-player/enums/SerializedType"
+/>
 
-<Card title="QueueRepeatMode" description="The queue repeat mode. This can be one of:
-- OFF
-- TRACK
-- QUEUE
-- AUTOPLAY" href="/api/discord-player/enums/QueueRepeatMode" />
-
-<Card title="SerializedType" description="SerializedType" href="/api/discord-player/enums/SerializedType" />
-
-</Cards>
-
-# Interfaces
-
-<Cards>
-
-</Cards>
+<Card title="TrackSkipReason" description="Docs for enum TrackSkipReason" href="/api/discord-player/enums/TrackSkipReason" /></Cards>
