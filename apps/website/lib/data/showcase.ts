@@ -230,7 +230,7 @@ export const ShowcaseResource: IShowcase = {
     },
     {
       name: 'discord-player-soundgasm',
-      description: 'An unofficial discord-player extractor to add support for Soundgasm. (because why not)',
+      description: 'An unofficial discord-player extractor to add support for Soundgasm.',
       url: 'https://npm.im/soundgasm-extractor',
     },
   ]),
