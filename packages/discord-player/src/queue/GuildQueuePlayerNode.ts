@@ -317,7 +317,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
       reason: TrackSkipReason.Manual,
       description: 'The track was skipped manually',
     };
-    this.queue.emit(GuildQueueEvent.playerSkip, this.queue, track, reason, description);
+    this.queue.emit(GuildQueueEvent.PlayerSkip, this.queue, track, reason, description);
     return true;
   }
 
@@ -338,7 +338,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
     this.queue.tracks.removeOne((t) => t.id === foundTrack.id);
 
-    if (emitEvent) this.queue.emit(GuildQueueEvent.audioTrackRemove, this.queue, foundTrack);
+    if (emitEvent) this.queue.emit(GuildQueueEvent.AudioTrackRemove, this.queue, foundTrack);
 
     return foundTrack;
   }
@@ -382,7 +382,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     if (!removed) return false;
     const toRemove = this.queue.tracks.store.filter((_, i) => i <= idx);
     this.queue.tracks.store.splice(0, idx, removed);
-    this.queue.emit(GuildQueueEvent.audioTracksRemove, this.queue, toRemove);
+    this.queue.emit(GuildQueueEvent.AudioTracksRemove, this.queue, toRemove);
     return this.skip({
       reason: TrackSkipReason.SkipTo,
       description: 'The player was skipped to another track manually',
@@ -399,7 +399,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
       throw Exceptions.ERR_INVALID_ARG_TYPE('track value', 'instance of Track', String(track));
     VALIDATE_QUEUE_CAP(this.queue, track);
     this.queue.tracks.store.splice(index, 0, track);
-    if (!this.queue.options.noEmitInsert) this.queue.emit(GuildQueueEvent.audioTrackAdd, this.queue, track);
+    if (!this.queue.options.noEmitInsert) this.queue.emit(GuildQueueEvent.AudioTrackAdd, this.queue, track);
   }
 
   /**
@@ -509,7 +509,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     const track = res || this.queue.tracks.dispatch();
     if (!track) {
       const error = Exceptions.ERR_NO_RESULT('Play request received but track was not provided');
-      this.queue.emit(GuildQueueEvent.error, this.queue, error);
+      this.queue.emit(GuildQueueEvent.Error, this.queue, error);
       return;
     }
 
@@ -601,7 +601,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
       let resolver: () => void = Util.noop;
       const donePromise = new Promise<void>((resolve) => (resolver = resolve));
 
-      const success = this.queue.emit(GuildQueueEvent.willPlayTrack, this.queue, track, trackStreamConfig, resolver!);
+      const success = this.queue.emit(GuildQueueEvent.WillPlayTrack, this.queue, track, trackStreamConfig, resolver!);
 
       // prevent dangling promise
       if (!success) resolver();
@@ -726,14 +726,14 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         );
 
     this.queue.emit(
-      GuildQueueEvent.playerSkip,
+      GuildQueueEvent.PlayerSkip,
       this.queue,
       track,
       TrackSkipReason.NoStream,
       streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault.message,
     );
     this.queue.emit(
-      GuildQueueEvent.playerError,
+      GuildQueueEvent.PlayerError,
       this.queue,
       streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault,
       track,
@@ -858,7 +858,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
         if (m.includes('premature close') || m.includes('epipe')) return;
 
-        this.queue.emit(GuildQueueEvent.playerError, this.queue, err, track);
+        this.queue.emit(GuildQueueEvent.PlayerError, this.queue, err, track);
       });
 
     return ffmpegStream;

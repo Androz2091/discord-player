@@ -81,147 +81,118 @@ export const GuildQueueEvent = {
   /**
    * Emitted when audio track is added to the queue
    */
-  audioTrackAdd: 'audioTrackAdd',
   AudioTrackAdd: 'audioTrackAdd',
   /**
    * Emitted when audio tracks were added to the queue
    */
-  audioTracksAdd: 'audioTracksAdd',
   AudioTracksAdd: 'audioTracksAdd',
   /**
    * Emitted when audio track is removed from the queue
    */
-  audioTrackRemove: 'audioTrackRemove',
   AudioTrackRemove: 'audioTrackRemove',
   /**
    * Emitted when audio tracks are removed from the queue
    */
-  audioTracksRemove: 'audioTracksRemove',
   AudioTracksRemove: 'audioTracksRemove',
   /**
    * Emitted when a connection is created
    */
-  connection: 'connection',
   Connection: 'connection',
   /**
    * Emitted when a voice connection is destroyed
    */
-  connectionDestroyed: 'connectionDestroyed',
   ConnectionDestroyed: 'connectionDestroyed',
   /**
    * Emitted when the bot is disconnected from the channel
    */
-  disconnect: 'disconnect',
   Disconnect: 'disconnect',
   /**
    * Emitted when the queue sends a debug info
    */
-  debug: 'debug',
   Debug: 'debug',
   /**
    * Emitted when the queue encounters error
    */
-  error: 'error',
   Error: 'error',
   /**
    * Emitted when the voice channel is empty
    */
-  emptyChannel: 'emptyChannel',
   EmptyChannel: 'emptyChannel',
   /**
    * Emitted when the queue is empty
    */
-  emptyQueue: 'emptyQueue',
   EmptyQueue: 'emptyQueue',
   /**
    * Emitted when the audio player starts streaming audio track
    */
-  playerStart: 'playerStart',
   PlayerStart: 'playerStart',
   /**
    * Emitted when the audio player errors while streaming audio track
    */
-  playerError: 'playerError',
   PlayerError: 'playerError',
   /**
    * Emitted when the audio player finishes streaming audio track
    */
-  playerFinish: 'playerFinish',
   PlayerFinish: 'playerFinish',
   /**
    * Emitted when the audio player skips current track
    */
-  playerSkip: 'playerSkip',
   PlayerSkip: 'playerSkip',
   /**
    * Emitted when the audio player is triggered
    */
-  playerTrigger: 'playerTrigger',
   PlayerTrigger: 'playerTrigger',
   /**
    * Emitted when the voice state is updated. Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
    */
-  voiceStateUpdate: 'voiceStateUpdate',
   VoiceStateUpdate: 'voiceStateUpdate',
   /**
    * Emitted when volume is updated
    */
-  volumeChange: 'volumeChange',
   VolumeChange: 'volumeChange',
   /**
    * Emitted when player is paused
    */
-  playerPause: 'playerPause',
   PlayerPause: 'playerPause',
   /**
    * Emitted when player is resumed
    */
-  playerResume: 'playerResume',
   PlayerResume: 'playerResume',
   /**
    * Biquad Filters Update
    */
-  biquadFiltersUpdate: 'biquadFiltersUpdate',
   BiquadFiltersUpdate: 'biquadFiltersUpdate',
   /**
    * Equalizer Update
    */
-  equalizerUpdate: 'equalizerUpdate',
   EqualizerUpdate: 'equalizerUpdate',
   /**
    * DSP update
    */
-  dspUpdate: 'dspUpdate',
   DSPUpdate: 'dspUpdate',
   /**
    * Audio Filters Update
    */
-  audioFiltersUpdate: 'audioFiltersUpdate',
   AudioFiltersUpdate: 'audioFiltersUpdate',
   /**
    * Audio player will play next track
    */
-  willPlayTrack: 'willPlayTrack',
   WillPlayTrack: 'willPlayTrack',
   /**
    * Emitted when a voice channel is repopulated
    */
-  channelPopulate: 'channelPopulate',
   ChannelPopulate: 'channelPopulate',
   /**
    * Emitted when a queue is successfully created
    */
-  queueCreate: 'queueCreate',
   QueueCreate: 'queueCreate',
   /**
    * Emitted when a queue is deleted
    */
-  queueDelete: 'queueDelete',
   QueueDelete: 'queueDelete',
   /**
    * Emitted when a queue is trying to add similar track for autoplay
    */
-  willAutoPlay: 'willAutoPlay',
   WillAutoPlay: 'willAutoPlay',
 } as const;
 
@@ -509,7 +480,7 @@ export class GuildQueue<Meta = unknown> {
 
     if (this.hasDebugger)
       this.debug(`GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`);
-    this.emit(GuildQueueEvent.queueCreate, this);
+    this.emit(GuildQueueEvent.QueueCreate, this);
   }
 
   /**
@@ -549,7 +520,7 @@ export class GuildQueue<Meta = unknown> {
    * @param m The message to write
    */
   public debug(m: string) {
-    this.emit(GuildQueueEvent.debug, this, m);
+    this.emit(GuildQueueEvent.Debug, this, m);
   }
 
   /**
@@ -767,9 +738,9 @@ export class GuildQueue<Meta = unknown> {
     this.tracks.add(toAdd);
 
     if (isMulti) {
-      this.emit(GuildQueueEvent.audioTracksAdd, this, toAdd);
+      this.emit(GuildQueueEvent.AudioTracksAdd, this, toAdd);
     } else {
-      this.emit(GuildQueueEvent.audioTrackAdd, this, toAdd);
+      this.emit(GuildQueueEvent.AudioTrackAdd, this, toAdd);
     }
   }
 
@@ -890,7 +861,7 @@ export class GuildQueue<Meta = unknown> {
       group: options.group ?? this.player.client.user?.id,
     });
 
-    this.emit(GuildQueueEvent.connection, this);
+    this.emit(GuildQueueEvent.Connection, this);
 
     if (this.channel!.type === ChannelType.GuildStageVoice) {
       await this.channel!.guild.members.me!.voice.setSuppressed(false).catch(async () => {
@@ -962,7 +933,7 @@ export class GuildQueue<Meta = unknown> {
   public delete() {
     if (this.player.nodes.delete(this.id)) {
       this.#deleted = true;
-      this.player.events.emit(GuildQueueEvent.queueDelete, this);
+      this.player.events.emit(GuildQueueEvent.QueueDelete, this);
       this.node.tasksQueue.cancelAll();
       this.tasksQueue.cancelAll();
     }
@@ -977,7 +948,7 @@ export class GuildQueue<Meta = unknown> {
     this.#deleted = false;
     this.setTransitioning(false);
     this.player.nodes.cache.set(this.id, this);
-    this.player.events.emit(GuildQueueEvent.queueCreate, this);
+    this.player.events.emit(GuildQueueEvent.QueueCreate, this);
   }
 
   /**
@@ -1023,8 +994,8 @@ export class GuildQueue<Meta = unknown> {
   }
 
   #attachListeners(dispatcher: StreamDispatcher) {
-    dispatcher.on('error', (e) => this.emit(GuildQueueEvent.error, this, e));
-    dispatcher.on('debug', (m) => this.hasDebugger && this.emit(GuildQueueEvent.debug, this, m));
+    dispatcher.on('error', (e) => this.emit(GuildQueueEvent.Error, this, e));
+    dispatcher.on('debug', (m) => this.hasDebugger && this.emit(GuildQueueEvent.Debug, this, m));
     dispatcher.on('finish', (r) => this.#performFinish(r));
     dispatcher.on('start', (r) => this.#performStart(r));
     dispatcher.on('destroyed', () => {
@@ -1033,25 +1004,25 @@ export class GuildQueue<Meta = unknown> {
     });
     dispatcher.on('dsp', (f) => {
       if (!Object.is(this.filters._lastFiltersCache.filters, f)) {
-        this.emit(GuildQueueEvent.dspUpdate, this, this.filters._lastFiltersCache.filters, f);
+        this.emit(GuildQueueEvent.DSPUpdate, this, this.filters._lastFiltersCache.filters, f);
       }
       this.filters._lastFiltersCache.filters = f;
     });
     dispatcher.on('biquad', (f) => {
       if (this.filters._lastFiltersCache.biquad !== f) {
-        this.emit(GuildQueueEvent.biquadFiltersUpdate, this, this.filters._lastFiltersCache.biquad, f);
+        this.emit(GuildQueueEvent.BiquadFiltersUpdate, this, this.filters._lastFiltersCache.biquad, f);
       }
       this.filters._lastFiltersCache.biquad = f;
     });
     dispatcher.on('eqBands', (f) => {
       if (!Object.is(f, this.filters._lastFiltersCache.equalizer)) {
-        this.emit(GuildQueueEvent.equalizerUpdate, this, this.filters._lastFiltersCache.equalizer, f);
+        this.emit(GuildQueueEvent.EqualizerUpdate, this, this.filters._lastFiltersCache.equalizer, f);
       }
       this.filters._lastFiltersCache.equalizer = f;
     });
     dispatcher.on('volume', (f) => {
       if (this.filters._lastFiltersCache.volume !== f)
-        this.emit(GuildQueueEvent.volumeChange, this, this.filters._lastFiltersCache.volume, f);
+        this.emit(GuildQueueEvent.VolumeChange, this, this.filters._lastFiltersCache.volume, f);
       this.filters._lastFiltersCache.volume = f;
     });
   }
@@ -1076,8 +1047,8 @@ export class GuildQueue<Meta = unknown> {
         })}`,
       );
 
-    this.emit(GuildQueueEvent.playerTrigger, this, track!, reason);
-    if (track && !this.isTransitioning()) this.emit(GuildQueueEvent.playerStart, this, track);
+    this.emit(GuildQueueEvent.PlayerTrigger, this, track!, reason);
+    if (track && !this.isTransitioning()) this.emit(GuildQueueEvent.PlayerStart, this, track);
     this.setTransitioning(false);
   }
 
@@ -1118,7 +1089,7 @@ export class GuildQueue<Meta = unknown> {
       if (track) {
         this.history.push(track);
         this.node.resetProgress();
-        this.emit(GuildQueueEvent.playerFinish, this, track);
+        this.emit(GuildQueueEvent.PlayerFinish, this, track);
       }
       if (this.#deleted) return this.#emitEnd();
       if (this.tracks.size < 1 && this.repeatMode === QueueRepeatMode.OFF) {
@@ -1156,7 +1127,7 @@ export class GuildQueue<Meta = unknown> {
 
   #emitEnd() {
     this.__current = null;
-    this.emit(GuildQueueEvent.emptyQueue, this);
+    this.emit(GuildQueueEvent.EmptyQueue, this);
     if (this.options.leaveOnEnd) {
       const tm: NodeJS.Timeout = setTimeout(() => {
         if (this.isPlaying()) return clearTimeout(tm);
@@ -1194,7 +1165,7 @@ export class GuildQueue<Meta = unknown> {
       let resolver: (track: Track | null) => void = Util.noop;
       const donePromise = new Promise<Track | null>((resolve) => (resolver = resolve));
 
-      const success = this.emit(GuildQueueEvent.willAutoPlay, this, tracks, resolver!);
+      const success = this.emit(GuildQueueEvent.WillAutoPlay, this, tracks, resolver!);
 
       // prevent dangling promise
       if (!success) {

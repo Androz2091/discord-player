@@ -325,7 +325,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     if (!queue || !queue.connection || !queue.channel) return;
 
     // dispatch voice state update
-    const wasHandled = this.events.emit(GuildQueueEvent.voiceStateUpdate, queue, oldState, newState);
+    const wasHandled = this.events.emit(GuildQueueEvent.VoiceStateUpdate, queue, oldState, newState);
     // if the event was handled, return assuming the listener implemented all of the logic below
     if (wasHandled && !this.options.lockVoiceStateHandler) return;
 

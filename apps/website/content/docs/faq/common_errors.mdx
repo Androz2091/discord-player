@@ -54,15 +54,15 @@ client.once('ready', () => {
   const player = useMainPlayer();
 
   // generate dependencies report
-  console.log(player.scanDeps());
-  // ^------ This is similar to discord-voip's `generateDependenciesReport()` function, but with additional informations related to discord-player
+  console.log(player.scanDeps()); // [!code highlight]
+  // ^------ This is similar to discord-voip's `generateDependenciesReport()` function, but with additional informations related to discord-player.
 
   // log metadata query, search execution, etc.
-  player.on('debug', console.log);
+  player.on('debug', console.log); // [!code highlight]
   // ^------ This shows how your search query is interpreted, if the query was cached, which extractor resolved the query or which extractor failed to resolve, etc.
 
   // log debug logs of the queue, such as voice connection logs, player execution, streaming process etc.
-  player.events.on('debug', (queue, message) => console.log(`[DEBUG ${queue.guild.id}] ${message}`));
+  player.events.on('debug', (queue, message) => console.log(`[DEBUG ${queue.guild.id}] ${message}`)); // [!code highlight]
   // ^------ This shows how queue handles the track. It logs informations like the status of audio player, streaming process, configurations used, if streaming failed or not, etc.
 });
 ```

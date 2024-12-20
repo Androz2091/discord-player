@@ -1,0 +1,184 @@
+---
+title: Creating a Play Command
+description: Learn how to create a play command using Discord Player
+---
+
+In this guide, we will learn how to create a play command using Discord Player. The play command allows users to play music in a voice channel.
+
+## Prerequisites
+
+Before creating a play command, make sure you have [ffmpeg](https://ffmpeg.org/download.html) installed on your system. Discord Player uses ffmpeg to transcode audio streams. You may also install ffmpeg from npm, although it is not recommended due to its unstable nature.
+
+```package-install
+npm install --save ffmpeg-static
+# or
+npm install --save @ffmpeg-installer/ffmpeg
+# or
+npm install --save @node-ffmpeg/node-ffmpeg-installer
+# or
+npm install --save ffmpeg-binaries
+```
+
+## Creating a Play Command
+
+The play command allows users to play music in a voice channel. The play command must cover the following functionalities:
+
+1. Abort if the user is not in a voice channel.
+2. Abort if the bot does not have permission to join the voice channel.
+3. Abort if the bot does not have permission to speak in the voice channel.
+4. Abort if the bot is already playing in a voice channel different from the user's voice channel.
+5. Join the user's voice channel.
+6. Play the requested song if the queue is empty, otherwise add the song to the queue.
+7. Also handle playlists and other audio sources.
+
+### Step 1: Define the Command
+
+First, we need to define the play command using `SlashCommandBuilder`.
+
+```js title="play.js"
+// Import necessary classes from discord.js
+import { SlashCommandBuilder } from 'discord.js';
+
+// Define the play command
+export const data = new SlashCommandBuilder()
+  .setName('play') // Command name
+  .setDescription('Play a song in a voice channel') // Command description
+  .addStringOption(
+    (option) =>
+      option
+        .setName('song') // Option name
+        .setDescription('The song to play') // Option description
+        .setRequired(true), // Make the option required
+  );
+```
+
+### Step 2: Get the Player Instance and Song Query
+
+Next, we need to get the player instance and the song query from the user.
+
+```js title="play.js"
+// Import the useMainPlayer function from discord-player
+import { useMainPlayer } from 'discord-player';
+
+// Define the execute function for the play command
+export async function execute(interaction) {
+  // Get the player instance
+  const player = useMainPlayer();
+  // Get the song query from the user input
+  const query = interaction.options.getString('song', true);
+}
+```
+
+### Step 3: Check User and Bot Permissions
+
+We need to check if the user is in a voice channel and if the bot has the necessary permissions.
+
+```js title="play.js"
+// Import necessary classes from discord.js
+import { PermissionsBitField } from 'discord.js';
+
+// Define the execute function for the play command
+export async function execute(interaction) {
+  // Get the player instance and song query
+  const player = useMainPlayer();
+  const query = interaction.options.getString('song', true);
+
+  // Get the voice channel of the user
+  const voiceChannel = interaction.member.voice.channel;
+
+  // Check if the user is in a voice channel
+  if (!voiceChannel) {
+    return interaction.reply('You need to be in a voice channel to play music!');
+  }
+
+  // Check if the bot is already playing in a different voice channel
+  if (interaction.guild.members.me.voice.channel && interaction.guild.members.me.voice.channel !== voiceChannel) {
+    return interaction.reply('I am already playing in a different voice channel!');
+  }
+
+  // Check if the bot has permission to join the voice channel
+  if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.Connect)) {
+    return interaction.reply('I do not have permission to join your voice channel!');
+  }
+
+  // Check if the bot has permission to speak in the voice channel
+  if (!interaction.guild.members.me.permissionsIn(voiceChannel).has(PermissionsBitField.Flags.Speak)) {
+    return interaction.reply('I do not have permission to speak in your voice channel!');
+  }
+}
+```
+
+### Step 4: Play the Song
+
+Finally, we need to play the song and handle any errors that may occur.
+
+```js title="play.js"
+// Define the execute function for the play command
+export async function execute(interaction) {
+  // Get the player instance and song query
+  const player = useMainPlayer();
+  const query = interaction.options.getString('song', true);
+
+  // Get the voice channel of the user and check permissions
+  const voiceChannel = interaction.member.voice.channel;
+
+  if (!voiceChannel) {
+    return interaction.reply('You need to be in a voice channel to play music!');
+  }
+
+  if (interaction.guild.members.me.voice.channel && interaction.guild.members.me.voice.channel !== voiceChannel) {
+    return interaction.reply('I am already playing in a different voice channel!');
+  }
+
+  if (!voiceChannel.permissionsFor(interaction.guild.members.me).has(PermissionsBitField.Flags.Connect)) {
+    return interaction.reply('I do not have permission to join your voice channel!');
+  }
+
+  if (!voiceChannel.permissionsFor(interaction.guild.members.me).has(PermissionsBitField.Flags.Speak)) {
+    return interaction.reply('I do not have permission to speak in your voice channel!');
+  }
+
+  try {
+    // Play the song in the voice channel
+    const result = await player.play(voiceChannel, query, {
+      nodeOptions: {
+        metadata: { channel: interaction.channel }, // Store text channel as metadata on the queue
+      },
+    });
+
+    // Reply to the user that the song has been added to the queue
+    return interaction.reply(`${result.track.title} has been added to the queue!`);
+  } catch (error) {
+    // Handle any errors that occur
+    console.error(error);
+    return interaction.reply('An error occurred while playing the song!');
+  }
+}
+```
+
+### Handling Track Lifecycle Events
+
+You can also handle track lifecycle events to send messages when a track starts or finishes playing.
+
+```js title="index.js"
+// Import necessary classes from discord-player
+import { GuildQueueEvent } from 'discord-player';
+
+// Handle the event when a track starts playing
+player.events.on(GuildQueueEvent.PlayerStart, async (queue, track) => {
+  // Get the metadata stored on the queue
+  const { channel } = queue.metadata;
+  // Send a message to the channel
+  await channel.send(`Now playing: ${track.title}`);
+});
+
+// Handle the event when a track finishes playing
+player.events.on(GuildQueueEvent.PlayerFinish, async (queue, track) => {
+  // Get the metadata stored on the queue
+  const { channel } = queue.metadata;
+  // Send a message to the channel
+  await channel.send(`Finished playing ${track.title}`);
+});
+```
+
+That's it! You have successfully created a play command using Discord Player. You can now play music in your Discord bot.

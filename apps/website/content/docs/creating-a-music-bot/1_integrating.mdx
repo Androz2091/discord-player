@@ -1,0 +1,65 @@
+---
+title: Integrating Discord Player
+description: Learn how to integrate Discord Player in your Discord bot
+---
+
+Discord Player is a powerful and easy-to-use music framework for Discord.js. It provides a simple and easy-to-use API to play music in your Discord bot. This guide will help you integrate Discord Player in your Discord bot.
+
+## Installation
+
+First, you need to install the Discord Player and its dependencies. You can do this by running the following command:
+
+```package-install
+npm install discord-player @discord-player/extractor
+```
+
+<Callout>
+  We are also installing `@discord-player/extractor` as it contains the default extractors for Discord Player which
+  provides ability to play audio from local files, raw url or SoundCloud. **Discord Player on itself does not support
+  anything.**
+</Callout>
+
+## Initialization
+
+To use Discord Player, you need to initialize it in your bot. Here is an example of how you can initialize Discord Player:
+
+<Tabs items={['discord.js', 'eris']}>
+<Tab value='discord.js'>
+
+```js title="index.js"
+import { Client } from 'discord.js';
+import { Player } from 'discord-player';
+
+const client = new Client({
+  /* options */
+});
+const player = new Player(client);
+```
+
+</Tab>
+
+<Tab value="eris">
+
+```js title="index.js"
+import Eris from 'eris';
+import { Player, createErisCompat } from 'discord-player';
+
+const client = Eris({
+  /* options */
+});
+const player = new Player(createErisCompat(client));
+```
+
+</Tab>
+
+</Tabs>
+
+That's it! You have successfully initialized Discord Player in your bot.
+
+<Callout>
+  Even though Discord Player supports Eris, the guide from here will focus on discord.js. You can refer to the [Eris
+  documentation](https://abal.moe/Eris/docs) for more information on Eris specific APIs. Concept wise, both discord.js
+  and Eris are similar.
+</Callout>
+
+In the next section, we will learn about extractors and how to integrate them to support audio streaming.

@@ -50,7 +50,7 @@ In v7, `Player` is no longer a singleton. This means that you can create multipl
 Assuming you have a command handler that looks something like this:
 
 ```js title="command-handler.js"
-await command.execute(client, interaction);
+await command.execute(interaction);
 ```
 
 You will need to wrap `command.execute` in a player context provider like this:
@@ -60,7 +60,7 @@ const data = {
   guild: interaction.guild,
 };
 
-await player.context.provide(data, () => command.execute(client, interaction));
+await player.context.provide(data, () => command.execute(interaction));
 ```
 
 <Callout>In order to access hooks via context api, you must not provide arguments to the hooks.</Callout>

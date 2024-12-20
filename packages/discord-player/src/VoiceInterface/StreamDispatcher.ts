@@ -142,16 +142,16 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
       })
       .on(VoiceConnectionStatus.Destroyed, () => {
         this.end();
-        this.queue.emit(GuildQueueEvent.connectionDestroyed, this.queue);
+        this.queue.emit(GuildQueueEvent.ConnectionDestroyed, this.queue);
       });
 
     this.audioPlayer.on('stateChange', (oldState, newState) => {
       if (oldState.status !== AudioPlayerStatus.Paused && newState.status === AudioPlayerStatus.Paused) {
-        this.queue.emit(GuildQueueEvent.playerPause, this.queue);
+        this.queue.emit(GuildQueueEvent.PlayerPause, this.queue);
       }
 
       if (oldState.status === AudioPlayerStatus.Paused && newState.status !== AudioPlayerStatus.Paused) {
-        this.queue.emit(GuildQueueEvent.playerResume, this.queue);
+        this.queue.emit(GuildQueueEvent.PlayerResume, this.queue);
       }
 
       if (newState.status === AudioPlayerStatus.Playing) {

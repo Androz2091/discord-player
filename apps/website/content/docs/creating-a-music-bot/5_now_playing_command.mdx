@@ -1,0 +1,99 @@
+---
+title: Now Playing Command
+description: Learn how to create a now playing command in your Discord bot
+---
+
+In this guide, we will learn how to create a now playing command in your Discord bot using Discord Player. The now playing command will display the currently playing song in the voice channel. We will cover two approaches: using player context and without using player context.
+
+<Tabs items={['With Player Context', 'Without Player Context']}>
+
+<Tab value='With Player Context'>
+
+### With Player Context
+
+Using player context allows Discord Player to automatically detect the queue for the current interaction. This simplifies the process as you don't need to manually provide the guild information.
+
+```js title="now-playing.js"
+import { SlashCommandBuilder } from 'discord.js';
+import { useQueue } from 'discord-player';
+
+export const data = new SlashCommandBuilder()
+  .setName('nowplaying') // Command name
+  .setDescription('Display the currently playing song'); // Command description
+
+export async function execute(interaction) {
+  // Get the current queue
+  const queue = useQueue();
+
+  if (!queue) {
+    return interaction.reply('This server does not have an active player session.');
+  }
+
+  // Get the currently playing song
+  const currentSong = queue.currentTrack;
+
+  // Check if there is a song playing
+  if (!currentSong) {
+    return interaction.reply('No song is currently playing.');
+  }
+
+  // Send the currently playing song information
+  return interaction.reply(`Now playing: ${currentSong.name}`);
+}
+```
+
+In this example:
+
+- We define a new slash command named `nowplaying` using `SlashCommandBuilder`.
+- We use the `useQueue` hook to get the current queue.
+- If there is no active player session, we reply with an appropriate message.
+- We check if there is a currently playing song and reply with its name.
+
+</Tab>
+
+<Tab value='Without Player Context'>
+
+### Without Player Context
+
+Without player context, you need to provide the guild to the `useQueue` hook to get the queue for the guild. This approach requires a bit more manual handling but is useful in scenarios where player context is not available.
+
+```js title="now-playing.js"
+import { SlashCommandBuilder } from 'discord.js';
+import { useQueue } from 'discord-player';
+
+export const data = new SlashCommandBuilder()
+  .setName('nowplaying') // Command name
+  .setDescription('Display the currently playing song'); // Command description
+
+export async function execute(interaction) {
+  // Get the queue for the guild
+  const queue = useQueue(interaction.guild);
+
+  if (!queue) {
+    return interaction.reply('This server does not have an active player session.');
+  }
+
+  // Get the currently playing song
+  const currentSong = queue.currentTrack;
+
+  // Check if there is a song playing
+  if (!currentSong) {
+    return interaction.reply('No song is currently playing.');
+  }
+
+  // Send the currently playing song information
+  return interaction.reply(`Now playing: ${currentSong.name}`);
+}
+```
+
+In this example:
+
+- We define the same `nowplaying` command.
+- We use the `useQueue` hook with the guild information to get the queue.
+- The rest of the logic remains the same as the previous example.
+
+</Tab>
+
+</Tabs>
+
+By following this guide, you will be able to create a now playing command in your Discord bot that displays the currently playing song in the voice channel. Choose the approach that best fits your use case and integrate it into your bot.

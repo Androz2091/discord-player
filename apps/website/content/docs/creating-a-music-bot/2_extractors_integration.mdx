@@ -1,0 +1,83 @@
+---
+title: Extractors Integration
+description: Learn how to integrate extractors in Discord Player
+---
+
+Discord Player on itself does not provide a way to resolve the query to a track. It requires you to provide extractors (or plugins) to resolve your input to a track. Extractors are the plugins that provide the ability to resolve the query to a track. Extractors may or may not support audio extraction though.
+
+## Official Extractors
+
+Discord Player provides a set of default extractors that you can use. These extractors are provided by the `@discord-player/extractor` package. You can install it by running:
+
+```package-install
+npm install @discord-player/extractor
+```
+
+You may also choose to not use the default extractors and find other extractors that suit your needs. The official extractor package provides the following extractors:
+
+| Extractor               | Description                                                                                          | Supports Streaming | Supports Search |
+| ----------------------- | ---------------------------------------------------------------------------------------------------- | ------------------ | --------------- |
+| `AttachmentExtractor`   | Resolves raw url or local files to playable `Track`                                                  | Yes                | No              |
+| `SoundCloudExtractor`   | Resolves SoundCloud url, playlist or album to playable `Track`. Copyrighted tracks cannot be played. | Yes                | Yes             |
+| `VimeoExtractor`        | Resolves Vimeo url to playable `Track`.                                                              | Yes                | No              |
+| `AppleMusicExtractor`   | Resolves Apple Music url, album or playlist to playable `Track`.                                     | No                 | Yes             |
+| `SpotifyExtractor`      | Resolves Spotify url, album or playlist to playable `Track`.                                         | No                 | Yes             |
+| `ReverbnationExtractor` | Resolves Reverbnation url to playable `Track`.                                                       | Yes                | No              |
+
+<Callout>
+  The extractors that do not support streaming can only be used for search. They cannot be used to play the audio. In
+  other words, extractors such as `AppleMusicExtractor` and `SpotifyExtractor` can only be used to search for tracks,
+  but not to play them.
+</Callout>
+
+If the query is resolved via extractors that do not support streaming, Discord Player uses alternative streaming method called **bridging** to facilitate the playback. This method may not be as efficient and accurate.
+
+<Callout>
+  Bridging is a method where track extracted by one extractor is passed to another extractor that supports streaming. If
+  the track is unable to be bridged, Discord Player will skip the track and move to the next track in the queue.
+</Callout>
+
+## Community Extractors
+
+You can also find community built extractors that provide additional functionality. These extractors may not be officially supported by Discord Player. You can find community extractors on [Community](/community) showcase list.
+
+<Callout type="warn">
+  Some extractors may violate the terms of service of the platform they are extracting from. Make sure to read the terms
+  of service of the platform before using the extractors. Discord Player is not responsible for any violation of terms
+  of service, as it gives you full control over the extractors.
+</Callout>
+
+## Loading `@discord-player/extractor`
+
+To load the default extractors, you can use the following code:
+
+<Tabs items={['Default Extractors', 'Named Extractors']}>
+
+<Tab value="Default Extractors">
+
+```js
+import { DefaultExtractors } from '@discord-player/extractor';
+
+await player.extractors.loadMulti(DefaultExtractors);
+```
+
+`DefaultExtractors` is an array of extractors that `@discord-player/extractor` provides. You can also load a single extractor by using `player.extractors.register` method.
+
+</Tab>
+
+<Tab value="Named Extractors">
+
+```js
+import { SoundCloudExtractor, AttachmentExtractor } from '@discord-player/extractor';
+
+await player.extractors.loadMulti([SoundCloudExtractor, AttachmentExtractor]);
+```
+
+</Tab>
+
+</Tabs>
+
+<Callout>
+  It is up to you to decide which extractors you want to use. Having too many extractors may slow down the query
+  resolution process.
+</Callout>

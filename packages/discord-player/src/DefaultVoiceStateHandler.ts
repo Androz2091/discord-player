@@ -17,7 +17,7 @@ export async function defaultVoiceStateHandler(
     } catch {
       /* noop */
     }
-    return void player.events.emit(GuildQueueEvent.disconnect, queue);
+    return void player.events.emit(GuildQueueEvent.Disconnect, queue);
   }
 
   if (queue.options.pauseOnEmpty) {
@@ -61,7 +61,7 @@ export async function defaultVoiceStateHandler(
       if (!Util.isVoiceEmpty(queue.channel!)) return;
       if (!player.nodes.has(queue.guild.id)) return;
       if (queue.options.leaveOnEmpty) queue.delete();
-      player.events.emit(GuildQueueEvent.emptyChannel, queue);
+      player.events.emit(GuildQueueEvent.EmptyChannel, queue);
     }, queue.options.leaveOnEmptyCooldown || 0).unref();
     queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
   }
@@ -72,7 +72,7 @@ export async function defaultVoiceStateHandler(
     if (!channelEmpty && emptyTimeout) {
       clearTimeout(emptyTimeout);
       queue.timeouts.delete(`empty_${oldState.guild.id}`);
-      player.events.emit(GuildQueueEvent.channelPopulate, queue);
+      player.events.emit(GuildQueueEvent.ChannelPopulate, queue);
     }
   }
 
@@ -84,13 +84,13 @@ export async function defaultVoiceStateHandler(
       if (!channelEmpty && emptyTimeout) {
         clearTimeout(emptyTimeout);
         queue.timeouts.delete(`empty_${oldState.guild.id}`);
-        player.events.emit(GuildQueueEvent.channelPopulate, queue);
+        player.events.emit(GuildQueueEvent.ChannelPopulate, queue);
       } else {
         const timeout = setTimeout(() => {
           if (queue.connection && !Util.isVoiceEmpty(queue.channel!)) return;
           if (!player.nodes.has(queue.guild.id)) return;
           if (queue.options.leaveOnEmpty) queue.delete();
-          player.events.emit(GuildQueueEvent.emptyChannel, queue);
+          player.events.emit(GuildQueueEvent.EmptyChannel, queue);
         }, queue.options.leaveOnEmptyCooldown || 0).unref();
         queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
       }
@@ -103,7 +103,7 @@ export async function defaultVoiceStateHandler(
           if (!Util.isVoiceEmpty(queue.channel!)) return;
           if (!player.nodes.has(queue.guild.id)) return;
           if (queue.options.leaveOnEmpty) queue.delete();
-          player.events.emit(GuildQueueEvent.emptyChannel, queue);
+          player.events.emit(GuildQueueEvent.EmptyChannel, queue);
         }, queue.options.leaveOnEmptyCooldown || 0).unref();
         queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
       } else {
@@ -112,7 +112,7 @@ export async function defaultVoiceStateHandler(
         if (!channelEmpty && emptyTimeout) {
           clearTimeout(emptyTimeout);
           queue.timeouts.delete(`empty_${oldState.guild.id}`);
-          player.events.emit(GuildQueueEvent.channelPopulate, queue);
+          player.events.emit(GuildQueueEvent.ChannelPopulate, queue);
         }
       }
     }
