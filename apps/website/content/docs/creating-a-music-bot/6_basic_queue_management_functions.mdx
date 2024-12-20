@@ -29,11 +29,11 @@ if (!queue.currentTrack) {
 ## Pause, skip and shuffle
 
 <Tabs items={['Pause', 'Skip', 'Shuffle', 'Loop']}>
-<Tab value="pause.js">
+<Tab value="Pause">
 
 This code will be used to pause or resume the queue depending on its previous state.
 
-```js title="Pause"
+```js title="pause.js"
 import { useQueue, useTimeline } from 'discord-player';
 
 // Do the queue verification here...
@@ -68,11 +68,11 @@ interaction.reply('The current track has been skipped.');
 if (!queue.tracks[0]) interaction.reply('There is no tracks left in the queue.');
 ```
 </Tab>
-<Tab value="shuffle.js">
+<Tab value="Shuffle">
 
 This code will be used to shuffle the queue.
 
-```js title="Shuffle"
+```js title="shuffle.js"
 import { useQueue } from 'discord-player';
 
 const queue = useQueue();
@@ -87,11 +87,11 @@ interaction.reply(`Shuffled ${queue.tracks.size} tracks.`);
 ```
 
 </Tab>
-<Tab value="loop.js">
+<Tab value="Loop">
 
 This code will be used to loop the queue.
 
-```js title="Loop"
+```js title="loop.js"
 import { useQueue, QueueRepeatMode } from 'discord-player';
 // The loop modes are off, queue, track and autoplay, and are available in the QueueRepeatMode enum
 
