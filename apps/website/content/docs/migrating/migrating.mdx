@@ -3,4 +3,89 @@ title: Migrating to v7
 description: Learn how to migrate your existing v6 code to v7
 ---
 
-## TODO
+Discord Player v7 is a major release with some breaking changes. This guide will help you migrate your existing v6 code to v7.
+
+## Key Changes
+
+### `VoiceReceiverNode` Removed
+
+In v7, we have removed `VoiceReceiverNode` from the framework. This means that any codebase that uses `VoiceReceiverNode` api will need to be updated.
+We no longer support this feature at the core level. If you want to use voice receiving functionality, please follow [@discordjs/voice](https://github.com/discordjs/voice-examples/tree/main/recorder) example. This was done to make the library more lightweight and focused on the core features.
+
+### Mediaplex is now preinstalled
+
+In v7, [mediaplex](https://npm.im/mediaplex) comes preinstalled with the library. This means you don't need to install opus libraries such as `@discordjs/opus` or `opusscript` separately. Mediaplex is maintained by the discord-player team and is a drop-in replacement for `@discordjs/opus`.
+
+### `YoutubeExtractor` Removed
+
+In v7, we have removed `YoutubeExtractor` from the framework. This means that any codebase that uses `YoutubeExtractor` api will need to be updated.
+YouTube playback is officially discontinued due to the frequent breakage of YouTube extraction libraries. Discord Player still comes with query detection utility for YouTube (i.e. detecting if the given query is a youtube link or not) but it does not support playback or metadata extraction.
+
+## `lyricsExtractor` Removed
+
+In v7, we have removed `lyricsExtractor` from the framework. This means that any codebase that uses `lyricsExtractor` api will need to be updated. This was done in favor of the new lyrics api that is more flexible and even supports synced lyrics. See [Getting Lyrics](/docs/examples/getting_lyrics) for more information.
+
+### `player.extractors.loadDefault` removed
+
+In v7, we have removed `player.extractors.loadDefault` from the framework. This means that any codebase that uses `player.extractors.loadDefault` api will need to be updated. This was done to make loading extractors more explicit and to avoid any confusion. The new alternative method to `player.extractors.loadDefault` is
+
+```js
+import { DefaultExtractors } from '@discord-player/extractor';
+
+await player.extractors.loadMulti(DefaultExtractors);
+```
+
+### IP Rotator Removed
+
+In v7, we have removed the IP rotator from the framework. This means that any codebase that uses the IP rotator will need to be updated. This was done to make the library more lightweight and focused on the core features. The extractors may implement their own IP rotator if needed.
+
+### tweetnacl support removed
+
+In v7, `tweetnacl` as encryption library is not supported. This was done due to the voice encryption requirement imposed by Discord.
+
+### `Player` is no longer a singleton
+
+In v7, `Player` is no longer a singleton. This means that you can create multiple instances of `Player` and manage them separately. Hooks should still behave as usual, but creating a new instance will override the hooks binding and hooks will now point to latest instance. If you want to use hooks with multiple instances independently, you have to utilize the hooks context api.
+
+Assuming you have a command handler that looks something like this:
+
+```js title="command-handler.js"
+await command.execute(client, interaction);
+```
+
+You will need to wrap `command.execute` in a player context provider like this:
+
+```js title="command-handler.js"
+const data = {
+  guild: interaction.guild,
+};
+
+await player.context.provide(data, () => command.execute(client, interaction));
+```
+
+<Callout>In order to access hooks via context api, you must not provide arguments to the hooks.</Callout>
+
+You can now use hooks in your command like this:
+
+#### Before
+
+```js title="command.js"
+const queue = useQueue(interaction.guild);
+```
+
+#### After
+
+```js title="command.js"
+const queue = useQueue();
+```
+
+Discord Player will automatically resolve the guild from the context.
+
+<Callout>
+  The hooks will not work outside the context scope. If you want to use hooks outside the context scope, you have to
+  provide the arguments manually.
+</Callout>
+
+Passing arguments to hooks inside a context will ignore the context and use the provided arguments instead. This may cause unexpected issues when using multiple instances of `Player`.
+
+See [Using Hooks](/docs/hooks/using_hooks) for more information.
