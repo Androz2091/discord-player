@@ -5,7 +5,12 @@ import { ChannelType, GatewayDispatchEvents } from 'discord-api-types/v10';
 import { Util } from '../utils/Util';
 
 import type { DiscordGatewayAdapterCreator } from 'discord-voip';
-import type { Client, GatewayVoiceServerUpdateDispatchData, GatewayVoiceStateUpdateDispatchData } from 'discord.js';
+import {
+  Client,
+  GatewayVoiceServerUpdateDispatchData,
+  GatewayVoiceStateUpdateDispatchData,
+  VoiceState,
+} from 'discord.js';
 import type Eris from 'eris';
 
 type ErisUserResolvable = Eris.User | string | Eris.Member;
@@ -67,6 +72,8 @@ export function createErisCompat(client: Eris.Client): Client {
           return erisGuildsProxy(target, eris);
         case 'channels':
           return erisChannelsProxy(target, eris);
+        case '__dp_voiceStateUpdate_proxy':
+          return (handler: (a, b) => void) => erisVoiceStateUpdateProxy(target, erisProxy, handler);
         case 'incrementMaxListeners':
           return () => {
             // @ts-expect-error patching
@@ -90,6 +97,58 @@ export function createErisCompat(client: Eris.Client): Client {
   Reflect.set(erisProxy, DiscordPlayerClientSymbol, 'Eris');
 
   return erisProxy as unknown as Client;
+}
+
+function erisVoiceStateUpdateProxy(client: Eris.Client, proxy: Eris.Client, handler: (a, b) => void) {
+  client.on('voiceStateUpdate', (member, oldState) => {
+    try {
+      const proxiedOldState = {
+        channelId: oldState.channelID,
+        serverMute: oldState.mute,
+        suppress: oldState.suppress,
+        guild: {
+          id: oldState.guild.id,
+        },
+        member: {
+          id: oldState.user.id,
+        },
+      } as VoiceState;
+
+      const me = member.guild.members.get(client.user.id);
+      const resolvedChannel = member.guild.channels.get(member.voiceState.channelID);
+
+      const proxiedNewState = {
+        channelId: member.voiceState.channelID,
+        serverMute: member.voiceState.mute,
+        suppress: member.voiceState.suppress,
+        channel: erisResolvedChannelProxy(resolvedChannel, client),
+        member: {
+          id: member.id,
+        },
+        guild: {
+          id: member.guild.id,
+          members: {
+            me: {
+              id: me?.id,
+              voice: {
+                async setRequestToSpeak(value: boolean) {
+                  void value;
+                  return me?.voiceState;
+                  // if (me) {
+                  //   return me.voice.setRequestToSpeak(value);
+                  // }
+                },
+              },
+            },
+          },
+        },
+      } as VoiceState;
+
+      return handler(proxiedNewState, proxiedOldState);
+    } catch {
+      /* noop */
+    }
+  });
 }
 
 function erisVoiceEventsHandler(client: Eris.Client) {

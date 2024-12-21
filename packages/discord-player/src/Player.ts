@@ -135,7 +135,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     const isCompatMode = isClientProxy(client);
 
     /**
-     * The discord.js client
+     * The discord client
      * @type {Client}
      */
     this.client = client;
@@ -180,6 +180,16 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
       // @ts-ignore private method
       this.client.incrementMaxListeners();
       this.client.on(Events.VoiceStateUpdate, this.#voiceStateUpdateListener);
+    } else {
+      try {
+        // @ts-ignore private method
+        this.client.__dp_voiceStateUpdate_proxy(this.#voiceStateUpdateListener);
+      } catch (e) {
+        Util.warn(
+          'Failed to attach voice state update proxy, voice state handler will not work properly',
+          'CompatModeError',
+        );
+      }
     }
 
     if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
