@@ -1,0 +1,133 @@
+---
+title: Basic queue functions
+description: Learn how to use basic queue functions like pause, shuffle, skip and loop.
+---
+
+In this guide we will learn how to use basic queue functions.
+The functions we will be looking at are: pause, shuffle, skip and loop.
+
+For any of these functions, you will first need to create a slash command as explained in a previous page.
+Then, you will have to get the queue like explained before, but usually goes like this:
+
+```js title="Getting the queue"
+import { useQueue } from 'discord-player';
+
+//If you're using context
+const queue = useQueue();
+// Or
+// Directly with the guild
+const queue = useQueue(interaction.guild);
+
+if (!queue) {
+  return interaction.reply('This server does not have an active player session.');
+}
+
+if (!queue.currentTrack) {
+  return interaction.reply('There is no track playing.');
+}
+```
+## Pause, skip and shuffle
+
+<Tabs items={['Pause', 'Skip', 'Shuffle', 'Loop']}>
+<Tab value="Pause">
+
+This code will be used to pause or resume the queue depending on its previous state.
+
+```js title="pause.js"
+import { useQueue, useTimeline } from 'discord-player';
+
+// Do the queue verification here...
+
+// Get the queue's timeline
+const timeline = useTimeline();
+
+// Invert the pause state
+let wasPaused = timeline.paused;
+wasPaused ? timeline.resume() : timeline.pause();
+
+// If the timeline was previously paused, the queue is now back to playing
+interaction.reply(`The queue is now ${wasPaused ? 'playing' : 'paused'}.`);
+```
+</Tab>
+<Tab value="Skip">
+
+This code will be used to skip the current track.
+
+```js title="skip.js"
+import { useQueue } from 'discord-player';
+
+const queue = useQueue();
+
+// Do the queue verification here...
+
+// Skip the current track
+queue.node.skip();
+
+interaction.reply('The current track has been skipped.');
+// If there isn't a next track, send a message saying so
+if (!queue.tracks[0]) interaction.reply('There is no tracks left in the queue.');
+```
+</Tab>
+<Tab value="Shuffle">
+
+This code will be used to shuffle the queue.
+
+```js title="shuffle.js"
+import { useQueue } from 'discord-player';
+
+const queue = useQueue();
+
+// Do the queue verification here...
+// Also make sure the queue has enough tracks to be shuffled
+if (queue.tracks.size < 2) return interaction.reply('There is no tracks to shuffle.');
+
+queue.tracks.shuffle();
+
+interaction.reply(`Shuffled ${queue.tracks.size} tracks.`);
+```
+
+</Tab>
+<Tab value="Loop">
+
+This code will be used to loop the queue.
+
+```js title="loop.js"
+import { useQueue, QueueRepeatMode } from 'discord-player';
+// The loop modes are off, queue, track and autoplay, and are available in the QueueRepeatMode enum
+
+// Assuming this is in a slash command
+const loopMode = interaction.options.getString('loop', true);
+
+const queue = useQueue();
+
+// Do the queue verification here...
+
+swicth(loopMode) {
+    case "off":
+        queue.setRepeatMode(QueueRepeatMode.OFF);
+        break;
+    case "queue":
+        queue.setRepeatMode(QueueRepeatMode.QUEUE);
+        break;
+    case "track":
+        queue.setRepeatMode(QueueRepeatMode.TRACK);
+        break;
+    case "autoplay":
+        queue.setRepeatMode(QueueRepeatMode.AUTOPLAY);
+        break;
+    default:
+        interaction.reply('Invalid loop mode.');
+        break;
+}
+
+// If the queue is nopt looping anymore, send a message saying so, else, send a messaege specifying the new loop mode
+if (loopMode == QueueRepeatMode.OFF) interaction.reply('The loop mode has been disabled.');
+else interaction.reply(`The queue is now looping in ${loopMode} mode.`);
+```
+
+</Tab>
+</Tabs>
+
+
+
+By following this guide, you will be able to create multiple core functions for your music bot.
