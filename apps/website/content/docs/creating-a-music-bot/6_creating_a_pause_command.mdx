@@ -1,0 +1,86 @@
+---
+title: Creating a Pause Command
+description: Learn how to create a pause command for your music bot
+---
+
+In this guide, we will learn how to create a pause command in your Discord bot using Discord Player. The pause command will pause the currently playing song in the voice channel. If the song is already paused, it will resume playing.
+
+## Design Planning
+
+Before we dive into the code, let's plan the design of our pause command:
+
+1. **Command Definition**: We will define a new slash command named `pause` using `SlashCommandBuilder`.
+2. **Timeline Retrieval**: We will use the `useTimeline` hook to get the current timeline.
+3. **Pause State Handling**: We will invert the pause state of the timeline to pause or resume the queue.
+4. **Response**: We will send a message indicating the current state of the queue.
+
+<Tabs items={['With Player Context', 'Without Player Context']}>
+
+<Tab value='With Player Context'>
+
+```js title="pause.js"
+import { SlashCommandBuilder } from 'discord.js';
+import { useQueue, useTimeline } from 'discord-player';
+
+export const data = new SlashCommandBuilder()
+  .setName('pause') // Command name
+  .setDescription('Pause the currently playing song'); // Command description
+
+export async function execute(interaction) {
+  // Get the queue's timeline
+  const timeline = useTimeline();
+
+  if (!timeline) {
+    return interaction.reply('This server does not have an active player session.');
+  }
+
+  // Invert the pause state
+  const wasPaused = timeline.paused;
+
+  wasPaused ? timeline.resume() : timeline.pause();
+
+  // If the timeline was previously paused, the queue is now back to playing
+  return interaction.reply(`The player is now ${wasPaused ? 'playing' : 'paused'}.`);
+}
+```
+
+</Tab>
+
+<Tab value='Without Player Context'>
+
+```js title="pause.js"
+import { SlashCommandBuilder } from 'discord.js';
+import { useQueue, useTimeline } from 'discord-player';
+
+export const data = new SlashCommandBuilder()
+  .setName('pause') // Command name
+  .setDescription('Pause the currently playing song'); // Command description
+
+export async function execute(interaction) {
+  // Get the queue's timeline
+  const timeline = useTimeline(interaction.guild);
+
+  if (!timeline) {
+    return interaction.reply('This server does not have an active player session.');
+  }
+
+  // Invert the pause state
+  const wasPaused = timeline.paused;
+  wasPaused ? timeline.resume() : timeline.pause();
+
+  // If the timeline was previously paused, the queue is now back to playing
+  return interaction.reply(`The queue is now ${wasPaused ? 'playing' : 'paused'}.`);
+}
+```
+
+</Tab>
+
+</Tabs>
+
+In this example:
+
+- We define a new slash command named `pause` using `SlashCommandBuilder`.
+- We use the `useQueue` and `useTimeline` hooks to get the current queue and timeline.
+- If there is no active player session, we reply with an appropriate message.
+- We invert the pause state of the timeline to pause or resume the queue.
+- We reply with a message indicating the current state of the queue.

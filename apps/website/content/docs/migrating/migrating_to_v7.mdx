@@ -1,6 +1,6 @@
 ---
 title: Migrating to v7
-description: Learn how to migrate your existing v6 code to v7
+description: Learn how to migrate your existing discord-player v6 code to v7
 ---
 
 Discord Player v7 is a major release with some breaking changes. This guide will help you migrate your existing v6 code to v7.
@@ -42,6 +42,10 @@ In v7, we have removed the IP rotator from the framework. This means that any co
 ### tweetnacl support removed
 
 In v7, `tweetnacl` as encryption library is not supported. This was done due to the voice encryption requirement imposed by Discord.
+
+### `GuildQueueEvent` no longer provides `camelCase` enums
+
+In v7, `GuildQueueEvent` no longer provides `camelCase` enums. This means that any codebase that uses `GuildQueueEvent` enums will need to be updated. The enums are now provided in `PascalCase` format. For example, `GuildQueueEvent.playerStart` is now `GuildQueueEvent.PlayerStart`.
 
 ### `Player` is no longer a singleton
 

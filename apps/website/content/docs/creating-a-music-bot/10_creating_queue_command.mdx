@@ -1,0 +1,101 @@
+---
+title: Creating a Queue Command
+description: Learn how to create a queue command for your music bot
+---
+
+In this guide, we will learn how to create a queue command in your Discord bot using Discord Player. The queue command will display the current queue of tracks in the voice channel.
+
+<Tabs items={['With Player Context', 'Without Player Context']}>
+<Tab value='With Player Context'>
+
+```js title="queue.js"
+import { SlashCommandBuilder } from 'discord.js';
+import { useQueue } from 'discord-player';
+
+export const data = new SlashCommandBuilder()
+  .setName('queue') // Command name
+  .setDescription('Display the current queue'); // Command description
+
+export async function execute(interaction) {
+  // Get the current queue
+  const queue = useQueue();
+
+  if (!queue) {
+    return interaction.reply('This server does not have an active player session.');
+  }
+
+  // Get the current track
+  const currentTrack = queue.current;
+
+  // Get the upcoming tracks
+  const upcomingTracks = queue.tracks.slice(0, 5);
+
+  // Create a message with the current track and upcoming tracks
+  const message = [
+    `**Now Playing:** ${currentTrack.title} - ${currentTrack.author}`,
+    '',
+    '**Upcoming Tracks:**',
+    ...upcomingTracks.map((track, index) => `${index + 1}. ${track.title} - ${track.author}`),
+  ].join('\n');
+
+  // Send the message
+  return interaction.reply(message);
+}
+```
+
+</Tab>
+
+<Tab value='Without Player Context'>
+
+```js title="queue.js"
+import { SlashCommandBuilder } from 'discord.js';
+import { useQueue } from 'discord-player';
+
+export const data = new SlashCommandBuilder()
+  .setName('queue') // Command name
+  .setDescription('Display the current queue'); // Command description
+
+export async function execute(interaction) {
+  // Get the current queue
+  const queue = useQueue(interaction.guild);
+
+  if (!queue) {
+    return interaction.reply('This server does not have an active player session.');
+  }
+
+  // Get the current track
+  const currentTrack = queue.current;
+
+  // Get the upcoming tracks
+  const upcomingTracks = queue.tracks.slice(0, 5);
+
+  // Create a message with the current track and upcoming tracks
+  const message = [
+    `**Now Playing:** ${currentTrack.title} - ${currentTrack.author}`,
+    '',
+    '**Upcoming Tracks:**',
+    ...upcomingTracks.map((track, index) => `${index + 1}. ${track.title} - ${track.author}`),
+  ].join('\n');
+
+  // Send the message
+  return interaction.reply(message);
+}
+```
+
+</Tab>
+
+</Tabs>
+
+<Callout type="warning">
+  In the example above, we are only displaying the current track and the next 5 upcoming tracks to keep things minimal
+  and easy to understand. You can modify the number of upcoming tracks to display by changing the `slice` method
+  argument. You may also handle pagination if you have a large number of tracks in the queue.
+</Callout>
+
+In this example:
+
+- We define a new slash command named `queue` using `SlashCommandBuilder`.
+- We use the `useQueue` hook to get the current queue.
+- If there is no active player session, we reply with an appropriate message.
+- We get the current track and upcoming tracks from the queue.
+- We create a message with the current track and upcoming tracks and send it as a reply.

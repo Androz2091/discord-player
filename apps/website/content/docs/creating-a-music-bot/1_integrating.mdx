@@ -7,7 +7,7 @@ Discord Player is a powerful and easy-to-use music framework for Discord.js. It 
 
 ## Installation
 
-First, you need to install the Discord Player and its dependencies. You can do this by running the following command:
+To create a music bot using Discord Player, you need to install discord-player and its dependencies. You can do this by running the following command:
 
 ```package-install
 npm install discord-player @discord-player/extractor
@@ -21,7 +21,7 @@ npm install discord-player @discord-player/extractor
 
 ## Initialization
 
-To use Discord Player, you need to initialize it in your bot. Here is an example of how you can initialize Discord Player:
+Discord Player works with both discord.js and Eris. You can initialize Discord Player based on the library you are using.
 
 <Tabs items={['discord.js', 'eris']}>
 <Tab value='discord.js'>
@@ -53,6 +53,11 @@ const player = new Player(createErisCompat(client));
 </Tab>
 
 </Tabs>
+
+<Callout type="warn">
+  We don't recommend assigning `player` to `client` using `client.player = player` here. Discord Player provides
+  [hooks](/docs/hooks/using_hooks) (aka helper functions) to access discord-player objects at ease.
+</Callout>
 
 That's it! You have successfully initialized Discord Player in your bot.
 

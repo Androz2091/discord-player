@@ -5,6 +5,14 @@ description: Learn how to integrate extractors in Discord Player
 
 Discord Player on itself does not provide a way to resolve the query to a track. It requires you to provide extractors (or plugins) to resolve your input to a track. Extractors are the plugins that provide the ability to resolve the query to a track. Extractors may or may not support audio extraction though.
 
+## Design Planning
+
+Before we dive into the code, let's plan the design of our extractors integration:
+
+1. **Extractor Installation**: We will install the `@discord-player/extractor` package.
+2. **Extractor Loading**: We will load the default extractors provided by the package.
+3. **Custom Extractors**: We will mention the possibility of using community-built extractors.
+
 ## Official Extractors
 
 Discord Player provides a set of default extractors that you can use. These extractors are provided by the `@discord-player/extractor` package. You can install it by running:

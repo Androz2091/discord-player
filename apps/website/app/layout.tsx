@@ -11,7 +11,25 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
-        <RootProvider>{children}</RootProvider>
+        <RootProvider
+          search={{
+            options: {
+              defaultTag: 'guide',
+              tags: [
+                {
+                  name: 'Guide',
+                  value: 'guide',
+                },
+                {
+                  name: 'API',
+                  value: 'api',
+                },
+              ],
+            },
+          }}
+        >
+          {children}
+        </RootProvider>
       </body>
     </html>
   );

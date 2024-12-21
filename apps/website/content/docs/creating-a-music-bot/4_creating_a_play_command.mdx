@@ -19,17 +19,16 @@ npm install --save @node-ffmpeg/node-ffmpeg-installer
 npm install --save ffmpeg-binaries
 ```
 
-## Creating a Play Command
+## Design Planning
 
-The play command allows users to play music in a voice channel. The play command must cover the following functionalities:
+Before we dive into the code, let's plan the design of our play command:
 
-1. Abort if the user is not in a voice channel.
-2. Abort if the bot does not have permission to join the voice channel.
-3. Abort if the bot does not have permission to speak in the voice channel.
-4. Abort if the bot is already playing in a voice channel different from the user's voice channel.
-5. Join the user's voice channel.
-6. Play the requested song if the queue is empty, otherwise add the song to the queue.
-7. Also handle playlists and other audio sources.
+1. **Command Definition**: We will define a new slash command named `play` using `SlashCommandBuilder`.
+2. **Option Handling**: The command will have a required option named `song` to specify the song to play.
+3. **Player Instance**: We will use the `useMainPlayer` hook to get the player instance.
+4. **Permission Checks**: We will check if the user is in a voice channel and if the bot has the necessary permissions.
+5. **Playing**: We will play the requested song in the user's voice channel.
+6. **Response**: We will send a confirmation message indicating the song has been added to the queue.
 
 ### Step 1: Define the Command
 

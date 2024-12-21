@@ -113,6 +113,11 @@ const player = new Player(client);
 await player.extractors.loadMulti(DefaultExtractors);
 ```
 
+<Callout type="warn">
+  We don't recommend assigning `player` to `client` using `client.player = player` here. Discord Player provides
+  [hooks](/docs/hooks/using_hooks) (aka helper functions) to access discord-player objects at ease.
+</Callout>
+
 ## Eris Setup
 
 Discord Player has limited support for Eris. You can use the following code to set up Discord Player with Eris:

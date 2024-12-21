@@ -5,6 +5,14 @@ description: Learn how to setup Discord Player context in your command handler
 
 Discord Player context allows your bot to manage queues and other player specific features more efficiently. **If you do not wish to use context, you may skip this guide.**
 
+## Design Planning
+
+Before we dive into the code, let's plan the design of our player context setup:
+
+1. **Command Handler**: We will modify the command handler to wrap `command.execute` in a player context provider.
+2. **Context Data**: We will provide the necessary context data (e.g., guild) to the player context provider.
+3. **Main Player Hook**: We will use the `useMainPlayer` hook to get the main player instance.
+
 ## Setting up Player Context
 
 To set up the player context, you need to provide the context data to the player context provider. Here is an example of how you can set up the player context:

@@ -1,0 +1,89 @@
+---
+title: Creating a Shuffle Command
+description: Learn how to create a shuffle command for your music bot
+---
+
+In this guide, we will learn how to create a shuffle command in your Discord bot using Discord Player. The shuffle command will shuffle the tracks in the queue.
+
+## Design Planning
+
+Before we dive into the code, let's plan the design of our shuffle command:
+
+1. **Command Definition**: We will define a new slash command named `shuffle` using `SlashCommandBuilder`.
+2. **Queue Retrieval**: We will use the `useQueue` hook to get the current queue.
+3. **Track Check**: We will check if there are enough tracks in the queue to shuffle.
+4. **Shuffling**: We will shuffle the tracks in the queue.
+5. **Response**: We will send a confirmation message indicating the number of tracks shuffled.
+
+<Tabs items={['With Player Context', 'Without Player Context']}>
+<Tab value='With Player Context'>
+
+```js title="shuffle.js"
+import { SlashCommandBuilder } from 'discord.js';
+import { useQueue } from 'discord-player';
+
+export const data = new SlashCommandBuilder()
+  .setName('shuffle') // Command name
+  .setDescription('Shuffle the tracks in the queue'); // Command description
+
+export async function execute(interaction) {
+  // Get the current queue
+  const queue = useQueue();
+
+  if (!queue) {
+    return interaction.reply('This server does not have an active player session.');
+  }
+
+  // Check if there are enough tracks in the queue
+  if (queue.tracks.size < 2) return interaction.reply('There are not enough tracks in the queue to shuffle.');
+
+  // Shuffle the tracks in the queue
+  queue.tracks.shuffle();
+
+  // Send a confirmation message
+  return interaction.reply(`Shuffled ${queue.tracks.size} tracks.`);
+}
+```
+
+</Tab>
+
+<Tab value='Without Player Context'>
+
+```js title="shuffle.js"
+import { SlashCommandBuilder } from 'discord.js';
+import { useQueue } from 'discord-player';
+
+export const data = new SlashCommandBuilder()
+  .setName('shuffle') // Command name
+  .setDescription('Shuffle the tracks in the queue'); // Command description
+
+export async function execute(interaction) {
+  // Get the current queue
+  const queue = useQueue(interaction.guild);
+
+  if (!queue) {
+    return interaction.reply('This server does not have an active player session.');
+  }
+
+  // Check if there are enough tracks in the queue
+  if (queue.tracks.size < 2) return interaction.reply('There are not enough tracks in the queue to shuffle.');
+
+  // Shuffle the tracks in the queue
+  queue.tracks.shuffle();
+
+  // Send a confirmation message
+  return interaction.reply(`Shuffled ${queue.tracks.size} tracks.`);
+}
+```
+
+</Tab>
+
+</Tabs>
+
+In this example:
+
+- We define a new slash command named `shuffle` using `SlashCommandBuilder`.
+- We use the `useQueue` hook to get the current queue.
+- If there is no active player session, we reply with an appropriate message.
+- We check if there are enough tracks in the queue to shuffle.
+- We shuffle the tracks in the queue and send a confirmation message.

@@ -5,6 +5,15 @@ description: Learn how to create a now playing command in your Discord bot
 
 In this guide, we will learn how to create a now playing command in your Discord bot using Discord Player. The now playing command will display the currently playing song in the voice channel. We will cover two approaches: using player context and without using player context.
 
+## Design Planning
+
+Before we dive into the code, let's plan the design of our now playing command:
+
+1. **Command Definition**: We will define a new slash command named `nowplaying` using `SlashCommandBuilder`.
+2. **Queue Retrieval**: We will use the `useQueue` hook to get the current queue.
+3. **Track Check**: We will check if there is a currently playing song.
+4. **Response**: We will send a message with the currently playing song information.
+
 <Tabs items={['With Player Context', 'Without Player Context']}>
 
 <Tab value='With Player Context'>
@@ -82,7 +91,7 @@ export async function execute(interaction) {
   }
 
   // Send the currently playing song information
-  return interaction.reply(`Now playing: ${currentSong.name}`);
+  return interaction.reply(`Now playing: ${currentSong.name}\n${queue.node.createProgressBar()}`);
 }
 ```
 

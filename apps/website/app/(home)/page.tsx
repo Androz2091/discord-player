@@ -3,10 +3,17 @@ import Link from 'next/link';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import DiscordInvite from '@/components/discord-invite';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Metadata } from 'next';
 
 const orbitron = Orbitron({
   subsets: ['latin'],
 });
+
+export const metadata: Metadata = {
+  title: 'Discord Player',
+  description:
+    'Discord Player is a robust framework for developing Discord Music bots using JavaScript and TypeScript. It is built on top of discord-voip library and offers a comprehensive set of customizable tools, making it one of the most feature enrich framework in town.',
+};
 
 export default function HomePage() {
   return (
