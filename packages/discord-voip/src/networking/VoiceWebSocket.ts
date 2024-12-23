@@ -10,8 +10,8 @@ import { unsafe } from '../common/types';
 
 export interface VoiceWebSocket extends EventEmitter {
   on(event: 'error', listener: (error: Error) => void): this;
-  on(event: 'open', listener: (event: WebSocket.Event) => void): this;
-  on(event: 'close', listener: (event: WebSocket.CloseEvent) => void): this;
+  on(event: 'open', listener: (event: Event) => void): this;
+  on(event: 'close', listener: (event: CloseEvent) => void): this;
   /**
    * Debug event for VoiceWebSocket.
    *
@@ -78,7 +78,8 @@ export class VoiceWebSocket extends EventEmitter {
     this.ws = new WebSocket(address);
     this.ws.onmessage = (err) => this.onMessage(err as unknown as MessageEvent);
     this.ws.onopen = (err) => this.emit('open', err);
-    this.ws.onerror = (err: Error | WebSocket.ErrorEvent) => this.emit('error', err instanceof Error ? err : err.error);
+    // @ts-ignore
+    this.ws.onerror = (err: Error | ErrorEvent) => this.emit('error', err instanceof Error ? err : err.error);
     this.ws.onclose = (err) => this.emit('close', err);
 
     this.lastHeartbeatAck = 0;

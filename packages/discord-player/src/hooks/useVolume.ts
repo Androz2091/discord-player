@@ -10,6 +10,7 @@ type VolumeDispatch = readonly [() => number, (volume: number | SetterFN) => boo
  * @param node Guild queue node resolvable
  */
 export function useVolume(): VolumeDispatch;
+export function useVolume(node: NodeResolvable): VolumeDispatch;
 export function useVolume(node?: NodeResolvable): VolumeDispatch {
   const { context, player } = useHooksContext('useVolume');
   const queue = player.queues.get(node ?? context.guild.id);

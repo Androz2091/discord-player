@@ -30,17 +30,34 @@ export function useHooksContext(hookName: string, mainOnly = false) {
   if (!player)
     throw Exceptions.ERR_ILLEGAL_HOOK_INVOCATION(
       'discord-player',
-      'Player context is not available, is it being called inside <Player>.context.provide()?',
+      `Player context is not available, ${
+        isFallback
+          ? 'did you forget to initialize the player with `new Player(client)`?'
+          : 'is it being called inside <Player>.context.provide()?'
+      }`,
     );
 
   if (mainOnly) return { player, context: {} as HooksCtx, isFallback };
 
-  const context = useContext(player.context);
-  if (!context)
-    throw Exceptions.ERR_ILLEGAL_HOOK_INVOCATION(
-      hookName,
-      `${hookName} must be called inside a player context created by <Player>.context.provide()`,
-    );
+  let context: HooksCtx | undefined;
+
+  if (!isFallback) {
+    context = useContext(player.context);
+    if (!context)
+      throw Exceptions.ERR_ILLEGAL_HOOK_INVOCATION(
+        hookName,
+        `${hookName} must be called inside a player context created by <Player>.context.provide()`,
+      );
+  } else {
+    context = {
+      get guild() {
+        throw Exceptions.ERR_ILLEGAL_HOOK_INVOCATION(
+          hookName,
+          `${hookName} must be called with an explicit guild argument when not inside a player context`,
+        );
+      },
+    } as unknown as HooksCtx;
+  }
 
   return { context, player, isFallback };
 }

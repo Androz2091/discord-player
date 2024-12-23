@@ -41,7 +41,7 @@
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
     "@evan/opus": "^1.0.2",
-    "tsup": "^7.2.0",
+    "tsup": "^8.3.5",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"
   },
