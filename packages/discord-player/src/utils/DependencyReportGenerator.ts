@@ -1,5 +1,6 @@
 import { resolve, dirname } from 'node:path';
 import { FFmpeg, FFmpegLib } from '@discord-player/ffmpeg';
+import { version } from '../version';
 
 export interface PackageJSON {
   name: string;
@@ -79,7 +80,7 @@ export const DependencyReportGenerator = {
   version(name: string, maxLookupDepth = 3): string | null {
     try {
       if (name === 'discord-player') {
-        return '[VI]{{inject}}[/VI]';
+        return version;
       }
 
       const pkg = DependencyReportGenerator.findPackageJSON(dirname(require.resolve(name)), name, maxLookupDepth);

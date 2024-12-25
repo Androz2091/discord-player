@@ -1,6 +1,6 @@
 import { defineConfig } from '../../tsup.config';
-import { esbuildPluginVersionInjector } from 'esbuild-plugin-version-injector';
+import { esbuildPluginUseMacro } from 'use-macro';
 
 export default defineConfig({
-  esbuildPlugins: [esbuildPluginVersionInjector()],
+  esbuildPlugins: [esbuildPluginUseMacro()],
 });

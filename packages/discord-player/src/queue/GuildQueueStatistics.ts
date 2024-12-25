@@ -47,7 +47,7 @@ export class GuildQueueStatistics<Meta = unknown> {
       memoryUsage: process.memoryUsage(),
       versions: {
         node: process.version,
-        player: '[VI]{{inject}}[/VI]',
+        player: this.queue.player.version,
       },
     } as GuildQueueStatisticsMetadata;
   }

@@ -44,6 +44,7 @@ import { LrcLib } from './lrclib/LrcLib';
 import { getCompatName, isClientProxy } from './compat/createErisCompat';
 import { DependencyReportGenerator } from './utils/DependencyReportGenerator';
 import { getGlobalRegistry } from './utils/__internal__';
+import { version as dpVersion } from './version';
 
 export interface PlayerNodeInitializationResult<T = unknown> {
   track: Track;
@@ -79,7 +80,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
   /**
    * The version of discord-player
    */
-  public static readonly version: string = '[VI]{{inject}}[/VI]';
+  public static readonly version: string = dpVersion;
   /**
    * The unique identifier of this player instance
    */
