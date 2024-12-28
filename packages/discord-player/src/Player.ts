@@ -19,7 +19,7 @@ import {
   ResourcePlayOptions,
   GuildQueueEvent,
 } from './queue';
-import { VoiceUtils } from './VoiceInterface/VoiceUtils';
+import { VoiceUtils } from './stream/VoiceUtils';
 import { QueryResolver, QueryType, ResolvedQuery, SearchQueryType } from './utils/QueryResolver';
 import { Util } from './utils/Util';
 import { version as dVoiceVersion } from 'discord-voip';

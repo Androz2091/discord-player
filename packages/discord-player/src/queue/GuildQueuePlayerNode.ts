@@ -8,7 +8,7 @@ import { setTimeout as waitFor } from 'timers/promises';
 import { AsyncQueue } from '../utils/AsyncQueue';
 import { InvalidArgTypeError, NoResultError, NoVoiceConnectionError, OutOfRangeError } from '../errors';
 import { TypeUtil } from '../utils/TypeUtil';
-import { CreateStreamOps } from '../VoiceInterface/StreamDispatcher';
+import { CreateStreamOps } from '../stream/StreamDispatcher';
 import { ExtractorStreamable } from '../extractors/BaseExtractor';
 import { OggDemuxer, OpusDecoder, WebmDemuxer } from '@discord-player/opus';
 
