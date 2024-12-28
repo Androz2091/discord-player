@@ -299,7 +299,7 @@ export class Track<T = unknown> {
       extractor: this.extractor?.identifier ?? null,
       metadata: this.metadata,
       $type: SerializedType.Track,
-      $encoder_version: '[VI]{{inject}}[/VI]',
+      $encoder_version: this.player.version,
     };
   }
 

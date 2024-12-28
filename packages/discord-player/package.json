@@ -1,6 +1,6 @@
 {
   "name": "discord-player",
-  "version": "7.0.0-dev.4",
+  "version": "7.0.0-dev.5",
   "description": "Complete framework to facilitate music commands using discord.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -68,7 +68,7 @@
     "discord.js": "^14.15.3",
     "eris": "^0.17.2",
     "opusscript": "^0.0.8",
-    "tsup": "^7.2.0",
+    "tsup": "^8.3.5",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"
   },

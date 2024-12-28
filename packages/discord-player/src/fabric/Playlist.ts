@@ -269,7 +269,7 @@ export class Playlist {
       id: this.id,
       url: this.url,
       $type: SerializedType.Playlist,
-      $encoder_version: '[VI]{{inject}}[/VI]',
+      $encoder_version: this.player.version,
     };
   }
 

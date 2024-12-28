@@ -10,6 +10,7 @@ export type MetadataDispatch<T> = readonly [() => T, (metadata: T | SetterFN<T, 
  * @param node Guild queue node resolvable
  */
 export function useMetadata<T = unknown>(): MetadataDispatch<T>;
+export function useMetadata<T = unknown>(node: NodeResolvable): MetadataDispatch<T>;
 export function useMetadata<T = unknown>(node?: NodeResolvable): MetadataDispatch<T> {
   const { context, player } = useHooksContext('useMetadata');
   const queue = player.queues.get<T>(node ?? context.guild.id);

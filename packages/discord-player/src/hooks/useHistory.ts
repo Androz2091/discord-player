@@ -6,6 +6,7 @@ import { useHooksContext } from './common';
  * @param node guild queue node resolvable
  */
 export function useHistory<Meta = unknown>(): GuildQueueHistory<Meta> | null;
+export function useHistory<Meta = unknown>(node: NodeResolvable): GuildQueueHistory<Meta> | null;
 export function useHistory<Meta = unknown>(node?: NodeResolvable): GuildQueueHistory<Meta> | null {
   const { context, player } = useHooksContext('useHistory');
 
