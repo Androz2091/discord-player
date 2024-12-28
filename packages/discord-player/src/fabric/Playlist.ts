@@ -1,13 +1,112 @@
 import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
-import { Track } from './Track';
-import { PlaylistInitData, PlaylistJSON, TrackJSON, TrackSource } from '../types/types';
+import { Track, TrackJSON, TrackSource } from './Track';
 import { Util } from '../utils/Util';
 import { GuildVoiceChannelResolvable } from 'discord.js';
 import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
 import { TypeUtil } from '../utils/TypeUtil';
-import { Exceptions } from '../errors';
+import { InvalidArgTypeError } from '../errors';
 
 export type SerializedPlaylist = ReturnType<Playlist['serialize']>;
+
+export interface PlaylistInitData {
+  /**
+   * The tracks of this playlist
+   */
+  tracks: Track[];
+  /**
+   * The playlist title
+   */
+  title: string;
+  /**
+   * The description
+   */
+  description: string;
+  /**
+   * The thumbnail
+   */
+  thumbnail: string;
+  /**
+   * The playlist type: `album` | `playlist`
+   */
+  type: 'album' | 'playlist';
+  /**
+   * The playlist source
+   */
+  source: TrackSource;
+  /**
+   * The playlist author
+   */
+  author: {
+    /**
+     * The author name
+     */
+    name: string;
+    /**
+     * The author url
+     */
+    url: string;
+  };
+  /**
+   * The playlist id
+   */
+  id: string;
+  /**
+   * The playlist url
+   */
+  url: string;
+  /**
+   * The raw playlist data
+   */
+  rawPlaylist?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
+export interface PlaylistJSON {
+  /**
+   * The playlist id
+   */
+  id: string;
+  /**
+   * The playlist url
+   */
+  url: string;
+  /**
+   * The playlist title
+   */
+  title: string;
+  /**
+   * The playlist description
+   */
+  description: string;
+  /**
+   * The thumbnail
+   */
+  thumbnail: string;
+  /**
+   * The playlist type: `album` | `playlist`
+   */
+  type: 'album' | 'playlist';
+  /**
+   * The track source
+   */
+  source: TrackSource;
+  /**
+   * The playlist author
+   */
+  author: {
+    /**
+     * The author name
+     */
+    name: string;
+    /**
+     * The author url
+     */
+    url: string;
+  };
+  /**
+   * The tracks data (if any)
+   */
+  tracks: TrackJSON[];
+}
 
 export class Playlist {
   public readonly player: Player;
@@ -181,7 +280,7 @@ export class Playlist {
    */
   public static fromSerialized(player: Player, data: SerializedPlaylist) {
     if (data.$type !== SerializedType.Playlist)
-      throw Exceptions.ERR_INVALID_ARG_TYPE('data', 'SerializedPlaylist', 'malformed data');
+      throw new InvalidArgTypeError('data', 'SerializedPlaylist', 'malformed data');
     return new Playlist(player, {
       ...data,
       tracks: data.tracks.map((m) => Track.fromSerialized(player, m)),

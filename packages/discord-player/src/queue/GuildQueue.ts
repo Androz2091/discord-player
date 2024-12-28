@@ -11,14 +11,20 @@ import { GuildQueueHistory } from './GuildQueueHistory';
 import { GuildQueuePlayerNode, StreamConfig } from './GuildQueuePlayerNode';
 import { GuildQueueAudioFilters } from './GuildQueueAudioFilters';
 import { Readable } from 'stream';
-import { FiltersName, QueueRepeatMode, SearchQueryType } from '../types/types';
 import { setTimeout } from 'timers';
 import { GuildQueueStatistics } from './GuildQueueStatistics';
 import { TypeUtil } from '../utils/TypeUtil';
 import { AsyncQueue } from '../utils/AsyncQueue';
-import { Exceptions } from '../errors';
+import {
+  InvalidArgTypeError,
+  NoVoiceChannelError,
+  NoVoiceConnectionError,
+  VoiceConnectionDestroyedError,
+} from '../errors';
 import { SyncedLyricsProvider } from './SyncedLyricsProvider';
 import { LrcGetResult, LrcSearchResult } from '../lrclib/LrcLib';
+import { FiltersName } from '../fabric';
+import { SearchQueryType } from '../utils/QueryResolver';
 
 export interface GuildNodeInit<Meta = unknown> {
   guild: Guild;
@@ -415,6 +421,34 @@ export interface GuildQueueEvents<Meta = any> {
   ) => unknown;
 }
 
+/**
+ * The queue repeat mode. This can be one of:
+ * - OFF
+ * - TRACK
+ * - QUEUE
+ * - AUTOPLAY
+ */
+export const QueueRepeatMode = {
+  /**
+   * Disable repeat mode.
+   */
+  OFF: 0,
+  /**
+   * Repeat the current track.
+   */
+  TRACK: 1,
+  /**
+   * Repeat the entire queue.
+   */
+  QUEUE: 2,
+  /**
+   * When last track ends, play similar tracks in the future if queue is empty.
+   */
+  AUTOPLAY: 3,
+} as const;
+
+export type QueueRepeatMode = (typeof QueueRepeatMode)[keyof typeof QueueRepeatMode];
+
 export class GuildQueue<Meta = unknown> {
   #transitioning = false;
   #deleted = false;
@@ -430,7 +464,7 @@ export class GuildQueue<Meta = unknown> {
     stream,
     type: StreamType.Raw,
   });
-  public repeatMode = QueueRepeatMode.OFF;
+  public repeatMode: QueueRepeatMode = QueueRepeatMode.OFF;
   public timeouts = new Collection<string, NodeJS.Timeout>();
   public stats = new GuildQueueStatistics<Meta>(this);
   public tasksQueue = new AsyncQueue();
@@ -468,11 +502,11 @@ export class GuildQueue<Meta = unknown> {
     }
 
     if (!TypeUtil.isNumber(options.maxSize)) {
-      throw Exceptions.ERR_INVALID_ARG_TYPE('[GuildNodeInit.maxSize]', 'number', typeof options.maxSize);
+      throw new InvalidArgTypeError('[GuildNodeInit.maxSize]', 'number', typeof options.maxSize);
     }
 
     if (!TypeUtil.isNumber(options.maxHistorySize)) {
-      throw Exceptions.ERR_INVALID_ARG_TYPE('[GuildNodeInit.maxHistorySize]', 'number', typeof options.maxHistorySize);
+      throw new InvalidArgTypeError('[GuildNodeInit.maxHistorySize]', 'number', typeof options.maxHistorySize);
     }
 
     if (options.maxSize < 1) options.maxSize = Infinity;
@@ -665,7 +699,7 @@ export class GuildQueue<Meta = unknown> {
    */
   public setMaxHistorySize(size: number) {
     if (!TypeUtil.isNumber(size)) {
-      throw Exceptions.ERR_INVALID_ARG_TYPE('size', 'number', typeof size);
+      throw new InvalidArgTypeError('size', 'number', typeof size);
     }
 
     if (size < 1) size = Infinity;
@@ -679,7 +713,7 @@ export class GuildQueue<Meta = unknown> {
    */
   public setMaxSize(size: number) {
     if (!TypeUtil.isNumber(size)) {
-      throw Exceptions.ERR_INVALID_ARG_TYPE('size', 'number', typeof size);
+      throw new InvalidArgTypeError('size', 'number', typeof size);
     }
 
     if (size < 1) size = Infinity;
@@ -797,13 +831,13 @@ export class GuildQueue<Meta = unknown> {
     options: Pick<VoiceConnectConfig, 'audioPlayer' | 'timeout'> = {},
   ) {
     if (connection.state.status === VoiceConnectionStatus.Destroyed) {
-      throw Exceptions.ERR_VOICE_CONNECTION_DESTROYED();
+      throw new VoiceConnectionDestroyedError();
     }
 
     const channel = this.player.client.channels.cache.get(connection.joinConfig.channelId!);
-    if (!channel) throw Exceptions.ERR_NO_VOICE_CHANNEL();
+    if (!channel) throw new NoVoiceChannelError();
     if (!channel.isVoiceBased())
-      throw Exceptions.ERR_INVALID_ARG_TYPE(
+      throw new InvalidArgTypeError(
         'channel',
         `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`,
         String(channel?.type),
@@ -832,7 +866,7 @@ export class GuildQueue<Meta = unknown> {
   public async connect(channelResolvable: GuildVoiceChannelResolvable, options: VoiceConnectConfig = {}) {
     const channel = this.player.client.channels.resolve(channelResolvable);
     if (!channel || !channel.isVoiceBased()) {
-      throw Exceptions.ERR_INVALID_ARG_TYPE(
+      throw new InvalidArgTypeError(
         'channel',
         `VoiceBasedChannel (type ${ChannelType.GuildVoice}/${ChannelType.GuildStageVoice})`,
         String(channel?.type),
@@ -975,7 +1009,7 @@ export class GuildQueue<Meta = unknown> {
    * @param options Player node initialization options
    */
   public async play(track: TrackLike, options?: PlayerNodeInitializerOptions<Meta>) {
-    if (!this.channel) throw Exceptions.ERR_NO_VOICE_CONNECTION();
+    if (!this.channel) throw new NoVoiceConnectionError();
 
     return this.player.play(this.channel, track, options);
   }

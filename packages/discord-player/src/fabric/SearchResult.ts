@@ -1,9 +1,9 @@
-import { User } from 'discord.js';
+import { User, UserResolvable } from 'discord.js';
 import { BaseExtractor } from '../extractors/BaseExtractor';
 import { Player } from '../Player';
-import { QueryExtractorSearch, QueryType, SearchQueryType } from '../types/types';
 import { Playlist } from './Playlist';
 import { Track } from './Track';
+import { QueryType, SearchQueryType } from '../utils/QueryResolver';
 
 export interface SearchResultData {
   query: string;
@@ -12,6 +12,60 @@ export interface SearchResultData {
   playlist?: Playlist | null;
   tracks?: Track[];
   requestedBy?: User | null;
+}
+
+export interface PlayOptions {
+  /**
+   * If this play was triggered for filters update
+   */
+  filtersUpdate?: boolean;
+  /**
+   * FFmpeg args passed to encoder
+   */
+  encoderArgs?: string[];
+  /**
+   * Time to seek to before playing
+   */
+  seek?: number;
+  /**
+   * If it should start playing the provided track immediately
+   */
+  immediate?: boolean;
+}
+
+export type QueryExtractorSearch = `ext:${string}`;
+
+export interface SearchOptions {
+  /**
+   * The user who requested this search
+   */
+  requestedBy?: UserResolvable;
+  /**
+   * The query search engine, can be extractor name to target specific one (custom)
+   */
+  searchEngine?: SearchQueryType | QueryExtractorSearch;
+  /**
+   * List of the extractors to block
+   */
+  blockExtractors?: string[];
+  /**
+   * If it should ignore query cache lookup
+   */
+  ignoreCache?: boolean;
+  /**
+   * Fallback search engine to use
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  requestOptions?: any;
+  /**
+   * Fallback search engine to use
+   */
+  fallbackSearchEngine?: (typeof QueryType)[keyof typeof QueryType];
+}
+
+export interface PlayerSearchResult {
+  playlist: Playlist | null;
+  tracks: Track[];
 }
 
 export class SearchResult {

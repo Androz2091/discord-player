@@ -65,12 +65,12 @@ export class AudioResource<Metadata = unknown> {
 
   /**
    * If the resource was created with inline volume transformation enabled, then this will be a
-   * prism-media VolumeTransformer. You can use this to alter the volume of the stream.
+   * `@discord-player/equalizer` VolumeTransformer. You can use this to alter the volume of the stream.
    */
   public readonly volume?: VolumeTransformer;
 
   /**
-   * If using an Opus encoder to create this audio resource, then this will be a prism-media opus.Encoder.
+   * If using an Opus encoder to create this audio resource, then this will be a`@discord-player/opus` opus.Encoder.
    * You can use this to control settings such as bitrate, FEC, PLP.
    */
   public readonly encoder?: OpusEncoder;

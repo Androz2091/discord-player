@@ -1,20 +1,13 @@
 import type { Duplex, Readable } from 'stream';
 import { FFmpeg } from '@discord-player/ffmpeg';
 
-// @ts-ignore
-import * as prism from 'prism-media';
-
 export interface FFmpegStreamOptions {
   fmt?: string;
   encoderArgs?: string[];
   seek?: number;
   skip?: boolean;
   cookies?: string;
-  useLegacyFFmpeg?: boolean;
 }
-
-const getFFmpegProvider = (legacy = false) =>
-  legacy ? (prism as typeof prism & { default: typeof prism }).default?.FFmpeg || prism.FFmpeg : FFmpeg;
 
 const resolveArgs = (config: Record<string, string | number | null | undefined>): string[] => {
   return Object.entries(config).reduce((acc, [key, value]) => {
@@ -71,9 +64,7 @@ export function createFFmpegStream(stream: Readable | Duplex | string, options?:
   if (!Number.isNaN(options.seek)) args.unshift('-ss', String(options.seek));
   if (Array.isArray(options.encoderArgs)) args.push(...options.encoderArgs);
 
-  const FFMPEG = getFFmpegProvider(!!options.useLegacyFFmpeg);
-
-  const transcoder: Duplex = new FFMPEG({ shell: false, args });
+  const transcoder: Duplex = new FFmpeg({ shell: false, args });
 
   transcoder.on('close', () => transcoder.destroy());
 

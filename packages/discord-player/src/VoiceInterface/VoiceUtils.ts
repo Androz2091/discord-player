@@ -11,7 +11,7 @@ import { StreamDispatcher } from './StreamDispatcher';
 import { Collection } from '@discord-player/utils';
 import { GuildQueue } from '../queue';
 import type { Player } from '../Player';
-import { Exceptions } from '../errors';
+import { NoGuildQueueError } from '../errors';
 
 class VoiceUtils {
   /**
@@ -43,7 +43,7 @@ class VoiceUtils {
       group?: string;
     },
   ): Promise<StreamDispatcher> {
-    if (!options?.queue) throw Exceptions.ERR_NO_GUILD_QUEUE();
+    if (!options?.queue) throw new NoGuildQueueError();
     const conn = await this.join(channel, options);
     const sub = new StreamDispatcher(conn, channel, options.queue, options.maxTime, options.audioPlayer);
     return sub;

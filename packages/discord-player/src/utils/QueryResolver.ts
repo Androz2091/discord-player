@@ -1,6 +1,5 @@
-import { QueryType } from '../types/types';
 import { TypeUtil } from './TypeUtil';
-import { Exceptions } from '../errors';
+import { InfoRequiredError, InvalidArgTypeError } from '../errors';
 import { fetch } from 'undici';
 
 // #region scary things below *sigh*
@@ -41,6 +40,64 @@ const redirectDomains = new Set([
     /^https:\/\/on\.soundcloud\.com\/[a-zA-Z1-9]{0,17}$/
 ]);
 
+/**
+ * The search query type
+ * This can be one of:
+ * - AUTO
+ * - YOUTUBE
+ * - YOUTUBE_PLAYLIST
+ * - SOUNDCLOUD_TRACK
+ * - SOUNDCLOUD_PLAYLIST
+ * - SOUNDCLOUD
+ * - SPOTIFY_SONG
+ * - SPOTIFY_ALBUM
+ * - SPOTIFY_PLAYLIST
+ * - SPOTIFY_SEARCH
+ * - FACEBOOK
+ * - VIMEO
+ * - ARBITRARY
+ * - REVERBNATION
+ * - YOUTUBE_SEARCH
+ * - YOUTUBE_VIDEO
+ * - SOUNDCLOUD_SEARCH
+ * - APPLE_MUSIC_SONG
+ * - APPLE_MUSIC_ALBUM
+ * - APPLE_MUSIC_PLAYLIST
+ * - APPLE_MUSIC_SEARCH
+ * - FILE
+ * - AUTO_SEARCH
+ * @typedef {string} QueryType
+ */
+export const QueryType = {
+  AUTO: 'auto',
+  YOUTUBE: 'youtube',
+  YOUTUBE_PLAYLIST: 'youtubePlaylist',
+  SOUNDCLOUD_TRACK: 'soundcloudTrack',
+  SOUNDCLOUD_PLAYLIST: 'soundcloudPlaylist',
+  SOUNDCLOUD: 'soundcloud',
+  SPOTIFY_SONG: 'spotifySong',
+  SPOTIFY_ALBUM: 'spotifyAlbum',
+  SPOTIFY_PLAYLIST: 'spotifyPlaylist',
+  SPOTIFY_SEARCH: 'spotifySearch',
+  FACEBOOK: 'facebook',
+  VIMEO: 'vimeo',
+  ARBITRARY: 'arbitrary',
+  REVERBNATION: 'reverbnation',
+  YOUTUBE_SEARCH: 'youtubeSearch',
+  YOUTUBE_VIDEO: 'youtubeVideo',
+  SOUNDCLOUD_SEARCH: 'soundcloudSearch',
+  APPLE_MUSIC_SONG: 'appleMusicSong',
+  APPLE_MUSIC_ALBUM: 'appleMusicAlbum',
+  APPLE_MUSIC_PLAYLIST: 'appleMusicPlaylist',
+  APPLE_MUSIC_SEARCH: 'appleMusicSearch',
+  FILE: 'file',
+  AUTO_SEARCH: 'autoSearch',
+} as const;
+
+export type QueryType = (typeof QueryType)[keyof typeof QueryType];
+
+export type SearchQueryType = keyof typeof QueryType | QueryType;
+
 export interface ResolvedQuery {
   type: (typeof QueryType)[keyof typeof QueryType];
   query: string;
@@ -73,7 +130,7 @@ class QueryResolver {
    * Pre-resolve redirect urls
    */
   static async preResolve(query: string, maxDepth = 5): Promise<string> {
-    if (!TypeUtil.isString(query)) throw Exceptions.ERR_INVALID_ARG_TYPE(query, 'string', typeof query);
+    if (!TypeUtil.isString(query)) throw new InvalidArgTypeError(query, 'string', typeof query);
 
     for (const domain of redirectDomains) {
       if (domain.test(query)) {
@@ -112,8 +169,8 @@ class QueryResolver {
     query: string,
     fallbackSearchEngine: (typeof QueryType)[keyof typeof QueryType] = QueryType.AUTO_SEARCH,
   ): ResolvedQuery {
-    if (!TypeUtil.isString(query)) throw Exceptions.ERR_INVALID_ARG_TYPE(query, 'string', typeof query);
-    if (!query.length) throw Exceptions.ERR_INFO_REQUIRED('query', String(query));
+    if (!TypeUtil.isString(query)) throw new InvalidArgTypeError(query, 'string', typeof query);
+    if (!query.length) throw new InfoRequiredError('query', String(query));
 
     const resolver = (type: typeof fallbackSearchEngine, query: string) => ({ type, query });
 

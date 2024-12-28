@@ -1,14 +1,14 @@
 import { User, escapeMarkdown, SnowflakeUtil, GuildVoiceChannelResolvable, APIUser } from 'discord.js';
 import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
-import { RawTrackData, SearchQueryType, TrackJSON } from '../types/types';
-import { Playlist } from './Playlist';
+import { Playlist, PlaylistJSON } from './Playlist';
 import { GuildQueue } from '../queue/GuildQueue';
 import { BaseExtractor } from '../extractors/BaseExtractor';
 import { Collection } from '@discord-player/utils';
 import { TypeUtil } from '../utils/TypeUtil';
 import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
-import { Exceptions } from '../errors';
+import { InvalidArgTypeError } from '../errors';
 import { Util } from '../utils/Util';
+import { SearchQueryType } from '../utils/QueryResolver';
 
 export type TrackResolvable = Track | string | number;
 
@@ -18,6 +18,126 @@ export type WithMetadata<T extends object, M> = T & {
 };
 
 export type SerializedTrack = ReturnType<Track['serialize']>;
+
+/**
+ * The track source:
+ * - soundcloud
+ * - youtube
+ * - spotify
+ * - apple_music
+ * - arbitrary
+ */
+export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'apple_music' | 'arbitrary';
+
+export interface RawTrackData {
+  /**
+   * The title
+   */
+  title: string;
+  /**
+   * The description
+   */
+  description: string;
+  /**
+   * The author
+   */
+  author: string;
+  /**
+   * The url
+   */
+  url: string;
+  /**
+   * The thumbnail
+   */
+  thumbnail: string;
+  /**
+   * The duration
+   */
+  duration: string;
+  /**
+   * The duration in ms
+   */
+  views: number;
+  /**
+   * The user who requested this track
+   */
+  requestedBy?: User | null;
+  /**
+   * The playlist
+   */
+  playlist?: Playlist;
+  /**
+   * The source
+   */
+  source?: TrackSource;
+  /**
+   * The engine
+   */
+  engine?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  /**
+   * If this track is live
+   */
+  live?: boolean;
+  /**
+   * The raw data
+   */
+  raw?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  /**
+   * The query type
+   */
+  queryType?: SearchQueryType;
+  /**
+   * The serialized title
+   */
+  cleanTitle?: string;
+}
+
+export interface TrackJSON {
+  /**
+   * The track id
+   */
+  id: string;
+  /**
+   * The track title
+   */
+  title: string;
+  /**
+   * The track description
+   */
+  description: string;
+  /**
+   * The track author
+   */
+  author: string;
+  /**
+   * The track url
+   */
+  url: string;
+  /**
+   * The track thumbnail
+   */
+  thumbnail: string;
+  /**
+   * The track duration
+   */
+  duration: string;
+  /**
+   * The track duration in ms
+   */
+  durationMS: number;
+  /**
+   * The track views
+   */
+  views: number;
+  /**
+   * The user id who requested this track
+   */
+  requestedBy: string;
+  /**
+   * The playlist info (if any)
+   */
+  playlist?: PlaylistJSON;
+}
 
 export class Track<T = unknown> {
   public title: string;
@@ -189,8 +309,7 @@ export class Track<T = unknown> {
    * @param data Serialized data
    */
   public static fromSerialized(player: Player, data: ReturnType<Track['serialize']>) {
-    if (data.$type !== SerializedType.Track)
-      throw Exceptions.ERR_INVALID_ARG_TYPE('data', 'SerializedTrack', 'malformed data');
+    if (data.$type !== SerializedType.Track) throw new InvalidArgTypeError('data', 'SerializedTrack', 'malformed data');
     const track = new Track(player, {
       ...data,
       requestedBy: data.requested_by

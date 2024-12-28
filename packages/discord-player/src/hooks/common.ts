@@ -1,6 +1,6 @@
 import { Guild } from 'discord.js';
 import { Player } from '../Player';
-import { Exceptions } from '../errors';
+import { IllegalHookInvocationError } from '../errors';
 import { createContext, useContext } from './context/async-context';
 import { getGlobalRegistry } from '../utils/__internal__';
 
@@ -28,7 +28,7 @@ export function useHooksContext(hookName: string, mainOnly = false) {
   }
 
   if (!player)
-    throw Exceptions.ERR_ILLEGAL_HOOK_INVOCATION(
+    throw new IllegalHookInvocationError(
       'discord-player',
       'Player context is not available, is it being called inside <Player>.context.provide()?',
     );
@@ -37,7 +37,7 @@ export function useHooksContext(hookName: string, mainOnly = false) {
 
   const context = useContext(player.context);
   if (!context)
-    throw Exceptions.ERR_ILLEGAL_HOOK_INVOCATION(
+    throw new IllegalHookInvocationError(
       hookName,
       `${hookName} must be called inside a player context created by <Player>.context.provide()`,
     );

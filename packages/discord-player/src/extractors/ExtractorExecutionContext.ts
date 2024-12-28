@@ -6,7 +6,7 @@ import { PlayerEventsEmitter } from '../utils/PlayerEventsEmitter';
 import { TypeUtil } from '../utils/TypeUtil';
 import { Track } from '../fabric';
 import { createContext } from '../hooks';
-import { Exceptions } from '../errors';
+import { BridgeFailedError } from '../errors';
 
 export interface ExtractorSession {
   id: string;
@@ -134,9 +134,6 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
   ): Promise<InstanceType<T> | null> {
     if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return null;
     const extractor = new _extractor(this, options);
-
-    // @ts-ignore
-    if (this.player.options.bridgeProvider) options.bridgeProvider ??= this.player.options.bridgeProvider;
 
     try {
       this.store.set(_extractor.identifier, extractor);
@@ -267,7 +264,7 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
     });
 
     if (!result?.result)
-      throw Exceptions.ERR_BRIDGE_FAILED(
+      throw new BridgeFailedError(
         this.getExecutionId(),
         result?.error?.stack || result?.error?.message || 'No extractors available to bridge',
       );

@@ -1,19 +1,49 @@
 import { AudioResource, StreamType } from 'discord-voip';
 import { Readable } from 'stream';
-import { PlayerProgressbarOptions, SearchQueryType } from '../types/types';
-import { QueryResolver } from '../utils/QueryResolver';
+import { QueryResolver, SearchQueryType } from '../utils/QueryResolver';
 import { Util, VALIDATE_QUEUE_CAP } from '../utils/Util';
 import { Track, TrackResolvable } from '../fabric/Track';
 import { GuildQueue, GuildQueueEvent, TrackSkipReason } from './GuildQueue';
 import { setTimeout as waitFor } from 'timers/promises';
 import { AsyncQueue } from '../utils/AsyncQueue';
-import { Exceptions } from '../errors';
+import { InvalidArgTypeError, NoResultError, NoVoiceConnectionError, OutOfRangeError } from '../errors';
 import { TypeUtil } from '../utils/TypeUtil';
 import { CreateStreamOps } from '../VoiceInterface/StreamDispatcher';
 import { ExtractorStreamable } from '../extractors/BaseExtractor';
 import { OggDemuxer, OpusDecoder, WebmDemuxer } from '@discord-player/opus';
 
 export const FFMPEG_SRATE_REGEX = /asetrate=\d+\*(\d(\.\d)?)/;
+
+export interface PlayerProgressbarOptions {
+  /**
+   * If it should render time codes
+   */
+  timecodes?: boolean;
+  /**
+   * If it should create progress bar for the whole queue
+   */
+  length?: number;
+  /**
+   * The bar length
+   */
+  leftChar?: string;
+  /**
+   * The elapsed time track
+   */
+  rightChar?: string;
+  /**
+   * The remaining time track
+   */
+  separator?: string;
+  /**
+   * The separation between timestamp and line
+   */
+  indicator?: string;
+  /**
+   * The indicator
+   */
+  queue?: boolean;
+}
 
 export interface ResourcePlayOptions {
   queue?: boolean;
@@ -212,7 +242,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
       separator = '\u2503',
     } = options || {};
     if (isNaN(length) || length < 0 || !Number.isFinite(length)) {
-      throw Exceptions.ERR_OUT_OF_RANGE('[PlayerProgressBarOptions.length]', String(length), '0', 'Finite Number');
+      throw new OutOfRangeError('[PlayerProgressBarOptions.length]', String(length), '0', 'Finite Number');
     }
     const index = Math.round((timestamp.current.value / timestamp.total.value) * length);
     if (index >= 1 && index <= length) {
@@ -245,8 +275,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     if (duration > this.totalDuration) {
       return this.skip({
         reason: TrackSkipReason.SEEK_OVER_THRESHOLD,
-        description: Exceptions.ERR_OUT_OF_RANGE('[duration]', String(duration), '0', String(this.totalDuration))
-          .message,
+        description: new OutOfRangeError('[duration]', String(duration), '0', String(this.totalDuration)).message,
       });
     }
     if (duration < 0) duration = 0;
@@ -395,8 +424,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
    * @param index The position to insert to, defaults to 0.
    */
   public insert(track: Track, index = 0) {
-    if (!(track instanceof Track))
-      throw Exceptions.ERR_INVALID_ARG_TYPE('track value', 'instance of Track', String(track));
+    if (!(track instanceof Track)) throw new InvalidArgTypeError('track value', 'instance of Track', String(track));
     VALIDATE_QUEUE_CAP(this.queue, track);
     this.queue.tracks.store.splice(index, 0, track);
     if (!this.queue.options.noEmitInsert) this.queue.emit(GuildQueueEvent.AudioTrackAdd, this.queue, track);
@@ -410,7 +438,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
   public move(from: TrackResolvable, to: number) {
     const removed = this.remove(from);
     if (!removed) {
-      throw Exceptions.ERR_NO_RESULT('invalid track to move');
+      throw new NoResultError('invalid track to move');
     }
     this.insert(removed, to);
   }
@@ -423,7 +451,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
   public copy(from: TrackResolvable, to: number) {
     const src = this.queue.tracks.at(this.getTrackPosition(from));
     if (!src) {
-      throw Exceptions.ERR_NO_RESULT('invalid track to copy');
+      throw new NoResultError('invalid track to copy');
     }
     this.insert(src, to);
   }
@@ -435,10 +463,10 @@ export class GuildQueuePlayerNode<Meta = unknown> {
    */
   public swap(first: TrackResolvable, second: TrackResolvable) {
     const src = this.getTrackPosition(first);
-    if (src < 0) throw Exceptions.ERR_NO_RESULT('invalid src track to swap');
+    if (src < 0) throw new NoResultError('invalid src track to swap');
 
     const dest = this.getTrackPosition(second);
-    if (dest < 0) throw Exceptions.ERR_NO_RESULT('invalid dest track to swap');
+    if (dest < 0) throw new NoResultError('invalid dest track to swap');
 
     const srcT = this.queue.tracks.store[src];
     const destT = this.queue.tracks.store[dest];
@@ -484,7 +512,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
    */
   public async play(res?: Track | null, options?: ResourcePlayOptions) {
     if (!this.queue.dispatcher?.voiceConnection) {
-      throw Exceptions.ERR_NO_VOICE_CONNECTION();
+      throw new NoVoiceConnectionError();
     }
 
     if (this.queue.hasDebugger)
@@ -508,7 +536,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
 
     const track = res || this.queue.tracks.dispatch();
     if (!track) {
-      const error = Exceptions.ERR_NO_RESULT('Play request received but track was not provided');
+      const error = new NoResultError('Play request received but track was not provided');
       this.queue.emit(GuildQueueEvent.Error, this.queue, error);
       return;
     }
@@ -722,7 +750,7 @@ export class GuildQueuePlayerNode<Meta = unknown> {
   #throw(track: Track, error?: Error | null): void {
     // prettier-ignore
     const streamDefinitelyFailedMyDearT_TPleaseTrustMeItsNotMyFault = (
-            Exceptions.ERR_NO_RESULT(`Could not extract stream for this track${error ? `\n\n${error.stack || error}` : ''}`)
+            new NoResultError(`Could not extract stream for this track${error ? `\n\n${error.stack || error}` : ''}`)
         );
 
     this.queue.emit(
@@ -848,7 +876,6 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         encoderArgs: this.queue.filters.ffmpeg.args,
         seek: seek / 1000,
         fmt: opus ? 'opus' : 's16le',
-        useLegacyFFmpeg: !!this.queue.player.options.useLegacyFFmpeg,
       })
       .on('error', (err) => {
         const m = `${err}`.toLowerCase();

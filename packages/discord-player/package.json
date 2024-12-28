@@ -34,15 +34,11 @@
     "discord",
     "volume",
     "queue",
-    "youtube",
     "discord.js",
     "musicbot",
     "discord-music-player",
     "discord-music",
     "music-player",
-    "youtube-dl",
-    "ytdl-core",
-    "ytdl",
     "lavalink",
     "api"
   ],
@@ -72,7 +68,6 @@
     "discord.js": "^14.15.3",
     "eris": "^0.17.2",
     "opusscript": "^0.0.8",
-    "prism-media": "^1.3.5",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"

@@ -18,7 +18,7 @@ import { Track } from '../fabric/Track';
 import { Util } from '../utils/Util';
 import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
 import { GuildQueue, GuildQueueEvent, PostProcessedResult } from '../queue';
-import { Exceptions } from '../errors';
+import { NoAudioResourceError } from '../errors';
 
 export interface CreateStreamOps {
   type?: StreamType;
@@ -386,7 +386,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
    */
   async playStream(resource: AudioResource<Track> = this.audioResource!) {
     if (!resource) {
-      throw Exceptions.ERR_NO_AUDIO_RESOURCE();
+      throw new NoAudioResourceError();
     }
     if (resource.ended) {
       return void this.emit('finish', resource);

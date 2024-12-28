@@ -1,9 +1,8 @@
 import { StageChannel, VoiceChannel } from 'discord.js';
-import { TimeData } from '../types/types';
 import { setTimeout } from 'node:timers/promises';
 import { GuildQueue } from '../queue';
-import { Playlist, Track } from '../fabric';
-import { Exceptions } from '../errors';
+import { Playlist, Track, TrackSource } from '../fabric';
+import { OutOfSpaceError } from '../errors';
 import { randomInt } from 'node:crypto';
 import {
   createFilter,
@@ -17,9 +16,27 @@ import {
   replaceSmartQuotes,
   removeCleanExplicit,
 } from '@web-scrobbler/metadata-filter';
-import { TrackSource } from '../types/types';
 
 export type RuntimeType = 'node' | 'deno' | 'bun' | 'unknown';
+
+export interface TimeData {
+  /**
+   * Time in days
+   */
+  days: number;
+  /**
+   * Time in hours
+   */
+  hours: number;
+  /**
+   * Time in minutes
+   */
+  minutes: number;
+  /**
+   * Time in seconds
+   */
+  seconds: number;
+}
 
 export interface Runtime {
   name: RuntimeType;
@@ -243,7 +260,7 @@ export const VALIDATE_QUEUE_CAP = (queue: GuildQueue, items: Playlist | Track | 
   const maxCap = queue.getCapacity();
 
   if (maxCap < tracks.length) {
-    throw Exceptions.ERR_OUT_OF_SPACE('tracks queue', maxCap, tracks.length);
+    throw new OutOfSpaceError('tracks queue', maxCap, tracks.length);
   }
 };
 

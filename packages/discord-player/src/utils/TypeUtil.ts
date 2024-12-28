@@ -1,3 +1,5 @@
+import { DiscordPlayerError, isDiscordPlayerError } from '../errors';
+
 export class TypeUtil {
   private constructor() {
     return TypeUtil;
@@ -30,5 +32,9 @@ export class TypeUtil {
 
   public static isError(t: unknown): t is Error {
     return t instanceof Error;
+  }
+
+  public static isDiscordPlayerError(t: unknown): t is DiscordPlayerError {
+    return isDiscordPlayerError(t);
   }
 }

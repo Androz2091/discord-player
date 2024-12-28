@@ -1,4 +1,4 @@
-import { Exceptions } from '../errors';
+import { InvalidArgTypeError } from '../errors';
 import type { Player } from '../Player';
 import { Util } from '../utils/Util';
 import { SequentialBucket } from '../utils/SequentialBucket';
@@ -155,7 +155,7 @@ export class LrcLib {
    */
   public search(params: LrcSearchParams) {
     if (!params.q && !params.trackName) {
-      throw Exceptions.ERR_INVALID_ARG_TYPE(
+      throw new InvalidArgTypeError(
         'one of q or trackName',
         'string',
         [String(params.q), String(params.trackName)].join(', '),
@@ -173,15 +173,7 @@ export class LrcLib {
    * @param options The request options
    */
   public async request<T>(path: string, options?: RequestInit): Promise<T> {
-    let timeout: NodeJS.Timeout | null = null;
-
     const dispatcher = () => {
-      const controller = new AbortController();
-
-      timeout = setTimeout(() => {
-        controller.abort();
-      }, this.timeout).unref();
-
       const { name, version } = Util.getRuntime();
 
       const runtimeVersion = name === 'unknown' ? version : `${name}/${version}`;
@@ -189,7 +181,7 @@ export class LrcLib {
       const init: RequestInit = {
         method: 'GET',
         redirect: 'follow',
-        signal: controller.signal,
+        signal: AbortSignal.timeout(this.timeout),
         ...options,
         headers: {
           'User-Agent': `Discord-Player/${this.player.version} ${runtimeVersion ?? ''}`.trimEnd(),
@@ -204,8 +196,6 @@ export class LrcLib {
     };
 
     const res = await this.bucket.enqueue(dispatcher);
-
-    if (timeout) clearTimeout(timeout);
 
     return res.json();
   }

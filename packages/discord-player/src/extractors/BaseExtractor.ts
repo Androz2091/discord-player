@@ -2,11 +2,12 @@ import { User } from 'discord.js';
 import { Readable } from 'stream';
 import { Playlist } from '../fabric/Playlist';
 import { Track } from '../fabric/Track';
-import { PlayerEvents, SearchQueryType } from '../types/types';
 import { ExtractorExecutionContext } from './ExtractorExecutionContext';
 import type { RequestOptions } from 'http';
-import { Exceptions } from '../errors';
+import { NotImplementedError } from '../errors';
 import type { GuildQueueHistory } from '../queue';
+import { SearchQueryType } from '../utils/QueryResolver';
+import { PlayerEvents } from '../Player';
 
 export type ExtractorStreamable =
   | Readable
@@ -93,7 +94,7 @@ export class BaseExtractor<T extends object = object> {
    */
   public async stream(info: Track): Promise<ExtractorStreamable> {
     void info;
-    throw Exceptions.ERR_NOT_IMPLEMENTED(`${this.constructor.name}.stream()`);
+    throw new NotImplementedError(`${this.constructor.name}.stream()`);
   }
 
   /**
@@ -102,7 +103,7 @@ export class BaseExtractor<T extends object = object> {
    */
   public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
     void context;
-    throw Exceptions.ERR_NOT_IMPLEMENTED(`${this.constructor.name}.handle()`);
+    throw new NotImplementedError(`${this.constructor.name}.handle()`);
   }
 
   /**
@@ -112,7 +113,7 @@ export class BaseExtractor<T extends object = object> {
   public async getRelatedTracks(track: Track, history: GuildQueueHistory): Promise<ExtractorInfo> {
     void track;
     void history;
-    throw Exceptions.ERR_NOT_IMPLEMENTED(`${this.constructor.name}.getRelatedTracks()`);
+    throw new NotImplementedError(`${this.constructor.name}.getRelatedTracks()`);
   }
 
   /**

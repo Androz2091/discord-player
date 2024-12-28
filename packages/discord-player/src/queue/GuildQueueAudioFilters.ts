@@ -1,10 +1,9 @@
 import { Readable } from 'stream';
-import { FiltersName, QueueFilters } from '../types/types';
-import { AudioFilters } from '../utils/AudioFilters';
+import { AudioFilters, FiltersName, QueueFilters } from '../utils/AudioFilters';
 import { GuildQueue, GuildQueueEvent } from './GuildQueue';
 import { BiquadFilters, Equalizer, EqualizerBand, PCMFilters } from '@discord-player/equalizer';
 import { FFmpegStreamOptions, createFFmpegStream } from '../utils/FFmpegStream';
-import { Exceptions } from '../errors';
+import { InvalidArgTypeError } from '../errors';
 
 type Filters = keyof typeof AudioFilters.filters;
 
@@ -103,7 +102,7 @@ export class FFmpegFilterer<Meta = unknown> {
    */
   public setInputArgs(args: string[]) {
     if (!args.every((arg) => typeof arg === 'string'))
-      throw Exceptions.ERR_INVALID_ARG_TYPE('args', 'Array<string>', 'invalid item(s)');
+      throw new InvalidArgTypeError('args', 'Array<string>', 'invalid item(s)');
     this.#inputArgs = args;
   }
 

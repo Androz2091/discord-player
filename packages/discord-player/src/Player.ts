@@ -9,7 +9,7 @@ import {
   version as djsVersion,
   Events,
 } from 'discord.js';
-import { Playlist, Track, SearchResult } from './fabric';
+import { Playlist, Track, SearchResult, SearchOptions, PlaylistInitData } from './fabric';
 import {
   GuildQueueEvents,
   VoiceConnectConfig,
@@ -20,23 +20,14 @@ import {
   GuildQueueEvent,
 } from './queue';
 import { VoiceUtils } from './VoiceInterface/VoiceUtils';
-import {
-  PlayerEvents,
-  QueryType,
-  SearchOptions,
-  PlayerInitOptions,
-  PlaylistInitData,
-  SearchQueryType,
-  PlayerEvent,
-} from './types/types';
-import { QueryResolver, ResolvedQuery } from './utils/QueryResolver';
+import { QueryResolver, QueryType, ResolvedQuery, SearchQueryType } from './utils/QueryResolver';
 import { Util } from './utils/Util';
 import { version as dVoiceVersion } from 'discord-voip';
 import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
 import { BaseExtractor } from './extractors/BaseExtractor';
-import { QueryCache } from './utils/QueryCache';
+import { QueryCache, QueryCacheProvider } from './utils/QueryCache';
 import { PlayerEventsEmitter } from './utils/PlayerEventsEmitter';
-import { Exceptions } from './errors';
+import { InvalidArgTypeError, NoResultError } from './errors';
 import { defaultVoiceStateHandler } from './DefaultVoiceStateHandler';
 import { Context, createContext } from './hooks';
 import { HooksCtx, SUPER_CONTEXT } from './hooks/common';
@@ -44,6 +35,25 @@ import { LrcLib } from './lrclib/LrcLib';
 import { getCompatName, isClientProxy } from './compat/createErisCompat';
 import { DependencyReportGenerator } from './utils/DependencyReportGenerator';
 import { getGlobalRegistry } from './utils/__internal__';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export interface PlayerEvents {
+  debug: (message: string) => any;
+  error: (error: Error) => any;
+  voiceStateUpdate: (queue: GuildQueue, oldState: VoiceState, newState: VoiceState) => any;
+}
+
+export const PlayerEvent = {
+  debug: 'debug',
+  Debug: 'debug',
+  error: 'error',
+  Error: 'error',
+  voiceStateUpdate: 'voiceStateUpdate',
+  VoiceStateUpdate: 'voiceStateUpdate',
+} as const;
+export type PlayerEvent = (typeof PlayerEvent)[keyof typeof PlayerEvent];
+
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export interface PlayerNodeInitializationResult<T = unknown> {
   track: Track;
@@ -68,6 +78,50 @@ export type VoiceStateHandler = (
   oldVoiceState: VoiceState,
   newVoiceState: VoiceState,
 ) => Awaited<void>;
+
+export interface PlayerInitOptions {
+  /**
+   * The voice connection timeout
+   */
+  connectionTimeout?: number;
+  /**
+   * Time in ms to re-monitor event loop lag
+   */
+  lagMonitor?: number;
+  /**
+   * Prevent voice state handler from being overridden
+   */
+  lockVoiceStateHandler?: boolean;
+  /**
+   * List of extractors to disable querying metadata from
+   */
+  blockExtractors?: string[];
+  /**
+   * List of extractors to disable streaming from
+   */
+  blockStreamFrom?: string[];
+  /**
+   * Query cache provider
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  queryCache?: QueryCacheProvider<any> | null;
+  /**
+   * Skip ffmpeg process when possible
+   */
+  skipFFmpeg?: boolean;
+  /**
+   * The probe timeout in milliseconds. Defaults to 5000.
+   */
+  probeTimeout?: number;
+  /**
+   * Configure ffmpeg path
+   */
+  ffmpegPath?: string;
+  /**
+   * Whether to override the fallback context. Defaults to `true`.
+   */
+  overrideFallbackContext?: boolean;
+}
 
 export class Player extends PlayerEventsEmitter<PlayerEvents> {
   #lastLatency = -1;
@@ -169,12 +223,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
       connectionTimeout: 20000,
       lagMonitor: 30000,
       queryCache: options.queryCache === null ? null : options.queryCache || new QueryCache(this),
-      useLegacyFFmpeg: false,
       skipFFmpeg: true,
       probeTimeout: 5000,
       overrideFallbackContext: true,
       ...options,
-    } as PlayerInitOptions;
+    } satisfies PlayerInitOptions;
 
     if (!isCompatMode) {
       // @ts-ignore private method
@@ -405,18 +458,12 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
   ): Promise<PlayerNodeInitializationResult<T>> {
     const vc = this.client.channels.resolve(channel);
     if (!vc?.isVoiceBased())
-      throw Exceptions.ERR_INVALID_ARG_TYPE(
-        'channel',
-        'VoiceBasedChannel',
-        !vc ? 'undefined' : `channel type ${vc.type}`,
-      );
+      throw new InvalidArgTypeError('channel', 'VoiceBasedChannel', !vc ? 'undefined' : `channel type ${vc.type}`);
 
     const originalResult = query instanceof SearchResult ? query : await this.search(query, options);
     const result = (await options.afterSearch?.(originalResult)) || originalResult;
     if (result.isEmpty()) {
-      throw Exceptions.ERR_NO_RESULT(
-        `No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`,
-      );
+      throw new NoResultError(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
     }
 
     const queue = this.nodes.create(vc.guild, options.nodeOptions);
@@ -701,7 +748,6 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
       `- discord.js: ${djsVersion}`,
       `- Node version: ${process.version} (Detected Runtime: ${runtime}, Platform: ${process.platform} [${process.arch}])`,
       (() => {
-        if (this.options.useLegacyFFmpeg) return '- ffmpeg: N/A (using legacy ffmpeg)';
         const info = FFmpeg.resolveSafe();
         if (!info) return 'FFmpeg/Avconv not found';
 

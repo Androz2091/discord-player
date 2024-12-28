@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Exceptions } from '../errors';
+import { DeserializationError, SerializationError } from '../errors';
 import { Playlist, type SerializedTrack, Track, SerializedPlaylist } from '../fabric';
 import { TypeUtil } from './TypeUtil';
 import { Buffer } from 'buffer';
@@ -23,7 +23,7 @@ export function serialize(data: Track | Playlist | any) {
   try {
     return data.toJSON();
   } catch {
-    throw Exceptions.ERR_SERIALIZATION_FAILED();
+    throw new SerializationError();
   }
 }
 
@@ -31,7 +31,7 @@ export function deserialize(player: Player, data: Encodable) {
   if (isTrack(data)) return Track.fromSerialized(player, data);
   if (isPlaylist(data)) return Playlist.fromSerialized(player, data);
 
-  throw Exceptions.ERR_DESERIALIZATION_FAILED();
+  throw new DeserializationError();
 }
 
 export function encode(data: Encodable) {

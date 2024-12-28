@@ -1,4 +1,4 @@
-import { Exceptions } from '../errors';
+import { NotExistingError } from '../errors';
 import { LrcGetResult, LrcSearchResult } from '../lrclib/LrcLib';
 import type { GuildQueue } from './GuildQueue';
 
@@ -26,7 +26,7 @@ export class SyncedLyricsProvider {
   }
 
   public load(lyrics: string) {
-    if (!lyrics) throw Exceptions.ERR_NOT_EXISTING('syncedLyrics');
+    if (!lyrics) throw new NotExistingError('syncedLyrics');
 
     this.lyrics.clear();
     this.unsubscribe();

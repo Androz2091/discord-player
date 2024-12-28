@@ -3,15 +3,74 @@ import { GuildQueue, GuildQueueEvent } from './queue';
 import { Player } from './Player';
 import { Util } from './utils/Util';
 
+function handleEmptyChannel(player: Player, queue: GuildQueue, guildId: string) {
+  const timeout = setTimeout(() => {
+    if (!Util.isVoiceEmpty(queue.channel!) || !player.nodes.has(queue.guild.id)) return;
+    if (queue.options.leaveOnEmpty) queue.delete();
+    player.events.emit(GuildQueueEvent.EmptyChannel, queue);
+  }, queue.options.leaveOnEmptyCooldown || 0).unref();
+  queue.timeouts.set(`empty_${guildId}`, timeout);
+}
+
+function handleChannelPopulate(player: Player, queue: GuildQueue, guildId: string) {
+  const emptyTimeout = queue.timeouts.get(`empty_${guildId}`);
+  if (!Util.isVoiceEmpty(queue.channel!) && emptyTimeout) {
+    clearTimeout(emptyTimeout);
+    queue.timeouts.delete(`empty_${guildId}`);
+    player.events.emit(GuildQueueEvent.ChannelPopulate, queue);
+  }
+}
+
+function handlePauseOnEmpty(queue: GuildQueue) {
+  const isEmpty = Util.isVoiceEmpty(queue.channel!);
+  const wasPausedOnEmpty = Reflect.get(queue, '__pausedOnEmpty');
+
+  if (isEmpty && !wasPausedOnEmpty) {
+    queue.node.setPaused(true);
+    Reflect.set(queue, '__pausedOnEmpty', true);
+    if (queue.hasDebugger) {
+      queue.debug('Voice channel is empty and options#pauseOnEmpty is true, pausing...');
+    }
+  } else if (!isEmpty && wasPausedOnEmpty) {
+    queue.node.setPaused(false);
+    Reflect.set(queue, '__pausedOnEmpty', false);
+    if (queue.hasDebugger) {
+      queue.debug('Voice channel is not empty and options#pauseOnEmpty is true, resuming...');
+    }
+  }
+}
+
+function handleBotVoiceStateUpdate(queue: GuildQueue, oldState: VoiceState, newState: VoiceState) {
+  if (newState.serverMute != null && oldState.serverMute !== newState.serverMute) {
+    queue.node.setPaused(newState.serverMute);
+    return;
+  }
+
+  if (
+    newState.channel?.type === ChannelType.GuildStageVoice &&
+    newState.suppress != null &&
+    oldState.suppress !== newState.suppress
+  ) {
+    queue.node.setPaused(newState.suppress);
+    if (newState.suppress) {
+      newState.guild.members.me?.voice.setRequestToSpeak(true).catch(Util.noop);
+    }
+  }
+}
+
 export async function defaultVoiceStateHandler(
   player: Player,
   queue: GuildQueue,
   oldState: VoiceState,
   newState: VoiceState,
 ) {
-  if (!queue || !queue.connection || !queue.channel) return;
+  if (!queue?.connection || !queue.channel) return;
 
-  if (oldState.channelId && !newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
+  const isBotState = newState.member?.id === newState.guild.members.me?.id;
+  const guildId = oldState.guild.id;
+
+  // Bot disconnected
+  if (isBotState && oldState.channelId && !newState.channelId) {
     try {
       queue.delete();
     } catch {
@@ -21,100 +80,25 @@ export async function defaultVoiceStateHandler(
   }
 
   if (queue.options.pauseOnEmpty) {
-    const isEmpty = Util.isVoiceEmpty(queue.channel);
-
-    if (isEmpty) {
-      queue.node.setPaused(true);
-      Reflect.set(queue, '__pausedOnEmpty', true);
-      if (queue.hasDebugger) {
-        queue.debug('Voice channel is empty and options#pauseOnEmpty is true, pausing...');
-      }
-    } else {
-      if (Reflect.get(queue, '__pausedOnEmpty')) {
-        queue.node.setPaused(false);
-        Reflect.set(queue, '__pausedOnEmpty', false);
-        if (queue.hasDebugger) {
-          queue.debug('Voice channel is not empty and options#pauseOnEmpty is true, resuming...');
-        }
-      }
-    }
+    handlePauseOnEmpty(queue);
   }
 
-  if (!oldState.channelId && newState.channelId && newState.member?.id === newState.guild.members.me?.id) {
-    if (newState.serverMute != null && oldState.serverMute !== newState.serverMute) {
-      queue.node.setPaused(newState.serverMute);
-    } else if (
-      newState.channel?.type === ChannelType.GuildStageVoice &&
-      newState.suppress != null &&
-      oldState.suppress !== newState.suppress
-    ) {
-      queue.node.setPaused(newState.suppress);
-      if (newState.suppress) {
-        newState.guild.members.me?.voice.setRequestToSpeak(true).catch(Util.noop);
-      }
-    }
+  // Bot joined channel or changed state
+  if (isBotState && newState.channelId && (!oldState.channelId || oldState.channelId !== newState.channelId)) {
+    if (queue.connection) queue.channel = newState.channel!;
+    handleBotVoiceStateUpdate(queue, oldState, newState);
   }
 
+  // Handle channel empty/populate events
   if (!newState.channelId && oldState.channelId === queue.channel.id) {
     if (!Util.isVoiceEmpty(queue.channel)) return;
-    const timeout = setTimeout(() => {
-      if (!Util.isVoiceEmpty(queue.channel!)) return;
-      if (!player.nodes.has(queue.guild.id)) return;
-      if (queue.options.leaveOnEmpty) queue.delete();
-      player.events.emit(GuildQueueEvent.EmptyChannel, queue);
-    }, queue.options.leaveOnEmptyCooldown || 0).unref();
-    queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
-  }
-
-  if (newState.channelId && newState.channelId === queue.channel.id) {
-    const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
-    const channelEmpty = Util.isVoiceEmpty(queue.channel);
-    if (!channelEmpty && emptyTimeout) {
-      clearTimeout(emptyTimeout);
-      queue.timeouts.delete(`empty_${oldState.guild.id}`);
-      player.events.emit(GuildQueueEvent.ChannelPopulate, queue);
-    }
-  }
-
-  if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-    if (newState.member?.id === newState.guild.members.me?.id) {
-      if (queue.connection && newState.member?.id === newState.guild.members.me?.id) queue.channel = newState.channel!;
-      const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
-      const channelEmpty = Util.isVoiceEmpty(queue.channel);
-      if (!channelEmpty && emptyTimeout) {
-        clearTimeout(emptyTimeout);
-        queue.timeouts.delete(`empty_${oldState.guild.id}`);
-        player.events.emit(GuildQueueEvent.ChannelPopulate, queue);
-      } else {
-        const timeout = setTimeout(() => {
-          if (queue.connection && !Util.isVoiceEmpty(queue.channel!)) return;
-          if (!player.nodes.has(queue.guild.id)) return;
-          if (queue.options.leaveOnEmpty) queue.delete();
-          player.events.emit(GuildQueueEvent.EmptyChannel, queue);
-        }, queue.options.leaveOnEmptyCooldown || 0).unref();
-        queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
-      }
-    } else {
-      if (newState.channelId !== queue.channel.id) {
-        const channelEmpty = Util.isVoiceEmpty(queue.channel!);
-        if (!channelEmpty) return;
-        if (queue.timeouts.has(`empty_${oldState.guild.id}`)) return;
-        const timeout = setTimeout(() => {
-          if (!Util.isVoiceEmpty(queue.channel!)) return;
-          if (!player.nodes.has(queue.guild.id)) return;
-          if (queue.options.leaveOnEmpty) queue.delete();
-          player.events.emit(GuildQueueEvent.EmptyChannel, queue);
-        }, queue.options.leaveOnEmptyCooldown || 0).unref();
-        queue.timeouts.set(`empty_${oldState.guild.id}`, timeout);
-      } else {
-        const emptyTimeout = queue.timeouts.get(`empty_${oldState.guild.id}`);
-        const channelEmpty = Util.isVoiceEmpty(queue.channel!);
-        if (!channelEmpty && emptyTimeout) {
-          clearTimeout(emptyTimeout);
-          queue.timeouts.delete(`empty_${oldState.guild.id}`);
-          player.events.emit(GuildQueueEvent.ChannelPopulate, queue);
-        }
-      }
+    handleEmptyChannel(player, queue, guildId);
+  } else if (newState.channelId === queue.channel.id) {
+    handleChannelPopulate(player, queue, guildId);
+  } else if (oldState.channelId !== newState.channelId) {
+    if (newState.channelId !== queue.channel.id && !Util.isVoiceEmpty(queue.channel)) return;
+    if (!queue.timeouts.has(`empty_${guildId}`)) {
+      handleEmptyChannel(player, queue, guildId);
     }
   }
 }

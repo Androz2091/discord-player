@@ -82,7 +82,7 @@ const client = new Discord.Client({
 // this is the entrypoint for discord-player based application
 const player = new Player(client);
 
-// Now, lets load all the default extractors, except 'YouTubeExtractor'. You can remove the filter if you want to include youtube.
+// Now, lets load all the default extractors.
 await player.extractors.loadMulti(DefaultExtractors);
 ```
 

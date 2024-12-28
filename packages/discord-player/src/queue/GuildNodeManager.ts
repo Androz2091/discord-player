@@ -2,10 +2,10 @@ import { EqualizerBand, PCMFilters, BiquadFilters } from '@discord-player/equali
 import { Collection, QueueStrategy } from '@discord-player/utils';
 import { GuildResolvable } from 'discord.js';
 import { Player } from '../Player';
-import { GuildQueue, OnAfterCreateStreamHandler, OnBeforeCreateStreamHandler } from './GuildQueue';
-import { FiltersName, QueueRepeatMode } from '../types/types';
+import { GuildQueue, OnAfterCreateStreamHandler, OnBeforeCreateStreamHandler, QueueRepeatMode } from './GuildQueue';
 import { getGlobalRegistry } from '../utils/__internal__';
-import { Exceptions } from '../errors';
+import { NoGuildError, NoGuildQueueError } from '../errors';
+import { FiltersName } from '../fabric';
 
 export interface GuildNodeCreateOptions<T = unknown> {
   strategy?: QueueStrategy;
@@ -56,7 +56,7 @@ export class GuildNodeManager<Meta = unknown> {
   public create<T = Meta>(guild: GuildResolvable, options: GuildNodeCreateOptions<T> = {}): GuildQueue<T> {
     const server = this.player.client.guilds.resolve(guild);
     if (!server) {
-      throw Exceptions.ERR_NO_GUILD('Invalid or unknown guild');
+      throw new NoGuildError('Invalid or unknown guild');
     }
 
     if (this.cache.has(server.id)) {
@@ -166,7 +166,7 @@ export class GuildNodeManager<Meta = unknown> {
   public delete(node: NodeResolvable) {
     const queue = this.resolve(node);
     if (!queue) {
-      throw Exceptions.ERR_NO_GUILD_QUEUE('Cannot delete non-existing queue');
+      throw new NoGuildQueueError('Cannot delete non-existing queue');
     }
 
     queue.setTransitioning(true);

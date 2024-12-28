@@ -36,7 +36,7 @@ for resources with inline volume transformation enabled.
 
 ### public encoder: any
 
-If using an Opus encoder to create this audio resource, then this will be a prism-media opus.Encoder.
+If using an Opus encoder to create this audio resource, then this will be a `@discord-player/opus` opus.Encoder.
 You can use this to control settings such as bitrate, FEC, PLP.
 
 - [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L76)
@@ -80,7 +80,7 @@ Whether or not the stream for this resource has started (data has become readabl
 ### public volume: any
 
 If the resource was created with inline volume transformation enabled, then this will be a
-prism-media VolumeTransformer. You can use this to alter the volume of the stream.
+`@discord-player/equalizer` VolumeTransformer. You can use this to alter the volume of the stream.
 
 - [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L70)
 

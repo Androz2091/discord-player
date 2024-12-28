@@ -14,7 +14,7 @@ By default, discord-player **does not support anything** (including search opera
 - SoundCloud (backed by `soundcloud extractor`)
 
 If you dont want to stream from certain extractors, you can block them by passing `blockStreamFrom: [id, id, ...]` to player instantiation options.
-Disabling youtube streaming completely would be as easy as:
+Disabling streaming from specific extractor completely would be as easy as:
 
 ```js title="index.js"
 import { Player } from 'discord-player';
@@ -51,7 +51,7 @@ const result = await player.search(query, {
 
 ### Overriding bridged stream
 
-Extractors such as AppleMusicExtractor, SpotifyExtractor cannot stream from their original source so they internally use ytdl to resolve streams.
+Extractors such as AppleMusicExtractor, SpotifyExtractor cannot stream from their original source so they internally use alternative methods to resolve streams.
 In order to bypass this behavior, you can override `createStream` function of the extractor like so:
 
 ```js title="index.js"
