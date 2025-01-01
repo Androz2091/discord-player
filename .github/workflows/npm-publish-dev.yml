@@ -1,13 +1,11 @@
 name: Node.js Package
 on:
   workflow_dispatch:
-  release:
-    types: [published]
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  publish-npm:
+  publish-npm-dev:
     timeout-minutes: 5
     runs-on: ubuntu-20.04
     env:
@@ -29,4 +27,4 @@ jobs:
         run: yarn publish-packages
         env:
           YARN_NPM_AUTH_TOKEN: ${{secrets.npm_token}}
-          DP_PUBLISH_DEV: false
+          DP_PUBLISH_DEV: true

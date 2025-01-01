@@ -3,7 +3,7 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const VERSION_PATTERN = /^\d+\.\d+\.\d+(-\S+\.\d+)?/;
+const VERSION_PATTERN = /^\d+\.\d+\.\d+?/;
 const version = process.argv[2];
 
 if (!version) {
@@ -12,9 +12,7 @@ if (!version) {
 }
 
 if (!VERSION_PATTERN.test(version)) {
-  console.error(
-    'Invalid version format. Use semver format: <major>.<minor>.<patch> or <major>.<minor>.<patch>-<tag>.<patch>',
-  );
+  console.error('Invalid version format. Use semver format: <major>.<minor>.<patch>');
   process.exit(1);
 }
 

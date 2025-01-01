@@ -58,7 +58,9 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
   // Get the queue's timeline
-  const timeline = useTimeline(interaction.guild);
+  const timeline = useTimeline({
+    node: interaction.guild,
+  });
 
   if (!timeline) {
     return interaction.reply('This server does not have an active player session.');

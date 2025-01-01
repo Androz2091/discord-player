@@ -156,7 +156,7 @@ Control and monitor the current track's playback state.
 const { useTimeline } = require('discord-player');
 
 // Get timeline controls
-const timeline = useTimeline(interaction.guildId);
+const timeline = useTimeline({ node: interaction.guildId });
 
 // Example: Comprehensive playback control
 console.log(`Volume: ${timeline.volume}%`);
