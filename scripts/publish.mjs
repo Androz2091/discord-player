@@ -8,16 +8,14 @@ const otherFlags = process.argv.slice(2);
 const FILE_NAME = 'package.json';
 const ENTRYPOINT = join(process.cwd(), 'packages');
 
-console.log({ DP_IS_DEV: process.env.DP_PUBLISH_DEV })
-
 const isDev = process.env.DP_PUBLISH_DEV === 'true';
 
-if (!isDev) {
-  console.log(`Disabled for testing.`)
-  process.exit(1);
-}
+console.log(`\nPublish tag is set to ${isDev ? '@dev' : '@latest'}`);
 
 const packages = await readdir(ENTRYPOINT);
+
+// use same timestamp for all packages
+const DEV_NOW = Date.now();
 
 for (const dir of packages) {
   const path = join(ENTRYPOINT, dir, FILE_NAME);
@@ -27,7 +25,7 @@ for (const dir of packages) {
   if (isDev) {
     packageJson = {
       ...packageJson,
-      version: `${packageJson.version}-dev.${Date.now()}`,
+      version: `${packageJson.version}-dev.${DEV_NOW}`,
     };
 
     await writeFile(path, JSON.stringify(packageJson, null, 2));
