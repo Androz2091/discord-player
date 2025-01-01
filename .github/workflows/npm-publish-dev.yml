@@ -1,4 +1,4 @@
-name: Node.js Package
+name: Publish Dev
 on:
   workflow_dispatch:
 concurrency:
