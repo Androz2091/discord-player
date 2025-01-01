@@ -5,21 +5,29 @@ import { writeFile } from 'node:fs/promises';
 
 const normalizeName = (name: string) => name.replace('@discord-player/', '');
 
+const shouldGenerateJSON = process.argv.includes('--json');
+
 async function main() {
   const docs = await createDocumentation({
     input: ['.'],
-    markdown: true,
-    clean: true,
+    markdown: !shouldGenerateJSON,
+    clean: !shouldGenerateJSON,
     typeLinkerBasePath: '/api',
     extension: 'mdx',
     includeMarkdownHeaders: true,
     omitTypeLinkerExtension: true,
     output: './apps/website/content/api',
+    noEmit: shouldGenerateJSON,
   });
 
   const modules = Object.values(docs.modules);
 
   console.log(`Generated docs for ${modules.length} modules in ${docs.metadata.generationMs}`);
+
+  if (shouldGenerateJSON) {
+    await writeFile('./apps/website/lib/data/docs.json', JSON.stringify(docs));
+    process.exit(0);
+  }
 
   const heading = (name: string, description: string) =>
     `---\ntitle: ${normalizeName(name)}\ndescription: ${description || 'No description available.'}\n---\n\n`;
