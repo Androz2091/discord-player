@@ -23,9 +23,12 @@ const youtubePlaylistRegex =
 const youtubeVideoURLRegex =
   /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w-]+\?v=|embed\/|v\/)?)([\w-]+)(\S+)?$/;
 const youtubeVideoIdRegex = /^[a-zA-Z0-9-_]{11}$/;
+// discord-player://blob/uuid-v4
+const discordPlayerBlobRegex = /^discord-player:\/\/blob\/\d+$/;
 // #endregion scary things above *sigh*
 
 const DomainsMap = {
+  DiscordPlayer: ['discord-player'],
   YouTube: ['youtube.com', 'youtu.be', 'music.youtube.com', 'gaming.youtube.com', 'www.youtube.com', 'm.youtube.com'],
   Spotify: ['open.spotify.com', 'embed.spotify.com'],
   Vimeo: ['vimeo.com', 'player.vimeo.com'],
@@ -66,6 +69,7 @@ const redirectDomains = new Set([
  * - APPLE_MUSIC_SEARCH
  * - FILE
  * - AUTO_SEARCH
+ * - DISCORD_PLAYER_BLOB
  * @typedef {string} QueryType
  */
 export const QueryType = {
@@ -92,6 +96,7 @@ export const QueryType = {
   APPLE_MUSIC_SEARCH: 'appleMusicSearch',
   FILE: 'file',
   AUTO_SEARCH: 'autoSearch',
+  DISCORD_PLAYER_BLOB: 'discordPlayerBlob',
 } as const;
 
 export type QueryType = (typeof QueryType)[keyof typeof QueryType];
@@ -123,6 +128,7 @@ class QueryResolver {
       soundcloudTrackRegex,
       soundcloudPlaylistRegex,
       youtubePlaylistRegex,
+      discordPlayerBlobRegex,
     };
   }
 
@@ -173,6 +179,8 @@ class QueryResolver {
     if (!query.length) throw new InfoRequiredError('query', String(query));
 
     const resolver = (type: typeof fallbackSearchEngine, query: string) => ({ type, query });
+
+    if (discordPlayerBlobRegex.test(query)) return resolver(QueryType.DISCORD_PLAYER_BLOB, query);
 
     try {
       const url = new URL(query);

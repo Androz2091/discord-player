@@ -35,28 +35,30 @@ export default function HomePage() {
         library and offers a comprehensive set of customizable tools, making it one of the most feature enrich framework
         in town.
       </p>
-      <Tabs items={['npm', 'yarn', 'pnpm', 'bun']} className="w-1/6 text-start">
-        <Tab value="npm">
-          <CodeBlock lang="bash">
-            <Pre>npm i --save discord-player</Pre>
-          </CodeBlock>
-        </Tab>
-        <Tab value="yarn">
-          <CodeBlock lang="bash">
-            <Pre>yarn add discord-player</Pre>
-          </CodeBlock>
-        </Tab>
-        <Tab value="pnpm">
-          <CodeBlock lang="bash">
-            <Pre>pnpm add discord-player</Pre>
-          </CodeBlock>
-        </Tab>
-        <Tab value="bun">
-          <CodeBlock lang="bash">
-            <Pre>bun add discord-player</Pre>
-          </CodeBlock>
-        </Tab>
-      </Tabs>
+      <div className="px-4 w-full md:w-[40%] lg:w-[30%]">
+        <Tabs items={['npm', 'yarn', 'pnpm', 'bun']} className="text-start" persist>
+          <Tab value="npm">
+            <CodeBlock lang="bash">
+              <Pre>npm add discord-player</Pre>
+            </CodeBlock>
+          </Tab>
+          <Tab value="yarn">
+            <CodeBlock lang="bash">
+              <Pre>yarn add discord-player</Pre>
+            </CodeBlock>
+          </Tab>
+          <Tab value="pnpm">
+            <CodeBlock lang="bash">
+              <Pre>pnpm add discord-player</Pre>
+            </CodeBlock>
+          </Tab>
+          <Tab value="bun">
+            <CodeBlock lang="bash">
+              <Pre>bun add discord-player</Pre>
+            </CodeBlock>
+          </Tab>
+        </Tabs>
+      </div>
       <div className="inline-flex items-center gap-3 max-md:mx-auto">
         <Link
           className="inline-flex items-center justify-center text-sm font-medium ring-offset-fd-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring disabled:pointer-events-none disabled:opacity-50 bg-fd-background bg-gradient-to-b from-fd-primary to-fd-primary/60 text-fd-primary-foreground shadow-inner shadow-fd-background/20 hover:bg-fd-primary/90 h-11 px-6 rounded-full"

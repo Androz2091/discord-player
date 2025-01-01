@@ -498,14 +498,6 @@ export class GuildQueuePlayerNode<Meta = unknown> {
   }
 
   /**
-   * Play raw audio resource
-   * @param resource The audio resource to play
-   */
-  public async playRaw(resource: AudioResource) {
-    await this.queue.dispatcher?.playStream(resource as AudioResource<Track>);
-  }
-
-  /**
    * Play the given track
    * @param res The track to play
    * @param options Options for playing the track
@@ -544,6 +536,17 @@ export class GuildQueuePlayerNode<Meta = unknown> {
     if (this.queue.hasDebugger) this.queue.debug('Requested option requires to play the track, initializing...');
 
     try {
+      const assignedResource = track.resource;
+
+      if (assignedResource) {
+        if (this.queue.hasDebugger)
+          this.queue.debug('Track has an audio resource assigned, player will now play the resource directly...');
+
+        this.queue.setTransitioning(!!options.transitionMode);
+
+        return this.#performPlay(assignedResource);
+      }
+
       if (this.queue.hasDebugger) this.queue.debug(`Initiating stream extraction process...`);
       const src = track.raw?.source || track.source;
       const qt: SearchQueryType =

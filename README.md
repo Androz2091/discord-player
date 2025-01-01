@@ -25,7 +25,7 @@ Discord Player is a robust framework for developing Discord Music bots using Jav
 - Out-of-the-box voice states handling
 - IP Rotation support
 - Easy serialization and deserialization
-- Limited support for [Eris](https://npmjs.com/eris)
+- Experimental support for [Eris](https://npmjs.com/eris) client
 
 ## Installation
 

@@ -9,6 +9,7 @@ import { SerializedType, tryIntoThumbnailString } from '../utils/serde';
 import { InvalidArgTypeError } from '../errors';
 import { Util } from '../utils/Util';
 import { SearchQueryType } from '../utils/QueryResolver';
+import { AudioResource } from 'discord-voip';
 
 export type TrackResolvable = Track | string | number;
 
@@ -161,6 +162,8 @@ export class Track<T = unknown> {
   public bridgedExtractor: BaseExtractor | null = null;
   public bridgedTrack: Track | null = null;
 
+  #resource: AudioResource<Track> | null = null;
+
   /**
    * Track constructor
    * @param player The player that instantiated this Track
@@ -182,6 +185,28 @@ export class Track<T = unknown> {
     this.__reqMetadataFn = data.requestMetadata || (() => Promise.resolve<T | null>(null));
     this.cleanTitle = data.cleanTitle ?? Util.cleanTitle(this.title, this.source);
     this.live = data.live ?? false;
+  }
+
+  /**
+   * Sets audio resource for this track. This is not useful outside of the library.
+   * @param resource Audio resource
+   */
+  public setResource(resource: AudioResource<Track> | null) {
+    this.#resource = resource;
+  }
+
+  /**
+   * Gets audio resource for this track
+   */
+  public get resource() {
+    return this.#resource;
+  }
+
+  /**
+   * Whether this track has an audio resource
+   */
+  public get hasResource() {
+    return this.#resource != null;
   }
 
   /**

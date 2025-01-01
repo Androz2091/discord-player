@@ -22,7 +22,7 @@ import {
 import { VoiceUtils } from './stream/VoiceUtils';
 import { QueryResolver, QueryType, ResolvedQuery, SearchQueryType } from './utils/QueryResolver';
 import { Util } from './utils/Util';
-import { version as dVoiceVersion } from 'discord-voip';
+import { AudioResource, version as dVoiceVersion } from 'discord-voip';
 import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
 import { BaseExtractor } from './extractors/BaseExtractor';
 import { QueryCache, QueryCacheProvider } from './utils/QueryCache';
@@ -63,7 +63,7 @@ export interface PlayerNodeInitializationResult<T = unknown> {
   queue: GuildQueue<T>;
 }
 
-export type TrackLike = string | Track | SearchResult | Track[] | Playlist;
+export type TrackLike = string | Track | SearchResult | Track[] | Playlist | AudioResource;
 
 export interface PlayerNodeInitializerOptions<T> extends SearchOptions {
   nodeOptions?: GuildNodeCreateOptions<T>;
@@ -511,13 +511,15 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
    * console.log(result); // Logs `SearchResult` object
    * ```
    */
-  public async search(
-    searchQuery: string | Track | Track[] | Playlist | SearchResult,
-    options: SearchOptions = {},
-  ): Promise<SearchResult> {
+  public async search(searchQuery: TrackLike, options: SearchOptions = {}): Promise<SearchResult> {
     if (searchQuery instanceof SearchResult) return searchQuery;
 
+    if (searchQuery instanceof AudioResource) {
+      searchQuery = this.createTrackFromAudioResource(searchQuery);
+    }
+
     if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
+
     options.blockExtractors ??= this.options.blockExtractors;
     options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
 
@@ -784,5 +786,41 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
    */
   public createPlaylist(data: PlaylistInitData) {
     return new Playlist(this, data);
+  }
+
+  /**
+   * Creates a track from an audio resource.
+   * @param resource The audio resource
+   */
+  public createTrackFromAudioResource(resource: AudioResource) {
+    const metadata = resource.metadata as Record<string, unknown>;
+    const ref = SnowflakeUtil.generate().toString();
+    const maybeTitle = 'title' in metadata ? `${metadata.title}` : `Track ${ref}`;
+    const maybeAuthor = 'author' in metadata ? `${metadata.author}` : 'Unknown author';
+    const maybeDuration = 'duration' in metadata ? `${metadata.duration}` : '00:00';
+    const maybeThumbnail = 'thumbnail' in metadata ? `${metadata.thumbnail}` : undefined;
+    const maybeURL = 'url' in metadata ? `${metadata.url}` : `discord-player://blob/${ref}`;
+    const maybeDescription = 'description' in metadata ? `${metadata.description}` : 'No description available.';
+    const maybeViews = 'views' in metadata ? Number(metadata.views) || 0 : 0;
+
+    const track = new Track(this, {
+      title: maybeTitle,
+      author: maybeAuthor,
+      duration: maybeDuration,
+      thumbnail: maybeThumbnail,
+      url: maybeURL,
+      description: maybeDescription,
+      queryType: QueryType.DISCORD_PLAYER_BLOB,
+      source: 'arbitrary',
+      metadata,
+      live: false,
+      views: maybeViews,
+    });
+
+    resource.metadata = track;
+
+    track.setResource(resource as AudioResource<Track>);
+
+    return track;
   }
 }

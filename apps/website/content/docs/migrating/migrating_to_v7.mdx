@@ -93,3 +93,15 @@ Discord Player will automatically resolve the guild from the context.
 Passing arguments to hooks inside a context will ignore the context and use the provided arguments instead. This may cause unexpected issues when using multiple instances of `Player`.
 
 See [Using Hooks](/docs/hooks/using_hooks) for more information.
+
+### `queue.node.playRaw` method removed
+
+The `queue.node.playRaw` method allowed you to play a custom audio resource. This method has been removed in v7. You can now directly use `player.play` to play a custom audio resource.
+
+```js title="play-raw.js"
+import { createAudioResource } from 'discord-voip';
+
+const resource = createAudioResource(...); // create audio resource
+
+await player.play(resource); // play that resource
+```
