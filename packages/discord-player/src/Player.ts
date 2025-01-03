@@ -793,7 +793,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
    * @param resource The audio resource
    */
   public createTrackFromAudioResource(resource: AudioResource) {
-    const metadata = resource.metadata as Record<string, unknown>;
+    const metadata = (resource.metadata || {}) as Record<string, unknown>;
     const ref = SnowflakeUtil.generate().toString();
     const maybeTitle = 'title' in metadata ? `${metadata.title}` : `Track ${ref}`;
     const maybeAuthor = 'author' in metadata ? `${metadata.author}` : 'Unknown author';
