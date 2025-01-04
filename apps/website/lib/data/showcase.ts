@@ -239,5 +239,10 @@ export const ShowcaseResource: IShowcase = {
       description: 'An unofficial discord-player extractor to add support for Soundgasm.',
       url: 'https://npm.im/soundgasm-extractor',
     },
+    {
+      name: 'discord-player-tts',
+      description: 'An unofficial discord-player extractor to add tts capabilities to your bot.',
+      url: 'https://npm.im/tts-extractor',
+    },
   ]),
 };
