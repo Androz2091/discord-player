@@ -204,6 +204,12 @@ export const ShowcaseResource: IShowcase = {
         version: 'v6.7.1',
         url: 'https://github.com/zijipia/Ziji-bot-discord',
       },
+      {
+        name: 'discord-bot',
+        description: '🎵 Music bot for my private Discord server, powered by discord-player',
+        version: 'v7.0.0',
+        url: 'https://github.com/xxczaki/discord-bot'
+      }
     ].sort((a, b) => semver.rcompare(a.version.replace(/^v/, ''), b.version.replace(/^v/, ''))),
   ),
   extractors: PromotedList.extractors.concat([
