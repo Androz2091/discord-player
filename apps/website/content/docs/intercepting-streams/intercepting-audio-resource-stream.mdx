@@ -42,16 +42,24 @@ const interceptor = player.createStreamInterceptor({
 });
 
 // this will be called every time an audio resource stream is intercepted
-const unsubscribe = interceptor.onStream(async (queue, track, format, stream) => {
+const unsubscribe = interceptor.onStream(
+  async (queue, track, format, stream) => {
     const ext = format === StreamType.Opus ? '.opus' : '.pcm';
     const out = fs.createWriteStream(`./${track.title}${ext}`);
 
     stream.interceptors.add(out);
-});
+  },
+);
 
 // Unsubscribe the interceptor
 unsubscribe();
 ```
+
+<Callout type="warn">
+  You must not use `.pipe()` method on this stream. This affects the audio
+  player directly. Instead, use `.interceptors.add()` method to add a writable
+  stream. You can add as many interceptors as you want.
+</Callout>
 
 <Callout type="info">
   Discord Player returns `opus` stream format when ffmpeg is not being used. If
