@@ -93,7 +93,8 @@ export class SequentialBucket {
   private _patchHeaders(res: Response) {
     const limit = Number(res.headers.get('X-RateLimit-Limit'));
     const remaining = Number(res.headers.get('X-RateLimit-Remaining'));
-    const resetAfter = Number(res.headers.get('X-RateLimit-Reset')) * 1000 + Date.now();
+    const resetAfter =
+      Number(res.headers.get('X-RateLimit-Reset')) * 1000 + Date.now();
 
     if (!Number.isNaN(limit)) this.limit = limit;
     if (!Number.isNaN(remaining)) this.remaining = remaining;

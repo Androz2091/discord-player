@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { Client, IntentsBitField } from 'discord.js';
-import { decode, deserialize, encode, Player, Playlist, serialize, SerializedType, Track } from '../src';
+import {
+  decode,
+  deserialize,
+  encode,
+  Player,
+  Playlist,
+  serialize,
+  SerializedType,
+  Track,
+} from '../src';
 
 describe('serde', () => {
   const client = new Client({

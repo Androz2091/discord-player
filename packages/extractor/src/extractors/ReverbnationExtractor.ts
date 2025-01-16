@@ -11,11 +11,17 @@ import {
 import reverbnation from 'reverbnation-scraper';
 
 export class ReverbnationExtractor extends BaseExtractor {
-  public static identifier = 'com.discord-player.reverbnationextractor' as const;
+  public static identifier =
+    'com.discord-player.reverbnationextractor' as const;
 
-  public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
+  public async validate(
+    query: string,
+    type?: SearchQueryType | null | undefined,
+  ): Promise<boolean> {
     if (typeof query !== 'string') return false;
-    return ([QueryType.REVERBNATION] as SearchQueryType[]).some((r) => r === type);
+    return ([QueryType.REVERBNATION] as SearchQueryType[]).some(
+      (r) => r === type,
+    );
   }
 
   public async getRelatedTracks(track: Track) {
@@ -23,7 +29,10 @@ export class ReverbnationExtractor extends BaseExtractor {
     return this.createResponse();
   }
 
-  public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
+  public async handle(
+    query: string,
+    context: ExtractorSearchContext,
+  ): Promise<ExtractorInfo> {
     switch (context.type) {
       case QueryType.REVERBNATION: {
         const trackInfo = await reverbnation.getInfo(query).catch(Util.noop);
@@ -34,7 +43,9 @@ export class ReverbnationExtractor extends BaseExtractor {
           title: trackInfo.title,
           url: trackInfo.url,
           duration: Util.buildTimeCode(Util.parseMS(trackInfo.duration)),
-          description: trackInfo.lyrics || `${trackInfo.title} by ${trackInfo.artist.name}`,
+          description:
+            trackInfo.lyrics ||
+            `${trackInfo.title} by ${trackInfo.artist.name}`,
           thumbnail: trackInfo.thumbnail,
           views: 0,
           author: trackInfo.artist.name,
@@ -68,7 +79,8 @@ export class ReverbnationExtractor extends BaseExtractor {
     }
 
     const track = await reverbnation.getInfo(info.url).catch(Util.noop);
-    if (!track || !track.streamURL) throw new Error('Could not extract stream from this source');
+    if (!track || !track.streamURL)
+      throw new Error('Could not extract stream from this source');
 
     info.raw.engine = {
       streamURL: track.streamURL,

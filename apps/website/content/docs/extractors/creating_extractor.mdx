@@ -30,7 +30,8 @@ class MyExtractor extends BaseExtractor {
   // (required) you should give a unique id for you extractor here.
   static identifier = 'unique-id-for-my-extractor' as const;
 
-  public createBridgeQuery = (track: Track) => `${track.title} by ${track.author} official audio`;
+  public createBridgeQuery = (track: Track) =>
+    `${track.title} by ${track.author} official audio`;
 
   // this method is called when your extractor is loaded into discord-player's registry
   async activate(): Promise<void> {
@@ -83,8 +84,9 @@ player.extractors.register(MyExtractor, initializationOptions /* optional */);
 ```
 
 <Callout type="warn">
-  Do not instantiate the extractor class directly. Always use `player.extractors.register` method to load your
-  extractor. Discord Player will instantiate the extractor for you.
+  Do not instantiate the extractor class directly. Always use
+  `player.extractors.register` method to load your extractor. Discord Player
+  will instantiate the extractor for you.
 </Callout>
 
 # Search Engine Behavior

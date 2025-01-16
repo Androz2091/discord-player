@@ -26,7 +26,10 @@ export class QueryCache implements QueryCacheProvider<Track> {
       checkInterval: DEFAULT_EXPIRY_TIMEOUT,
     },
   ) {
-    this.timer = setInterval(this.cleanup.bind(this), this.checkInterval).unref();
+    this.timer = setInterval(
+      this.cleanup.bind(this),
+      this.checkInterval,
+    ).unref();
   }
 
   public get checkInterval() {
@@ -77,14 +80,22 @@ export class QueryCache implements QueryCacheProvider<Track> {
 
 export class DiscordPlayerQueryResultCache<T = unknown> {
   public expireAfter = DEFAULT_EXPIRY_TIMEOUT;
-  public constructor(public data: T, expireAfter: number = DEFAULT_EXPIRY_TIMEOUT) {
+  public constructor(
+    public data: T,
+    expireAfter: number = DEFAULT_EXPIRY_TIMEOUT,
+  ) {
     if (typeof expireAfter === 'number') {
       this.expireAfter = Date.now() + expireAfter;
     }
   }
 
   public hasExpired() {
-    if (typeof this.expireAfter !== 'number' || isNaN(this.expireAfter) || this.expireAfter < 1) return false;
+    if (
+      typeof this.expireAfter !== 'number' ||
+      isNaN(this.expireAfter) ||
+      this.expireAfter < 1
+    )
+      return false;
     return Date.now() <= this.expireAfter;
   }
 }

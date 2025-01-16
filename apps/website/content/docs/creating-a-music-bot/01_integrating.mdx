@@ -14,8 +14,9 @@ npm install discord-player @discord-player/extractor
 ```
 
 <Callout>
-  We are also installing `@discord-player/extractor` as it contains the default extractors for Discord Player which
-  provides ability to play audio from local files, raw url or SoundCloud. **Discord Player on itself does not support
+  We are also installing `@discord-player/extractor` as it contains the default
+  extractors for Discord Player which provides ability to play audio from local
+  files, raw url or SoundCloud. **Discord Player on itself does not support
   anything.**
 </Callout>
 
@@ -55,16 +56,18 @@ const player = new Player(createErisCompat(client));
 </Tabs>
 
 <Callout type="warn">
-  We don't recommend assigning `player` to `client` using `client.player = player` here. Discord Player provides
-  [hooks](/docs/hooks/using_hooks) (aka helper functions) to access discord-player objects at ease.
+  We don't recommend assigning `player` to `client` using `client.player =
+  player` here. Discord Player provides [hooks](/docs/hooks/using_hooks) (aka
+  helper functions) to access discord-player objects at ease.
 </Callout>
 
 That's it! You have successfully initialized Discord Player in your bot.
 
 <Callout>
-  Even though Discord Player supports Eris, the guide from here will focus on discord.js. You can refer to the [Eris
-  documentation](https://abal.moe/Eris/docs) for more information on Eris specific APIs. Concept wise, both discord.js
-  and Eris are similar.
+  Even though Discord Player supports Eris, the guide from here will focus on
+  discord.js. You can refer to the [Eris
+  documentation](https://abal.moe/Eris/docs) for more information on Eris
+  specific APIs. Concept wise, both discord.js and Eris are similar.
 </Callout>
 
 In the next section, we will learn about extractors and how to integrate them to support audio streaming.

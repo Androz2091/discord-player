@@ -40,7 +40,10 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
     SoundCloudExtractor.instance = null;
   }
 
-  public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
+  public async validate(
+    query: string,
+    type?: SearchQueryType | null | undefined,
+  ): Promise<boolean> {
     if (typeof query !== 'string') return false;
     // prettier-ignore
     return ([
@@ -93,11 +96,17 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
     return this.createResponse();
   }
 
-  public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
-    if (context.protocol === 'scsearch') context.type = QueryType.SOUNDCLOUD_SEARCH;
+  public async handle(
+    query: string,
+    context: ExtractorSearchContext,
+  ): Promise<ExtractorInfo> {
+    if (context.protocol === 'scsearch')
+      context.type = QueryType.SOUNDCLOUD_SEARCH;
     switch (context.type) {
       case QueryType.SOUNDCLOUD_TRACK: {
-        const trackInfo = await this.internal.tracks.getV2(query).catch(Util.noop);
+        const trackInfo = await this.internal.tracks
+          .getV2(query)
+          .catch(Util.noop);
 
         if (!trackInfo) return this.emptyResponse();
 
@@ -125,7 +134,9 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
         return { playlist: null, tracks: [track] };
       }
       case QueryType.SOUNDCLOUD_PLAYLIST: {
-        const data = await this.internal.playlists.getV2(query).catch(Util.noop);
+        const data = await this.internal.playlists
+          .getV2(query)
+          .catch(Util.noop);
         if (!data) return { playlist: null, tracks: [] };
 
         const res = new Playlist(this.context.player, {
@@ -177,7 +188,8 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
           .then((t) => t.collection)
           .catch(Util.noop);
 
-        if (!tracks) tracks = await this.internal.tracks.searchAlt(query).catch(Util.noop);
+        if (!tracks)
+          tracks = await this.internal.tracks.searchAlt(query).catch(Util.noop);
 
         if (!tracks || !tracks.length) return this.emptyResponse();
 
@@ -221,17 +233,23 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
 
   public async stream(info: Track) {
     const url = await this.internal.util.streamLink(info.url).catch(Util.noop);
-    if (!url) throw new Error('Could not extract stream from this track source');
+    if (!url)
+      throw new Error('Could not extract stream from this track source');
 
     return url;
   }
 
-  public async bridge(track: Track, sourceExtractor: BaseExtractor | null): Promise<ExtractorStreamable | null> {
+  public async bridge(
+    track: Track,
+    sourceExtractor: BaseExtractor | null,
+  ): Promise<ExtractorStreamable | null> {
     if (sourceExtractor?.identifier === this.identifier) {
       return this.stream(track);
     }
 
-    const query = sourceExtractor?.createBridgeQuery(track) ?? `${track.author} - ${track.title}`;
+    const query =
+      sourceExtractor?.createBridgeQuery(track) ??
+      `${track.author} - ${track.title}`;
 
     const info = await this.handle(query, {
       requestedBy: track.requestedBy,

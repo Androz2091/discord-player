@@ -1,9 +1,9 @@
 /* eslint-disable */
-import { Player } from 'discord-player';
-import { DefaultExtractors } from '@discord-player/extractor';
-import { Client, Events, IntentsBitField } from 'discord.js';
-import { PlayCommand } from './play';
-import { NowPlayingCommand } from './nowplaying';
+import { Player, StreamType } from 'discord-player';
+import { Client, IntentsBitField } from 'discord.js';
+import { CommandKit } from 'commandkit';
+import { createWriteStream } from 'node:fs';
+import { join } from 'node:path';
 
 const client = new Client({
   // prettier-ignore
@@ -18,34 +18,29 @@ const client = new Client({
 
 const player = Player.create(client);
 
-client.once(Events.ClientReady, async () => {
-  await player.extractors.loadMulti(DefaultExtractors);
-  console.log('Ready!');
+player.on('error', console.error);
+player.events.on('error', (_, e) => console.error(e));
+player.events.on('playerError', (_, e) => console.error(e));
+
+const interceptor = player.createStreamInterceptor({
+  async shouldIntercept() {
+    return true;
+  },
 });
 
-client.on(Events.MessageCreate, async (message) => {
-  if (!message.guild || message.author.bot) return;
-
-  const prefix = '!';
-  if (!message.content.startsWith(prefix)) return;
-
-  const args = message.content.slice(prefix.length).trim().split(/ +/);
-
-  const command = args.shift();
-
-  try {
-    await player.context.provide({ guild: message.guild }, () => {
-      switch (command) {
-        case 'play':
-          return PlayCommand(message, args);
-        case 'np':
-          return NowPlayingCommand(message);
-      }
-    });
-  } catch (e) {
-    console.error(e);
-    message.channel.send('An error occurred while executing this command.');
-  }
+interceptor.onStream((queue, track, format, stream) => {
+  const ext = format === StreamType.Opus ? '.opus' : '.pcm';
+  stream.interceptors.add(
+    createWriteStream(import.meta.dirname + '/../.streams/' + track.id + ext),
+  );
 });
 
-client.login();
+new CommandKit({
+  client,
+  bulkRegister: true,
+  skipBuiltInValidations: true,
+  eventsPath: join(import.meta.dirname, 'events'),
+  commandsPath: join(import.meta.dirname, 'commands'),
+});
+
+await client.login();

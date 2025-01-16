@@ -28,14 +28,17 @@ export class EqualizerStream extends PCMTransformer {
     );
 
     this.equalizer = new Equalizer(options.channels || 1, this.bandMultipliers);
-    if (Array.isArray(options.bandMultiplier)) this._processBands(options.bandMultiplier);
+    if (Array.isArray(options.bandMultiplier))
+      this._processBands(options.bandMultiplier);
   }
 
   public _processBands(multiplier: EqualizerBand[]) {
     for (const mul of multiplier) {
       if (mul.band > Equalizer.BAND_COUNT - 1 || mul.band < 0)
         throw new RangeError(
-          `Band value out of range. Expected >0 & <${Equalizer.BAND_COUNT - 1}, received "${mul.band}"`,
+          `Band value out of range. Expected >0 & <${
+            Equalizer.BAND_COUNT - 1
+          }, received "${mul.band}"`,
         );
       this.equalizer.setGain(mul.band, mul.gain);
     }
@@ -43,7 +46,11 @@ export class EqualizerStream extends PCMTransformer {
     this.onUpdate?.();
   }
 
-  public _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {
+  public _transform(
+    chunk: Buffer,
+    encoding: BufferEncoding,
+    callback: TransformCallback,
+  ): void {
     if (this.disabled) {
       this.push(chunk);
       return callback();

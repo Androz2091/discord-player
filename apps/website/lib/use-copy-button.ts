@@ -1,7 +1,15 @@
 'use client';
-import { useState, useRef, useEffect, useCallback, type MouseEventHandler } from 'react';
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  type MouseEventHandler,
+} from 'react';
 
-export function useCopyButton(onCopy: () => void): [checked: boolean, onClick: MouseEventHandler] {
+export function useCopyButton(
+  onCopy: () => void,
+): [checked: boolean, onClick: MouseEventHandler] {
   const [checked, setChecked] = useState(false);
   const timeoutRef = useRef<number | null>(null);
   const callbackRef = useRef(onCopy);

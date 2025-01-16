@@ -1,6 +1,6 @@
 {
   "name": "discord-voip",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "Discord VoIP library used by discord-player",
   "keywords": [
     "discord-player",

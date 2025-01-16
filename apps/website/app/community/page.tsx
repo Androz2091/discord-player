@@ -2,7 +2,11 @@
 
 import { Heading } from '@/components/heading';
 import Link from 'next/link';
-import { IExtractorShowcase, IMusicBotShowcase, ShowcaseResource } from '@/lib/data/showcase';
+import {
+  IExtractorShowcase,
+  IMusicBotShowcase,
+  ShowcaseResource,
+} from '@/lib/data/showcase';
 import { useEffect, useState } from 'react';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Card } from 'fumadocs-ui/components/card';
@@ -50,7 +54,8 @@ export default function CommunityPage() {
           Community Showcase
         </Heading>
         <p className="mt-2 mb-4 text-lg text-fd-muted-foreground">
-          A curated list of resources like open-source music bots and extractors, built by the Discord Player community.
+          A curated list of resources like open-source music bots and
+          extractors, built by the Discord Player community.
         </p>
         <Link
           className="inline-flex items-center justify-center text-sm font-medium ring-offset-fd-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring disabled:pointer-events-none disabled:opacity-50 bg-fd-background bg-gradient-to-b from-fd-primary to-fd-primary/60 text-fd-primary-foreground shadow-inner shadow-fd-background/20 hover:bg-fd-primary/90 h-11 px-6 rounded-full"

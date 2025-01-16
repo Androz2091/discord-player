@@ -14,7 +14,12 @@ import {
 import type Eris from 'eris';
 
 type ErisUserResolvable = Eris.User | string | Eris.Member;
-type ErisGuildResolvable = Eris.Guild | string | Eris.Member | Eris.GuildChannel | Eris.Role;
+type ErisGuildResolvable =
+  | Eris.Guild
+  | string
+  | Eris.Member
+  | Eris.GuildChannel
+  | Eris.Role;
 type ErisChannelResolvable = Eris.GuildChannel | string;
 
 const DiscordPlayerClientSymbol = Symbol('DiscordPlayerClient');
@@ -73,7 +78,8 @@ export function createErisCompat(client: Eris.Client): Client {
         case 'channels':
           return erisChannelsProxy(target, eris);
         case '__dp_voiceStateUpdate_proxy':
-          return (handler: (a, b) => void) => erisVoiceStateUpdateProxy(target, erisProxy, handler);
+          return (handler: (a, b) => void) =>
+            erisVoiceStateUpdateProxy(target, erisProxy, handler);
         case 'incrementMaxListeners':
           return () => {
             // @ts-expect-error patching
@@ -99,7 +105,11 @@ export function createErisCompat(client: Eris.Client): Client {
   return erisProxy as unknown as Client;
 }
 
-function erisVoiceStateUpdateProxy(client: Eris.Client, proxy: Eris.Client, handler: (a, b) => void) {
+function erisVoiceStateUpdateProxy(
+  client: Eris.Client,
+  proxy: Eris.Client,
+  handler: (a, b) => void,
+) {
   client.on('voiceStateUpdate', (member, oldState) => {
     try {
       const proxiedOldState = {
@@ -115,7 +125,9 @@ function erisVoiceStateUpdateProxy(client: Eris.Client, proxy: Eris.Client, hand
       } as VoiceState;
 
       const me = member.guild.members.get(client.user.id);
-      const resolvedChannel = member.guild.channels.get(member.voiceState.channelID);
+      const resolvedChannel = member.guild.channels.get(
+        member.voiceState.channelID,
+      );
 
       const proxiedNewState = {
         channelId: member.voiceState.channelID,
@@ -178,7 +190,11 @@ function erisVoiceEventsHandler(client: Eris.Client) {
       case GatewayDispatchEvents.VoiceStateUpdate: {
         const payload = packet.d as GatewayVoiceStateUpdateDispatchData;
 
-        if (payload.guild_id && payload.session_id && payload.user_id === client.user.id) {
+        if (
+          payload.guild_id &&
+          payload.session_id &&
+          payload.user_id === client.user.id
+        ) {
           adapters.get(payload.guild_id)?.onVoiceStateUpdate(payload);
         }
 
@@ -205,7 +221,10 @@ function erisChannelsProxy(client: Eris.Client, eris: typeof import('eris')) {
     },
     resolve(resolvable: string | ErisChannelResolvable) {
       if (typeof resolvable === 'string') {
-        return erisResolvedChannelProxy(this.client.getChannel(resolvable) as Eris.GuildChannel, client);
+        return erisResolvedChannelProxy(
+          this.client.getChannel(resolvable) as Eris.GuildChannel,
+          client,
+        );
       }
 
       if (resolvable instanceof eris.GuildChannel) {
@@ -235,7 +254,9 @@ function erisResolvedChannelProxy(
         case 'members':
           return (target as Eris.VoiceChannel).voiceMembers;
         case 'isVoiceBased':
-          return () => target.type === ChannelType.GuildVoice || target.type === ChannelType.GuildStageVoice;
+          return () =>
+            target.type === ChannelType.GuildVoice ||
+            target.type === ChannelType.GuildStageVoice;
         case 'isVoice':
           return () => target.type === ChannelType.GuildVoice;
         case 'isStage':
@@ -248,7 +269,10 @@ function erisResolvedChannelProxy(
   });
 }
 
-function erisVoiceAdapterProxy(guild: Eris.Guild | undefined, client: Eris.Client): Eris.Guild | undefined {
+function erisVoiceAdapterProxy(
+  guild: Eris.Guild | undefined,
+  client: Eris.Client,
+): Eris.Guild | undefined {
   if (!guild) return;
 
   return new Proxy(guild, {
@@ -263,7 +287,10 @@ function erisVoiceAdapterProxy(guild: Eris.Guild | undefined, client: Eris.Clien
   });
 }
 
-function erisVoiceAdapterCreator(guild: Eris.Guild, client: Eris.Client): DiscordGatewayAdapterCreator {
+function erisVoiceAdapterCreator(
+  guild: Eris.Guild,
+  client: Eris.Client,
+): DiscordGatewayAdapterCreator {
   return (methods) => {
     let adapters = getProperty<Map<string, typeof methods>>(client, 'adapters');
 

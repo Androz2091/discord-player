@@ -16,12 +16,26 @@ function getHTML(link: string): Promise<HTMLElement | null> {
     );
 }
 
-function makeImage({ height, url, width, ext = 'jpg' }: { url: string; width: number; height: number; ext?: string }) {
-  return url.replace('{w}', `${width}`).replace('{h}', `${height}`).replace('{f}', ext);
+function makeImage({
+  height,
+  url,
+  width,
+  ext = 'jpg',
+}: {
+  url: string;
+  width: number;
+  height: number;
+  ext?: string;
+}) {
+  return url
+    .replace('{w}', `${width}`)
+    .replace('{h}', `${height}`)
+    .replace('{f}', ext);
 }
 
 function parseDuration(d: string) {
-  const r = (name: string, unit: string) => `((?<${name}>-?\\d*[\\.,]?\\d+)${unit})?`;
+  const r = (name: string, unit: string) =>
+    `((?<${name}>-?\\d*[\\.,]?\\d+)${unit})?`;
   const regex = new RegExp(
     [
       '(?<negative>-)?P',
@@ -67,7 +81,9 @@ export class AppleMusic {
 
   public static async search(query: string) {
     try {
-      const url = `https://music.apple.com/us/search?term=${encodeURIComponent(query)}`;
+      const url = `https://music.apple.com/us/search?term=${encodeURIComponent(
+        query,
+      )}`;
       const node = await getHTML(url);
       if (!node) return [];
 
@@ -99,17 +115,26 @@ export class AppleMusic {
     }
   }
 
-  public static async getSongInfoFallback(res: HTMLElement, name: string, id: string, link: string) {
+  public static async getSongInfoFallback(
+    res: HTMLElement,
+    name: string,
+    id: string,
+    link: string,
+  ) {
     try {
       const metaTags = res.getElementsByTagName('meta');
       if (!metaTags.length) return null;
 
       const title =
-        metaTags.find((r) => r.getAttribute('name') === 'apple:title')?.getAttribute('content') ||
+        metaTags
+          .find((r) => r.getAttribute('name') === 'apple:title')
+          ?.getAttribute('content') ||
         res.querySelector('title')?.innerText ||
         name;
       const contentId =
-        metaTags.find((r) => r.getAttribute('name') === 'apple:content_id')?.getAttribute('content') || id;
+        metaTags
+          .find((r) => r.getAttribute('name') === 'apple:content_id')
+          ?.getAttribute('content') || id;
       const durationRaw = metaTags
         .find((r) => r.getAttribute('property') === 'music:song:duration')
         ?.getAttribute('content');
@@ -126,10 +151,18 @@ export class AppleMusic {
         url: link,
         thumbnail:
           metaTags
-            .find((r) => ['og:image:secure_url', 'og:image'].includes(r.getAttribute('property')!))
-            ?.getAttribute('content') || 'https://music.apple.com/assets/favicon/favicon-180.png',
+            .find((r) =>
+              ['og:image:secure_url', 'og:image'].includes(
+                r.getAttribute('property')!,
+              ),
+            )
+            ?.getAttribute('content') ||
+          'https://music.apple.com/assets/favicon/favicon-180.png',
         artist: {
-          name: res.querySelector('.song-subtitles__artists>a')?.textContent?.trim() || 'Apple Music',
+          name:
+            res
+              .querySelector('.song-subtitles__artists>a')
+              ?.textContent?.trim() || 'Apple Music',
         },
       };
 
@@ -157,7 +190,9 @@ export class AppleMusic {
       const datasrc =
         res.getElementById('serialized-server-data')?.innerText ||
         res.innerText
-          .split('<script type="application/json" id="serialized-server-data">')?.[1]
+          .split(
+            '<script type="application/json" id="serialized-server-data">',
+          )?.[1]
           ?.split('</script>')?.[0];
       if (!datasrc) throw 'not found';
       const data = JSON.parse(datasrc)[0].data.seoData;
@@ -203,7 +238,9 @@ export class AppleMusic {
       const datasrc =
         res.getElementById('serialized-server-data')?.innerText ||
         res.innerText
-          .split('<script type="application/json" id="serialized-server-data">')?.[1]
+          .split(
+            '<script type="application/json" id="serialized-server-data">',
+          )?.[1]
           ?.split('</script>')?.[0];
       if (!datasrc) throw 'not found';
       const pl = JSON.parse(datasrc)[0].data.seoData;
@@ -262,7 +299,9 @@ export class AppleMusic {
       const datasrc =
         res.getElementById('serialized-server-data')?.innerText ||
         res.innerText
-          .split('<script type="application/json" id="serialized-server-data">')?.[1]
+          .split(
+            '<script type="application/json" id="serialized-server-data">',
+          )?.[1]
           ?.split('</script>')?.[0];
       if (!datasrc) throw 'not found';
       const pl = JSON.parse(datasrc)[0].data.seoData;

@@ -24,8 +24,8 @@ Ensure that you have either `FFmpeg` or `Avconv` available on your system.
 ### Installing FFmpeg or Avconv
 
 <Callout>
-  We do not recommend using static binaries like `ffmpeg-static` as they are not always up-to-date or stable and may
-  cause issues.
+  We do not recommend using static binaries like `ffmpeg-static` as they are not
+  always up-to-date or stable and may cause issues.
 </Callout>
 
 You have several options to get FFmpeg:
@@ -62,7 +62,9 @@ client.once('ready', () => {
   // ^------ This shows how your search query is interpreted, if the query was cached, which extractor resolved the query or which extractor failed to resolve, etc.
 
   // log debug logs of the queue, such as voice connection logs, player execution, streaming process etc.
-  player.events.on('debug', (queue, message) => console.log(`[DEBUG ${queue.guild.id}] ${message}`)); // [!code highlight]
+  player.events.on('debug', (queue, message) =>
+    console.log(`[DEBUG ${queue.guild.id}] ${message}`),
+  ); // [!code highlight]
   // ^------ This shows how queue handles the track. It logs informations like the status of audio player, streaming process, configurations used, if streaming failed or not, etc.
 });
 ```

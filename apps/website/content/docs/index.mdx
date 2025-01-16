@@ -12,7 +12,10 @@ Discord Player is a robust framework for developing Discord Music bots using Jav
     rel="noopener noreferrer"
     href="/guide/[topic]/[page]"
   >
-    <img src="https://img.shields.io/npm/dt/discord-player?style=for-the-badge" alt="downloadsBadge" />
+    <img
+      src="https://img.shields.io/npm/dt/discord-player?style=for-the-badge"
+      alt="downloadsBadge"
+    />
   </a>
   <a
     className="underline font-semibold text-teal-500 hover:text-teal-600"
@@ -20,7 +23,10 @@ Discord Player is a robust framework for developing Discord Music bots using Jav
     rel="noopener noreferrer"
     href="https://npmjs.com/discord-player"
   >
-    <img src="https://img.shields.io/npm/v/discord-player?style=for-the-badge" alt="versionBadge" />
+    <img
+      src="https://img.shields.io/npm/v/discord-player?style=for-the-badge"
+      alt="versionBadge"
+    />
   </a>
   <a
     className="underline font-semibold text-teal-500 hover:text-teal-600"
@@ -71,8 +77,9 @@ npm install discord-player @discord-player/extractor
 FFmpeg or Avconv is required for media transcoding. You can obtain it from [https://ffmpeg.org](https://ffmpeg.org) or via npm.
 
 <Callout type="warn">
-  We do not recommend installing `ffmpeg` via npm because binaries pulled from npm is known to be unstable. It is
-  recommended to install it from the official source.
+  We do not recommend installing `ffmpeg` via npm because binaries pulled from
+  npm is known to be unstable. It is recommended to install it from the official
+  source.
 </Callout>
 
 ```package-install
@@ -85,7 +92,9 @@ npm install --save @node-ffmpeg/node-ffmpeg-installer
 npm install --save ffmpeg-binaries
 ```
 
-<Callout type="info">Use `FFMPEG_PATH` environment variable to load ffmpeg from custom path.</Callout>
+<Callout type="info">
+  Use `FFMPEG_PATH` environment variable to load ffmpeg from custom path.
+</Callout>
 
 Once you have completed these installations, let's proceed with writing a simple music bot.
 
@@ -110,8 +119,9 @@ await player.extractors.loadMulti(DefaultExtractors);
 ```
 
 <Callout type="warn">
-  We don't recommend assigning `player` to `client` using `client.player = player` here. Discord Player provides
-  [hooks](/docs/hooks/using_hooks) (aka helper functions) to access discord-player objects at ease.
+  We don't recommend assigning `player` to `client` using `client.player =
+  player` here. Discord Player provides [hooks](/docs/hooks/using_hooks) (aka
+  helper functions) to access discord-player objects at ease.
 </Callout>
 
 ## Eris Setup
@@ -142,7 +152,8 @@ const { useMainPlayer } = require('discord-player');
 export async function execute(interaction) {
   const player = useMainPlayer();
   const channel = interaction.member.voice.channel;
-  if (!channel) return interaction.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
+  if (!channel)
+    return interaction.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
   const query = interaction.options.getString('query', true); // we need input/query to play
 
   // let's defer the interaction as things can take time to process

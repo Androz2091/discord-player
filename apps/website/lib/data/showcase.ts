@@ -59,13 +59,15 @@ export const ShowcaseResource: IShowcase = {
       },
       {
         name: 'Naybor',
-        description: 'Complete and configurable discord music bot using discord-player',
+        description:
+          'Complete and configurable discord music bot using discord-player',
         version: 'v6.3.0',
         url: 'https://github.com/antoinemcx/naybor',
       },
       {
         name: '그린Bot',
-        description: 'Very simple and based official guide music bot, written in TypeScript.',
+        description:
+          'Very simple and based official guide music bot, written in TypeScript.',
         version: 'v6.3.0',
         url: 'https://github.com/GreenScreen410/GreenBot-Discord',
       },
@@ -78,7 +80,8 @@ export const ShowcaseResource: IShowcase = {
       },
       {
         name: 'Botanique',
-        description: 'Typescript bot running on Docker, using discord-player for music and lyrics.',
+        description:
+          'Typescript bot running on Docker, using discord-player for music and lyrics.',
         version: 'v7.0.0',
         url: 'https://git.mylloon.fr/ConfrerieDuKassoulait/Botanique',
       },
@@ -91,13 +94,15 @@ export const ShowcaseResource: IShowcase = {
       },
       {
         name: 'Mittelbot',
-        description: "A moderation & utility bot with music to play everyone's favourite music.",
+        description:
+          "A moderation & utility bot with music to play everyone's favourite music.",
         version: 'v6.6.3',
         url: 'https://github.com/Mittelbots/Mittelbot',
       },
       {
         name: 'Wego Overseer',
-        description: "Using discord-player to manage Wego Overseer's music functionality",
+        description:
+          "Using discord-player to manage Wego Overseer's music functionality",
         version: 'v6.2.1',
         url: 'https://github.com/rickklaasboer/wego-overseer',
       },
@@ -110,13 +115,15 @@ export const ShowcaseResource: IShowcase = {
       },
       {
         name: 'Beat-Bot',
-        description: 'Fun discord bot with helpful util commands and music player using discord-player.',
+        description:
+          'Fun discord bot with helpful util commands and music player using discord-player.',
         version: 'v6.1.1',
         url: 'https://github.com/IslandRhythms/Beat-Bot',
       },
       {
         name: 'Melody',
-        description: 'Useful Discord music bot with many commands and effects to spice up your music.',
+        description:
+          'Useful Discord music bot with many commands and effects to spice up your music.',
         version: 'v6.1.1',
         url: 'https://github.com/NerdyTechy/Melody',
       },
@@ -161,13 +168,15 @@ export const ShowcaseResource: IShowcase = {
       },
       {
         name: 'Flowease',
-        description: 'A discord bot that use discord-player to play music from netease-cloud-music',
+        description:
+          'A discord bot that use discord-player to play music from netease-cloud-music',
         version: 'v6.6.0',
         url: 'https://github.com/Lutra-Fs/Flowease',
       },
       {
         name: 'AtlantaBot',
-        description: 'We are using discord-player to manager all of our music commands.',
+        description:
+          'We are using discord-player to manager all of our music commands.',
         version: 'v4.1.0',
         url: 'https://github.com/Androz2091/AtlantaBot',
       },
@@ -187,7 +196,8 @@ export const ShowcaseResource: IShowcase = {
       },
       {
         name: 'muusik.app',
-        description: 'An open-source Discord music bot with an interative dashboard, only plays music, nothing else.',
+        description:
+          'An open-source Discord music bot with an interative dashboard, only plays music, nothing else.',
         version: 'v6.6.7',
         url: 'https://muusik.app',
       },
@@ -206,11 +216,14 @@ export const ShowcaseResource: IShowcase = {
       },
       {
         name: 'discord-bot',
-        description: '🎵 Music bot for my private Discord server, powered by discord-player',
+        description:
+          '🎵 Music bot for my private Discord server, powered by discord-player',
         version: 'v7.0.0',
-        url: 'https://github.com/xxczaki/discord-bot'
-      }
-    ].sort((a, b) => semver.rcompare(a.version.replace(/^v/, ''), b.version.replace(/^v/, ''))),
+        url: 'https://github.com/xxczaki/discord-bot',
+      },
+    ].sort((a, b) =>
+      semver.rcompare(a.version.replace(/^v/, ''), b.version.replace(/^v/, '')),
+    ),
   ),
   extractors: PromotedList.extractors.concat([
     {
@@ -221,7 +234,8 @@ export const ShowcaseResource: IShowcase = {
     },
     {
       name: 'discord-player-deezer',
-      description: 'An official extractor for discord-player to add support for deezer source.',
+      description:
+        'An official extractor for discord-player to add support for deezer source.',
       url: 'https://npm.im/discord-player-deezer',
     },
     {
@@ -231,17 +245,20 @@ export const ShowcaseResource: IShowcase = {
     },
     {
       name: 'discord-player-tidal',
-      description: 'An unofficial discord-player extractor to add support for tidal source.',
+      description:
+        'An unofficial discord-player extractor to add support for tidal source.',
       url: 'https://npm.im/discord-player-tidal',
     },
     {
       name: 'discord-player-soundgasm',
-      description: 'An unofficial discord-player extractor to add support for Soundgasm.',
+      description:
+        'An unofficial discord-player extractor to add support for Soundgasm.',
       url: 'https://npm.im/soundgasm-extractor',
     },
     {
       name: 'discord-player-tts',
-      description: 'An unofficial discord-player extractor to add tts capabilities to your bot.',
+      description:
+        'An unofficial discord-player extractor to add tts capabilities to your bot.',
       url: 'https://npm.im/tts-extractor',
     },
   ]),

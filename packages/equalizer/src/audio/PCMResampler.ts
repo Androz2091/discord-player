@@ -10,7 +10,8 @@ export class PCMResampler extends PCMTransformer {
 
   public constructor(options?: PCMResamplerOptions) {
     super(options);
-    if (options?.targetSampleRate) this.targetSampleRate = options.targetSampleRate;
+    if (options?.targetSampleRate)
+      this.targetSampleRate = options.targetSampleRate;
   }
 
   public get AF_NIGHTCORE() {

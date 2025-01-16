@@ -7,7 +7,8 @@ export interface AFResampleConfig {
 }
 
 export function resamplePCM(chunk: Buffer, config: AFResampleConfig) {
-  const { bits, readInt, sourceSampleRate, targetSampleRate, writeInt } = config;
+  const { bits, readInt, sourceSampleRate, targetSampleRate, writeInt } =
+    config;
 
   if (sourceSampleRate === targetSampleRate) return chunk;
 
@@ -15,7 +16,9 @@ export function resamplePCM(chunk: Buffer, config: AFResampleConfig) {
     bytes = bits / 8;
   const chunkLength = chunk.length / 2;
 
-  const resampledData = Buffer.alloc(Math.floor((chunkLength * targetSampleRate) / sourceSampleRate));
+  const resampledData = Buffer.alloc(
+    Math.floor((chunkLength * targetSampleRate) / sourceSampleRate),
+  );
   const resLen = resampledData.length;
 
   let i = 0,
@@ -36,7 +39,11 @@ export function resamplePCM(chunk: Buffer, config: AFResampleConfig) {
     if (isNaN(sum)) {
       writeInt(resampledData, sample, j);
     } else {
-      writeInt(resampledData, Math.min(extremum - 1, Math.max(-extremum, sum)), j);
+      writeInt(
+        resampledData,
+        Math.min(extremum - 1, Math.max(-extremum, sum)),
+        j,
+      );
     }
 
     j += bytes;

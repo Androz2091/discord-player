@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { BiquadFilter, BiquadFilters, Coefficients, FilterType, Q_BUTTERWORTH } from '..';
+import {
+  BiquadFilter,
+  BiquadFilters,
+  Coefficients,
+  FilterType,
+  Q_BUTTERWORTH,
+} from '..';
 
 describe('Biquad', () => {
-  const getCoeff = (filter: BiquadFilters) => Coefficients.from(filter, 48000, 20, Q_BUTTERWORTH, 10);
+  const getCoeff = (filter: BiquadFilters) =>
+    Coefficients.from(filter, 48000, 20, Q_BUTTERWORTH, 10);
 
   it('should apply LowPass filter', () => {
     const coefficients = getCoeff(FilterType.LowPass);

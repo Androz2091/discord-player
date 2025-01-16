@@ -94,7 +94,8 @@ export class WebmBaseDemuxer extends Transform {
    */
   _readEBMLId(chunk: Buffer, offset: number) {
     const idLength = vintLength(chunk, offset);
-    if (idLength === WebmBaseDemuxer.TOO_SHORT) return WebmBaseDemuxer.TOO_SHORT;
+    if (idLength === WebmBaseDemuxer.TOO_SHORT)
+      return WebmBaseDemuxer.TOO_SHORT;
     return {
       id: chunk.subarray(offset, offset + idLength),
       offset: offset + idLength,
@@ -111,7 +112,8 @@ export class WebmBaseDemuxer extends Transform {
    */
   _readTagDataSize(chunk: Buffer, offset: number) {
     const sizeLength = vintLength(chunk, offset);
-    if (sizeLength === WebmBaseDemuxer.TOO_SHORT) return WebmBaseDemuxer.TOO_SHORT;
+    if (sizeLength === WebmBaseDemuxer.TOO_SHORT)
+      return WebmBaseDemuxer.TOO_SHORT;
     const dataLength = expandVint(chunk, offset, offset + sizeLength);
     return { offset: offset + sizeLength, dataLength, sizeLength };
   }
@@ -135,29 +137,45 @@ export class WebmBaseDemuxer extends Transform {
     }
     offset = idData.offset;
     const sizeData = this._readTagDataSize(chunk, offset);
-    if (sizeData === WebmBaseDemuxer.TOO_SHORT) return WebmBaseDemuxer.TOO_SHORT;
+    if (sizeData === WebmBaseDemuxer.TOO_SHORT)
+      return WebmBaseDemuxer.TOO_SHORT;
     const { dataLength } = sizeData;
     offset = sizeData.offset;
     // If this tag isn't useful, tell the stream to stop processing data until the tag ends
-    if (typeof WebmBaseDemuxer.TAGS[ebmlID as keyof (typeof WebmBaseDemuxer)['TAGS']] === 'undefined') {
+    if (
+      typeof WebmBaseDemuxer.TAGS[
+        ebmlID as keyof (typeof WebmBaseDemuxer)['TAGS']
+      ] === 'undefined'
+    ) {
       if (chunk.length > offset + (dataLength as number)) {
         return { offset: offset + (dataLength as number) };
       }
-      return { offset, _skipUntil: this._count + (offset as number) + (dataLength as number) };
+      return {
+        offset,
+        _skipUntil: this._count + (offset as number) + (dataLength as number),
+      };
     }
 
-    const tagHasChildren = WebmBaseDemuxer.TAGS[ebmlID as keyof (typeof WebmBaseDemuxer)['TAGS']];
+    const tagHasChildren =
+      WebmBaseDemuxer.TAGS[ebmlID as keyof (typeof WebmBaseDemuxer)['TAGS']];
     if (tagHasChildren) {
       return { offset };
     }
 
-    if ((offset as number) + (dataLength as number) > chunk.length) return WebmBaseDemuxer.TOO_SHORT;
-    const data = chunk.subarray(offset, (offset as number) + (dataLength as number));
+    if ((offset as number) + (dataLength as number) > chunk.length)
+      return WebmBaseDemuxer.TOO_SHORT;
+    const data = chunk.subarray(
+      offset,
+      (offset as number) + (dataLength as number),
+    );
     if (!this._track) {
       if (ebmlID === 'ae') this._incompleteTrack = {};
       if (ebmlID === 'd7') this._incompleteTrack.number = data[0];
       if (ebmlID === '83') this._incompleteTrack.type = data[0];
-      if (this._incompleteTrack.type === 2 && typeof this._incompleteTrack.number !== 'undefined') {
+      if (
+        this._incompleteTrack.type === 2 &&
+        typeof this._incompleteTrack.number !== 'undefined'
+      ) {
         // @ts-ignore
         this._track = this._incompleteTrack;
       }
@@ -209,7 +227,8 @@ function vintLength(buffer: Buffer, index: number) {
 
 function expandVint(buffer: Buffer, start: number, end: number) {
   const length = vintLength(buffer, start);
-  if (end > buffer.length || length === WebmBaseDemuxer.TOO_SHORT) return WebmBaseDemuxer.TOO_SHORT;
+  if (end > buffer.length || length === WebmBaseDemuxer.TOO_SHORT)
+    return WebmBaseDemuxer.TOO_SHORT;
   // @ts-ignore
   const mask = (1 << (8 - length)) - 1;
   let value = buffer[start] & mask;

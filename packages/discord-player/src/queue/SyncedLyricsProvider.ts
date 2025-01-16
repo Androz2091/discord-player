@@ -17,7 +17,10 @@ export class SyncedLyricsProvider {
   public interval = 100;
   public readonly lyrics: LyricsData = new Map();
 
-  public constructor(public readonly queue: GuildQueue, public readonly raw?: LrcGetResult | LrcSearchResult) {
+  public constructor(
+    public readonly queue: GuildQueue,
+    public readonly raw?: LrcGetResult | LrcSearchResult,
+  ) {
     if (raw?.syncedLyrics) this.load(raw?.syncedLyrics);
   }
 
@@ -38,7 +41,10 @@ export class SyncedLyricsProvider {
 
       if (match) {
         const [, minutes, seconds, milliseconds] = match;
-        const timestamp = parseInt(minutes) * 60 * 1000 + parseInt(seconds) * 1000 + parseInt(milliseconds);
+        const timestamp =
+          parseInt(minutes) * 60 * 1000 +
+          parseInt(seconds) * 1000 +
+          parseInt(milliseconds);
 
         this.lyrics.set(timestamp, line.replace(timestampPattern, '').trim());
       }
@@ -52,11 +58,14 @@ export class SyncedLyricsProvider {
   public at(time: number): LyricsAt | null {
     const lowestTime = this.lyrics.keys().next().value;
     if (lowestTime == null || time < lowestTime) return null;
-    if (this.lyrics.has(time)) return { line: this.lyrics.get(time) as string, timestamp: time };
+    if (this.lyrics.has(time))
+      return { line: this.lyrics.get(time) as string, timestamp: time };
 
     const keys = Array.from(this.lyrics.keys());
 
-    const closest = keys.reduce((a, b) => (Math.abs(b - time) < Math.abs(a - time) ? b : a));
+    const closest = keys.reduce((a, b) =>
+      Math.abs(b - time) < Math.abs(a - time) ? b : a,
+    );
 
     if (closest > time) return null;
 
@@ -152,7 +161,12 @@ export class SyncedLyricsProvider {
 
       if (!lyrics) return;
 
-      if (lastValue !== null && lyrics.line === lastValue.line && lyrics.timestamp === lastValue.timestamp) return;
+      if (
+        lastValue !== null &&
+        lyrics.line === lastValue.line &&
+        lyrics.timestamp === lastValue.timestamp
+      )
+        return;
 
       lastValue = lyrics;
 

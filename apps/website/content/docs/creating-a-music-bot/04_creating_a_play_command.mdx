@@ -87,22 +87,41 @@ export async function execute(interaction) {
 
   // Check if the user is in a voice channel
   if (!voiceChannel) {
-    return interaction.reply('You need to be in a voice channel to play music!');
+    return interaction.reply(
+      'You need to be in a voice channel to play music!',
+    );
   }
 
   // Check if the bot is already playing in a different voice channel
-  if (interaction.guild.members.me.voice.channel && interaction.guild.members.me.voice.channel !== voiceChannel) {
-    return interaction.reply('I am already playing in a different voice channel!');
+  if (
+    interaction.guild.members.me.voice.channel &&
+    interaction.guild.members.me.voice.channel !== voiceChannel
+  ) {
+    return interaction.reply(
+      'I am already playing in a different voice channel!',
+    );
   }
 
   // Check if the bot has permission to join the voice channel
-  if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.Connect)) {
-    return interaction.reply('I do not have permission to join your voice channel!');
+  if (
+    !interaction.guild.members.me.permissions.has(
+      PermissionsBitField.Flags.Connect,
+    )
+  ) {
+    return interaction.reply(
+      'I do not have permission to join your voice channel!',
+    );
   }
 
   // Check if the bot has permission to speak in the voice channel
-  if (!interaction.guild.members.me.permissionsIn(voiceChannel).has(PermissionsBitField.Flags.Speak)) {
-    return interaction.reply('I do not have permission to speak in your voice channel!');
+  if (
+    !interaction.guild.members.me
+      .permissionsIn(voiceChannel)
+      .has(PermissionsBitField.Flags.Speak)
+  ) {
+    return interaction.reply(
+      'I do not have permission to speak in your voice channel!',
+    );
   }
 }
 ```
@@ -122,19 +141,38 @@ export async function execute(interaction) {
   const voiceChannel = interaction.member.voice.channel;
 
   if (!voiceChannel) {
-    return interaction.reply('You need to be in a voice channel to play music!');
+    return interaction.reply(
+      'You need to be in a voice channel to play music!',
+    );
   }
 
-  if (interaction.guild.members.me.voice.channel && interaction.guild.members.me.voice.channel !== voiceChannel) {
-    return interaction.reply('I am already playing in a different voice channel!');
+  if (
+    interaction.guild.members.me.voice.channel &&
+    interaction.guild.members.me.voice.channel !== voiceChannel
+  ) {
+    return interaction.reply(
+      'I am already playing in a different voice channel!',
+    );
   }
 
-  if (!voiceChannel.permissionsFor(interaction.guild.members.me).has(PermissionsBitField.Flags.Connect)) {
-    return interaction.reply('I do not have permission to join your voice channel!');
+  if (
+    !voiceChannel
+      .permissionsFor(interaction.guild.members.me)
+      .has(PermissionsBitField.Flags.Connect)
+  ) {
+    return interaction.reply(
+      'I do not have permission to join your voice channel!',
+    );
   }
 
-  if (!voiceChannel.permissionsFor(interaction.guild.members.me).has(PermissionsBitField.Flags.Speak)) {
-    return interaction.reply('I do not have permission to speak in your voice channel!');
+  if (
+    !voiceChannel
+      .permissionsFor(interaction.guild.members.me)
+      .has(PermissionsBitField.Flags.Speak)
+  ) {
+    return interaction.reply(
+      'I do not have permission to speak in your voice channel!',
+    );
   }
 
   try {
@@ -146,7 +184,9 @@ export async function execute(interaction) {
     });
 
     // Reply to the user that the song has been added to the queue
-    return interaction.reply(`${result.track.title} has been added to the queue!`);
+    return interaction.reply(
+      `${result.track.title} has been added to the queue!`,
+    );
   } catch (error) {
     // Handle any errors that occur
     console.error(error);

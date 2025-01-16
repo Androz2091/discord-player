@@ -18,7 +18,13 @@ export class BiquadFilter {
   public constructor(public coefficients: Coefficients) {}
 
   public setFilter(filter: BiquadFilters, options: BiquadSetFilterProps) {
-    const coefficients = Coefficients.from(filter, options.fs, options.f0, options.Q, options.gain);
+    const coefficients = Coefficients.from(
+      filter,
+      options.fs,
+      options.f0,
+      options.Q,
+      options.gain,
+    );
 
     this.update(coefficients);
   }
@@ -43,7 +49,8 @@ export class BiquadFilter {
   public run(input: number) {
     const { a1, a2, b0, b1, b2 } = this.coefficients;
 
-    const out = b0 * input + b1 * this.x1 + b2 * this.x2 - a1 * this.y1 - a2 * this.y2;
+    const out =
+      b0 * input + b1 * this.x1 + b2 * this.x2 - a1 * this.y1 - a2 * this.y2;
 
     this.x2 = this.x1;
     this.x1 = input;

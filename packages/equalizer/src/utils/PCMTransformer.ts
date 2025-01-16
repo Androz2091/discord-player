@@ -41,9 +41,9 @@ export class PCMTransformer extends Transform {
         break;
       default:
         throw new TypeError(
-          `Expected type to be one of ${(['s16be', 's16le', 's32be', 's32le'] as PCMType[]).join(', ')}, got "${
-            options.type
-          }"`,
+          `Expected type to be one of ${(
+            ['s16be', 's16le', 's32be', 's32le'] as PCMType[]
+          ).join(', ')}, got "${options.type}"`,
         );
     }
 
@@ -64,12 +64,16 @@ export class PCMTransformer extends Transform {
   }
 
   public _readInt(buffer: Buffer, index: number) {
-    const method = `readInt${this.type.substring(1).toUpperCase()}` as `readInt${16 | 32}${'L' | 'B'}E`;
+    const method = `readInt${this.type
+      .substring(1)
+      .toUpperCase()}` as `readInt${16 | 32}${'L' | 'B'}E`;
     return buffer[method](index);
   }
 
   public _writeInt(buffer: Buffer, int: number, index: number) {
-    const method = `writeInt${this.type.substring(1).toUpperCase()}` as `writeInt${16 | 32}${'L' | 'B'}E`;
+    const method = `writeInt${this.type
+      .substring(1)
+      .toUpperCase()}` as `writeInt${16 | 32}${'L' | 'B'}E`;
     return buffer[method](int, index);
   }
 

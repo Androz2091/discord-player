@@ -20,6 +20,8 @@ export * from './Player';
 export * from './hooks';
 export * from './utils/serde';
 export * from './utils/DependencyReportGenerator';
+export * from './stream/InterceptedStream';
+export * from './PlayerStreamInterceptor';
 export {
   AudioFilters as PCMAudioFilters,
   type BiquadFilters,
@@ -38,6 +40,8 @@ export {
   getVoiceConnection,
   getVoiceConnections,
   joinVoiceChannel,
+  StreamType,
+  createAudioResource,
   type JoinConfig,
   type JoinVoiceChannelOptions,
   type CreateAudioPlayerOptions,

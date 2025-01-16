@@ -79,13 +79,16 @@ export class VoiceWebSocket extends EventEmitter {
     this.ws.onmessage = (err) => this.onMessage(err as unknown as MessageEvent);
     this.ws.onopen = (err) => this.emit('open', err);
     // @ts-ignore
-    this.ws.onerror = (err: Error | ErrorEvent) => this.emit('error', err instanceof Error ? err : err.error);
+    this.ws.onerror = (err: Error | ErrorEvent) =>
+      this.emit('error', err instanceof Error ? err : err.error);
     this.ws.onclose = (err) => this.emit('close', err);
 
     this.lastHeartbeatAck = 0;
     this.lastHeartbeatSend = 0;
 
-    this.debug = debug ? (message: string) => this.emit('debug', message) : null;
+    this.debug = debug
+      ? (message: string) => this.emit('debug', message)
+      : null;
   }
 
   /**
@@ -167,7 +170,8 @@ export class VoiceWebSocket extends EventEmitter {
    * @param ms - The interval in milliseconds. If negative, the interval will be unset
    */
   public setHeartbeatInterval(ms: number) {
-    if (this.heartbeatInterval !== undefined) clearInterval(this.heartbeatInterval);
+    if (this.heartbeatInterval !== undefined)
+      clearInterval(this.heartbeatInterval);
     if (ms > 0) {
       this.heartbeatInterval = setInterval(() => {
         if (this.lastHeartbeatSend !== 0 && this.missedHeartbeats >= 3) {

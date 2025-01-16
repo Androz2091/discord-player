@@ -1,0 +1,4 @@
+.commandkit/
+dist/
+.streams/*
+!.streams/.gitkeep

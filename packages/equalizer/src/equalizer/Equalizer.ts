@@ -1,4 +1,8 @@
-import { ChannelProcessor, ReadIntCallback, WriteIntCallback } from './ChannelProcessor';
+import {
+  ChannelProcessor,
+  ReadIntCallback,
+  WriteIntCallback,
+} from './ChannelProcessor';
 import { EqualizerCoefficients } from './Coefficients';
 import { EqualizerConfiguration } from './EqualizerConfiguration';
 
@@ -27,8 +31,16 @@ export class Equalizer extends EqualizerConfiguration {
     new EqualizerCoefficients(8.5868004289e-1, 7.0659978553e-2, 1.7600401337),
     new EqualizerCoefficients(7.8409610788e-1, 1.0795194606e-1, 1.5450725522),
     new EqualizerCoefficients(6.8332861002e-1, 1.5833569499e-1, 1.1426447155),
-    new EqualizerCoefficients(5.5267518228e-1, 2.2366240886e-1, 4.0186190803e-1),
-    new EqualizerCoefficients(4.1811888447e-1, 2.9094055777e-1, -7.0905944223e-1),
+    new EqualizerCoefficients(
+      5.5267518228e-1,
+      2.2366240886e-1,
+      4.0186190803e-1,
+    ),
+    new EqualizerCoefficients(
+      4.1811888447e-1,
+      2.9094055777e-1,
+      -7.0905944223e-1,
+    ),
   ];
   public channels: ChannelProcessor[] = [];
   public channelCount: number;

@@ -1,8 +1,16 @@
 import { type Readable, pipeline } from 'stream';
 import { EqualizerStream, EqualizerStreamOptions } from './equalizer';
-import { AudioFilter, PCMFiltererOptions, PCMResampler, PCMResamplerOptions } from './audio';
+import {
+  AudioFilter,
+  PCMFiltererOptions,
+  PCMResampler,
+  PCMResamplerOptions,
+} from './audio';
 import { BiquadStream, BiquadStreamOptions } from './biquad';
-import { VolumeTransformer, VolumeTransformerOptions } from './audio/VolumeTransformer';
+import {
+  VolumeTransformer,
+  VolumeTransformerOptions,
+} from './audio/VolumeTransformer';
 
 export interface DSPFiltersPreset {
   equalizer?: EqualizerStreamOptions;
@@ -31,10 +39,18 @@ export class FiltersChain {
     this.source = src;
 
     // const resampler = new PCMResampler(presets.resampler);
-    const equalizerStream = !presets.equalizer?.disabled ? new EqualizerStream(presets.equalizer) : null;
-    const dspStream = !presets.dsp?.disabled ? new AudioFilter(presets.dsp) : null;
-    const biquadStream = !presets.biquad?.disabled ? new BiquadStream(presets.biquad) : null;
-    const volumeTransformer = !presets.volume?.disabled ? new VolumeTransformer(presets.volume) : null;
+    const equalizerStream = !presets.equalizer?.disabled
+      ? new EqualizerStream(presets.equalizer)
+      : null;
+    const dspStream = !presets.dsp?.disabled
+      ? new AudioFilter(presets.dsp)
+      : null;
+    const biquadStream = !presets.biquad?.disabled
+      ? new BiquadStream(presets.biquad)
+      : null;
+    const volumeTransformer = !presets.volume?.disabled
+      ? new VolumeTransformer(presets.volume)
+      : null;
 
     // this.resampler = resampler;
     this.equalizer = equalizerStream;
@@ -49,9 +65,13 @@ export class FiltersChain {
     if (biquadStream) biquadStream.onUpdate = this.onUpdate;
     if (volumeTransformer) volumeTransformer.onUpdate = this.onUpdate;
 
-    const chains = [src, equalizerStream, dspStream, biquadStream, volumeTransformer].filter(Boolean) as Readonly<
-      Readable[]
-    >;
+    const chains = [
+      src,
+      equalizerStream,
+      dspStream,
+      biquadStream,
+      volumeTransformer,
+    ].filter(Boolean) as Readonly<Readable[]>;
 
     if (!chains.length) return src;
 
@@ -59,7 +79,8 @@ export class FiltersChain {
     this.destination = pipeline(...chains, (err: Error | null) => {
       if (err) {
         this.destroy();
-        if (!err.message.includes('ERR_STREAM_PREMATURE_CLOSE')) this.onError(err);
+        if (!err.message.includes('ERR_STREAM_PREMATURE_CLOSE'))
+          this.onError(err);
       }
     });
 

@@ -24,13 +24,19 @@ export class DiscordPlayerError extends Error {
 
 export class OutOfSpaceError extends DiscordPlayerError {
   constructor(target: string, capacity: number, total: number) {
-    super(ErrorCodes.ERR_OUT_OF_SPACE, `Max capacity reached for ${target} (Capacity ${capacity}/Total ${total})`);
+    super(
+      ErrorCodes.ERR_OUT_OF_SPACE,
+      `Max capacity reached for ${target} (Capacity ${capacity}/Total ${total})`,
+    );
   }
 }
 
 export class InvalidArgTypeError extends DiscordPlayerError {
   constructor(target: string, expectation: string, found: string) {
-    super(ErrorCodes.ERR_INVALID_ARG_TYPE, `Expected ${target} to be "${expectation}", received "${found}"`);
+    super(
+      ErrorCodes.ERR_INVALID_ARG_TYPE,
+      `Expected ${target} to be "${expectation}", received "${found}"`,
+    );
   }
 }
 
@@ -65,14 +71,18 @@ export class NoVoiceConnectionError extends DiscordPlayerError {
   constructor(message?: string) {
     super(
       ErrorCodes.ERR_NO_VOICE_CONNECTION,
-      message || 'No voice connection available, maybe connect to a voice channel first?',
+      message ||
+        'No voice connection available, maybe connect to a voice channel first?',
     );
   }
 }
 
 export class VoiceConnectionDestroyedError extends DiscordPlayerError {
   constructor() {
-    super(ErrorCodes.ERR_VOICE_CONNECTION_DESTROYED, 'Cannot use destroyed voice connection');
+    super(
+      ErrorCodes.ERR_VOICE_CONNECTION_DESTROYED,
+      'Cannot use destroyed voice connection',
+    );
   }
 }
 
@@ -92,7 +102,8 @@ export class NoReceiverError extends DiscordPlayerError {
   constructor(message?: string) {
     super(
       ErrorCodes.ERR_NO_RECEIVER,
-      message || 'No voice receiver is available, maybe connect to a voice channel first?',
+      message ||
+        'No voice receiver is available, maybe connect to a voice channel first?',
     );
   }
 }
@@ -105,7 +116,10 @@ export class FFmpegError extends DiscordPlayerError {
 
 export class NoAudioResourceError extends DiscordPlayerError {
   constructor(message?: string) {
-    super(ErrorCodes.ERR_NO_AUDIO_RESOURCE, message || 'Expected an audio resource');
+    super(
+      ErrorCodes.ERR_NO_AUDIO_RESOURCE,
+      message || 'Expected an audio resource',
+    );
   }
 }
 
@@ -123,19 +137,28 @@ export class NoGuildError extends DiscordPlayerError {
 
 export class InfoRequiredError extends DiscordPlayerError {
   constructor(target: string, actual: string) {
-    super(ErrorCodes.ERR_INFO_REQUIRED, `Expected ${target}, found "${actual}"`);
+    super(
+      ErrorCodes.ERR_INFO_REQUIRED,
+      `Expected ${target}, found "${actual}"`,
+    );
   }
 }
 
 export class SerializationError extends DiscordPlayerError {
   constructor() {
-    super(ErrorCodes.ERR_SERIALIZATION_FAILED, "Don't know how to serialize this data");
+    super(
+      ErrorCodes.ERR_SERIALIZATION_FAILED,
+      "Don't know how to serialize this data",
+    );
   }
 }
 
 export class DeserializationError extends DiscordPlayerError {
   constructor() {
-    super(ErrorCodes.ERR_DESERIALIZATION_FAILED, "Don't know how to deserialize this data");
+    super(
+      ErrorCodes.ERR_DESERIALIZATION_FAILED,
+      "Don't know how to deserialize this data",
+    );
   }
 }
 
@@ -163,7 +186,9 @@ export class BridgeFailedError extends DiscordPlayerError {
   constructor(id: string | null, error: string) {
     super(
       ErrorCodes.ERR_BRIDGE_FAILED,
-      `${id ? `(Extractor Execution Context ID is ${id})` : ''}Failed to bridge this query:\n${error}`,
+      `${
+        id ? `(Extractor Execution Context ID is ${id})` : ''
+      }Failed to bridge this query:\n${error}`,
     );
   }
 }

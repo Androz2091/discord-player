@@ -1,5 +1,15 @@
-import { User, escapeMarkdown, SnowflakeUtil, GuildVoiceChannelResolvable, APIUser } from 'discord.js';
-import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
+import {
+  User,
+  escapeMarkdown,
+  SnowflakeUtil,
+  GuildVoiceChannelResolvable,
+  APIUser,
+} from 'discord.js';
+import {
+  Player,
+  PlayerNodeInitializationResult,
+  PlayerNodeInitializerOptions,
+} from '../Player';
 import { Playlist, PlaylistJSON } from './Playlist';
 import { GuildQueue } from '../queue/GuildQueue';
 import { BaseExtractor } from '../extractors/BaseExtractor';
@@ -28,7 +38,12 @@ export type SerializedTrack = ReturnType<Track['serialize']>;
  * - apple_music
  * - arbitrary
  */
-export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'apple_music' | 'arbitrary';
+export type TrackSource =
+  | 'soundcloud'
+  | 'youtube'
+  | 'spotify'
+  | 'apple_music'
+  | 'arbitrary';
 
 export interface RawTrackData {
   /**
@@ -169,7 +184,10 @@ export class Track<T = unknown> {
    * @param player The player that instantiated this Track
    * @param data Track data
    */
-  public constructor(public readonly player: Player, data: Partial<WithMetadata<RawTrackData, T>>) {
+  public constructor(
+    public readonly player: Player,
+    data: Partial<WithMetadata<RawTrackData, T>>,
+  ) {
     this.title = escapeMarkdown(data.title ?? '');
     this.author = data.author ?? '';
     this.url = data.url ?? '';
@@ -180,10 +198,16 @@ export class Track<T = unknown> {
     this.requestedBy = data.requestedBy || null;
     this.playlist = data.playlist;
     this.description = `${this.title} by ${this.author}`;
-    this.raw = Object.assign({}, { source: data.raw?.source ?? data.source }, data.raw ?? data);
+    this.raw = Object.assign(
+      {},
+      { source: data.raw?.source ?? data.source },
+      data.raw ?? data,
+    );
     this.__metadata = data.metadata ?? null;
-    this.__reqMetadataFn = data.requestMetadata || (() => Promise.resolve<T | null>(null));
-    this.cleanTitle = data.cleanTitle ?? Util.cleanTitle(this.title, this.source);
+    this.__reqMetadataFn =
+      data.requestMetadata || (() => Promise.resolve<T | null>(null));
+    this.cleanTitle =
+      data.cleanTitle ?? Util.cleanTitle(this.title, this.source);
     this.live = data.live ?? false;
   }
 
@@ -245,7 +269,9 @@ export class Track<T = unknown> {
    * The queue in which this track is located
    */
   public get queue(): GuildQueue {
-    return this.player.nodes.cache.find((q) => q.tracks.some((ab) => ab.id === this.id))!;
+    return this.player.nodes.cache.find((q) =>
+      q.tracks.some((ab) => ab.id === this.id),
+    )!;
   }
 
   /**
@@ -314,7 +340,9 @@ export class Track<T = unknown> {
       description: this.description,
       author: this.author,
       url: this.url,
-      thumbnail: TypeUtil.isString(this.thumbnail) ? this.thumbnail : tryIntoThumbnailString(this.thumbnail),
+      thumbnail: TypeUtil.isString(this.thumbnail)
+        ? this.thumbnail
+        : tryIntoThumbnailString(this.thumbnail),
       duration: this.duration,
       views: this.views ?? 0,
       requested_by: this.requestedBy?.toJSON() ?? null,
@@ -333,8 +361,16 @@ export class Track<T = unknown> {
    * @param player Player instance
    * @param data Serialized data
    */
-  public static fromSerialized(player: Player, data: ReturnType<Track['serialize']>) {
-    if (data.$type !== SerializedType.Track) throw new InvalidArgTypeError('data', 'SerializedTrack', 'malformed data');
+  public static fromSerialized(
+    player: Player,
+    data: ReturnType<Track['serialize']>,
+  ) {
+    if (data.$type !== SerializedType.Track)
+      throw new InvalidArgTypeError(
+        'data',
+        'SerializedTrack',
+        'malformed data',
+      );
     const track = new Track(player, {
       ...data,
       requestedBy: data.requested_by
@@ -343,7 +379,8 @@ export class Track<T = unknown> {
             try {
               const resolved = player.client.users.resolve(res.id);
               if (resolved) return resolved;
-              if (player.client.users.cache.has(res.id)) return player.client.users.cache.get(res.id)!;
+              if (player.client.users.cache.has(res.id))
+                return player.client.users.cache.get(res.id)!;
               // @ts-expect-error
               const user = new User(player.client, res);
               return user;
@@ -364,7 +401,9 @@ export class Track<T = unknown> {
    * Get belonging queues of this track
    */
   public getBelongingQueues() {
-    const nodes = this.player.nodes.cache.filter((node) => node.tracks.some((t) => t.id === this.id));
+    const nodes = this.player.nodes.cache.filter((node) =>
+      node.tracks.some((t) => t.id === this.id),
+    );
 
     return nodes as Collection<string, GuildQueue<unknown>>;
   }

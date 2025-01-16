@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { DeserializationError, SerializationError } from '../errors';
-import { Playlist, type SerializedTrack, Track, SerializedPlaylist } from '../fabric';
+import {
+  Playlist,
+  type SerializedTrack,
+  Track,
+  SerializedPlaylist,
+} from '../fabric';
 import { TypeUtil } from './TypeUtil';
 import { Buffer } from 'buffer';
 import { Player } from '../Player';
@@ -13,8 +18,10 @@ export enum SerializedType {
 
 export type Encodable = SerializedTrack | SerializedPlaylist;
 
-const isTrack = (data: any): data is SerializedTrack => data.$type === SerializedType.Track;
-const isPlaylist = (data: any): data is SerializedPlaylist => data.$type === SerializedType.Playlist;
+const isTrack = (data: any): data is SerializedTrack =>
+  data.$type === SerializedType.Track;
+const isPlaylist = (data: any): data is SerializedPlaylist =>
+  data.$type === SerializedType.Playlist;
 
 export function serialize(data: Track | Playlist | any) {
   if (data instanceof Track) return data.serialize();

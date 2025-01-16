@@ -8,7 +8,10 @@ description: 'Create FFmpeg arguments from an object.'
 Create FFmpeg arguments from an object.
 
 ```ts
-createFFmpegArgs({ i: 'input.mp3', af: ['bass=g=10', 'acompressor'] }, './out.mp3');
+createFFmpegArgs(
+  { i: 'input.mp3', af: ['bass=g=10', 'acompressor'] },
+  './out.mp3',
+);
 // => ['-i', 'input.mp3', '-af', 'bass=g=10,acompressor', './out.mp3']
 ```
 

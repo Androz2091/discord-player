@@ -1,5 +1,9 @@
 export class EqualizerCoefficients {
-  public constructor(public beta: number, public alpha: number, public gamma: number) {}
+  public constructor(
+    public beta: number,
+    public alpha: number,
+    public gamma: number,
+  ) {}
 
   public setBeta(v: number) {
     this.beta = v;

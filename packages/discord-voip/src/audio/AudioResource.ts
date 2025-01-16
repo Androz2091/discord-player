@@ -5,8 +5,18 @@ import type { Buffer } from 'node:buffer';
 import { pipeline, type Readable } from 'node:stream';
 import { noop } from '../util/util';
 import { SILENCE_FRAME, type AudioPlayer } from './AudioPlayer';
-import { findPipeline, StreamType, TransformerType, type Edge } from './TransformerGraph';
-import { OggDemuxer, OpusDecoder, OpusEncoder, WebmDemuxer } from '@discord-player/opus';
+import {
+  findPipeline,
+  StreamType,
+  TransformerType,
+  type Edge,
+} from './TransformerGraph';
+import {
+  OggDemuxer,
+  OpusDecoder,
+  OpusEncoder,
+  WebmDemuxer,
+} from '@discord-player/opus';
 import { VolumeTransformer } from '@discord-player/equalizer';
 
 /**
@@ -107,7 +117,10 @@ export class AudioResource<Metadata = unknown> {
     silencePaddingFrames: number,
   ) {
     this.edges = edges;
-    this.playStream = streams.length > 1 ? (pipeline(streams, noop) as unknown as Readable) : streams[0]!;
+    this.playStream =
+      streams.length > 1
+        ? (pipeline(streams, noop) as unknown as Readable)
+        : streams[0]!;
     this.metadata = metadata;
     this.silencePaddingFrames = silencePaddingFrames;
 
@@ -130,7 +143,8 @@ export class AudioResource<Metadata = unknown> {
     if (this.silenceRemaining === 0) return false;
     const real = this.playStream.readable;
     if (!real) {
-      if (this.silenceRemaining === -1) this.silenceRemaining = this.silencePaddingFrames;
+      if (this.silenceRemaining === -1)
+        this.silenceRemaining = this.silencePaddingFrames;
       return this.silenceRemaining !== 0;
     }
 
@@ -141,7 +155,11 @@ export class AudioResource<Metadata = unknown> {
    * Whether this resource has ended or not.
    */
   public get ended() {
-    return this.playStream.readableEnded || this.playStream.destroyed || this.silenceRemaining === 0;
+    return (
+      this.playStream.readableEnded ||
+      this.playStream.destroyed ||
+      this.silenceRemaining === 0
+    );
   }
 
   /**
@@ -176,7 +194,8 @@ export class AudioResource<Metadata = unknown> {
  *
  * @param path - The path to validate constraints on
  */
-export const VOLUME_CONSTRAINT = (path: Edge[]) => path.some((edge) => edge.type === TransformerType.InlineVolume);
+export const VOLUME_CONSTRAINT = (path: Edge[]) =>
+  path.some((edge) => edge.type === TransformerType.InlineVolume);
 
 export const NO_CONSTRAINT = () => true;
 
@@ -275,10 +294,16 @@ export function createAudioResource<Metadata>(
     needsInlineVolume = needsInlineVolume && !analysis.hasVolume;
   }
 
-  const transformerPipeline = findPipeline(inputType, needsInlineVolume ? VOLUME_CONSTRAINT : NO_CONSTRAINT);
+  const transformerPipeline = findPipeline(
+    inputType,
+    needsInlineVolume ? VOLUME_CONSTRAINT : NO_CONSTRAINT,
+  );
 
   if (transformerPipeline.length === 0) {
-    if (typeof input === 'string') throw new Error(`Invalid pipeline constructed for string resource '${input}'`);
+    if (typeof input === 'string')
+      throw new Error(
+        `Invalid pipeline constructed for string resource '${input}'`,
+      );
     // No adjustments required
     return new AudioResource<Metadata>(
       [],

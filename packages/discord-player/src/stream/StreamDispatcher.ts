@@ -16,14 +16,19 @@ import type { Readable } from 'stream';
 import { EventEmitter } from '@discord-player/utils';
 import { Track } from '../fabric/Track';
 import { Util } from '../utils/Util';
-import { EqualizerBand, BiquadFilters, PCMFilters, FiltersChain } from '@discord-player/equalizer';
+import {
+  EqualizerBand,
+  BiquadFilters,
+  PCMFilters,
+  FiltersChain,
+} from '@discord-player/equalizer';
 import { GuildQueue, GuildQueueEvent, PostProcessedResult } from '../queue';
 import { NoAudioResourceError } from '../errors';
+import { InterceptedStream } from './InterceptedStream';
 
 export interface CreateStreamOps {
   type?: StreamType;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any;
+  data: Track;
   disableVolume?: boolean;
   disableEqualizer?: boolean;
   disableBiquad?: boolean;
@@ -58,6 +63,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
   public channel: VoiceChannel | StageChannel;
   public audioResource?: AudioResource<Track> | null;
   public dsp = new FiltersChain();
+
+  #interceptor: InterceptedStream | null = null;
 
   /**
    * Creates new connection object
@@ -97,17 +104,23 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     this.channel = channel;
 
     this.voiceConnection.on('debug', (m) => void this.emit('debug', m));
-    this.voiceConnection.on('error', (error) => void this.emit('error', error as AudioPlayerError));
+    this.voiceConnection.on(
+      'error',
+      (error) => void this.emit('error', error as AudioPlayerError),
+    );
     this.audioPlayer.on('debug', (m) => void this.emit('debug', m));
     this.audioPlayer.on('error', (error) => void this.emit('error', error));
 
     this.dsp.onUpdate = () => {
       if (!this.dsp) return;
-      if (this.dsp.filters?.filters) this.emit('dsp', this.dsp.filters?.filters);
-      if (this.dsp.biquad?.filters) this.emit('biquad', this.dsp.biquad?.filters);
+      if (this.dsp.filters?.filters)
+        this.emit('dsp', this.dsp.filters?.filters);
+      if (this.dsp.biquad?.filters)
+        this.emit('biquad', this.dsp.biquad?.filters);
       if (this.dsp.equalizer) this.emit('eqBands', this.dsp.equalizer.getEQ());
       if (this.dsp.volume) this.emit('volume', this.dsp.volume.volume);
-      if (this.dsp.resampler) this.emit('sampleRate', this.dsp.resampler.targetSampleRate);
+      if (this.dsp.resampler)
+        this.emit('sampleRate', this.dsp.resampler.targetSampleRate);
     };
 
     this.dsp.onError = (e) => this.emit('error', e as AudioPlayerError);
@@ -119,12 +132,23 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
           return;
         }
 
-        if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
+        if (
+          newState.reason === VoiceConnectionDisconnectReason.WebSocketClose &&
+          newState.closeCode === 4014
+        ) {
           try {
-            await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, this.connectionTimeout);
+            await entersState(
+              this.voiceConnection,
+              VoiceConnectionStatus.Connecting,
+              this.connectionTimeout,
+            );
           } catch {
             try {
-              if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.destroy();
+              if (
+                this.voiceConnection.state.status !==
+                VoiceConnectionStatus.Destroyed
+              )
+                this.destroy();
             } catch (err) {
               this.emit('error', err as AudioPlayerError);
             }
@@ -134,7 +158,11 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
           this.voiceConnection.rejoin();
         } else {
           try {
-            if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.destroy();
+            if (
+              this.voiceConnection.state.status !==
+              VoiceConnectionStatus.Destroyed
+            )
+              this.destroy();
           } catch (err) {
             this.emit('error', err as AudioPlayerError);
           }
@@ -146,19 +174,31 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
       });
 
     this.audioPlayer.on('stateChange', (oldState, newState) => {
-      if (oldState.status !== AudioPlayerStatus.Paused && newState.status === AudioPlayerStatus.Paused) {
+      if (
+        oldState.status !== AudioPlayerStatus.Paused &&
+        newState.status === AudioPlayerStatus.Paused
+      ) {
         this.queue.emit(GuildQueueEvent.PlayerPause, this.queue);
       }
 
-      if (oldState.status === AudioPlayerStatus.Paused && newState.status !== AudioPlayerStatus.Paused) {
+      if (
+        oldState.status === AudioPlayerStatus.Paused &&
+        newState.status !== AudioPlayerStatus.Paused
+      ) {
         this.queue.emit(GuildQueueEvent.PlayerResume, this.queue);
       }
 
       if (newState.status === AudioPlayerStatus.Playing) {
-        if (oldState.status === AudioPlayerStatus.Idle || oldState.status === AudioPlayerStatus.Buffering) {
+        if (
+          oldState.status === AudioPlayerStatus.Idle ||
+          oldState.status === AudioPlayerStatus.Buffering
+        ) {
           return this.emit('start', this.audioResource!);
         }
-      } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
+      } else if (
+        newState.status === AudioPlayerStatus.Idle &&
+        oldState.status !== AudioPlayerStatus.Idle
+      ) {
         this.emit('finish', this.audioResource!);
         this.dsp.destroy();
         this.audioResource = null;
@@ -183,7 +223,10 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
    * Whether or not the player is currently paused automatically or manually.
    */
   isPaused() {
-    return this.paused || this.audioPlayer.state.status === AudioPlayerStatus.AutoPaused;
+    return (
+      this.paused ||
+      this.audioPlayer.state.status === AudioPlayerStatus.AutoPaused
+    );
   }
 
   /**
@@ -211,14 +254,18 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
    * Whether or not the voice connection has been destroyed
    */
   isDestroyed() {
-    return this.voiceConnection.state.status === VoiceConnectionStatus.Destroyed;
+    return (
+      this.voiceConnection.state.status === VoiceConnectionStatus.Destroyed
+    );
   }
 
   /**
    * Whether or not the voice connection has been destroyed
    */
   isDisconnected() {
-    return this.voiceConnection.state.status === VoiceConnectionStatus.Disconnected;
+    return (
+      this.voiceConnection.state.status === VoiceConnectionStatus.Disconnected
+    );
   }
 
   /**
@@ -232,14 +279,18 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
    * Whether or not the voice connection is signalling
    */
   isSignalling() {
-    return this.voiceConnection.state.status === VoiceConnectionStatus.Signalling;
+    return (
+      this.voiceConnection.state.status === VoiceConnectionStatus.Signalling
+    );
   }
 
   /**
    * Whether or not the voice connection is connecting
    */
   isConnecting() {
-    return this.voiceConnection.state.status === VoiceConnectionStatus.Connecting;
+    return (
+      this.voiceConnection.state.status === VoiceConnectionStatus.Connecting
+    );
   }
 
   /**
@@ -248,8 +299,9 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
    * @param {object} [ops] Options
    * @returns {AudioResource}
    */
-  async createStream(src: Readable, ops?: CreateStreamOps) {
-    if (!ops?.disableFilters && this.queue.hasDebugger) this.queue.debug('Initiating DSP filters pipeline...');
+  async createStream(src: Readable, ops: CreateStreamOps) {
+    if (!ops?.disableFilters && this.queue.hasDebugger)
+      this.queue.debug('Initiating DSP filters pipeline...');
     const stream = !ops?.disableFilters
       ? this.dsp.create(src, {
           dsp: {
@@ -277,19 +329,47 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
         })
       : src;
 
-    if (this.queue.hasDebugger) this.queue.debug('Executing onAfterCreateStream hook...');
-    const postStream = await this.queue.onAfterCreateStream?.(stream, this.queue).catch(
-      () =>
-        ({
-          stream: stream,
-          type: ops?.type ?? StreamType.Arbitrary,
-        } as PostProcessedResult),
-    );
+    if (this.queue.hasDebugger) {
+      this.queue.debug('Executing onAfterCreateStream hook...');
+    }
+
+    const postStream = await this.queue
+      .onAfterCreateStream?.(stream, this.queue, ops?.data)
+      .catch(
+        () =>
+          ({
+            stream: stream,
+            type: ops?.type ?? StreamType.Arbitrary,
+          } as PostProcessedResult),
+      );
 
     if (this.queue.hasDebugger) this.queue.debug('Preparing AudioResource...');
-    this.audioResource = createAudioResource(postStream?.stream ?? stream, {
-      inputType: postStream?.type ?? ops?.type ?? StreamType.Arbitrary,
-      metadata: ops?.data,
+
+    const format = postStream?.type ?? ops?.type ?? StreamType.Arbitrary;
+
+    let _stream: Readable;
+
+    if (this.queue.canIntercept()) {
+      this.#interceptor = new InterceptedStream();
+
+      // @ts-ignore
+      (postStream?.stream ?? stream).pipe(this.#interceptor);
+
+      _stream = this.#interceptor;
+
+      await this.queue.player.handleInterceptingStream(
+        this.queue,
+        ops?.data,
+        format,
+        this.#interceptor,
+      );
+    } else {
+      _stream = postStream?.stream ?? stream;
+    }
+
+    this.audioResource = createAudioResource(_stream, {
+      inputType: format,
+      metadata: ops?.data as Track,
       // volume controls happen from AudioFilter DSP utility
       inlineVolume: false,
     });
@@ -328,7 +408,8 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
   disconnect() {
     try {
       if (this.audioPlayer) this.audioPlayer.stop(true);
-      if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
+      if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed)
+        this.voiceConnection.destroy();
     } catch {} // eslint-disable-line no-empty
   }
 
@@ -394,7 +475,11 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
     if (!this.audioResource) this.audioResource = resource;
     if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) {
       try {
-        await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, this.connectionTimeout);
+        await entersState(
+          this.voiceConnection,
+          VoiceConnectionStatus.Ready,
+          this.connectionTimeout,
+        );
       } catch (err) {
         return void this.emit('error', err as AudioPlayerError);
       }

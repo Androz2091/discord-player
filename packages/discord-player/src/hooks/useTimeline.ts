@@ -23,8 +23,12 @@ export interface GuildQueueTimeline {
  * @param options Options for timeline dispatcher
  */
 export function useTimeline(): GuildQueueTimeline | null;
-export function useTimeline(options: Partial<TimelineDispatcherOptions>): GuildQueueTimeline | null;
-export function useTimeline(options?: Partial<TimelineDispatcherOptions>): GuildQueueTimeline | null {
+export function useTimeline(
+  options: Partial<TimelineDispatcherOptions>,
+): GuildQueueTimeline | null;
+export function useTimeline(
+  options?: Partial<TimelineDispatcherOptions>,
+): GuildQueueTimeline | null {
   const { context, player } = useHooksContext('useTimeline');
   const queue = player.queues.get(options?.node ?? context.guild.id);
   if (!queue) return null;
@@ -54,7 +58,7 @@ export function useTimeline(options?: Partial<TimelineDispatcherOptions>): Guild
     async setPosition(time: number) {
       return queue.node.seek(time);
     },
-  });
+  } satisfies GuildQueueTimeline);
 
   return timeline;
 }

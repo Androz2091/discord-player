@@ -66,7 +66,9 @@ export class OggDemuxer extends Transform {
       throw Error(`capture_pattern is not ${OGGS_HEADER}`);
     }
     if (chunk.readUInt8(4) !== STREAM_STRUCTURE_VERSION) {
-      throw Error(`stream_structure_version is not ${STREAM_STRUCTURE_VERSION}`);
+      throw Error(
+        `stream_structure_version is not ${STREAM_STRUCTURE_VERSION}`,
+      );
     }
 
     if (chunk.length < 27) return false;

@@ -105,7 +105,10 @@ export class AsyncQueueEntry {
   private resolve!: () => void;
   private reject!: (err: Error) => void;
 
-  public constructor(public queue: AsyncQueue, public options?: AsyncQueueAcquisitionOptions) {
+  public constructor(
+    public queue: AsyncQueue,
+    public options?: AsyncQueueAcquisitionOptions,
+  ) {
     this.promise = new Promise((resolve, reject) => {
       this.resolve = resolve;
       this.reject = reject;

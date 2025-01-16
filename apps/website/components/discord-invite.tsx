@@ -32,7 +32,10 @@ function Icon() {
 function StatusIndicator({ online = false }: { online?: boolean }) {
   return (
     <svg
-      className={cn(online ? 'fill-[#23a559]' : 'fill-[#b5bac1] dark:fill-[#4e5058]', 'h-[0.6rem] w-[0.6rem]')}
+      className={cn(
+        online ? 'fill-[#23a559]' : 'fill-[#b5bac1] dark:fill-[#4e5058]',
+        'h-[0.6rem] w-[0.6rem]',
+      )}
       strokeWidth="0"
       viewBox="0 0 512 512"
       xmlns="http://www.w3.org/2000/svg"
@@ -52,8 +55,14 @@ export default function DiscordInvite() {
         <div className="flex items-center gap-4">
           <Icon />
           <div className="text-left">
-            <Link href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-              <h1 className="dark:text-white text-[#060607] font-normal hover:underline cursor-pointer">AndrozDev</h1>
+            <Link
+              href={DISCORD_INVITE}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <h1 className="dark:text-white text-[#060607] font-normal hover:underline cursor-pointer">
+                AndrozDev
+              </h1>
             </Link>
             <div className="flex items-center justify-between gap-3 text-xs">
               <p className="text-[#80848e]">

@@ -2,12 +2,20 @@ import { inspect } from 'util';
 
 export type QueueStrategy = 'LIFO' | 'FIFO';
 
-export type QueueItemFilter<T, R = boolean> = (value: T, idx: number, array: T[]) => R;
+export type QueueItemFilter<T, R = boolean> = (
+  value: T,
+  idx: number,
+  array: T[],
+) => R;
 
 export class Queue<T = unknown> {
   public store: T[];
-  public constructor(public strategy: QueueStrategy = 'FIFO', initializer: T[] = []) {
-    if (!['FIFO', 'LIFO'].includes(strategy)) throw new TypeError(`Invalid queue strategy "${strategy}"!`);
+  public constructor(
+    public strategy: QueueStrategy = 'FIFO',
+    initializer: T[] = [],
+  ) {
+    if (!['FIFO', 'LIFO'].includes(strategy))
+      throw new TypeError(`Invalid queue strategy "${strategy}"!`);
     this.store = Array.isArray(initializer) ? initializer : [];
 
     Object.defineProperty(this, 'store', {
@@ -62,7 +70,8 @@ export class Queue<T = unknown> {
 
   public remove(itemFilter: QueueItemFilter<T>) {
     const items = this.store.filter(itemFilter);
-    if (items.length) this.store = this.store.filter((res) => !items.includes(res));
+    if (items.length)
+      this.store = this.store.filter((res) => !items.includes(res));
   }
 
   public removeOne(itemFilter: QueueItemFilter<T>) {
@@ -121,7 +130,9 @@ export class Queue<T = unknown> {
   }
 
   public [inspect.custom]() {
-    return `${this.constructor.name} {\n  strategy: '${this.strategy}',\n  data: ${inspect(this.data, {
+    return `${this.constructor.name} {\n  strategy: '${
+      this.strategy
+    }',\n  data: ${inspect(this.data, {
       showHidden: false,
       colors: true,
       depth: 1,

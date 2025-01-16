@@ -28,7 +28,11 @@ export class MonoStereoTransformer extends PCMTransformer {
     this.strategy = strategy;
   }
 
-  public _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {
+  public _transform(
+    chunk: Buffer,
+    encoding: BufferEncoding,
+    callback: TransformCallback,
+  ): void {
     if (this.disabled) {
       this.push(chunk);
       return callback();

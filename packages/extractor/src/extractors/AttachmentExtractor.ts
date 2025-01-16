@@ -23,9 +23,14 @@ export class AttachmentExtractor extends BaseExtractor {
   // use lowest priority to avoid conflict with other extractors
   public priority = 0;
 
-  public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
+  public async validate(
+    query: string,
+    type?: SearchQueryType | null | undefined,
+  ): Promise<boolean> {
     if (typeof query !== 'string') return false;
-    return ([QueryType.ARBITRARY, QueryType.FILE] as SearchQueryType[]).some((r) => r === type);
+    return ([QueryType.ARBITRARY, QueryType.FILE] as SearchQueryType[]).some(
+      (r) => r === type,
+    );
   }
 
   public async getRelatedTracks(track: Track) {
@@ -33,11 +38,22 @@ export class AttachmentExtractor extends BaseExtractor {
     return this.createResponse();
   }
 
-  public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
+  public async handle(
+    query: string,
+    context: ExtractorSearchContext,
+  ): Promise<ExtractorInfo> {
     switch (context.type) {
       case QueryType.ARBITRARY: {
-        const data = (await downloadStream(query, context.requestOptions)) as IncomingMessage;
-        if (!ATTACHMENT_HEADER.some((r) => !!data.headers['content-type']?.startsWith(r))) return this.emptyResponse();
+        const data = (await downloadStream(
+          query,
+          context.requestOptions,
+        )) as IncomingMessage;
+        if (
+          !ATTACHMENT_HEADER.some(
+            (r) => !!data.headers['content-type']?.startsWith(r),
+          )
+        )
+          return this.emptyResponse();
 
         const trackInfo = {
           title: (
@@ -49,12 +65,14 @@ export class AttachmentExtractor extends BaseExtractor {
             .split('?')[0]
             .trim(),
           duration: 0,
-          thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/ITunes_12.2_logo.png',
+          thumbnail:
+            'https://upload.wikimedia.org/wikipedia/commons/2/2a/ITunes_12.2_logo.png',
           engine: query,
           // eslint-disable-next-line
           author: ((data as any).client?.servername as string) || 'Attachment',
           // eslint-disable-next-line
-          description: ((data as any).client?.servername as string) || 'Attachment',
+          description:
+            ((data as any).client?.servername as string) || 'Attachment',
           url: data.url || query,
         };
 
@@ -114,12 +132,14 @@ export class AttachmentExtractor extends BaseExtractor {
         const fstat = await stat(query);
         if (!fstat.isFile()) return this.emptyResponse();
         const mime = await fileType.fromFile(query).catch(() => null);
-        if (!mime || !ATTACHMENT_HEADER.some((r) => !!mime.mime.startsWith(r))) return this.emptyResponse();
+        if (!mime || !ATTACHMENT_HEADER.some((r) => !!mime.mime.startsWith(r)))
+          return this.emptyResponse();
 
         const trackInfo = {
           title: path.basename(query) || 'Attachment',
           duration: 0,
-          thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/ITunes_12.2_logo.png',
+          thumbnail:
+            'https://upload.wikimedia.org/wikipedia/commons/2/2a/ITunes_12.2_logo.png',
           engine: query,
           author: 'Attachment',
           description: 'Attachment',

@@ -9,7 +9,13 @@ import {
   version as djsVersion,
   Events,
 } from 'discord.js';
-import { Playlist, Track, SearchResult, SearchOptions, PlaylistInitData } from './fabric';
+import {
+  Playlist,
+  Track,
+  SearchResult,
+  SearchOptions,
+  PlaylistInitData,
+} from './fabric';
 import {
   GuildQueueEvents,
   VoiceConnectConfig,
@@ -20,9 +26,18 @@ import {
   GuildQueueEvent,
 } from './queue';
 import { VoiceUtils } from './stream/VoiceUtils';
-import { QueryResolver, QueryType, ResolvedQuery, SearchQueryType } from './utils/QueryResolver';
+import {
+  QueryResolver,
+  QueryType,
+  ResolvedQuery,
+  SearchQueryType,
+} from './utils/QueryResolver';
 import { Util } from './utils/Util';
-import { AudioResource, version as dVoiceVersion } from 'discord-voip';
+import {
+  AudioResource,
+  version as dVoiceVersion,
+  StreamType,
+} from 'discord-voip';
 import { ExtractorExecutionContext } from './extractors/ExtractorExecutionContext';
 import { BaseExtractor } from './extractors/BaseExtractor';
 import { QueryCache, QueryCacheProvider } from './utils/QueryCache';
@@ -36,12 +51,21 @@ import { getCompatName, isClientProxy } from './compat/createErisCompat';
 import { DependencyReportGenerator } from './utils/DependencyReportGenerator';
 import { getGlobalRegistry } from './utils/__internal__';
 import { version as dpVersion } from './version';
+import {
+  PlayerStreamInterceptor,
+  type PlayerStreamInterceptorOptions,
+} from './PlayerStreamInterceptor';
+import type { InterceptedStream } from './stream/InterceptedStream';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface PlayerEvents {
   debug: (message: string) => any;
   error: (error: Error) => any;
-  voiceStateUpdate: (queue: GuildQueue, oldState: VoiceState, newState: VoiceState) => any;
+  voiceStateUpdate: (
+    queue: GuildQueue,
+    oldState: VoiceState,
+    newState: VoiceState,
+  ) => any;
 }
 
 export const PlayerEvent = {
@@ -63,7 +87,13 @@ export interface PlayerNodeInitializationResult<T = unknown> {
   queue: GuildQueue<T>;
 }
 
-export type TrackLike = string | Track | SearchResult | Track[] | Playlist | AudioResource;
+export type TrackLike =
+  | string
+  | Track
+  | SearchResult
+  | Track[]
+  | Playlist
+  | AudioResource;
 
 export interface PlayerNodeInitializerOptions<T> extends SearchOptions {
   nodeOptions?: GuildNodeCreateOptions<T>;
@@ -162,7 +192,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
   /**
    * The player events channel
    */
-  public events = new PlayerEventsEmitter<GuildQueueEvents>([GuildQueueEvent.Error, GuildQueueEvent.PlayerError]);
+  public events = new PlayerEventsEmitter<GuildQueueEvents>([
+    GuildQueueEvent.Error,
+    GuildQueueEvent.PlayerError,
+  ]);
   /**
    * The player version
    */
@@ -171,6 +204,8 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
    * The lyrics api
    */
   public readonly lyrics = new LrcLib(this);
+
+  #streamInterceptor: PlayerStreamInterceptor | null = null;
 
   /**
    * Creates new Discord Player
@@ -182,7 +217,9 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
     if (options.ffmpegPath) {
       if (typeof options.ffmpegPath !== 'string')
-        throw new TypeError(`Expected type "string" for options.ffmpegPath. Got ${typeof options.ffmpegPath} instead`);
+        throw new TypeError(
+          `Expected type "string" for options.ffmpegPath. Got ${typeof options.ffmpegPath} instead`,
+        );
 
       process.env.FFMPEG_PATH = options.ffmpegPath;
     }
@@ -210,7 +247,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
             : new IntentsBitField(this.client.options.intents);
 
         if (!ibf.has(IntentsBitField.Flags.GuildVoiceStates)) {
-          Util.warn('client is missing "GuildVoiceStates" intent', 'InvalidIntentsBitField');
+          Util.warn(
+            'client is missing "GuildVoiceStates" intent',
+            'InvalidIntentsBitField',
+          );
         }
       } catch {
         // noop
@@ -223,7 +263,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
       blockStreamFrom: [],
       connectionTimeout: 20000,
       lagMonitor: 30000,
-      queryCache: options.queryCache === null ? null : options.queryCache || new QueryCache(this),
+      queryCache:
+        options.queryCache === null
+          ? null
+          : options.queryCache || new QueryCache(this),
       skipFFmpeg: true,
       probeTimeout: 5000,
       overrideFallbackContext: true,
@@ -246,12 +289,18 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
       }
     }
 
-    if (typeof this.options.lagMonitor === 'number' && this.options.lagMonitor > 0) {
+    if (
+      typeof this.options.lagMonitor === 'number' &&
+      this.options.lagMonitor > 0
+    ) {
       this.#lagMonitorInterval = setInterval(() => {
         const start = performance.now();
         this.#lagMonitorTimeout = setTimeout(() => {
           this.#lastLatency = performance.now() - start;
-          if (this.hasDebugger) this.debug(`[Lag Monitor] Event loop latency: ${this.#lastLatency}ms`);
+          if (this.hasDebugger)
+            this.debug(
+              `[Lag Monitor] Event loop latency: ${this.#lastLatency}ms`,
+            );
         }, 0).unref();
       }, this.options.lagMonitor).unref();
     }
@@ -389,7 +438,12 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     if (!queue || !queue.connection || !queue.channel) return;
 
     // dispatch voice state update
-    const wasHandled = this.events.emit(GuildQueueEvent.VoiceStateUpdate, queue, oldState, newState);
+    const wasHandled = this.events.emit(
+      GuildQueueEvent.VoiceStateUpdate,
+      queue,
+      oldState,
+      newState,
+    );
     // if the event was handled, return assuming the listener implemented all of the logic below
     if (wasHandled && !this.options.lockVoiceStateHandler) return;
 
@@ -459,23 +513,36 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
   ): Promise<PlayerNodeInitializationResult<T>> {
     const vc = this.client.channels.resolve(channel);
     if (!vc?.isVoiceBased())
-      throw new InvalidArgTypeError('channel', 'VoiceBasedChannel', !vc ? 'undefined' : `channel type ${vc.type}`);
+      throw new InvalidArgTypeError(
+        'channel',
+        'VoiceBasedChannel',
+        !vc ? 'undefined' : `channel type ${vc.type}`,
+      );
 
-    const originalResult = query instanceof SearchResult ? query : await this.search(query, options);
-    const result = (await options.afterSearch?.(originalResult)) || originalResult;
+    const originalResult =
+      query instanceof SearchResult ? query : await this.search(query, options);
+    const result =
+      (await options.afterSearch?.(originalResult)) || originalResult;
     if (result.isEmpty()) {
-      throw new NoResultError(`No results found for "${query}" (Extractor: ${result.extractor?.identifier || 'N/A'})`);
+      throw new NoResultError(
+        `No results found for "${query}" (Extractor: ${
+          result.extractor?.identifier || 'N/A'
+        })`,
+      );
     }
 
     const queue = this.nodes.create(vc.guild, options.nodeOptions);
 
     if (this.hasDebugger) this.debug(`[AsyncQueue] Acquiring an entry...`);
     const entry = queue.tasksQueue.acquire({ signal: options.signal });
-    if (this.hasDebugger) this.debug(`[AsyncQueue] Entry ${entry.id} was acquired successfully!`);
+    if (this.hasDebugger)
+      this.debug(`[AsyncQueue] Entry ${entry.id} was acquired successfully!`);
 
-    if (this.hasDebugger) this.debug(`[AsyncQueue] Waiting for the queue to resolve...`);
+    if (this.hasDebugger)
+      this.debug(`[AsyncQueue] Waiting for the queue to resolve...`);
     await entry.getTask();
-    if (this.hasDebugger) this.debug(`[AsyncQueue] Entry ${entry.id} was resolved!`);
+    if (this.hasDebugger)
+      this.debug(`[AsyncQueue] Entry ${entry.id} was resolved!`);
 
     try {
       if (!queue.channel) await queue.connect(vc, options.connectionOptions);
@@ -485,9 +552,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
       } else {
         queue.addTrack(result.playlist);
       }
-      if (!queue.isPlaying()) await queue.node.play(null, options.audioPlayerOptions);
+      if (!queue.isPlaying())
+        await queue.node.play(null, options.audioPlayerOptions);
     } finally {
-      if (this.hasDebugger) this.debug(`[AsyncQueue] Releasing an entry from the queue...`);
+      if (this.hasDebugger)
+        this.debug(`[AsyncQueue] Releasing an entry from the queue...`);
       queue.tasksQueue.release();
     }
 
@@ -511,14 +580,18 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
    * console.log(result); // Logs `SearchResult` object
    * ```
    */
-  public async search(searchQuery: TrackLike, options: SearchOptions = {}): Promise<SearchResult> {
+  public async search(
+    searchQuery: TrackLike,
+    options: SearchOptions = {},
+  ): Promise<SearchResult> {
     if (searchQuery instanceof SearchResult) return searchQuery;
 
     if (searchQuery instanceof AudioResource) {
       searchQuery = this.createTrackFromAudioResource(searchQuery);
     }
 
-    if (options.requestedBy != null) options.requestedBy = this.client.users.resolve(options.requestedBy)!;
+    if (options.requestedBy != null)
+      options.requestedBy = this.client.users.resolve(options.requestedBy)!;
 
     options.blockExtractors ??= this.options.blockExtractors;
     options.fallbackSearchEngine ??= QueryType.AUTO_SEARCH;
@@ -572,15 +645,20 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
     if (/^\w+:/.test(searchQuery)) {
       const [protocolName, ...query] = searchQuery.split(':');
-      if (this.hasDebugger) this.debug(`Protocol ${protocolName} detected in query`);
+      if (this.hasDebugger)
+        this.debug(`Protocol ${protocolName} detected in query`);
 
       const matchingExtractor = this.extractors.store.find(
-        (e) => !this.extractors.isDisabled(e.identifier) && e.protocols.includes(protocolName),
+        (e) =>
+          !this.extractors.isDisabled(e.identifier) &&
+          e.protocols.includes(protocolName),
       );
 
       if (matchingExtractor) {
         if (this.hasDebugger)
-          this.debug(`Protocol ${protocolName} is supported by ${matchingExtractor.identifier} extractor!`);
+          this.debug(
+            `Protocol ${protocolName} is supported by ${matchingExtractor.identifier} extractor!`,
+          );
         extractor = matchingExtractor;
         searchQuery = query.join(':');
         protocol = protocolName;
@@ -601,13 +679,16 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     if (this.hasDebugger)
       this.debug(
         `Query type identified as ${queryType}${
-          extractor && protocol ? ' but might not be used due to the presence of protocol' : ''
+          extractor && protocol
+            ? ' but might not be used due to the presence of protocol'
+            : ''
         }`,
       );
 
     // force particular extractor
     if (options.searchEngine.startsWith('ext:')) {
-      if (this.hasDebugger) this.debug(`Forcing ${options.searchEngine.substring(4)} extractor...`);
+      if (this.hasDebugger)
+        this.debug(`Forcing ${options.searchEngine.substring(4)} extractor...`);
       extractor = this.extractors.get(options.searchEngine.substring(4))!;
       if (!extractor)
         return new SearchResult(this, {
@@ -659,7 +740,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
       });
     }
 
-    if (this.hasDebugger) this.debug(`Executing metadata query using ${extractor.identifier} extractor...`);
+    if (this.hasDebugger)
+      this.debug(
+        `Executing metadata query using ${extractor.identifier} extractor...`,
+      );
     const res = await extractor
       .handle(query, {
         type: queryType as SearchQueryType,
@@ -688,7 +772,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
       return result;
     }
 
-    if (this.hasDebugger) this.debug('Failed to find result using appropriate extractor. Querying all extractors...');
+    if (this.hasDebugger)
+      this.debug(
+        'Failed to find result using appropriate extractor. Querying all extractors...',
+      );
     const result = await this.extractors.run(
       async (ext) =>
         !options.blockExtractors?.includes(ext.identifier) &&
@@ -702,7 +789,11 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     );
     if (!result?.result) {
       if (this.hasDebugger)
-        this.debug(`Failed to query metadata query using ${result?.extractor.identifier || 'N/A'} extractor.`);
+        this.debug(
+          `Failed to query metadata query using ${
+            result?.extractor.identifier || 'N/A'
+          } extractor.`,
+        );
       return new SearchResult(this, {
         query,
         queryType,
@@ -711,7 +802,10 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
       });
     }
 
-    if (this.hasDebugger) this.debug(`Metadata query was successful using ${result.extractor.identifier}!`);
+    if (this.hasDebugger)
+      this.debug(
+        `Metadata query was successful using ${result.extractor.identifier}!`,
+      );
 
     const data = new SearchResult(this, {
       query,
@@ -740,12 +834,15 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
    */
   public scanDeps() {
     const line = '-'.repeat(50);
-    const runtime = 'Bun' in globalThis ? 'Bun' : 'Deno' in globalThis ? 'Deno' : 'Node';
+    const runtime =
+      'Bun' in globalThis ? 'Bun' : 'Deno' in globalThis ? 'Deno' : 'Node';
     const depsReport = [
       'Discord Player',
       line,
       `- discord-player: ${Player.version}${
-        this.isCompatMode() ? ` (${getCompatName(this.client)} compatibility mode)` : ''
+        this.isCompatMode()
+          ? ` (${getCompatName(this.client)} compatibility mode)`
+          : ''
       }`,
       `- discord-voip: ${dVoiceVersion}`,
       `- discord.js: ${djsVersion}`,
@@ -795,12 +892,20 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
   public createTrackFromAudioResource(resource: AudioResource) {
     const metadata = (resource.metadata || {}) as Record<string, unknown>;
     const ref = SnowflakeUtil.generate().toString();
-    const maybeTitle = 'title' in metadata ? `${metadata.title}` : `Track ${ref}`;
-    const maybeAuthor = 'author' in metadata ? `${metadata.author}` : 'Unknown author';
-    const maybeDuration = 'duration' in metadata ? `${metadata.duration}` : '00:00';
-    const maybeThumbnail = 'thumbnail' in metadata ? `${metadata.thumbnail}` : undefined;
-    const maybeURL = 'url' in metadata ? `${metadata.url}` : `discord-player://blob/${ref}`;
-    const maybeDescription = 'description' in metadata ? `${metadata.description}` : 'No description available.';
+    const maybeTitle =
+      'title' in metadata ? `${metadata.title}` : `Track ${ref}`;
+    const maybeAuthor =
+      'author' in metadata ? `${metadata.author}` : 'Unknown author';
+    const maybeDuration =
+      'duration' in metadata ? `${metadata.duration}` : '00:00';
+    const maybeThumbnail =
+      'thumbnail' in metadata ? `${metadata.thumbnail}` : undefined;
+    const maybeURL =
+      'url' in metadata ? `${metadata.url}` : `discord-player://blob/${ref}`;
+    const maybeDescription =
+      'description' in metadata
+        ? `${metadata.description}`
+        : 'No description available.';
     const maybeViews = 'views' in metadata ? Number(metadata.views) || 0 : 0;
 
     const track = new Track(this, {
@@ -822,5 +927,34 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
     track.setResource(resource as AudioResource<Track>);
 
     return track;
+  }
+
+  /**
+   * Handles intercepting streams
+   * @param stream The stream to intercept
+   */
+  public async handleInterceptingStream(
+    queue: GuildQueue,
+    track: Track,
+    format: StreamType,
+    stream: InterceptedStream,
+  ) {
+    if (!this.#streamInterceptor) return;
+
+    return this.#streamInterceptor.handle(queue, track, format, stream);
+  }
+
+  /**
+   * Creates a global stream interceptor
+   * @param options The stream interceptor options
+   */
+  public createStreamInterceptor(options: PlayerStreamInterceptorOptions) {
+    if (this.#streamInterceptor) {
+      return this.#streamInterceptor;
+    }
+
+    this.#streamInterceptor = new PlayerStreamInterceptor(this, options);
+
+    return this.#streamInterceptor;
   }
 }

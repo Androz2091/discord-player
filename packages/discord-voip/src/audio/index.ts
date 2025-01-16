@@ -16,7 +16,11 @@ export {
 
 export { AudioPlayerError } from './AudioPlayerError';
 
-export { AudioResource, type CreateAudioResourceOptions, createAudioResource } from './AudioResource';
+export {
+  AudioResource,
+  type CreateAudioResourceOptions,
+  createAudioResource,
+} from './AudioResource';
 
 export { PlayerSubscription } from './PlayerSubscription';
 

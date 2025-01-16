@@ -33,16 +33,19 @@ You may also choose to not use the default extractors and find other extractors 
 | `ReverbnationExtractor` | Resolves Reverbnation url to playable `Track`.                                                       | Yes                | No              |
 
 <Callout>
-  The extractors that do not support streaming can only be used for search. They cannot be used to play the audio. In
-  other words, extractors such as `AppleMusicExtractor` and `SpotifyExtractor` can only be used to search for tracks,
-  but not to play them.
+  The extractors that do not support streaming can only be used for search. They
+  cannot be used to play the audio. In other words, extractors such as
+  `AppleMusicExtractor` and `SpotifyExtractor` can only be used to search for
+  tracks, but not to play them.
 </Callout>
 
 If the query is resolved via extractors that do not support streaming, Discord Player uses alternative streaming method called **bridging** to facilitate the playback. This method may not be as efficient and accurate.
 
 <Callout>
-  Bridging is a method where track extracted by one extractor is passed to another extractor that supports streaming. If
-  the track is unable to be bridged, Discord Player will skip the track and move to the next track in the queue.
+  Bridging is a method where track extracted by one extractor is passed to
+  another extractor that supports streaming. If the track is unable to be
+  bridged, Discord Player will skip the track and move to the next track in the
+  queue.
 </Callout>
 
 ## Community Extractors
@@ -50,9 +53,10 @@ If the query is resolved via extractors that do not support streaming, Discord P
 You can also find community built extractors that provide additional functionality. These extractors may not be officially supported by Discord Player. You can find community extractors on [Community](/community) showcase list.
 
 <Callout type="warn">
-  Some extractors may violate the terms of service of the platform they are extracting from. Make sure to read the terms
-  of service of the platform before using the extractors. Discord Player is not responsible for any violation of terms
-  of service, as it gives you full control over the extractors.
+  Some extractors may violate the terms of service of the platform they are
+  extracting from. Make sure to read the terms of service of the platform before
+  using the extractors. Discord Player is not responsible for any violation of
+  terms of service, as it gives you full control over the extractors.
 </Callout>
 
 ## Loading `@discord-player/extractor`
@@ -76,7 +80,10 @@ await player.extractors.loadMulti(DefaultExtractors);
 <Tab value="Named Extractors">
 
 ```js
-import { SoundCloudExtractor, AttachmentExtractor } from '@discord-player/extractor';
+import {
+  SoundCloudExtractor,
+  AttachmentExtractor,
+} from '@discord-player/extractor';
 
 await player.extractors.loadMulti([SoundCloudExtractor, AttachmentExtractor]);
 ```
@@ -86,6 +93,6 @@ await player.extractors.loadMulti([SoundCloudExtractor, AttachmentExtractor]);
 </Tabs>
 
 <Callout>
-  It is up to you to decide which extractors you want to use. Having too many extractors may slow down the query
-  resolution process.
+  It is up to you to decide which extractors you want to use. Having too many
+  extractors may slow down the query resolution process.
 </Callout>

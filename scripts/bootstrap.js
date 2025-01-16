@@ -45,8 +45,18 @@ function getPackageJSON(name) {
     {
       name,
       version: '0.1.0',
-      description: 'A complete framework to simplify the implementation of music commands for Discord bots',
-      keywords: ['discord-player', 'music', 'bot', 'discord.js', 'javascript', 'voip', 'lavalink', 'lavaplayer'],
+      description:
+        'A complete framework to simplify the implementation of music commands for Discord bots',
+      keywords: [
+        'discord-player',
+        'music',
+        'bot',
+        'discord.js',
+        'javascript',
+        'voip',
+        'lavalink',
+        'lavaplayer',
+      ],
       author: 'Androz2091 <androz2091@gmail.com>',
       homepage: 'https://discord-player.js.org',
       license: 'MIT',
@@ -80,12 +90,15 @@ function getPackageJSON(name) {
 }
 
 async function main() {
-  if (!destName) return console.log(chalk.redBright('✘ Package name is required!'));
+  if (!destName)
+    return console.log(chalk.redBright('✘ Package name is required!'));
   const match = destName.match(DP_PKG);
   const name = match?.[1] || destName;
 
   if (await exists(`${TARGET_DIR}/${name}`))
-    return console.log(chalk.redBright(`✘ Cannot create ${name} as it already exists.`));
+    return console.log(
+      chalk.redBright(`✘ Cannot create ${name} as it already exists.`),
+    );
 
   console.log(chalk.cyanBright(`▲ Generating project...`));
   await ensureDir(`${TARGET_DIR}/${name}`);
@@ -100,5 +113,7 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.log(`${chalk.redBright('Failed to bootstrap!')}\n\n${chalk.red(`${e}`)}`);
+  console.log(
+    `${chalk.redBright('Failed to bootstrap!')}\n\n${chalk.red(`${e}`)}`,
+  );
 });

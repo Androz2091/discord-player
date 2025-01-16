@@ -9,7 +9,11 @@ const client = Eris(process.env.DISCORD_TOKEN!, {
 
 const player = new Player(createErisCompat(client));
 
-player.on('debug', console.log).events.on('debug', (queue, msg) => console.log(`[${queue.guild.name}] ${msg}`));
+player
+  .on('debug', console.log)
+  .events.on('debug', (queue, msg) =>
+    console.log(`[${queue.guild.name}] ${msg}`),
+  );
 
 player.extractors.loadMulti(DefaultExtractors);
 
@@ -48,7 +52,11 @@ client.on('messageCreate', async (message) => {
       return client.createMessage(message.channel.id, 'Pong!');
     case 'play': {
       const voiceChannel = message.member?.voiceState.channelID;
-      if (!voiceChannel) return client.createMessage(message.channel.id, 'You need to be in a voice channel!');
+      if (!voiceChannel)
+        return client.createMessage(
+          message.channel.id,
+          'You need to be in a voice channel!',
+        );
 
       const query = args.join(' ');
 
@@ -67,7 +75,8 @@ client.on('messageCreate', async (message) => {
     }
     case 'pause': {
       const queue = player.queues.get(message.guildID);
-      if (!queue) return client.createMessage(message.channel.id, 'No queue found!');
+      if (!queue)
+        return client.createMessage(message.channel.id, 'No queue found!');
 
       queue.node.pause();
 
@@ -75,7 +84,8 @@ client.on('messageCreate', async (message) => {
     }
     case 'resume': {
       const queue = player.queues.get(message.guildID);
-      if (!queue) return client.createMessage(message.channel.id, 'No queue found!');
+      if (!queue)
+        return client.createMessage(message.channel.id, 'No queue found!');
 
       queue.node.resume();
 
@@ -83,7 +93,8 @@ client.on('messageCreate', async (message) => {
     }
     case 'stop': {
       const queue = player.queues.get(message.guildID);
-      if (!queue) return client.createMessage(message.channel.id, 'No queue found!');
+      if (!queue)
+        return client.createMessage(message.channel.id, 'No queue found!');
 
       queue.delete();
 
@@ -91,26 +102,40 @@ client.on('messageCreate', async (message) => {
     }
     case 'skip': {
       const queue = player.queues.get(message.guildID);
-      if (!queue) return client.createMessage(message.channel.id, 'No queue found!');
+      if (!queue)
+        return client.createMessage(message.channel.id, 'No queue found!');
 
       const success = queue.node.skip();
 
-      if (!success) return client.createMessage(message.channel.id, 'Cannot skip the track!');
+      if (!success)
+        return client.createMessage(
+          message.channel.id,
+          'Cannot skip the track!',
+        );
 
       return client.createMessage(message.channel.id, 'Skipped the track!');
     }
     case 'volume': {
       const queue = player.queues.get(message.guildID);
-      if (!queue) return client.createMessage(message.channel.id, 'No queue found!');
+      if (!queue)
+        return client.createMessage(message.channel.id, 'No queue found!');
 
-      if (!args.length) return client.createMessage(message.channel.id, `Current volume: ${queue.node.volume}`);
+      if (!args.length)
+        return client.createMessage(
+          message.channel.id,
+          `Current volume: ${queue.node.volume}`,
+        );
 
       const volume = parseInt(args[0], 10);
-      if (isNaN(volume)) return client.createMessage(message.channel.id, 'Invalid volume!');
+      if (isNaN(volume))
+        return client.createMessage(message.channel.id, 'Invalid volume!');
 
       queue.node.setVolume(volume);
 
-      return client.createMessage(message.channel.id, `Set the volume to: ${volume}`);
+      return client.createMessage(
+        message.channel.id,
+        `Set the volume to: ${volume}`,
+      );
     }
   }
 });

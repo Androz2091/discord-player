@@ -1,29 +1,10 @@
-import { ChildProcessWithoutNullStreams, spawn, spawnSync } from 'node:child_process';
+import {
+  ChildProcessWithoutNullStreams,
+  spawn,
+  spawnSync,
+} from 'node:child_process';
 import { Duplex, DuplexOptions } from 'node:stream';
-
-export type FFmpegLib =
-  | 'ffmpeg'
-  | './ffmpeg'
-  | 'avconv'
-  | './avconv'
-  | 'ffmpeg-static'
-  | '@ffmpeg-installer/ffmpeg'
-  | '@node-ffmpeg/node-ffmpeg-installer'
-  | 'ffmpeg-binaries';
-
-export type FFmpegCallback<Args extends Array<unknown>> = (...args: Args) => unknown;
-
-export interface FFmpegSource {
-  name: FFmpegLib;
-  module: boolean;
-}
-
-export interface ResolvedFFmpegSource extends FFmpegSource {
-  path: string;
-  version: string;
-  command: string;
-  result: string;
-}
+import { FFmpegCallback, FFmpegSource, ResolvedFFmpegSource } from './common';
 
 export interface FFmpegOptions extends DuplexOptions {
   args?: string[];
@@ -102,7 +83,10 @@ export class FFmpeg extends Duplex {
         if (source.module) {
           // eslint-disable-next-line @typescript-eslint/no-var-requires
           const mod = require(source.name);
-          path = validatePathParam(mod.default?.path || mod.path || mod, source.name);
+          path = validatePathParam(
+            mod.default?.path || mod.path || mod,
+            source.name,
+          );
         } else {
           path = source.name;
         }
@@ -115,7 +99,8 @@ export class FFmpeg extends Duplex {
           module: source.module,
           name: source.name,
           path,
-          version: VERSION_REGEX.exec(result.stderr.toString())?.[1] ?? 'unknown',
+          version:
+            VERSION_REGEX.exec(result.stderr.toString())?.[1] ?? 'unknown',
         };
 
         FFmpeg.cached = resolved;
@@ -126,7 +111,9 @@ export class FFmpeg extends Duplex {
       } catch (e) {
         const err = e && e instanceof Error ? e.message : `${e}`;
         const msg = `Failed to load ffmpeg using ${
-          source.module ? `require('${source.name}')` : `spawn('${source.name}')`
+          source.module
+            ? `require('${source.name}')`
+            : `spawn('${source.name}')`
         }. Error: ${err}`;
 
         errors.push(msg);
@@ -154,7 +141,10 @@ export class FFmpeg extends Duplex {
    */
   public static spawn({ args = [] as string[], shell = false } = {}) {
     if (!args.includes('-i')) args.unshift('-i', '-');
-    return spawn(FFmpeg.resolve().command, args.concat(['pipe:1']), { windowsHide: true, shell });
+    return spawn(FFmpeg.resolve().command, args.concat(['pipe:1']), {
+      windowsHide: true,
+      shell,
+    });
   }
 
   /**
@@ -204,11 +194,21 @@ export class FFmpeg extends Duplex {
     this._copy(['write', 'end'], this._writer);
     this._copy(['read', 'setEncoding', 'pipe', 'unpipe'], this._reader);
 
-    for (const method of ['on', 'once', 'removeListener', 'removeAllListeners', 'listeners'] as const) {
+    for (const method of [
+      'on',
+      'once',
+      'removeListener',
+      'removeAllListeners',
+      'listeners',
+    ] as const) {
       // @ts-expect-error
       this[method] = (ev, fn) =>
         // @ts-expect-error
-        EVENTS[ev] ? EVENTS[ev][method](ev, fn) : Duplex.prototype[method].call(this, ev, fn);
+        EVENTS[ev]
+          ? // @ts-expect-error
+            EVENTS[ev][method](ev, fn)
+          : // @ts-expect-error
+            Duplex.prototype[method].call(this, ev, fn);
     }
 
     const processError = (error: Error) => this.emit('error', error);

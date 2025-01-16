@@ -1,7 +1,18 @@
 'use client';
 
-import type { TabsContentProps, TabsProps as BaseProps } from '@radix-ui/react-tabs';
-import { useMemo, useState, useCallback, createContext, useContext, useRef, useLayoutEffect } from 'react';
+import type {
+  TabsContentProps,
+  TabsProps as BaseProps,
+} from '@radix-ui/react-tabs';
+import {
+  useMemo,
+  useState,
+  useCallback,
+  createContext,
+  useContext,
+  useRef,
+  useLayoutEffect,
+} from 'react';
 import { cn } from '../lib/cn';
 import * as Primitive from './ui/tabs';
 
@@ -47,7 +58,9 @@ export interface TabsProps extends BaseProps {
   updateAnchor?: boolean;
 }
 
-const ValueToMapContext = createContext<Map<string, string> | undefined>(undefined);
+const ValueToMapContext = createContext<Map<string, string> | undefined>(
+  undefined,
+);
 
 export function Tabs({
   groupId,
@@ -70,7 +83,9 @@ export function Tabs({
     if (!groupId) return;
     const onUpdate: ChangeListener = (v) => onChangeRef.current?.(v);
 
-    const previous = persist ? localStorage.getItem(groupId) : sessionStorage.getItem(groupId);
+    const previous = persist
+      ? localStorage.getItem(groupId)
+      : sessionStorage.getItem(groupId);
 
     if (previous) onUpdate(previous);
     addChangeListener(groupId, onUpdate);
@@ -83,7 +98,9 @@ export function Tabs({
     const hash = window.location.hash.slice(1);
     if (!hash) return;
 
-    const entry = Array.from(valueToIdMapRef.current.entries()).find(([_, id]) => id === hash);
+    const entry = Array.from(valueToIdMapRef.current.entries()).find(
+      ([_, id]) => id === hash,
+    );
 
     if (entry) setValue(entry[0]);
   }, []);
@@ -113,7 +130,12 @@ export function Tabs({
   );
 
   return (
-    <Primitive.Tabs value={value} onValueChange={onValueChange} {...props} className={cn('my-4', props.className)}>
+    <Primitive.Tabs
+      value={value}
+      onValueChange={onValueChange}
+      {...props}
+      className={cn('my-4', props.className)}
+    >
       <Primitive.TabsList>
         {values.map((v, i) => (
           <Primitive.TabsTrigger key={v} value={v}>
@@ -121,7 +143,9 @@ export function Tabs({
           </Primitive.TabsTrigger>
         ))}
       </Primitive.TabsList>
-      <ValueToMapContext.Provider value={valueToIdMapRef.current}>{props.children}</ValueToMapContext.Provider>
+      <ValueToMapContext.Provider value={valueToIdMapRef.current}>
+        {props.children}
+      </ValueToMapContext.Provider>
     </Primitive.Tabs>
   );
 }

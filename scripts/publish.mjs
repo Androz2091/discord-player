@@ -4,6 +4,10 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
 
+try {
+  process.loadEnvFile();
+} catch {}
+
 const otherFlags = process.argv.slice(2);
 const FILE_NAME = 'package.json';
 const ENTRYPOINT = join(process.cwd(), 'packages');
@@ -35,7 +39,11 @@ for (const dir of packages) {
 
   console.log(`\nPublishing ${name}@${packageJson.version}`);
 
-  const flags = ['--access public', isDev ? '--tag dev' : '', ...otherFlags].filter(Boolean);
+  const flags = [
+    '--access public',
+    isDev ? '--tag dev' : '',
+    ...otherFlags,
+  ].filter(Boolean);
 
   const cmd = `yarn workspace ${name} npm publish ${flags.join(' ')}`;
 
@@ -43,5 +51,6 @@ for (const dir of packages) {
 
   execSync(cmd, {
     stdio: 'inherit',
+    env: process.env,
   });
 }

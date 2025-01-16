@@ -170,7 +170,10 @@ export interface Networking extends EventEmitter {
    */
   on(event: 'debug', listener: (message: string) => void): this;
   on(event: 'error', listener: (error: Error) => void): this;
-  on(event: 'stateChange', listener: (oldState: NetworkingState, newState: NetworkingState) => void): this;
+  on(
+    event: 'stateChange',
+    listener: (oldState: NetworkingState, newState: NetworkingState) => void,
+  ): this;
   on(event: 'close', listener: (code: number) => void): this;
 }
 
@@ -193,9 +196,15 @@ function stringifyState(state: NetworkingState) {
  * @param options - The available encryption options
  */
 function chooseEncryptionMode(options: string[]): string {
-  const option = options.find((option) => SUPPORTED_ENCRYPTION_MODES.includes(option));
+  const option = options.find((option) =>
+    SUPPORTED_ENCRYPTION_MODES.includes(option),
+  );
   if (!option) {
-    throw new Error(`No compatible encryption modes. Available include: ${options.join(', ')}`);
+    throw new Error(
+      `No compatible encryption modes. Available include: ${options.join(
+        ', ',
+      )}`,
+    );
   }
 
   return option;
@@ -235,7 +244,9 @@ export class Networking extends EventEmitter {
     this.onUdpDebug = this.onUdpDebug.bind(this);
     this.onUdpClose = this.onUdpClose.bind(this);
 
-    this.debug = debug ? (message: string) => this.emit('debug', message) : null;
+    this.debug = debug
+      ? (message: string) => this.emit('debug', message)
+      : null;
 
     this._state = {
       code: NetworkingStatusCode.OpeningWs,
@@ -277,7 +288,9 @@ export class Networking extends EventEmitter {
       oldWs.destroy();
     }
 
-    const oldUdp = Reflect.get(this._state, 'udp') as VoiceUDPSocket | undefined;
+    const oldUdp = Reflect.get(this._state, 'udp') as
+      | VoiceUDPSocket
+      | undefined;
     const newUdp = Reflect.get(newState, 'udp') as VoiceUDPSocket | undefined;
 
     if (oldUdp && oldUdp !== newUdp) {
@@ -292,7 +305,11 @@ export class Networking extends EventEmitter {
     this._state = newState;
     this.emit('stateChange', oldState, newState);
 
-    this.debug?.(`state change:\nfrom ${stringifyState(oldState)}\nto ${stringifyState(newState)}`);
+    this.debug?.(
+      `state change:\nfrom ${stringifyState(oldState)}\nto ${stringifyState(
+        newState,
+      )}`,
+    );
   }
 
   /**
@@ -394,9 +411,15 @@ export class Networking extends EventEmitter {
    * @param packet - The received packet
    */
   private onWsPacket(packet: unsafe) {
-    if (packet.op === VoiceOpcodes.Hello && this.state.code !== NetworkingStatusCode.Closed) {
+    if (
+      packet.op === VoiceOpcodes.Hello &&
+      this.state.code !== NetworkingStatusCode.Closed
+    ) {
       this.state.ws.setHeartbeatInterval(packet.d.heartbeat_interval);
-    } else if (packet.op === VoiceOpcodes.Ready && this.state.code === NetworkingStatusCode.Identifying) {
+    } else if (
+      packet.op === VoiceOpcodes.Ready &&
+      this.state.code === NetworkingStatusCode.Identifying
+    ) {
       const { ip, port, ssrc, modes } = packet.d;
 
       const udp = new VoiceUDPSocket({ ip, port });
@@ -448,12 +471,18 @@ export class Networking extends EventEmitter {
           sequence: randomNBit(16),
           timestamp: randomNBit(32),
           nonce: 0,
-          nonceBuffer: encryptionMode === 'aead_aes256_gcm_rtpsize' ? Buffer.alloc(12) : Buffer.alloc(24),
+          nonceBuffer:
+            encryptionMode === 'aead_aes256_gcm_rtpsize'
+              ? Buffer.alloc(12)
+              : Buffer.alloc(24),
           speaking: false,
           packetsPlayed: 0,
         },
       };
-    } else if (packet.op === VoiceOpcodes.Resumed && this.state.code === NetworkingStatusCode.Resuming) {
+    } else if (
+      packet.op === VoiceOpcodes.Resumed &&
+      this.state.code === NetworkingStatusCode.Resuming
+    ) {
       this.state = {
         ...this.state,
         code: NetworkingStatusCode.Ready,
@@ -493,7 +522,10 @@ export class Networking extends EventEmitter {
   public prepareAudioPacket(opusPacket: Buffer) {
     const state = this.state;
     if (state.code !== NetworkingStatusCode.Ready) return;
-    state.preparedPacket = this.createAudioPacket(opusPacket, state.connectionData);
+    state.preparedPacket = this.createAudioPacket(
+      opusPacket,
+      state.connectionData,
+    );
     return state.preparedPacket;
   }
 
@@ -559,7 +591,10 @@ export class Networking extends EventEmitter {
    * @param opusPacket - The Opus packet to prepare
    * @param connectionData - The current connection data of the instance
    */
-  private createAudioPacket(opusPacket: Buffer, connectionData: ConnectionData) {
+  private createAudioPacket(
+    opusPacket: Buffer,
+    connectionData: ConnectionData,
+  ) {
     const packetBuffer = Buffer.alloc(12);
     packetBuffer[0] = 0x80;
     packetBuffer[1] = 0x78;
@@ -572,8 +607,11 @@ export class Networking extends EventEmitter {
 
     // @ts-ignore
     packetBuffer.copy(nonce, 0, 0, 12);
-    // @ts-ignore
-    return Buffer.concat([packetBuffer, ...this.encryptOpusPacket(opusPacket, connectionData, packetBuffer)]);
+    return Buffer.concat([
+      // @ts-ignore
+      packetBuffer,
+      ...this.encryptOpusPacket(opusPacket, connectionData, packetBuffer),
+    ]);
   }
 
   /**
@@ -582,7 +620,11 @@ export class Networking extends EventEmitter {
    * @param opusPacket - The Opus packet to encrypt
    * @param connectionData - The current connection data of the instance
    */
-  private encryptOpusPacket(opusPacket: Buffer, connectionData: ConnectionData, data: Buffer) {
+  private encryptOpusPacket(
+    opusPacket: Buffer,
+    connectionData: ConnectionData,
+    data: Buffer,
+  ) {
     const { secretKey, encryptionMode } = connectionData;
 
     // Both supported encryption methods want the nonce to be an incremental integer
@@ -597,28 +639,39 @@ export class Networking extends EventEmitter {
     switch (encryptionMode) {
       case 'aead_aes256_gcm_rtpsize': {
         // @ts-ignore
-        const cipher = crypto.createCipheriv('aes-256-gcm', secretKey, connectionData.nonceBuffer);
+        const cipher = crypto.createCipheriv(
+          'aes-256-gcm',
+          secretKey,
+          connectionData.nonceBuffer,
+        );
         // @ts-ignore
         cipher.setAAD(data);
 
         // @ts-ignore
-        encrypted = Buffer.concat([cipher.update(opusPacket), cipher.final(), cipher.getAuthTag()]);
+        encrypted = Buffer.concat([
+          cipher.update(opusPacket),
+          cipher.final(),
+          cipher.getAuthTag(),
+        ]);
 
         return [encrypted, noncePadding];
       }
       case 'aead_xchacha20_poly1305_rtpsize': {
-        encrypted = secretbox.methods.crypto_aead_xchacha20poly1305_ietf_encrypt(
-          opusPacket,
-          data,
-          connectionData.nonceBuffer,
-          secretKey,
-        );
+        encrypted =
+          secretbox.methods.crypto_aead_xchacha20poly1305_ietf_encrypt(
+            opusPacket,
+            data,
+            connectionData.nonceBuffer,
+            secretKey,
+          );
 
         return [encrypted, noncePadding];
       }
       default: {
         // This should never happen. Our encryption mode is chosen from a list given to us by the gateway and checked with the ones we support.
-        throw new RangeError(`Unsupported encryption method: ${encryptionMode}`);
+        throw new RangeError(
+          `Unsupported encryption method: ${encryptionMode}`,
+        );
       }
     }
   }

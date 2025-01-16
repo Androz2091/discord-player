@@ -53,15 +53,23 @@ class Util {
    * Gets the runtime information
    */
   static getRuntime(): Runtime {
-    const version = typeof navigator !== 'undefined' ? navigator.userAgent : null;
+    const version =
+      typeof navigator !== 'undefined' ? navigator.userAgent : null;
 
     // @ts-ignore
-    if (typeof Deno !== 'undefined' && Deno.version) return { name: 'deno', version: Deno.version.deno };
+    if (typeof Deno !== 'undefined' && Deno.version) {
+      // @ts-ignore
+      return { name: 'deno', version: Deno.version.deno };
+    }
 
     // @ts-ignore
-    if (typeof Bun !== 'undefined' && Bun.version) return { name: 'bun', version: Bun.version };
+    if (typeof Bun !== 'undefined' && Bun.version) {
+      // @ts-ignore
+      return { name: 'bun', version: Bun.version };
+    }
 
-    if (typeof process !== 'undefined' && process.version) return { name: 'node', version: process.version };
+    if (typeof process !== 'undefined' && process.version)
+      return { name: 'node', version: process.version };
 
     return { name: 'unknown', version: version ?? 'unknown' };
   }
@@ -103,7 +111,9 @@ class Util {
     const items = Object.keys(duration);
     const required = ['days', 'hours', 'minutes', 'seconds'];
 
-    const parsed = items.filter((x) => required.includes(x)).map((m) => duration[m as keyof TimeData]);
+    const parsed = items
+      .filter((x) => required.includes(x))
+      .map((m) => duration[m as keyof TimeData]);
     const final = parsed
       .slice(parsed.findIndex((x) => x !== 0))
       .map((x) => x.toString().padStart(2, '0'))
@@ -137,7 +147,9 @@ class Util {
    * @returns {boolean}
    */
   static isVoiceEmpty(channel: VoiceChannel | StageChannel) {
-    return channel && channel.members.filter((member) => !member.user.bot).size === 0;
+    return (
+      channel && channel.members.filter((member) => !member.user.bot).size === 0
+    );
   }
 
   /**
@@ -214,7 +226,9 @@ class Util {
     if ('fetch' in globalThis) return globalThis.fetch;
     for (const lib of ['node-fetch', 'undici']) {
       try {
-        return await import(lib).then((res) => res.fetch || res.default?.fetch || res.default);
+        return await import(lib).then(
+          (res) => res.fetch || res.default?.fetch || res.default,
+        );
       } catch {
         try {
           // eslint-disable-next-line
@@ -252,8 +266,16 @@ class Util {
   }
 }
 
-export const VALIDATE_QUEUE_CAP = (queue: GuildQueue, items: Playlist | Track | Track[]) => {
-  const tracks = items instanceof Playlist ? items.tracks : Array.isArray(items) ? items : [items];
+export const VALIDATE_QUEUE_CAP = (
+  queue: GuildQueue,
+  items: Playlist | Track | Track[],
+) => {
+  const tracks =
+    items instanceof Playlist
+      ? items.tracks
+      : Array.isArray(items)
+      ? items
+      : [items];
 
   if (queue.maxSize < 1 || queue.maxSize === Infinity) return;
 

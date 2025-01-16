@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/ffmpeg",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "FFmpeg stream abstraction for discord-player",
   "keywords": [
     "discord-player",
@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
-    "@types/node": "^20.3.1",
+    "@types/node": "^22.10.7",
     "tsup": "^8.3.5",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"

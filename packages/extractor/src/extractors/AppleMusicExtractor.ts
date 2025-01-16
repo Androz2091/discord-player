@@ -15,7 +15,11 @@ import { Readable } from 'stream';
 import { StreamFN } from '../types/common';
 
 export interface AppleMusicExtractorInit {
-  createStream?: (ext: AppleMusicExtractor, url: string, track: Track) => Promise<Readable | string>;
+  createStream?: (
+    ext: AppleMusicExtractor,
+    url: string,
+    track: Track,
+  ) => Promise<Readable | string>;
 }
 
 export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> {
@@ -37,7 +41,10 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
     this.protocols = [];
   }
 
-  public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
+  public async validate(
+    query: string,
+    type?: SearchQueryType | null | undefined,
+  ): Promise<boolean> {
     // prettier-ignore
     return (<SearchQueryType[]>[
             QueryType.APPLE_MUSIC_ALBUM,
@@ -56,15 +63,23 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
         requestedBy: track.requestedBy,
       });
 
-      const unique = data.tracks.filter((t) => !history.tracks.some((h) => h.url === t.url));
-      return unique.length > 0 ? this.createResponse(null, unique) : this.createResponse();
+      const unique = data.tracks.filter(
+        (t) => !history.tracks.some((h) => h.url === t.url),
+      );
+      return unique.length > 0
+        ? this.createResponse(null, unique)
+        : this.createResponse();
     }
 
     return this.createResponse();
   }
 
-  public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
-    if (context.protocol === 'amsearch') context.type = QueryType.APPLE_MUSIC_SEARCH;
+  public async handle(
+    query: string,
+    context: ExtractorSearchContext,
+  ): Promise<ExtractorInfo> {
+    if (context.protocol === 'amsearch')
+      context.type = QueryType.APPLE_MUSIC_SEARCH;
 
     switch (context.type) {
       case QueryType.AUTO:
@@ -78,7 +93,10 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
             const track: Track = new Track(this.context.player, {
               author: m.artist.name,
               description: m.title,
-              duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
+              duration:
+                typeof m.duration === 'number'
+                  ? Util.buildTimeCode(Util.parseMS(m.duration))
+                  : m.duration,
               thumbnail: m.thumbnail,
               title: m.title,
               url: m.url,
@@ -133,7 +151,10 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
             const track: Track = new Track(this.context.player, {
               author: m.artist.name,
               description: m.title,
-              duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
+              duration:
+                typeof m.duration === 'number'
+                  ? Util.buildTimeCode(Util.parseMS(m.duration))
+                  : m.duration,
               thumbnail: m.thumbnail,
               title: m.title,
               url: m.url,
@@ -187,7 +208,10 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
             const track: Track = new Track(this.context.player, {
               author: m.artist.name,
               description: m.title,
-              duration: typeof m.duration === 'number' ? Util.buildTimeCode(Util.parseMS(m.duration)) : m.duration,
+              duration:
+                typeof m.duration === 'number'
+                  ? Util.buildTimeCode(Util.parseMS(m.duration))
+                  : m.duration,
               thumbnail: m.thumbnail,
               title: m.title,
               url: m.url,
@@ -223,7 +247,10 @@ export class AppleMusicExtractor extends BaseExtractor<AppleMusicExtractorInit> 
         const track: Track = new Track(this.context.player, {
           author: info.artist.name,
           description: info.title,
-          duration: typeof info.duration === 'number' ? Util.buildTimeCode(Util.parseMS(info.duration)) : info.duration,
+          duration:
+            typeof info.duration === 'number'
+              ? Util.buildTimeCode(Util.parseMS(info.duration))
+              : info.duration,
           thumbnail: info.thumbnail,
           title: info.title,
           url: info.url,

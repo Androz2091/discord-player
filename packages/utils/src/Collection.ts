@@ -1,6 +1,9 @@
 import { Collection as CollectionNative } from '@discordjs/collection';
 
-export class Collection<K = unknown, V = unknown> extends CollectionNative<K, V> {
+export class Collection<K = unknown, V = unknown> extends CollectionNative<
+  K,
+  V
+> {
   #array!: V[] | null;
 
   /**

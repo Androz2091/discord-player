@@ -10,7 +10,7 @@
   "license": "MIT",
   "description": "",
   "devDependencies": {
-    "@types/node": "^22.2.0",
+    "@types/node": "^22.10.7",
     "tsx": "^4.17.0"
   },
   "dependencies": {

@@ -101,7 +101,10 @@ export class VoiceUDPSocket extends EventEmitter {
     this.socket.on('close', () => this.emit('close'));
     this.remote = remote;
     this.keepAliveBuffer = Buffer.alloc(8);
-    this.keepAliveInterval = setInterval(() => this.keepAlive(), KEEP_ALIVE_INTERVAL);
+    this.keepAliveInterval = setInterval(
+      () => this.keepAlive(),
+      KEEP_ALIVE_INTERVAL,
+    );
     setImmediate(() => this.keepAlive());
   }
 
@@ -169,7 +172,9 @@ export class VoiceUDPSocket extends EventEmitter {
       };
 
       this.socket.on('message', listener);
-      this.socket.once('close', () => reject(new Error('Cannot perform IP discovery - socket closed')));
+      this.socket.once('close', () =>
+        reject(new Error('Cannot perform IP discovery - socket closed')),
+      );
 
       const discoveryBuffer = Buffer.alloc(74);
 

@@ -2,7 +2,12 @@
 // Copyright discord.js authors. All rights reserved. Apache License 2.0
 
 import type { Readable } from 'node:stream';
-import { OpusEncoder, OpusDecoder, OggDemuxer, WebmDemuxer } from '@discord-player/opus';
+import {
+  OpusEncoder,
+  OpusDecoder,
+  OggDemuxer,
+  WebmDemuxer,
+} from '@discord-player/opus';
 import { createFFmpegArgs, FFmpeg } from '@discord-player/ffmpeg';
 import { VolumeTransformer } from '@discord-player/equalizer';
 
@@ -129,14 +134,16 @@ function initializeNodes(): Map<StreamType, Node> {
     type: TransformerType.OpusEncoder,
     to: nodes.get(StreamType.Opus)!,
     cost: 1.5,
-    transformer: () => new OpusEncoder({ rate: 48_000, channels: 2, frameSize: 960 }),
+    transformer: () =>
+      new OpusEncoder({ rate: 48_000, channels: 2, frameSize: 960 }),
   });
 
   nodes.get(StreamType.Opus)!.addEdge({
     type: TransformerType.OpusDecoder,
     to: nodes.get(StreamType.Raw)!,
     cost: 1.5,
-    transformer: () => new OpusDecoder({ rate: 48_000, channels: 2, frameSize: 960 }),
+    transformer: () =>
+      new OpusDecoder({ rate: 48_000, channels: 2, frameSize: 960 }),
   });
 
   nodes.get(StreamType.OggOpus)!.addEdge({
@@ -159,7 +166,11 @@ function initializeNodes(): Map<StreamType, Node> {
     cost: 2,
     transformer: (input) =>
       new FFmpeg({
-        args: ['-i', typeof input === 'string' ? input : '-', ...FFMPEG_PCM_ARGUMENTS],
+        args: [
+          '-i',
+          typeof input === 'string' ? input : '-',
+          ...FFMPEG_PCM_ARGUMENTS,
+        ],
       }),
   };
 
@@ -181,7 +192,11 @@ function initializeNodes(): Map<StreamType, Node> {
       cost: 2,
       transformer: (input) =>
         new FFmpeg({
-          args: ['-i', typeof input === 'string' ? input : '-', ...FFMPEG_OPUS_ARGUMENTS],
+          args: [
+            '-i',
+            typeof input === 'string' ? input : '-',
+            ...FFMPEG_OPUS_ARGUMENTS,
+          ],
         }),
     };
     nodes.get(StreamType.Arbitrary)!.addEdge(FFMPEG_OGG_EDGE);
@@ -240,7 +255,13 @@ function findPath(
   let currentBest: Step | undefined;
   for (const edge of from.edges) {
     if (currentBest && edge.cost > currentBest.cost) continue;
-    const next = findPath(edge.to, constraints, goal, [...path, edge], depth - 1);
+    const next = findPath(
+      edge.to,
+      constraints,
+      goal,
+      [...path, edge],
+      depth - 1,
+    );
     const cost = edge.cost + next.cost;
     if (!currentBest || cost < currentBest.cost) {
       currentBest = { cost, edge, next };
@@ -272,6 +293,9 @@ function constructPipeline(step: Step) {
  * @param from - The stream type to start from
  * @param constraint - Extra constraints that may be imposed on potential solution
  */
-export function findPipeline(from: StreamType, constraint: (path: Edge[]) => boolean) {
+export function findPipeline(
+  from: StreamType,
+  constraint: (path: Edge[]) => boolean,
+) {
   return constructPipeline(findPath(getNode(from), constraint));
 }

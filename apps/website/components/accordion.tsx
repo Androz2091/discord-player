@@ -1,23 +1,35 @@
 'use client';
 
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
-import type { AccordionMultipleProps, AccordionSingleProps } from '@radix-ui/react-accordion';
+import type {
+  AccordionMultipleProps,
+  AccordionSingleProps,
+} from '@radix-ui/react-accordion';
 import { Check, ChevronRight, LinkIcon } from 'lucide-react';
-import { forwardRef, type ComponentPropsWithoutRef, useState, useEffect } from 'react';
+import {
+  forwardRef,
+  type ComponentPropsWithoutRef,
+  useState,
+  useEffect,
+} from 'react';
 import { cn } from '../lib/cn';
 import { useCopyButton } from '../lib/use-copy-button';
 import { buttonVariants } from './ui/button';
 
 export const Accordions = forwardRef<
   HTMLDivElement,
-  Omit<AccordionSingleProps, 'value' | 'onValueChange'> | Omit<AccordionMultipleProps, 'value' | 'onValueChange'>
+  | Omit<AccordionSingleProps, 'value' | 'onValueChange'>
+  | Omit<AccordionMultipleProps, 'value' | 'onValueChange'>
 >(({ type = 'single', className, defaultValue, ...props }, ref) => {
-  const [value, setValue] = useState<string | string[]>(type === 'single' ? defaultValue ?? '' : defaultValue ?? []);
+  const [value, setValue] = useState<string | string[]>(
+    type === 'single' ? defaultValue ?? '' : defaultValue ?? [],
+  );
 
   useEffect(() => {
     const id = window.location.hash.substring(1);
 
-    if (id.length > 0) setValue((prev) => (typeof prev === 'string' ? id : [id, ...prev]));
+    if (id.length > 0)
+      setValue((prev) => (typeof prev === 'string' ? id : [id, ...prev]));
   }, []);
 
   return (
@@ -28,7 +40,10 @@ export const Accordions = forwardRef<
       value={value}
       onValueChange={setValue}
       collapsible={type === 'single' ? true : undefined}
-      className={cn('divide-y divide-fd-border overflow-hidden rounded-lg border bg-fd-card', className)}
+      className={cn(
+        'divide-y divide-fd-border overflow-hidden rounded-lg border bg-fd-card',
+        className,
+      )}
       {...props}
     />
   );
@@ -87,7 +102,11 @@ function CopyButton({ id }: { id: string }): React.ReactElement {
       )}
       onClick={onClick}
     >
-      {checked ? <Check className="size-3.5" /> : <LinkIcon className="size-3.5" />}
+      {checked ? (
+        <Check className="size-3.5" />
+      ) : (
+        <LinkIcon className="size-3.5" />
+      )}
     </button>
   );
 }

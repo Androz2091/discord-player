@@ -9,6 +9,10 @@ export const metadata: Metadata = {
     'A curated list of resources like open-source music bots and extractors, built by the Discord Player community.',
 };
 
-export default function Layout({ children }: { children: ReactNode }): React.ReactElement {
+export default function Layout({
+  children,
+}: {
+  children: ReactNode;
+}): React.ReactElement {
   return <HomeLayout {...baseOptions}>{children}</HomeLayout>;
 }

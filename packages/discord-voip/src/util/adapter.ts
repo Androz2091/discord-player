@@ -1,7 +1,10 @@
 // Copyright discord-player authors. All rights reserved. MIT License.
 // Copyright discord.js authors. All rights reserved. Apache License 2.0
 
-import type { GatewayVoiceServerUpdateDispatchData, GatewayVoiceStateUpdateDispatchData } from 'discord-api-types/v10';
+import type {
+  GatewayVoiceServerUpdateDispatchData,
+  GatewayVoiceStateUpdateDispatchData,
+} from 'discord-api-types/v10';
 import { unsafe } from '../common/types';
 
 /**

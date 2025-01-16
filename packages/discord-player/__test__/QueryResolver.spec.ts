@@ -11,7 +11,9 @@ describe('QueryResolver', () => {
 
   it('should be appleMusicSearch [custom]', () => {
     const query = 'a search query';
-    expect(qr.resolve(query, QueryType.APPLE_MUSIC_SEARCH).type).toBe(QueryType.APPLE_MUSIC_SEARCH);
+    expect(qr.resolve(query, QueryType.APPLE_MUSIC_SEARCH).type).toBe(
+      QueryType.APPLE_MUSIC_SEARCH,
+    );
   });
 
   it('should be youtubeVideo', () => {
@@ -30,17 +32,20 @@ describe('QueryResolver', () => {
   });
 
   it('should be youtubePlaylist', () => {
-    const query = 'https://www.youtube.com/playlist?list=PLu4wnki9NI_8VmJ7Qz_byhKwCquXcy6u9';
+    const query =
+      'https://www.youtube.com/playlist?list=PLu4wnki9NI_8VmJ7Qz_byhKwCquXcy6u9';
     expect(qr.resolve(query).type).toBe(QueryType.YOUTUBE_PLAYLIST);
   });
 
   it('should be youtubePlaylist [2]', () => {
-    const query = 'https://youtube.com/playlist?list=PLRxX1Jhp-oqUhk_VQPuyVxwVhRPeuxNYQ&si=9vQkdM4MnJl_H6HZ';
+    const query =
+      'https://youtube.com/playlist?list=PLRxX1Jhp-oqUhk_VQPuyVxwVhRPeuxNYQ&si=9vQkdM4MnJl_H6HZ';
     expect(qr.resolve(query).type).toBe(QueryType.YOUTUBE_PLAYLIST);
   });
 
   it('should be youtubePlaylist [3]', () => {
-    const query = 'https://youtube.com/playlist?si=9vQkdM4MnJl_H6HZ&list=PLRxX1Jhp-oqUhk_VQPuyVxwVhRPeuxNYQ';
+    const query =
+      'https://youtube.com/playlist?si=9vQkdM4MnJl_H6HZ&list=PLRxX1Jhp-oqUhk_VQPuyVxwVhRPeuxNYQ';
     expect(qr.resolve(query).type).toBe(QueryType.YOUTUBE_PLAYLIST);
   });
 
@@ -56,7 +61,8 @@ describe('QueryResolver', () => {
   });
 
   it('should be soundcloudTrack', () => {
-    const query = 'https://soundcloud.com/rick-astley-official/never-gonna-give-you-up-4';
+    const query =
+      'https://soundcloud.com/rick-astley-official/never-gonna-give-you-up-4';
     expect(qr.resolve(query).type).toBe(QueryType.SOUNDCLOUD_TRACK);
   });
 
@@ -71,7 +77,8 @@ describe('QueryResolver', () => {
   });
 
   it('should be spotifySong (new url)', () => {
-    const query = 'https://open.spotify.com/intl-de/track/2USlegnFJLrVLpoVfPimKB?si=8e3902d2056547ca';
+    const query =
+      'https://open.spotify.com/intl-de/track/2USlegnFJLrVLpoVfPimKB?si=8e3902d2056547ca';
 
     expect(qr.resolve(query).type).toBe(QueryType.SPOTIFY_SONG);
   });
@@ -82,7 +89,8 @@ describe('QueryResolver', () => {
   });
 
   it('should be spotifyPlaylist (alternate)', () => {
-    const query = 'https://open.spotify.com/playlist/6Wu1PLrAuL1aApvX0iX9Rh?si=5b6c2f185b624001';
+    const query =
+      'https://open.spotify.com/playlist/6Wu1PLrAuL1aApvX0iX9Rh?si=5b6c2f185b624001';
     expect(qr.resolve(query).type).toBe(QueryType.SPOTIFY_PLAYLIST);
   });
 
@@ -92,29 +100,34 @@ describe('QueryResolver', () => {
   });
 
   it('should be appleMusicSong', () => {
-    const query = 'https://music.apple.com/us/album/never-gonna-give-you-up/1558533900?i=1558534271';
+    const query =
+      'https://music.apple.com/us/album/never-gonna-give-you-up/1558533900?i=1558534271';
     expect(qr.resolve(query).type).toBe(QueryType.APPLE_MUSIC_SONG);
   });
 
   it('should be appleMusicPlaylist', () => {
-    const query = 'https://music.apple.com/us/playlist/rick-astley-essentials/pl.504a9420747e43ec93e4faa999a8bef9';
+    const query =
+      'https://music.apple.com/us/playlist/rick-astley-essentials/pl.504a9420747e43ec93e4faa999a8bef9';
     expect(qr.resolve(query).type).toBe(QueryType.APPLE_MUSIC_PLAYLIST);
   });
 
   it('should resolve alternative apple music playlist [1]', () => {
-    const query = 'https://music.apple.com/us/playlist/new-music-mix/pl.u-d5779e520ff52d7f35681bfcaa17b064';
+    const query =
+      'https://music.apple.com/us/playlist/new-music-mix/pl.u-d5779e520ff52d7f35681bfcaa17b064';
 
     expect(qr.resolve(query).type).toBe(QueryType.APPLE_MUSIC_PLAYLIST);
   });
 
   it('should resolve alternative apple music playlist [2]', () => {
-    const query = 'https://music.apple.com/us/playlist/new-music-mix/pl.pm-d5779e520ff52d7f35681bfcaa17b064';
+    const query =
+      'https://music.apple.com/us/playlist/new-music-mix/pl.pm-d5779e520ff52d7f35681bfcaa17b064';
 
     expect(qr.resolve(query).type).toBe(QueryType.APPLE_MUSIC_PLAYLIST);
   });
 
   it('should be appleMusicAlbum', () => {
-    const query = 'https://music.apple.com/us/album/whenever-you-need-somebody-deluxe-edition-2022-remaster/1615678477';
+    const query =
+      'https://music.apple.com/us/album/whenever-you-need-somebody-deluxe-edition-2022-remaster/1615678477';
     expect(qr.resolve(query).type).toBe(QueryType.APPLE_MUSIC_ALBUM);
   });
 

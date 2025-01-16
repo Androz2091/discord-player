@@ -1,8 +1,17 @@
-import { EqualizerBand, PCMFilters, BiquadFilters } from '@discord-player/equalizer';
+import {
+  EqualizerBand,
+  PCMFilters,
+  BiquadFilters,
+} from '@discord-player/equalizer';
 import { Collection, QueueStrategy } from '@discord-player/utils';
 import { GuildResolvable } from 'discord.js';
 import { Player } from '../Player';
-import { GuildQueue, OnAfterCreateStreamHandler, OnBeforeCreateStreamHandler, QueueRepeatMode } from './GuildQueue';
+import {
+  GuildQueue,
+  OnAfterCreateStreamHandler,
+  OnBeforeCreateStreamHandler,
+  QueueRepeatMode,
+} from './GuildQueue';
 import { getGlobalRegistry } from '../utils/__internal__';
 import { NoGuildError, NoGuildQueueError } from '../errors';
 import { FiltersName } from '../fabric';
@@ -40,6 +49,7 @@ export interface GuildNodeCreateOptions<T = unknown> {
   disableBiquad?: boolean;
   disableResampler?: boolean;
   disableFallbackStream?: boolean;
+  enableStreamInterceptor?: boolean;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
@@ -53,7 +63,10 @@ export class GuildNodeManager<Meta = unknown> {
    * @param guild The guild which will be the owner of the queue
    * @param options Queue initializer options
    */
-  public create<T = Meta>(guild: GuildResolvable, options: GuildNodeCreateOptions<T> = {}): GuildQueue<T> {
+  public create<T = Meta>(
+    guild: GuildResolvable,
+    options: GuildNodeCreateOptions<T> = {},
+  ): GuildQueue<T> {
     const server = this.player.client.guilds.resolve(guild);
     if (!server) {
       throw new NoGuildError('Invalid or unknown guild');
@@ -89,13 +102,24 @@ export class GuildNodeManager<Meta = unknown> {
     options.disableVolume ??= false;
     options.disableResampler ??= true;
     options.disableFallbackStream ??= false;
+    options.enableStreamInterceptor ??= false;
 
-    if (getGlobalRegistry().has('@[onBeforeCreateStream]') && !options.onBeforeCreateStream) {
-      options.onBeforeCreateStream = getGlobalRegistry().get('@[onBeforeCreateStream]') as OnBeforeCreateStreamHandler;
+    if (
+      getGlobalRegistry().has('@[onBeforeCreateStream]') &&
+      !options.onBeforeCreateStream
+    ) {
+      options.onBeforeCreateStream = getGlobalRegistry().get(
+        '@[onBeforeCreateStream]',
+      ) as OnBeforeCreateStreamHandler;
     }
 
-    if (getGlobalRegistry().has('@[onAfterCreateStream]') && !options.onAfterCreateStream) {
-      options.onAfterCreateStream = getGlobalRegistry().get('@[onAfterCreateStream]') as OnAfterCreateStreamHandler;
+    if (
+      getGlobalRegistry().has('@[onAfterCreateStream]') &&
+      !options.onAfterCreateStream
+    ) {
+      options.onAfterCreateStream = getGlobalRegistry().get(
+        '@[onAfterCreateStream]',
+      ) as OnAfterCreateStreamHandler;
     }
 
     const queue = new GuildQueue<T>(this.player, {
@@ -132,6 +156,7 @@ export class GuildNodeManager<Meta = unknown> {
       disableResampler: options.disableResampler,
       disableVolume: options.disableVolume,
       disableFallbackStream: options.disableFallbackStream,
+      enableStreamInterceptor: options.enableStreamInterceptor,
     });
 
     this.cache.set(server.id, queue);
@@ -155,7 +180,10 @@ export class GuildNodeManager<Meta = unknown> {
    * @param node Queue resolvable
    */
   public has(node: NodeResolvable) {
-    const id = node instanceof GuildQueue ? node.id : this.player.client.guilds.resolveId(node)!;
+    const id =
+      node instanceof GuildQueue
+        ? node.id
+        : this.player.client.guilds.resolveId(node)!;
     return this.cache.has(id);
   }
 
@@ -191,7 +219,9 @@ export class GuildNodeManager<Meta = unknown> {
       return node as GuildQueue<T>;
     }
 
-    return this.cache.get(this.player.client.guilds.resolveId(node)!) as GuildQueue<T>;
+    return this.cache.get(
+      this.player.client.guilds.resolveId(node)!,
+    ) as GuildQueue<T>;
   }
 
   /**

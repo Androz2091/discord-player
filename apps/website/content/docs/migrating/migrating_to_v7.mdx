@@ -67,7 +67,10 @@ const data = {
 await player.context.provide(data, () => command.execute(interaction));
 ```
 
-<Callout>In order to access hooks via context api, you must not provide arguments to the hooks.</Callout>
+<Callout>
+  In order to access hooks via context api, you must not provide arguments to
+  the hooks.
+</Callout>
 
 You can now use hooks in your command like this:
 
@@ -86,8 +89,8 @@ const queue = useQueue();
 Discord Player will automatically resolve the guild from the context.
 
 <Callout>
-  The hooks will not work outside the context scope. If you want to use hooks outside the context scope, you have to
-  provide the arguments manually.
+  The hooks will not work outside the context scope. If you want to use hooks
+  outside the context scope, you have to provide the arguments manually.
 </Callout>
 
 Passing arguments to hooks inside a context will ignore the context and use the provided arguments instead. This may cause unexpected issues when using multiple instances of `Player`.

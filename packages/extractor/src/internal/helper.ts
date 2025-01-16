@@ -38,7 +38,9 @@ export async function pullSCMetadata(ext: BaseExtractor, info: Track) {
   return meta;
 }
 
-export function filterSoundCloudPreviews(tracks: SoundCloud.SoundcloudTrackV2[]): SoundCloud.SoundcloudTrackV2[] {
+export function filterSoundCloudPreviews(
+  tracks: SoundCloud.SoundcloudTrackV2[],
+): SoundCloud.SoundcloudTrackV2[] {
   const filtered = tracks.filter((t) => {
     if (typeof t.policy === 'string') return t.policy.toUpperCase() === 'ALLOW';
     return !(t.duration === 30_000 && t.full_duration > 30_000);

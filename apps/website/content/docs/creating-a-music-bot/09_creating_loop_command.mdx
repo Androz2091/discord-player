@@ -67,7 +67,9 @@ export async function execute(interaction) {
   const queue = useQueue();
 
   if (!queue) {
-    return interaction.reply('This server does not have an active player session.');
+    return interaction.reply(
+      'This server does not have an active player session.',
+    );
   }
 
   // Get the loop mode
@@ -125,7 +127,9 @@ export async function execute(interaction) {
   const queue = useQueue(interaction.guild);
 
   if (!queue) {
-    return interaction.reply('This server does not have an active player session.');
+    return interaction.reply(
+      'This server does not have an active player session.',
+    );
   }
 
   // Set the loop mode

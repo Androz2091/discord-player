@@ -1,10 +1,11 @@
 export * from './FFmpeg';
 
-export type ArgPrimitive = string | number;
+export type ArgPrimitive = string | number | null;
 
 /**
  * Create FFmpeg arguments from an object.
  * @param input The input object.
+ * @param post Additional arguments to append.
  * @returns The FFmpeg arguments.
  * @example createFFmpegArgs({ i: 'input.mp3', af: ['bass=g=10','acompressor'] }, './out.mp3');
  * // => ['-i', 'input.mp3', '-af', 'bass=g=10,acompressor', './out.mp3']
@@ -16,6 +17,7 @@ export const createFFmpegArgs = (
   const args = [];
 
   for (const [key, value] of Object.entries(input)) {
+    if (value == null) continue;
     args.push(`-${key}`, String(value));
   }
 
@@ -26,4 +28,5 @@ export const createFFmpegArgs = (
   return args;
 };
 
+export * from './common';
 export { version } from './version';

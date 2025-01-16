@@ -34,7 +34,10 @@ const toSnakeCase = (obj: Record<string, string>): Record<string, string> => {
 
   for (const [key, value] of Object.entries(obj)) {
     if (value == null) continue;
-    const newKey = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+    const newKey = key.replace(
+      /[A-Z]/g,
+      (letter) => `_${letter.toLowerCase()}`,
+    );
     snakeObj[newKey] = value;
   }
 
@@ -42,7 +45,8 @@ const toSnakeCase = (obj: Record<string, string>): Record<string, string> => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const createQuery = (params: any) => new URLSearchParams(toSnakeCase(params)).toString();
+const createQuery = (params: any) =>
+  new URLSearchParams(toSnakeCase(params)).toString();
 
 export interface LrcSearchResult {
   /**
@@ -176,7 +180,8 @@ export class LrcLib {
     const dispatcher = () => {
       const { name, version } = Util.getRuntime();
 
-      const runtimeVersion = name === 'unknown' ? version : `${name}/${version}`;
+      const runtimeVersion =
+        name === 'unknown' ? version : `${name}/${version}`;
 
       const init: RequestInit = {
         method: 'GET',
@@ -184,7 +189,9 @@ export class LrcLib {
         signal: AbortSignal.timeout(this.timeout),
         ...options,
         headers: {
-          'User-Agent': `Discord-Player/${this.player.version} ${runtimeVersion ?? ''}`.trimEnd(),
+          'User-Agent': `Discord-Player/${this.player.version} ${
+            runtimeVersion ?? ''
+          }`.trimEnd(),
           'Content-Type': 'application/json',
           ...options?.headers,
         },
@@ -192,7 +199,10 @@ export class LrcLib {
 
       this.player.debug(`[LrcLib] Requesting ${path}`);
 
-      return fetch(`${this.api}${path.startsWith('/') ? path : '/' + path}`, init);
+      return fetch(
+        `${this.api}${path.startsWith('/') ? path : '/' + path}`,
+        init,
+      );
     };
 
     const res = await this.bucket.enqueue(dispatcher);

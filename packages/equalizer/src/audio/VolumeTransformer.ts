@@ -29,7 +29,9 @@ export class VolumeTransformer extends PCMTransformer {
 
   public setVolume(volume: number) {
     if (typeof volume !== 'number' || isNaN(volume))
-      throw new Error(`Expected volume amount to be a number, received ${typeof volume}!`);
+      throw new Error(
+        `Expected volume amount to be a number, received ${typeof volume}!`,
+      );
     if (volume < 0) volume = 0;
     if (!isFinite(volume)) volume = 100;
 
@@ -40,7 +42,11 @@ export class VolumeTransformer extends PCMTransformer {
     return true;
   }
 
-  public _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {
+  public _transform(
+    chunk: Buffer,
+    encoding: BufferEncoding,
+    callback: TransformCallback,
+  ): void {
     if (this.disabled || this._volume === 1) {
       this.push(chunk);
       return callback();

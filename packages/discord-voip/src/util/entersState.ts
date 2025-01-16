@@ -2,7 +2,10 @@
 // Copyright discord.js authors. All rights reserved. Apache License 2.0
 
 import { type EventEmitter, once } from 'node:events';
-import type { VoiceConnection, VoiceConnectionStatus } from '../VoiceConnection';
+import type {
+  VoiceConnection,
+  VoiceConnectionStatus,
+} from '../VoiceConnection';
 import type { AudioPlayer, AudioPlayerStatus } from '../audio/AudioPlayer';
 import { abortAfter } from './abortAfter';
 
@@ -46,7 +49,9 @@ export async function entersState<Target extends AudioPlayer | VoiceConnection>(
 ) {
   if (target.state.status !== status) {
     const [ac, signal] =
-      typeof timeoutOrSignal === 'number' ? abortAfter(timeoutOrSignal) : [undefined, timeoutOrSignal];
+      typeof timeoutOrSignal === 'number'
+        ? abortAfter(timeoutOrSignal)
+        : [undefined, timeoutOrSignal];
     try {
       await once(target as EventEmitter, status, { signal });
     } finally {

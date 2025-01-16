@@ -20,31 +20,47 @@ export interface ExtractorExecutionEvents {
    * @param context The context where extractor was registered
    * @param extractor The extractor that was registered
    */
-  registered: (context: ExtractorExecutionContext, extractor: BaseExtractor) => unknown;
+  registered: (
+    context: ExtractorExecutionContext,
+    extractor: BaseExtractor,
+  ) => unknown;
   /**
    * Emitted when a extractor is unregistered
    * @param context The context where extractor was unregistered
    * @param extractor The extractor that was unregistered
    */
-  unregistered: (context: ExtractorExecutionContext, extractor: BaseExtractor) => unknown;
+  unregistered: (
+    context: ExtractorExecutionContext,
+    extractor: BaseExtractor,
+  ) => unknown;
   /**
    * Emitted when a extractor is activated
    * @param context The context where this event occurred
    * @param extractor The extractor which was activated
    */
-  activate: (context: ExtractorExecutionContext, extractor: BaseExtractor) => unknown;
+  activate: (
+    context: ExtractorExecutionContext,
+    extractor: BaseExtractor,
+  ) => unknown;
   /**
    * Emitted when a extractor is deactivated
    * @param context The context where this event occurred
    * @param extractor The extractor which was deactivated
    */
-  deactivate: (context: ExtractorExecutionContext, extractor: BaseExtractor) => unknown;
+  deactivate: (
+    context: ExtractorExecutionContext,
+    extractor: BaseExtractor,
+  ) => unknown;
   /**
    * Emitted when a extractor fails to activate/deactivate
    * @param context The context where this event occurred
    * @param extractor The extractor which was deactivated
    */
-  error: (context: ExtractorExecutionContext, extractor: BaseExtractor, error: Error) => unknown;
+  error: (
+    context: ExtractorExecutionContext,
+    extractor: BaseExtractor,
+    error: Error,
+  ) => unknown;
 }
 
 export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExecutionEvents> {
@@ -90,7 +106,10 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
   public async loadMulti<
     O extends object,
     T extends (typeof BaseExtractor<O>)[],
-    R extends Record<T[number]['identifier'], ConstructorParameters<T[number]>[1]>,
+    R extends Record<
+      T[number]['identifier'],
+      ConstructorParameters<T[number]>[1]
+    >,
   >(bundle: T, options: R = {} as R) {
     bundle.forEach((ext) => {
       // @ts-ignore
@@ -132,21 +151,29 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
     _extractor: T,
     options: ConstructorParameters<T>['1'],
   ): Promise<InstanceType<T> | null> {
-    if (typeof _extractor.identifier !== 'string' || this.store.has(_extractor.identifier)) return null;
+    if (
+      typeof _extractor.identifier !== 'string' ||
+      this.store.has(_extractor.identifier)
+    )
+      return null;
     const extractor = new _extractor(this, options);
 
     try {
       this.store.set(_extractor.identifier, extractor);
-      if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor loaded!`);
+      if (this.player.hasDebugger)
+        this.player.debug(`${_extractor.identifier} extractor loaded!`);
       this.emit('registered', this, extractor);
       await extractor.activate();
-      if (this.player.hasDebugger) this.player.debug(`${_extractor.identifier} extractor activated!`);
+      if (this.player.hasDebugger)
+        this.player.debug(`${_extractor.identifier} extractor activated!`);
       this.emit('activate', this, extractor);
       return extractor as unknown as InstanceType<T>;
     } catch (e) {
       this.store.delete(_extractor.identifier);
       if (this.player.hasDebugger)
-        this.player.debug(`${_extractor.identifier} extractor failed to activate! Error: ${e}`);
+        this.player.debug(
+          `${_extractor.identifier} extractor failed to activate! Error: ${e}`,
+        );
       this.emit('error', this, extractor, e as Error);
       return null;
     }
@@ -158,19 +185,27 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
    */
   public async unregister<K extends string | BaseExtractor>(_extractor: K) {
     const extractor =
-      typeof _extractor === 'string' ? this.store.get(_extractor) : this.store.find((r) => r === _extractor);
+      typeof _extractor === 'string'
+        ? this.store.get(_extractor)
+        : this.store.find((r) => r === _extractor);
     if (!extractor) return;
 
     try {
-      const key = extractor.identifier || this.store.findKey((e) => e === extractor)!;
+      const key =
+        extractor.identifier || this.store.findKey((e) => e === extractor)!;
       this.store.delete(key);
-      if (this.player.hasDebugger) this.player.debug(`${extractor.identifier} extractor disabled!`);
+      if (this.player.hasDebugger)
+        this.player.debug(`${extractor.identifier} extractor disabled!`);
       this.emit('unregistered', this, extractor);
       await extractor.deactivate();
-      if (this.player.hasDebugger) this.player.debug(`${extractor.identifier} extractor deactivated!`);
+      if (this.player.hasDebugger)
+        this.player.debug(`${extractor.identifier} extractor deactivated!`);
       this.emit('deactivate', this, extractor);
     } catch (e) {
-      if (this.player.hasDebugger) this.player.debug(`${extractor.identifier} extractor failed to deactivate!`);
+      if (this.player.hasDebugger)
+        this.player.debug(
+          `${extractor.identifier} extractor failed to deactivate!`,
+        );
       this.emit('error', this, extractor, e as Error);
     }
   }
@@ -191,11 +226,17 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
    * @param fn The runner function
    * @param filterBlocked Filter blocked extractors
    */
-  public async run<T = unknown>(fn: ExtractorExecutionFN<T>, filterBlocked = true) {
+  public async run<T = unknown>(
+    fn: ExtractorExecutionFN<T>,
+    filterBlocked = true,
+  ) {
     const blocked = this.player.options.blockExtractors ?? [];
 
     if (!this.store.size) {
-      Util.warn('Skipping extractors execution since zero extractors were registered', 'NoExtractors');
+      Util.warn(
+        'Skipping extractors execution since zero extractors were registered',
+        'NoExtractors',
+      );
       return;
     }
 
@@ -207,13 +248,17 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
 
     for (const ext of extractors.values()) {
       if (filterBlocked && blocked.some((e) => e === ext.identifier)) continue;
-      if (this.player.hasDebugger) this.player.debug(`Executing extractor ${ext.identifier}...`);
+      if (this.player.hasDebugger)
+        this.player.debug(`Executing extractor ${ext.identifier}...`);
       const result = await fn(ext).then(
         (res) => {
           return res;
         },
         (e) => {
-          if (this.player.hasDebugger) this.player.debug(`Extractor ${ext.identifier} failed with error: ${e}`);
+          if (this.player.hasDebugger)
+            this.player.debug(
+              `Extractor ${ext.identifier} failed with error: ${e}`,
+            );
 
           return TypeUtil.isError(e) ? e : new Error(`${e}`);
         },
@@ -222,7 +267,10 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
       lastExt = ext;
 
       if (result && !TypeUtil.isError(result)) {
-        if (this.player.hasDebugger) this.player.debug(`Extractor ${ext.identifier} executed successfully!`);
+        if (this.player.hasDebugger)
+          this.player.debug(
+            `Extractor ${ext.identifier} executed successfully!`,
+          );
 
         return {
           extractor: ext,
@@ -247,11 +295,16 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
    * @param track The track to request bridge for
    * @param sourceExtractor The source extractor of the track
    */
-  public async requestBridge(track: Track, sourceExtractor: BaseExtractor | null = track.extractor) {
-    const previouslyAttempted = this.getContext()?.bridgeAttemptedExtractors ?? new Set<string>();
+  public async requestBridge(
+    track: Track,
+    sourceExtractor: BaseExtractor | null = track.extractor,
+  ) {
+    const previouslyAttempted =
+      this.getContext()?.bridgeAttemptedExtractors ?? new Set<string>();
 
     const result = await this.run<ExtractorStreamable>(async (ext) => {
-      if (sourceExtractor && ext.identifier === sourceExtractor.identifier) return false;
+      if (sourceExtractor && ext.identifier === sourceExtractor.identifier)
+        return false;
       if (previouslyAttempted.has(ext.identifier)) return false;
 
       previouslyAttempted.add(ext.identifier);
@@ -266,7 +319,9 @@ export class ExtractorExecutionContext extends PlayerEventsEmitter<ExtractorExec
     if (!result?.result)
       throw new BridgeFailedError(
         this.getExecutionId(),
-        result?.error?.stack || result?.error?.message || 'No extractors available to bridge',
+        result?.error?.stack ||
+          result?.error?.message ||
+          'No extractors available to bridge',
       );
 
     track.bridgedExtractor = result.extractor;
@@ -325,6 +380,8 @@ export interface ExtractorExecutionResult<T = unknown> {
   result: T;
 }
 
-export type ExtractorExecutionFN<T = unknown> = (extractor: BaseExtractor) => Promise<T | boolean>;
+export type ExtractorExecutionFN<T = unknown> = (
+  extractor: BaseExtractor,
+) => Promise<T | boolean>;
 
 export type ExtractorResolvable = string | BaseExtractor;

@@ -11,7 +11,9 @@ export const FilterType = {
   PeakingEQ: 9,
 } as const;
 
-export type BiquadFilters = keyof typeof FilterType | (typeof FilterType)[keyof typeof FilterType];
+export type BiquadFilters =
+  | keyof typeof FilterType
+  | (typeof FilterType)[keyof typeof FilterType];
 
 interface CoefficientsInit {
   a1: number;
@@ -43,7 +45,13 @@ export class Coefficients {
     }
   }
 
-  public static from(filter: BiquadFilters, samplingFreq: number, cutoffFreq: number, Q: number, dbGain = -10) {
+  public static from(
+    filter: BiquadFilters,
+    samplingFreq: number,
+    cutoffFreq: number,
+    Q: number,
+    dbGain = -10,
+  ) {
     if (2.0 * cutoffFreq > samplingFreq) {
       throw new Error(`Cutoff frequency is too big!`);
     }
@@ -194,9 +202,11 @@ export class Coefficients {
         const omega_c = Math.cos(omega);
         const alpha = omega_s / (2.0 * Q);
 
-        const b0 = a * (a + 1.0 - (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a));
+        const b0 =
+          a * (a + 1.0 - (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a));
         const b1 = 2.0 * a * (a - 1.0 - (a + 1.0) * omega_c);
-        const b2 = a * (a + 1.0 - (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a));
+        const b2 =
+          a * (a + 1.0 - (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a));
         const a0 = a + 1.0 + (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a);
         const a1 = -2.0 * (a - 1.0 + (a + 1.0) * omega_c);
         const a2 = a + 1.0 + (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a);
@@ -215,9 +225,11 @@ export class Coefficients {
         const omega_c = Math.cos(omega);
         const alpha = omega_s / (2.0 * Q);
 
-        const b0 = a * (a + 1.0 + (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a));
+        const b0 =
+          a * (a + 1.0 + (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a));
         const b1 = -2.0 * a * (a - 1.0 + (a + 1.0) * omega_c);
-        const b2 = a * (a + 1.0 + (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a));
+        const b2 =
+          a * (a + 1.0 + (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a));
         const a0 = a + 1.0 - (a - 1.0) * omega_c + 2.0 * alpha * Math.sqrt(a);
         const a1 = 2.0 * (a - 1.0 - (a + 1.0) * omega_c);
         const a2 = a + 1.0 - (a - 1.0) * omega_c - 2.0 * alpha * Math.sqrt(a);

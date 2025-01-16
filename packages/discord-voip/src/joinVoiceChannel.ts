@@ -53,7 +53,9 @@ export interface JoinVoiceChannelOptions {
  *
  * @param options - the options for joining the voice channel
  */
-export function joinVoiceChannel(options: CreateVoiceConnectionOptions & JoinVoiceChannelOptions) {
+export function joinVoiceChannel(
+  options: CreateVoiceConnectionOptions & JoinVoiceChannelOptions,
+) {
   const joinConfig: JoinConfig = {
     selfDeaf: true,
     selfMute: false,

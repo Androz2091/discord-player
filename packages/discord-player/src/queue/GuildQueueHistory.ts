@@ -11,8 +11,11 @@ export class GuildQueueHistory<Meta = unknown> {
    * Current track in the queue
    */
   public get currentTrack() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.queue.dispatcher?.audioResource?.metadata || ((this.queue as any).__current as Track | null);
+    return (
+      this.queue.dispatcher?.audioResource?.metadata ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((this.queue as any).__current as Track | null)
+    );
   }
 
   /**

@@ -5,7 +5,9 @@ import { fetch } from './helper';
 
 class Vimeo {
   constructor() {
-    throw new Error(`The ${this.constructor.name} class may not be instantiated!`);
+    throw new Error(
+      `The ${this.constructor.name} class may not be instantiated!`,
+    );
   }
 
   /**
@@ -41,7 +43,9 @@ class Vimeo {
     try {
       const res = await fetch(url);
       const data = await res.text();
-      const json = JSON.parse(data.split('window.playerConfig =')[1].split(';')[0].trim());
+      const json = JSON.parse(
+        data.split('window.playerConfig =')[1].split(';')[0].trim(),
+      );
 
       const obj = {
         id: json.video.id,

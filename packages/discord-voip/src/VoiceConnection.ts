@@ -5,7 +5,10 @@
 
 import type { Buffer } from 'node:buffer';
 import { EventEmitter } from 'node:events';
-import type { GatewayVoiceServerUpdateDispatchData, GatewayVoiceStateUpdateDispatchData } from 'discord-api-types/v10';
+import type {
+  GatewayVoiceServerUpdateDispatchData,
+  GatewayVoiceStateUpdateDispatchData,
+} from 'discord-api-types/v10';
 import type { JoinConfig } from './DataStore';
 import {
   getVoiceConnection,
@@ -15,7 +18,11 @@ import {
 } from './DataStore';
 import type { AudioPlayer } from './audio/AudioPlayer';
 import type { PlayerSubscription } from './audio/PlayerSubscription';
-import { Networking, NetworkingStatusCode, type NetworkingState } from './networking/Networking';
+import {
+  Networking,
+  NetworkingStatusCode,
+  type NetworkingState,
+} from './networking/Networking';
 import type { DiscordGatewayAdapterImplementerMethods } from './util/adapter';
 import { noop } from './util/util';
 import type { CreateVoiceConnectionOptions } from './index';
@@ -100,15 +107,20 @@ export interface VoiceConnectionDisconnectedBaseState {
  * The state that a VoiceConnection will be in when it is not connected to a Discord voice server nor is
  * it attempting to connect. You can manually attempt to reconnect using VoiceConnection#reconnect.
  */
-export interface VoiceConnectionDisconnectedOtherState extends VoiceConnectionDisconnectedBaseState {
-  reason: Exclude<VoiceConnectionDisconnectReason, VoiceConnectionDisconnectReason.WebSocketClose>;
+export interface VoiceConnectionDisconnectedOtherState
+  extends VoiceConnectionDisconnectedBaseState {
+  reason: Exclude<
+    VoiceConnectionDisconnectReason,
+    VoiceConnectionDisconnectReason.WebSocketClose
+  >;
 }
 
 /**
  * The state that a VoiceConnection will be in when its WebSocket connection was closed.
  * You can manually attempt to reconnect using VoiceConnection#reconnect.
  */
-export interface VoiceConnectionDisconnectedWebSocketState extends VoiceConnectionDisconnectedBaseState {
+export interface VoiceConnectionDisconnectedWebSocketState
+  extends VoiceConnectionDisconnectedBaseState {
   /**
    * The close code of the WebSocket connection to the Discord voice server.
    */
@@ -184,7 +196,13 @@ export interface VoiceConnection extends EventEmitter {
    *
    * @eventProperty
    */
-  on(event: 'stateChange', listener: (oldState: VoiceConnectionState, newState: VoiceConnectionState) => void): this;
+  on(
+    event: 'stateChange',
+    listener: (
+      oldState: VoiceConnectionState,
+      newState: VoiceConnectionState,
+    ) => void,
+  ): this;
   /**
    * Emitted when the state of the voice connection changes to a specific status
    *
@@ -192,7 +210,10 @@ export interface VoiceConnection extends EventEmitter {
    */
   on<Event extends VoiceConnectionStatus>(
     event: Event,
-    listener: (oldState: VoiceConnectionState, newState: VoiceConnectionState & { status: Event }) => void,
+    listener: (
+      oldState: VoiceConnectionState,
+      newState: VoiceConnectionState & { status: Event },
+    ) => void,
   ): this;
 }
 
@@ -238,10 +259,15 @@ export class VoiceConnection extends EventEmitter {
    * @param joinConfig - The data required to establish the voice connection
    * @param options - The options used to create this voice connection
    */
-  public constructor(joinConfig: JoinConfig, options: CreateVoiceConnectionOptions) {
+  public constructor(
+    joinConfig: JoinConfig,
+    options: CreateVoiceConnectionOptions,
+  ) {
     super();
 
-    this.debug = options.debug ? (message: string) => this.emit('debug', message) : null;
+    this.debug = options.debug
+      ? (message: string) => this.emit('debug', message)
+      : null;
     this.rejoinAttempts = 0;
 
     this.onNetworkingClose = this.onNetworkingClose.bind(this);
@@ -277,11 +303,19 @@ export class VoiceConnection extends EventEmitter {
    */
   public set state(newState: VoiceConnectionState) {
     const oldState = this._state;
-    const oldNetworking = Reflect.get(oldState, 'networking') as Networking | undefined;
-    const newNetworking = Reflect.get(newState, 'networking') as Networking | undefined;
+    const oldNetworking = Reflect.get(oldState, 'networking') as
+      | Networking
+      | undefined;
+    const newNetworking = Reflect.get(newState, 'networking') as
+      | Networking
+      | undefined;
 
-    const oldSubscription = Reflect.get(oldState, 'subscription') as PlayerSubscription | undefined;
-    const newSubscription = Reflect.get(newState, 'subscription') as PlayerSubscription | undefined;
+    const oldSubscription = Reflect.get(oldState, 'subscription') as
+      | PlayerSubscription
+      | undefined;
+    const newSubscription = Reflect.get(newState, 'subscription') as
+      | PlayerSubscription
+      | undefined;
 
     if (oldNetworking !== newNetworking) {
       if (oldNetworking) {
@@ -299,7 +333,10 @@ export class VoiceConnection extends EventEmitter {
     }
 
     // If destroyed, the adapter can also be destroyed so it can be cleaned up by the user
-    if (oldState.status !== VoiceConnectionStatus.Destroyed && newState.status === VoiceConnectionStatus.Destroyed) {
+    if (
+      oldState.status !== VoiceConnectionStatus.Destroyed &&
+      newState.status === VoiceConnectionStatus.Destroyed
+    ) {
       oldState.adapter.destroy();
     }
 
@@ -343,8 +380,10 @@ export class VoiceConnection extends EventEmitter {
   private addStatePacket(packet: GatewayVoiceStateUpdateDispatchData) {
     this.packets.state = packet;
 
-    if (packet.self_deaf !== undefined) this.joinConfig.selfDeaf = packet.self_deaf;
-    if (packet.self_mute !== undefined) this.joinConfig.selfMute = packet.self_mute;
+    if (packet.self_deaf !== undefined)
+      this.joinConfig.selfDeaf = packet.self_deaf;
+    if (packet.self_mute !== undefined)
+      this.joinConfig.selfMute = packet.self_mute;
     if (packet.channel_id) this.joinConfig.channelId = packet.channel_id;
     /*
 			the channel_id being null doesn't necessarily mean it was intended for the client to leave the voice channel
@@ -366,7 +405,13 @@ export class VoiceConnection extends EventEmitter {
    */
   public configureNetworking() {
     const { server, state } = this.packets;
-    if (!server || !state || this.state.status === VoiceConnectionStatus.Destroyed || !server.endpoint) return;
+    if (
+      !server ||
+      !state ||
+      this.state.status === VoiceConnectionStatus.Destroyed ||
+      !server.endpoint
+    )
+      return;
 
     const networking = new Networking(
       {
@@ -419,7 +464,11 @@ export class VoiceConnection extends EventEmitter {
         status: VoiceConnectionStatus.Signalling,
       };
       this.rejoinAttempts++;
-      if (!this.state.adapter.sendPayload(createJoinVoiceChannelPayload(this.joinConfig))) {
+      if (
+        !this.state.adapter.sendPayload(
+          createJoinVoiceChannelPayload(this.joinConfig),
+        )
+      ) {
         this.state = {
           ...this.state,
           status: VoiceConnectionStatus.Disconnected,
@@ -435,9 +484,15 @@ export class VoiceConnection extends EventEmitter {
    * @param oldState - The previous state
    * @param newState - The new state
    */
-  private onNetworkingStateChange(oldState: NetworkingState, newState: NetworkingState) {
+  private onNetworkingStateChange(
+    oldState: NetworkingState,
+    newState: NetworkingState,
+  ) {
     if (oldState.code === newState.code) return;
-    if (this.state.status !== VoiceConnectionStatus.Connecting && this.state.status !== VoiceConnectionStatus.Ready)
+    if (
+      this.state.status !== VoiceConnectionStatus.Connecting &&
+      this.state.status !== VoiceConnectionStatus.Ready
+    )
       return;
 
     if (newState.code === NetworkingStatusCode.Ready) {
@@ -512,15 +567,22 @@ export class VoiceConnection extends EventEmitter {
    */
   public destroy(adapterAvailable = true) {
     if (this.state.status === VoiceConnectionStatus.Destroyed) {
-      throw new Error('Cannot destroy VoiceConnection - it has already been destroyed');
+      throw new Error(
+        'Cannot destroy VoiceConnection - it has already been destroyed',
+      );
     }
 
-    if (getVoiceConnection(this.joinConfig.guildId, this.joinConfig.group) === this) {
+    if (
+      getVoiceConnection(this.joinConfig.guildId, this.joinConfig.group) ===
+      this
+    ) {
       untrackVoiceConnection(this);
     }
 
     if (adapterAvailable) {
-      this.state.adapter.sendPayload(createJoinVoiceChannelPayload({ ...this.joinConfig, channelId: null }));
+      this.state.adapter.sendPayload(
+        createJoinVoiceChannelPayload({ ...this.joinConfig, channelId: null }),
+      );
     }
 
     this.state = {
@@ -542,7 +604,11 @@ export class VoiceConnection extends EventEmitter {
     }
 
     this.joinConfig.channelId = null;
-    if (!this.state.adapter.sendPayload(createJoinVoiceChannelPayload(this.joinConfig))) {
+    if (
+      !this.state.adapter.sendPayload(
+        createJoinVoiceChannelPayload(this.joinConfig),
+      )
+    ) {
       this.state = {
         adapter: this.state.adapter,
         subscription: this.state.subscription,
@@ -579,7 +645,11 @@ export class VoiceConnection extends EventEmitter {
 
     if (notReady) this.rejoinAttempts++;
     Object.assign(this.joinConfig, joinConfig);
-    if (this.state.adapter.sendPayload(createJoinVoiceChannelPayload(this.joinConfig))) {
+    if (
+      this.state.adapter.sendPayload(
+        createJoinVoiceChannelPayload(this.joinConfig),
+      )
+    ) {
       if (notReady) {
         this.state = {
           ...this.state,
@@ -662,7 +732,10 @@ export class VoiceConnection extends EventEmitter {
    * @param subscription - The removed subscription
    */
   protected onSubscriptionRemoved(subscription: PlayerSubscription) {
-    if (this.state.status !== VoiceConnectionStatus.Destroyed && this.state.subscription === subscription) {
+    if (
+      this.state.status !== VoiceConnectionStatus.Destroyed &&
+      this.state.subscription === subscription
+    ) {
       this.state = {
         ...this.state,
         subscription: undefined,
@@ -677,7 +750,10 @@ export class VoiceConnection extends EventEmitter {
  * @param joinConfig - The data required to establish the voice connection
  * @param options - The options to use when joining the voice channel
  */
-export function createVoiceConnection(joinConfig: JoinConfig, options: CreateVoiceConnectionOptions) {
+export function createVoiceConnection(
+  joinConfig: JoinConfig,
+  options: CreateVoiceConnectionOptions,
+) {
   const payload = createJoinVoiceChannelPayload(joinConfig);
   const existing = getVoiceConnection(joinConfig.guildId, joinConfig.group);
   if (existing && existing.state.status !== VoiceConnectionStatus.Destroyed) {

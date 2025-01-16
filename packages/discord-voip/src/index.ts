@@ -20,6 +20,11 @@ export {
   type VoiceConnectionSignallingState,
 } from './VoiceConnection';
 
-export { type JoinConfig, getVoiceConnection, getVoiceConnections, getGroups } from './DataStore';
+export {
+  type JoinConfig,
+  getVoiceConnection,
+  getVoiceConnections,
+  getGroups,
+} from './DataStore';
 
 export { version } from './version';

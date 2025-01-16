@@ -48,7 +48,9 @@ const loadModule = (
   }
 
   throw new Error(
-    `Could not load opus module, tried ${modules.length} different modules. Errors: ${errors.join('\n')}`,
+    `Could not load opus module, tried ${
+      modules.length
+    } different modules. Errors: ${errors.join('\n')}`,
   );
 };
 
@@ -77,7 +79,11 @@ const OPUS_MOD_REGISTRY: IMod[] = [
         private _encoder!: InstanceType<typeof Encoder> | null;
         private _decoder!: InstanceType<typeof Decoder> | null;
 
-        public constructor(private _rate: number, private _channels: number, private _application: number) {}
+        public constructor(
+          private _rate: number,
+          private _channels: number,
+          private _application: number,
+        ) {}
 
         private _ensureEncoder() {
           if (this._encoder) return;
@@ -197,7 +203,9 @@ export class OpusStream extends Transform {
   constructor(options = {} as IOpusStreamInit) {
     if (!loadOpus().Encoder) {
       throw Error(
-        `Could not find an Opus module! Please install one of ${OPUS_MOD_REGISTRY.map((o) => o[0]).join(', ')}.`,
+        `Could not find an Opus module! Please install one of ${OPUS_MOD_REGISTRY.map(
+          (o) => o[0],
+        ).join(', ')}.`,
       );
     }
     super(Object.assign({ readableObjectMode: true }, options));
@@ -208,7 +216,11 @@ export class OpusStream extends Transform {
       options.application = lib.Encoder.Application![options.application!];
     }
 
-    this.encoder = new lib.Encoder(options.rate, options.channels, options.application!);
+    this.encoder = new lib.Encoder(
+      options.rate,
+      options.channels,
+      options.application!,
+    );
 
     this._options = options;
     this._required = this._options.frameSize * this._options.channels * 2;
@@ -247,10 +259,10 @@ export class OpusStream extends Transform {
    * @public
    */
   setBitrate(bitrate: number) {
-    (this.encoder!.applyEncoderCTL! || this.encoder!.encoderCTL).apply(this.encoder!, [
-      CTL.BITRATE,
-      Math.min(128e3, Math.max(16e3, bitrate)),
-    ]);
+    (this.encoder!.applyEncoderCTL! || this.encoder!.encoderCTL).apply(
+      this.encoder!,
+      [CTL.BITRATE, Math.min(128e3, Math.max(16e3, bitrate))],
+    );
   }
 
   /**
@@ -259,7 +271,10 @@ export class OpusStream extends Transform {
    * @public
    */
   setFEC(enabled: boolean) {
-    (this.encoder!.applyEncoderCTL! || this.encoder!.encoderCTL).apply(this.encoder!, [CTL.FEC, enabled ? 1 : 0]);
+    (this.encoder!.applyEncoderCTL! || this.encoder!.encoderCTL).apply(
+      this.encoder!,
+      [CTL.FEC, enabled ? 1 : 0],
+    );
   }
 
   /**
@@ -267,10 +282,10 @@ export class OpusStream extends Transform {
    * @param {number} [percentage] a percentage (represented between 0 and 1)
    */
   setPLP(percentage: number) {
-    (this.encoder!.applyEncoderCTL! || this.encoder!.encoderCTL).apply(this.encoder!, [
-      CTL.PLP,
-      Math.min(100, Math.max(0, percentage * 100)),
-    ]);
+    (this.encoder!.applyEncoderCTL! || this.encoder!.encoderCTL).apply(
+      this.encoder!,
+      [CTL.PLP, Math.min(100, Math.max(0, percentage * 100))],
+    );
   }
 
   _final(cb: () => void) {
@@ -320,7 +335,11 @@ export class OpusEncoder extends OpusStream {
     super(options);
   }
 
-  public _transform(newChunk: Buffer, encoding: BufferEncoding, done: TransformCallback): void {
+  public _transform(
+    newChunk: Buffer,
+    encoding: BufferEncoding,
+    done: TransformCallback,
+  ): void {
     const chunk = Buffer.concat([this._buffer, newChunk]);
 
     let i = 0;
@@ -360,7 +379,11 @@ export class OpusEncoder extends OpusStream {
  * // decoder will now output PCM audio
  */
 export class OpusDecoder extends OpusStream {
-  _transform(chunk: Buffer, encoding: BufferEncoding, done: (e?: Error | null, chunk?: Buffer) => void) {
+  _transform(
+    chunk: Buffer,
+    encoding: BufferEncoding,
+    done: (e?: Error | null, chunk?: Buffer) => void,
+  ) {
     const signature = chunk.slice(0, 8);
     if (chunk.length >= 8 && signature.equals(OPUS_HEAD)) {
       this.emit('format', {

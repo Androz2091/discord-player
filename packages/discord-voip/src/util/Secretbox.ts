@@ -18,8 +18,17 @@ const libs = {
       nonce: Buffer,
       key: ArrayBufferLike,
     ) => {
-      const cipherText = Buffer.alloc(plaintext.length + sodium.crypto_aead_xchacha20poly1305_ietf_ABYTES);
-      sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(cipherText, plaintext, additionalData, null, nonce, key);
+      const cipherText = Buffer.alloc(
+        plaintext.length + sodium.crypto_aead_xchacha20poly1305_ietf_ABYTES,
+      );
+      sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
+        cipherText,
+        plaintext,
+        additionalData,
+        null,
+        nonce,
+        key,
+      );
       return cipherText;
     },
   }),
@@ -31,7 +40,13 @@ const libs = {
       nonce: Buffer,
       key: ArrayBufferLike,
     ) => {
-      return sodium.api.crypto_aead_xchacha20poly1305_ietf_encrypt(plaintext, additionalData, null, nonce, key);
+      return sodium.api.crypto_aead_xchacha20poly1305_ietf_encrypt(
+        plaintext,
+        additionalData,
+        null,
+        nonce,
+        key,
+      );
     },
   }),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,19 +57,35 @@ const libs = {
       nonce: Buffer,
       key: ArrayBufferLike,
     ) => {
-      return sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(plaintext, additionalData, null, nonce, key);
+      return sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
+        plaintext,
+        additionalData,
+        null,
+        nonce,
+        key,
+      );
     },
   }),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   '@stablelib/xchacha20poly1305': (stablelib: any): Methods => ({
-    crypto_aead_xchacha20poly1305_ietf_encrypt(cipherText, additionalData, nonce, key) {
+    crypto_aead_xchacha20poly1305_ietf_encrypt(
+      cipherText,
+      additionalData,
+      nonce,
+      key,
+    ) {
       const crypto = new stablelib.XChaCha20Poly1305(key);
       return crypto.seal(nonce, cipherText, additionalData);
     },
   }),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   '@noble/ciphers/chacha': (noble: any): Methods => ({
-    crypto_aead_xchacha20poly1305_ietf_encrypt(plaintext, additionalData, nonce, key) {
+    crypto_aead_xchacha20poly1305_ietf_encrypt(
+      plaintext,
+      additionalData,
+      nonce,
+      key,
+    ) {
       const chacha = noble.xchacha20poly1305(key, nonce, additionalData);
       return chacha.encrypt(plaintext);
     },

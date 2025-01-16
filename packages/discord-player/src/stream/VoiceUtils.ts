@@ -20,7 +20,10 @@ class VoiceUtils {
    * It only exists for compatibility reasons.
    * @deprecated
    */
-  public cache: Collection<Snowflake, StreamDispatcher> = new Collection<Snowflake, StreamDispatcher>();
+  public cache: Collection<Snowflake, StreamDispatcher> = new Collection<
+    Snowflake,
+    StreamDispatcher
+  >();
 
   /**
    * The voice utils constructor
@@ -45,7 +48,13 @@ class VoiceUtils {
   ): Promise<StreamDispatcher> {
     if (!options?.queue) throw new NoGuildQueueError();
     const conn = await this.join(channel, options);
-    const sub = new StreamDispatcher(conn, channel, options.queue, options.maxTime, options.audioPlayer);
+    const sub = new StreamDispatcher(
+      conn,
+      channel,
+      options.queue,
+      options.maxTime,
+      options.audioPlayer,
+    );
     return sub;
   }
 
@@ -63,7 +72,10 @@ class VoiceUtils {
       group?: string;
     },
   ) {
-    const existingConnection = this.getConnection(channel.guild.id, options?.group);
+    const existingConnection = this.getConnection(
+      channel.guild.id,
+      options?.group,
+    );
 
     if (
       existingConnection?.joinConfig.channelId === channel?.id &&
@@ -75,7 +87,8 @@ class VoiceUtils {
     const conn = joinVoiceChannel({
       guildId: channel.guild.id,
       channelId: channel.id,
-      adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
+      adapterCreator: channel.guild
+        .voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
       selfDeaf: Boolean(options?.deaf),
       debug: this.player.events.listenerCount('debug') > 0,
       group: options?.group,
@@ -90,10 +103,12 @@ class VoiceUtils {
    * @returns {void}
    */
   public disconnect(connection: VoiceConnection | StreamDispatcher) {
-    if (connection instanceof StreamDispatcher) connection = connection.voiceConnection;
+    if (connection instanceof StreamDispatcher)
+      connection = connection.voiceConnection;
 
     try {
-      if (connection.state.status !== VoiceConnectionStatus.Destroyed) return connection.destroy();
+      if (connection.state.status !== VoiceConnectionStatus.Destroyed)
+        return connection.destroy();
     } catch {
       //
     }

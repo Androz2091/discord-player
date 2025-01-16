@@ -3,7 +3,9 @@ import { ListenerSignature } from '@discord-player/utils';
 import { EventEmitter } from '@discord-player/utils';
 import { Util } from './Util';
 
-export class PlayerEventsEmitter<L extends ListenerSignature<L> = DefaultListener> extends EventEmitter<L> {
+export class PlayerEventsEmitter<
+  L extends ListenerSignature<L> = DefaultListener,
+> extends EventEmitter<L> {
   #hasDebugger = false;
   public constructor(public requiredEvents: Array<keyof L> = []) {
     super();
@@ -52,11 +54,16 @@ export class PlayerEventsEmitter<L extends ListenerSignature<L> = DefaultListene
   }
 
   public emit<K extends keyof L>(name: K, ...args: Parameters<L[K]>) {
-    if (this.requiredEvents.includes(name) && !this.eventNames().includes(name)) {
+    if (
+      this.requiredEvents.includes(name) &&
+      !this.eventNames().includes(name)
+    ) {
       // eslint-disable-next-line no-console
       console.error(...args);
       Util.warn(
-        `No event listener found for event "${String(name)}". Events ${this.requiredEvents
+        `No event listener found for event "${String(
+          name,
+        )}". Events ${this.requiredEvents
           .map((m) => `"${String(m)}"`)
           .join(', ')} must have event listeners.`,
         'UnhandledEventsWarning',

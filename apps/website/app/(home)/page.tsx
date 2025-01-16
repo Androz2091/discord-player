@@ -27,16 +27,23 @@ export default function HomePage() {
         Discord Player
       </h1>
       <p className="text-fd-muted-foreground lg:w-1/2 text-justify px-4 md:px-0 md:text-center">
-        Discord Player is a robust framework for developing Discord Music bots using JavaScript and TypeScript. It is
-        built on top of{' '}
-        <Link href="https://npm.im/discord-voip" className="text-fd-foreground font-semibold underline">
+        Discord Player is a robust framework for developing Discord Music bots
+        using JavaScript and TypeScript. It is built on top of{' '}
+        <Link
+          href="https://npm.im/discord-voip"
+          className="text-fd-foreground font-semibold underline"
+        >
           discord-voip
         </Link>{' '}
-        library and offers a comprehensive set of customizable tools, making it one of the most feature enrich framework
-        in town.
+        library and offers a comprehensive set of customizable tools, making it
+        one of the most feature enrich framework in town.
       </p>
       <div className="px-4 w-full md:w-[40%] lg:w-[30%]">
-        <Tabs items={['npm', 'yarn', 'pnpm', 'bun']} className="text-start" persist>
+        <Tabs
+          items={['npm', 'yarn', 'pnpm', 'bun']}
+          className="text-start"
+          persist
+        >
           <Tab value="npm">
             <CodeBlock lang="bash">
               <Pre>npm add discord-player</Pre>

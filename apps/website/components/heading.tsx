@@ -7,13 +7,20 @@ type HeadingProps<T extends Types> = Omit<ComponentPropsWithoutRef<T>, 'as'> & {
   as?: T;
 };
 
-export function Heading<T extends Types = 'h1'>({ as, className, ...props }: HeadingProps<T>): React.ReactElement {
+export function Heading<T extends Types = 'h1'>({
+  as,
+  className,
+  ...props
+}: HeadingProps<T>): React.ReactElement {
   const As = as ?? 'h1';
 
   if (!props.id) return <As className={className} {...props} />;
 
   return (
-    <As className={cn('flex scroll-m-28 flex-row items-center gap-2', className)} {...props}>
+    <As
+      className={cn('flex scroll-m-28 flex-row items-center gap-2', className)}
+      {...props}
+    >
       <a data-card="" href={`#${props.id}`} className="peer">
         {props.children}
       </a>

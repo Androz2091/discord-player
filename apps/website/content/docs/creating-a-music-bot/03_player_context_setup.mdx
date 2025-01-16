@@ -39,13 +39,14 @@ await player.context.provide(data, () => command.execute(interaction)); // [!cod
 ```
 
 <Callout type="warn">
-  Keep in mind, the command handler above is just an example. Your command handler may look different. Make sure to
-  adjust the code according to your needs.
+  Keep in mind, the command handler above is just an example. Your command
+  handler may look different. Make sure to adjust the code according to your
+  needs.
 </Callout>
 
 <Callout>
-  `useMainPlayer` is a hook that provides the main player instance. You must call this hook after initializing the
-  player.
+  `useMainPlayer` is a hook that provides the main player instance. You must
+  call this hook after initializing the player.
 </Callout>
 
 In the example above, we are providing the guild data to the player context. This allows the player to manage the queue and other player specific features more efficiently.

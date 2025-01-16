@@ -51,12 +51,21 @@ export const DependencyReportGenerator = {
    * @param depth - The maximum depth to search
    * @returns The package.json file, or null if not found
    */
-  findPackageJSON(dir: string, packageName: string, depth: number): PackageJSON | null {
+  findPackageJSON(
+    dir: string,
+    packageName: string,
+    depth: number,
+  ): PackageJSON | null {
     if (depth === 0) return null;
 
     const target = resolve(dir, 'package.json');
 
-    const next = () => DependencyReportGenerator.findPackageJSON(resolve(dir, '..'), packageName, depth - 1);
+    const next = () =>
+      DependencyReportGenerator.findPackageJSON(
+        resolve(dir, '..'),
+        packageName,
+        depth - 1,
+      );
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -83,7 +92,11 @@ export const DependencyReportGenerator = {
         return version;
       }
 
-      const pkg = DependencyReportGenerator.findPackageJSON(dirname(require.resolve(name)), name, maxLookupDepth);
+      const pkg = DependencyReportGenerator.findPackageJSON(
+        dirname(require.resolve(name)),
+        name,
+        maxLookupDepth,
+      );
       return pkg?.version ?? null;
     } catch {
       return null;
@@ -111,8 +124,12 @@ export const DependencyReportGenerator = {
 
     return {
       core: {
-        'discord-player': DependencyReportGenerator.version('discord-player') as string,
-        'discord-voip': DependencyReportGenerator.version('discord-voip') as string,
+        'discord-player': DependencyReportGenerator.version(
+          'discord-player',
+        ) as string,
+        'discord-voip': DependencyReportGenerator.version(
+          'discord-voip',
+        ) as string,
       },
       libopus: {
         mediaplex: DependencyReportGenerator.version('mediaplex'),
@@ -124,9 +141,13 @@ export const DependencyReportGenerator = {
       libsodium: {
         'sodium-native': DependencyReportGenerator.version('sodium-native'),
         sodium: DependencyReportGenerator.version('sodium'),
-        'libsodium-wrappers': DependencyReportGenerator.version('libsodium-wrappers'),
-        '@stablelib/xchacha20poly1305': DependencyReportGenerator.version('@stablelib/xchacha20poly1305'),
-        'sodium-javascript': DependencyReportGenerator.version('sodium-javascript'),
+        'libsodium-wrappers':
+          DependencyReportGenerator.version('libsodium-wrappers'),
+        '@stablelib/xchacha20poly1305': DependencyReportGenerator.version(
+          '@stablelib/xchacha20poly1305',
+        ),
+        'sodium-javascript':
+          DependencyReportGenerator.version('sodium-javascript'),
         '@nobel/ciphers': DependencyReportGenerator.version('@nobel/ciphers'),
       },
       ffmpeg: ffmpegReport,
@@ -158,7 +179,11 @@ export const DependencyReportGenerator = {
         const subKey = _subKey as keyof DependenciesReport[typeof key];
         const value = report[key][subKey] ?? 'N/A';
 
-        output.push(`- ${subKey}: ${typeof value === 'object' ? JSON.stringify(value, null, 2) : value}`);
+        output.push(
+          `- ${subKey}: ${
+            typeof value === 'object' ? JSON.stringify(value, null, 2) : value
+          }`,
+        );
       }
 
       output.push('');

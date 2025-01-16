@@ -22,7 +22,9 @@ async function main() {
 
   const modules = Object.values(docs.modules);
 
-  console.log(`Generated docs for ${modules.length} modules in ${docs.metadata.generationMs}`);
+  console.log(
+    `Generated docs for ${modules.length} modules in ${docs.metadata.generationMs}`,
+  );
 
   if (shouldGenerateJSON) {
     await writeFile('./apps/website/lib/data/docs.json', JSON.stringify(docs));
@@ -30,12 +32,20 @@ async function main() {
   }
 
   const heading = (name: string, description: string) =>
-    `---\ntitle: ${normalizeName(name)}\ndescription: ${description || 'No description available.'}\n---\n\n`;
-  const cards = [heading('Discord Player', 'Documentation for Discord Player monorepo'), '# Packages', '<Cards>'];
+    `---\ntitle: ${normalizeName(name)}\ndescription: ${
+      description || 'No description available.'
+    }\n---\n\n`;
+  const cards = [
+    heading('Discord Player', 'Documentation for Discord Player monorepo'),
+    '# Packages',
+    '<Cards>',
+  ];
 
   for (const mod of modules) {
     cards.push(
-      `<Card title="${mod.name}" description="${`Documentation for ${mod.name} package`}" href="/api/${normalizeName(
+      `<Card title="${
+        mod.name
+      }" description="${`Documentation for ${mod.name} package`}" href="/api/${normalizeName(
         mod.name,
       )}" />`,
     );
@@ -70,18 +80,31 @@ async function main() {
       }" href="/api/${normalizeName(mod.name)}/enums/${en.data.name}" />`;
     });
 
-    const classesContent = classes.length ? `# Classes\n\n<Cards>${classes.join('\n\n')}</Cards>` : '';
+    const classesContent = classes.length
+      ? `# Classes\n\n<Cards>${classes.join('\n\n')}</Cards>`
+      : '';
 
-    const interfacesContent = types.length ? `# Types\n\n<Cards>${types.join('\n\n')}</Cards>` : '';
+    const interfacesContent = types.length
+      ? `# Types\n\n<Cards>${types.join('\n\n')}</Cards>`
+      : '';
 
-    const functionsContent = functions.length ? `# Functions\n\n<Cards>${functions.join('\n\n')}</Cards>` : '';
+    const functionsContent = functions.length
+      ? `# Functions\n\n<Cards>${functions.join('\n\n')}</Cards>`
+      : '';
 
-    const variablesContent = variables.length ? `# Variables\n\n<Cards>${variables.join('\n\n')}</Cards>` : '';
+    const variablesContent = variables.length
+      ? `# Variables\n\n<Cards>${variables.join('\n\n')}</Cards>`
+      : '';
 
-    const enumsContent = enums.length ? `# Enums\n\n<Cards>${enums.join('\n\n')}</Cards>` : '';
+    const enumsContent = enums.length
+      ? `# Enums\n\n<Cards>${enums.join('\n\n')}</Cards>`
+      : '';
 
     const content = [
-      heading(mod.name, 'Beginner friendly command & event handler for Discord.js'),
+      heading(
+        mod.name,
+        'Beginner friendly command & event handler for Discord.js',
+      ),
       '\n',
       classesContent,
       '\n',
@@ -97,8 +120,11 @@ async function main() {
     // classes index
     if (classesContent) {
       await writeFile(
-        `./apps/website/content/api/${normalizeName(mod.name)}/classes/index.mdx`,
-        heading('Classes', `Classes provided by ${normalizeName(mod.name)}`) + classesContent,
+        `./apps/website/content/api/${normalizeName(
+          mod.name,
+        )}/classes/index.mdx`,
+        heading('Classes', `Classes provided by ${normalizeName(mod.name)}`) +
+          classesContent,
       ).catch(Object);
     }
 
@@ -106,23 +132,34 @@ async function main() {
     if (interfacesContent) {
       await writeFile(
         `./apps/website/content/api/${normalizeName(mod.name)}/types/index.mdx`,
-        heading('Types', `Types provided by ${normalizeName(mod.name)}`) + interfacesContent,
+        heading('Types', `Types provided by ${normalizeName(mod.name)}`) +
+          interfacesContent,
       ).catch(Object);
     }
 
     // functions index
     if (functionsContent) {
       await writeFile(
-        `./apps/website/content/api/${normalizeName(mod.name)}/functions/index.mdx`,
-        heading('Functions', `Functions provided by ${normalizeName(mod.name)}`) + functionsContent,
+        `./apps/website/content/api/${normalizeName(
+          mod.name,
+        )}/functions/index.mdx`,
+        heading(
+          'Functions',
+          `Functions provided by ${normalizeName(mod.name)}`,
+        ) + functionsContent,
       ).catch(Object);
     }
 
     // variables index
     if (variablesContent) {
       await writeFile(
-        `./apps/website/content/api/${normalizeName(mod.name)}/variables/index.mdx`,
-        heading('Variables', `Variables provided by ${normalizeName(mod.name)}`) + variablesContent,
+        `./apps/website/content/api/${normalizeName(
+          mod.name,
+        )}/variables/index.mdx`,
+        heading(
+          'Variables',
+          `Variables provided by ${normalizeName(mod.name)}`,
+        ) + variablesContent,
       ).catch(Object);
     }
 
@@ -130,11 +167,15 @@ async function main() {
     if (enumsContent) {
       await writeFile(
         `./apps/website/content/api/${normalizeName(mod.name)}/enums/index.mdx`,
-        heading('Enums', `Enums provided by ${normalizeName(mod.name)}`) + enumsContent,
+        heading('Enums', `Enums provided by ${normalizeName(mod.name)}`) +
+          enumsContent,
       ).catch(Object);
     }
 
-    await writeFile(`./apps/website/content/api/${normalizeName(mod.name)}/index.mdx`, content);
+    await writeFile(
+      `./apps/website/content/api/${normalizeName(mod.name)}/index.mdx`,
+      content,
+    );
   }
 
   cards.push('</Cards>');

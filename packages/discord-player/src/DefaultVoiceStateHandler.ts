@@ -3,16 +3,25 @@ import { GuildQueue, GuildQueueEvent } from './queue';
 import { Player } from './Player';
 import { Util } from './utils/Util';
 
-function handleEmptyChannel(player: Player, queue: GuildQueue, guildId: string) {
+function handleEmptyChannel(
+  player: Player,
+  queue: GuildQueue,
+  guildId: string,
+) {
   const timeout = setTimeout(() => {
-    if (!Util.isVoiceEmpty(queue.channel!) || !player.nodes.has(queue.guild.id)) return;
+    if (!Util.isVoiceEmpty(queue.channel!) || !player.nodes.has(queue.guild.id))
+      return;
     if (queue.options.leaveOnEmpty) queue.delete();
     player.events.emit(GuildQueueEvent.EmptyChannel, queue);
   }, queue.options.leaveOnEmptyCooldown || 0).unref();
   queue.timeouts.set(`empty_${guildId}`, timeout);
 }
 
-function handleChannelPopulate(player: Player, queue: GuildQueue, guildId: string) {
+function handleChannelPopulate(
+  player: Player,
+  queue: GuildQueue,
+  guildId: string,
+) {
   const emptyTimeout = queue.timeouts.get(`empty_${guildId}`);
   if (!Util.isVoiceEmpty(queue.channel!) && emptyTimeout) {
     clearTimeout(emptyTimeout);
@@ -29,19 +38,30 @@ function handlePauseOnEmpty(queue: GuildQueue) {
     queue.node.setPaused(true);
     Reflect.set(queue, '__pausedOnEmpty', true);
     if (queue.hasDebugger) {
-      queue.debug('Voice channel is empty and options#pauseOnEmpty is true, pausing...');
+      queue.debug(
+        'Voice channel is empty and options#pauseOnEmpty is true, pausing...',
+      );
     }
   } else if (!isEmpty && wasPausedOnEmpty) {
     queue.node.setPaused(false);
     Reflect.set(queue, '__pausedOnEmpty', false);
     if (queue.hasDebugger) {
-      queue.debug('Voice channel is not empty and options#pauseOnEmpty is true, resuming...');
+      queue.debug(
+        'Voice channel is not empty and options#pauseOnEmpty is true, resuming...',
+      );
     }
   }
 }
 
-function handleBotVoiceStateUpdate(queue: GuildQueue, oldState: VoiceState, newState: VoiceState) {
-  if (newState.serverMute != null && oldState.serverMute !== newState.serverMute) {
+function handleBotVoiceStateUpdate(
+  queue: GuildQueue,
+  oldState: VoiceState,
+  newState: VoiceState,
+) {
+  if (
+    newState.serverMute != null &&
+    oldState.serverMute !== newState.serverMute
+  ) {
     queue.node.setPaused(newState.serverMute);
     return;
   }
@@ -84,7 +104,11 @@ export async function defaultVoiceStateHandler(
   }
 
   // Bot joined channel or changed state
-  if (isBotState && newState.channelId && (!oldState.channelId || oldState.channelId !== newState.channelId)) {
+  if (
+    isBotState &&
+    newState.channelId &&
+    (!oldState.channelId || oldState.channelId !== newState.channelId)
+  ) {
     if (queue.connection) queue.channel = newState.channel!;
     handleBotVoiceStateUpdate(queue, oldState, newState);
   }
@@ -96,7 +120,11 @@ export async function defaultVoiceStateHandler(
   } else if (newState.channelId === queue.channel.id) {
     handleChannelPopulate(player, queue, guildId);
   } else if (oldState.channelId !== newState.channelId) {
-    if (newState.channelId !== queue.channel.id && !Util.isVoiceEmpty(queue.channel)) return;
+    if (
+      newState.channelId !== queue.channel.id &&
+      !Util.isVoiceEmpty(queue.channel)
+    )
+      return;
     if (!queue.timeouts.has(`empty_${guildId}`)) {
       handleEmptyChannel(player, queue, guildId);
     }

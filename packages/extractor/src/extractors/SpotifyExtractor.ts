@@ -11,7 +11,12 @@ import {
 } from 'discord-player';
 import type { Readable } from 'stream';
 import { fetch } from '../internal/helper';
-import spotify, { Spotify, SpotifyAlbum, SpotifyPlaylist, SpotifySong } from 'spotify-url-info';
+import spotify, {
+  Spotify,
+  SpotifyAlbum,
+  SpotifyPlaylist,
+  SpotifySong,
+} from 'spotify-url-info';
 import { SpotifyAPI } from '../internal';
 import { StreamFN } from '../types/common';
 
@@ -21,7 +26,10 @@ const re =
 export interface SpotifyExtractorInit {
   clientId?: string | null;
   clientSecret?: string | null;
-  createStream?: (ext: SpotifyExtractor, url: string) => Promise<Readable | string>;
+  createStream?: (
+    ext: SpotifyExtractor,
+    url: string,
+  ) => Promise<Readable | string>;
 }
 
 export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
@@ -30,7 +38,8 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
   private _lib!: Spotify;
   private _credentials = {
     clientId: this.options.clientId || process.env.DP_SPOTIFY_CLIENT_ID || null,
-    clientSecret: this.options.clientSecret || process.env.DP_SPOTIFY_CLIENT_SECRET || null,
+    clientSecret:
+      this.options.clientSecret || process.env.DP_SPOTIFY_CLIENT_SECRET || null,
   };
   public internal = new SpotifyAPI(this._credentials);
 
@@ -53,7 +62,10 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
     this.protocols = [];
   }
 
-  public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
+  public async validate(
+    query: string,
+    type?: SearchQueryType | null | undefined,
+  ): Promise<boolean> {
     // prettier-ignore
     return (<SearchQueryType[]>[
             QueryType.SPOTIFY_ALBUM,
@@ -72,8 +84,12 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
     });
   }
 
-  public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
-    if (context.protocol === 'spsearch') context.type = QueryType.SPOTIFY_SEARCH;
+  public async handle(
+    query: string,
+    context: ExtractorSearchContext,
+  ): Promise<ExtractorInfo> {
+    if (context.protocol === 'spsearch')
+      context.type = QueryType.SPOTIFY_SEARCH;
     switch (context.type) {
       case QueryType.AUTO:
       case QueryType.AUTO_SEARCH:
@@ -89,8 +105,12 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
               description: `${spotifyData.title} by ${spotifyData.artist}`,
               author: spotifyData.artist ?? 'Unknown Artist',
               url: spotifyData.url,
-              thumbnail: spotifyData.thumbnail || 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-              duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration ?? 0)),
+              thumbnail:
+                spotifyData.thumbnail ||
+                'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+              duration: Util.buildTimeCode(
+                Util.parseMS(spotifyData.duration ?? 0),
+              ),
               views: 0,
               requestedBy: context.requestedBy,
               source: 'spotify',
@@ -120,12 +140,19 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
         if (!spotifyData) return { playlist: null, tracks: [] };
         const spotifyTrack: Track = new Track(this.context.player, {
           title: spotifyData.title,
-          description: `${spotifyData.name} by ${spotifyData.artists.map((m) => m.name).join(', ')}`,
+          description: `${spotifyData.name} by ${spotifyData.artists
+            .map((m) => m.name)
+            .join(', ')}`,
           author: spotifyData.artists[0]?.name ?? 'Unknown Artist',
-          url: spotifyData.id ? `https://open.spotify.com/track/${spotifyData.id}` : query,
+          url: spotifyData.id
+            ? `https://open.spotify.com/track/${spotifyData.id}`
+            : query,
           thumbnail:
-            spotifyData.coverArt?.sources?.[0]?.url || 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-          duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration ?? spotifyData.maxDuration ?? 0)),
+            spotifyData.coverArt?.sources?.[0]?.url ||
+            'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+          duration: Util.buildTimeCode(
+            Util.parseMS(spotifyData.duration ?? spotifyData.maxDuration ?? 0),
+          ),
           views: 0,
           requestedBy: context.requestedBy,
           source: 'spotify',
@@ -157,7 +184,9 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
           const playlist = new Playlist(this.context.player, {
             title: spotifyPlaylist.name,
             description: spotifyPlaylist.name ?? '',
-            thumbnail: spotifyPlaylist.thumbnail ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+            thumbnail:
+              spotifyPlaylist.thumbnail ??
+              'https://www.scdn.co/i/_global/twitter_card-default.jpg',
             type: 'playlist',
             source: 'spotify',
             author: {
@@ -176,8 +205,12 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
               description: `${spotifyData.title} by ${spotifyData.artist}`,
               author: spotifyData.artist ?? 'Unknown Artist',
               url: spotifyData.url,
-              thumbnail: spotifyData.thumbnail || 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-              duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration ?? 0)),
+              thumbnail:
+                spotifyData.thumbnail ||
+                'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+              duration: Util.buildTimeCode(
+                Util.parseMS(spotifyData.duration ?? 0),
+              ),
               views: 0,
               requestedBy: context.requestedBy,
               source: 'spotify',
@@ -209,7 +242,8 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
             title: spotifyPlaylist.name ?? spotifyPlaylist.title,
             description: spotifyPlaylist.title ?? '',
             thumbnail:
-              spotifyPlaylist.coverArt?.sources?.[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+              spotifyPlaylist.coverArt?.sources?.[0]?.url ??
+              'https://www.scdn.co/i/_global/twitter_card-default.jpg',
             type: spotifyPlaylist.type,
             source: 'spotify',
             author: {
@@ -218,7 +252,9 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
             },
             tracks: [],
             id: spotifyPlaylist.id,
-            url: spotifyPlaylist.id ? `https://open.spotify.com/playlist/${spotifyPlaylist.id}` : query,
+            url: spotifyPlaylist.id
+              ? `https://open.spotify.com/playlist/${spotifyPlaylist.id}`
+              : query,
             rawPlaylist: spotifyPlaylist,
           });
 
@@ -228,7 +264,8 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
               description: m.title ?? '',
               author: m.subtitle ?? 'Unknown Artist',
               url: m.uid ? `https://open.spotify.com/tracks/${m.uid}` : query,
-              thumbnail: 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+              thumbnail:
+                'https://www.scdn.co/i/_global/twitter_card-default.jpg',
               duration: Util.buildTimeCode(Util.parseMS(m.duration)),
               views: 0,
               requestedBy: context.requestedBy,
@@ -265,7 +302,9 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
           const playlist = new Playlist(this.context.player, {
             title: spotifyAlbum.name,
             description: spotifyAlbum.name ?? '',
-            thumbnail: spotifyAlbum.thumbnail ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+            thumbnail:
+              spotifyAlbum.thumbnail ??
+              'https://www.scdn.co/i/_global/twitter_card-default.jpg',
             type: 'album',
             source: 'spotify',
             author: {
@@ -284,8 +323,12 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
               description: `${spotifyData.title} by ${spotifyData.artist}`,
               author: spotifyData.artist ?? 'Unknown Artist',
               url: spotifyData.url,
-              thumbnail: spotifyData.thumbnail || 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
-              duration: Util.buildTimeCode(Util.parseMS(spotifyData.duration ?? 0)),
+              thumbnail:
+                spotifyData.thumbnail ||
+                'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+              duration: Util.buildTimeCode(
+                Util.parseMS(spotifyData.duration ?? 0),
+              ),
               views: 0,
               requestedBy: context.requestedBy,
               source: 'spotify',
@@ -316,7 +359,9 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
           const playlist = new Playlist(this.context.player, {
             title: album.name ?? album.title,
             description: album.title ?? '',
-            thumbnail: album.coverArt?.sources?.[0]?.url ?? 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+            thumbnail:
+              album.coverArt?.sources?.[0]?.url ??
+              'https://www.scdn.co/i/_global/twitter_card-default.jpg',
             type: album.type,
             source: 'spotify',
             author: {
@@ -325,7 +370,9 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
             },
             tracks: [],
             id: album.id,
-            url: album.id ? `https://open.spotify.com/playlist/${album.id}` : query,
+            url: album.id
+              ? `https://open.spotify.com/playlist/${album.id}`
+              : query,
             rawPlaylist: album,
           });
 
@@ -335,7 +382,8 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
               description: m.title ?? '',
               author: m.subtitle ?? 'Unknown Artist',
               url: m.uid ? `https://open.spotify.com/tracks/${m.uid}` : query,
-              thumbnail: 'https://www.scdn.co/i/_global/twitter_card-default.jpg',
+              thumbnail:
+                'https://www.scdn.co/i/_global/twitter_card-default.jpg',
               duration: Util.buildTimeCode(Util.parseMS(m.duration)),
               views: 0,
               requestedBy: context.requestedBy,

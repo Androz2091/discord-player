@@ -1,5 +1,5 @@
 import type { Duplex, Readable } from 'stream';
-import { FFmpeg } from '@discord-player/ffmpeg';
+import { FFmpeg, createFFmpegArgs } from '@discord-player/ffmpeg';
 
 export interface FFmpegStreamOptions {
   fmt?: string;
@@ -9,16 +9,12 @@ export interface FFmpegStreamOptions {
   cookies?: string;
 }
 
-const resolveArgs = (config: Record<string, string | number | null | undefined>): string[] => {
-  return Object.entries(config).reduce((acc, [key, value]) => {
-    if (value == null) return acc;
-    acc.push(`-${key}`, String(value));
-    return acc;
-  }, [] as string[]);
-};
-
-export function FFMPEG_ARGS_STRING(stream: string, fmt?: string, cookies?: string) {
-  const args = resolveArgs({
+export function FFMPEG_ARGS_STRING(
+  stream: string,
+  fmt?: string,
+  cookies?: string,
+) {
+  const args = createFFmpegArgs({
     reconnect: 1,
     reconnect_streamed: 1,
     reconnect_delay_max: 5,
@@ -29,14 +25,19 @@ export function FFMPEG_ARGS_STRING(stream: string, fmt?: string, cookies?: strin
     ac: 2,
     f: `${typeof fmt === 'string' ? fmt : 's16le'}`,
     acodec: fmt === 'opus' ? 'libopus' : null,
-    cookies: typeof cookies === 'string' ? (!cookies.includes(' ') ? cookies : `"${cookies}"`) : null,
+    cookies:
+      typeof cookies === 'string'
+        ? !cookies.includes(' ')
+          ? cookies
+          : `"${cookies}"`
+        : null,
   });
 
   return args;
 }
 
 export function FFMPEG_ARGS_PIPED(fmt?: string) {
-  const args = resolveArgs({
+  const args = createFFmpegArgs({
     analyzeduration: 0,
     loglevel: 0,
     ar: 48000,
@@ -53,7 +54,10 @@ export function FFMPEG_ARGS_PIPED(fmt?: string) {
  * @param stream The source stream
  * @param options FFmpeg stream options
  */
-export function createFFmpegStream(stream: Readable | Duplex | string, options?: FFmpegStreamOptions) {
+export function createFFmpegStream(
+  stream: Readable | Duplex | string,
+  options?: FFmpegStreamOptions,
+): Readable {
   if (options?.skip && typeof stream !== 'string') return stream;
   options ??= {};
   const args =
@@ -64,7 +68,7 @@ export function createFFmpegStream(stream: Readable | Duplex | string, options?:
   if (!Number.isNaN(options.seek)) args.unshift('-ss', String(options.seek));
   if (Array.isArray(options.encoderArgs)) args.push(...options.encoderArgs);
 
-  const transcoder: Duplex = new FFmpeg({ shell: false, args });
+  const transcoder = new FFmpeg({ shell: false, args });
 
   transcoder.on('close', () => transcoder.destroy());
 

@@ -13,7 +13,10 @@ import { Vimeo } from '../internal/Vimeo';
 export class VimeoExtractor extends BaseExtractor {
   public static identifier = 'com.discord-player.vimeoextractor' as const;
 
-  public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
+  public async validate(
+    query: string,
+    type?: SearchQueryType | null | undefined,
+  ): Promise<boolean> {
     if (typeof query !== 'string') return false;
     return ([QueryType.VIMEO] as SearchQueryType[]).some((r) => r === type);
   }
@@ -23,7 +26,10 @@ export class VimeoExtractor extends BaseExtractor {
     return this.createResponse();
   }
 
-  public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
+  public async handle(
+    query: string,
+    context: ExtractorSearchContext,
+  ): Promise<ExtractorInfo> {
     switch (context.type) {
       case QueryType.VIMEO: {
         const trackInfo = await Vimeo.getInfo(
@@ -73,7 +79,8 @@ export class VimeoExtractor extends BaseExtractor {
     }
 
     const track = await Vimeo.getInfo(info.url).catch(Util.noop);
-    if (!track || !track.stream) throw new Error('Could not extract stream from this source');
+    if (!track || !track.stream)
+      throw new Error('Could not extract stream from this source');
 
     info.raw.engine = {
       streamURL: track.stream,

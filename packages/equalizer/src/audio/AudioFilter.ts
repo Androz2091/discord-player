@@ -26,10 +26,13 @@ export interface PCMFiltererOptions extends PCMTransformerOptions {
 export const AF_NIGHTCORE_RATE = 1.3 as const;
 export const AF_VAPORWAVE_RATE = 0.8 as const;
 
-export const BASS_EQ_BANDS: EqualizerBand[] = Array.from({ length: 3 }, (_, i) => ({
-  band: i,
-  gain: 0.25,
-}));
+export const BASS_EQ_BANDS: EqualizerBand[] = Array.from(
+  { length: 3 },
+  (_, i) => ({
+    band: i,
+    gain: 0.25,
+  }),
+);
 
 // based on lavadsp
 export class AudioFilter extends PCMTransformer {
@@ -136,7 +139,11 @@ export class AudioFilter extends PCMTransformer {
     // we would have to buffer the entire stream in order to implement backwards seek
   }
 
-  public _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {
+  public _transform(
+    chunk: Buffer,
+    encoding: BufferEncoding,
+    callback: TransformCallback,
+  ): void {
     this._processedSamples++;
     this.totalSamples += chunk.length / this.bits;
 

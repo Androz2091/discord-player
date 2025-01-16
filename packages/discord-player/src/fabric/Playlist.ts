@@ -1,4 +1,8 @@
-import { Player, PlayerNodeInitializationResult, PlayerNodeInitializerOptions } from '../Player';
+import {
+  Player,
+  PlayerNodeInitializationResult,
+  PlayerNodeInitializerOptions,
+} from '../Player';
 import { Track, TrackJSON, TrackSource } from './Track';
 import { Util } from '../utils/Util';
 import { GuildVoiceChannelResolvable } from 'discord.js';
@@ -262,7 +266,9 @@ export class Playlist {
       tracks: this.tracks.map((m) => m.serialize()),
       title: this.title,
       description: this.description,
-      thumbnail: TypeUtil.isString(this.thumbnail) ? this.thumbnail : tryIntoThumbnailString(this.thumbnail),
+      thumbnail: TypeUtil.isString(this.thumbnail)
+        ? this.thumbnail
+        : tryIntoThumbnailString(this.thumbnail),
       type: this.type,
       source: this.source,
       author: this.author,
@@ -280,7 +286,11 @@ export class Playlist {
    */
   public static fromSerialized(player: Player, data: SerializedPlaylist) {
     if (data.$type !== SerializedType.Playlist)
-      throw new InvalidArgTypeError('data', 'SerializedPlaylist', 'malformed data');
+      throw new InvalidArgTypeError(
+        'data',
+        'SerializedPlaylist',
+        'malformed data',
+      );
     return new Playlist(player, {
       ...data,
       tracks: data.tracks.map((m) => Track.fromSerialized(player, m)),

@@ -60,7 +60,9 @@ export function getGroups() {
  * @param group - The group to look up
  * @returns The map of voice connections
  */
-export function getVoiceConnections(group?: 'default'): Map<string, VoiceConnection>;
+export function getVoiceConnections(
+  group?: 'default',
+): Map<string, VoiceConnection>;
 
 /**
  * Retrieves all the voice connections under the given group name.
@@ -68,7 +70,9 @@ export function getVoiceConnections(group?: 'default'): Map<string, VoiceConnect
  * @param group - The group to look up
  * @returns The map of voice connections
  */
-export function getVoiceConnections(group: string): Map<string, VoiceConnection> | undefined;
+export function getVoiceConnections(
+  group: string,
+): Map<string, VoiceConnection> | undefined;
 
 /**
  * Retrieves all the voice connections under the given group name. Defaults to the 'default' group.
@@ -92,11 +96,16 @@ export function getVoiceConnection(guildId: string, group = 'default') {
 }
 
 export function untrackVoiceConnection(voiceConnection: VoiceConnection) {
-  return getVoiceConnections(voiceConnection.joinConfig.group)?.delete(voiceConnection.joinConfig.guildId);
+  return getVoiceConnections(voiceConnection.joinConfig.group)?.delete(
+    voiceConnection.joinConfig.guildId,
+  );
 }
 
 export function trackVoiceConnection(voiceConnection: VoiceConnection) {
-  return getOrCreateGroup(voiceConnection.joinConfig.group).set(voiceConnection.joinConfig.guildId, voiceConnection);
+  return getOrCreateGroup(voiceConnection.joinConfig.group).set(
+    voiceConnection.joinConfig.guildId,
+    voiceConnection,
+  );
 }
 
 // Audio Players
@@ -139,7 +148,10 @@ function prepareNextAudioFrame(players: AudioPlayer[]) {
 
   if (!nextPlayer) {
     if (nextTime !== -1) {
-      audioCycleInterval = setTimeout(() => audioCycleStep(), nextTime - Date.now());
+      audioCycleInterval = setTimeout(
+        () => audioCycleStep(),
+        nextTime - Date.now(),
+      );
     }
 
     return;

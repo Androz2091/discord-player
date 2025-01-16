@@ -43,7 +43,10 @@ export class GuildQueueStatistics<Meta = unknown> {
       tracksCount: this.queue.tracks.size,
       historySize: this.queue.history.tracks.size,
       extractors: this.queue.player.extractors.size,
-      listeners: this.queue.guild.members.me?.voice.channel?.members.filter((m) => !m.user.bot).size || 0,
+      listeners:
+        this.queue.guild.members.me?.voice.channel?.members.filter(
+          (m) => !m.user.bot,
+        ).size || 0,
       memoryUsage: process.memoryUsage(),
       versions: {
         node: process.version,

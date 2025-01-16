@@ -33,7 +33,8 @@ export class Context<T> {
   public consume(): T | undefined {
     const data = this.storage.getStore();
 
-    if (data === undefined && this.defaultValue !== undefined) return this.defaultValue;
+    if (data === undefined && this.defaultValue !== undefined)
+      return this.defaultValue;
 
     return data;
   }

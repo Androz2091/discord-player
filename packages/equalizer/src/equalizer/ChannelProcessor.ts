@@ -1,7 +1,11 @@
 import { Equalizer } from './Equalizer';
 
 export type ReadIntCallback = (buffer: Buffer, index: number) => number;
-export type WriteIntCallback = (buffer: Buffer, int: number, index: number) => number;
+export type WriteIntCallback = (
+  buffer: Buffer,
+  int: number,
+  index: number,
+) => number;
 
 export class ChannelProcessor {
   public history: number[];
@@ -52,11 +56,13 @@ export class ChannelProcessor {
   ) {
     const endIndex = Math.floor(samples.length / 2) * 2;
     for (let sampleIndex = 0; sampleIndex < endIndex; sampleIndex += bytes) {
-      const sample = readInt?.(samples, sampleIndex) ?? samples.readInt16LE(sampleIndex);
+      const sample =
+        readInt?.(samples, sampleIndex) ?? samples.readInt16LE(sampleIndex);
       const result = this.processInt(sample);
 
       const val = Math.min(extremum - 1, Math.max(-extremum, result));
-      writeInt?.(samples, val, sampleIndex) ?? samples.writeInt16LE(val, sampleIndex);
+      writeInt?.(samples, val, sampleIndex) ??
+        samples.writeInt16LE(val, sampleIndex);
 
       this.step();
     }

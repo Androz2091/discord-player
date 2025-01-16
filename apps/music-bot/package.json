@@ -2,10 +2,11 @@
   "name": "music-bot",
   "version": "1.0.0",
   "description": "Test music bot",
-  "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "tsx --env-file=.env ./src/index.ts"
+    "build": "commandkit build",
+    "dev": "commandkit dev",
+    "start": "commandkit start"
   },
   "repository": {
     "type": "git",
@@ -17,7 +18,10 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "homepage": "https://github.com/Androz2091/discord-player#readme",
-  "devDependencies": {
-    "tsx": "^4.19.2"
+  "dependencies": {
+    "@discord-player/extractor": "workspace:^",
+    "commandkit": "^0.1.10",
+    "discord-player": "workspace:^",
+    "discord.js": "^14.17.3"
   }
 }

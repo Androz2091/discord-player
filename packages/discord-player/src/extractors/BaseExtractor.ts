@@ -37,14 +37,18 @@ export class BaseExtractor<T extends object = object> {
    * Handle bridge query creation
    * @param track The track to build query for
    */
-  public createBridgeQuery = (track: Track) => `${track.title} by ${track.author} official audio`;
+  public createBridgeQuery = (track: Track) =>
+    `${track.title} by ${track.author} official audio`;
 
   /**
    * Extractor constructor
    * @param context Context that instantiated this extractor
    * @param options Initialization options for this extractor
    */
-  public constructor(public context: ExtractorExecutionContext, public options: T = <T>{}) {}
+  public constructor(
+    public context: ExtractorExecutionContext,
+    public options: T = <T>{},
+  ) {}
 
   /**
    * Identifier of this extractor
@@ -83,7 +87,10 @@ export class BaseExtractor<T extends object = object> {
    * Validate incoming query
    * @param query The query to validate
    */
-  public async validate(query: string, type?: SearchQueryType | null): Promise<boolean> {
+  public async validate(
+    query: string,
+    type?: SearchQueryType | null,
+  ): Promise<boolean> {
     void type;
     return false;
   }
@@ -101,7 +108,10 @@ export class BaseExtractor<T extends object = object> {
    * Handle the given query
    * @param query The query to handle
    */
-  public async handle(query: string, context: ExtractorSearchContext): Promise<ExtractorInfo> {
+  public async handle(
+    query: string,
+    context: ExtractorSearchContext,
+  ): Promise<ExtractorInfo> {
     void context;
     throw new NotImplementedError(`${this.constructor.name}.handle()`);
   }
@@ -110,10 +120,15 @@ export class BaseExtractor<T extends object = object> {
    * Get related tracks for the given track
    * @param track The track source
    */
-  public async getRelatedTracks(track: Track, history: GuildQueueHistory): Promise<ExtractorInfo> {
+  public async getRelatedTracks(
+    track: Track,
+    history: GuildQueueHistory,
+  ): Promise<ExtractorInfo> {
     void track;
     void history;
-    throw new NotImplementedError(`${this.constructor.name}.getRelatedTracks()`);
+    throw new NotImplementedError(
+      `${this.constructor.name}.getRelatedTracks()`,
+    );
   }
 
   /**
@@ -130,7 +145,10 @@ export class BaseExtractor<T extends object = object> {
    * @param event The event to dispatch
    * @param args The data to dispatch
    */
-  public emit<K extends keyof PlayerEvents>(event: K, ...args: Parameters<PlayerEvents[K]>) {
+  public emit<K extends keyof PlayerEvents>(
+    event: K,
+    ...args: Parameters<PlayerEvents[K]>
+  ) {
     return this.context.player.emit(event, ...args);
   }
 
@@ -139,7 +157,10 @@ export class BaseExtractor<T extends object = object> {
    * @param playlist The playlist
    * @param tracks The track array
    */
-  public createResponse(playlist?: Playlist | null, tracks: Track[] = playlist?.tracks || []): ExtractorInfo {
+  public createResponse(
+    playlist?: Playlist | null,
+    tracks: Track[] = playlist?.tracks || [],
+  ): ExtractorInfo {
     return { playlist: playlist || null, tracks };
   }
 
@@ -163,7 +184,10 @@ export class BaseExtractor<T extends object = object> {
    * @param track The track to bridge
    * @param sourceExtractor The source extractor
    */
-  public async bridge(track: Track, sourceExtractor: BaseExtractor | null): Promise<ExtractorStreamable | null> {
+  public async bridge(
+    track: Track,
+    sourceExtractor: BaseExtractor | null,
+  ): Promise<ExtractorStreamable | null> {
     void sourceExtractor;
     return null;
   }
