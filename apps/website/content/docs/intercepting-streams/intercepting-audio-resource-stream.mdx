@@ -32,7 +32,6 @@ await player.play(channel, query, {
 
 Interceptor will always execute **after** the `OnAfterCreateStream` hook.
 
-<!-- prettier-ignore -->
 ```js
 const interceptor = player.createStreamInterceptor({
   async shouldIntercept(queue, track, format, stream) {
