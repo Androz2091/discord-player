@@ -31,7 +31,12 @@ const interceptor = player.createStreamInterceptor({
 interceptor.onStream((queue, track, format, stream) => {
   const ext = format === StreamType.Opus ? '.opus' : '.pcm';
   stream.interceptors.add(
-    createWriteStream(import.meta.dirname + '/../.streams/' + track.id + ext),
+    createWriteStream(
+      import.meta.dirname +
+        '/../.streams/' +
+        track.title.replace(/[^a-z0-9]/gi, '_') +
+        ext,
+    ),
   );
 });
 

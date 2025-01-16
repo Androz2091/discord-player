@@ -37,7 +37,8 @@ export async function run({ interaction }: SlashCommandProps) {
       metadata: {
         channel: interaction.channel,
       },
-      enableStreamInterceptor: false,
+      enableStreamInterceptor: true,
+      volume: 50,
     },
   });
 
