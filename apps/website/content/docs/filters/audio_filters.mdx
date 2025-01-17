@@ -42,6 +42,27 @@ queue.filters.biquad.setFilter(BiquadFilterType.LowPass);
 
 There is no delay between filter transition when using biquad filters.
 
+### Resampler
+
+<Callout type="info">
+  This feature is currently available in dev release only.
+</Callout>
+
+This filter provides resampling to the player. This filter is identical to `await queue.filters.ffmpeg.toggle(..)` with `vaporwave` or `nightcore` filters. To use this, you can do:
+
+```js title="resampler.js"
+// resample current audio to 1.3 times the current sample rate
+queue.filters.resampler.setSampleRate(48000 * 1.3);
+
+// resample using predefined preset
+const enabled = queue.filters.resampler.toggleFilter('nightcore'); // or 'vaporwave'
+
+// currently applied sample rate
+console.log(queue.filters.resampler.sampleRate);
+```
+
+There is no delay between filter transition when using resampler.
+
 ### Other Filters
 
 This is another type of audio filters provider. It currently supports `Tremolo` and `8D` filters only. To use this, you can do:
