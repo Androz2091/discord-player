@@ -3,8 +3,8 @@ import { useQueue } from 'discord-player';
 import { SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
-  .setName('bassboost')
-  .setDescription('Toggle bassboost filter');
+  .setName('skip')
+  .setDescription('Skip current track');
 
 export async function run({ interaction }: SlashCommandProps) {
   if (!interaction.inCachedGuild()) return;
@@ -21,11 +21,9 @@ export async function run({ interaction }: SlashCommandProps) {
     return interaction.reply('There is no track playing.');
   }
 
-  await interaction.deferReply();
+  queue.node.skip();
 
-  const on = await queue.filters.ffmpeg.toggle(['bassboost_high']);
-
-  await interaction.editReply(
-    `Bassboost is now ${on ? 'enabled' : 'disabled'}`,
+  return interaction.reply(
+    `Skipped: ${currentTrack.title} by ${currentTrack.author}`,
   );
 }

@@ -16,7 +16,8 @@ import { getGlobalRegistry } from '../utils/__internal__';
 import { NoGuildError, NoGuildQueueError } from '../errors';
 import { FiltersName } from '../fabric';
 
-export interface GuildNodeCreateOptions<T = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface GuildNodeCreateOptions<T = any> {
   strategy?: QueueStrategy;
   volume?: number;
   equalizer?: EqualizerBand[];
@@ -50,11 +51,13 @@ export interface GuildNodeCreateOptions<T = unknown> {
   disableResampler?: boolean;
   disableFallbackStream?: boolean;
   enableStreamInterceptor?: boolean;
+  verifyFallbackStream?: boolean;
 }
 
 export type NodeResolvable = GuildQueue | GuildResolvable;
 
-export class GuildNodeManager<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class GuildNodeManager<Meta = any> {
   public cache = new Collection<string, GuildQueue>();
   public constructor(public player: Player) {}
 
@@ -95,14 +98,17 @@ export class GuildNodeManager<Meta = unknown> {
     options.maxHistorySize ??= Infinity;
     options.preferBridgedMetadata ??= true;
     options.pauseOnEmpty ??= true;
+
     // todo(twlite): maybe disable these by default?
     options.disableBiquad ??= false;
     options.disableEqualizer ??= false;
     options.disableFilterer ??= false;
     options.disableVolume ??= false;
-    options.disableResampler ??= true;
+    options.disableResampler ??= false;
+
     options.disableFallbackStream ??= false;
     options.enableStreamInterceptor ??= false;
+    options.verifyFallbackStream ??= false;
 
     if (
       getGlobalRegistry().has('@[onBeforeCreateStream]') &&
@@ -157,6 +163,7 @@ export class GuildNodeManager<Meta = unknown> {
       disableVolume: options.disableVolume,
       disableFallbackStream: options.disableFallbackStream,
       enableStreamInterceptor: options.enableStreamInterceptor,
+      verifyFallbackStream: options.verifyFallbackStream,
     });
 
     this.cache.set(server.id, queue);

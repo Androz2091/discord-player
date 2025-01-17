@@ -78,7 +78,8 @@ export interface StreamConfig {
   playerConfig: ResourcePlayOptions;
 }
 
-export class GuildQueuePlayerNode<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class GuildQueuePlayerNode<Meta = any> {
   #progress = 0;
   #hasFFmpegOptimization = false;
   public tasksQueue = new AsyncQueue();
@@ -169,7 +170,18 @@ export class GuildQueuePlayerNode<Meta = unknown> {
    */
   public get estimatedPlaybackTime() {
     const dur = this.playbackTime;
-    return Math.round(this.getDurationMultiplier() * dur);
+    const val = this.getDurationMultiplier() * dur;
+
+    // we also need to check if we have a native resampler filter as it may also affect the duration
+    if (this.queue.filters.resampler) {
+      // get the resampler ratio if we have one
+      const ratio = this.queue.filters.resampler.getRatio();
+      if (ratio <= 0) return val;
+
+      return val * ratio;
+    }
+
+    return val;
   }
 
   /**
@@ -178,7 +190,19 @@ export class GuildQueuePlayerNode<Meta = unknown> {
   public get estimatedDuration() {
     const dur = this.totalDuration;
 
-    return Math.round(dur / this.getDurationMultiplier());
+    // duration multiplier checks ffmpeg filters that may affect the duration
+    const val = Math.round(dur / this.getDurationMultiplier());
+
+    // we also need to check if we have a native resampler filter as it may also affect the duration
+    if (this.queue.filters.resampler) {
+      // get the resampler ratio if we have one
+      const ratio = this.queue.filters.resampler.getRatio();
+      if (ratio <= 0) return val;
+
+      return Math.round(val / ratio);
+    }
+
+    return val;
   }
 
   /**
@@ -469,8 +493,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
       );
     VALIDATE_QUEUE_CAP(this.queue, track);
     this.queue.tracks.store.splice(index, 0, track);
-    if (!this.queue.options.noEmitInsert)
+    if (!this.queue.options.noEmitInsert) {
       this.queue.emit(GuildQueueEvent.AudioTrackAdd, this.queue, track);
+    }
   }
 
   /**
@@ -639,7 +664,9 @@ export class GuildQueuePlayerNode<Meta = unknown> {
       // default behavior when 'onBeforeCreateStream' did not panic
       if (!streamSrc.stream) {
         if (this.queue.hasDebugger)
-          this.queue.debug('Failed to get stream from onBeforeCreateStream!');
+          this.queue.debug(
+            'Failed to get stream from onBeforeCreateStream, attempting to extract stream using extractors...',
+          );
         await this.queue.player.extractors.context.provide(
           {
             id: crypto.randomUUID(),
@@ -682,10 +709,11 @@ export class GuildQueuePlayerNode<Meta = unknown> {
           disableFilters: this.queue.options.disableFilterer,
           disableResampler: this.queue.options.disableResampler,
           sampleRate:
-            typeof this.queue.options.resampler === 'number' &&
+            this.queue.filters._lastFiltersCache.sampleRate ??
+            (typeof this.queue.options.resampler === 'number' &&
             this.queue.options.resampler > 0
               ? this.queue.options.resampler
-              : undefined,
+              : undefined),
           biquadFilter:
             this.queue.filters._lastFiltersCache.biquad || undefined,
           eq: this.queue.filters._lastFiltersCache.equalizer,
@@ -949,6 +977,8 @@ export class GuildQueuePlayerNode<Meta = unknown> {
         `Attempting to extract stream for Track { title: ${track.title}, url: ${track.url} } using fallback streaming method...`,
       );
 
+    const verifyFallbackStream = this.queue.options.verifyFallbackStream;
+
     const fallbackStream = await this.queue.player.extractors.run(
       async (extractor) => {
         if (extractor.identifier === track.extractor?.identifier) return false;
@@ -956,10 +986,38 @@ export class GuildQueuePlayerNode<Meta = unknown> {
           this.queue.player.options.blockStreamFrom?.some(
             (ext) => ext === extractor.identifier,
           )
-        )
+        ) {
           return false;
+        }
 
         const query = `${track.title} ${track.author}`;
+
+        if (verifyFallbackStream) {
+          if (this.queue.hasDebugger) {
+            this.queue.debug(
+              `Fallback stream verification is enabled, validating query for Track { title: ${track.title}, url: ${track.url} } using ${extractor.identifier}...`,
+            );
+          }
+
+          const shouldProceed = await extractor.validate(
+            query,
+            track.queryType || track.source,
+          );
+
+          if (!shouldProceed) {
+            if (this.queue.hasDebugger)
+              this.queue.debug(
+                `Failed to validate query for Track { title: ${track.title}, url: ${track.url} } using ${extractor.identifier}`,
+              );
+            return false;
+          } else {
+            if (this.queue.hasDebugger)
+              this.queue.debug(
+                `Query for Track { title: ${track.title}, url: ${track.url} } was validated using ${extractor.identifier}. Proceeding with extraction...`,
+              );
+          }
+        }
+
         const fallbackTracks = await extractor.handle(query, {
           requestedBy: track.requestedBy,
         });

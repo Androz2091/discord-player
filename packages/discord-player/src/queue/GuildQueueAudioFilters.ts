@@ -102,7 +102,8 @@ export const EqualizerConfigurationPreset: Readonly<EQPreset> = Object.freeze({
   ]),
 });
 
-export class FFmpegFilterer<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class FFmpegFilterer<Meta = any> {
   #ffmpegFilters: Filters[] = [];
   #inputArgs: string[] = [];
 
@@ -322,7 +323,8 @@ export interface GuildQueueAFiltersCache {
   sampleRate: number;
 }
 
-export class GuildQueueAudioFilters<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class GuildQueueAudioFilters<Meta = any> {
   public graph = new AFilterGraph<Meta>(this);
   public ffmpeg = new FFmpegFilterer<Meta>(this);
   public equalizerPresets = EqualizerConfigurationPreset;
@@ -411,7 +413,8 @@ export class GuildQueueAudioFilters<Meta = unknown> {
   }
 }
 
-export class AFilterGraph<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class AFilterGraph<Meta = any> {
   public constructor(public af: GuildQueueAudioFilters<Meta>) {}
 
   public get ffmpeg() {
@@ -452,8 +455,7 @@ export class AFilterGraph<Meta = unknown> {
       equalizer: this.equalizer,
       biquad: this.biquad,
       filters: this.filters,
-      sampleRate:
-        this.resampler?.targetSampleRate || this.resampler?.sampleRate || 48000,
+      sampleRate: this.resampler?.sampleRate || 48000,
       volume: this.volume?.volume ?? 100,
     };
   }

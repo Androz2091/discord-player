@@ -3,8 +3,8 @@ import { useQueue } from 'discord-player';
 import { SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
-  .setName('bassboost')
-  .setDescription('Toggle bassboost filter');
+  .setName('nightcore')
+  .setDescription('Set nightcore filter');
 
 export async function run({ interaction }: SlashCommandProps) {
   if (!interaction.inCachedGuild()) return;
@@ -23,9 +23,13 @@ export async function run({ interaction }: SlashCommandProps) {
 
   await interaction.deferReply();
 
-  const on = await queue.filters.ffmpeg.toggle(['bassboost_high']);
+  if (!queue.filters.resampler) {
+    return interaction.editReply('This filter is not supported.');
+  }
+
+  const enabled = queue.filters.resampler?.toggleFilter('nightcore');
 
   await interaction.editReply(
-    `Bassboost is now ${on ? 'enabled' : 'disabled'}`,
+    `Nightcore is now ${enabled ? 'enabled' : 'disabled'}`,
   );
 }

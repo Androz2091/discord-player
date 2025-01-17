@@ -38,7 +38,9 @@ export class FiltersChain {
 
     this.source = src;
 
-    // const resampler = new PCMResampler(presets.resampler);
+    const resampler = !presets.resampler?.disabled
+      ? new PCMResampler(presets.resampler)
+      : null;
     const equalizerStream = !presets.equalizer?.disabled
       ? new EqualizerStream(presets.equalizer)
       : null;
@@ -52,14 +54,14 @@ export class FiltersChain {
       ? new VolumeTransformer(presets.volume)
       : null;
 
-    // this.resampler = resampler;
+    this.resampler = resampler;
     this.equalizer = equalizerStream;
     this.filters = dspStream;
     this.biquad = biquadStream;
     this.volume = volumeTransformer;
 
     // update listeners
-    // resampler.onUpdate = this.onUpdate;
+    if (resampler) resampler.onUpdate = this.onUpdate;
     if (equalizerStream) equalizerStream.onUpdate = this.onUpdate;
     if (dspStream) dspStream.onUpdate = this.onUpdate;
     if (biquadStream) biquadStream.onUpdate = this.onUpdate;
@@ -67,6 +69,7 @@ export class FiltersChain {
 
     const chains = [
       src,
+      resampler,
       equalizerStream,
       dspStream,
       biquadStream,
@@ -91,7 +94,7 @@ export class FiltersChain {
 
   public destroy() {
     // cleanup
-    // this.resampler?.destroy();
+    this.resampler?.destroy();
     this.equalizer?.destroy();
     this.biquad?.destroy();
     this.filters?.destroy();
@@ -100,7 +103,7 @@ export class FiltersChain {
     this.source?.destroy();
 
     // remove events
-    // this.resampler?.removeAllListeners();
+    this.resampler?.removeAllListeners();
     this.equalizer?.removeAllListeners();
     this.biquad?.removeAllListeners();
     this.filters?.removeAllListeners();
@@ -109,7 +112,7 @@ export class FiltersChain {
     this.source?.removeAllListeners();
 
     // unref
-    // this.resampler = null;
+    this.resampler = null;
     this.equalizer = null;
     this.biquad = null;
     this.filters = null;

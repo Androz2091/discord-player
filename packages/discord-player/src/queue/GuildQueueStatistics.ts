@@ -22,7 +22,8 @@ export interface GuildQueueStatisticsMetadata {
   };
 }
 
-export class GuildQueueStatistics<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class GuildQueueStatistics<Meta = any> {
   public constructor(public queue: GuildQueue<Meta>) {}
 
   /**

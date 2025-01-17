@@ -35,6 +35,7 @@ import {
   InvalidArgTypeError,
   NoVoiceChannelError,
   NoVoiceConnectionError,
+  OutOfRangeError,
   VoiceConnectionDestroyedError,
 } from '../errors';
 import { SyncedLyricsProvider } from './SyncedLyricsProvider';
@@ -42,7 +43,8 @@ import { LrcGetResult, LrcSearchResult } from '../lrclib/LrcLib';
 import { FiltersName } from '../fabric';
 import { SearchQueryType } from '../utils/QueryResolver';
 
-export interface GuildNodeInit<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface GuildNodeInit<Meta = any> {
   guild: Guild;
   queueStrategy: QueueStrategy;
   equalizer: EqualizerBand[] | boolean;
@@ -77,6 +79,7 @@ export interface GuildNodeInit<Meta = unknown> {
   disableResampler: boolean;
   disableFallbackStream: boolean;
   enableStreamInterceptor: boolean;
+  verifyFallbackStream: boolean;
 }
 
 export interface VoiceConnectConfig {
@@ -222,6 +225,10 @@ export const GuildQueueEvent = {
    * Emitted when a queue is trying to add similar track for autoplay
    */
   WillAutoPlay: 'willAutoPlay',
+  /**
+   * Emitted when sample rate is updated
+   */
+  SampleRateUpdate: 'sampleRateUpdate',
 } as const;
 
 export type GuildQueueEvent =
@@ -483,6 +490,17 @@ export interface GuildQueueEvents<Meta = any> {
     tracks: Track[],
     done: (track: Track | null) => void,
   ) => unknown;
+  /**
+   * Emitted when sample rate is updated
+   * @param queue The queue where this event occurred
+   * @param oldRate The old sample rate
+   * @param newRate The new sample rate
+   */
+  [GuildQueueEvent.SampleRateUpdate]: (
+    queue: GuildQueue<Meta>,
+    oldRate: number,
+    newRate: number,
+  ) => unknown;
 }
 
 /**
@@ -514,7 +532,8 @@ export const QueueRepeatMode = {
 export type QueueRepeatMode =
   (typeof QueueRepeatMode)[keyof typeof QueueRepeatMode];
 
-export class GuildQueue<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class GuildQueue<Meta = any> {
   #transitioning = false;
   #deleted = false;
   #shuffle = false;
@@ -881,6 +900,84 @@ export class GuildQueue<Meta = unknown> {
   }
 
   /**
+   * Prepends a track or track resolvable to the queue
+   * @param track The track resolvable to insert
+   * @param index The index to insert the track at (defaults to 0). If > 0, the inserted track will be placed before the track at the given index.
+   */
+  public prepend(track: Track | Queue<Track> | Array<Track>, index = 0): void {
+    if (index < 0 || index > this.tracks.size) {
+      throw new OutOfRangeError(
+        'index',
+        `${index}`,
+        '0',
+        `${this.tracks.size}`,
+      );
+    }
+
+    const count = Array.isArray(track)
+      ? track.length
+      : track instanceof Queue
+      ? track.size
+      : 1;
+
+    VALIDATE_QUEUE_CAP(this, count);
+
+    const insertionIndex = index === 0 ? 0 : index - 1;
+
+    if (track instanceof Track) {
+      this.node.insert(track, insertionIndex);
+      this.emit(GuildQueueEvent.AudioTrackAdd, this, track);
+      return;
+    }
+
+    const tracks = track instanceof Queue ? track.store : track;
+
+    this.tracks.store.splice(insertionIndex, 0, ...tracks);
+
+    if (!this.options.noEmitInsert) {
+      this.emit(GuildQueueEvent.AudioTracksAdd, this, tracks);
+    }
+  }
+
+  /**
+   * Appends a track or track resolvable to the queue
+   * @param track The track resolvable to insert
+   * @param index The index to insert the track at (defaults to 0). If > 0, the inserted track will be placed after the track at the given index.
+   */
+  public append(track: Track | Queue<Track> | Array<Track>, index = 0): void {
+    if (index < 0 || index > this.tracks.size) {
+      throw new OutOfRangeError(
+        'index',
+        `${index}`,
+        '0',
+        `${this.tracks.size}`,
+      );
+    }
+
+    const count = Array.isArray(track)
+      ? track.length
+      : track instanceof Queue
+      ? track.size
+      : 1;
+
+    VALIDATE_QUEUE_CAP(this, count);
+
+    if (track instanceof Track) {
+      this.node.insert(track, index);
+      this.emit(GuildQueueEvent.AudioTrackAdd, this, track);
+      return;
+    }
+
+    const tracks = track instanceof Queue ? track.store : track;
+
+    this.tracks.store.splice(index, 0, ...tracks);
+
+    if (!this.options.noEmitInsert) {
+      this.emit(GuildQueueEvent.AudioTracksAdd, this, tracks);
+    }
+  }
+
+  /**
    * Inserts the track to the given index
    * @param track The track to insert
    * @param index The index to insert the track at (defaults to 0)
@@ -1187,6 +1284,16 @@ export class GuildQueue<Meta = unknown> {
           f,
         );
       this.filters._lastFiltersCache.volume = f;
+    });
+    dispatcher.on('sampleRate', (f) => {
+      if (this.filters._lastFiltersCache.sampleRate !== f)
+        this.emit(
+          GuildQueueEvent.SampleRateUpdate,
+          this,
+          this.filters._lastFiltersCache.sampleRate,
+          f,
+        );
+      this.filters._lastFiltersCache.sampleRate = f;
     });
   }
 

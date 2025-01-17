@@ -120,7 +120,7 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
       if (this.dsp.equalizer) this.emit('eqBands', this.dsp.equalizer.getEQ());
       if (this.dsp.volume) this.emit('volume', this.dsp.volume.volume);
       if (this.dsp.resampler)
-        this.emit('sampleRate', this.dsp.resampler.targetSampleRate);
+        this.emit('sampleRate', this.dsp.resampler.sampleRate);
     };
 
     this.dsp.onError = (e) => this.emit('error', e as AudioPlayerError);
@@ -314,10 +314,13 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
                 disabled: ops?.disableBiquad,
               }
             : undefined,
-          resampler: {
-            targetSampleRate: ops?.sampleRate,
-            disabled: ops?.disableResampler,
-          },
+          resampler: ops?.sampleRate
+            ? {
+                inputSampleRate: 48000,
+                targetSampleRate: ops?.sampleRate,
+                disabled: ops?.disableResampler,
+              }
+            : undefined,
           equalizer: {
             bandMultiplier: ops?.eq,
             disabled: ops?.disableEqualizer,

@@ -3,7 +3,8 @@ import { NoResultError } from '../errors';
 import { Track } from '../fabric/Track';
 import { GuildQueue, TrackSkipReason } from './GuildQueue';
 
-export class GuildQueueHistory<Meta = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class GuildQueueHistory<Meta = any> {
   public tracks = new Queue<Track>('LIFO');
   public constructor(public queue: GuildQueue<Meta>) {}
 

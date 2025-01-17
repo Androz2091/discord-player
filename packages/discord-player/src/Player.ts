@@ -78,14 +78,14 @@ export const PlayerEvent = {
 } as const;
 export type PlayerEvent = (typeof PlayerEvent)[keyof typeof PlayerEvent];
 
-/* eslint-enable @typescript-eslint/no-explicit-any */
-
-export interface PlayerNodeInitializationResult<T = unknown> {
+export interface PlayerNodeInitializationResult<T = any> {
   track: Track;
   extractor: BaseExtractor | null;
   searchResult: SearchResult;
   queue: GuildQueue<T>;
 }
+
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export type TrackLike =
   | string

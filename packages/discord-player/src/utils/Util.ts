@@ -268,21 +268,24 @@ class Util {
 
 export const VALIDATE_QUEUE_CAP = (
   queue: GuildQueue,
-  items: Playlist | Track | Track[],
+  items: Playlist | Track | Track[] | number,
 ) => {
-  const tracks =
-    items instanceof Playlist
-      ? items.tracks
-      : Array.isArray(items)
-      ? items
-      : [items];
-
   if (queue.maxSize < 1 || queue.maxSize === Infinity) return;
+
+  const tracks =
+    typeof items === 'number'
+      ? items
+      : (items instanceof Playlist
+          ? items.tracks
+          : Array.isArray(items)
+          ? items
+          : [items]
+        ).length;
 
   const maxCap = queue.getCapacity();
 
-  if (maxCap < tracks.length) {
-    throw new OutOfSpaceError('tracks queue', maxCap, tracks.length);
+  if (maxCap < tracks) {
+    throw new OutOfSpaceError('tracks queue', maxCap, tracks);
   }
 };
 

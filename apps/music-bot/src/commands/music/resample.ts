@@ -3,8 +3,16 @@ import { useQueue } from 'discord-player';
 import { SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
-  .setName('bassboost')
-  .setDescription('Toggle bassboost filter');
+  .setName('resample')
+  .setDescription('Set resample filter')
+  .addIntegerOption((option) =>
+    option
+      .setName('value')
+      .setDescription('The value to set')
+      .setMinValue(1)
+      .setMaxValue(192000)
+      .setRequired(true),
+  );
 
 export async function run({ interaction }: SlashCommandProps) {
   if (!interaction.inCachedGuild()) return;
@@ -23,9 +31,16 @@ export async function run({ interaction }: SlashCommandProps) {
 
   await interaction.deferReply();
 
-  const on = await queue.filters.ffmpeg.toggle(['bassboost_high']);
+  if (!queue.filters.resampler) {
+    return interaction.editReply('This filter is not supported.');
+  }
+
+  const oldValue = queue.filters.resampler.sampleRate;
+  const newValue = interaction.options.getInteger('value', true);
+
+  queue.filters.resampler?.setSampleRate(newValue);
 
   await interaction.editReply(
-    `Bassboost is now ${on ? 'enabled' : 'disabled'}`,
+    `Sample rate set to ${newValue} Hz (was ${oldValue} Hz)`,
   );
 }
