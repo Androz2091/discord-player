@@ -172,15 +172,6 @@ export class GuildQueuePlayerNode<Meta = any> {
     const dur = this.playbackTime;
     const val = this.getDurationMultiplier() * dur;
 
-    // we also need to check if we have a native resampler filter as it may also affect the duration
-    if (this.queue.filters.resampler) {
-      // get the resampler ratio if we have one
-      const ratio = this.queue.filters.resampler.getRatio();
-      if (ratio <= 0) return val;
-
-      return val * ratio;
-    }
-
     return val;
   }
 
