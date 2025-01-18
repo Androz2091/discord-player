@@ -1,12 +1,12 @@
 // prettier-ignore
 import {
-    BaseExtractor,
-    ExtractorInfo,
-    ExtractorSearchContext,
-    QueryType,
-    SearchQueryType,
-    Track,
-    Util
+  BaseExtractor,
+  ExtractorInfo,
+  ExtractorSearchContext,
+  QueryType,
+  SearchQueryType,
+  Track,
+  Util
 } from 'discord-player';
 import type { IncomingMessage } from 'http';
 import { createReadStream, existsSync } from 'fs';
@@ -15,7 +15,13 @@ import * as fileType from 'file-type';
 import path from 'path';
 import { stat } from 'fs/promises';
 
-const ATTACHMENT_HEADER = ['audio/', 'video/', 'application/ogg'] as const;
+const ATTACHMENT_HEADER = [
+  'audio/',
+  'video/',
+  'application/ogg',
+  'raw/pcm',
+  'raw/opus',
+] as const;
 
 export class AttachmentExtractor extends BaseExtractor {
   public static identifier = 'com.discord-player.attachmentextractor' as const;
@@ -70,8 +76,8 @@ export class AttachmentExtractor extends BaseExtractor {
           engine: query,
           // eslint-disable-next-line
           author: ((data as any).client?.servername as string) || 'Attachment',
-          // eslint-disable-next-line
           description:
+            // eslint-disable-next-line
             ((data as any).client?.servername as string) || 'Attachment',
           url: data.url || query,
         };
@@ -131,7 +137,17 @@ export class AttachmentExtractor extends BaseExtractor {
         if (!existsSync(query)) return this.emptyResponse();
         const fstat = await stat(query);
         if (!fstat.isFile()) return this.emptyResponse();
-        const mime = await fileType.fromFile(query).catch(() => null);
+
+        const fileExt = path.extname(query).toLowerCase();
+        const mime = await fileType
+          .fromFile(query)
+          .then((v) => {
+            if (v) return v;
+            if (/\.(opus|pcm)$/.test(fileExt))
+              return { mime: `raw/${fileExt.replace('.', '')}` };
+          })
+          .catch(() => null);
+
         if (!mime || !ATTACHMENT_HEADER.some((r) => !!mime.mime.startsWith(r)))
           return this.emptyResponse();
 
@@ -146,37 +162,58 @@ export class AttachmentExtractor extends BaseExtractor {
           url: query,
         };
 
-        try {
-          // eslint-disable-next-line
-          const mediaplex = require('mediaplex') as typeof import('mediaplex');
+        const isRaw = /raw\/(pcm|opus)/.test(mime.mime);
 
-          const timeout = this.context.player.options.probeTimeout ?? 5000;
+        if (!isRaw) {
+          try {
+            const mediaplex =
+              // eslint-disable-next-line
+              require('mediaplex') as typeof import('mediaplex');
 
-          const { result, stream } = (await Promise.race([
-            mediaplex.probeStream(
-              createReadStream(query, {
-                start: 0,
-                end: 1024 * 1024 * 10,
+            const timeout = this.context.player.options.probeTimeout ?? 5000;
+
+            const { result, stream } = (await Promise.race([
+              mediaplex.probeStream(
+                createReadStream(query, {
+                  start: 0,
+                  end: 1024 * 1024 * 10,
+                }),
+              ),
+              new Promise((_, r) => {
+                setTimeout(() => r(new Error('Timeout')), timeout);
               }),
-            ),
-            new Promise((_, r) => {
-              setTimeout(() => r(new Error('Timeout')), timeout);
-            }),
-          ])) as Awaited<ReturnType<typeof mediaplex.probeStream>>;
+            ])) as Awaited<ReturnType<typeof mediaplex.probeStream>>;
 
-          if (result) {
-            trackInfo.duration = result.duration * 1000;
+            if (result) {
+              trackInfo.duration = result.duration * 1000;
 
-            const metadata = mediaplex.readMetadata(result);
-            if (metadata.author) trackInfo.author = metadata.author;
-            if (metadata.title) trackInfo.title = metadata.title;
+              const metadata = mediaplex.readMetadata(result);
+              if (metadata.author) trackInfo.author = metadata.author;
+              if (metadata.title) trackInfo.title = metadata.title;
 
-            trackInfo.description = `${trackInfo.title} by ${trackInfo.author}`;
+              trackInfo.description = `${trackInfo.title} by ${trackInfo.author}`;
+            }
+
+            stream.destroy();
+          } catch {
+            //
           }
+        } else {
+          const isPcm = /raw\/pcm/.test(mime.mime);
 
-          stream.destroy();
-        } catch {
-          //
+          if (isPcm) {
+            const details = estimatePCMProperties(fstat);
+
+            if (details) {
+              trackInfo.duration = Math.round(details.duration) * 1000;
+            }
+          } else {
+            const details = estimateOpusProperties(fstat);
+
+            if (details) {
+              trackInfo.duration = Math.round(details.duration) * 1000;
+            }
+          }
         }
 
         const track = new Track(this.context.player, {
@@ -198,8 +235,8 @@ export class AttachmentExtractor extends BaseExtractor {
         });
 
         track.extractor = this;
-
         track.raw.isFile = true;
+        track.raw.mime = mime.mime.split('/')[1];
 
         return { playlist: null, tracks: [track] };
       }
@@ -224,6 +261,48 @@ export class AttachmentExtractor extends BaseExtractor {
       // return await downloadStream(engine);
     }
 
-    return createReadStream(engine);
+    const stream = createReadStream(engine);
+
+    return {
+      stream,
+      $fmt: info.raw.mime as string,
+    };
   }
+}
+
+function estimatePCMProperties(
+  stats: import('node:fs').Stats,
+  sampleSize = 2,
+  channels = 2,
+  sampleRate = 48000,
+) {
+  const fileSize = stats.size;
+  const durationInSeconds = fileSize / (sampleSize * channels * sampleRate);
+
+  return {
+    sampleSize,
+    channels,
+    sampleRate,
+    duration: !Number.isFinite(durationInSeconds) ? 0 : durationInSeconds,
+  };
+}
+
+function estimateOpusProperties(
+  stats: import('node:fs').Stats,
+  bitrate = 96000,
+  channels = 2,
+) {
+  const fileSize = stats.size;
+  const sampleRate = 48000;
+  const bitsPerSample = 16;
+
+  const duration = (fileSize * 8) / bitrate;
+
+  return {
+    bitrate,
+    channels,
+    sampleRate,
+    bitsPerSample,
+    duration: !Number.isFinite(duration) ? 0 : duration,
+  };
 }

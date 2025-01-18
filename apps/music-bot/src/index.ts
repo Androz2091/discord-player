@@ -21,10 +21,19 @@ const player = Player.create(client);
 player.on('error', console.error);
 player.events.on('error', (_, e) => console.error(e));
 player.events.on('playerError', (_, e) => console.error(e));
+player.events.on('playerStart', (queue, track) => {
+  queue.metadata.channel.send(`Started playing ${track.title}`);
+});
+player.events.on('playerFinish', (queue, track) => {
+  queue.metadata.channel.send(`Finished playing ${track.title}`);
+});
+player.events.on('playerSeek', (queue, time) => {
+  console.log(`Seeked ${queue.currentTrack} to ${time}ms`);
+});
 
 const interceptor = player.createStreamInterceptor({
-  async shouldIntercept() {
-    return true;
+  async shouldIntercept(queue, track) {
+    return !track.raw.isFile;
   },
 });
 

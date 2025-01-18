@@ -49,6 +49,9 @@ export interface GuildNodeCreateOptions<T = any> {
   disableFilterer?: boolean;
   disableBiquad?: boolean;
   disableResampler?: boolean;
+  disableCompressor?: boolean;
+  disableSeeker?: boolean;
+  disableReverb?: boolean;
   disableFallbackStream?: boolean;
   enableStreamInterceptor?: boolean;
   verifyFallbackStream?: boolean;
@@ -105,6 +108,9 @@ export class GuildNodeManager<Meta = any> {
     options.disableFilterer ??= false;
     options.disableVolume ??= false;
     options.disableResampler ??= false;
+    options.disableCompressor ??= true;
+    options.disableSeeker ??= true;
+    options.disableReverb ??= true;
 
     options.disableFallbackStream ??= false;
     options.enableStreamInterceptor ??= false;
@@ -164,6 +170,9 @@ export class GuildNodeManager<Meta = any> {
       disableFallbackStream: options.disableFallbackStream,
       enableStreamInterceptor: options.enableStreamInterceptor,
       verifyFallbackStream: options.verifyFallbackStream,
+      disableCompressor: options.disableCompressor,
+      disableSeeker: options.disableSeeker,
+      disableReverb: options.disableReverb,
     });
 
     this.cache.set(server.id, queue);

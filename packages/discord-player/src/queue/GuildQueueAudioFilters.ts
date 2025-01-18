@@ -9,6 +9,7 @@ import {
 } from '@discord-player/equalizer';
 import { FFmpegStreamOptions, createFFmpegStream } from '../utils/FFmpegStream';
 import { InvalidArgTypeError } from '../errors';
+import { StreamConfig } from './GuildQueuePlayerNode';
 
 type Filters = keyof typeof AudioFilters.filters;
 
@@ -321,6 +322,11 @@ export interface GuildQueueAFiltersCache {
   filters: PCMFilters[];
   volume: number;
   sampleRate: number;
+  sampleRateFilter:
+    | StreamConfig['dispatcherConfig']['sampleRateFilters']
+    | null;
+  compressor: StreamConfig['dispatcherConfig']['compressor'] | null;
+  reverb: StreamConfig['dispatcherConfig']['reverb'] | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -334,6 +340,9 @@ export class GuildQueueAudioFilters<Meta = any> {
     filters: [],
     volume: 100,
     sampleRate: -1,
+    compressor: null,
+    reverb: null,
+    sampleRateFilter: null,
   };
   public constructor(public queue: GuildQueue<Meta>) {
     if (typeof this.queue.options.volume === 'number') {
@@ -388,6 +397,27 @@ export class GuildQueueAudioFilters<Meta = any> {
    */
   public get resampler() {
     return this.queue.dispatcher?.resampler || null;
+  }
+
+  /**
+   * Compressor transformer
+   */
+  public get compressor() {
+    return this.queue.dispatcher?.compressor || null;
+  }
+
+  /**
+   * Reverb transformer
+   */
+  public get reverb() {
+    return this.queue.dispatcher?.reverb || null;
+  }
+
+  /**
+   * PCM Seeker transformer
+   */
+  public get seeker() {
+    return this.queue.dispatcher?.seeker || null;
   }
 
   /**

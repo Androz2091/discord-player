@@ -38,8 +38,6 @@ export const BASS_EQ_BANDS: EqualizerBand[] = Array.from(
 export class AudioFilter extends PCMTransformer {
   public filters: PCMFilters[] = [];
   public targetSampleRate = this.sampleRate;
-  public totalSamples = 0;
-  private _processedSamples = 0;
 
   public pulsatorConfig: AFPulsatorConfig = {
     hz: 0.02,
@@ -127,26 +125,11 @@ export class AudioFilter extends PCMTransformer {
     return true;
   }
 
-  // TODO
-  public seek(duration: number) {
-    // determines the sample to seek to
-    // this._seekPos = (duration / 1000) * this.targetSampleRate;
-    void duration;
-    throw new Error('Not Implemented');
-
-    // this method has not been implemented as of right now
-    // Since we can only move forward in the stream,
-    // we would have to buffer the entire stream in order to implement backwards seek
-  }
-
   public _transform(
     chunk: Buffer,
     encoding: BufferEncoding,
     callback: TransformCallback,
   ): void {
-    this._processedSamples++;
-    this.totalSamples += chunk.length / this.bits;
-
     if (this.disabled || !this.filters.length) {
       return callback(null, chunk);
     }
@@ -170,16 +153,6 @@ export class AudioFilter extends PCMTransformer {
 
   public get currentSampleRate() {
     return this.targetSampleRate || this.sampleRate;
-  }
-
-  public get estimatedDuration() {
-    // this wont be accurate (for example, livestream), but can be used as a fallback
-    return (this.totalSamples / this.targetSampleRate) * 1000;
-  }
-
-  public get currentDuration() {
-    // this may not be accurate
-    return (this._processedSamples * 1000) / this.targetSampleRate;
   }
 
   public applyFilters(byte: number, channel: LR) {

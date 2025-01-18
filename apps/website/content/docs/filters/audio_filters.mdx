@@ -44,9 +44,7 @@ There is no delay between filter transition when using biquad filters.
 
 ### Resampler
 
-<Callout type="info">
-  This feature is currently available in dev release only.
-</Callout>
+<DevelopmentOnly />
 
 This filter provides resampling to the player. This filter is identical to `await queue.filters.ffmpeg.toggle(..)` with `vaporwave` or `nightcore` filters. To use this, you can do:
 
@@ -72,3 +70,55 @@ queue.filters.filters.setFilters(['8D']);
 ```
 
 There is no delay between filters transition using this filter.
+
+### Seeker
+
+<DevelopmentOnly />
+
+Discord Player has a built-in filter called `seeker`. This filter is used to seek the audio forward. To use this, you have to explicitly enable it via `nodeOptions`:
+
+```js title="seeker.js"
+await player.play(channel, track, {
+  nodeOptions: {
+    disableSeeker: false,
+  },
+});
+```
+
+Invoking `queue.node.seek()` will use this filter to seek the audio forward. When seeking backwards, the player will fall back to the default behavior of seeking (using FFmpeg).
+
+### Reverb Filter
+
+<DevelopmentOnly />
+
+This filter provides reverb to the player. To use this, you can do:
+
+```js title="reverb.js"
+queue.filters.reverb.setReverb({
+  roomSize: 0.5,
+  damping: 0.5,
+  wetLevel: 0.5,
+  dryLevel: 0.5,
+});
+```
+
+There is no delay between filter transition when using reverb filter.
+
+### Compressor Filter
+
+<DevelopmentOnly />
+
+This filter provides compressor to the player. To use this, you can do:
+
+```js title="compressor.js"
+queue.filters.compressor.setCompressor({
+  threshold: -20,
+  ratio: 3,
+  attack: 0.1,
+  release: 0.1,
+  makeupGain: 0,
+  kneeWidth: 0,
+});
+```
+
+There is no delay between filter transition when using compressor filter.

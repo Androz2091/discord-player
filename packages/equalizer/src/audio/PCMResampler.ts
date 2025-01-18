@@ -6,6 +6,13 @@ export interface PCMResamplerOptions extends PCMTransformerOptions {
   channels?: number;
 }
 
+export interface ResampleParameters {
+  currentFilter: CommonResamplerFilterPreset | null;
+  inputSampleRate: number;
+  channels: number;
+  sampleRate: number;
+}
+
 export type CommonResamplerFilterPreset = 'nightcore' | 'vaporwave';
 
 export class PCMResampler extends PCMTransformer {
@@ -46,6 +53,15 @@ export class PCMResampler extends PCMTransformer {
     }
 
     this.currentFilter = filter;
+  }
+
+  public getParameters(): ResampleParameters {
+    return {
+      currentFilter: this.currentFilter,
+      inputSampleRate: this.inputSampleRate,
+      channels: this.channels,
+      sampleRate: this.sampleRate,
+    };
   }
 
   public toggleFilter(filter: CommonResamplerFilterPreset): boolean {

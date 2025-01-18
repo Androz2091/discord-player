@@ -9,8 +9,12 @@ import {
 import { Collection, Queue, QueueStrategy } from '@discord-player/utils';
 import {
   BiquadFilters,
+  CommonResamplerFilterPreset,
+  CompressorParameters,
   EqualizerBand,
   PCMFilters,
+  ReverbParameters,
+  SeekerParameters,
 } from '@discord-player/equalizer';
 import { Track, TrackResolvable } from '../fabric/Track';
 import { StreamDispatcher } from '../stream/StreamDispatcher';
@@ -77,6 +81,9 @@ export interface GuildNodeInit<Meta = any> {
   disableFilterer: boolean;
   disableBiquad: boolean;
   disableResampler: boolean;
+  disableCompressor: boolean;
+  disableReverb: boolean;
+  disableSeeker: boolean;
   disableFallbackStream: boolean;
   enableStreamInterceptor: boolean;
   verifyFallbackStream: boolean;
@@ -229,6 +236,22 @@ export const GuildQueueEvent = {
    * Emitted when sample rate is updated
    */
   SampleRateUpdate: 'sampleRateUpdate',
+  /**
+   * Emitted when a named sample rate filter is updated
+   */
+  SampleRateFilterUpdate: 'sampleRateFilterUpdate',
+  /**
+   * Emitted when reverb filter is updated
+   */
+  ReverbUpdate: 'reverbUpdate',
+  /**
+   * Emitted when compressor filter is updated
+   */
+  CompressorUpdate: 'compressorUpdate',
+  /**
+   * Emitted when seek is performed
+   */
+  PlayerSeek: 'playerSeek',
 } as const;
 
 export type GuildQueueEvent =
@@ -500,6 +523,48 @@ export interface GuildQueueEvents<Meta = any> {
     queue: GuildQueue<Meta>,
     oldRate: number,
     newRate: number,
+  ) => unknown;
+  /**
+   * Emitted when a named sample rate filter is updated
+   * @param queue The queue where this event occurred
+   * @param oldRate The old sample rate filter
+   * @param newRate The new sample rate filter
+   */
+  [GuildQueueEvent.SampleRateFilterUpdate]: (
+    queue: GuildQueue<Meta>,
+    oldFilter: CommonResamplerFilterPreset | null,
+    newFilter: CommonResamplerFilterPreset | null,
+  ) => unknown;
+  /**
+   * Emitted when reverb filter is updated
+   * @param queue The queue where this event occurred
+   * @param oldFilter The old reverb filter
+   * @param newFilter The new reverb filter
+   */
+  [GuildQueueEvent.ReverbUpdate]: (
+    queue: GuildQueue<Meta>,
+    oldFilter: ReverbParameters | null,
+    newFilter: ReverbParameters | null,
+  ) => unknown;
+  /**
+   * Emitted when compressor filter is updated
+   * @param queue The queue where this event occurred
+   * @param oldFilter The old compressor filter
+   * @param newFilter The new compressor filter
+   */
+  [GuildQueueEvent.CompressorUpdate]: (
+    queue: GuildQueue<Meta>,
+    oldFilter: CompressorParameters | null,
+    newFilter: CompressorParameters | null,
+  ) => unknown;
+  /**
+   * Emitted when seek is performed
+   * @param queue The queue where this event occurred
+   * @param position The seek position
+   */
+  [GuildQueueEvent.PlayerSeek]: (
+    queue: GuildQueue<Meta>,
+    parameters: SeekerParameters,
   ) => unknown;
 }
 
@@ -1285,15 +1350,73 @@ export class GuildQueue<Meta = any> {
         );
       this.filters._lastFiltersCache.volume = f;
     });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const areObjectsDifferent = (a: any, b: any) => {
+      if (!a && !b) return false;
+      if (!a || !b) return true;
+      if (Object.keys(a).length !== Object.keys(b).length) return true;
+      return Object.keys(a).some((k) => a[k] !== b[k]);
+    };
+
     dispatcher.on('sampleRate', (f) => {
-      if (this.filters._lastFiltersCache.sampleRate !== f)
+      if (this.filters._lastFiltersCache.sampleRate !== f.sampleRate) {
         this.emit(
           GuildQueueEvent.SampleRateUpdate,
           this,
           this.filters._lastFiltersCache.sampleRate,
+          f.sampleRate,
+        );
+
+        this.filters._lastFiltersCache.sampleRate = f.sampleRate;
+
+        this.filters.seeker?.setSampleRate(f.sampleRate);
+        this.filters.seeker?.setTotalDuration(this.node.estimatedDuration);
+      }
+
+      if (f.currentFilter !== this.filters._lastFiltersCache.sampleRateFilter) {
+        this.emit(
+          GuildQueueEvent.SampleRateFilterUpdate,
+          this,
+          this.filters._lastFiltersCache.sampleRateFilter ?? null,
+          f.currentFilter,
+        );
+        this.filters._lastFiltersCache.sampleRateFilter = f.currentFilter;
+      }
+    });
+    dispatcher.on('reverb', (f) => {
+      if (areObjectsDifferent(f, this.filters._lastFiltersCache.reverb)) {
+        this.emit(
+          GuildQueueEvent.ReverbUpdate,
+          this,
+          this.filters._lastFiltersCache.reverb ?? null,
           f,
         );
-      this.filters._lastFiltersCache.sampleRate = f;
+        this.filters._lastFiltersCache.reverb = f;
+      }
+    });
+    dispatcher.on('seeker', (f) => {
+      if (this.hasDebugger) {
+        this.debug(
+          `Seeker >> Seeked to ${f.seekTarget}ms for Track ${this.currentTrack?.title}`,
+        );
+      }
+
+      if (f.seekTarget != null) this.node.setProgress(f.seekTarget);
+
+      this.emit(GuildQueueEvent.PlayerSeek, this, f);
+    });
+
+    dispatcher.on('compressor', (f) => {
+      if (areObjectsDifferent(f, this.filters._lastFiltersCache.compressor)) {
+        this.emit(
+          GuildQueueEvent.CompressorUpdate,
+          this,
+          this.filters._lastFiltersCache.compressor ?? null,
+          f,
+        );
+        this.filters._lastFiltersCache.compressor = f;
+      }
     });
   }
 

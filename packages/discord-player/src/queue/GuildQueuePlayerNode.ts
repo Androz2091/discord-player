@@ -16,6 +16,7 @@ import { TypeUtil } from '../utils/TypeUtil';
 import { CreateStreamOps } from '../stream/StreamDispatcher';
 import { ExtractorStreamable } from '../extractors/BaseExtractor';
 import { OggDemuxer, OpusDecoder, WebmDemuxer } from '@discord-player/opus';
+import { SeekEvent } from '@discord-player/equalizer';
 
 export const FFMPEG_SRATE_REGEX = /asetrate=\d+\*(\d(\.\d)?)/;
 
@@ -142,6 +143,11 @@ export class GuildQueuePlayerNode<Meta = any> {
    * Current playback duration with history included
    */
   public get playbackTime() {
+    if (this.queue.filters.seeker) {
+      const pos = this.queue.filters.seeker.getPosition();
+      if (pos > 0) return pos;
+    }
+
     const dur = this.#progress + this.streamTime;
 
     return dur;
@@ -324,7 +330,24 @@ export class GuildQueuePlayerNode<Meta = any> {
     }
     if (duration < 0) duration = 0;
 
-    return this.queue.filters.triggerReplay(duration);
+    const seeker = this.queue.filters.seeker;
+
+    if (seeker) {
+      seeker.seek(duration);
+      return true;
+    }
+
+    return this.queue.filters.triggerReplay(duration).then((v) => {
+      if (v) {
+        this.queue.emit(GuildQueueEvent.PlayerSeek, this.queue, {
+          currentPosition: this.estimatedPlaybackTime,
+          seekTarget: duration,
+          totalDuration: this.estimatedDuration,
+        });
+      }
+
+      return v;
+    });
   }
 
   /**
@@ -557,6 +580,21 @@ export class GuildQueuePlayerNode<Meta = any> {
   }
 
   /**
+   * Request the source to seek
+   * @param data The seek parameters
+   */
+  public async requestSeek(data: SeekEvent) {
+    const track = this.queue.currentTrack;
+    if (!track) return false;
+
+    if (track.seekable) {
+      return track.seek(data);
+    }
+
+    return this.queue.filters.triggerReplay(data.position);
+  }
+
+  /**
    * Play the given track
    * @param res The track to play
    * @param options Options for playing the track
@@ -699,6 +737,19 @@ export class GuildQueuePlayerNode<Meta = any> {
           disableVolume: this.queue.options.disableVolume,
           disableFilters: this.queue.options.disableFilterer,
           disableResampler: this.queue.options.disableResampler,
+          disableCompressor: this.queue.options.disableCompressor,
+          disableReverb: this.queue.options.disableReverb,
+          disableSeeker: this.queue.options.disableSeeker,
+          compressor:
+            this.queue.filters._lastFiltersCache.compressor ?? undefined,
+          reverb: this.queue.filters._lastFiltersCache.reverb ?? undefined,
+          seeker: {
+            seekTarget:
+              options.transitionMode && options.seek != null
+                ? options.seek
+                : null,
+            totalDuration: track.durationMS ?? 0,
+          },
           sampleRate:
             this.queue.filters._lastFiltersCache.sampleRate ??
             (typeof this.queue.options.resampler === 'number' &&
@@ -736,14 +787,16 @@ export class GuildQueuePlayerNode<Meta = any> {
 
       await donePromise;
 
-      // prettier-ignore
       const daspDisabled = [
-                trackStreamConfig.dispatcherConfig.disableBiquad,
-                trackStreamConfig.dispatcherConfig.disableEqualizer,
-                trackStreamConfig.dispatcherConfig.disableFilters,
-                trackStreamConfig.dispatcherConfig.disableResampler,
-                trackStreamConfig.dispatcherConfig.disableVolume
-            ].every((e) => !!e === true);
+        trackStreamConfig.dispatcherConfig.disableBiquad,
+        trackStreamConfig.dispatcherConfig.disableEqualizer,
+        trackStreamConfig.dispatcherConfig.disableFilters,
+        trackStreamConfig.dispatcherConfig.disableResampler,
+        trackStreamConfig.dispatcherConfig.disableVolume,
+        trackStreamConfig.dispatcherConfig.disableCompressor,
+        trackStreamConfig.dispatcherConfig.disableReverb,
+        trackStreamConfig.dispatcherConfig.disableSeeker,
+      ].every((e) => !!e === true);
 
       const needsFilters =
         !!trackStreamConfig.playerConfig.seek ||
@@ -754,9 +807,13 @@ export class GuildQueuePlayerNode<Meta = any> {
       let finalStream: Readable;
 
       const demuxable = (fmt: string) =>
-        [StreamType.Opus, StreamType.WebmOpus, StreamType.OggOpus].includes(
-          fmt as StreamType,
-        );
+        [
+          StreamType.Opus,
+          StreamType.WebmOpus,
+          StreamType.OggOpus,
+          StreamType.Raw,
+          'pcm',
+        ].includes(fmt as StreamType);
 
       // skip ffmpeg when possible
       if (
@@ -775,25 +832,32 @@ export class GuildQueuePlayerNode<Meta = any> {
             }`,
           );
 
+        const isRaw = $fmt === 'pcm' || $fmt === StreamType.Raw;
+
         // prettier-ignore
-        const opusStream = $fmt === StreamType.Opus ?
-                    stream :
-                    $fmt === StreamType.OggOpus ?
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    stream.pipe(new OggDemuxer() as any) :
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    stream.pipe(new WebmDemuxer() as any);
+        const opusStream =
+          isRaw || $fmt === StreamType.Opus
+            ? stream
+            : $fmt === StreamType.OggOpus
+            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              stream.pipe(new OggDemuxer() as any)
+            : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              stream.pipe(new WebmDemuxer() as any);
 
         if (shouldPCM) {
-          // if we have any filters enabled, we need to decode the opus stream to pcm
-          finalStream = opusStream.pipe(
-            new OpusDecoder({
-              channels: 2,
-              frameSize: 960,
-              rate: 48000,
-            }),
-          );
-          trackStreamConfig.dispatcherConfig.type = StreamType.Raw;
+          if (isRaw) {
+            finalStream = opusStream;
+          } else {
+            // if we have any filters enabled, we need to decode the opus stream to pcm
+            finalStream = opusStream.pipe(
+              new OpusDecoder({
+                channels: 2,
+                frameSize: 960,
+                rate: 48000,
+              }),
+            );
+            trackStreamConfig.dispatcherConfig.type = StreamType.Raw;
+          }
         } else {
           finalStream = opusStream;
           trackStreamConfig.dispatcherConfig.type = StreamType.Opus;

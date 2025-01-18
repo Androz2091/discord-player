@@ -46,6 +46,13 @@ export default async function Page(props: {
               </CodeBlock>
             ),
             Callout,
+            DevelopmentOnly: () => {
+              return (
+                <Callout type="info">
+                  This feature is currently available in dev release only.
+                </Callout>
+              );
+            },
           }}
         />
       </DocsBody>

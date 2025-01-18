@@ -61,6 +61,8 @@ export class PCMTransformer extends Transform {
 
   public toggle() {
     this.disabled = !this.disabled;
+
+    return this.disabled;
   }
 
   public _readInt(buffer: Buffer, index: number) {

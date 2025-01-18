@@ -39,6 +39,9 @@ export async function run({ interaction }: SlashCommandProps) {
       },
       enableStreamInterceptor: true,
       volume: 50,
+      disableReverb: true,
+      disableCompressor: false,
+      disableSeeker: true,
     },
   });
 

@@ -28,6 +28,12 @@ await player.play(channel, filePath, {
 });
 ```
 
+<Callout type="info">
+  When a `.pcm` file is encountered, discord-player will assume that it is a raw
+  PCM file with 48000 sample rate and 2 channels. The duration of this track may
+  be inaccurate because of this.
+</Callout>
+
 This does not show the metadata of the track you are playing. In order to add support for the metadata, you need to install [mediaplex](https://npm.im/mediaplex) on your system.
 
 ```package-install

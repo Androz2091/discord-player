@@ -21,6 +21,12 @@ import {
   BiquadFilters,
   PCMFilters,
   FiltersChain,
+  CompressorParameters,
+  ReverbParameters,
+  SeekerParameters,
+  ResampleParameters,
+  CommonResamplerFilterPreset,
+  SeekEvent,
 } from '@discord-player/equalizer';
 import { GuildQueue, GuildQueueEvent, PostProcessedResult } from '../queue';
 import { NoAudioResourceError } from '../errors';
@@ -32,14 +38,36 @@ export interface CreateStreamOps {
   disableVolume?: boolean;
   disableEqualizer?: boolean;
   disableBiquad?: boolean;
+  disableCompressor?: boolean;
+  disableResampler?: boolean;
+  disableReverb?: boolean;
+  disableSeeker?: boolean;
   eq?: EqualizerBand[];
   biquadFilter?: BiquadFilters;
   disableFilters?: boolean;
   defaultFilters?: PCMFilters[];
   volume?: number;
-  disableResampler?: boolean;
   sampleRate?: number;
+  sampleRateFilters?: CommonResamplerFilterPreset;
   skipFFmpeg?: boolean;
+  compressor?: {
+    threshold: number;
+    ratio: number;
+    attack: number;
+    release: number;
+    makeupGain: number;
+    kneeWidth: number;
+  };
+  reverb?: {
+    roomSize: number;
+    damping: number;
+    wetLevel: number;
+    dryLevel: number;
+  };
+  seeker?: {
+    seekTarget: number | null;
+    totalDuration: number;
+  };
 }
 
 export interface VoiceEvents {
@@ -50,8 +78,11 @@ export interface VoiceEvents {
   finish: (resource: AudioResource<Track>) => any;
   dsp: (filters: PCMFilters[]) => any;
   eqBands: (filters: EqualizerBand[]) => any;
-  sampleRate: (filters: number) => any;
+  sampleRate: (filters: ResampleParameters) => any;
   biquad: (filters: BiquadFilters) => any;
+  compressor: (filters: CompressorParameters) => any;
+  reverb: (filters: ReverbParameters) => any;
+  seeker: (filters: SeekerParameters) => any;
   volume: (volume: number) => any;
   destroyed: () => any;
   /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -113,14 +144,37 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
     this.dsp.onUpdate = () => {
       if (!this.dsp) return;
-      if (this.dsp.filters?.filters)
+
+      if (this.dsp.filters?.filters) {
         this.emit('dsp', this.dsp.filters?.filters);
-      if (this.dsp.biquad?.filters)
+      }
+
+      if (this.dsp.biquad?.filters) {
         this.emit('biquad', this.dsp.biquad?.filters);
-      if (this.dsp.equalizer) this.emit('eqBands', this.dsp.equalizer.getEQ());
-      if (this.dsp.volume) this.emit('volume', this.dsp.volume.volume);
-      if (this.dsp.resampler)
-        this.emit('sampleRate', this.dsp.resampler.sampleRate);
+      }
+
+      if (this.dsp.equalizer) {
+        this.emit('eqBands', this.dsp.equalizer.getEQ());
+      }
+
+      if (this.dsp.volume) {
+        this.emit('volume', this.dsp.volume.volume);
+      }
+
+      if (this.dsp.resampler) {
+        this.emit('sampleRate', this.dsp.resampler.getParameters());
+      }
+      if (this.dsp.compressor) {
+        this.emit('compressor', this.dsp.compressor.getParameters());
+      }
+
+      if (this.dsp.reverb) {
+        this.emit('reverb', this.dsp.reverb.getParameters());
+      }
+
+      if (this.dsp.seeker) {
+        this.emit('seeker', this.dsp.seeker.getParameters());
+      }
     };
 
     this.dsp.onError = (e) => this.emit('error', e as AudioPlayerError);
@@ -329,8 +383,44 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
             volume: ops?.volume,
             disabled: ops?.disableVolume,
           },
+          compressor: ops?.compressor
+            ? {
+                threshold: ops?.compressor.threshold,
+                ratio: ops?.compressor.ratio,
+                attack: ops?.compressor.attack,
+                release: ops?.compressor.release,
+                makeupGain: ops?.compressor.makeupGain,
+                disabled: ops?.disableCompressor,
+                kneeWidth: ops?.compressor.kneeWidth,
+              }
+            : undefined,
+          reverb: ops?.reverb
+            ? {
+                roomSize: ops?.reverb.roomSize,
+                damping: ops?.reverb.damping,
+                wetLevel: ops?.reverb.wetLevel,
+                dryLevel: ops?.reverb.dryLevel,
+                disabled: ops?.disableReverb,
+              }
+            : undefined,
+          seeker: ops?.seeker
+            ? {
+                disabled: ops?.disableSeeker,
+                seekTarget: ops?.seeker.seekTarget,
+                sampleRate: 48000,
+                channels: 2,
+                totalDuration: ops?.seeker.totalDuration,
+              }
+            : undefined,
         })
       : src;
+
+    if (this.dsp.seeker) {
+      // used to handle backward seeking
+      this.dsp.seeker.on('seek', (data: SeekEvent) => {
+        this.queue.node.requestSeek(data).catch(() => {});
+      });
+    }
 
     if (this.queue.hasDebugger) {
       this.queue.debug('Executing onAfterCreateStream hook...');
@@ -394,6 +484,18 @@ class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
   public get equalizer() {
     return this.dsp?.equalizer || null;
+  }
+
+  public get compressor() {
+    return this.dsp?.compressor || null;
+  }
+
+  public get reverb() {
+    return this.dsp?.reverb || null;
+  }
+
+  public get seeker() {
+    return this.dsp?.seeker || null;
   }
 
   /**

@@ -3,14 +3,8 @@ import { useQueue } from 'discord-player';
 import { SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
-  .setName('bassboost')
-  .setDescription('Toggle bassboost filter')
-  .addBooleanOption((option) =>
-    option
-      .setName('on')
-      .setDescription('Enable or disable the filter')
-      .setRequired(true),
-  );
+  .setName('compressor')
+  .setDescription('Set compressor filter');
 
 export async function run({ interaction }: SlashCommandProps) {
   if (!interaction.inCachedGuild()) return;
@@ -29,23 +23,13 @@ export async function run({ interaction }: SlashCommandProps) {
 
   await interaction.deferReply();
 
-  if (!queue.filters.equalizer) {
+  if (!queue.filters.compressor) {
     return interaction.editReply('This filter is not supported.');
   }
 
-  const on = interaction.options.getBoolean('on', true);
-
-  if (on) {
-    queue.filters.equalizer.setEQ([
-      { band: 0, gain: 1.25 },
-      { band: 1, gain: 1.25 },
-      { band: 2, gain: 1.25 },
-    ]);
-  } else {
-    queue.filters.equalizer.resetEQ();
-  }
+  const enabled = queue.filters.compressor.toggle();
 
   await interaction.editReply(
-    `Bassboost is now ${on ? 'enabled' : 'disabled'}`,
+    `Compressor is now ${enabled ? 'enabled' : 'disabled'}`,
   );
 }

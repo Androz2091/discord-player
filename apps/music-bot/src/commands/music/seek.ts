@@ -3,13 +3,10 @@ import { useQueue } from 'discord-player';
 import { SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
-  .setName('bassboost')
-  .setDescription('Toggle bassboost filter')
-  .addBooleanOption((option) =>
-    option
-      .setName('on')
-      .setDescription('Enable or disable the filter')
-      .setRequired(true),
+  .setName('seek')
+  .setDescription('Set seek filter')
+  .addIntegerOption((option) =>
+    option.setName('seek').setDescription('The seek value').setRequired(true),
   );
 
 export async function run({ interaction }: SlashCommandProps) {
@@ -29,23 +26,15 @@ export async function run({ interaction }: SlashCommandProps) {
 
   await interaction.deferReply();
 
-  if (!queue.filters.equalizer) {
+  if (!queue.filters.seeker) {
     return interaction.editReply('This filter is not supported.');
   }
 
-  const on = interaction.options.getBoolean('on', true);
+  const time = interaction.options.getInteger('seek')!;
 
-  if (on) {
-    queue.filters.equalizer.setEQ([
-      { band: 0, gain: 1.25 },
-      { band: 1, gain: 1.25 },
-      { band: 2, gain: 1.25 },
-    ]);
-  } else {
-    queue.filters.equalizer.resetEQ();
-  }
+  const success = await queue.node.seek(time);
 
   await interaction.editReply(
-    `Bassboost is now ${on ? 'enabled' : 'disabled'}`,
+    `Seeked to ${time}ms: ${success ? 'success' : 'failed'}`,
   );
 }

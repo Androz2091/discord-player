@@ -20,6 +20,7 @@ import { InvalidArgTypeError } from '../errors';
 import { Util } from '../utils/Util';
 import { SearchQueryType } from '../utils/QueryResolver';
 import { AudioResource } from 'discord-voip';
+import { SeekEvent } from '@discord-player/equalizer';
 
 export type TrackResolvable = Track | string | number;
 
@@ -177,6 +178,7 @@ export class Track<T = unknown> {
   public bridgedExtractor: BaseExtractor | null = null;
   public bridgedTrack: Track | null = null;
 
+  #onSeek: ((event: SeekEvent) => Awaited<void>) | null = null;
   #resource: AudioResource<Track> | null = null;
 
   /**
@@ -209,6 +211,29 @@ export class Track<T = unknown> {
     this.cleanTitle =
       data.cleanTitle ?? Util.cleanTitle(this.title, this.source);
     this.live = data.live ?? false;
+  }
+
+  /**
+   * Whether this track can be seeked
+   */
+  public get seekable() {
+    return this.#onSeek !== null;
+  }
+
+  /**
+   * Set the onSeek event
+   * @param fn The onSeek event
+   */
+  public handleSeek(fn: (event: SeekEvent) => Awaited<void>) {
+    this.#onSeek = fn;
+  }
+
+  /**
+   * Request seek
+   * @param event The seek event
+   */
+  public async seek(event: SeekEvent) {
+    if (this.#onSeek) return this.#onSeek(event);
   }
 
   /**

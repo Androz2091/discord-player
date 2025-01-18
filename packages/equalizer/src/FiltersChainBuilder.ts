@@ -2,9 +2,15 @@ import { type Readable, pipeline } from 'stream';
 import { EqualizerStream, EqualizerStreamOptions } from './equalizer';
 import {
   AudioFilter,
+  CompressorOptions,
+  CompressorTransformer,
   PCMFiltererOptions,
   PCMResampler,
   PCMResamplerOptions,
+  PCMSeekerOptions,
+  PCMSeekerTransformer,
+  ReverbOptions,
+  ReverbTransformer,
 } from './audio';
 import { BiquadStream, BiquadStreamOptions } from './biquad';
 import {
@@ -18,6 +24,9 @@ export interface DSPFiltersPreset {
   biquad?: BiquadStreamOptions;
   volume?: VolumeTransformerOptions;
   resampler?: PCMResamplerOptions;
+  compressor?: CompressorOptions;
+  seeker?: PCMSeekerOptions;
+  reverb?: ReverbOptions;
 }
 
 export class FiltersChain {
@@ -26,6 +35,9 @@ export class FiltersChain {
   public biquad: BiquadStream | null = null;
   public volume: VolumeTransformer | null = null;
   public resampler: PCMResampler | null = null;
+  public compressor: CompressorTransformer | null = null;
+  public seeker: PCMSeekerTransformer | null = null;
+  public reverb: ReverbTransformer | null = null;
   public destination: Readable | null = null;
   public source: Readable | null = null;
   public onUpdate: () => unknown = () => null;
@@ -41,17 +53,33 @@ export class FiltersChain {
     const resampler = !presets.resampler?.disabled
       ? new PCMResampler(presets.resampler)
       : null;
+
     const equalizerStream = !presets.equalizer?.disabled
       ? new EqualizerStream(presets.equalizer)
       : null;
+
     const dspStream = !presets.dsp?.disabled
       ? new AudioFilter(presets.dsp)
       : null;
+
     const biquadStream = !presets.biquad?.disabled
       ? new BiquadStream(presets.biquad)
       : null;
+
     const volumeTransformer = !presets.volume?.disabled
       ? new VolumeTransformer(presets.volume)
+      : null;
+
+    const compressor = !presets.compressor?.disabled
+      ? new CompressorTransformer(presets.compressor)
+      : null;
+
+    const seeker = !presets.seeker?.disabled
+      ? new PCMSeekerTransformer(presets.seeker)
+      : null;
+
+    const reverb = !presets.reverb?.disabled
+      ? new ReverbTransformer(presets.reverb)
       : null;
 
     this.resampler = resampler;
@@ -59,6 +87,9 @@ export class FiltersChain {
     this.filters = dspStream;
     this.biquad = biquadStream;
     this.volume = volumeTransformer;
+    this.compressor = compressor;
+    this.seeker = seeker;
+    this.reverb = reverb;
 
     // update listeners
     if (resampler) resampler.onUpdate = this.onUpdate;
@@ -66,14 +97,20 @@ export class FiltersChain {
     if (dspStream) dspStream.onUpdate = this.onUpdate;
     if (biquadStream) biquadStream.onUpdate = this.onUpdate;
     if (volumeTransformer) volumeTransformer.onUpdate = this.onUpdate;
+    if (compressor) compressor.onUpdate = this.onUpdate;
+    if (seeker) seeker.onUpdate = this.onUpdate;
+    if (reverb) reverb.onUpdate = this.onUpdate;
 
     const chains = [
       src,
       resampler,
       equalizerStream,
+      reverb,
       dspStream,
       biquadStream,
+      compressor,
       volumeTransformer,
+      seeker,
     ].filter(Boolean) as Readonly<Readable[]>;
 
     if (!chains.length) return src;
@@ -99,6 +136,9 @@ export class FiltersChain {
     this.biquad?.destroy();
     this.filters?.destroy();
     this.volume?.destroy();
+    this.compressor?.destroy();
+    this.seeker?.destroy();
+    this.reverb?.destroy();
     this.destination?.destroy();
     this.source?.destroy();
 
@@ -108,6 +148,9 @@ export class FiltersChain {
     this.biquad?.removeAllListeners();
     this.filters?.removeAllListeners();
     this.volume?.removeAllListeners();
+    this.compressor?.removeAllListeners();
+    this.seeker?.removeAllListeners();
+    this.reverb?.removeAllListeners();
     this.destination?.removeAllListeners();
     this.source?.removeAllListeners();
 
@@ -117,6 +160,9 @@ export class FiltersChain {
     this.biquad = null;
     this.filters = null;
     this.volume = null;
+    this.compressor = null;
+    this.seeker = null;
+    this.reverb = null;
     this.destination = null;
     this.source = null;
   }
