@@ -12,30 +12,30 @@ import {
   GatewayVoiceStateUpdateDispatchData,
   VoiceState,
 } from 'discord.js';
-import type Eris from 'eris';
+import * as Oceanic from 'oceanic.js';
 
-type ErisUserResolvable = Eris.User | string | Eris.Member;
-type ErisGuildResolvable =
-  | Eris.Guild
+type OceanicUserResolvable = Oceanic.User | string | Oceanic.Member;
+type OceanicGuildResolvable =
+  | Oceanic.Guild
   | string
-  | Eris.Member
-  | Eris.GuildChannel
-  | Eris.Role;
-type ErisChannelResolvable = Eris.GuildChannel | string;
+  | Oceanic.Member
+  | Oceanic.GuildChannel
+  | Oceanic.Role;
+type OceanicChannelResolvable = Oceanic.GuildChannel | string;
 
 const DiscordPlayerClientSymbol = Symbol('DiscordPlayerClient');
 
-export function isErisClient(client: any): client is Eris.Client {
-  const { module, error } = Util.require('eris');
+export function isOceanicClient(client: any): client is Oceanic.Client {
+  const { module, error } = Util.require('oceanic.js');
 
   if (error) return false;
 
-  const eris = module as typeof import('eris');
+  const oceanic = module as typeof import('oceanic.js');
 
-  return client instanceof eris.Client;
+  return client instanceof oceanic.Client;
 }
 
-function declareProperty(target: any, key: string, value: any) {
+function declareProperty(target: any, key: string, value: any): T {
   Reflect.set(target, key, value);
 }
 
@@ -44,31 +44,31 @@ function getProperty<T>(target: any, key: string): T {
 }
 
 /**
- * Allows Eris clients to be used with discord-player. When this method is called, discord-player creates a proxy object that intercepts certain methods and properties to make it compatible with discord-player.
- * @param client The Eris client to be used.
- * @returns The Eris client with discord-player compatibility.
+ * Allows Oceanic.js clients to be used with discord-player. When this method is called, discord-player creates a proxy object that intercepts certain methods and properties to make it compatible with discord-player.
+ * @param client The Oceanic.js client to be used.
+ * @returns The Oceanic.js client with discord-player compatibility.
  */
-export function createErisCompat(client: Eris.Client): Client {
-  const { module, error } = Util.require('eris');
+export function createOceanicCompat(client: Oceanic.Client): Client {
+  const { module, error } = Util.require('oceanic.js');
 
   if (error) throw error;
 
-  const eris = module as typeof import('eris');
+  const oceanic = module as typeof import('oceanic.js');
 
-  erisVoiceEventsHandler(client);
+  oceanicVoiceEventsHandler(client);
 
-  const erisProxy = new Proxy(client, {
+  const oceanicProxy = new Proxy(client, {
     get(target, p) {
       switch (p) {
         case 'users':
-          return erisUsersProxy(target, eris);
+          return oceanicUsersProxy(target, oceanic);
         case 'guilds':
-          return erisGuildsProxy(target, eris);
+          return oceanicGuildsProxy(target, oceanic);
         case 'channels':
-          return erisChannelsProxy(target, eris);
+          return oceanicChannelsProxy(target, oceanic);
         case '__dp_voiceStateUpdate_proxy':
           return (handler: (a, b) => void) =>
-            erisVoiceStateUpdateProxy(target, erisProxy, handler);
+            oceanicVoiceStateUpdateProxy(target, oceanicProxy, handler);
         case 'incrementMaxListeners':
           return () => {
             // @ts-expect-error patching
@@ -89,14 +89,14 @@ export function createErisCompat(client: Eris.Client): Client {
     },
   });
 
-  Reflect.set(erisProxy, DiscordPlayerClientSymbol, 'Eris');
+  Reflect.set(oceanicProxy, DiscordPlayerClientSymbol, 'Oceanic');
 
-  return createCompatClient(erisProxy, 'Eris').client as unknown as Client;
+  return createCompatClient(oceanicProxy, 'Oceanic').client as unknown as Client;
 }
 
-function erisVoiceStateUpdateProxy(
-  client: Eris.Client,
-  proxy: Eris.Client,
+function oceanicVoiceStateUpdateProxy(
+  client: Oceanic.Client,
+  proxy: Oceanic.Client,
   handler: (a, b) => void,
 ) {
   client.on('voiceStateUpdate', (member, oldState) => {
@@ -122,7 +122,7 @@ function erisVoiceStateUpdateProxy(
         channelId: member.voiceState.channelID,
         serverMute: member.voiceState.mute,
         suppress: member.voiceState.suppress,
-        channel: erisResolvedChannelProxy(resolvedChannel, client),
+        channel: oceanicResolvedChannelProxy(resolvedChannel, client),
         member: {
           id: member.id,
         },
@@ -152,7 +152,7 @@ function erisVoiceStateUpdateProxy(
   });
 }
 
-function erisVoiceEventsHandler(client: Eris.Client) {
+function oceanicVoiceEventsHandler(client: Oceanic.Client) {
   let adapters = getProperty<Map<string, any>>(client, 'adapters');
 
   if (!adapters) {
@@ -169,7 +169,7 @@ function erisVoiceEventsHandler(client: Eris.Client) {
     }
   });
 
-  client.on('rawWS', (packet) => {
+  client.on('packet', (packet) => {
     switch (packet.t) {
       case GatewayDispatchEvents.VoiceServerUpdate: {
         const payload = packet.d as GatewayVoiceServerUpdateDispatchData;
@@ -195,7 +195,7 @@ function erisVoiceEventsHandler(client: Eris.Client) {
   });
 }
 
-function erisChannelsProxy(client: Eris.Client, eris: typeof import('eris')) {
+function oceanicChannelsProxy(client: Oceanic.Client, oceanic: typeof import('oceanic.js')) {
   const handler = {
     client,
     get cache() {
@@ -208,19 +208,19 @@ function erisChannelsProxy(client: Eris.Client, eris: typeof import('eris')) {
         },
       };
     },
-    resolve(resolvable: string | ErisChannelResolvable) {
+    resolve(resolvable: string | OceanicChannelResolvable) {
       if (typeof resolvable === 'string') {
-        return erisResolvedChannelProxy(
-          this.client.getChannel(resolvable) as Eris.GuildChannel,
+        return oceanicResolvedChannelProxy(
+          this.client.getChannel(resolvable) as Oceanic.GuildChannel,
           client,
         );
       }
 
-      if (resolvable instanceof eris.GuildChannel) {
-        return erisResolvedChannelProxy(resolvable, client);
+      if (resolvable instanceof Oceanic.GuildChannel) {
+        return oceanicResolvedChannelProxy(resolvable, client);
       }
     },
-    resolveId(resolvable: ErisChannelResolvable) {
+    resolveId(resolvable: OceanicChannelResolvable) {
       const channel = this.resolve(resolvable);
       return channel?.id;
     },
@@ -229,19 +229,19 @@ function erisChannelsProxy(client: Eris.Client, eris: typeof import('eris')) {
   return handler;
 }
 
-function erisResolvedChannelProxy(
-  channel: Eris.GuildChannel | undefined,
-  client: Eris.Client,
-): Eris.GuildChannel | undefined {
+function oceanicResolvedChannelProxy(
+  channel: Oceanic.GuildChannel | undefined,
+  client: Oceanic.Client,
+): Oceanic.GuildChannel | undefined {
   if (!channel) return;
 
   return new Proxy(channel, {
     get(target, p) {
       switch (p) {
         case 'guild':
-          return erisVoiceAdapterProxy(target.guild, client);
+          return oceanicVoiceAdapterProxy(target.guild, client);
         case 'members':
-          return (target as Eris.VoiceChannel).voiceMembers;
+          return (target as Oceanic.VoiceChannel).voiceMembers;
         case 'isVoiceBased':
           return () =>
             target.type === ChannelType.GuildVoice ||
@@ -258,16 +258,16 @@ function erisResolvedChannelProxy(
   });
 }
 
-function erisVoiceAdapterProxy(
-  guild: Eris.Guild | undefined,
-  client: Eris.Client,
-): Eris.Guild | undefined {
+function oceanicVoiceAdapterProxy(
+  guild: Oceanic.Guild | undefined,
+  client: Oceanic.Client,
+): Oceanic.Guild | undefined {
   if (!guild) return;
 
   return new Proxy(guild, {
     get(target, p) {
       if (p === 'voiceAdapterCreator') {
-        return erisVoiceAdapterCreator(target, client);
+        return oceanicVoiceAdapterCreator(target, client);
       }
 
       // @ts-expect-error patching
@@ -276,9 +276,9 @@ function erisVoiceAdapterProxy(
   });
 }
 
-function erisVoiceAdapterCreator(
-  guild: Eris.Guild,
-  client: Eris.Client,
+function oceanicVoiceAdapterCreator(
+  guild: Oceanic.Guild,
+  client: Oceanic.Client,
 ): DiscordGatewayAdapterCreator {
   return (methods) => {
     let adapters = getProperty<Map<string, typeof methods>>(client, 'adapters');
@@ -294,7 +294,7 @@ function erisVoiceAdapterCreator(
     return {
       sendPayload(payload) {
         if (guild.shard.status !== 'ready') return false;
-        guild.shard.sendWS(payload.op, payload.d);
+        guild.shard.send(payload.op, payload.d);
         return true;
       },
       destroy() {
@@ -304,7 +304,7 @@ function erisVoiceAdapterCreator(
   };
 }
 
-function erisGuildsProxy(client: Eris.Client, eris: typeof import('eris')) {
+function oceanicGuildsProxy(client: Oceanic.Client, oceanic: typeof import('oceanic.js')) {
   return new Proxy(client.guilds, {
     get(target, p) {
       if (p === 'cache') {
@@ -312,20 +312,20 @@ function erisGuildsProxy(client: Eris.Client, eris: typeof import('eris')) {
       }
 
       if (p === 'resolve' || p === 'resolveId') {
-        const resolver = function (resolvable: ErisGuildResolvable) {
+        const resolver = function (resolvable: OceanicGuildResolvable) {
           if (typeof resolvable === 'string') {
             return target.get(resolvable);
           }
 
-          if (resolvable instanceof eris.Guild) {
+          if (resolvable instanceof oceanic.Guild) {
             return resolvable;
           }
 
           if (
-            resolvable instanceof eris.Member ||
-            resolvable instanceof eris.Guild ||
-            resolvable instanceof eris.GuildChannel ||
-            resolvable instanceof eris.Role
+            resolvable instanceof oceanic.Member ||
+            resolvable instanceof oceanic.Guild ||
+            resolvable instanceof oceanic.GuildChannel ||
+            resolvable instanceof oceanic.Role
           ) {
             return resolvable.guild;
           }
@@ -335,7 +335,7 @@ function erisGuildsProxy(client: Eris.Client, eris: typeof import('eris')) {
           return resolver;
         }
 
-        return (resolvable: ErisGuildResolvable) => {
+        return (resolvable: OceanicGuildResolvable) => {
           const guild = resolver(resolvable);
           return guild?.id;
         };
@@ -345,9 +345,9 @@ function erisGuildsProxy(client: Eris.Client, eris: typeof import('eris')) {
       return target[p];
     },
   });
-}
+} 
 
-function erisUsersProxy(client: Eris.Client, eris: typeof import('eris')) {
+function oceanicUsersProxy(client: Oceanic.Client, oceanic: typeof import('oceanic.js')) {
   return new Proxy(client.users, {
     get(target, p) {
       if (p === 'cache') {
@@ -355,16 +355,16 @@ function erisUsersProxy(client: Eris.Client, eris: typeof import('eris')) {
       }
 
       if (p === 'resolve' || p === 'resolveId') {
-        const resolver = function (resolvable: ErisUserResolvable) {
+        const resolver = function (resolvable: OceanicUserResolvable) {
           if (typeof resolvable === 'string') {
             return target.get(resolvable);
           }
 
-          if (resolvable instanceof eris.User) {
+          if (resolvable instanceof oceanic.User) {
             return resolvable;
           }
 
-          if (resolvable instanceof eris.Member) {
+          if (resolvable instanceof oceanic.Member) {
             return resolvable.user;
           }
         };
@@ -373,7 +373,7 @@ function erisUsersProxy(client: Eris.Client, eris: typeof import('eris')) {
           return resolver;
         }
 
-        return (resolvable: ErisUserResolvable) => {
+        return (resolvable: OceanicUserResolvable) => {
           const user = resolver(resolvable);
           return user?.id;
         };
