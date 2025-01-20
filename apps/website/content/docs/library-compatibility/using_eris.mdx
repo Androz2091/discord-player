@@ -3,11 +3,6 @@ title: Using Eris instead of Discord.js
 description: Learn how to use Eris instead of Discord.js with Discord Player
 ---
 
-<Callout>
-  This feature is not currently experimental. It does not support automatic
-  voice state handling as of now.
-</Callout>
-
 To use [Eris](https://npm.im/eris), you just need to wrap your eris client with `createErisCompat` function from discord-player. This function will return a new client proxy which mimics the Discord.js client.
 
 ```js title="index.js"
