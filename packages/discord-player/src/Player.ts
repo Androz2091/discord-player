@@ -47,7 +47,7 @@ import { defaultVoiceStateHandler } from './DefaultVoiceStateHandler';
 import { Context, createContext } from './hooks';
 import { HooksCtx, SUPER_CONTEXT } from './hooks/common';
 import { LrcLib } from './lrclib/LrcLib';
-import { getCompatName, isClientProxy } from './compat/createErisCompat';
+import { getCompatName, isClientProxy } from './compat/common';
 import { DependencyReportGenerator } from './utils/DependencyReportGenerator';
 import { getGlobalRegistry } from './utils/__internal__';
 import { version as dpVersion } from './version';

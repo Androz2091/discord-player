@@ -1,4 +1,6 @@
-export { createErisCompat, isErisProxy } from './compat/createErisCompat';
+export { createErisCompat } from './compat/createErisCompat';
+export { createOceanicCompat } from './compat/createOceanicCompat';
+export { isErisProxy, isOceanicProxy } from './compat/common';
 export * from './utils/PlayerEventsEmitter';
 export * from './utils/AudioFilters';
 export * from './extractors/BaseExtractor';

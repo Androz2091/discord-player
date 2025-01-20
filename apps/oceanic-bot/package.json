@@ -1,0 +1,23 @@
+{
+  "name": "oceanic-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx --env-file=.env src/index.ts"
+  },
+  "keywords": [],
+  "author": "Twilight <hello@twlite.dev>",
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "tsx": "^4.17.0"
+  },
+  "dependencies": {
+    "@discord-player/extractor": "workspace:^",
+    "discord-player": "workspace:^",
+    "dotenv": "^16.4.5",
+    "mediaplex": "^1.0.0",
+    "oceanic.js": "^1.11.2"
+  }
+}
