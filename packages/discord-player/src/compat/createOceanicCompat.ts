@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 import { ChannelType, GatewayDispatchEvents } from 'discord-api-types/v10';
-import { createCompatClient, CompatProvider } from './common';
+import { createCompatClient } from './common';
 import { Util } from '../utils/Util';
 
 import type { DiscordGatewayAdapterCreator } from 'discord-voip';
@@ -91,7 +91,8 @@ export function createOceanicCompat(client: Oceanic.Client): Client {
 
   Reflect.set(oceanicProxy, DiscordPlayerClientSymbol, 'Oceanic');
 
-  return createCompatClient(oceanicProxy, 'Oceanic').client as unknown as Client;
+  return createCompatClient(oceanicProxy, 'Oceanic')
+    .client as unknown as Client;
 }
 
 function oceanicVoiceStateUpdateProxy(
@@ -195,7 +196,10 @@ function oceanicVoiceEventsHandler(client: Oceanic.Client) {
   });
 }
 
-function oceanicChannelsProxy(client: Oceanic.Client, oceanic: typeof import('oceanic.js')) {
+function oceanicChannelsProxy(
+  client: Oceanic.Client,
+  oceanic: typeof import('oceanic.js'),
+) {
   const handler = {
     client,
     get cache() {
@@ -304,7 +308,10 @@ function oceanicVoiceAdapterCreator(
   };
 }
 
-function oceanicGuildsProxy(client: Oceanic.Client, oceanic: typeof import('oceanic.js')) {
+function oceanicGuildsProxy(
+  client: Oceanic.Client,
+  oceanic: typeof import('oceanic.js'),
+) {
   return new Proxy(client.guilds, {
     get(target, p) {
       if (p === 'cache') {
@@ -345,9 +352,12 @@ function oceanicGuildsProxy(client: Oceanic.Client, oceanic: typeof import('ocea
       return target[p];
     },
   });
-} 
+}
 
-function oceanicUsersProxy(client: Oceanic.Client, oceanic: typeof import('oceanic.js')) {
+function oceanicUsersProxy(
+  client: Oceanic.Client,
+  oceanic: typeof import('oceanic.js'),
+) {
   return new Proxy(client.users, {
     get(target, p) {
       if (p === 'cache') {

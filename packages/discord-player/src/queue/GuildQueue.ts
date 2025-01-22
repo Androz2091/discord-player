@@ -46,6 +46,7 @@ import { SyncedLyricsProvider } from './SyncedLyricsProvider';
 import { LrcGetResult, LrcSearchResult } from '../lrclib/LrcLib';
 import { FiltersName } from '../fabric';
 import { SearchQueryType } from '../utils/QueryResolver';
+import type { ExtractorStreamable } from '../extractors/BaseExtractor';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface GuildNodeInit<Meta = any> {
@@ -60,6 +61,7 @@ export interface GuildNodeInit<Meta = any> {
   disableHistory: boolean;
   onBeforeCreateStream?: OnBeforeCreateStreamHandler;
   onAfterCreateStream?: OnAfterCreateStreamHandler;
+  onStreamExtracted?: OnStreamExtractedHandler;
   repeatMode?: QueueRepeatMode;
   leaveOnEmpty: boolean;
   leaveOnEmptyCooldown: number;
@@ -106,6 +108,12 @@ export type OnBeforeCreateStreamHandler = (
   queryType: SearchQueryType,
   queue: GuildQueue,
 ) => Promise<Readable | null>;
+
+export type OnStreamExtractedHandler = (
+  stream: Readable | ExtractorStreamable | string,
+  track: Track,
+  queue: GuildQueue,
+) => Promise<Readable | ExtractorStreamable | string>;
 
 export type OnAfterCreateStreamHandler<T = unknown> = (
   stream: Readable,
@@ -613,6 +621,7 @@ export class GuildQueue<Meta = any> {
     stream,
     type: StreamType.Raw,
   });
+  public onStreamExtracted: OnStreamExtractedHandler = async (stream) => stream;
   public repeatMode: QueueRepeatMode = QueueRepeatMode.OFF;
   public timeouts = new Collection<string, NodeJS.Timeout>();
   public stats = new GuildQueueStatistics<Meta>(this);
@@ -628,6 +637,8 @@ export class GuildQueue<Meta = any> {
       this.onBeforeCreateStream = options.onBeforeCreateStream;
     if (TypeUtil.isFunction(options.onAfterCreateStream))
       this.onAfterCreateStream = options.onAfterCreateStream;
+    if (TypeUtil.isFunction(options.onStreamExtracted))
+      this.onStreamExtracted = options.onStreamExtracted;
     if (!TypeUtil.isNullish(options.repeatMode))
       this.repeatMode = options.repeatMode;
 

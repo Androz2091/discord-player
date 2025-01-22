@@ -703,10 +703,17 @@ export class GuildQueuePlayerNode<Meta = any> {
             bridgeAttemptedExtractors: new Set<string>(),
           },
           () =>
-            this.#createGenericStream(track).then(
-              (r) => {
+            this.#createGenericStream(track)
+              .then(async (r) => {
                 if (r?.result) {
-                  streamSrc.stream = <Readable>r.result;
+                  streamSrc.stream =
+                    <Readable>(
+                      await this.queue.onStreamExtracted?.(
+                        r.result,
+                        track,
+                        this.queue,
+                      )
+                    ) ?? r.result;
                   return;
                 }
 
@@ -716,9 +723,8 @@ export class GuildQueuePlayerNode<Meta = any> {
                 }
 
                 streamSrc.stream = streamSrc.error = null;
-              },
-              (e: Error) => (streamSrc.error = e),
-            ),
+              })
+              .catch((e: Error) => (streamSrc.error = e)),
         );
       }
 

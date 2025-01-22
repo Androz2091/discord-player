@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export const DiscordPlayerClientSymbol = Symbol('DiscordPlayerClient');
 
 export type CompatProvider = 'Eris' | 'Oceanic';
@@ -7,11 +9,14 @@ export interface CompatClient {
   client: any;
 }
 
-export function createCompatClient(client: any, provider: CompatProvider): CompatClient {
+export function createCompatClient(
+  client: any,
+  provider: CompatProvider,
+): CompatClient {
   Reflect.set(client, DiscordPlayerClientSymbol, provider);
   return {
     provider,
-    client
+    client,
   };
 }
 
@@ -28,5 +33,5 @@ export function isErisProxy(client: any): boolean {
 }
 
 export function isOceanicProxy(client: any): boolean {
-  return getCompatName(client) === 'Oceanic'; 
+  return getCompatName(client) === 'Oceanic';
 }

@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 import { ChannelType, GatewayDispatchEvents } from 'discord-api-types/v10';
-import { createCompatClient, CompatProvider } from './common';
+import { createCompatClient } from './common';
 import { Util } from '../utils/Util';
 
 import type { DiscordGatewayAdapterCreator } from 'discord-voip';

@@ -10,6 +10,7 @@ import {
   GuildQueue,
   OnAfterCreateStreamHandler,
   OnBeforeCreateStreamHandler,
+  OnStreamExtractedHandler,
   QueueRepeatMode,
 } from './GuildQueue';
 import { getGlobalRegistry } from '../utils/__internal__';
@@ -27,6 +28,7 @@ export interface GuildNodeCreateOptions<T = any> {
   disableHistory?: boolean;
   onBeforeCreateStream?: OnBeforeCreateStreamHandler;
   onAfterCreateStream?: OnAfterCreateStreamHandler;
+  onStreamExtracted?: OnStreamExtractedHandler;
   repeatMode?: QueueRepeatMode;
   pauseOnEmpty?: boolean;
   leaveOnEmpty?: boolean;
@@ -117,6 +119,15 @@ export class GuildNodeManager<Meta = any> {
     options.verifyFallbackStream ??= false;
 
     if (
+      getGlobalRegistry().has('@[onStreamExtracted]') &&
+      !options.onStreamExtracted
+    ) {
+      options.onStreamExtracted = getGlobalRegistry().get(
+        '@[onStreamExtracted]',
+      ) as OnStreamExtractedHandler;
+    }
+
+    if (
       getGlobalRegistry().has('@[onBeforeCreateStream]') &&
       !options.onBeforeCreateStream
     ) {
@@ -145,6 +156,7 @@ export class GuildNodeManager<Meta = any> {
       disableHistory: options.disableHistory,
       onBeforeCreateStream: options.onBeforeCreateStream,
       onAfterCreateStream: options.onAfterCreateStream,
+      onStreamExtracted: options.onStreamExtracted,
       repeatMode: options.repeatMode,
       leaveOnEmpty: options.leaveOnEmpty,
       leaveOnEmptyCooldown: options.leaveOnEmptyCooldown,
