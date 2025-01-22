@@ -12,7 +12,7 @@ import {
   GatewayVoiceStateUpdateDispatchData,
   VoiceState,
 } from 'discord.js';
-import * as Oceanic from 'oceanic.js';
+import type Oceanic from 'oceanic.js';
 
 type OceanicUserResolvable = Oceanic.User | string | Oceanic.Member;
 type OceanicGuildResolvable =
