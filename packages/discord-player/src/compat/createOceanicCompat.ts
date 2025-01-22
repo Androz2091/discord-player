@@ -216,7 +216,7 @@ function oceanicChannelsProxy(client: Oceanic.Client, oceanic: typeof import('oc
         );
       }
 
-      if (resolvable instanceof Oceanic.GuildChannel) {
+      if (resolvable instanceof oceanic.GuildChannel) {
         return oceanicResolvedChannelProxy(resolvable, client);
       }
     },
