@@ -261,5 +261,11 @@ export const ShowcaseResource: IShowcase = {
         'An unofficial discord-player extractor to add tts capabilities to your bot.',
       url: 'https://npm.im/tts-extractor',
     },
+    {
+      name: 'simple-folder-search',
+      description:
+        'Not an extractor, but a small tool to be able to search for songs in a folder and play them.',
+      url: 'https://www.npmjs.com/package/simple-folder-search',
+    },
   ]),
 };
