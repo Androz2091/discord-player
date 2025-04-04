@@ -253,13 +253,31 @@ export const ShowcaseResource: IShowcase = {
       name: 'discord-player-soundgasm',
       description:
         'An unofficial discord-player extractor to add support for Soundgasm.',
-      url: 'https://npm.im/soundgasm-extractor',
+      url: 'https://www.npmjs.com/package/discord-player-soundgasm',
     },
     {
       name: 'discord-player-tts',
       description:
         'An unofficial discord-player extractor to add tts capabilities to your bot.',
-      url: 'https://npm.im/tts-extractor',
+      url: 'https://www.npmjs.com/package/discord-player-tts',
+    },
+    {
+      name: 'discord-player-soundcloud',
+      description:
+        'An unofficial discord-player extractor for soundcloud, inspired from the original one at @discord-player/extractor',
+      url: 'https://www.npmjs.com/package/discord-player-soundcloud',
+    },
+    {
+      name: 'discord-player-spotify',
+      description:
+        'An unofficial discord-player extractor for spotify, inspired from the original one at @discord-player/extractor',
+      url: 'https://www.npmjs.com/package/discord-player-spotify',
+    },
+    {
+      name: 'discord-player-applemusic',
+      description:
+        'An unofficial discord-player extractor for applemusic, inspired from the original one at @discord-player/extractor',
+      url: 'https://www.npmjs.com/package/discord-player-applemusic',
     },
     {
       name: 'simple-folder-search',
