@@ -1,5 +1,5 @@
 import type { Duplex, Readable } from 'stream';
-import { FFmpeg, createFFmpegArgs, type ArgPrimitive } from '@discord-player/ffmpeg';
+import { FFmpeg, createFFmpegArgs } from '@discord-player/ffmpeg';
 import type { RequestOptions } from 'http';
 
 export interface FFmpegStreamOptions {
@@ -58,8 +58,6 @@ export function FFMPEG_ARGS_STRING(
   if (fmt === 'opus') {
     args.push('-acodec', 'libopus');
   }
-
-  console.log(`FFMPEG ARGS: ${args.join(' ')}`);
   return args;
 }
 
