@@ -148,7 +148,7 @@ export class SpotifyExtractor extends BaseExtractor<SpotifyExtractorInit> {
             ? `https://open.spotify.com/track/${spotifyData.id}`
             : query,
           thumbnail:
-            spotifyData.visualIdentity?.image?.[0]?.url ||
+            spotifyData.coverArt?.sources[0]?.url ||
             'https://www.scdn.co/i/_global/twitter_card-default.jpg',
           duration: Util.buildTimeCode(
             Util.parseMS(spotifyData.duration ?? spotifyData.maxDuration ?? 0),

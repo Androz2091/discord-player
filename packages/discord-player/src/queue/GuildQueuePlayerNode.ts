@@ -1122,6 +1122,7 @@ export class GuildQueuePlayerNode<Meta = any> {
         encoderArgs: this.queue.filters.ffmpeg.args,
         seek: seek / 1000,
         fmt: opus ? 'opus' : 's16le',
+        requestOptions: track.raw?.requestOptions,
       })
       .on('error', (err) => {
         const m = `${err}`.toLowerCase();

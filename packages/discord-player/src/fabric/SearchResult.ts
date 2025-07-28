@@ -4,6 +4,7 @@ import { Player } from '../Player';
 import { Playlist } from './Playlist';
 import { Track } from './Track';
 import { QueryType, SearchQueryType } from '../utils/QueryResolver';
+import type { RequestOptions } from 'http';
 
 export interface SearchResultData {
   query: string;
@@ -53,10 +54,9 @@ export interface SearchOptions {
    */
   ignoreCache?: boolean;
   /**
-   * Fallback search engine to use
+   * Request options to be passed with the http request
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  requestOptions?: any;
+  requestOptions?: RequestOptions;
   /**
    * Fallback search engine to use
    */
