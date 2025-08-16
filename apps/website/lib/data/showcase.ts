@@ -239,11 +239,6 @@ export const ShowcaseResource: IShowcase = {
       url: 'https://npm.im/discord-player-deezer',
     },
     {
-      name: 'discord-player-vkmusic',
-      description: 'An unofficial discord-player extractor for VK Music.',
-      url: 'https://npm.im/discord-player-vkmusic',
-    },
-    {
       name: 'discord-player-yandexmusic',
       description: 'Unofficial discord-player extractor for Yandex Music.',
       url: 'https://npm.im/discord-player-yandexmusic',
