@@ -27,7 +27,7 @@ export interface DependenciesReport {
     'libsodium-wrappers': MaybeNull<string>;
     'sodium-javascript': MaybeNull<string>;
     '@stablelib/xchacha20poly1305': MaybeNull<string>;
-    '@nobel/ciphers': MaybeNull<string>;
+    '@noble/ciphers': MaybeNull<string>;
   };
   ffmpeg: FFmpegReport;
 }
@@ -148,7 +148,7 @@ export const DependencyReportGenerator = {
         ),
         'sodium-javascript':
           DependencyReportGenerator.version('sodium-javascript'),
-        '@nobel/ciphers': DependencyReportGenerator.version('@nobel/ciphers'),
+        '@noble/ciphers': DependencyReportGenerator.version('@noble/ciphers'),
       },
       ffmpeg: ffmpegReport,
     };
