@@ -37,6 +37,13 @@ export const ShowcaseResource: IShowcase = {
   bots: PromotedList.bots.concat(
     [
       {
+        name: 'Kunang-Kunang',
+        description:
+          'Discord music bot with TikTok live integration, built with discord.js v14 and discord-player v7.1.x',
+        version: 'v7.1.0',
+        url: 'https://github.com/Kiznaiverr/kunang-kunang',
+      },
+      {
         name: 'Cadence [Deprecated]',
         description:
           "A Free Discord Music Bot. No locked functionality, no premium tier, no ads; everything's free, always!",
