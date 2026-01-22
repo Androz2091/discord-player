@@ -292,5 +292,11 @@ export const ShowcaseResource: IShowcase = {
         'Not an extractor, but a small tool to be able to search for songs in a folder and play them.',
       url: 'https://www.npmjs.com/package/simple-folder-search',
     },
+    {
+      name: 'discord-player-hifi',
+      description:
+        'An extractor that use hifi-api instances.',
+      url: 'https://npm.im/discord-player-hifi',
+    },
   ]),
 };
