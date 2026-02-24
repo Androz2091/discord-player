@@ -6,7 +6,7 @@ import { DefaultExtractors } from '@discord-player/extractor';
 const client = new Client({
   auth: `Bot ${process.env.DISCORD_TOKEN!}`,
   gateway: {
-    intents: ["ALL"],
+    intents: ['ALL'],
   },
 });
 
@@ -28,19 +28,17 @@ client.once('ready', () => {
 player.events.on('playerStart', async (queue, track) => {
   const meta = queue.metadata as { channel: string };
 
-  await client.rest.channels.createMessage(
-    meta.channel,
-    { content: `Now playing: ${track.title} (Extractor: \`${track.extractor?.identifier}\`/Bridge: \`${track.bridgedExtractor?.identifier}\`)` },
-  );
+  await client.rest.channels.createMessage(meta.channel, {
+    content: `Now playing: ${track.title} (Extractor: \`${track.extractor?.identifier}\`/Bridge: \`${track.bridgedExtractor?.identifier}\`)`,
+  });
 });
 
 player.events.on('playerFinish', async (queue, track) => {
   const meta = queue.metadata as { channel: string };
 
-  await client.rest.channels.createMessage(
-    meta.channel,
-    { content: `Finished track: ${track.title} (Extractor: \`${track.extractor?.identifier}\`/Bridge: \`${track.bridgedExtractor?.identifier}\`)` },
-  );
+  await client.rest.channels.createMessage(meta.channel, {
+    content: `Finished track: ${track.title} (Extractor: \`${track.extractor?.identifier}\`/Bridge: \`${track.bridgedExtractor?.identifier}\`)`,
+  });
 });
 
 client.on('messageCreate', async (message) => {
@@ -53,14 +51,15 @@ client.on('messageCreate', async (message) => {
 
   switch (command) {
     case 'ping':
-      return client.rest.channels.createMessage(message.channel.id, { content: 'Pong!' });
+      return client.rest.channels.createMessage(message.channel.id, {
+        content: 'Pong!',
+      });
     case 'play': {
       const voiceChannel = message.member?.voiceState?.channelID;
       if (!voiceChannel)
-        return client.rest.channels.createMessage(
-          message.channel.id,
-          { content: 'You need to be in a voice channel!' },
-        );
+        return client.rest.channels.createMessage(message.channel.id, {
+          content: 'You need to be in a voice channel!',
+        });
 
       const query = args.join(' ');
 
@@ -72,74 +71,90 @@ client.on('messageCreate', async (message) => {
         },
       });
 
-      return client.rest.channels.createMessage(
-        message.channel.id,
-        { content: `Loaded: ${track.title} (Extractor: \`${track.extractor?.identifier}\`/Bridge: \`${track.bridgedExtractor?.identifier}\`)` },
-      );
+      return client.rest.channels.createMessage(message.channel.id, {
+        content: `Loaded: ${track.title} (Extractor: \`${track.extractor?.identifier}\`/Bridge: \`${track.bridgedExtractor?.identifier}\`)`,
+      });
     }
     case 'pause': {
       const queue = player.queues.get(message.guildID);
       if (!queue)
-        return client.rest.channels.createMessage(message.channel.id, { content: 'No queue found!' });
+        return client.rest.channels.createMessage(message.channel.id, {
+          content: 'No queue found!',
+        });
 
       queue.node.pause();
 
-      return client.rest.channels.createMessage(message.channel.id, { content: 'Paused the queue!' });
+      return client.rest.channels.createMessage(message.channel.id, {
+        content: 'Paused the queue!',
+      });
     }
     case 'resume': {
       const queue = player.queues.get(message.guildID);
       if (!queue)
-        return client.rest.channels.createMessage(message.channel.id, { content: 'No queue found!' });
+        return client.rest.channels.createMessage(message.channel.id, {
+          content: 'No queue found!',
+        });
 
       queue.node.resume();
 
-      return client.rest.channels.createMessage(message.channel.id, { content: 'Resumed the queue!' });
+      return client.rest.channels.createMessage(message.channel.id, {
+        content: 'Resumed the queue!',
+      });
     }
     case 'stop': {
       const queue = player.queues.get(message.guildID);
       if (!queue)
-        return client.rest.channels.createMessage(message.channel.id, { content: 'No queue found!' });
+        return client.rest.channels.createMessage(message.channel.id, {
+          content: 'No queue found!',
+        });
 
       queue.delete();
 
-      return client.rest.channels.createMessage(message.channel.id, { content: 'Stopped the queue!' });
+      return client.rest.channels.createMessage(message.channel.id, {
+        content: 'Stopped the queue!',
+      });
     }
     case 'skip': {
       const queue = player.queues.get(message.guildID);
       if (!queue)
-        return client.rest.channels.createMessage(message.channel.id, { content: 'No queue found!' });
+        return client.rest.channels.createMessage(message.channel.id, {
+          content: 'No queue found!',
+        });
 
       const success = queue.node.skip();
 
       if (!success)
-        return client.rest.channels.createMessage(
-          message.channel.id,
-          { content: 'Cannot skip the track!' },
-        );
+        return client.rest.channels.createMessage(message.channel.id, {
+          content: 'Cannot skip the track!',
+        });
 
-      return client.rest.channels.createMessage(message.channel.id, { content: 'Skipped the track!' });
+      return client.rest.channels.createMessage(message.channel.id, {
+        content: 'Skipped the track!',
+      });
     }
     case 'volume': {
       const queue = player.queues.get(message.guildID);
       if (!queue)
-        return client.rest.channels.createMessage(message.channel.id, { content: 'No queue found!' });
+        return client.rest.channels.createMessage(message.channel.id, {
+          content: 'No queue found!',
+        });
 
       if (!args.length)
-        return client.rest.channels.createMessage(
-          message.channel.id,
-          { content: `Current volume: ${queue.node.volume}` },
-        );
+        return client.rest.channels.createMessage(message.channel.id, {
+          content: `Current volume: ${queue.node.volume}`,
+        });
 
       const volume = parseInt(args[0], 10);
       if (isNaN(volume))
-        return client.rest.channels.createMessage(message.channel.id, { content: 'Invalid volume!' });
+        return client.rest.channels.createMessage(message.channel.id, {
+          content: 'Invalid volume!',
+        });
 
       queue.node.setVolume(volume);
 
-      return client.rest.channels.createMessage(
-        message.channel.id,
-        { content: `Set the volume to: ${volume}` },
-      );
+      return client.rest.channels.createMessage(message.channel.id, {
+        content: `Set the volume to: ${volume}`,
+      });
     }
   }
 });

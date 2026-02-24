@@ -130,7 +130,7 @@ export class AttachmentExtractor extends BaseExtractor {
         track.extractor = this;
 
         track.raw.isFile = false;
-        
+
         // Store RequestOptions for later use during streaming
         if (context.requestOptions) {
           track.raw.requestOptions = context.requestOptions;
@@ -242,7 +242,7 @@ export class AttachmentExtractor extends BaseExtractor {
         track.extractor = this;
         track.raw.isFile = true;
         track.raw.mime = mime.mime.split('/')[1];
-        
+
         // Store RequestOptions for later use during streaming
         if (context.requestOptions) {
           track.raw.requestOptions = context.requestOptions;

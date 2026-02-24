@@ -530,7 +530,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
         })`,
       );
     }
-    
+
     const queue = this.nodes.create(vc.guild, options.nodeOptions);
 
     if (this.hasDebugger) this.debug(`[AsyncQueue] Acquiring an entry...`);
@@ -757,7 +757,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
       if (this.hasDebugger) this.debug('Metadata query was successful!');
       // Store RequestOptions in track raw data for later use during streaming
       if (options.requestOptions && res.tracks) {
-        res.tracks.forEach(track => {
+        res.tracks.forEach((track) => {
           if (track.raw) {
             track.raw.requestOptions = options.requestOptions;
           } else {
@@ -765,7 +765,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
           }
         });
       }
-      
+
       const result = new SearchResult(this, {
         query,
         queryType,
@@ -820,7 +820,7 @@ export class Player extends PlayerEventsEmitter<PlayerEvents> {
 
     // Store RequestOptions in track raw data for later use during streaming
     if (options.requestOptions && result.result.tracks) {
-      result.result.tracks.forEach(track => {
+      result.result.tracks.forEach((track) => {
         if (track.raw) {
           track.raw.requestOptions = options.requestOptions;
         } else {

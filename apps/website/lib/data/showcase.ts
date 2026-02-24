@@ -294,8 +294,7 @@ export const ShowcaseResource: IShowcase = {
     },
     {
       name: 'discord-player-hifi',
-      description:
-        'An extractor that use hifi-api instances.',
+      description: 'An extractor that use hifi-api instances.',
       url: 'https://npm.im/discord-player-hifi',
     },
   ]),

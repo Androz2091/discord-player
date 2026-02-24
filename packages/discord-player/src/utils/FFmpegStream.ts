@@ -27,13 +27,17 @@ export function FFMPEG_ARGS_STRING(
 
   // Add HTTP headers if provided - FFmpeg HTTP protocol format, thank god it started working...
   if (requestOptions?.headers) {
-    const userAgent = requestOptions.headers['user-agent'] || requestOptions.headers['User-Agent'];
+    const userAgent =
+      requestOptions.headers['user-agent'] ||
+      requestOptions.headers['User-Agent'];
     if (userAgent) {
       args.push('-user_agent', String(userAgent));
     }
 
     // Add other headers using FFmpeg's headers option
-    const formattedHeaders = formatFFmpegHeaders(requestOptions.headers as NodeJS.Dict<string | string[]>);
+    const formattedHeaders = formatFFmpegHeaders(
+      requestOptions.headers as NodeJS.Dict<string | string[]>,
+    );
     if (formattedHeaders) {
       args.push('-headers', formattedHeaders);
     }
@@ -54,23 +58,25 @@ export function FFMPEG_ARGS_STRING(
   args.push('-ar', '48000');
   args.push('-ac', '2');
   args.push('-f', typeof fmt === 'string' ? fmt : 's16le');
-  
+
   if (fmt === 'opus') {
     args.push('-acodec', 'libopus');
   }
   return args;
 }
 
-function formatFFmpegHeaders(headers: NodeJS.Dict<string | string[]>): string | null {
+function formatFFmpegHeaders(
+  headers: NodeJS.Dict<string | string[]>,
+): string | null {
   const headerPairs: string[] = [];
-  
+
   for (const [name, value] of Object.entries(headers)) {
     if (value && name.toLowerCase() !== 'user-agent') {
       const valueStr = Array.isArray(value) ? value.join(', ') : String(value);
       headerPairs.push(`${name}: ${valueStr}`);
     }
   }
-  
+
   return headerPairs.length > 0 ? headerPairs.join('\r\n') : null;
 }
 
@@ -100,7 +106,12 @@ export function createFFmpegStream(
   options ??= {};
   const args =
     typeof stream === 'string'
-      ? FFMPEG_ARGS_STRING(stream, options.fmt, options.cookies, options.requestOptions)
+      ? FFMPEG_ARGS_STRING(
+          stream,
+          options.fmt,
+          options.cookies,
+          options.requestOptions,
+        )
       : FFMPEG_ARGS_PIPED(options.fmt);
 
   if (!Number.isNaN(options.seek)) args.unshift('-ss', String(options.seek));

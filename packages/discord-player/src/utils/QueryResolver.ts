@@ -214,7 +214,9 @@ class QueryResolver {
         if (playlistId)
           return resolver(
             QueryType.YOUTUBE_PLAYLIST,
-            `https://www.youtube.com/${url.searchParams.size === 1 ? "playlist" : "watch"}${url.search}`,
+            `https://www.youtube.com/${
+              url.searchParams.size === 1 ? 'playlist' : 'watch'
+            }${url.search}`,
           );
         if (QueryResolver.validateId(query) || QueryResolver.validateURL(query))
           return resolver(QueryType.YOUTUBE_VIDEO, query);
