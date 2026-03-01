@@ -1,12 +1,12 @@
-import { SlashCommandProps } from 'commandkit';
+import { ChatInputCommand } from 'commandkit';
 import { useQueue } from 'discord-player';
 import { SlashCommandBuilder } from 'discord.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('reverb')
-  .setDescription('Set reverb filter');
+export const command = new SlashCommandBuilder()
+  .setName('vaporwave')
+  .setDescription('Set vaporwave filter');
 
-export async function run({ interaction }: SlashCommandProps) {
+export const chatInput: ChatInputCommand = async ({ interaction }) => {
   if (!interaction.inCachedGuild()) return;
 
   const queue = useQueue(interaction.guildId);
@@ -23,13 +23,13 @@ export async function run({ interaction }: SlashCommandProps) {
 
   await interaction.deferReply();
 
-  if (!queue.filters.reverb) {
+  if (!queue.filters.resampler) {
     return interaction.editReply('This filter is not supported.');
   }
 
-  const enabled = queue.filters.reverb.toggle();
+  const enabled = queue.filters.resampler?.toggleFilter('vaporwave');
 
   await interaction.editReply(
-    `Reverb is now ${enabled ? 'enabled' : 'disabled'}`,
+    `Vaporwave is now ${enabled ? 'enabled' : 'disabled'}`,
   );
-}
+};

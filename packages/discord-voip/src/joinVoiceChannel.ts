@@ -1,6 +1,5 @@
 // Copyright discord-player authors. All rights reserved. MIT License.
 // Copyright discord.js authors. All rights reserved. Apache License 2.0
-
 import type { JoinConfig } from './DataStore';
 import { createVoiceConnection } from './VoiceConnection';
 import type { DiscordGatewayAdapterCreator } from './util/adapter';
@@ -12,10 +11,21 @@ export interface CreateVoiceConnectionOptions {
   adapterCreator: DiscordGatewayAdapterCreator;
 
   /**
+   * Whether to use the DAVE protocol for end-to-end encryption. Defaults to true.
+   */
+  daveEncryption?: boolean | undefined;
+
+  /**
    * If true, debug messages will be enabled for the voice connection and its
    * related components. Defaults to false.
    */
   debug?: boolean | undefined;
+
+  /**
+   * The amount of consecutive decryption failures needed to try to
+   * re-initialize the end-to-end encrypted session to recover. Defaults to 24.
+   */
+  decryptionFailureTolerance?: number | undefined;
 }
 
 /**
@@ -66,5 +76,7 @@ export function joinVoiceChannel(
   return createVoiceConnection(joinConfig, {
     adapterCreator: options.adapterCreator,
     debug: options.debug,
+    daveEncryption: options.daveEncryption,
+    decryptionFailureTolerance: options.decryptionFailureTolerance,
   });
 }

@@ -1,8 +1,8 @@
-import { SlashCommandProps } from 'commandkit';
+import { ChatInputCommand } from 'commandkit';
 import { useQueue } from 'discord-player';
 import { SlashCommandBuilder } from 'discord.js';
 
-export const data = new SlashCommandBuilder()
+export const command = new SlashCommandBuilder()
   .setName('bassboost')
   .setDescription('Toggle bassboost filter')
   .addBooleanOption((option) =>
@@ -12,7 +12,7 @@ export const data = new SlashCommandBuilder()
       .setRequired(true),
   );
 
-export async function run({ interaction }: SlashCommandProps) {
+export const chatInput: ChatInputCommand = async ({ interaction }) => {
   if (!interaction.inCachedGuild()) return;
 
   const queue = useQueue(interaction.guildId);
@@ -48,4 +48,4 @@ export async function run({ interaction }: SlashCommandProps) {
   await interaction.editReply(
     `Bassboost is now ${on ? 'enabled' : 'disabled'}`,
   );
-}
+};

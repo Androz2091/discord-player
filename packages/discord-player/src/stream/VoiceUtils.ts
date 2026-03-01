@@ -44,6 +44,8 @@ class VoiceUtils {
       queue: GuildQueue;
       audioPlayer?: AudioPlayer;
       group?: string;
+      daveEncryption?: boolean;
+      decryptionFailureTolerance?: number;
     },
   ): Promise<StreamDispatcher> {
     if (!options?.queue) throw new NoGuildQueueError();
@@ -70,6 +72,8 @@ class VoiceUtils {
       deaf?: boolean;
       maxTime?: number;
       group?: string;
+      daveEncryption?: boolean;
+      decryptionFailureTolerance?: number;
     },
   ) {
     const existingConnection = this.getConnection(
@@ -92,6 +96,8 @@ class VoiceUtils {
       selfDeaf: Boolean(options?.deaf),
       debug: this.player.events.listenerCount('debug') > 0,
       group: options?.group,
+      daveEncryption: options?.daveEncryption ?? true,
+      decryptionFailureTolerance: options?.decryptionFailureTolerance ?? 24,
     });
 
     return conn;

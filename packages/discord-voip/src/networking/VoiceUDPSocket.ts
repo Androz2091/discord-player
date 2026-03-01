@@ -1,7 +1,6 @@
 // Copyright discord-player authors. All rights reserved. MIT License.
 // Copyright discord.js authors. All rights reserved. Apache License 2.0
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-
 import { Buffer } from 'node:buffer';
 import { createSocket, type Socket } from 'node:dgram';
 import { EventEmitter } from 'node:events';
@@ -24,7 +23,7 @@ export interface SocketConfig {
 export function parseLocalPacket(message: Buffer): SocketConfig {
   const packet = Buffer.from(message);
 
-  const ip = packet.slice(8, packet.indexOf(0, 8)).toString('utf8');
+  const ip = packet.subarray(8, packet.indexOf(0, 8)).toString('utf8');
 
   if (!isIPv4(ip)) {
     throw new Error('Malformed IP address');
@@ -136,7 +135,6 @@ export class VoiceUDPSocket extends EventEmitter {
    * @param buffer - The buffer to send
    */
   public send(buffer: Buffer) {
-    // @ts-ignore
     this.socket.send(buffer, this.remote.port, this.remote.ip);
   }
 

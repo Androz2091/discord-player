@@ -1,15 +1,12 @@
-import { SlashCommandProps } from 'commandkit';
+import { ChatInputCommand } from 'commandkit';
 import { useQueue } from 'discord-player';
 import { SlashCommandBuilder } from 'discord.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('seek')
-  .setDescription('Set seek filter')
-  .addIntegerOption((option) =>
-    option.setName('seek').setDescription('The seek value').setRequired(true),
-  );
+export const command = new SlashCommandBuilder()
+  .setName('reverb')
+  .setDescription('Set reverb filter');
 
-export async function run({ interaction }: SlashCommandProps) {
+export const chatInput: ChatInputCommand = async ({ interaction }) => {
   if (!interaction.inCachedGuild()) return;
 
   const queue = useQueue(interaction.guildId);
@@ -26,15 +23,13 @@ export async function run({ interaction }: SlashCommandProps) {
 
   await interaction.deferReply();
 
-  if (!queue.filters.seeker) {
+  if (!queue.filters.reverb) {
     return interaction.editReply('This filter is not supported.');
   }
 
-  const time = interaction.options.getInteger('seek')!;
-
-  const success = await queue.node.seek(time);
+  const enabled = queue.filters.reverb.toggle();
 
   await interaction.editReply(
-    `Seeked to ${time}ms: ${success ? 'success' : 'failed'}`,
+    `Reverb is now ${enabled ? 'enabled' : 'disabled'}`,
   );
-}
+};

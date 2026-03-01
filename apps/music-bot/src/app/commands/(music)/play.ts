@@ -1,8 +1,8 @@
-import { SlashCommandProps } from 'commandkit';
+import { ChatInputCommand } from 'commandkit';
 import { useMainPlayer } from 'discord-player';
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 
-export const data = new SlashCommandBuilder()
+export const command = new SlashCommandBuilder()
   .setName('play')
   .setDescription('Play a song')
   .addStringOption((option) =>
@@ -12,7 +12,7 @@ export const data = new SlashCommandBuilder()
       .setRequired(true),
   );
 
-export async function run({ interaction }: SlashCommandProps) {
+export const chatInput: ChatInputCommand = async ({ interaction }) => {
   if (!interaction.inCachedGuild()) return;
 
   const player = useMainPlayer();
@@ -32,6 +32,7 @@ export async function run({ interaction }: SlashCommandProps) {
 
   const query = interaction.options.getString('query')!;
 
+  // @ts-ignore
   const result = await player.play(channel, query, {
     nodeOptions: {
       metadata: {
@@ -39,11 +40,11 @@ export async function run({ interaction }: SlashCommandProps) {
       },
       enableStreamInterceptor: true,
       volume: 50,
-      disableReverb: true,
+      disableReverb: false,
       disableCompressor: false,
       disableSeeker: true,
     },
   });
 
   await interaction.editReply(`Playing ${result.track} in ${channel}`);
-}
+};

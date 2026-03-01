@@ -1,12 +1,12 @@
-import { SlashCommandProps } from 'commandkit';
+import { ChatInputCommand } from 'commandkit';
 import { useQueue } from 'discord-player';
 import { SlashCommandBuilder } from 'discord.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('skip')
-  .setDescription('Skip current track');
+export const command = new SlashCommandBuilder()
+  .setName('nowplaying')
+  .setDescription('Check what is currently playing');
 
-export async function run({ interaction }: SlashCommandProps) {
+export const chatInput: ChatInputCommand = async ({ interaction }) => {
   if (!interaction.inCachedGuild()) return;
 
   const queue = useQueue(interaction.guildId);
@@ -21,9 +21,9 @@ export async function run({ interaction }: SlashCommandProps) {
     return interaction.reply('There is no track playing.');
   }
 
-  queue.node.skip();
-
   return interaction.reply(
-    `Skipped: ${currentTrack.title} by ${currentTrack.author}`,
+    `Now playing: ${currentTrack.title} by ${
+      currentTrack.author
+    }\n${queue.node.createProgressBar()}`,
   );
-}
+};

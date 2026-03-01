@@ -1,12 +1,15 @@
-import { SlashCommandProps } from 'commandkit';
+import { ChatInputCommand } from 'commandkit';
 import { useQueue } from 'discord-player';
 import { SlashCommandBuilder } from 'discord.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('vaporwave')
-  .setDescription('Set vaporwave filter');
+export const command = new SlashCommandBuilder()
+  .setName('seek')
+  .setDescription('Set seek filter')
+  .addIntegerOption((option) =>
+    option.setName('seek').setDescription('The seek value').setRequired(true),
+  );
 
-export async function run({ interaction }: SlashCommandProps) {
+export const chatInput: ChatInputCommand = async ({ interaction }) => {
   if (!interaction.inCachedGuild()) return;
 
   const queue = useQueue(interaction.guildId);
@@ -23,13 +26,15 @@ export async function run({ interaction }: SlashCommandProps) {
 
   await interaction.deferReply();
 
-  if (!queue.filters.resampler) {
+  if (!queue.filters.seeker) {
     return interaction.editReply('This filter is not supported.');
   }
 
-  const enabled = queue.filters.resampler?.toggleFilter('vaporwave');
+  const time = interaction.options.getInteger('seek')!;
+
+  const success = await queue.node.seek(time);
 
   await interaction.editReply(
-    `Vaporwave is now ${enabled ? 'enabled' : 'disabled'}`,
+    `Seeked to ${time}ms: ${success ? 'success' : 'failed'}`,
   );
-}
+};

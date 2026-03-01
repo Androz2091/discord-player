@@ -96,6 +96,8 @@ export interface VoiceConnectConfig {
   timeout?: number;
   group?: string;
   audioPlayer?: AudioPlayer;
+  daveEncryption?: boolean;
+  decryptionFailureTolerance?: number;
 }
 
 export interface PostProcessedResult {
@@ -1165,6 +1167,8 @@ export class GuildQueue<Meta = any> {
       queue: this,
       audioPlayer: options?.audioPlayer,
       group: options.group ?? this.player.client.user?.id,
+      daveEncryption: options.daveEncryption,
+      decryptionFailureTolerance: options.decryptionFailureTolerance,
     });
 
     this.emit(GuildQueueEvent.Connection, this);

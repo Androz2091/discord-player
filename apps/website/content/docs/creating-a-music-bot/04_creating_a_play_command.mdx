@@ -39,7 +39,7 @@ First, we need to define the play command using `SlashCommandBuilder`.
 import { SlashCommandBuilder } from 'discord.js';
 
 // Define the play command
-export const data = new SlashCommandBuilder()
+export const command = new SlashCommandBuilder()
   .setName('play') // Command name
   .setDescription('Play a song in a voice channel') // Command description
   .addStringOption(

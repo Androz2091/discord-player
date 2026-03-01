@@ -22,7 +22,7 @@ Before we dive into the code, let's plan the design of our pause command:
 import { SlashCommandBuilder } from 'discord.js';
 import { useQueue, useTimeline } from 'discord-player';
 
-export const data = new SlashCommandBuilder()
+export const command = new SlashCommandBuilder()
   .setName('pause') // Command name
   .setDescription('Pause the currently playing song'); // Command description
 
@@ -56,7 +56,7 @@ export async function execute(interaction) {
 import { SlashCommandBuilder } from 'discord.js';
 import { useQueue, useTimeline } from 'discord-player';
 
-export const data = new SlashCommandBuilder()
+export const command = new SlashCommandBuilder()
   .setName('pause') // Command name
   .setDescription('Pause the currently playing song'); // Command description
 

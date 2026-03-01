@@ -34,7 +34,7 @@ Before we dive into the code, let's plan the design of our loop command:
 import { SlashCommandBuilder } from 'discord.js';
 import { QueueRepeatMode, useQueue } from 'discord-player';
 
-export const data = new SlashCommandBuilder()
+export const command = new SlashCommandBuilder()
   .setName('loop') // Command name
   .setDescription('Loop the queue in different modes') // Command description
   .addNumberOption((option) =>
@@ -91,7 +91,7 @@ export async function execute(interaction) {
 import { SlashCommandBuilder } from 'discord.js';
 import { QueueRepeatMode, useQueue } from 'discord-player';
 
-export const data = new SlashCommandBuilder()
+export const command = new SlashCommandBuilder()
   .setName('loop') // Command name
   .setDescription('Loop the queue in different modes') // Command description
   .addNumberOption((option) =>

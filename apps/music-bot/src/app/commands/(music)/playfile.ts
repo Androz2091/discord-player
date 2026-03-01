@@ -1,4 +1,4 @@
-import { SlashCommandProps } from 'commandkit';
+import { ChatInputCommand } from 'commandkit';
 import { randomUUID } from 'crypto';
 import { QueryType, useMainPlayer } from 'discord-player';
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
@@ -12,7 +12,7 @@ const files = new Map<
   }
 >();
 
-export const data = new SlashCommandBuilder()
+export const command = new SlashCommandBuilder()
   .setName('playfile')
   .setDescription('Play a song from fs')
   .addStringOption((option) =>
@@ -38,7 +38,7 @@ export const data = new SlashCommandBuilder()
       ),
   );
 
-export async function run({ interaction }: SlashCommandProps) {
+export const chatInput: ChatInputCommand = async ({ interaction }) => {
   if (!interaction.inCachedGuild()) return;
 
   const player = useMainPlayer();
@@ -63,6 +63,7 @@ export async function run({ interaction }: SlashCommandProps) {
     return interaction.editReply('Invalid file');
   }
 
+  // @ts-ignore
   const result = await player.play(channel, file.value, {
     searchEngine: QueryType.FILE,
     nodeOptions: {
@@ -77,4 +78,4 @@ export async function run({ interaction }: SlashCommandProps) {
   });
 
   await interaction.editReply(`Playing ${result.track} in ${channel}`);
-}
+};

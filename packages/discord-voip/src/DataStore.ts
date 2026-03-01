@@ -147,10 +147,10 @@ function prepareNextAudioFrame(players: AudioPlayer[]) {
   const nextPlayer = players.shift();
 
   if (!nextPlayer) {
-    if (nextTime !== -1) {
+    if (nextTime >= 0) {
       audioCycleInterval = setTimeout(
         () => audioCycleStep(),
-        nextTime - Date.now(),
+        Math.max(nextTime - Date.now(), 1),
       );
     }
 

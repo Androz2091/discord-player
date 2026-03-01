@@ -1,11 +1,13 @@
 {
   "name": "music-bot",
-  "version": "1.0.0",
-  "description": "Test music bot",
+  "description": "Discord Player test bot",
+  "version": "0.1.0",
   "type": "module",
+  "private": true,
+  "main": "dist/index.js",
   "scripts": {
+    "dev": "bunx cross-env NODE_OPTIONS=\"--trace-warnings\" commandkit dev",
     "build": "commandkit build",
-    "dev": "commandkit dev",
     "start": "commandkit start"
   },
   "repository": {
@@ -18,10 +20,15 @@
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "homepage": "https://github.com/Androz2091/discord-player#readme",
+  "devDependencies": {
+    "@snazzah/davey": "^0.1.9",
+    "@types/node": "^25.3.3",
+    "typescript": "^5.7.2"
+  },
   "dependencies": {
     "@discord-player/extractor": "workspace:^",
-    "commandkit": "^0.1.10",
+    "commandkit": "^1.2.0-rc.15",
     "discord-player": "workspace:^",
-    "discord.js": "^14.17.3"
+    "discord.js": "^14.25.1"
   }
 }

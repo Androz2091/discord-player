@@ -24,11 +24,11 @@ export class SoundCloudExtractor extends BaseExtractor<SoundCloudExtractorInit> 
   public static identifier = 'com.discord-player.soundcloudextractor' as const;
   public static instance: SoundCloudExtractor | null = null;
 
-  public internal = new SoundCloud.default({
-    clientId: this.options.clientId,
-    oauthToken: this.options.oauthToken,
-    proxy: this.options.proxy,
-  });
+  public internal = new SoundCloud.default(
+    this.options.clientId,
+    this.options.oauthToken,
+    this.options.proxy ? { proxy: this.options.proxy } : undefined,
+  );
 
   public async activate(): Promise<void> {
     this.protocols = ['scsearch', 'soundcloud'];

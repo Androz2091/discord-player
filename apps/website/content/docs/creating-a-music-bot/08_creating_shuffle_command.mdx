@@ -22,7 +22,7 @@ Before we dive into the code, let's plan the design of our shuffle command:
 import { SlashCommandBuilder } from 'discord.js';
 import { useQueue } from 'discord-player';
 
-export const data = new SlashCommandBuilder()
+export const command = new SlashCommandBuilder()
   .setName('shuffle') // Command name
   .setDescription('Shuffle the tracks in the queue'); // Command description
 
@@ -58,7 +58,7 @@ export async function execute(interaction) {
 import { SlashCommandBuilder } from 'discord.js';
 import { useQueue } from 'discord-player';
 
-export const data = new SlashCommandBuilder()
+export const command = new SlashCommandBuilder()
   .setName('shuffle') // Command name
   .setDescription('Shuffle the tracks in the queue'); // Command description
 

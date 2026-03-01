@@ -1,26 +1,23 @@
-/* eslint-disable */
+import { Logger } from 'commandkit';
 import { Player, StreamType } from 'discord-player';
 import { Client, IntentsBitField } from 'discord.js';
-import { CommandKit } from 'commandkit';
 import { createWriteStream } from 'node:fs';
-import { join } from 'node:path';
 
 const client = new Client({
-  // prettier-ignore
   intents: [
-        IntentsBitField.Flags.Guilds,
-        IntentsBitField.Flags.GuildVoiceStates,
-        IntentsBitField.Flags.GuildMembers,
-        IntentsBitField.Flags.GuildMessages,
-        IntentsBitField.Flags.MessageContent
-    ],
+    IntentsBitField.Flags.Guilds,
+    IntentsBitField.Flags.GuildVoiceStates,
+    IntentsBitField.Flags.GuildMembers,
+    IntentsBitField.Flags.GuildMessages,
+    IntentsBitField.Flags.MessageContent,
+  ],
 });
 
 const player = Player.create(client);
 
-player.on('error', console.error);
-player.events.on('error', (_, e) => console.error(e));
-player.events.on('playerError', (_, e) => console.error(e));
+player.on('error', Logger.error);
+player.events.on('error', (_, e) => Logger.error(e));
+player.events.on('playerError', (_, e) => Logger.error(e));
 player.events.on('playerStart', (queue, track) => {
   queue.metadata.channel.send(`Started playing ${track.title}`);
 });
@@ -28,7 +25,10 @@ player.events.on('playerFinish', (queue, track) => {
   queue.metadata.channel.send(`Finished playing ${track.title}`);
 });
 player.events.on('playerSeek', (queue, time) => {
-  console.log(`Seeked ${queue.currentTrack} to ${time}ms`);
+  Logger.log(`Seeked ${queue.currentTrack} to ${time}ms`);
+});
+player.events.on('debug', (queue, message) => {
+  Logger.debug(message);
 });
 
 const interceptor = player.createStreamInterceptor({
@@ -49,12 +49,4 @@ interceptor.onStream((queue, track, format, stream) => {
   );
 });
 
-new CommandKit({
-  client,
-  bulkRegister: true,
-  skipBuiltInValidations: true,
-  eventsPath: join(import.meta.dirname, 'events'),
-  commandsPath: join(import.meta.dirname, 'commands'),
-});
-
-await client.login();
+export default client;

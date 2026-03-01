@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM"],
+    "target": "esnext",
+    "moduleResolution": "bundler",
+    "module": "es2022",
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "noUncheckedIndexedAccess": true,
+    "removeComments": true,
+    "allowJs": true,
+    "strict": true,
+    "alwaysStrict": true,
+    "noEmit": true,
+    "declaration": false,
+    "jsx": "react-jsx",
+    "jsxImportSource": "commandkit",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "commandkit.config.ts", "commandkit-env.d.ts"],
+  "exclude": ["dist", "node_modules", ".commandkit"]
+}
