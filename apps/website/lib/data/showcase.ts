@@ -234,6 +234,12 @@ export const ShowcaseResource: IShowcase = {
   ),
   extractors: PromotedList.extractors.concat([
     {
+      name: 'discord-player-youtubedlp',
+      description:
+        'A YouTube yt-dlp extractor for Discord Player.',
+      url: 'https://github.com/dfxphoenix/discord-player-youtubedlp',
+    },
+    {
       name: 'discord-player-youtubei',
       description:
         'An alternative unofficial youtube extractor for discord-player with better stability and performance.',
