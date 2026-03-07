@@ -50,37 +50,45 @@ export class FiltersChain {
 
     this.source = src;
 
-    const resampler = !presets.resampler?.disabled
-      ? new PCMResampler(presets.resampler)
-      : null;
+    const resampler =
+      presets.resampler && !presets.resampler.disabled
+        ? new PCMResampler(presets.resampler)
+        : null;
 
-    const equalizerStream = !presets.equalizer?.disabled
-      ? new EqualizerStream(presets.equalizer)
-      : null;
+    const equalizerStream =
+      presets.equalizer && !presets.equalizer.disabled
+        ? new EqualizerStream(presets.equalizer)
+        : null;
 
-    const dspStream = !presets.dsp?.disabled
-      ? new AudioFilter(presets.dsp)
-      : null;
+    const dspStream =
+      presets.dsp && !presets.dsp.disabled
+        ? new AudioFilter(presets.dsp)
+        : null;
 
-    const biquadStream = !presets.biquad?.disabled
-      ? new BiquadStream(presets.biquad)
-      : null;
+    const biquadStream =
+      presets.biquad && !presets.biquad.disabled
+        ? new BiquadStream(presets.biquad)
+        : null;
 
-    const volumeTransformer = !presets.volume?.disabled
-      ? new VolumeTransformer(presets.volume)
-      : null;
+    const volumeTransformer =
+      presets.volume && !presets.volume.disabled
+        ? new VolumeTransformer(presets.volume)
+        : null;
 
-    const compressor = !presets.compressor?.disabled
-      ? new CompressorTransformer(presets.compressor)
-      : null;
+    const compressor =
+      presets.compressor && !presets.compressor.disabled
+        ? new CompressorTransformer(presets.compressor)
+        : null;
 
-    const seeker = !presets.seeker?.disabled
-      ? new PCMSeekerTransformer(presets.seeker)
-      : null;
+    const seeker =
+      presets.seeker && !presets.seeker.disabled
+        ? new PCMSeekerTransformer(presets.seeker)
+        : null;
 
-    const reverb = !presets.reverb?.disabled
-      ? new ReverbTransformer(presets.reverb)
-      : null;
+    const reverb =
+      presets.reverb && !presets.reverb.disabled
+        ? new ReverbTransformer(presets.reverb)
+        : null;
 
     this.resampler = resampler;
     this.equalizer = equalizerStream;
