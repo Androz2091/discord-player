@@ -99,11 +99,13 @@ export class SyncedLyricsProvider {
    */
   public unsubscribe() {
     if (this.#loop) clearInterval(this.#loop);
-    if (this.#onUnsubscribe) this.#onUnsubscribe();
-
-    this.#callback = null;
-    this.#onUnsubscribe = null;
     this.#loop = null;
+    this.#callback = null;
+
+    const onUnsub = this.#onUnsubscribe;
+    this.#onUnsubscribe = null;
+
+    if (onUnsub) onUnsub();
   }
 
   /**
@@ -150,27 +152,31 @@ export class SyncedLyricsProvider {
     let lastValue: LyricsAt | null = null;
 
     this.#loop = setInterval(() => {
-      if (this.queue.deleted) return this.unsubscribe();
+      try {
+        if (this.queue.deleted) return this.unsubscribe();
 
-      if (!this.#callback || !this.queue.isPlaying()) return;
+        if (!this.#callback || !this.queue.isPlaying()) return;
 
-      const time = this.queue.node.getTimestamp();
-      if (!time) return;
+        const time = this.queue.node.getTimestamp();
+        if (!time) return;
 
-      const lyrics = this.at(time.current.value);
+        const lyrics = this.at(time.current.value);
 
-      if (!lyrics) return;
+        if (!lyrics) return;
 
-      if (
-        lastValue !== null &&
-        lyrics.line === lastValue.line &&
-        lyrics.timestamp === lastValue.timestamp
-      )
-        return;
+        if (
+          lastValue !== null &&
+          lyrics.line === lastValue.line &&
+          lyrics.timestamp === lastValue.timestamp
+        )
+          return;
 
-      lastValue = lyrics;
+        lastValue = lyrics;
 
-      this.#callback(lyrics.line, lyrics.timestamp);
+        this.#callback(lyrics.line, lyrics.timestamp);
+      } catch {
+        this.unsubscribe();
+      }
     }, this.interval).unref();
   }
 }
