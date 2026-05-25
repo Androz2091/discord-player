@@ -1,0 +1,64 @@
+name: Deploy Website
+
+on:
+    workflow_dispatch:
+    push:
+        branches: [master]
+        paths:
+            - 'apps/website/**'
+            - 'packages/**'
+            - '.github/workflows/deploy-website.yml'
+
+# Allow the workflow to publish to GitHub Pages.
+permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+# Only one concurrent deployment; in-progress runs are allowed to finish.
+concurrency:
+    group: pages
+    cancel-in-progress: false
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - name: Enable Corepack
+              run: corepack enable
+
+            - name: Cache yarn
+              uses: actions/cache@v4
+              with:
+                  path: .yarn/cache
+                  key: yarn-cache-node-20-${{ hashFiles('yarn.lock') }}
+                  restore-keys: yarn-cache-node-20-
+
+            - name: Install dependencies
+              run: yarn install --immutable
+
+            - name: Build website (static export)
+              run: yarn workspace website build
+
+            - name: Upload Pages artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: apps/website/out
+
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
