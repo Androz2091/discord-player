@@ -310,5 +310,10 @@ export const ShowcaseResource: IShowcase = {
       description: 'An extractor that use hifi-api instances.',
       url: 'https://npm.im/discord-player-hifi',
     },
+    {
+      name: 'discord-player-qobuzdl',
+      description: 'An extractor that use Qobuz-DL instances.',
+      url: 'https://npm.im/discord-player-qobuzdl',
+    },
   ]),
 };
