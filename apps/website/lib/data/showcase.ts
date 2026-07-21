@@ -218,7 +218,7 @@ export const ShowcaseResource: IShowcase = {
       {
         name: 'WD-40',
         description: 'A music, utility & fun discord bot made in JavaScript ',
-        version: 'v7.1.1',
+        version: 'v7.2.0-dev.2',
         url: 'https://github.com/iTsMaaT/WD-40',
       },
       {
