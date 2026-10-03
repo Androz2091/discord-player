@@ -100,15 +100,7 @@ export async function createMediabunnyStream(queue: GuildQueue, extractedStream:
 
     const sink = new AudioSampleSink(audioTrack);
 
-    const initialFilters: string[] = [];
-
-    const filters = queue.filters.ffmpeg.toString();
-    if (!filters.trim()) {
-        initialFilters.push(queue.filters.ffmpeg.toString());
-    }
-    initialFilters.push(OUTPUT_FORMAT);
-
-    const init = removeTrailingCommas(initialFilters.join(","));
+    const init = removeTrailingCommas(`${queue.filters.ffmpeg.toString().trim()},${OUTPUT_FORMAT}`);
 
     let filterApi = NodeAV.FilterAPI.create(init);
 
