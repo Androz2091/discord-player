@@ -218,7 +218,7 @@ export const ShowcaseResource: IShowcase = {
       {
         name: 'WD-40',
         description: 'A music, utility & fun discord bot made in JavaScript ',
-        version: 'v7.2.0-dev.2',
+        version: 'v7.2.0',
         url: 'https://github.com/iTsMaaT/WD-40',
       },
       {
@@ -300,12 +300,6 @@ export const ShowcaseResource: IShowcase = {
       url: 'https://www.npmjs.com/package/discord-player-applemusic',
     },
     {
-      name: 'simple-folder-search',
-      description:
-        'Not an extractor, but a small tool to be able to search for songs in a folder and play them.',
-      url: 'https://www.npmjs.com/package/simple-folder-search',
-    },
-    {
       name: 'discord-player-hifi',
       description: 'An extractor that use hifi-api instances.',
       url: 'https://npm.im/discord-player-hifi',
@@ -314,6 +308,17 @@ export const ShowcaseResource: IShowcase = {
       name: 'discord-player-qobuzdl',
       description: 'An extractor that use Qobuz-DL instances.',
       url: 'https://npm.im/discord-player-qobuzdl',
+    },
+    {
+      name: 'discord-player-subsonic',
+      description: 'An extractor for a Subsonic API.',
+      url: 'https://npm.im/discord-player-subsonic',
+    },
+    {
+      name: 'simple-folder-search',
+      description:
+        'Not an extractor, but a small tool to be able to search for songs in a folder and play them.',
+      url: 'https://www.npmjs.com/package/simple-folder-search',
     },
   ]),
 };
