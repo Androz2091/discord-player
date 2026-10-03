@@ -131,31 +131,26 @@ export class FFmpegFilterer<Meta = any> {
     const seekTime = queue.node.getTimestamp(ignoreFilters)?.current.value || 0;
     const prev = this.#ffmpegFilters.slice();
     this.#ffmpegFilters = [...new Set(filters)];
+    const next = this.#ffmpegFilters.slice();
+
+    const emitUpdate = () =>
+      queue.emit(GuildQueueEvent.AudioFiltersUpdate, queue, prev, next);
 
     if(queue.__isMediabunnyDecoder()) {
       const filterChanger = queue.__mediabunnyMetadata.changeFilter;
-      if(!filterChanger) return Promise.resolve(false);
-
-      filterChanger(this.toString());
-
-      queue.emit(
-        GuildQueueEvent.AudioFiltersUpdate,
-        queue,
-        prev,
-        this.#ffmpegFilters.slice()
-      );
-      
+      filterChanger?.(this.toString());
+      emitUpdate();
       return Promise.resolve(true);
     }
 
-    return this.af.triggerReplay(seekTime).then((t) => {
-      queue.emit(
-        GuildQueueEvent.AudioFiltersUpdate,
-        queue,
-        prev,
-        this.#ffmpegFilters.slice(),
-      );
-      return t;
+    if (!queue.currentTrack) {
+      emitUpdate();
+      return Promise.resolve(true);
+    }
+
+    return this.af.triggerReplay(seekTime).then(() => {
+      emitUpdate();
+      return true;
     });
   }
 
