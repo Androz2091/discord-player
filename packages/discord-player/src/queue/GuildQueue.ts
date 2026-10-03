@@ -47,7 +47,7 @@ import { LrcGetResult, LrcSearchResult } from '../lrclib/LrcLib';
 import { FiltersName } from '../fabric';
 import { SearchQueryType } from '../utils/QueryResolver';
 import type { ExtractorStreamable } from '../extractors/BaseExtractor';
-import { createMediabunnyDecoder, type FilterChangeFunction } from '../stream/MediabunnyStreamCompact';
+import { type FilterChangeFunction } from '../stream/MediabunnyStreamCompact';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface GuildNodeInit<Meta = any> {
@@ -615,6 +615,7 @@ let hasWarnedMediabunny = false;
 
 export type MediabunnyDecoderMetadata = {
   changeFilter?: (filterArgs: string) => void;
+  executionId: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -720,8 +721,9 @@ export class GuildQueue<Meta = any> {
           "ExperimentalWarning");
         hasWarnedMediabunny = true;
       }
-      this.__mediabunnyMetadata = {};
-      this.onStreamExtracted = createMediabunnyDecoder(this);
+      this.__mediabunnyMetadata = {
+        executionId: 0
+      };
     }
   }
 
@@ -734,6 +736,12 @@ export class GuildQueue<Meta = any> {
     return Boolean(this.options.useMediabunnyDecoder);
   }
 
+  public __incrementMediabunnyExecutionId() {
+    if(!this.__isMediabunnyDecoder()) throw new Error("Not in mediabunny decoder mode.");
+    this.__mediabunnyMetadata.executionId++;
+    return this.__mediabunnyMetadata.executionId;
+  }
+
   /**
    * Set the filter change function for mediabunny. **Used internally only**
    * @internal
@@ -741,7 +749,14 @@ export class GuildQueue<Meta = any> {
   public __setMediabunnyFilterChanger(changeFilter: FilterChangeFunction) {
     if(!this.__isMediabunnyDecoder()) throw new Error("Not in mediabunny decoder mode.");
     
-    this.__mediabunnyMetadata.changeFilter = changeFilter;
+    const metadata = this.__mediabunnyMetadata;
+    metadata.changeFilter = changeFilter;
+
+    return () => {
+      if (metadata.changeFilter === changeFilter) {
+        metadata.changeFilter = undefined;
+      }
+    };
   }
   // #endregion
 

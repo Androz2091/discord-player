@@ -5791,6 +5791,7 @@ __metadata:
     eris: "npm:^0.17.2"
     libsodium-wrappers: "npm:^0.7.13"
     mediabunny: "npm:^1.61.0"
+    node-av: "npm:^6.1.1"
     oceanic.js: "npm:^1.11.2"
     opusscript: "npm:^0.0.8"
     tsup: "npm:^8.3.5"
@@ -5798,7 +5799,10 @@ __metadata:
     vitest: "npm:^0.34.6"
   peerDependencies:
     "@discord-player/extractor": "workspace:^"
+    "@mediabunny/server": "*"
+    mediabunny: "*"
     mediaplex: ^1
+    node-av: "*"
   languageName: unknown
   linkType: soft
 
@@ -10634,7 +10638,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-av@npm:^6.0.0":
+"node-av@npm:^6.0.0, node-av@npm:^6.1.1":
   version: 6.1.1
   resolution: "node-av@npm:6.1.1"
   dependencies:
