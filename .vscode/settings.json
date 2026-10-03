@@ -1,4 +1,3 @@
 {
-    "typescript.tsdk": "node_modules\\typescript\\lib",
-    "vscord.app.privacyMode.enable": false
+    "typescript.tsdk": "node_modules\\typescript\\lib"
 }
