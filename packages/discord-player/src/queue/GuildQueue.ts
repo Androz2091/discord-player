@@ -47,9 +47,12 @@ import { LrcGetResult, LrcSearchResult } from '../lrclib/LrcLib';
 import { FiltersName } from '../fabric';
 import { SearchQueryType } from '../utils/QueryResolver';
 import type { ExtractorStreamable } from '../extractors/BaseExtractor';
+import { createMediabunnyDecoder, type FilterChangeFunction } from '../stream/MediabunnyStreamCompact';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface GuildNodeInit<Meta = any> {
+  // experimental flag to enable mediabunny decoding. OPT-IN
+  useMediabunnyDecoder?: boolean;
   guild: Guild;
   queueStrategy: QueueStrategy;
   equalizer: EqualizerBand[] | boolean;
@@ -607,6 +610,13 @@ export const QueueRepeatMode = {
 export type QueueRepeatMode =
   (typeof QueueRepeatMode)[keyof typeof QueueRepeatMode];
 
+// Warn the user if using mediabunny to enable skipFFmpeg: true
+let hasWarnedMediabunny = false;
+
+export type MediabunnyDecoderMetadata = {
+  changeFilter?: (filterArgs: string) => void;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class GuildQueue<Meta = any> {
   #transitioning = false;
@@ -629,6 +639,12 @@ export class GuildQueue<Meta = any> {
   public stats = new GuildQueueStatistics<Meta>(this);
   public tasksQueue = new AsyncQueue();
   public syncedLyricsProvider = new SyncedLyricsProvider(this);
+
+  /**
+   * Metadata attached when mediabunny decoder is being used. **Used internally only**
+   * @internal
+   */
+  public __mediabunnyMetadata?: MediabunnyDecoderMetadata;
 
   public constructor(
     public player: Player,
@@ -696,7 +712,38 @@ export class GuildQueue<Meta = any> {
         `GuildQueue initialized for guild ${this.options.guild.name} (ID: ${this.options.guild.id})`,
       );
     this.emit(GuildQueueEvent.QueueCreate, this);
+
+    if(options.useMediabunnyDecoder) {
+      if(!hasWarnedMediabunny) {
+        Util.warn(
+          `Using Mediabunny decoder. This option is experimental.${player.options.skipFFmpeg ? "" : " Please enable <Player>.skipFFmpeg when using this option"}`,
+          "ExperimentalWarning");
+        hasWarnedMediabunny = true;
+      }
+      this.__mediabunnyMetadata = {};
+      this.onStreamExtracted = createMediabunnyDecoder(this);
+    }
   }
+
+  // #region Experimental mediabunny decoder methods
+  /**
+   * Typeguard to check if the queue is using Mediabunny based decoder. **Used internally only**
+   * @internal
+   */
+  public __isMediabunnyDecoder(): this is { __mediabunnyMetadata: MediabunnyDecoderMetadata } {
+    return Boolean(this.options.useMediabunnyDecoder);
+  }
+
+  /**
+   * Set the filter change function for mediabunny. **Used internally only**
+   * @internal
+   */
+  public __setMediabunnyFilterChanger(changeFilter: FilterChangeFunction) {
+    if(!this.__isMediabunnyDecoder()) throw new Error("Not in mediabunny decoder mode.");
+    
+    this.__mediabunnyMetadata.changeFilter = changeFilter;
+  }
+  // #endregion
 
   /**
    * Whether this queue can intercept streams

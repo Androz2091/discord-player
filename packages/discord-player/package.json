@@ -62,11 +62,13 @@
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
+    "@mediabunny/server": "^1.61.0",
     "@types/node": "^22.10.7",
     "@types/ws": "^8.5.3",
     "discord-api-types": "^0.38.40",
     "discord.js": "^14.25.1",
     "eris": "^0.17.2",
+    "mediabunny": "^1.61.0",
     "oceanic.js": "^1.11.2",
     "opusscript": "^0.0.8",
     "tsup": "^8.3.5",

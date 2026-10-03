@@ -132,6 +132,22 @@ export class FFmpegFilterer<Meta = any> {
     const prev = this.#ffmpegFilters.slice();
     this.#ffmpegFilters = [...new Set(filters)];
 
+    if(queue.__isMediabunnyDecoder()) {
+      const filterChanger = queue.__mediabunnyMetadata.changeFilter;
+      if(!filterChanger) return Promise.resolve(false);
+
+      filterChanger(this.toString());
+
+      queue.emit(
+        GuildQueueEvent.AudioFiltersUpdate,
+        queue,
+        prev,
+        this.#ffmpegFilters.slice()
+      );
+      
+      return Promise.resolve(true);
+    }
+
     return this.af.triggerReplay(seekTime).then((t) => {
       queue.emit(
         GuildQueueEvent.AudioFiltersUpdate,
@@ -334,6 +350,9 @@ export class GuildQueueAudioFilters<Meta = any> {
   public graph = new AFilterGraph<Meta>(this);
   public ffmpeg = new FFmpegFilterer<Meta>(this);
   public equalizerPresets = EqualizerConfigurationPreset;
+  
+  public _mediabunnyChangeFilter?: (filterArgs: string) => void;
+
   public _lastFiltersCache: GuildQueueAFiltersCache = {
     biquad: null,
     equalizer: [],

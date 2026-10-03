@@ -19,6 +19,9 @@ import { FiltersName } from '../fabric';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface GuildNodeCreateOptions<T = any> {
+  // experimental flag to enable mediabunny decoding. OPT-IN
+  useMediabunnyDecoder?: boolean;
+
   strategy?: QueueStrategy;
   volume?: number;
   equalizer?: EqualizerBand[];
@@ -146,6 +149,7 @@ export class GuildNodeManager<Meta = any> {
     }
 
     const queue = new GuildQueue<T>(this.player, {
+      useMediabunnyDecoder: options.useMediabunnyDecoder,
       guild: server,
       queueStrategy: options.strategy,
       volume: options.volume,
