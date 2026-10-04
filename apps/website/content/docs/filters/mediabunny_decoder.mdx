@@ -1,0 +1,61 @@
+---
+title: Mediabunny Decoder
+description: Learn how to use the experimental Mediabunny decoder in Discord Player
+---
+# Mediabunny Decoder
+
+<DevelopmentOnly />
+<Callout type="warn">
+  Mediabunny decoder is experimental. You may encounter unexpected results.
+</Callout>
+
+[Mediabunny](https://mediabunny.dev/) is a media processing library written in TypeScript. The Mediabunny decoder will use Mediabunny to decode streams into PCM s16le instead of FFmpeg.
+
+<Callout type="warn">
+  Mediabunny is not a replacement for FFmpeg. Its server adapter, `@mediabunny/server` uses
+  [`node-av`](https://seydx.github.io/node-av/) under the hood which maps FFmpeg APIs
+  to NodeJS
+</Callout>
+
+## What can Mediabunny do?
+
+Mediabunny
+- does not require a seperate child process to spawn FFmpeg making it extremely fast to begin decoding
+- does not require restarting the pipeline when filters change
+
+## Before you start
+
+Enabling Mediabunny decoder require installing the following packages.
+```bash
+npm install mediabunny @mediabunny/server node-av
+```
+
+## Enabling the decoder
+
+You can simply enable the mediabunny decoder when creating the queue. This maybe `<Player>.play()` like the following.
+
+```ts
+const { track } = await player.play(channel, query, {
+  nodeOptions: {
+    // along with your other queue options
+    useMediabunnyDecoder: true
+  },
+});
+```
+
+or maybe using `<Player>.queue.create()` like in the following
+
+```ts
+const queue = player.nodes.create(interaction.guild, {
+  // along with your other queue options
+  useMediabunnyDecoder: true
+});
+```
+
+## Using FFmpeg filters
+
+You can then proceed with using your FFmpeg filters as normal and see the filters switch instantly without delay.
+
+```ts
+await queue.filters.ffmpeg.toggle("8D");
+```
