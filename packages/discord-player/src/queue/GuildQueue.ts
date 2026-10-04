@@ -614,9 +614,9 @@ export type QueueRepeatMode =
 let hasWarnedMediabunny = false;
 
 export type MediabunnyDecoderMetadata = {
-  changeFilter?: (filterArgs: string) => void;
+  changeFilter?: FilterChangeFunction;
   executionId: number;
-}
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class GuildQueue<Meta = any> {
@@ -714,15 +714,20 @@ export class GuildQueue<Meta = any> {
       );
     this.emit(GuildQueueEvent.QueueCreate, this);
 
-    if(options.useMediabunnyDecoder) {
-      if(!hasWarnedMediabunny) {
+    if (options.useMediabunnyDecoder) {
+      if (!hasWarnedMediabunny) {
         Util.warn(
-          `Using Mediabunny decoder. This option is experimental.${player.options.skipFFmpeg ? "" : " Please enable <Player>.skipFFmpeg when using this option"}`,
-          "ExperimentalWarning");
+          `Using Mediabunny decoder. This option is experimental.${
+            player.options.skipFFmpeg
+              ? ''
+              : ' Please enable <Player>.skipFFmpeg when using this option'
+          }`,
+          'ExperimentalWarning',
+        );
         hasWarnedMediabunny = true;
       }
       this.__mediabunnyMetadata = {
-        executionId: 0
+        executionId: 0,
       };
     }
   }
@@ -732,12 +737,15 @@ export class GuildQueue<Meta = any> {
    * Typeguard to check if the queue is using Mediabunny based decoder. **Used internally only**
    * @internal
    */
-  public __isMediabunnyDecoder(): this is { __mediabunnyMetadata: MediabunnyDecoderMetadata } {
+  public __isMediabunnyDecoder(): this is {
+    __mediabunnyMetadata: MediabunnyDecoderMetadata;
+  } {
     return Boolean(this.options.useMediabunnyDecoder);
   }
 
   public __incrementMediabunnyExecutionId() {
-    if(!this.__isMediabunnyDecoder()) throw new Error("Not in mediabunny decoder mode.");
+    if (!this.__isMediabunnyDecoder())
+      throw new Error('Not in mediabunny decoder mode.');
     this.__mediabunnyMetadata.executionId++;
     return this.__mediabunnyMetadata.executionId;
   }
@@ -747,8 +755,9 @@ export class GuildQueue<Meta = any> {
    * @internal
    */
   public __setMediabunnyFilterChanger(changeFilter: FilterChangeFunction) {
-    if(!this.__isMediabunnyDecoder()) throw new Error("Not in mediabunny decoder mode.");
-    
+    if (!this.__isMediabunnyDecoder())
+      throw new Error('Not in mediabunny decoder mode.');
+
     const metadata = this.__mediabunnyMetadata;
     metadata.changeFilter = changeFilter;
 
