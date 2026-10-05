@@ -85,7 +85,6 @@ export async function createMediabunnyStream(
     ReadableStreamSource,
     ALL_FORMATS,
     AudioSampleSink,
-    AudioSample,
     UrlSource,
   } = Mediabunny;
 
@@ -141,10 +140,17 @@ export async function createMediabunnyStream(
   let isFilterChangerActive = true;
   let unregisterFilterChanger = () => { };
 
+  function settlePendingFilterChange() {
+    const resolve = pendingFilterChangeResolve;
+    pendingFilterChangeResolve = null;
+    resolve?.();
+  }
+
   function disposeFilterChanger() {
     if (!isFilterChangerActive) return;
     isFilterChangerActive = false;
     unregisterFilterChanger();
+    settlePendingFilterChange();
   }
 
   let pendingFilterChangeResolve: (() => void) | null = null;
@@ -158,6 +164,7 @@ export async function createMediabunnyStream(
     if (filterStringFmt === pendingFilterString) return Promise.resolve();
     if (filterStringFmt === currentFilterString) {
       pendingFilterString = undefined;
+      settlePendingFilterChange();
       return Promise.resolve();
     }
 
@@ -165,40 +172,41 @@ export async function createMediabunnyStream(
       queue.debug('[Mediabunny]: Pushing filter change.');
     }
 
-    if (pendingFilterChangeResolve) {
-      pendingFilterChangeResolve();
-      pendingFilterChangeResolve = null;
-    }
-
+    settlePendingFilterChange();
     pendingFilterString = filterStringFmt;
 
     return new Promise<void>((res) => {
-      pendingFilterChangeResolve = res;
+      const prev = pendingFilterChangeResolve;
+      pendingFilterChangeResolve = () => {
+        prev?.();
+        res();
+      };
     });
   }
 
   function applyPendingFilter() {
     const nextFilterString = pendingFilterString;
     if (!nextFilterString) return;
-
-    // node-av loads filters lazily making it really hard to detect bad filters
-    // We shouldn't have to do what we are doing in the catch statement to catch bad filter strings
-    const nextFilterApi = NodeAV.FilterAPI.create(nextFilterString);
-
-    if (queue.hasDebugger) {
-      queue.debug('[Mediabunny]: Processed filter change.');
-    }
-
-    const oldFilterApi = filterApi;
-    filterApi = nextFilterApi;
-    currentFilterString = nextFilterString;
     pendingFilterString = undefined;
 
-    oldFilterApi?.close();
+    try {
+      // node-av loads filters lazily making it really hard to detect bad filters
+      // We shouldn't have to do what we are doing in the catch statement to catch bad filter strings
+      const nextFilterApi = NodeAV.FilterAPI.create(nextFilterString);
 
-    if (pendingFilterChangeResolve) {
-      pendingFilterChangeResolve();
-      pendingFilterChangeResolve = null;
+      const oldFilterApi = filterApi;
+      filterApi = nextFilterApi;
+      currentFilterString = nextFilterString;
+      pendingFilterString = undefined;
+
+      oldFilterApi?.close();
+      if (queue.hasDebugger) {
+        queue.debug('[Mediabunny]: Processed filter change.');
+      }
+    } catch (error) {
+      reportBadFilterString(nextFilterString, error);
+    } finally {
+      settlePendingFilterChange();
     }
   }
 
@@ -249,6 +257,7 @@ export async function createMediabunnyStream(
 
         if (isStale()) {
           sample.close();
+          isNaturalEnd = false;
           break;
         }
 
@@ -264,28 +273,12 @@ export async function createMediabunnyStream(
               processedFrame.unref();
               break;
             }
-            const mSample = new AudioSample(
-              new MediabunnyServer.AvFrameAudioSampleResource(processedFrame),
-            );
-            let finalBuffer: Buffer;
             try {
-              const pcmBuffer = new Int16Array(
-                mSample.numberOfFrames * mSample.numberOfChannels,
-              );
-              mSample.copyTo(pcmBuffer, {
-                planeIndex: 0,
-                format: 's16',
-              });
-              finalBuffer = Buffer.from(
-                pcmBuffer.buffer,
-                pcmBuffer.byteOffset,
-                pcmBuffer.byteLength,
-              );
+              const buffer = processedFrame.toBuffer();
+              bufferCache.push(buffer);
             } finally {
-              mSample.close();
+              processedFrame.unref();
             }
-
-            bufferCache.push(finalBuffer);
 
             if (bufferCache.length >= 3) {
               const concatBuffer = Buffer.concat(bufferCache);
@@ -314,13 +307,21 @@ export async function createMediabunnyStream(
       }
     } catch (error) {
       passThrough.destroy(error as Error);
+      // errored. it is not a natural end
+      isNaturalEnd = false;
     } finally {
       disposeFilterChanger();
-      if (bufferCache.length > 0) {
-        const concatBuffer = Buffer.concat(bufferCache);
-        bufferCache = [];
-        passThrough.write(concatBuffer);
+
+      if (
+        isNaturalEnd &&
+        !passThrough.destroyed &&
+        !passThrough.writableEnded &&
+        bufferCache.length > 0
+      ) {
+        passThrough.write(Buffer.concat(bufferCache));
       }
+      bufferCache = [];
+
       if (sourceReadable && !sourceReadable.destroyed) {
         sourceReadable.destroy();
       }
@@ -329,9 +330,7 @@ export async function createMediabunnyStream(
       } else if (!passThrough.destroyed) {
         passThrough.destroy();
       }
-      if (!input.disposed) {
-        input.dispose();
-      }
+      if (!input.disposed) input.dispose();
       filterApi?.close();
     }
   })();
