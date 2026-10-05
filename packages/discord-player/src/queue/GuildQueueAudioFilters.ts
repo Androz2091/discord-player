@@ -138,10 +138,13 @@ export class FFmpegFilterer<Meta = any> {
 
     if (queue.__isMediabunnyDecoder()) {
       const filterChanger = queue.__mediabunnyMetadata.changeFilter;
-      filterChanger?.(this.toString()).then(() => {
-        emitUpdate();
-      });
-      return Promise.resolve(true);
+      // if filter change doesn't exists, just fall through to queue.currentTrack block
+      if (filterChanger) {
+        return filterChanger(this.toString()).then(() => {
+          emitUpdate();
+          return true;
+        });
+      }
     }
 
     if (!queue.currentTrack) {

@@ -60,17 +60,16 @@ export async function createMediabunnyStream(
 
   function reportBadFilterString(filter: string, error: unknown) {
     if (reportedBadFilters.has(filter)) return;
+    reportedBadFilters.add(filter);
 
     // prettier-ignore
     const myDearFilterYouHaveFailed0_0ItsNotMyFaultTho = new Error(
-            `FFmpeg encountered an error while applying the filter: ${filter}`,
-            { cause: error }
-        );
+      `FFmpeg encountered an error while applying the filter: ${filter}`,
+      { cause: error }
+    );
 
     queue.emit('error', queue, myDearFilterYouHaveFailed0_0ItsNotMyFaultTho);
   }
-
-  const currentExecutionId = queue.__incrementMediabunnyExecutionId();
 
   const [Mediabunny, MediabunnyServer, NodeAV] =
     await importMediabunnyOrThrow();
@@ -90,7 +89,7 @@ export async function createMediabunnyStream(
     UrlSource,
   } = Mediabunny;
 
-  const executionId = currentExecutionId;
+  const executionId = queue.__incrementMediabunnyExecutionId();
 
   // #region Decoder and filter manager
   let sourceReadable: Readable | null = null;
@@ -140,7 +139,7 @@ export async function createMediabunnyStream(
   let currentFilterString = init;
   let pendingFilterString: string | undefined;
   let isFilterChangerActive = true;
-  let unregisterFilterChanger = () => {};
+  let unregisterFilterChanger = () => { };
 
   function disposeFilterChanger() {
     if (!isFilterChangerActive) return;
@@ -207,14 +206,14 @@ export async function createMediabunnyStream(
 
   let isNaturalEnd = true;
 
+  const isStale = () =>
+    passThrough.destroyed ||
+    passThrough.writableEnded ||
+    queue.__mediabunnyMetadata?.executionId !== executionId;
+
   function waitForDrainOrClose(): Promise<void> {
     if (passThrough.destroyed || passThrough.writableEnded)
       return Promise.resolve();
-
-    const isStale = () =>
-      passThrough.destroyed ||
-      passThrough.writableEnded ||
-      currentExecutionId !== executionId;
 
     return new Promise((resolve) => {
       const finish = () => {
@@ -248,7 +247,7 @@ export async function createMediabunnyStream(
       for await (const sample of sink.samples(startTimestamp)) {
         applyPendingFilter();
 
-        if (passThrough.destroyed) {
+        if (isStale()) {
           sample.close();
           break;
         }

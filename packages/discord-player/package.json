@@ -58,10 +58,21 @@
   },
   "peerDependencies": {
     "@discord-player/extractor": "workspace:^",
-    "@mediabunny/server": "*",
-    "mediabunny": "*",
+    "@mediabunny/server": "^1",
+    "mediabunny": "^1",
     "mediaplex": "^1",
-    "node-av": "*"
+    "node-av": "^6"
+  },
+  "peerDependenciesMeta": {
+    "mediabunny": {
+      "optional": true
+    },
+    "@mediabunny/server": {
+      "optional": true
+    },
+    "node-av": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@discord-player/tsconfig": "workspace:^",
