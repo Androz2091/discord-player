@@ -117,7 +117,10 @@ export async function createMediabunnyStream(
   const audioTrack = await input.getPrimaryAudioTrack();
 
   if (!audioTrack) {
-    throw new Error('No audio tracks found. skipping ...');
+    input.dispose();
+    const audioNotFoundError = new Error('No audio tracks found. skipping ...');
+    sourceReadable?.destroy(audioNotFoundError);
+    throw audioNotFoundError;
   }
 
   const passThrough = new PassThrough({
