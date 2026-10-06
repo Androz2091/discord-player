@@ -2,6 +2,18 @@ import { PassThrough, Readable } from 'stream';
 import type { GuildQueue } from '../queue';
 import type { ExtractorStreamable } from '../extractors/BaseExtractor';
 
+class MediabunnySupersededError extends Error {
+  readonly code = "MEDIABUNNY_SUPERSEDED";
+
+  constructor(
+    public readonly executionId: number,
+    message = 'Mediabunny execution was superseded by a newer one.',
+  ) {
+    super(message);
+    this.name = 'MediabunnySupersededError';
+  }
+}
+
 const OUTPUT_FORMAT =
   'aformat=sample_fmts=s16:sample_rates=48000:channel_layouts=stereo';
 
@@ -90,6 +102,13 @@ export async function createMediabunnyStream(
 
   const executionId = queue.__incrementMediabunnyExecutionId();
 
+  const isCurrentExecution = () => queue.__mediabunnyMetadata?.executionId === executionId;
+
+  function abortSetup() {
+    if (!input.disposed) input.dispose();
+    if (sourceReadable && !sourceReadable.destroyed) sourceReadable.destroy();
+  }
+
   // #region Decoder and filter manager
   let sourceReadable: Readable | null = null;
   let source: import('mediabunny').Source;
@@ -116,11 +135,14 @@ export async function createMediabunnyStream(
 
   const audioTrack = await input.getPrimaryAudioTrack();
 
+  if (!isCurrentExecution()) {
+    abortSetup();
+    throw new MediabunnySupersededError(executionId);
+  }
+
   if (!audioTrack) {
-    input.dispose();
-    const audioNotFoundError = new Error('No audio tracks found. skipping ...');
-    sourceReadable?.destroy(audioNotFoundError);
-    throw audioNotFoundError;
+    abortSetup();
+    throw new Error('No audio tracks found. skipping ...');
   }
 
   const passThrough = new PassThrough({
@@ -220,7 +242,7 @@ export async function createMediabunnyStream(
   const isStale = () =>
     passThrough.destroyed ||
     passThrough.writableEnded ||
-    queue.__mediabunnyMetadata?.executionId !== executionId;
+    !isCurrentExecution();
 
   function waitForDrainOrClose(): Promise<void> {
     if (passThrough.destroyed || passThrough.writableEnded)
