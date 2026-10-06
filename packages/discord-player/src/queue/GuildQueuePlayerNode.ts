@@ -300,11 +300,10 @@ export class GuildQueuePlayerNode<Meta = any> {
       }
     } else {
       if (timecodes) {
-        return `${
-          timestamp.current.label
-        } ${separator} ${indicator}${rightChar.repeat(
-          length - 1,
-        )} ${separator} ${timestamp.total.label}`;
+        return `${timestamp.current.label
+          } ${separator} ${indicator}${rightChar.repeat(
+            length - 1,
+          )} ${separator} ${timestamp.total.label}`;
       } else {
         return `${indicator}${rightChar.repeat(length - 1)}`;
       }
@@ -664,8 +663,8 @@ export class GuildQueuePlayerNode<Meta = any> {
         (src === 'spotify'
           ? 'spotifySong'
           : src === 'apple_music'
-          ? 'appleMusicSong'
-          : src);
+            ? 'appleMusicSong'
+            : src);
       if (this.queue.hasDebugger)
         this.queue.debug(
           `Executing onBeforeCreateStream hook (QueryType: ${qt})...`,
@@ -760,7 +759,7 @@ export class GuildQueuePlayerNode<Meta = any> {
           sampleRate:
             this.queue.filters._lastFiltersCache.sampleRate ??
             (typeof this.queue.options.resampler === 'number' &&
-            this.queue.options.resampler > 0
+              this.queue.options.resampler > 0
               ? this.queue.options.resampler
               : undefined),
           biquadFilter:
@@ -822,7 +821,18 @@ export class GuildQueuePlayerNode<Meta = any> {
           'pcm',
         ].includes(fmt as StreamType);
 
-      if (
+      if (this.queue.options.useMediabunnyDecoder) {
+        if (this.queue.hasDebugger) {
+          this.queue.debug(
+            'Mediabunny decoder active. Attempting to create a PCM stream and skipping FFmpeg.',
+          );
+        }
+        finalStream = await createMediabunnyStream(
+          this.queue,
+          streamSrc.stream,
+          options.seek ?? 0,
+        );
+      } else if (
         shouldSkipFFmpeg &&
         !(streamSrc.stream instanceof Readable) &&
         typeof streamSrc.stream !== 'string' &&
@@ -834,8 +844,7 @@ export class GuildQueuePlayerNode<Meta = any> {
 
         if (this.queue.hasDebugger)
           this.queue.debug(
-            `skipFFmpeg is set to true and stream is demuxable, creating stream with type ${
-              shouldPCM ? 'pcm' : 'opus'
+            `skipFFmpeg is set to true and stream is demuxable, creating stream with type ${shouldPCM ? 'pcm' : 'opus'
             }`,
           );
 
@@ -869,17 +878,6 @@ export class GuildQueuePlayerNode<Meta = any> {
           finalStream = opusStream;
           trackStreamConfig.dispatcherConfig.type = StreamType.Opus;
         }
-      } else if (this.queue.options.useMediabunnyDecoder) {
-        if (this.queue.hasDebugger) {
-          this.queue.debug(
-            'Mediabunny decoder active. Attempting to create a PCM stream and skipping FFmpeg.',
-          );
-        }
-        finalStream = await createMediabunnyStream(
-          this.queue,
-          streamSrc.stream,
-          options.seek ?? 0,
-        );
       } else {
         // const opus = daspDisabled && this.#hasFFmpegOptimization;
         // if (opus && this.queue.hasDebugger) this.queue.debug('Disabling PCM output since all filters are disabled and opus encoding is supported...');
@@ -1034,10 +1032,8 @@ export class GuildQueuePlayerNode<Meta = any> {
 
     if (this.queue.hasDebugger)
       this.queue.debug(
-        `Stream extraction was successful for Track { title: ${
-          track.title
-        }, url: ${track.url} } (Extractor: ${
-          streamInfo.extractor?.identifier || 'N/A'
+        `Stream extraction was successful for Track { title: ${track.title
+        }, url: ${track.url} } (Extractor: ${streamInfo.extractor?.identifier || 'N/A'
         })`,
       );
 
@@ -1141,8 +1137,7 @@ export class GuildQueuePlayerNode<Meta = any> {
 
         if (this.queue.hasDebugger)
           this.queue.debug(
-            `Stream closed due to an error from FFmpeg stream: ${
-              err.stack || err.message || err
+            `Stream closed due to an error from FFmpeg stream: ${err.stack || err.message || err
             }`,
           );
 
