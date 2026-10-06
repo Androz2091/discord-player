@@ -2,7 +2,25 @@ import { PassThrough, Readable } from 'stream';
 import type { GuildQueue } from '../queue';
 import type { ExtractorStreamable } from '../extractors/BaseExtractor';
 
-class MediabunnySupersededError extends Error {
+export async function verifyFilterString(filterString: string): Promise<{ ok: true } | { ok: false, error: unknown }> {
+  const [, , NodeAV] = await importMediabunnyOrThrow();
+  const graph = new NodeAV.FilterGraph();
+  graph.alloc();
+  try {
+    const ffOpCode = graph.parse(filterString, null, null);
+    if (ffOpCode < 0) {
+      return { ok: false, error: new Error("Failed the change FFmpeg filters. Bad filter string") };
+    } else {
+      return { ok: true };
+    }
+  } catch (error) {
+    return { ok: false, error };
+  } finally {
+    graph.free();
+  }
+}
+
+export class MediabunnySupersededError extends Error {
   readonly code = "MEDIABUNNY_SUPERSEDED";
 
   constructor(
@@ -89,6 +107,7 @@ export async function createMediabunnyStream(
   if (!hasMediabunnyRegistered) {
     queue.player.debug('[Mediabunny]: Registered @mediabunny/server');
     MediabunnyServer.registerMediabunnyServer();
+    NodeAV.Log.setLevel(NodeAV.AV_LOG_FATAL);
     hasMediabunnyRegistered = true;
   }
 
@@ -158,6 +177,13 @@ export async function createMediabunnyStream(
 
   const init = removeTrailingCommas(`${queueFilters},${OUTPUT_FORMAT}`);
 
+  const isValidStarterFilter = await verifyFilterString(init);
+
+  if(!isValidStarterFilter.ok) {
+    abortSetup();
+    throw new Error("Recieved bad filter string");
+  }
+
   let filterApi = NodeAV.FilterAPI.create(init);
 
   let currentFilterString = init;
@@ -180,17 +206,21 @@ export async function createMediabunnyStream(
 
   let pendingFilterChangeResolve: (() => void) | null = null;
 
-  function changeFilter(filterString?: string) {
-    if (!isFilterChangerActive) return Promise.resolve();
+  async function changeFilter(filterString?: string) {
+    if (!isFilterChangerActive) return;
 
-    const filterStringFmt = !filterString
-      ? OUTPUT_FORMAT
-      : `${filterString},${OUTPUT_FORMAT}`;
-    if (filterStringFmt === pendingFilterString) return Promise.resolve();
+    const filterStringFmt = [filterString?.trim(), OUTPUT_FORMAT].filter(Boolean).join(",");
+    if (filterStringFmt === pendingFilterString) return;
     if (filterStringFmt === currentFilterString) {
       pendingFilterString = undefined;
       settlePendingFilterChange();
       return Promise.resolve();
+    }
+
+    const verification = await verifyFilterString(filterStringFmt);
+
+    if (!verification.ok) {
+      throw (verification.error || new Error(`Failed to change filters due to a bad filter string. ${filterStringFmt}`));
     }
 
     if (queue.hasDebugger) {

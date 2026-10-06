@@ -10,6 +10,7 @@ import {
 import { FFmpegStreamOptions, createFFmpegStream } from '../utils/FFmpegStream';
 import { InvalidArgTypeError } from '../errors';
 import { StreamConfig } from './GuildQueuePlayerNode';
+import { verifyFilterString } from '../stream/MediabunnyStreamCompact';
 
 type Filters = keyof typeof AudioFilters.filters;
 
@@ -108,7 +109,7 @@ export class FFmpegFilterer<Meta = any> {
   #ffmpegFilters: Filters[] = [];
   #inputArgs: string[] = [];
 
-  public constructor(public af: GuildQueueAudioFilters<Meta>) {}
+  public constructor(public af: GuildQueueAudioFilters<Meta>) { }
 
   /**
    * Indicates whether ffmpeg may be skipped
@@ -117,14 +118,14 @@ export class FFmpegFilterer<Meta = any> {
     return !!this.af.queue.player.options.skipFFmpeg;
   }
 
-  #setFilters(filters: Filters[]) {
+  async #setFilters(filters: Filters[]) {
     const { queue } = this.af;
     // skip if filters are the same
     if (
       filters.every((f) => this.#ffmpegFilters.includes(f)) &&
       this.#ffmpegFilters.every((f) => filters.includes(f))
     )
-      return Promise.resolve(false);
+      return false;
     const ignoreFilters =
       this.filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave') &&
       !filters.some((ff) => ff === 'nightcore' || ff === 'vaporwave');
@@ -137,10 +138,20 @@ export class FFmpegFilterer<Meta = any> {
       queue.emit(GuildQueueEvent.AudioFiltersUpdate, queue, prev, next);
 
     if (queue.__isMediabunnyDecoder()) {
+      const filterString = this.toString().trim();
+      // let empty strings pass through
+      if (filterString) {
+        const verifyFilter = await verifyFilterString(filterString);
+        if (!verifyFilter.ok) {
+          // revert back to the previous state so new tracks wont fail if the user caught the error.
+          this.#ffmpegFilters = prev;
+          throw (verifyFilter.error || new Error(`Failed to create filter on string ${filterString}. Reverting back to last known stable filter`));
+        }
+      }
       const filterChanger = queue.__mediabunnyMetadata.changeFilter;
       // if filter change doesn't exists, just fall through to queue.currentTrack block
       if (filterChanger) {
-        return filterChanger(this.toString()).then(() => {
+        return filterChanger(filterString).then(() => {
           emitUpdate();
           return true;
         });
@@ -149,7 +160,7 @@ export class FFmpegFilterer<Meta = any> {
 
     if (!queue.currentTrack) {
       emitUpdate();
-      return Promise.resolve(true);
+      return true;
     }
 
     return this.af.triggerReplay(seekTime).then(() => {
@@ -338,8 +349,8 @@ export interface GuildQueueAFiltersCache {
   volume: number;
   sampleRate: number;
   sampleRateFilter:
-    | StreamConfig['dispatcherConfig']['sampleRateFilters']
-    | null;
+  | StreamConfig['dispatcherConfig']['sampleRateFilters']
+  | null;
   compressor: StreamConfig['dispatcherConfig']['compressor'] | null;
   reverb: StreamConfig['dispatcherConfig']['reverb'] | null;
 }
@@ -463,7 +474,7 @@ export class GuildQueueAudioFilters<Meta = any> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class AFilterGraph<Meta = any> {
-  public constructor(public af: GuildQueueAudioFilters<Meta>) {}
+  public constructor(public af: GuildQueueAudioFilters<Meta>) { }
 
   public get ffmpeg() {
     return this.af.ffmpeg?.filters ?? [];
