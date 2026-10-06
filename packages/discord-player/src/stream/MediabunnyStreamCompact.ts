@@ -214,7 +214,7 @@ export async function createMediabunnyStream(
     if (filterStringFmt === currentFilterString) {
       pendingFilterString = undefined;
       settlePendingFilterChange();
-      return Promise.resolve();
+      return;
     }
 
     const verification = await verifyFilterString(filterStringFmt);
