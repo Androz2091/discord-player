@@ -1,0 +1,7 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+allowBuilds:
+  esbuild: false
+minimumReleaseAgeExclude:
+  - '@remedia/client'

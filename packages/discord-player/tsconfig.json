@@ -1,7 +1,17 @@
 {
-  "extends": "@discord-player/tsconfig/base.json",
+  "$schema": "https://json.schemastore.org/tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "esModuleInterop": true
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "rootDir": "lib",
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": false,
+    "stripInternal": true,
+    "noEmit": false,
+    "types": ["node"]
   },
-  "include": ["src/**/*"]
+  "include": ["lib/**/*.ts"]
 }

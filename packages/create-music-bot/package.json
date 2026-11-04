@@ -1,0 +1,30 @@
+{
+  "name": "create-music-bot",
+  "version": "0.0.0",
+  "description": "Create Discord Player powered music bots with one command",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "create",
+    "discord",
+    "music",
+    "bot"
+  ],
+  "homepage": "https://github.com/Androz2091/discord-player#readme",
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "license": "MIT",
+  "author": "Androz2091",
+  "dependencies": {}
+}

@@ -1,63 +1,34 @@
 {
-  "name": "@discord-player/discord-player",
+  "name": "@discord-player/workspace",
   "version": "0.0.0",
-  "description": "A complete framework to facilitate music commands using discord.js",
-  "main": "index.js",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
+  "description": "Discord Player Monorepo",
+  "type": "module",
   "scripts": {
-    "bump": "node ./scripts/set-version.mjs",
-    "publish-packages": "yarn build && node ./scripts/publish.mjs",
-    "bootstrap": "node ./scripts/bootstrap.js",
-    "build": "turbo run build --color --filter=!website --filter=!music-bot",
-    "docs": "tsx ./scripts/docgen.ts",
-    "docs:json": "tsx ./scripts/docgen.ts --json",
-    "build:check": "turbo run build:check --color",
-    "lint": "turbo run lint --color",
-    "format": "prettier --write \"{packages,scripts,examples,apps}/**/*.{js,ts,mjs,mts,jsx,tsx,mdx}\"",
-    "dev:web": "turbo run dev --filter=website",
-    "build:web": "turbo run build --filter=website",
-    "start:web": "turbo run preview --filter=website",
-    "test": "turbo run test --color",
-    "start:bot": "yarn workspace music-bot start",
-    "build:bot": "yarn workspace music-bot build"
+    "lint": "oxlint . --deny-warnings",
+    "lint:fix": "oxlint . --fix --deny-warnings",
+    "format": "oxfmt .",
+    "format:check": "oxfmt . --check",
+    "typecheck": "pnpm --recursive --if-present run typecheck",
+    "check": "pnpm lint && pnpm typecheck && pnpm format:check"
+  },
+  "license": "MIT",
+  "author": "Androz2091",
+  "homepage": "https://github.com/Androz2091/discord-player#readme",
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Androz2091/discord-player.git"
   },
-  "keywords": [
-    "discord-player",
-    "voip",
-    "discord",
-    "voice",
-    "opus"
-  ],
-  "author": "Androz2091",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Androz2091/discord-player/issues"
+  "devDependencies": {
+    "oxfmt": "0.75.0",
+    "oxlint": "1.90.0"
   },
-  "homepage": "https://github.com/Androz2091/discord-player#readme",
-  "packageManager": "yarn@4.6.0",
-  "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.6.0",
-    "@typescript-eslint/parser": "^6.6.0",
-    "ansi-colors": "^4.1.3",
-    "common-tags": "^1.8.2",
-    "eslint": "^8.21.0",
-    "fs-extra": "^11.1.0",
-    "fumadocs-typescript": "^3.0.2",
-    "micro-docgen": "0.3.5-compat.0",
-    "prettier": "^2.8.2",
-    "rimraf": "^4.1.2",
-    "tsx": "^4.19.2",
-    "turbo": "1.10.16",
-    "typescript": "^5.7.2",
-    "use-macro": "^1.0.1",
-    "vitest": "^0.34.6"
-  }
+  "dependencies": {},
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "packageManager": "pnpm@12.16.1"
 }

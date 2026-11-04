@@ -1,7 +1,0 @@
-{
-  "extends": "@discord-player/tsconfig/base.json",
-  "compilerOptions": {
-    "esModuleInterop": true
-  },
-  "include": ["src/**/*"]
-}

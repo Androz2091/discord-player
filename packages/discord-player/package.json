@@ -1,31 +1,15 @@
 {
   "name": "discord-player",
-  "version": "7.2.0",
-  "description": "Complete framework to facilitate music commands using discord.js",
+  "version": "8.0.0-dev",
+  "description": "Create Discord Player powered music bots with one command",
+  "type": "module",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist/"
-  ],
-  "module": "dist/index.mjs",
   "scripts": {
-    "build": "tsup && node ./scripts/esm-shim.cjs",
-    "build:check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts --fix",
-    "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "test": "vitest"
   },
-  "funding": "https://github.com/Androz2091/discord-player?sponsor=1",
-  "contributors": [
-    "twlite"
+  "files": [
+    "dist"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Androz2091/discord-player.git"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
   "keywords": [
     "music",
     "player",
@@ -44,40 +28,15 @@
   ],
   "author": "Androz2091",
   "license": "MIT",
+  "homepage": "https://discord-player.js.org",
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
-  "homepage": "https://discord-player.js.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
   "dependencies": {
-    "@discord-player/equalizer": "workspace:^",
-    "@discord-player/ffmpeg": "workspace:^",
-    "@discord-player/utils": "workspace:^",
-    "@web-scrobbler/metadata-filter": "^3.1.0",
-    "discord-voip": "workspace:^",
-    "libsodium-wrappers": "^0.7.13"
-  },
-  "peerDependencies": {
-    "@discord-player/extractor": "workspace:^",
-    "mediaplex": "^1"
-  },
-  "devDependencies": {
-    "@discord-player/tsconfig": "workspace:^",
-    "@types/node": "^22.10.7",
-    "@types/ws": "^8.5.3",
-    "discord-api-types": "^0.38.40",
-    "discord.js": "^14.25.1",
-    "eris": "^0.17.2",
-    "oceanic.js": "^1.11.2",
-    "opusscript": "^0.0.8",
-    "tsup": "^8.3.5",
-    "typescript": "^5.2.2",
-    "vitest": "^0.34.6"
-  },
-  "typedoc": {
-    "entryPoint": "./src/index.ts",
-    "readmeFile": "./README.md",
-    "tsconfig": "./tsconfig.json",
-    "excludeExternals": true,
-    "excludePrivate": true
+    "@remedia/client": "0.1.0-dev.0"
   }
 }
