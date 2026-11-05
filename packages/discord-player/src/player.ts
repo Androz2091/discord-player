@@ -18,10 +18,7 @@ import { PlayerContext } from './context.js';
 import { LrcLib } from './lyrics.js';
 
 /** Options for a Discord Player instance and its Remedia client. */
-export interface DiscordPlayerOptions extends Omit<RemediaClientOptions, 'selectNode' | 'botUserId'> {
-  /** Optional interval in milliseconds for measuring event-loop delay. Zero disables the monitor. */
-  lagMonitor?: number;
-}
+export type DiscordPlayerOptions = Omit<RemediaClientOptions, 'selectNode' | 'botUserId'>;
 
 /** Player-level event argument tuples. */
 export interface DiscordPlayerEvents {
@@ -58,8 +55,6 @@ export interface DiscordPlayerStatistics {
   upcomingTracks: number;
   /** Number of cached queues with active managed playback. */
   activeQueues: number;
-  /** Most recently measured event-loop lag, or null when disabled/unmeasured. */
-  eventLoopLag: number | null;
 }
 
 /** Familiar OOP Player facade for guild queues and the Remedia client. */
@@ -67,8 +62,6 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Current package version. */
   static readonly version = '8.0.0-dev.0';
   #clientId: string | null = null;
-  #lagTimer: NodeJS.Timeout | null = null;
-  #lastLag: number | null = null;
 
   /** Guild queue manager. */
   public readonly queues = new GuildQueueManager(this);
@@ -93,7 +86,6 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     private readonly options: DiscordPlayerOptions,
   ) {
     super();
-    this.startLagMonitor(options.lagMonitor ?? 0);
   }
 
   /** Identifier of this Player instance. */
@@ -102,10 +94,6 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   public get version(): string {
     return DiscordPlayer.version;
   }
-  /** Most recently measured event-loop lag in milliseconds, or null if unavailable. */
-  public get eventLoopLag(): number | null {
-    return this.#lastLag;
-  }
   /** Aggregated queue and runtime statistics. */
   public get statistics(): DiscordPlayerStatistics {
     const queues = Array.from(this.queues.cache.values());
@@ -113,7 +101,6 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       queues: queues.length,
       upcomingTracks: queues.reduce((sum, queue) => sum + queue.size, 0),
       activeQueues: queues.reduce((sum, queue) => sum + Number(queue.isPlaying()), 0),
-      eventLoopLag: this.#lastLag,
     };
   }
 
@@ -149,9 +136,8 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     clientId: string,
   ): Promise<void> {
     this.#clientId = clientId;
-    const { lagMonitor: _lagMonitor, ...clientOptions } = this.options;
     this.remedia = await RemediaClient.create({
-      ...clientOptions,
+      ...this.options,
       botUserId: clientId,
       selectNode: async (nodes, context) => {
         const queue = this.queues.get(context.guildId);
@@ -280,10 +266,8 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     return this.queues.delete(guildId);
   }
 
-  /** Stop the event-loop lag monitor and destroy all managed queues. */
+  /** Destroy all managed queues owned by this Player. */
   public async destroy(): Promise<void> {
-    if (this.#lagTimer) clearInterval(this.#lagTimer);
-    this.#lagTimer = null;
     await this.queues.clear();
   }
 
@@ -295,17 +279,6 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     message: string,
   ): void {
     this.emit('debug', message);
-  }
-
-  private startLagMonitor(intervalMs: number): void {
-    if (!Number.isFinite(intervalMs) || intervalMs <= 0) return;
-    let expected = performance.now() + intervalMs;
-    this.#lagTimer = setInterval(() => {
-      const now = performance.now();
-      this.#lastLag = Math.max(0, now - expected);
-      expected = now + intervalMs;
-    }, intervalMs);
-    this.#lagTimer.unref();
   }
 }
 
