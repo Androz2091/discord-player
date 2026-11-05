@@ -1,13 +1,14 @@
-import type { ChatInputCommand, CommandData } from 'commandkit';
+import { musicCommand } from '@/lib/music-command.ts';
+import type { CommandData } from 'commandkit';
 
 export const command: CommandData = {
   name: 'ping',
-  description: "Ping the bot to check if it's online.",
+  description: 'Check whether the bot is online.',
 };
 
-export const chatInput: ChatInputCommand = async (ctx) => {
-  const latency = (ctx.client.ws.ping ?? -1).toString();
-  const response = `Pong! Latency: ${latency}ms`;
-
-  await ctx.interaction.reply(response);
-};
+export const chatInput = musicCommand((interaction) => {
+  const latency = interaction.client.ws.ping;
+  return latency < 0
+    ? 'Connected to Discord; gateway latency is not available yet.'
+    : `Gateway latency: **${latency} ms**`;
+});

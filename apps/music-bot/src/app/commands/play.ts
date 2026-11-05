@@ -1,79 +1,55 @@
 import { player } from '@/lib/discord-player.ts';
-import type { CommandData, ChatInputCommand } from 'commandkit';
-import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
+import { displayTrack, formatTime, musicCommand, MusicCommandError, requireVoiceChannel } from '@/lib/music-command.ts';
+import { UrlTrack } from '@/lib/url-track.ts';
+import type { QueueMetadata } from '@/lib/common.ts';
+import { musicEmbed } from '@/lib/embeds.ts';
+import type { CommandData } from 'commandkit';
+import { ApplicationCommandOptionType } from 'discord.js';
 
 export const command: CommandData = {
   name: 'play',
-  description: 'Plays a song in the voice channel of the user who invoked the command.',
+  description: 'Play or queue a direct media URL in your voice channel.',
   options: [
     {
-      name: 'resource',
-      description: 'The resource to play.',
+      name: 'url',
+      description: 'A direct HTTP or HTTPS audio/video URL.',
       type: ApplicationCommandOptionType.String,
       required: true,
     },
   ],
 };
 
-export const chatInput: ChatInputCommand = async (ctx) => {
-  if (!ctx.interaction.inCachedGuild()) return;
-
-  const member = ctx.interaction.member;
-
-  if (!member.voice.channelId || member.voice.channelId !== ctx.interaction.guild.members.me?.voice.channelId) {
-    return ctx.interaction.reply({
-      content: 'You need to be in the same voice channel as me to use this command.',
-      ephemeral: true,
-    });
+export const chatInput = musicCommand(async (interaction) => {
+  const channel = requireVoiceChannel(interaction);
+  if (!channel.joinable) throw new MusicCommandError('I cannot join your voice channel. Check my permissions.');
+  const existingQueue = player.queues.get<QueueMetadata>(interaction.guildId);
+  if (existingQueue?.node.session && existingQueue.node.session.channelId !== channel.id) {
+    throw new MusicCommandError('Join my voice channel to add music, or use /join to move me.');
   }
+  const textChannel = interaction.channel;
+  if (!textChannel?.isSendable()) throw new MusicCommandError('Use a channel where I can send playback updates.');
 
-  await ctx.interaction.deferReply({ ephemeral: true });
-
-  const queue = player.queues.get(ctx.interaction.guildId);
-
-  if (!queue?.node.session) {
-    return ctx.interaction.editReply({
-      content: 'I am not connected to a voice channel. Please use the /join command first.',
-    });
+  let track: UrlTrack;
+  try {
+    track = new UrlTrack(interaction.options.getString('url', true), interaction.user.id);
+  } catch {
+    throw new MusicCommandError('Enter a complete HTTP or HTTPS media URL.');
   }
+  if (existingQueue) existingQueue.metadata = { textChannel };
 
-  const resource = ctx.options.getString('resource', true);
-
-  const customMetadata = {
-    url: resource,
-    playedBy: {
-      name: ctx.interaction.user.displayName,
-      id: ctx.interaction.user.id,
-      avatar: ctx.interaction.user.displayAvatarURL(),
-    },
-  };
-
-  const streamInfo = await queue.node.play(
-    {
-      url: resource,
-    },
-    {
-      customMetadata,
-    },
-  );
-
-  const embed = new EmbedBuilder()
-    .setTitle('Now Playing')
-    .setAuthor({
-      name: customMetadata.playedBy.name,
-      iconURL: customMetadata.playedBy.avatar,
-    })
-    .setDescription(`[${streamInfo.metadata?.title ?? 'Unknown Title'}](${customMetadata.url})`)
-    .addFields({
-      name: 'Duration',
-      value: ((streamInfo.durationMs ?? 0) / 1000).toFixed(2) + ' seconds',
-    })
-    .setFooter({
-      text: `Requested by ${ctx.interaction.user.displayName}`,
-    })
-    .setTimestamp();
-
-  await ctx.interaction.editReply({
-    embeds: [embed],
+  const result = await player.play<QueueMetadata>(channel, track, {
+    nodeOptions: { metadata: { textChannel } },
   });
-};
+  if (result.playerResult) {
+    const duration = result.playerResult.audioStream.durationMs;
+    return musicEmbed('🎶 Playback started', displayTrack(track), 0x57f287).addFields(
+      { name: 'Voice channel', value: `<#${channel.id}>`, inline: true },
+      { name: 'Duration', value: duration === null ? 'Unknown' : formatTime(duration), inline: true },
+    );
+  }
+  return musicEmbed('➕ Added to queue', displayTrack(track)).addFields({
+    name: 'Upcoming tracks',
+    value: String(result.queue.size),
+    inline: true,
+  });
+});
