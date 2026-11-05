@@ -3,6 +3,15 @@ import { RemediaClient, type RemediaClientOptions } from '@remedia/client';
 import { GuildQueueManager } from './managers/guild-queue.manager.js';
 import type { GuildQueueEventsMap } from './structures/common/guild-queue-events.js';
 import { randomInt } from 'node:crypto';
+import type {
+  MediaResource,
+  PlayerNodeInitializationOptions,
+  PlayerNodeInitializationResult,
+  SearchOptions,
+} from './types.js';
+import { Track } from './structures/track.js';
+import { Playlist } from './structures/playlist.js';
+import { SearchResult } from './structures/search-result.js';
 
 export interface DiscordPlayerOptions extends Omit<RemediaClientOptions, 'selectNode' | 'botUserId'> {}
 
@@ -35,6 +44,14 @@ export class DiscordPlayer extends EventEmitter<DiscordPlayerEvents> {
    */
   public constructor(private readonly options: DiscordPlayerOptions) {
     super();
+  }
+
+  /**
+   * Returns the list of available remedia nodes managed by the underlying RemediaClient instance.
+   * @returns An array of remedia nodes, or null if the RemediaClient is not initialized.
+   */
+  public get nodes() {
+    return this.getRemedia(false)?.nodes ?? null;
   }
 
   /**
@@ -113,5 +130,80 @@ export class DiscordPlayer extends EventEmitter<DiscordPlayerEvents> {
     }
 
     return this.getRemedia(false)?.receive(payload);
+  }
+
+  public async search(query: MediaResource, options: SearchOptions = {}): Promise<SearchResult> {
+    void options; // TODO: implement search options
+    if (query instanceof SearchResult) return query;
+
+    if (query instanceof Track) {
+      return new SearchResult({
+        tracks: [query],
+        playlist: null,
+      });
+    }
+
+    if (query instanceof Playlist) {
+      return new SearchResult({
+        tracks: query.tracks,
+        playlist: query,
+      });
+    }
+
+    return SearchResult.empty();
+  }
+
+  public async play<T = any>(
+    resource: MediaResource,
+    options: PlayerNodeInitializationOptions<T>,
+  ): Promise<PlayerNodeInitializationResult<T>> {
+    const queue = await this.queues.create(options.guildId, options.nodeOptions);
+    const searchResult = await this.search(resource, options.searchOptions);
+
+    if (!searchResult) {
+      return {
+        queue,
+        resource,
+        searchResult,
+        playerResult: null,
+      };
+    }
+
+    const session = queue.node.getSession(false);
+
+    using _lock = await queue.tasks.acquire('player.queue.play');
+
+    if (!session || session.channelId !== options.channelId || (options.nodeId && session.nodeId !== options.nodeId)) {
+      await queue.connect({
+        channelId: options.channelId,
+        nodeId: options.nodeId,
+      });
+    }
+
+    if (resource instanceof Track) {
+      queue.addTrack(resource);
+    } else if (resource instanceof Playlist) {
+      queue.addTracks(resource.tracks);
+    } else {
+      throw new Error('Invalid media resource provided. Only Track and Playlist objects are supported at the moment.');
+    }
+
+    if (!queue.isPlaying()) {
+      const result = await queue.node.play(null, options.audioPlayerOptions);
+
+      return {
+        queue,
+        resource,
+        playerResult: result,
+        searchResult,
+      };
+    } else {
+      return {
+        queue,
+        resource,
+        playerResult: null,
+        searchResult,
+      };
+    }
   }
 }

@@ -7,6 +7,7 @@
   },
   "rules": {
     "no-unused-vars": "error",
+    "no-underscore-dangle": "off",
     "react/react-in-jsx-scope": "off",
     "typescript/triple-slash-reference": "off",
     "typescript/consistent-type-imports": [

@@ -1,7 +1,7 @@
 import type { DiscordPlayer } from '../player.js';
 import type { GuildQueue } from '../structures/guild-queue.js';
 import type { Track } from '../structures/track.js';
-import { Stack } from '../utils/stack.js';
+import { Stack } from '../structures/common/stack.js';
 
 export class GuildQueueHistoryManager<Metadata = any> {
   public readonly player: DiscordPlayer;

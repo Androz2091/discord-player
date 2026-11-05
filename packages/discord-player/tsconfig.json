@@ -12,6 +12,7 @@
     "stripInternal": true,
     "sourceMap": true,
     "verbatimModuleSyntax": true,
+    "exactOptionalPropertyTypes": false,
     "noEmit": false,
     "types": ["node"]
   },

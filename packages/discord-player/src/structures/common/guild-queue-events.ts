@@ -1,4 +1,5 @@
 import type { GuildQueue } from '../guild-queue.js';
+import type { Track } from '../track.js';
 import type { DiscordSessionEvents } from '@remedia/client';
 
 export const GuildQueueEvents = {
@@ -149,6 +150,11 @@ export type GuildQueueEvents = (typeof GuildQueueEvents)[keyof typeof GuildQueue
 export type QueueEventParams<T extends unknown[]> = [queue: GuildQueue, ...args: T];
 
 export interface GuildQueueEventsMap {
+  [GuildQueueEvents.AudioTrackAdd]: QueueEventParams<[track: Track]>;
+  [GuildQueueEvents.AudioTracksAdd]: QueueEventParams<[tracks: Track[]]>;
+  [GuildQueueEvents.AudioTrackRemove]: QueueEventParams<[track: Track]>;
+  [GuildQueueEvents.AudioTracksRemove]: QueueEventParams<[tracks: Track[]]>;
+  [GuildQueueEvents.Error]: QueueEventParams<[error: Error]>;
   [GuildQueueEvents.PlayerSeek]: QueueEventParams<[event: DiscordSessionEvents['playbackSeeked'][0]]>;
   [GuildQueueEvents.PlayerPause]: QueueEventParams<[event: DiscordSessionEvents['playbackPaused'][0]]>;
   [GuildQueueEvents.PlayerStart]: QueueEventParams<[event: DiscordSessionEvents['playbackStarted'][0]]>;
