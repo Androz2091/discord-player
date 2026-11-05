@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google';
 import { Provider } from '@/components/provider';
+// eslint-disable-next-line no-unassigned-import
 import './global.css';
 
 const inter = Inter({

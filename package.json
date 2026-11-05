@@ -3,6 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "description": "Discord Player Monorepo",
+  "homepage": "https://github.com/Androz2091/discord-player#readme",
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "license": "MIT",
+  "author": "Androz2091",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
   "type": "module",
   "scripts": {
     "lint": "oxlint . --deny-warnings",
@@ -12,21 +22,11 @@
     "typecheck": "pnpm --recursive --if-present run typecheck",
     "check": "pnpm lint && pnpm typecheck && pnpm format:check"
   },
-  "license": "MIT",
-  "author": "Androz2091",
-  "homepage": "https://github.com/Androz2091/discord-player#readme",
-  "bugs": {
-    "url": "https://github.com/Androz2091/discord-player/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Androz2091/discord-player.git"
-  },
+  "dependencies": {},
   "devDependencies": {
     "oxfmt": "0.75.0",
     "oxlint": "1.90.0"
   },
-  "dependencies": {},
   "engines": {
     "node": ">=22.18.0"
   },

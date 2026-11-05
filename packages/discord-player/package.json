@@ -2,41 +2,48 @@
   "name": "discord-player",
   "version": "8.0.0-dev",
   "description": "Create Discord Player powered music bots with one command",
-  "type": "module",
-  "main": "dist/index.js",
-  "scripts": {
-    "test": "vitest"
-  },
-  "files": [
-    "dist"
-  ],
   "keywords": [
-    "music",
-    "player",
+    "api",
     "bot",
-    "framework",
     "discord",
-    "volume",
-    "queue",
-    "discord.js",
-    "musicbot",
-    "discord-music-player",
     "discord-music",
-    "music-player",
+    "discord-music-player",
+    "discord.js",
+    "framework",
     "lavalink",
-    "api"
+    "music",
+    "music-player",
+    "musicbot",
+    "player",
+    "queue",
+    "volume"
   ],
-  "author": "Androz2091",
-  "license": "MIT",
   "homepage": "https://discord-player.js.org",
   "bugs": {
     "url": "https://github.com/Androz2091/discord-player/issues"
   },
+  "license": "MIT",
+  "author": "Androz2091",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Androz2091/discord-player.git"
   },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
   "dependencies": {
+    "@discordjs/collection": "^2.1.1",
     "@remedia/client": "0.1.0-dev.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
   }
 }

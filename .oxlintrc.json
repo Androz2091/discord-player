@@ -6,7 +6,16 @@
     "suspicious": "error"
   },
   "rules": {
-    "no-unused-vars": "error"
+    "no-unused-vars": "error",
+    "react/react-in-jsx-scope": "off",
+    "typescript/triple-slash-reference": "off",
+    "typescript/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "fixStyle": "separate-type-imports"
+      }
+    ]
   },
   "overrides": [
     {
@@ -44,8 +53,6 @@
     "**/.next/**",
     "**/.source/**",
     "**/generated/**",
-    "packages/remedia-node/native.js",
-    "packages/remedia-node/native.d.ts",
     "**/*.generated.js",
     "**/*.generated.jsx",
     "**/*.generated.ts",
