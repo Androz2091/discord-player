@@ -660,8 +660,12 @@ describe('managed queue playback', () => {
       author: { name: 'Artist', url: 'https://example.test' },
       tracks: [track],
     });
-    const decodedPlaylist = deserialize(decode(encode(playlist.serialize()))) as Playlist;
-    const decodedTrack = deserialize(track.serialize()) as Track;
+    const decodedPlaylist = deserialize(decode(encode(playlist.serialize())));
+    const decodedTrack = deserialize(track.serialize());
+    expect(decodedPlaylist).toBeInstanceOf(Playlist);
+    expect(decodedTrack).toBeInstanceOf(Track);
+    if (!(decodedPlaylist instanceof Playlist) || !(decodedTrack instanceof Track))
+      throw new Error('Unexpected model.');
     expect(decodedPlaylist.tracks[0]?.title).toBe(track.title);
     expect(decodedTrack.durationMS).toBe(60_000);
     expect(playlist.durationFormatted).toBe('1:00');

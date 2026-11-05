@@ -1,4 +1,10 @@
 import { Track, type SerializedTrack, type TrackData, type TrackSource } from './track.js';
+import {
+  cloneJSONValue,
+  SERIALIZATION_SCHEMA_VERSION,
+  type Serializable,
+  type SerializedEntity,
+} from '../utils/serialization.js';
 
 /** Metadata used to construct a Playlist. */
 export interface PlaylistData {
@@ -19,7 +25,7 @@ export interface PlaylistData {
   /** Playlist author name and source URL. */
   author?: { name: string; url: string };
   /** Playlist entries. */
-  tracks?: Array<Track | (TrackData & { requested_by?: TrackData['requestedBy'] })>;
+  tracks?: Array<Track | TrackData>;
 }
 
 /** JSON-compatible Playlist representation. */
@@ -44,18 +50,37 @@ export interface PlaylistJSON {
   tracks: ReturnType<Track['toJSON']>[];
 }
 
-/** Reconstructable Playlist serialization with the v7 discriminator fields. */
-export interface SerializedPlaylist extends Omit<PlaylistJSON, 'tracks'> {
-  /** Serialized Tracks that belong to the playlist. */
+/** Public Playlist fields stored by the versioned persistence format. */
+export type SerializedPlaylistData = {
+  /** Stable source playlist identifier. */
+  id: string;
+  /** Source page URL. */
+  url: string;
+  /** Display title. */
+  title: string;
+  /** Playlist description. */
+  description: string;
+  /** Thumbnail URL. */
+  thumbnail: string;
+  /** Album or playlist classification. */
+  type: 'album' | 'playlist';
+  /** Source name. */
+  source: TrackSource;
+  /** Playlist author name and source URL. */
+  author: { name: string; url: string };
+  /** Serialized Tracks in playlist order, without parent references. */
   tracks: SerializedTrack[];
-  /** Serialization type discriminator. */
-  $type: 'playlist';
-  /** Encoder version string. */
-  $encoder_version: string;
-}
+};
+
+/** Version 1 persistence representation of a Playlist. */
+export type SerializedPlaylist = SerializedEntity<
+  'playlist',
+  SerializedPlaylistData,
+  typeof SERIALIZATION_SCHEMA_VERSION
+>;
 
 /** A playlist and its tracks, independent of any Discord client library. */
-export class Playlist implements Iterable<Track> {
+export class Playlist implements Iterable<Track>, Serializable<SerializedPlaylist> {
   /** Stable source playlist identifier. */
   public readonly id: string;
   /** Source page URL. */
@@ -76,7 +101,7 @@ export class Playlist implements Iterable<Track> {
   public tracks: Track[];
 
   /**
-   * Create a playlist and reconstruct any serialized Track entries.
+   * Create a playlist from public metadata and Track entries.
    * @param data Playlist metadata and entries in source order.
    */
   public constructor(data: PlaylistData = {}) {
@@ -125,38 +150,51 @@ export class Playlist implements Iterable<Track> {
     };
   }
 
-  /** Serialize this Playlist and each Track using v7-compatible discriminators. */
+  /**
+   * Serialize public Playlist metadata and ordered Tracks using schema version 1.
+   * Track serialization omits each Track's parent Playlist reference to prevent recursive payloads.
+   * @returns A versioned Playlist persistence payload.
+   */
   public serialize(): SerializedPlaylist {
-    return {
-      id: this.id,
-      url: this.url,
-      title: this.title,
-      description: this.description,
-      thumbnail: this.thumbnail,
-      type: this.type,
-      source: this.source,
-      author: this.author,
-      tracks: this.tracks.map((track) => track.serialize()),
-      $type: 'playlist',
-      $encoder_version: '8.0.0-dev.0',
+    const serialized: SerializedPlaylist = {
+      type: 'playlist',
+      version: SERIALIZATION_SCHEMA_VERSION,
+      data: {
+        id: this.id,
+        url: this.url,
+        title: this.title,
+        description: this.description,
+        thumbnail: this.thumbnail,
+        type: this.type,
+        source: this.source,
+        author: { name: this.author.name, url: this.author.url },
+        tracks: this.tracks.map((track) => track.serialize()),
+      },
     };
+    cloneJSONValue(serialized, '$');
+    return serialized;
   }
 
   /**
-   * Reconstruct a Playlist from regular or legacy playlist data.
+   * Reconstruct a Playlist from public data and link its Tracks to the restored Playlist.
    * @param data Playlist fields and optional Track entries.
    */
   public static deserialize(data: PlaylistData): Playlist {
-    return new Playlist(data);
+    const playlist = new Playlist(data);
+    for (const track of playlist.tracks) track.playlist = playlist;
+    return playlist;
   }
 
   /**
-   * Deserialize a v7-style object after validating its type discriminator.
-   * @param data Serialized Playlist carrying the `$type: "playlist"` discriminator.
+   * Reconstruct a Playlist from a validated versioned persistence payload.
+   * @param serialized Versioned Playlist payload containing ordered Track entities.
+   * @returns A Playlist with Track instances linked to their parent Playlist.
    */
-  public static fromSerialized(data: SerializedPlaylist): Playlist {
-    if (data.$type !== 'playlist') throw new TypeError('Expected serialized Playlist data with $type "playlist".');
-    return new Playlist({ ...data, tracks: data.tracks.map((track) => Track.fromSerialized(track)) });
+  public static fromSerialized(serialized: SerializedPlaylist): Playlist {
+    return Playlist.deserialize({
+      ...serialized.data,
+      tracks: serialized.data.tracks.map((track) => Track.fromSerialized(track)),
+    });
   }
 
   /** Iterate over Tracks in source order. */

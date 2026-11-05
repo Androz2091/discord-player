@@ -1,6 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import type { MediaSource } from '@remedia/client';
-import { SourceUnavailableError } from '../errors.js';
+import { SerializationError, SourceUnavailableError } from '../errors.js';
+import {
+  cloneJSONValue,
+  SERIALIZATION_SCHEMA_VERSION,
+  type JSONValue,
+  type Serializable,
+  type SerializedEntity,
+} from '../utils/serialization.js';
 import { Playlist, type PlaylistData, type PlaylistJSON } from './playlist.js';
 
 /** Name or identifier for a Track's source integration. */
@@ -67,15 +74,36 @@ export interface TrackJSON<Metadata = unknown> extends TrackData<Metadata> {
   playlist: PlaylistJSON | null;
 }
 
-/** Reconstructable Track serialization with the v7 discriminator fields. */
-export interface SerializedTrack<Metadata = unknown> extends Omit<TrackJSON<Metadata>, 'requestedBy' | 'playlist'> {
-  /** Legacy v7 requester field. */
-  requested_by: TrackRequester | null;
-  /** Serialization type discriminator. */
-  $type: 'track';
-  /** Encoder version string. */
-  $encoder_version: string;
-}
+/** Public Track fields stored by the versioned persistence format. */
+export type SerializedTrackData = {
+  /** Stable Track identifier. */
+  id: string;
+  /** Display title. */
+  title: string;
+  /** Track author or artist. */
+  author: string;
+  /** Track description. */
+  description: string;
+  /** Source page URL. */
+  url: string;
+  /** Thumbnail URL. */
+  thumbnail: string;
+  /** Duration in milliseconds. */
+  durationMS: number;
+  /** View or play count when available. */
+  views: number;
+  /** Portable requester identity, or null when unknown. */
+  requestedBy: string | null;
+  /** Source identifier such as `youtube` or `arbitrary`. */
+  source: string;
+  /** Whether the Track is a live stream. */
+  live: boolean;
+  /** JSON-safe application metadata, or null when absent. */
+  metadata: JSONValue | null;
+};
+
+/** Version 1 persistence representation of a Track. */
+export type SerializedTrack = SerializedEntity<'track', SerializedTrackData, typeof SERIALIZATION_SCHEMA_VERSION>;
 
 function parseDuration(value: string): number {
   if (!value || value === 'LIVE') return 0;
@@ -84,8 +112,27 @@ function parseDuration(value: string): number {
   return parts.reduce((total, part) => total * 60 + part, 0) * 1000;
 }
 
+function formatDuration(durationMS: number, live: boolean): string {
+  if (live) return 'LIVE';
+  if (durationMS === 0) return '';
+  const seconds = Math.floor(Math.max(0, durationMS) / 1000);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainder = seconds % 60;
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`
+    : `${minutes}:${String(remainder).padStart(2, '0')}`;
+}
+
+function requesterIdentity(requester: TrackRequester | null): string | null {
+  if (requester === null) return null;
+  if (typeof requester === 'string') return requester;
+  if (typeof requester === 'object' && requester !== null && typeof requester.id === 'string') return requester.id;
+  throw new SerializationError('Track requester objects must have a string id to be persisted.');
+}
+
 /** A Discord-library-agnostic track model. Source resolution belongs to a source plugin. */
-export class Track<Metadata = unknown> {
+export class Track<Metadata = unknown> implements Serializable<SerializedTrack> {
   /** Stable identifier for this Track instance. */
   public readonly id: string;
   /** Display title. */
@@ -221,45 +268,55 @@ export class Track<Metadata = unknown> {
     };
   }
 
-  /** Serialize this Track in a shape readable by v7-style serializers. */
-  public serialize(): SerializedTrack<Metadata> {
-    return {
-      id: this.id,
-      title: this.title,
-      author: this.author,
-      description: this.description,
-      url: this.url,
-      thumbnail: this.thumbnail,
-      duration: this.duration,
-      durationMS: this.durationMS,
-      views: this.views,
-      source: this.source,
-      live: this.live,
-      metadata: this.trackMetadata,
-      requested_by: this.requestedBy,
-      $type: 'track',
-      $encoder_version: '8.0.0-dev.0',
+  /**
+   * Serialize public Track data using schema version 1.
+   * Requesters are reduced to their string identity, Playlist links are omitted, and metadata must be JSON-safe.
+   * @returns A versioned Track persistence payload.
+   */
+  public serialize(): SerializedTrack {
+    const live = this.live || this.duration.trim().toUpperCase() === 'LIVE';
+    const serialized: SerializedTrack = {
+      type: 'track',
+      version: SERIALIZATION_SCHEMA_VERSION,
+      data: {
+        id: this.id,
+        title: this.title,
+        author: this.author,
+        description: this.description,
+        url: this.url,
+        thumbnail: this.thumbnail,
+        durationMS: this.durationMS,
+        views: this.views,
+        requestedBy: requesterIdentity(this.requestedBy),
+        source: this.source,
+        live,
+        metadata: this.trackMetadata === null ? null : cloneJSONValue(this.trackMetadata, '$.data.metadata'),
+      },
     };
+    cloneJSONValue(serialized, '$');
+    return serialized;
   }
 
   /**
-   * Deserialize JSON or legacy v7 serialized Track data without a Discord client.
-   * @param data JSON or legacy Track fields, including the optional `requested_by` alias.
+   * Construct a Track from public model data without resolving its media source.
+   * @param data Track fields and optional source-plugin metadata.
    * @returns A Track instance reconstructed from the provided fields.
    */
-  public static deserialize<Metadata = unknown>(
-    data: TrackData<Metadata> & { requested_by?: TrackRequester | null },
-  ): Track<Metadata> {
-    return new Track({ ...data, requestedBy: data.requestedBy ?? data.requested_by });
+  public static deserialize<Metadata = unknown>(data: TrackData<Metadata>): Track<Metadata> {
+    return new Track(data);
   }
 
   /**
-   * Deserialize a v7-style object after validating its type discriminator.
-   * @param data Serialized Track carrying the `$type: "track"` discriminator.
-   * @returns A reconstructed Track instance.
+   * Reconstruct a Track from a validated versioned persistence payload.
+   * @param serialized Versioned Track payload.
+   * @returns A Track instance with no reconstructed source-plugin playback state.
    */
-  public static fromSerialized<Metadata = unknown>(data: SerializedTrack<Metadata>): Track<Metadata> {
-    if (data.$type !== 'track') throw new TypeError('Expected serialized Track data with $type "track".');
-    return Track.deserialize(data);
+  public static fromSerialized(serialized: SerializedTrack): Track {
+    const data = serialized.data;
+    return Track.deserialize({
+      ...data,
+      duration: formatDuration(data.durationMS, data.live),
+      playlist: null,
+    });
   }
 }

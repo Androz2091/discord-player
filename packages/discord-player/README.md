@@ -68,6 +68,24 @@ await player.context.provide({ guildId }, async () => {
 });
 ```
 
+## Track and Playlist persistence
+
+`Track` and `Playlist` implement the exported `Serializable<T>` contract. `serialize()` returns a versioned persistence entity; `toJSON()` remains the public display/logging representation and is not used as the persistence payload.
+
+```ts
+import { deserialize, encode, decode, serialize, Track } from 'discord-player';
+
+const track = new Track({ id: 'track-123', title: 'Example', durationMS: 180_000, source: 'youtube' });
+const payload = serialize(track);
+// { type: 'track', version: 1, data: { id, title, ..., durationMS, requestedBy, metadata } }
+
+const restored = deserialize(decode(encode(payload)));
+```
+
+The schema version is independent of the npm package version. Track payloads store duration once in milliseconds, requester identity as a string, and omit Playlist links. A restored Track rebuilds its display duration from milliseconds, so formatting may be normalized; a zero duration is restored as an empty display string. Playlist payloads keep ordered Track entities and omit runtime playback/plugin state. Metadata must contain only finite JSON primitives, dense arrays, and plain objects; unsupported values and circular references throw `SerializationError`.
+
+`deserialize()` accepts the previous v7 `$type` payloads as a migration boundary. V7 did not persist Track IDs, so a migrated Track with no ID receives a new ID. Legacy requester objects are reduced to their string `id`; extractor/query state is not restored, and migrated Tracks still need a source integration before they can play. Incomplete or unsupported legacy fields are rejected. Newly serialized data uses only the v8 `{ type, version, data }` format.
+
 ## Source integration boundary
 
 This package does not include source extractors or a plugin runtime. `Player.search()` can wrap existing Track, Playlist, and SearchResult values; query strings return an empty result until a source integration handles them. The base `Track.getStreamableSource()` rejects with `SourceUnavailableError`. `queue.node.play()` accepts a resolved Remedia `MediaSource` and provides raw playback without changing queue state.
