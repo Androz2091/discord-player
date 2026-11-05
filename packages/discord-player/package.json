@@ -36,14 +36,15 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "dependencies": {
     "@discordjs/collection": "^2.1.1",
-    "@remedia/client": "0.1.0-dev.0"
+    "@remedia/client": "0.1.0-dev.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
   }
 }

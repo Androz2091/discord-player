@@ -1,65 +1,76 @@
-import type { PlayOptions, RemediaNodeConfig } from '@remedia/client';
-import type { GuildQueue, GuildQueueOptions } from './structures/guild-queue.js';
-import type { Track } from './structures/track.js';
-import type { PlayRawResult } from './structures/guild-queue-player-node.js';
+import type { RemediaNodeConfig } from '@remedia/client';
+import type {
+  GuildQueue,
+  GuildQueueOptions,
+  GuildQueuePlayOptions,
+  GuildQueuePlayResult,
+} from './structures/guild-queue.js';
 import type { Playlist } from './structures/playlist.js';
 import type { SearchResult } from './structures/search-result.js';
+import type { Track } from './structures/track.js';
 
-/**
- * The type representing a remedia node configuration used by the DiscordPlayer.
- */
+/** A configured Remedia node snapshot/config type used by Player. */
 export type DiscordPlayerNode = RemediaNodeConfig;
 
-export interface PlayerNodeInitializationOptions<T = any> {
-  /**
-   * The guild queue options to use when initializing the node for this guild queue.
-   * This is only used when the GuildQueue is created for the first time and will be ignored in other situations.
-   */
-  nodeOptions: GuildQueueOptions<T>;
-  /**
-   * The id of the guild for which the node is being initialized.
-   */
-  guildId: string;
-  /**
-   * The voice channel id to which the bot should connect for this guild queue.
-   */
-  channelId: string;
-  /**
-   * The id of the remedia node to be used for this session. If not specified, the default node selection strategy will be used to select a node.
-   */
-  nodeId?: string;
-  /**
-   * The audio player node options to be used when initializing the node for this guild queue. This is only used when the GuildQueue is created for the first time and will be ignored in other situations.
-   */
-  audioPlayerOptions?: PlayOptions;
-  /**
-   * The search options to use.
-   */
-  searchOptions?: SearchOptions;
+/** Structural voice-channel shape supported without a discord.js dependency. */
+export interface PlayerChannelLike {
+  /** Channel snowflake or stable channel ID. */
+  id: string;
+  /** Optional structural guild reference. */
+  guild?: { id: string } | null;
+  /** Optional direct guild ID for non-discord.js adapters. */
+  guildId?: string;
 }
 
-export interface SearchOptions {}
+/** Explicit identifiers accepted when no channel object is available. */
+export interface PlayerChannelIds {
+  /** Guild ID used to locate or create a queue. */
+  guildId: string;
+  /** Voice channel ID used for the Remedia session. */
+  channelId: string;
+}
 
-/**
- * The type representing a media resource that can be played by the DiscordPlayer.
- */
-export type MediaResource = string | Track | Playlist | SearchResult;
+/** Supported channel argument for `Player.play()`. */
+export type PlayerChannelResolvable = string | PlayerChannelLike | PlayerChannelIds;
 
-export interface PlayerNodeInitializationResult<T> {
-  /**
-   * The guild queue instance that was created or retrieved for the specified guild ID.
-   */
-  queue: GuildQueue<T>;
-  /**
-   * The source media resource that was played.
-   */
+/** Media accepted by the public player orchestration API. Strings require a source plugin and currently search empty. */
+export type MediaResource = string | Track | Track[] | Playlist | SearchResult;
+
+/** Search behavior options reserved for source integrations. */
+export interface SearchOptions {
+  /** Search source hint, interpreted by a future source plugin. */
+  source?: string;
+  /** Maximum number of results requested from a future source plugin. */
+  limit?: number;
+}
+
+/** Options for Player-level search. */
+export interface PlayerSearchOptions extends SearchOptions {
+  /** Optional guild context for future source plugin policies. */
+  guildId?: string;
+}
+
+/** Player-level playback orchestration options. */
+export interface PlayerPlayOptions<Metadata = unknown> extends GuildQueuePlayOptions<Metadata> {
+  /** Guild queue defaults used only when the queue is first created. */
+  nodeOptions?: GuildQueueOptions<Metadata>;
+  /** Alias for `nodeOptions`. */
+  queueOptions?: GuildQueueOptions<Metadata>;
+  /** Search options passed to `Player.search()`. */
+  searchOptions?: PlayerSearchOptions;
+  /** Explicit guild identifier when the channel argument is only a channel ID. */
+  guildId?: string;
+}
+
+/** Compatibility name for the v7-style initializer options. */
+export type PlayerNodeInitializationOptions<Metadata = unknown> = PlayerPlayOptions<Metadata>;
+
+/** Result of Player-level orchestration. */
+export interface PlayerNodeInitializationResult<Metadata = unknown> extends GuildQueuePlayResult<Metadata> {
+  /** The guild queue that received this playback request. */
+  queue: GuildQueue<Metadata>;
+  /** Original resource passed to `Player.play()`. */
   resource: MediaResource;
-  /**
-   * The result of the play operation, containing the audio stream information and the DiscordSession instance used to play the resource.
-   */
-  playerResult: PlayRawResult | null;
-  /**
-   * The result of the search operation
-   */
+  /** Resolved tracks and optional playlist metadata. */
   searchResult: SearchResult;
 }

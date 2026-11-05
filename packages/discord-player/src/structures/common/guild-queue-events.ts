@@ -1,164 +1,177 @@
-import type { GuildQueue } from '../guild-queue.js';
-import type { Track } from '../track.js';
 import type { DiscordSessionEvents } from '@remedia/client';
+import type { GuildQueue } from '../guild-queue.js';
+import type { PlayerTriggeredReason, TrackSkipReason } from '../guild-queue.js';
+import type { Track } from '../track.js';
 
+/** Familiar event names emitted by GuildQueue instances through `player.events`. */
 export const GuildQueueEvents = {
-  /**
-   * Emitted when audio track is added to the queue
-   */
+  /** Emitted when one Track is added to the upcoming queue. */
   AudioTrackAdd: 'audioTrackAdd',
-  /**
-   * Emitted when audio tracks were added to the queue
-   */
+  /** Emitted when multiple Tracks are added to the upcoming queue. */
   AudioTracksAdd: 'audioTracksAdd',
-  /**
-   * Emitted when audio track is removed from the queue
-   */
+  /** Emitted when one Track is removed from the upcoming queue. */
   AudioTrackRemove: 'audioTrackRemove',
-  /**
-   * Emitted when audio tracks are removed from the queue
-   */
+  /** Emitted when multiple Tracks are removed from the upcoming queue. */
   AudioTracksRemove: 'audioTracksRemove',
-  /**
-   * Emitted when a connection is created
-   */
+  /** Emitted after the queue's Remedia session connects. */
   Connection: 'connection',
-  /**
-   * Emitted when a voice connection is destroyed
-   */
+  /** Emitted after the queue's Remedia session is destroyed. */
   ConnectionDestroyed: 'connectionDestroyed',
-  /**
-   * Emitted when the bot is disconnected from the channel
-   */
+  /** Emitted when the queue's voice session disconnects. */
   Disconnect: 'disconnect',
-  /**
-   * Emitted when the queue sends a debug info
-   */
+  /** Emitted for queue-scoped diagnostic messages. */
   Debug: 'debug',
-  /**
-   * Emitted when the queue encounters error
-   */
+  /** Emitted for queue-scoped errors. */
   Error: 'error',
-  /**
-   * Emitted when the voice channel is empty
-   */
+  /** Emitted when the connected voice channel becomes empty. */
   EmptyChannel: 'emptyChannel',
-  /**
-   * Emitted when the queue is empty
-   */
+  /** Emitted when no upcoming Track remains after queue progression. */
   EmptyQueue: 'emptyQueue',
-  /**
-   * Emitted when the audio player starts streaming audio track
-   */
+  /** Emitted when a managed Track begins playback. */
   PlayerStart: 'playerStart',
-  /**
-   * Emitted when the audio player errors while streaming audio track
-   */
+  /** Emitted when managed Track playback fails. */
   PlayerError: 'playerError',
-  /**
-   * Emitted when the audio player finishes streaming audio track
-   */
+  /** Emitted when managed Track playback completes naturally. */
   PlayerFinish: 'playerFinish',
-  /**
-   * Emitted when the audio player skips current track
-   */
+  /** Emitted when the current managed Track is skipped. */
   PlayerSkip: 'playerSkip',
-  /**
-   * Emitted when the audio player is triggered
-   */
+  /** Emitted immediately before a managed Track is selected for playback. */
   PlayerTrigger: 'playerTrigger',
-  /**
-   * Emitted when the voice state is updated. Consuming this event may disable default voice state update handler if `Player.isVoiceStateHandlerLocked()` returns `false`.
-   */
+  /** Emitted when the Remedia voice state changes. */
   VoiceStateUpdate: 'voiceStateUpdate',
-  /**
-   * Emitted when volume is updated
-   */
+  /** Emitted after the queue node's percentage volume changes. */
   VolumeChange: 'volumeChange',
-  /**
-   * Emitted when player is paused
-   */
+  /** Emitted when Remedia pauses playback. */
   PlayerPause: 'playerPause',
-  /**
-   * Emitted when player is resumed
-   */
+  /** Emitted when Remedia resumes playback. */
   PlayerResume: 'playerResume',
-  /**
-   * Biquad Filters Update
-   */
-  BiquadFiltersUpdate: 'biquadFiltersUpdate',
-  /**
-   * Equalizer Update
-   */
-  EqualizerUpdate: 'equalizerUpdate',
-  /**
-   * DSP update
-   */
-  DSPUpdate: 'dspUpdate',
-  /**
-   * Audio Filters Update
-   */
-  AudioFiltersUpdate: 'audioFiltersUpdate',
-  /**
-   * Audio player will play next track
-   */
-  WillPlayTrack: 'willPlayTrack',
-  /**
-   * Emitted when a voice channel is repopulated
-   */
-  ChannelPopulate: 'channelPopulate',
-  /**
-   * Emitted when a queue is successfully created
-   */
-  QueueCreate: 'queueCreate',
-  /**
-   * Emitted when a queue is deleted
-   */
-  QueueDelete: 'queueDelete',
-  /**
-   * Emitted when a queue is trying to add similar track for autoplay
-   */
-  WillAutoPlay: 'willAutoPlay',
-  /**
-   * Emitted when sample rate is updated
-   */
-  SampleRateUpdate: 'sampleRateUpdate',
-  /**
-   * Emitted when a named sample rate filter is updated
-   */
-  SampleRateFilterUpdate: 'sampleRateFilterUpdate',
-  /**
-   * Emitted when reverb filter is updated
-   */
-  ReverbUpdate: 'reverbUpdate',
-  /**
-   * Emitted when compressor filter is updated
-   */
-  CompressorUpdate: 'compressorUpdate',
-  /**
-   * Emitted when seek is performed
-   */
+  /** Emitted when Remedia seeks playback. */
   PlayerSeek: 'playerSeek',
-  /**
-   * Emitted when the player is stopped
-   */
+  /** Emitted when managed playback stops without natural completion. */
   PlayerStop: 'playerStop',
+  /** Legacy filter event name retained for compatibility. */
+  BiquadFiltersUpdate: 'biquadFiltersUpdate',
+  /** Legacy filter event name retained for compatibility. */
+  EqualizerUpdate: 'equalizerUpdate',
+  /** Legacy filter event name retained for compatibility. */
+  DSPUpdate: 'dspUpdate',
+  /** Legacy filter event name retained for compatibility. */
+  AudioFiltersUpdate: 'audioFiltersUpdate',
+  /** Legacy channel population event name retained for compatibility. */
+  ChannelPopulate: 'channelPopulate',
+  /** Legacy sample-rate event name retained for compatibility. */
+  SampleRateUpdate: 'sampleRateUpdate',
+  /** Legacy filter sample-rate event name retained for compatibility. */
+  SampleRateFilterUpdate: 'sampleRateFilterUpdate',
+  /** Legacy reverb event name retained for compatibility. */
+  ReverbUpdate: 'reverbUpdate',
+  /** Legacy compressor event name retained for compatibility. */
+  CompressorUpdate: 'compressorUpdate',
+  /** Emitted when a GuildQueue is created. */
+  QueueCreate: 'queueCreate',
+  /** Emitted when a GuildQueue is destroyed. */
+  QueueDelete: 'queueDelete',
+  /** Emitted before queue-managed playback starts a selected Track. */
+  WillPlayTrack: 'willPlayTrack',
+  /** Emitted when AUTOPLAY repeat reaches the source-plugin scheduling boundary. */
+  WillAutoPlay: 'willAutoPlay',
 } as const;
 
+/** Union of familiar guild queue event names. */
 export type GuildQueueEvents = (typeof GuildQueueEvents)[keyof typeof GuildQueueEvents];
-
+/** Event parameter tuple with the owning queue prepended. */
 export type QueueEventParams<T extends unknown[]> = [queue: GuildQueue, ...args: T];
 
+/** Remedia event variants that can end a raw playback generation. */
+export type RawPlaybackTerminalEvent =
+  | DiscordSessionEvents['playbackCompleted'][0]
+  | DiscordSessionEvents['playbackStopped'][0]
+  | DiscordSessionEvents['playbackFailed'][0];
+
 export interface GuildQueueEventsMap {
+  /** One Track was added; arguments are queue and Track. */
   [GuildQueueEvents.AudioTrackAdd]: QueueEventParams<[track: Track]>;
+  /** Multiple Tracks were added; arguments are queue and Track array. */
   [GuildQueueEvents.AudioTracksAdd]: QueueEventParams<[tracks: Track[]]>;
+  /** One Track was removed; arguments are queue and Track. */
   [GuildQueueEvents.AudioTrackRemove]: QueueEventParams<[track: Track]>;
+  /** Multiple Tracks were removed; arguments are queue and Track array. */
   [GuildQueueEvents.AudioTracksRemove]: QueueEventParams<[tracks: Track[]]>;
+  /** A queue session connected. */
+  [GuildQueueEvents.Connection]: QueueEventParams<[]>;
+  /** A queue session was destroyed. */
+  [GuildQueueEvents.ConnectionDestroyed]: QueueEventParams<[]>;
+  /** A queue session disconnected. */
+  [GuildQueueEvents.Disconnect]: QueueEventParams<[]>;
+  /** Queue-scoped debug message. */
+  [GuildQueueEvents.Debug]: QueueEventParams<[message: string]>;
+  /** Queue-scoped application error. */
   [GuildQueueEvents.Error]: QueueEventParams<[error: Error]>;
-  [GuildQueueEvents.PlayerSeek]: QueueEventParams<[event: DiscordSessionEvents['playbackSeeked'][0]]>;
-  [GuildQueueEvents.PlayerPause]: QueueEventParams<[event: DiscordSessionEvents['playbackPaused'][0]]>;
-  [GuildQueueEvents.PlayerStart]: QueueEventParams<[event: DiscordSessionEvents['playbackStarted'][0]]>;
-  [GuildQueueEvents.PlayerFinish]: QueueEventParams<[event: DiscordSessionEvents['playbackCompleted'][0]]>;
-  [GuildQueueEvents.PlayerError]: QueueEventParams<[event: DiscordSessionEvents['playbackFailed'][0]]>;
-  [GuildQueueEvents.PlayerStop]: QueueEventParams<[event: DiscordSessionEvents['playbackStopped'][0]]>;
+  /** Connected voice channel became empty. */
+  [GuildQueueEvents.EmptyChannel]: QueueEventParams<[]>;
+  /** Upcoming queue became empty. */
+  [GuildQueueEvents.EmptyQueue]: QueueEventParams<[]>;
+  /** Managed Track started; raw Remedia event is appended when present. */
+  [GuildQueueEvents.PlayerStart]: QueueEventParams<
+    [track: Track, rawEvent: DiscordSessionEvents['playbackStarted'][0] | undefined]
+  >;
+  /** Managed Track failed; arguments preserve the v7 order and append the Remedia event. */
+  [GuildQueueEvents.PlayerError]: QueueEventParams<
+    [error: Error, track: Track, rawEvent: DiscordSessionEvents['playbackFailed'][0] | undefined]
+  >;
+  /** Managed Track completed naturally; the raw Remedia event is appended when present. */
+  [GuildQueueEvents.PlayerFinish]: QueueEventParams<
+    [track: Track, rawEvent: DiscordSessionEvents['playbackCompleted'][0] | undefined]
+  >;
+  /** Managed Track was skipped; the raw Remedia stop event is appended when present. */
+  [GuildQueueEvents.PlayerSkip]: QueueEventParams<
+    [
+      track: Track,
+      reason: TrackSkipReason,
+      description: string,
+      rawEvent: DiscordSessionEvents['playbackStopped'][0] | undefined,
+    ]
+  >;
+  /** Track selection trigger with its application-level reason. */
+  [GuildQueueEvents.PlayerTrigger]: QueueEventParams<[track: Track, reason: PlayerTriggeredReason]>;
+  /** Remedia voice-state update. */
+  [GuildQueueEvents.VoiceStateUpdate]: QueueEventParams<[event: DiscordSessionEvents['voiceStateChanged'][0]]>;
+  /** Previous and new volume percentages. */
+  [GuildQueueEvents.VolumeChange]: QueueEventParams<[oldVolume: number, newVolume: number]>;
+  /** Remedia pause lifecycle event. */
+  [GuildQueueEvents.PlayerPause]: QueueEventParams<[rawEvent: DiscordSessionEvents['playbackPaused'][0]]>;
+  /** Remedia resume lifecycle event. */
+  [GuildQueueEvents.PlayerResume]: QueueEventParams<[rawEvent: DiscordSessionEvents['playbackResumed'][0]]>;
+  /** Remedia seek lifecycle event. */
+  [GuildQueueEvents.PlayerSeek]: QueueEventParams<[rawEvent: DiscordSessionEvents['playbackSeeked'][0]]>;
+  /** Managed playback stopped; the raw Remedia stop event is appended when present. */
+  [GuildQueueEvents.PlayerStop]: QueueEventParams<
+    [track: Track | null, rawEvent: DiscordSessionEvents['playbackStopped'][0] | undefined]
+  >;
+  /** Legacy filter update event retained for consumer type compatibility. */
+  [GuildQueueEvents.BiquadFiltersUpdate]: QueueEventParams<[oldFilters: unknown, newFilters: unknown]>;
+  /** Legacy filter update event retained for consumer type compatibility. */
+  [GuildQueueEvents.EqualizerUpdate]: QueueEventParams<[oldFilters: unknown, newFilters: unknown]>;
+  /** Legacy filter update event retained for consumer type compatibility. */
+  [GuildQueueEvents.DSPUpdate]: QueueEventParams<[oldFilters: unknown, newFilters: unknown]>;
+  /** Legacy filter update event retained for consumer type compatibility. */
+  [GuildQueueEvents.AudioFiltersUpdate]: QueueEventParams<[oldFilters: unknown, newFilters: unknown]>;
+  /** Legacy channel population event retained for compatibility. */
+  [GuildQueueEvents.ChannelPopulate]: QueueEventParams<[]>;
+  /** Legacy sample-rate update event retained for compatibility. */
+  [GuildQueueEvents.SampleRateUpdate]: QueueEventParams<[oldRate: number | null, newRate: number]>;
+  /** Legacy filter sample-rate event retained for compatibility. */
+  [GuildQueueEvents.SampleRateFilterUpdate]: QueueEventParams<[oldFilter: unknown, newFilter: unknown]>;
+  /** Legacy reverb update event retained for compatibility. */
+  [GuildQueueEvents.ReverbUpdate]: QueueEventParams<[oldValue: unknown, newValue: unknown]>;
+  /** Legacy compressor update event retained for compatibility. */
+  [GuildQueueEvents.CompressorUpdate]: QueueEventParams<[oldValue: unknown, newValue: unknown]>;
+  /** Queue was created; no raw Remedia event exists. */
+  [GuildQueueEvents.QueueCreate]: QueueEventParams<[]>;
+  /** Queue was deleted; no raw Remedia event exists. */
+  [GuildQueueEvents.QueueDelete]: QueueEventParams<[]>;
+  /** A Track was selected and will be submitted to Remedia. */
+  [GuildQueueEvents.WillPlayTrack]: QueueEventParams<[track: Track]>;
+  /** AUTOPLAY reached its deferred source-plugin scheduling boundary. */
+  [GuildQueueEvents.WillAutoPlay]: QueueEventParams<[track: Track]>;
 }

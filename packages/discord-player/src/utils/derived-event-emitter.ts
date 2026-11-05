@@ -11,7 +11,11 @@ type DerivedEmitterConstructor<T extends Emittable> = new () => Pick<T, 'emit'>;
  */
 export function DerivedEventEmitter<T extends Emittable>(derivationTarget: string): DerivedEmitterConstructor<T> {
   class Derived {
-    /** The target emitter to delegate events to. */
+    /**
+     * Delegate event emission to the emitter stored on the derived instance.
+     * @param args Event name followed by the event's listener arguments.
+     * @returns Whether the target emitter had a matching listener.
+     */
     public emit(...args: unknown[]): boolean {
       const emitter = (this as unknown as Record<string, Emittable>)[derivationTarget];
 
