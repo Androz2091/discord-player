@@ -1,0 +1,38 @@
+---
+title: Serialization and persistence
+description: Store portable Track and Playlist data using the versioned v8 entity format.
+---
+
+`Track` and `Playlist` implement `Serializable<T>`. `serialize()` returns a validated persistence representation; `toJSON()` is intended for display/logging.
+
+```ts
+import { Track, serialize, deserialize, encode, decode } from 'discord-player';
+
+const track = new Track({
+  title: 'Example recording',
+  url: 'https://media.example.com/track.mp3',
+  durationMS: 180_000,
+});
+
+const entity = serialize(track); // { type: 'track', version: 1, data: ... }
+const encoded = encode(entity);
+const restored = deserialize(decode(encoded));
+```
+
+## What gets saved
+
+A Track saves portable identity, metadata, duration in **milliseconds**, and a source reference when provided by a plugin. A Playlist saves ordered serialized Tracks. Both omit the live queue, native player, streams, and plugin instances.
+
+Restore the same or a compatible source plugin before attempting playback of persisted Tracks. A restored Track does not automatically know how to open a private URL or stream.
+
+## Validation rules
+
+The serializer rejects cyclic objects, functions, getters, non-finite numbers, sparse arrays, and other non-JSON values. Treat decoded data as untrusted and call `deserialize()`, which validates the schema.
+
+The entity `version` is a persistence schema version and does **not** match the npm package version.
+
+## Upgrading stored v7 data
+
+`deserialize()` accepts supported v7 `$type` Track/Playlist entities as an import boundary. V7 records may lack stable Track IDs; new ones are generated. Extractor runtime state is not restored. See [migrating persisted data](/docs/migration/data) before changing your storage format.
+
+<NextStep href="/docs/guides/context" label="Use request-scoped Player context" />

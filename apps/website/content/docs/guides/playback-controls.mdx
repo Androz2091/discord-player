@@ -1,0 +1,49 @@
+---
+title: Playback controls
+description: Pause, resume, seek, change volume, and distinguish managed commands from raw session controls.
+---
+
+Controls are asynchronous because they cross the Remedia session boundary. Always await them before sending a success response to a user.
+
+```ts
+const queue = player.getQueue(guildId);
+if (!queue) return;
+
+await queue.node.pause();
+await queue.node.resume();
+await queue.node.seek(60_000); // Milliseconds
+await queue.node.setVolume(75); // 0–100 percent
+```
+
+## Managed lifecycle controls
+
+| Call | Effect |
+| --- | --- |
+| `await queue.skip()` | End the current managed Track and advance |
+| `await queue.skipTo(trackOrIndex)` | Skip to an upcoming Track |
+| `await queue.jump(trackOrIndex)` | Jump within the upcoming queue |
+| `await queue.stop()` | Stop managed playback, preserve upcoming Tracks |
+| `await queue.destroy()` | Dispose voice, history, and the queue |
+
+For a raw session, `queue.node.stopSession()` stops its audio without following the queue's managed lifecycle. Use `queue.stop()` for ordinary music commands.
+
+## Position and duration
+
+```ts
+const elapsed = queue.node.playbackTime;
+const duration = queue.node.totalDuration;
+const timestamp = queue.node.getTimestamp();
+const bar = queue.node.createProgressBar({ length: 20 });
+```
+
+`playbackTime` and `totalDuration` are **milliseconds**. The timeline can be unknown for live or unbounded sources. `getTimestamp()` returns `null` if the current Track cannot produce a timeline.
+
+## Seeking is source-dependent
+
+File, URL, and buffer seeking follow Remedia's decoder capabilities. One-shot streams may have more restricted seeking support and may require consuming intermediate audio. Do not assume every source can seek backward or that seeking to an unknown duration is valid.
+
+## Volume differs at the boundary
+
+discord-player uses a percentage (0–100). Remedia's low-level session uses linear gain, so discord-player converts `80` to `0.8` when configuring the native session.
+
+<NextStep href="/docs/guides/events" label="Handle lifecycle events" />

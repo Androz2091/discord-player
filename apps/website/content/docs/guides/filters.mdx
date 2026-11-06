@@ -1,0 +1,45 @@
+---
+title: Audio filters
+description: Apply named FFmpeg presets or raw filtergraphs through Remedia without manipulating stream pipes.
+---
+
+`queue.node.filters` holds the current graph configuration. It supports v8's named compatibility presets plus direct FFmpeg filtergraphs.
+
+```ts
+const filters = queue.node.filters;
+
+await filters.set(['8d', 'nightcore']);
+console.log(filters.enabled); // Canonical preset names
+console.log(filters.graph); // Generated filtergraph
+
+await filters.toggle('nightcore');
+await filters.remove('8d');
+await filters.setRaw('volume=0.8');
+await filters.clear();
+```
+
+## Named presets and raw graphs
+
+| Method | Description |
+| --- | --- |
+| `set(nameOrNames)` | Replace the graph with preset(s) |
+| `get(name)` | Check whether a named preset is enabled |
+| `get()` | Read the complete filtergraph, if present |
+| `toggle(name, enabled?)` | Change a named preset |
+| `remove(nameOrNames)` | Remove named presets |
+| `setRaw(graph)` | Replace with an opaque FFmpeg filtergraph |
+| `clear()` | Remove all filters |
+
+Preset names include `8d`, `bassboost`, `nightcore`, and others listed in the [public preset map](https://github.com/Androz2091/discord-player/blob/v8/packages/discord-player/src/structures/audio-filter-presets.ts).
+
+## Graph ownership
+
+When you call `setRaw()`, the graph is opaque. Toggle/remove operates on managed named presets and **does not** parse arbitrary filter strings. For example, a raw `volume=0.8` graph should be replaced explicitly when you want another custom configuration.
+
+Filters can be prepared before voice connection. Connected changes call the native session under a serialized operation lock, so an invalid FFmpeg graph rejects instead of silently replacing a working configuration.
+
+<Callout type="warn" title="Filters change sound and sometimes timing">
+Time-altering filters can affect the relationship between source duration and playback position. Always display the Remedia-backed timeline, not an independently incremented timer.
+</Callout>
+
+<NextStep href="/docs/guides/history" label="Navigate playback history" />

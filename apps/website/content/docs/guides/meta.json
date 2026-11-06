@@ -1,0 +1,15 @@
+{
+  "title": "Core guides",
+  "pages": [
+    "index",
+    "queues",
+    "playback-controls",
+    "events",
+    "voice",
+    "filters",
+    "history",
+    "persistence",
+    "context",
+    "errors"
+  ]
+}

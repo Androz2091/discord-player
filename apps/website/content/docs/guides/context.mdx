@@ -1,0 +1,26 @@
+---
+title: Player context
+description: Access a Player, queue, or history inside asynchronous command work without global singletons.
+---
+
+The v8 context uses Node.js `AsyncLocalStorage`. It is scoped to a particular Player instance, so multiple bots or Player instances do not share a global active queue.
+
+```ts
+import { useQueue, useHistory, usePlayer } from 'discord-player';
+
+await player.context.provide({ guildId }, async () => {
+  const activePlayer = usePlayer();
+  const queue = useQueue();
+  const history = useHistory();
+
+  console.log(activePlayer?.id, queue?.currentTrack?.title, history?.size);
+});
+```
+
+The scope survives `await` while the provided callback is active. Outside an active context, optional hooks return `null` or `undefined` rather than selecting a random Player.
+
+Other hooks include `useMetadata()`, `useVolume()`, and `useTimeline()`. These read state from the current queue; they are not native audio callbacks.
+
+Use explicit `player.getQueue(guildId)` for long-lived workers, background jobs, or places where an async context may not exist.
+
+<NextStep href="/docs/guides/errors" label="Handle errors and recovery" />
