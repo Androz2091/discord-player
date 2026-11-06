@@ -1,0 +1,53 @@
+---
+title: Migration verification checklist
+description: Test the new runtime and source host before switching production bots to v8.
+---
+
+Use this as a release gate. The items below are designed to expose the most common differences in source identity, native playback, and queue lifecycle.
+
+## Runtime and voice
+
+- [ ] Bot starts on Node.js 22.18+ with ESM.
+- [ ] Embedded host loads FFmpeg 7 and Remedia native bindings; or remote server loads them successfully.
+- [ ] `initialize(botUserId)` completes after Gateway READY.
+- [ ] Raw `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` are forwarded once.
+- [ ] Bot joins and leaves a voice channel correctly.
+- [ ] Moving channels retains queue metadata and existing playback policy.
+- [ ] Self-deaf and self-mute can be changed while connected.
+- [ ] Reconnect and voice-region changes do not generate a false `playerFinish`.
+
+## Sources and plugins
+
+- [ ] A valid query matches the intended plugin.
+- [ ] An unsupported query returns an empty result or a clearly handled error.
+- [ ] Track metadata and playable source are resolved independently.
+- [ ] Known direct URLs are accessible from the selected Remedia node.
+- [ ] Legacy extractor compatibility tests cover each retained integration.
+- [ ] Plugin teardown and cancellation complete without stuck promises.
+
+## Queue and controls
+
+- [ ] At least two Tracks play in order.
+- [ ] Pause/resume and volume controls work.
+- [ ] Seek works on sources that support it, and unsupported requests fail cleanly.
+- [ ] Skip advances once, with one `playerSkip`.
+- [ ] Stop retains upcoming Tracks but does not insert history.
+- [ ] Repeat and shuffle follow the intended policy.
+- [ ] Natural completion and failure do not produce duplicate queue transitions.
+- [ ] Filter updates apply without unexpectedly replacing the voice session.
+
+## Data and release
+
+- [ ] New serialized Tracks and Playlists deserialize correctly.
+- [ ] Sample v7 records import or are safely quarantined.
+- [ ] Restored Tracks resolve with registered source plugins.
+- [ ] Metrics and logs omit tokens and sensitive signed URLs.
+- [ ] A rollback plan exists for bot commands and the stored entity format.
+
+## Suggested rollout
+
+Start with a small test guild and a short set of known audio sources. Log queue lifecycle events and compare the expected queue order against actual playback. Move additional guilds only after the above checks pass.
+
+For ongoing work, use the [API reference](/docs/reference), [source plugin guide](/docs/plugins), and [error guide](/docs/guides/errors). The [architecture page](/docs/architecture) explains why the underlying behavior changed.
+
+<NextStep href="/docs/reference" label="Browse the v8 public API reference" />

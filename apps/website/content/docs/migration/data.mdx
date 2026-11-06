@@ -1,0 +1,55 @@
+---
+title: Migrating saved data
+description: Move from legacy Track and Playlist payloads to validated v8 persistence entities.
+---
+
+v8's persistence shape is separate from the npm version. Serialized entities have `type`, `version`, and `data`, and store only portable information.
+
+## New writes
+
+```ts
+import { serialize, deserialize, encode, decode } from 'discord-player';
+
+const stored = serialize(track);
+const encoded = encode(stored);
+
+// Later:
+const restored = deserialize(decode(encoded));
+```
+
+Avoid relying on `track.toJSON()` as a storage contract. It is a display representation, not the canonical persistence format.
+
+## Legacy reads
+
+`deserialize()` supports a defined subset of v7 `$type` Track/Playlist records as a migration boundary. It validates the record before constructing a new v8 model. Incompatible or incomplete data fails with `SerializationError`, so wrap migration in a per-record error boundary.
+
+```ts
+import { deserialize, serialize } from 'discord-player';
+
+for (const legacyRecord of historicalRecords) {
+  try {
+    const model = deserialize(legacyRecord);
+    const v8Entity = serialize(model);
+    await saveNewRecord(v8Entity);
+  } catch (error) {
+    await quarantineRecord(legacyRecord, error);
+  }
+}
+```
+
+`historicalRecords`, `saveNewRecord`, and `quarantineRecord` are your storage integration. Do not overwrite the original database until the transformed records have been validated.
+
+## Differences that affect playback
+
+- V7 data may not have a Track ID, so v8 generates one during reconstruction.
+- Legacy requester objects become portable requester ID strings.
+- Duration persists in milliseconds; formatted display strings may be normalized.
+- Playlist links and live playback objects are not persisted on each Track.
+- Private legacy extractor state, `raw.engine` closures, or credentials do not survive.
+- `sourceReference` should hold only public/portable identifiers, not tokens or streams.
+
+## Safe rollout
+
+Read legacy data, validate, write a new format in parallel, and compare sample playback resolution before switching reads. Keep an archive of original entities until rollback is no longer required.
+
+<NextStep href="/docs/migration/checklist" label="Run the migration checklist" />

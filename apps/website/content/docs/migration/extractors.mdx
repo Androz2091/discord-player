@@ -1,0 +1,86 @@
+---
+title: Migrating extractors to plugins
+description: Keep supported BaseExtractor subclasses via emulation, then port source logic to typed operations.
+---
+
+You can migrate in two phases. First keep a compatible legacy extractor through the emulation layer, then implement a modern source plugin. Both paths share `PluginRegistry`.
+
+## Phase 1: compatibility mode
+
+```ts
+import { BaseExtractor } from 'discord-player';
+
+class MyLegacyExtractor extends BaseExtractor {
+  static identifier = 'my.source';
+
+  async validate(query: string) {
+    return query.startsWith('https://');
+  }
+
+  async handle(query: string, context) {
+    return this.createResponse(null, [
+      new Track(this.context.player, {
+        title: 'Audio',
+        url: query,
+        requestedBy: context.requestedBy,
+        engine: query,
+      }),
+    ]);
+  }
+
+  async stream(track: Track) {
+    return track.raw.engine;
+  }
+}
+
+await player.extractors.register(MyLegacyExtractor, {});
+```
+
+Import `Track` and type `context` as `ExtractorSearchContext` when using TypeScript; see the complete [legacy extractor example](/docs/plugins/legacy-extractors).
+
+The compatibility adapter accepts a `BaseExtractor` **constructor**, not an instance or a modern plugin descriptor. Its `validate`, `handle`, `stream`, `bridge`, related lookup, and local encoded post-stream logic map onto the new operation host.
+
+## Phase 2: native source plugin
+
+```ts
+import { definePlugin, Track } from 'discord-player';
+
+export const mySource = definePlugin({
+  id: 'my.source',
+  kind: 'source',
+  setup(ctx) {
+    ctx.on('search.query.match', ({ query }) =>
+      query.startsWith('https://') ? { score: 100 } : null,
+    );
+    ctx.on('search.query.resolve', ({ query }) => ({
+      playlist: null,
+      tracks: [new Track({ title: 'Audio', url: query })],
+    }));
+    ctx.on('track.stream', ({ track }) => ({ url: track.url }));
+  },
+});
+```
+
+Register `plugins: [mySource()]` before Player initialization, or `await player.plugins.register(mySource())` later. Do not register both the modern and legacy plugin with the same ID at the same time.
+
+## The emulation contract
+
+| Legacy hook | Modern operation |
+| --- | --- |
+| `validate` | `search.query.match` |
+| `handle` | `search.query.resolve` |
+| `stream` | `track.stream` |
+| `getRelatedTracks` | `track.related` |
+| `bridge` | `track.bridge` |
+| `handlePostStream` | Local `stream.transform` |
+| `activate / deactivate` | `setup / destroy` |
+
+## Known incompatibilities
+
+A legacy extractor requiring raw voice packets, old stream dispatcher objects, customized PCM/Opus format overrides, or a private execution session cannot rely on compatibility mode. Move that functionality to Remedia-backed APIs or redesign the source integration.
+
+Persisted Track `raw.engine` fields are not portable. A restored Track needs a new source resolver using its public `url` or a portable `sourceReference`.
+
+Remote audio nodes require URLs/files accessible to the server. A Node.js Readable resolved by a compatibility extractor is local-only.
+
+<NextStep href="/docs/migration/data" label="Migrate stored Track and Playlist data" />
