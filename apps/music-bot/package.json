@@ -18,7 +18,7 @@
   "scripts": {
     "dev": "commandkit dev",
     "build": "commandkit build",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
     "test": "pnpm build && vitest run",
     "start": "commandkit start"
   },

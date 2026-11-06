@@ -6,7 +6,7 @@ it('creates, replaces, reconnects and destroys sessions while retaining configur
   const { queue, player, session, sessions, backend } = await setup();
   const node = queue.node;
   expect(node.getSession()).toBeDefined();
-  expect(node.filters).toBe(session.filters);
+  expect(node.filters.graph).toBe(session.filters.graph);
   const created = backend.asSession(
     await node.createSession({ channelId: 'new', volume: 0.4, selfMute: true, filterGraph: 'volume=0.4' }),
   );
@@ -26,7 +26,7 @@ it('creates, replaces, reconnects and destroys sessions while retaining configur
   expect(sessions).toHaveLength(2);
   await node.destroySession();
   expect(node.getSession(false)).toBeNull();
-  expect(node.filters).toBeNull();
+  expect(node.filters.graph).toBe(queue.options.filterGraph);
   expect(() => node.getSession()).toThrow('initialized');
   expect(node.isIdle()).toBe(true);
   expect(node.isPlaying()).toBe(false);

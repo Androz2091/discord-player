@@ -218,9 +218,43 @@ plugins, remote plugin execution/protocols and automatic distribution are deferr
 
 Discord Player uses Remedia `0.1.0-dev.1`. Queue connection settings initialize `DiscordSession` with self-deaf, self-mute, linear volume, and raw filtergraph configuration. Queue volume remains a 0–100 percentage and is converted to Remedia gain internally. Channel changes call `DiscordSession.move(channelId)` on the existing session, retaining the queue, current Track, filters, volume, and history. `queue.setSelfDeaf()` and `queue.setSelfMute()` update the connected session and queue defaults.
 
+## Audio filters
+
+`queue.node.filters` is a `GuildQueuePlayerAudioFilters` instance. It provides
+35 fixed v7 FFmpeg presets and accepts raw filtergraphs without exposing the old
+stream pipeline or custom preset-registration APIs.
+
+```ts
+const filters = queue.node.filters;
+await filters.set(['8d', 'nightcore']); // Replace the chain with named presets.
+filters.get('8D'); // true; both spellings are accepted.
+filters.get(); // Complete raw FFmpeg filtergraph, or null.
+filters.enabled; // Detached canonical preset names.
+await filters.toggle('nightcore'); // false: this preset is now disabled.
+await filters.toggle('bassboost', true);
+await filters.remove('8d');
+await filters.setRaw('volume=0.8'); // Replace with an opaque raw graph.
+await filters.toggle('nightcore'); // Append a named effect while retaining the raw graph.
+await filters.clear();
+```
+
+`set()` accepts a single preset, a preset array, a raw graph string, or null.
+`setRaw()` always treats its string as an opaque graph, even if it is also a preset
+name. `remove()` and `toggle()` operate on managed named presets; they do not parse
+or edit individual filters inside an opaque graph. After a graph is changed through
+raw session controls, exact single-preset graphs are recognized and other graphs
+are treated as opaque.
+
+Controls are available before connection and update queue defaults for the next
+session. Connected changes use Remedia's filter controls under the node operation
+lock; accepted changes persist across moves and reconnects. Failed native updates
+reject without committing the requested named state. No track replay or voice-session
+replacement is performed. Preset and raw-graph support depends on the selected
+Remedia build; the native backend remains responsible for FFmpeg graph validation.
+
 ## Compatibility notes
 
 - `queue.node.play()` is intentionally raw and does not enqueue Tracks, update history, or advance the queue when playback ends. Use `queue.play()` for queue-managed playback.
 - Queue navigation and voice controls are asynchronous where Remedia operations are asynchronous and return Promises accordingly.
-- Legacy stream pipeline classes, dispatcher utilities, FFmpeg filter wrappers, and audio equalizer processing are not part of v8. Raw Remedia filtergraphs are available through `queue.node.filters`.
+- Legacy stream pipeline classes, dispatcher utilities, and audio equalizer processing are not part of v8. Named FFmpeg presets and raw filtergraphs are available through `queue.node.filters`.
 - Runtime plugins and the planned private source bridge remain deferred.

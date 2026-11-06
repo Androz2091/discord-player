@@ -1,11 +1,5 @@
-import type {
-  AudioStreamInfo,
-  DiscordSession,
-  DiscordSessionOptions,
-  FilterControls,
-  MediaSource,
-  PlayOptions,
-} from '@remedia/client';
+import { GuildQueuePlayerAudioFilters } from './guild-queue-player-audio-filters.js';
+import type { AudioStreamInfo, DiscordSession, DiscordSessionOptions, MediaSource, PlayOptions } from '@remedia/client';
 import type { DiscordPlayer } from '../player.js';
 import type { GuildQueue } from './guild-queue.js';
 import type { Track } from './track.js';
@@ -69,6 +63,8 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   public session: DiscordSession | null = null;
   /** Parent Player that owns Remedia and gateway orchestration. */
   public readonly player: DiscordPlayer;
+  /** Queue-owned named presets and raw filtergraph controls, available before connection. */
+  public readonly filters: GuildQueuePlayerAudioFilters<Metadata>;
   #volume = 100;
 
   /**
@@ -81,6 +77,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   ) {
     this.player = queue.manager.player;
     this.#volume = queue.options.volume ?? 100;
+    this.filters = new GuildQueuePlayerAudioFilters(this);
   }
 
   /** Get the connected session, throwing when one does not exist. */
@@ -95,11 +92,6 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       throw new Error('DiscordSession is not initialized. Call queue.connect() first.');
     }
     return this.session as DiscordSession<M> | null;
-  }
-
-  /** Raw Remedia filtergraph controls. Null means no session is connected yet. */
-  public get filters(): FilterControls | null {
-    return this.session?.filters ?? null;
   }
 
   /**

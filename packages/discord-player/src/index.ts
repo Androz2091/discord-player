@@ -27,3 +27,6 @@ export * from './compat/utils.js';
 
 /** Legacy history class name mapped to the managed v8 history facade. */
 export { GuildQueueHistoryManager as GuildQueueHistory } from './managers/guild-queue-history.manager.js';
+
+export * from './structures/guild-queue-player-audio-filters.js';
+export * from './structures/audio-filter-presets.js';

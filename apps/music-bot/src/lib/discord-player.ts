@@ -3,11 +3,11 @@ import { useClient } from 'commandkit/hooks';
 import { escapeMarkdown } from 'discord.js';
 import type { QueueMetadata } from './common.ts';
 import { musicEmbed } from './embeds.ts';
-import { rawHTTPSource } from './url-track.ts';
+import { rawHTTPExtractor } from './raw-http-extractor.ts';
 
 export const player = new DiscordPlayer({
   nodes: [{ id: 'local', type: 'embedded' }],
-  plugins: [rawHTTPSource()],
+  plugins: [rawHTTPExtractor()],
   send(guildId, payload) {
     const client = useClient<true>();
     client.guilds.cache.get(guildId)?.shard?.send(payload);
