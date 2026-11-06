@@ -39,8 +39,8 @@ The options extend relevant `@remedia/client` configuration without exposing its
 | `search(query, options?)` | `Promise<SearchResult>` | String queries require a matching plugin |
 | `play(channel, resource, options?)` | `Promise<PlayerNodeInitializationResult>` | Create/retrieve queue and delegate managed playback |
 | `createQueue(guildId, options?)` | `Promise<GuildQueue>` | Reuse or create guild queue |
-| `getQueue(guildId)` | `GuildQueue | undefined` | Fetch existing queue |
-| `deleteQueue(guildId)` | `Promise<void>` | Delete queue and release its session |
+| `getQueue(guildId)` | `GuildQueue | null` | Fetch existing queue |
+| `deleteQueue(guildId)` | `Promise<boolean>` | Delete queue and release its session |
 | `getRemedia()` | `RemediaClient` | Requires initialization |
 | `destroy()` | `Promise<void>` | Dispose queues and Remedia |
 
