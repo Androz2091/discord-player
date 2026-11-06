@@ -1,0 +1,8 @@
+---
+title: Troubleshooting
+description: Diagnose Remedia native binding and audio-runtime installation failures.
+---
+
+For `ERR_DLOPEN_FAILED`, missing native bindings, missing DLLs, or shared-library errors, follow the [FFmpeg runtime troubleshooting checklist](/docs/installation/ffmpeg#troubleshooting). It covers architecture and libc mismatches, optional npm dependencies, FFmpeg ABI majors, Windows runtime/search paths, macOS install names, and transitive dependencies.
+
+Run the [native runtime smoke test](/docs/installation/ffmpeg#nodejs-smoke-test) in the same launch environment as an embedded bot. For a remote-only deployment, perform the library and server checks on the machine running `remedia-server`; installing FFmpeg on the bot machine will not repair the server's environment.

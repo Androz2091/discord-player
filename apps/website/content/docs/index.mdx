@@ -1,13 +1,24 @@
 ---
-title: Hello World
-description: Your first document
+title: Getting started
+description: Choose a Remedia runtime and prepare your discord-player v8 installation.
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+Discord Player v8 uses Remedia for audio processing. Start with Node.js 22.18.0 or newer and an ESM application.
 
-## What is Next?
+Choose where audio processing runs:
+
+- **Embedded:** Remedia runs in the bot's Node.js process. Install the native addon and compatible FFmpeg 7 shared libraries on that machine.
+- **Remote:** the bot connects exclusively to `remedia-server`. Install FFmpeg on the server machine; the bot machine needs no local FFmpeg installation.
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card
+    title="Installation"
+    href="/docs/installation"
+    description="Prepare the runtime for your selected deployment mode."
+  />
+  <Card
+    title="Installing FFmpeg 7 libraries"
+    href="/docs/installation/ffmpeg"
+    description="Platform-specific packages, ABI checks, and loader troubleshooting."
+  />
 </Cards>

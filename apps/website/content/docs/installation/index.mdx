@@ -1,0 +1,18 @@
+---
+title: Installation
+description: Runtime prerequisites for embedded and remote discord-player v8 deployments.
+---
+
+Use **Node.js 22.18.0 or newer** and ESM, matching [Remedia's Node.js requirement](https://github.com/twlite/remedia/blob/310db1f482d6904c8d0c99e60f784e282d3633aa/packages/remedia-node/package.json). Install the discord-player v8 release and matching Remedia packages selected for your application.
+
+## Embedded Remedia
+
+Embedded nodes use `@remedia/node` inside the bot process. npm selects its architecture-specific native addon through optional dependencies. Keep optional dependencies enabled and install the host's FFmpeg libraries separately before starting the bot.
+
+Follow [Installing FFmpeg 7 libraries](/docs/installation/ffmpeg) for the exact shared-library ABI requirements, package-manager commands, all 13 native targets, and a Node.js smoke test. Installing an unversioned FFmpeg application is not sufficient evidence that the required libraries are available.
+
+## Remote Remedia
+
+If the bot connects exclusively to `remedia-server`, the bot machine does not need FFmpeg or the embedded addon. The machine running the server requires compatible FFmpeg 7 shared libraries. Use the same [FFmpeg installation guide](/docs/installation/ffmpeg) on that server host.
+
+For native loading failures, use the guide's [troubleshooting checklist](/docs/installation/ffmpeg#troubleshooting), also linked from [Troubleshooting](/docs/troubleshooting).
