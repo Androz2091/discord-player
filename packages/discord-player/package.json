@@ -1,7 +1,7 @@
 {
   "name": "discord-player",
   "version": "8.0.0-dev",
-  "description": "Create Discord Player powered music bots with one command",
+  "description": "Complete framework to facilitate discord music commands using JavaScript and TypeScript",
   "keywords": [
     "api",
     "bot",
