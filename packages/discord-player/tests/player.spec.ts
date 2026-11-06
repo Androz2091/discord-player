@@ -1,9 +1,17 @@
+import { readFileSync } from 'node:fs';
 import { expect, it, vi } from 'vitest';
 import { RemediaClient } from '@remedia/client';
 import { DiscordPlayer, Track, Playlist, SearchResult, definePlugin } from '../src/index.js';
 import { createRemediaMock } from './mocks/remedia.js';
 import { setup, TestTrack } from './mocks/queue.js';
 import { settle } from './mocks/async.js';
+
+it('reports the version from the package manifest for the current release build', () => {
+  const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
+    version: string;
+  };
+  expect(DiscordPlayer.version).toBe(packageJson.version);
+});
 
 it('initializes sources before Remedia and keeps host options out of the client SDK', async () => {
   const backend = createRemediaMock();

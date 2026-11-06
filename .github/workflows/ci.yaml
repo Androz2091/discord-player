@@ -1,0 +1,206 @@
+name: CI and Release
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.detect.outputs.release }}
+      malformed: ${{ steps.detect.outputs.malformed }}
+      version: ${{ steps.detect.outputs.version }}
+      channel: ${{ steps.detect.outputs.channel }}
+      dist_tag: ${{ steps.detect.outputs.dist_tag }}
+      prerelease: ${{ steps.detect.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Detect release commit
+        id: detect
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node .github/scripts/release.mjs detect
+
+  validate:
+    needs: detect
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Synchronize release package versions
+        if: needs.detect.outputs.release == 'true'
+        env:
+          RELEASE_VERSION: ${{ needs.detect.outputs.version }}
+        run: node .github/scripts/release.mjs sync
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Typecheck all workspaces
+        run: pnpm typecheck
+
+      - name: Build packages and applications
+        run: pnpm build
+
+      - name: Run workspace and release tooling tests
+        run: pnpm test
+
+      - name: Verify publishable package entrypoints
+        run: node .github/scripts/release.mjs verify-build
+
+      - name: Fail malformed release subjects after CI validation
+        if: needs.detect.outputs.malformed == 'true'
+        run: node .github/scripts/release.mjs validate-subject
+
+      - name: Upload release build outputs
+        if: needs.detect.outputs.release == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-build-${{ github.sha }}
+          path: |
+            packages/discord-player/dist/
+            packages/create-music-bot/dist/
+          if-no-files-found: error
+          retention-days: 1
+
+  pack:
+    needs: [detect, validate]
+    if: needs.detect.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Synchronize release package versions
+        env:
+          RELEASE_VERSION: ${{ needs.detect.outputs.version }}
+        run: node .github/scripts/release.mjs sync
+
+      - name: Install fresh dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download validated build outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: release-build-${{ github.sha }}
+          path: packages
+
+      - name: Verify and pack release packages
+        env:
+          RELEASE_TARBALL_DIR: release-artifacts
+        run: |
+          node .github/scripts/release.mjs verify-build
+          node .github/scripts/release.mjs pack
+
+      - name: Upload verified npm tarballs
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-tarballs-${{ github.sha }}
+          path: release-artifacts/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: [detect, pack]
+    if: needs.detect.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: discord-player-npm-publish-${{ github.repository }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      packages: ${{ steps.publish.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install npm CLI with trusted publishing support
+        run: npm install --global npm@11.21.0
+
+      - name: Verify Node and npm versions
+        run: |
+          node --version
+          npm --version
+          node -e "const { execFileSync } = require('node:child_process'); const [major, minor, patch] = execFileSync('npm', ['--version'], { encoding: 'utf8' }).trim().split('.').map(Number); if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) throw new Error('npm 11.5.1 or newer is required for trusted publishing.');"
+
+      - name: Download verified npm tarballs
+        uses: actions/download-artifact@v4
+        with:
+          name: release-tarballs-${{ github.sha }}
+          path: release-artifacts
+
+      - name: Publish missing package versions through GitHub OIDC
+        id: publish
+        env:
+          RELEASE_VERSION: ${{ needs.detect.outputs.version }}
+        run: node .github/scripts/release.mjs publish release-artifacts
+
+  github-release:
+    needs: [detect, publish]
+    if: needs.detect.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Create or finalize GitHub release
+        env:
+          RELEASE_VERSION: ${{ needs.detect.outputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/github-release.mjs create

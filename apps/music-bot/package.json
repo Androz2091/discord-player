@@ -19,7 +19,7 @@
     "dev": "commandkit dev",
     "build": "commandkit build",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
-    "test": "pnpm build && vitest run",
+    "test": "vitest run",
     "start": "commandkit start"
   },
   "dependencies": {
@@ -29,8 +29,8 @@
     "discord.js": "^14.28.1"
   },
   "devDependencies": {
-    "@types/node": "^26.6.6",
-    "typescript": "^7.0.2",
-    "vitest": "^5.1.0"
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

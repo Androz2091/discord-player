@@ -2,6 +2,7 @@ import { PluginRegistry } from './plugins/registry.js';
 import type { PluginRegistration } from './plugins/types.js';
 import { ExtractorExecutionContext } from './compat/extractors.js';
 import { randomInt, randomUUID } from 'node:crypto';
+import { createRequire } from 'node:module';
 import { RemediaClient, type RemediaClientOptions } from '@remedia/client';
 import { GuildQueueManager } from './managers/guild-queue.manager.js';
 import type { GuildQueueOptions } from './structures/guild-queue.js';
@@ -19,6 +20,8 @@ import type {
 import { SafeEventEmitter } from './utils/safe-event-emitter.js';
 import { PlayerContext } from './context.js';
 import { LrcLib } from './lyrics.js';
+
+const packageVersion = (createRequire(import.meta.url)('../package.json') as { version: string }).version;
 
 /** Options for a Discord Player instance and its Remedia client. */
 export type DiscordPlayerOptions = Omit<RemediaClientOptions, 'selectNode' | 'botUserId'> & {
@@ -76,7 +79,7 @@ export interface DiscordPlayerStatistics {
 /** Familiar OOP Player facade for guild queues and the Remedia client. */
 export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Current package version. */
-  static readonly version = '8.0.0-dev.0';
+  static readonly version = packageVersion;
 
   /** Shared execution host for modern and legacy sources. */
   public readonly plugins = new PluginRegistry(() => this.options.blockExtractors ?? []);
