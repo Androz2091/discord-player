@@ -37,4 +37,16 @@ export class SearchResult {
   public isEmpty() {
     return this.tracks.length === 0;
   }
+
+  /** Retrieve the first Track in the search result. Null if no tracks are available. */
+  public first(): Track | null;
+  /** Retrieve the first N Tracks in the search result. */
+  public first(count: number): Track[];
+  public first(count?: number): Track | Track[] | null {
+    if (typeof count !== 'number') {
+      return this.tracks[0] ?? null;
+    }
+
+    return this.tracks.slice(0, count);
+  }
 }

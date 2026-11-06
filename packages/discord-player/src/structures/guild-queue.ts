@@ -175,7 +175,12 @@ export class GuildQueue<Metadata = unknown> {
   /** Keyed async locks used to serialize conflicting queue operations. */
   public readonly tasks: AsyncQueue;
   /** Statistics for queue-managed playback. */
-  public readonly stats = { tracksAdded: 0, tracksStarted: 0, tracksFinished: 0, tracksFailed: 0 };
+  public readonly stats = {
+    tracksAdded: 0,
+    tracksStarted: 0,
+    tracksFinished: 0,
+    tracksFailed: 0,
+  };
   #currentTrack: Track | null = null;
   #operation: ManagedOperation | null = null;
   #destroyed = false;
@@ -547,9 +552,9 @@ export class GuildQueue<Metadata = unknown> {
           : resource instanceof Playlist
             ? resource.tracks
             : resource instanceof SearchResult
-              ? resource.tracks
+              ? resource.first(1)
               : resource;
-      if (!incoming.length) return { track: null, playerResult: null };
+      if (!incoming?.length) return { track: null, playerResult: null };
       if (options.channelId) {
         await this.connectLocked({ ...options, channelId: options.channelId });
       } else if (!this.node.getSession(false)) {
@@ -561,7 +566,10 @@ export class GuildQueue<Metadata = unknown> {
         options.volume !== undefined ||
         options.filterGraph !== undefined
       ) {
-        await this.connectLocked({ ...options, channelId: this.node.getSession().channelId });
+        await this.connectLocked({
+          ...options,
+          channelId: this.node.getSession().channelId,
+        });
       }
       this.addTrack(incoming);
       selected = incoming[0] ?? null;
@@ -645,7 +653,10 @@ export class GuildQueue<Metadata = unknown> {
       }
 
       selected = this.takeNextTrack() ?? null;
-      if (selected) work = this.beginTrackLocked(selected, { customMetadata: this.#lastCustomMetadata });
+      if (selected)
+        work = this.beginTrackLocked(selected, {
+          customMetadata: this.#lastCustomMetadata,
+        });
     }
     if (work) await work;
     return selected;
@@ -850,7 +861,9 @@ export class GuildQueue<Metadata = unknown> {
       this.emit(GuildQueueEvents.EmptyQueue);
       return null;
     }
-    return this.beginTrackLocked(next, { customMetadata: this.#lastCustomMetadata });
+    return this.beginTrackLocked(next, {
+      customMetadata: this.#lastCustomMetadata,
+    });
   }
 
   private async terminateCurrent(
@@ -923,7 +936,10 @@ export class GuildQueue<Metadata = unknown> {
       if (this.#destroyed || this.#operation !== operation || operation.terminal || signal.aborted) return null;
       operation.phase = 'starting';
       const customMetadata: GuildQueuePlaybackMetadata<PlaybackMetadata> = {
-        __discordPlayer: { queueToken: this.#queueToken, operationId: operation.id },
+        __discordPlayer: {
+          queueToken: this.#queueToken,
+          operationId: operation.id,
+        },
         userMetadata: options.customMetadata,
       };
       const result = await this.node.play<GuildQueuePlaybackMetadata<PlaybackMetadata>>(source, {
