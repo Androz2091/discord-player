@@ -1,0 +1,41 @@
+---
+title: Extending the operation map
+description: Add typed operations and select explicit dispatch policies without inventing a separate plugin bus.
+---
+
+The public `SourceOperationMap` is declaration-mergeable. New operations must be defined on the host before handlers register.
+
+```ts
+import type { Operation } from 'discord-player';
+
+declare module 'discord-player' {
+  interface SourceOperationMap {
+    'track.audit': Operation<
+      { sourceId: string },
+      { accepted: boolean },
+      'first'
+    >;
+  }
+}
+
+player.plugins.defineOperation('track.audit', 'first');
+```
+
+After defining the policy, plugins may register `ctx.on('track.audit', handler)` and callers can execute `player.plugins.execute('track.audit', { sourceId })`.
+
+## Choose the correct policy
+
+- `first` selects the first result other than `undefined`.
+- `collect` returns the ordered list of results.
+- `pipe` passes the previous result into the next handler.
+- `broadcast` invokes notification handlers without a result.
+
+Prefer a named operation for one coherent purpose. Define request/response data with JSON-compatible, portable identities if you expect to persist data or share source metadata later.
+
+## Current host boundary
+
+This is a **local application-side operation system**. It does not automatically serialize a handler, launch a worker process, distribute a plugin to remote Remedia servers, or support a `runtime` kind today.
+
+For a source that must work with remote audio nodes, return server-accessible media in the existing `track.stream` operation.
+
+<NextStep href="/docs/remedia" label="Learn the audio runtime underneath" />

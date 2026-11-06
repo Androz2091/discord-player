@@ -1,0 +1,54 @@
+---
+title: Plugin registration and lifetime
+description: Register sources, handle asynchronous setup and teardown, and cancel in-flight work correctly.
+---
+
+Each Player has its own plugin registry. Registration owns the handler subscriptions, cleanup callbacks, and cancellation signal.
+
+```ts
+import { definePlugin } from 'discord-player';
+
+const mySource = definePlugin({
+  id: 'example.network-source',
+  kind: 'source',
+  async setup(ctx) {
+    const resource = await acquireResource();
+    ctx.onCleanup(() => resource.close());
+
+    ctx.on('track.stream', async ({ track }, { signal }) => {
+      signal.throwIfAborted();
+      return resolveMedia(track, { signal, resource });
+    });
+  },
+  async destroy() {
+    // Optional. Setup resources also have onCleanup handlers.
+  },
+});
+```
+
+Here `acquireResource` and `resolveMedia` are **your own implementation functions**. The public lifecycle methods are `setup`, `destroy`, and `onCleanup`.
+
+## Register and unregister
+
+```ts
+await player.plugins.register(mySource());
+console.log(player.plugins.has('example.network-source'));
+
+await player.plugins.unregister('example.network-source');
+```
+
+Constructor registrations through `plugins: [mySource()]` use the same host and are initialized before the Player starts. Do not register the same ID twice.
+
+## Teardown guarantees
+
+When a plugin is unregistered, new dispatches stop using its handlers immediately. The registration's AbortSignal is aborted, in-flight handlers are awaited, then `destroy()` and registered cleanups run in reverse cleanup order.
+
+**Do not await your own registration's removal from inside one of its handlers.** The host waits for active handlers to settle, so self-removal would deadlock.
+
+If setup fails, the host removes subscriptions and attempts resource cleanup. The ID can be reused once teardown completes.
+
+## Stream ownership
+
+A source handler returning a Node.js `Readable` hands playback lifetime to the host. It may destroy the stream on cancellation, plugin removal, or queue termination. Do not share one active Readable among multiple playback sessions.
+
+<NextStep href="/docs/plugins/streams" label="Choose a stream source" />

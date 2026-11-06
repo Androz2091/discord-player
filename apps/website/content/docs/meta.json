@@ -1,3 +1,22 @@
 {
-  "pages": ["index", "installation", "troubleshooting", "test"]
+  "title": "discord-player v8",
+  "root": true,
+  "pages": [
+    "index",
+    "---Start here---",
+    "getting-started",
+    "installation",
+    "---Build---",
+    "guides",
+    "---Extend---",
+    "plugins",
+    "---Understand---",
+    "remedia",
+    "architecture",
+    "---Upgrade---",
+    "migration",
+    "---Reference---",
+    "reference",
+    "troubleshooting"
+  ]
 }

@@ -1,0 +1,64 @@
+---
+title: Voice connections
+description: Understand the Gateway boundary, channel moves, self-deaf/mute controls, and session ownership.
+---
+
+discord-player does not open a Discord Gateway connection itself. Your bot library owns the connection; Remedia uses it to obtain Discord voice credentials.
+
+## The send/receive contract
+
+```ts
+const player = new Player({
+  nodes: [{ id: 'local', type: 'embedded' }],
+  send(guildId, packet) {
+    return gateway.sendToGuildShard(guildId, packet);
+  },
+});
+
+gateway.onDispatch((packet) => player.receive(packet));
+await player.initialize(botUserId);
+```
+
+`gateway.sendToGuildShard` and `gateway.onDispatch` are application integration points, **not** discord-player exports. For an executable discord.js example, see [create a player](/docs/getting-started/create-player).
+
+Only `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` are passed through to Remedia. Each bot account must use its own authenticated user identity, even if multiple bots share a guild or voice channel.
+
+## Connect or move channels
+
+```ts
+const queue = await player.createQueue(guildId);
+
+await queue.connect({
+  channelId: firstVoiceChannelId,
+  selfDeaf: true,
+  selfMute: false,
+  volume: 70,
+});
+
+await queue.connect({ channelId: nextVoiceChannelId });
+```
+
+The second call reuses the queue/session and requests a voice channel move. It does not intentionally clear history or create a new managed queue.
+
+## Update voice flags
+
+```ts
+await queue.setSelfDeaf(false);
+await queue.setSelfMute(true);
+```
+
+These settings update both the connected session and the defaults for subsequent sessions. Queue volume is percentage-based; session-level linear volume is a Remedia detail.
+
+## Handle voice recovery
+
+```ts
+player.events.on('voiceStateUpdate', (queue, event) => {
+  if (event.state === 'reconnecting') {
+    console.log('Recovering voice', queue.guildId);
+  }
+});
+```
+
+Avoid treating a brief voice reconnect as a completed Track. The queue and Remedia have separate state machines. A channel move is not the same thing as moving a decoder to another Remedia node.
+
+<NextStep href="/docs/guides/filters" label="Apply audio filters" />

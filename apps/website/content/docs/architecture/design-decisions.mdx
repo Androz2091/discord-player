@@ -1,0 +1,40 @@
+---
+title: Why v8 is designed this way
+description: Understand the separation between command orchestration, source plugins, and a single native audio engine.
+---
+
+v8 chooses explicit boundaries instead of exposing a web of stream and voice implementation objects to application code.
+
+## One Rust engine, two deployment modes
+
+Embedded and remote Remedia both use native Rust audio processing. This keeps decoder, filter, volume, and transport behavior aligned. It also avoids maintaining two independent audio implementations with different edge cases.
+
+Remote mode still has real differences: network round trips, authenticated sessions, reconnection, source accessibility, and process boundaries. **Consistency of engine behavior does not imply zero migration gaps or identical latency.**
+
+## A dedicated managed queue layer
+
+Track selection is application policy, not codec behavior. The queue owns repeat, shuffle, history, skip, and event reconciliation. The audio engine owns source playback and terminal generation events. This prevents native playback commands from accidentally mutating application history.
+
+It is also why `queue.play()` and `queue.node.play()` are intentionally different APIs.
+
+## Typed operations for source integration
+
+A source needs multiple capabilities, but rarely all at once. Typed operations separate query matching from metadata resolution and media opening. This makes cancellation, handler selection, priority, and error attribution explicit.
+
+Legacy extractors are adapted into the same operation host so compatibility work does not create a permanent parallel execution system.
+
+## Library-independent Gateway boundary
+
+The application already has a Discord Gateway connection. Rather than importing a specific client library, v8 asks for `send()` and `receive()` with raw Gateway payloads and identifiers. The same Player works wherever that contract can be fulfilled.
+
+## Deliberate non-goals
+
+- No built-in registration of every possible media provider. Source implementations remain explicit.
+- No second media engine for remote nodes.
+- No promise of gapless cross-node transfer.
+- No automatic remote execution of a local JavaScript plugin.
+- No general replacement for the previous raw audio pipe/dispatcher internals.
+
+The result is a smaller, more predictable public framework API. For implementation and error boundaries, return to [the plugin guide](/docs/plugins) or [the managed queue guide](/docs/guides/queues).
+
+<NextStep href="/docs/migration" label="Learn the v7 migration boundaries" />

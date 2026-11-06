@@ -1,11 +1,7 @@
 import { source } from '@/lib/source';
 import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-  MarkdownCopyButton,
-  ViewOptionsPopover,
+  DocsBody, DocsDescription, DocsPage, DocsTitle,
+  MarkdownCopyButton, ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
@@ -29,16 +25,11 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}
-          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`}
+          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/apps/website/content/docs/${page.path}`}
         />
       </div>
       <DocsBody>
-        <MDX
-          components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
-            a: createRelativeLink(source, page),
-          })}
-        />
+        <MDX components={getMDXComponents({ a: createRelativeLink(source, page) })} />
       </DocsBody>
     </DocsPage>
   );
@@ -56,8 +47,8 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
   return {
     title: page.data.title,
     description: page.data.description,
-    openGraph: {
-      images: getPageImageUrl(page).url,
-    },
+    alternates: { canonical: page.url },
+    openGraph: { images: getPageImageUrl(page).url },
+    twitter: { card: 'summary_large_image', images: getPageImageUrl(page).url },
   };
 }

@@ -1,0 +1,52 @@
+---
+title: 1. Create a player
+description: Configure an embedded Remedia node, wire Discord Gateway events, and initialize the Player.
+---
+
+Create a `player.ts` module. This example uses discord.js only to show how raw voice packets are forwarded. There is no discord.js adapter inside discord-player.
+
+```ts title="src/player.ts"
+import { Client, Events, GatewayIntentBits } from 'discord.js';
+import { Player } from 'discord-player';
+
+export const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+});
+
+export const player = new Player({
+  nodes: [{ id: 'local', type: 'embedded' }],
+  send(guildId, payload) {
+    return client.guilds.cache.get(guildId)?.shard?.send(payload);
+  },
+});
+
+client.on('raw', (payload) => {
+  player.receive(payload as Record<string, unknown>);
+});
+
+client.once(Events.ClientReady, async (ready) => {
+  await player.initialize(ready.user.id);
+  console.log('discord-player initialized');
+});
+
+await client.login(process.env.DISCORD_TOKEN);
+```
+
+## Why these calls are required
+
+1. `nodes` configures which Remedia engine(s) run audio. An embedded node runs in your Node.js process.
+2. `send(guildId, payload)` forwards Discord voice-state requests to the correct shard. Use your own Gateway library's equivalent.
+3. `player.receive(payload)` forwards only `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` dispatches to Remedia.
+4. `initialize(botUserId)` creates the Remedia client and activates plugin registrations. Call it once the bot user ID exists, **before issuing playback commands**.
+
+## Verify startup
+
+Set `DISCORD_TOKEN` on your machine and start the module. You should see `discord-player initialized`. If loading the native addon fails, follow [FFmpeg troubleshooting](/docs/installation/ffmpeg#troubleshooting).
+
+The Player has no source registrations yet. A query such as a music URL will return an empty result until you add a source plugin.
+
+<Callout type="warn" title="Do not forward events twice">
+Only one application-level Gateway handler should call `player.receive()` for a dispatch. Remedia manages Discord voice credentials and transport; your application still owns the Gateway connection.
+</Callout>
+
+<NextStep href="/docs/getting-started/source-plugin" label="2. Resolve a media source" />

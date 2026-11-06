@@ -1,8 +1,45 @@
 ---
 title: Troubleshooting
-description: Diagnose Remedia native binding and audio-runtime installation failures.
+description: Diagnose installation, source selection, voice transport, and playback problems systematically.
 ---
 
-For `ERR_DLOPEN_FAILED`, missing native bindings, missing DLLs, or shared-library errors, follow the [FFmpeg runtime troubleshooting checklist](/docs/installation/ffmpeg#troubleshooting). It covers architecture and libc mismatches, optional npm dependencies, FFmpeg ABI majors, Windows runtime/search paths, macOS install names, and transitive dependencies.
+Start by locating the layer that failed. A missing source plugin and a failed native decoder are different problems.
 
-Run the [native runtime smoke test](/docs/installation/ffmpeg#nodejs-smoke-test) in the same launch environment as an embedded bot. For a remote-only deployment, perform the library and server checks on the machine running `remedia-server`; installing FFmpeg on the bot machine will not repair the server's environment.
+## Installation and native runtime
+
+**Symptom:** `ERR_DLOPEN_FAILED`, missing `.node` addon, `avcodec`/FFmpeg shared library errors, or missing Windows DLLs.
+
+**Check:** Node.js version, CPU architecture, platform optional dependencies, and the five required FFmpeg 7 shared library ABI majors. Run the [native loading checklist and smoke test](/docs/installation/ffmpeg#troubleshooting). Embedded hosts need the libraries locally; remote-only bot hosts do not.
+
+## No matching tracks
+
+**Symptom:** `player.search(query)` returns no Tracks or a string query never starts playback.
+
+**Check:** `plugins` registrations, the `search.query.match` handler, query protocol, `blockExtractors`, explicit `pluginId`, and `search.query.resolve`. A Track's URL alone does not automatically register a decoder source.
+
+## Source fails at playback
+
+**Symptom:** Metadata resolves, but `playerError` fires when the Track is played.
+
+**Check:** `track.stream` is registered and returns an accessible media source. For remote nodes, the URL/file must be reachable from the audio server, not just the bot. Validate credentials/redirects and codec support. Inspect the associated native error.
+
+## Voice never becomes connected
+
+**Check:** Guild voice permissions, botUserId, the correct shard in `send`, and forwarding of `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE`. `player.receive()` should run on raw Gateway dispatches, not just a high-level voice-state callback.
+
+## Playback stops, skips, or repeats unexpectedly
+
+**Check:** Use `queue.play()` for managed Tracks, not `queue.node.play()`. Verify repeat mode and that application event listeners are not manually advancing a queue on `playerFinish`. [Queue lifecycle](/docs/architecture/lifecycle) explains the ownership boundary.
+
+## Legacy extractor breaks
+
+**Check:** Is the registered value a `BaseExtractor` subclass constructor? Does its `stream()` return an encoded media source instead of relying on retired voice pipe objects? If the source uses private `raw.engine`, migrate it to a public URL or a portable `sourceReference`.
+
+## Relevant next steps
+
+<Cards>
+  <Card title="FFmpeg installation" href="/docs/installation/ffmpeg" description="Platform-specific libraries, native dependencies, and smoke tests." />
+  <Card title="Plugin debugging" href="/docs/plugins/operations" description="Understand matching, priorities, and typed operation errors." />
+  <Card title="Voice debugging" href="/docs/guides/voice" description="Verify raw Gateway packets, identity, and channel moves." />
+  <Card title="Migration checklist" href="/docs/migration/checklist" description="Test all expected lifecycle behaviors before deployment." />
+</Cards>

@@ -1,0 +1,42 @@
+---
+title: Getting started
+description: Build a working discord-player v8 bot in a predictable sequence.
+---
+
+This walkthrough uses **discord.js as a Gateway client example**. discord-player v8 itself does not require discord.js; any Discord library that can send and receive raw Gateway payloads can integrate the same way.
+
+By the end you will have a Player, a source plugin for direct HTTP(S) audio, and a command that queues a real track. There are no implicit source integrations.
+
+<Steps>
+### Prepare Node.js and FFmpeg
+
+Use Node.js 22.18+ with an ESM project. For embedded audio, install the [FFmpeg 7 native libraries](/docs/installation/ffmpeg) on the bot host.
+
+### Install your packages
+
+```bash
+pnpm add discord-player discord.js @remedia/node
+```
+
+This command is for the embedded tutorial. The example uses discord.js to receive Gateway events. `@remedia/client` is installed as a dependency of discord-player. For a remote-only node, see [remote deployment](/docs/remedia/remote).
+
+### Create the player
+
+Configure Remedia nodes, forward the voice events, and call `initialize()` after the bot is ready.
+
+### Register a source
+
+A Track is not automatically playable just because it has a URL. A source plugin must provide a `track.stream` handler.
+
+### Request playback
+
+Use `player.play()` with a structural voice channel and a query handled by your registered plugin.
+</Steps>
+
+<Cards>
+  <Card title="1. Create a player" href="/docs/getting-started/create-player" description="Set up your Gateway integration and Remedia node." />
+  <Card title="2. Add a source plugin" href="/docs/getting-started/source-plugin" description="Return track metadata and a playable HTTP media source." />
+  <Card title="3. Play a track" href="/docs/getting-started/play-track" description="Wire the first command and confirm playback events." />
+</Cards>
+
+<NextStep href="/docs/getting-started/create-player" label="1. Create a player" />

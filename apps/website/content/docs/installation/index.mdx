@@ -1,18 +1,49 @@
 ---
 title: Installation
-description: Runtime prerequisites for embedded and remote discord-player v8 deployments.
+description: Pick a playback mode, install the required runtime, and verify native FFmpeg loading.
 ---
 
-Use **Node.js 22.18.0 or newer** and ESM, matching [Remedia's Node.js requirement](https://github.com/twlite/remedia/blob/310db1f482d6904c8d0c99e60f784e282d3633aa/packages/remedia-node/package.json). Install the discord-player v8 release and matching Remedia packages selected for your application.
+Use **Node.js 22.18 or newer** and an **ESM** application. discord-player v8 depends on `@remedia/client`. Where audio runs determines whether the bot needs native FFmpeg libraries.
 
-## Embedded Remedia
+<Cards>
+  <Card title="Embedded playback" href="/docs/remedia/embedded" description="Run the Rust engine inside your bot process." />
+  <Card title="Remote playback" href="/docs/remedia/remote" description="Connect to an independently deployed remedia-server." />
+  <Card title="Install FFmpeg 7 libraries" href="/docs/installation/ffmpeg" description="Verified ABI majors, platform commands, and runtime checks." />
+</Cards>
 
-Embedded nodes use `@remedia/node` inside the bot process. npm selects its architecture-specific native addon through optional dependencies. Keep optional dependencies enabled and install the host's FFmpeg libraries separately before starting the bot.
+## Install discord-player
 
-Follow [Installing FFmpeg 7 libraries](/docs/installation/ffmpeg) for the exact shared-library ABI requirements, package-manager commands, all 13 native targets, and a Node.js smoke test. Installing an unversioned FFmpeg application is not sufficient evidence that the required libraries are available.
+```bash
+pnpm add discord-player
+# If running an embedded node, also install the native addon:
+pnpm add @remedia/node
+```
 
-## Remote Remedia
+For the [discord.js example](/docs/getting-started/create-player), also install `discord.js`. You may use any other Discord Gateway client instead.
 
-If the bot connects exclusively to `remedia-server`, the bot machine does not need FFmpeg or the embedded addon. The machine running the server requires compatible FFmpeg 7 shared libraries. Use the same [FFmpeg installation guide](/docs/installation/ffmpeg) on that server host.
+### Embedded mode
 
-For native loading failures, use the guide's [troubleshooting checklist](/docs/installation/ffmpeg#troubleshooting), also linked from [Troubleshooting](/docs/troubleshooting).
+```ts
+nodes: [{ id: 'local', type: 'embedded' }]
+```
+
+The bot loads the native Remedia addon and FFmpeg shared libraries on its own host. Install [FFmpeg 7](/docs/installation/ffmpeg) **before** starting the bot. Native packages are selected by the package manager's optional dependencies.
+
+### Remote mode
+
+```ts
+nodes: [{
+  id: 'media-1',
+  type: 'remote',
+  url: 'wss://audio.example.com/v1/ws',
+  auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
+}]
+```
+
+The remote server owns FFmpeg, playback, and Discord voice packet delivery. Your bot still forwards Discord Gateway credentials to Remedia. Use a secure WebSocket connection and keep credentials out of source control.
+
+## Verify the runtime
+
+Follow the [platform-specific FFmpeg install and smoke test](/docs/installation/ffmpeg). Then work through [create a player](/docs/getting-started/create-player).
+
+<NextStep href="/docs/getting-started/create-player" label="Create your player" />

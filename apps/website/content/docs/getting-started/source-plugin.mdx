@@ -1,0 +1,68 @@
+---
+title: 2. Resolve a media source
+description: Register a small, fully implemented source plugin for direct HTTP(S) audio.
+---
+
+Unlike a static metadata record, a source plugin answers two separate questions: *does this query match?* and *how does this Track become playable audio?* Define a plugin for direct media URLs.
+
+```ts title="src/direct-media.ts"
+import { definePlugin, Track } from 'discord-player';
+
+export const directMedia = definePlugin({
+  id: 'example.direct-media',
+  kind: 'source',
+  setup(ctx) {
+    ctx.on('search.query.match', ({ query }) =>
+      /^https?:\/\/.*\.(mp3|ogg|wav)(\?.*)?$/i.test(query)
+        ? { score: 100 }
+        : null,
+    );
+
+    ctx.on('search.query.resolve', ({ query }) => ({
+      playlist: null,
+      tracks: [
+        new Track({
+          title: new URL(query).pathname.split('/').pop() || 'Audio',
+          url: query,
+        }),
+      ],
+    }));
+
+    ctx.on('track.stream', ({ track }, { signal }) => {
+      signal.throwIfAborted();
+      return { url: track.url };
+    });
+  },
+});
+```
+
+Add the plugin to the Player constructor **before** `initialize()`:
+
+```ts
+import { directMedia } from './direct-media.js';
+
+const player = new Player({
+  nodes: [{ id: 'local', type: 'embedded' }],
+  plugins: [directMedia()],
+  send: (guildId, payload) => sendGateway(guildId, payload),
+});
+```
+
+Here `sendGateway` is your own function from [step 1](/docs/getting-started/create-player), not a function exported by discord-player. Add `plugins: [directMedia()]` to that existing Player instead of constructing a second one.
+
+## Test source discovery
+
+```ts
+const result = await player.search('https://media.example.com/track.mp3');
+console.log(result.tracks[0]?.title);
+```
+
+The result includes one Track and a portable source reference. When playback starts, `track.stream` returns `{ url }` for Remedia to decode.
+
+<Callout type="warn" title="Example, not an unrestricted URL proxy">
+This tiny source is intentionally limited to direct URLs with recognizable audio extensions. In a production bot, enforce URL/domain policies, handle redirects safely, and validate sources before allowing public users to submit arbitrary addresses.
+</Callout>
+
+A plugin is **required** for string queries. A plain `new Track({ url })` with no matching source registration is metadata, not an audio decoder.
+
+<NextStep href="/docs/getting-started/play-track" label="3. Play the first track" />

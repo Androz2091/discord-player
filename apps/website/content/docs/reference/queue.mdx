@@ -1,0 +1,80 @@
+---
+title: GuildQueue and playback node
+description: Queue methods, result contracts, raw node operations, and state semantics.
+---
+
+`GuildQueue` owns application-level playback scheduling. `GuildQueuePlayerNode` provides controls over the underlying Remedia session.
+
+## Create, connect, play
+
+```ts
+const queue = await player.createQueue(guildId, {
+  maxSize: 100,
+  maxHistorySize: 50,
+  metadata: { textChannelId },
+});
+
+await queue.connect({ channelId, volume: 75 });
+await queue.play(track);
+```
+
+## Queue methods
+
+| Method | Purpose |
+| --- | --- |
+| `addTrack(trackOrArrayOrPlaylist)` | Append future Tracks |
+| `addTracks(tracks)` | Append multiple Tracks |
+| `prepend(...)`, `append(...)`, `insertTrack(...)` | Reorder upcoming Tracks |
+| `removeTrack(...)`, `moveTrack(...)`, `swapTracks(...)` | Modify future ordering |
+| `play(resource, options?)` | Queue-managed playback |
+| `playNext()` | Start next upcoming Track when idle |
+| `skip(reason?)`, `skipTo(...)`, `jump(...)` | Managed navigation |
+| `stop()` | Stop managed playback, retain upcoming Tracks |
+| `connect(options)` | Connect/move channel through Remedia |
+| `setSelfDeaf(bool)`, `setSelfMute(bool)` | Update voice flags |
+| `destroy()`, `delete()` | Release queue resources |
+| `clear()` | Clear upcoming Tracks and history |
+
+## Queue state
+
+| Property | Value |
+| --- | --- |
+| `guildId` | Owning guild ID |
+| `currentTrack` | Active or paused Track or `null` |
+| `tracks` | Upcoming Track collection |
+| `size` | Upcoming Track count, excludes current |
+| `history` | Previous-track manager |
+| `node` | GuildQueuePlayerNode |
+| `metadata` | App-defined metadata |
+| `repeatMode` | OFF, TRACK, QUEUE, AUTOPLAY |
+| `isShuffling` | Shuffle state |
+| `isPlaying()` | Managed active status (includes paused) |
+
+## Node/session API
+
+```ts
+await queue.node.pause();
+await queue.node.resume();
+await queue.node.seek(15_000);
+await queue.node.setVolume(80);
+await queue.node.filters.set(['8d', 'nightcore']);
+
+const session = queue.node.getSession();
+console.log(session.nodeId);
+```
+
+| Node method/property | Meaning |
+| --- | --- |
+| `play(source, options?)` | **Raw** Remedia playback, not managed Track scheduling |
+| `playRaw(source, options?)` | Alias to raw playback |
+| `stopSession()` | Stop raw session audio |
+| `pause()`, `resume()`, `setPaused(bool)` | Raw playback state |
+| `seek(ms)`, `setVolume(percent)` | Raw timing and gain controls |
+| `playbackTime`, `totalDuration` | Millisecond timeline |
+| `getTimestamp()`, `createProgressBar()` | Display helpers |
+| `isIdle()`, `isPlaying()`, `isPaused()` | Raw session status |
+| `filters` | Named/raw FFmpeg filtergraph API |
+
+The managed queue serializes conflicting transitions and correlates playback generations. Prefer its methods for user commands.
+
+<NextStep href="/docs/reference/plugins" label="Plugin API reference" />

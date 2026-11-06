@@ -1,0 +1,51 @@
+---
+title: Events and lifecycle
+description: Listen to queue-managed events, track terminal reasons, and distinguish them from Player diagnostics.
+---
+
+Most music-command events live on `player.events`. This is intentionally separate from the Player's own `player.on()` diagnostics.
+
+```ts
+player.events.on('playerStart', (queue, track, rawEvent) => {
+  console.log('Started', queue.guildId, track.title, rawEvent?.generation);
+});
+
+player.events.on('playerFinish', (queue, track) => {
+  console.log('Completed', track.title);
+});
+
+player.events.on('playerError', (queue, error, track) => {
+  console.error('Cannot play', track.title, error);
+});
+
+player.on('error', (error) => console.error('Player error:', error));
+```
+
+## Common queue events
+
+| Event | Arguments after `queue` | When it fires |
+| --- | --- | --- |
+| `queueCreate` / `queueDelete` | none | Queue lifecycle |
+| `connection` / `connectionDestroyed` | none | Remedia voice session lifecycle |
+| `audioTrackAdd` | `track` | Upcoming Track added |
+| `audioTracksAdd` | `tracks` | Batch added |
+| `playerStart` | `track, rawEvent?` | A managed generation starts |
+| `playerFinish` | `track, rawEvent?` | Natural completion |
+| `playerSkip` | `track, reason, description, rawEvent?` | Explicit skip |
+| `playerStop` | `trackOrNull, rawEvent?` | Managed stop |
+| `playerError` | `error, track, rawEvent?` | Playback failed |
+| `playerPause` / `playerResume` | `rawEvent` | Native pause/resume |
+| `playerSeek` | `rawEvent` | Native seek completed |
+| `voiceStateUpdate` | `event` | Native voice state changed |
+| `emptyQueue` | none | No further upcoming Tracks |
+| `willAutoPlay` | `track` | AUTOPLAY scheduling boundary |
+
+The first argument is always the owning `queue`. Terminal events are intentionally different: a skipped track is not a naturally completed track.
+
+## Error events are not success events
+
+Source resolution and native playback errors must be handled. `playerError` is useful for reporting a failed Track, while `error` on `player.events` is a queue-scoped failure. `player.on('error')` reports Player-level failures.
+
+Do not dispatch queue advancement from your own `playerFinish` listener. The managed queue already handles progression. For detail on terminal generation correlation, read [playback lifecycle](/docs/architecture/lifecycle).
+
+<NextStep href="/docs/guides/voice" label="Understand voice ownership" />

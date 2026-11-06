@@ -1,0 +1,59 @@
+---
+title: API changes
+description: A practical mapping of v7 APIs to their v8 equivalents, including intentional removals.
+---
+
+This table is based on the current v8 source and the v7 branch. It distinguishes retained names from changed behavior.
+
+| v7 | v8 | Migration note |
+| --- | --- | --- |
+| `new Player(discordClient)` | `new Player({ nodes, send, plugins })` | No Discord library instance required by the framework |
+| Automatic client wiring | `player.receive(rawGatewayDispatch)` | You forward voice Gateway events |
+| Initialized in constructor | `await player.initialize(botUserId)` | Must finish before playback |
+| `player.nodes` queue manager | `player.queues` | `player.nodes` remains a compatibility alias |
+| Extractor dispatcher | `player.plugins` | Modern source operations are the primary API |
+| `player.extractors.register(Extractor)` | Same supported constructor form | Adapter wraps a legacy extractor as a plugin |
+| Default extractor bundle | Explicit source registration | No guaranteed built-in provider bundle |
+| `player.play(channel, query)` | `player.play(channel, resource)` | Channel must resolve guild/channel IDs; queries need a plugin |
+| `queue.node.play(...)` | `queue.play(track)` for managed playback | Raw node playback does not advance queue/history |
+| Old filter/dispatcher classes | `queue.node.filters` | Named presets and raw FFmpeg graphs |
+| Old raw PCM/Opus stream handling | Remedia `MediaSource` | Engine owns codecs and voice transport |
+| Queue volume | `queue.node.setVolume(0..100)` | Percent; Remedia gain conversion is internal |
+| Track/Playlist `toJSON()` persistence | `serialize()` / `deserialize()` | Versioned, validated entity format |
+| Context hooks | `player.context.provide({ guildId }, fn)` | Per-Player async context; no global Player selection |
+| `player.events` | `player.events` | Familiar names, but terminal and async semantics matter |
+| `player.destroy()` | `await player.destroy()` | Await native session teardown |
+
+## Voice and channel types
+
+v8 accepts structural objects with `id` and `guildId` / `guild.id`, or explicit IDs:
+
+```ts
+await player.play({ guildId, channelId }, result);
+```
+
+This lets you use different Discord libraries without packaging a library-specific integration layer. Forward raw voice dispatches once from your chosen client. The [voice guide](/docs/guides/voice) explains the contract.
+
+## Queue operations still feel familiar
+
+```ts
+const queue = player.getQueue(guildId);
+if (!queue) return;
+
+await queue.node.pause();
+await queue.node.seek(25_000);
+await queue.skip();
+await queue.stop();
+```
+
+The v8 methods that call Remedia are asynchronous. Await completion, including error handling, before replying to user commands.
+
+## Events need careful auditing
+
+The `player.events` API survives, but event payloads can carry extra native data. `playerStart`, `playerFinish`, `playerSkip`, and `playerError` are distinct terminal categories. Do not progress the queue from your own finish listener; the framework already schedules the next Track.
+
+## Removed compatibility areas
+
+v8 does not recreate the former stream dispatcher, audio resource manipulation internals, old raw codec format overrides, or custom preset registration pipeline. Replace these with [source plugins](/docs/plugins) and [Remedia-backed filters](/docs/guides/filters).
+
+<NextStep href="/docs/migration/extractors" label="Migrate extractors correctly" />
