@@ -6,8 +6,11 @@ description: Connect to a voice channel and start queue-managed playback through
 Once the bot has initialized and `directMedia()` is registered, call `player.play()`. Pass a voice channel (or explicit guild and channel IDs) and a URL that your plugin recognizes.
 
 ```ts title="Inside your play command"
+const guildId = interaction.guildId;
+if (!guildId) throw new Error('Use this command in a server');
+
 const result = await player.play(
-  { guildId: interaction.guildId, channelId: voiceChannel.id },
+  { guildId, channelId: voiceChannel.id },
   'https://media.example.com/track.mp3',
 );
 

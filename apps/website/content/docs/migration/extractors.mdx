@@ -8,7 +8,8 @@ You can migrate in two phases. First keep a compatible legacy extractor through 
 ## Phase 1: compatibility mode
 
 ```ts
-import { BaseExtractor } from 'discord-player';
+import { BaseExtractor, Track } from 'discord-player';
+import type { ExtractorSearchContext } from 'discord-player';
 
 class MyLegacyExtractor extends BaseExtractor {
   static identifier = 'my.source';
@@ -17,7 +18,7 @@ class MyLegacyExtractor extends BaseExtractor {
     return query.startsWith('https://');
   }
 
-  async handle(query: string, context) {
+  async handle(query: string, context: ExtractorSearchContext) {
     return this.createResponse(null, [
       new Track(this.context.player, {
         title: 'Audio',
@@ -36,7 +37,7 @@ class MyLegacyExtractor extends BaseExtractor {
 await player.extractors.register(MyLegacyExtractor, {});
 ```
 
-Import `Track` and type `context` as `ExtractorSearchContext` when using TypeScript; see the complete [legacy extractor example](/docs/plugins/legacy-extractors).
+See the full [legacy extractor reference](/docs/plugins/legacy-extractors) for the supported compatibility lifecycle and limitations.
 
 The compatibility adapter accepts a `BaseExtractor` **constructor**, not an instance or a modern plugin descriptor. Its `validate`, `handle`, `stream`, `bridge`, related lookup, and local encoded post-stream logic map onto the new operation host.
 
