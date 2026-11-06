@@ -20,7 +20,7 @@
     "format": "oxfmt .",
     "format:check": "oxfmt . --check",
     "typecheck": "pnpm --recursive --if-present run typecheck",
-    "build": "pnpm --recursive --if-present run build",
+    "build": "pnpm --recursive --if-present --filter '!./apps/website' --filter '!./apps/music-bot' run build",
     "test": "pnpm --recursive --if-present run test && node --test .github/scripts/*.test.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm format:check"
   },
