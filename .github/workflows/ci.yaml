@@ -68,11 +68,11 @@ jobs:
       - name: Check formatting
         run: pnpm format:check
 
-      - name: Typecheck all workspaces
-        run: pnpm typecheck
-
       - name: Build packages and applications
         run: pnpm build
+
+      - name: Typecheck all workspaces
+        run: pnpm typecheck
 
       - name: Run workspace and release tooling tests
         run: pnpm test
