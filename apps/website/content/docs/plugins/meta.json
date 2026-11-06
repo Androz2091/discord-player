@@ -1,0 +1,12 @@
+{
+  "title": "Plugins",
+  "pages": [
+    "index",
+    "build-source",
+    "operations",
+    "lifecycle",
+    "streams",
+    "legacy-extractors",
+    "advanced"
+  ]
+}

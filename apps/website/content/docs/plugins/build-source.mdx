@@ -1,0 +1,86 @@
+---
+title: Build a source plugin
+description: Implement scored matching, metadata resolution, and a playable media source.
+---
+
+A source plugin should resolve **both** metadata and playable media. This example handles direct HTTP audio files. It uses real v8 operation names and does not require an extractor subclass.
+
+## Complete example
+
+```ts title="plugins/direct-audio.ts"
+import { definePlugin, Track } from 'discord-player';
+
+export const directAudio = definePlugin({
+  id: 'example.direct-audio',
+  kind: 'source',
+  setup(ctx) {
+    ctx.on('search.query.match', ({ query }) => {
+      const valid = /^https?:\/\/.*\.(mp3|ogg|wav)(\?.*)?$/i.test(query);
+      return valid ? { score: 100 } : null;
+    });
+
+    ctx.on('search.query.resolve', ({ query }) => ({
+      playlist: null,
+      tracks: [new Track({ title: 'Direct audio', url: query })],
+    }));
+
+    ctx.on('track.stream', ({ track }, { signal }) => {
+      signal.throwIfAborted();
+      return { url: track.url };
+    });
+  },
+});
+```
+
+Register it when creating the Player:
+
+```ts
+const player = new Player({
+  nodes: [{ id: 'local', type: 'embedded' }],
+  plugins: [directAudio()],
+  send: (guildId, packet) => sendGateway(guildId, packet),
+});
+await player.initialize(botUserId);
+```
+
+`sendGateway` is your application's Gateway sender. See the [working discord.js example](/docs/getting-started/create-player).
+
+## Search and play
+
+```ts
+const result = await player.search('https://media.example.com/song.mp3');
+const track = result.tracks[0];
+
+if (track) {
+  await player.play({ guildId, channelId }, result);
+}
+```
+
+Search selects one source plugin by priority and match score. The selected source produces Track metadata, and the host attaches a `sourceReference` for portable source identity. At playback time, the host resolves that Track through `track.stream`.
+
+## Typed plugin options
+
+For per-registration configuration, use `definePlugin<Options>()`:
+
+```ts
+type Options = { userAgent?: string };
+
+export const configurableSource = definePlugin<Options>({
+  id: 'example.configurable-source',
+  kind: 'source',
+  setup(ctx) {
+    console.log(ctx.options.userAgent);
+  },
+});
+
+// The factory supplies independent configuration to each Player.
+const registration = configurableSource({ userAgent: 'example-bot/1.0' });
+```
+
+Avoid global mutable state inside a plugin factory. Use `ctx.options`, `ctx.onCleanup()`, and the registration-local AbortSignal.
+
+## Production validation
+
+The direct-URL example deliberately has a narrow match rule, but it is not a complete security layer. Validate redirects, private-network targets, media access, and allowed hosts before accepting arbitrary user-supplied URLs.
+
+<NextStep href="/docs/plugins/operations" label="Understand the operation host" />

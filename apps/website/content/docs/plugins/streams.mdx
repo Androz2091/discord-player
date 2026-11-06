@@ -1,0 +1,52 @@
+---
+title: Media sources and stream ownership
+description: Select URL, file, and encoded Readable sources that the chosen Remedia node can actually open.
+---
+
+A `track.stream` handler must return a playable source, not only Track metadata. The host normalizes acceptable inputs to a Remedia `MediaSource`.
+
+## Supported source shapes
+
+```ts
+ctx.on('track.stream', ({ track }) => ({ url: track.url }));
+
+// Locally available file on the audio host:
+ctx.on('track.stream', ({ track }) => ({ file: track.url }));
+
+// Embedded mode only, from a Node.js encoded Readable:
+ctx.on('track.stream', async ({ track }) => ({
+  stream: createEncodedReadable(track),
+}));
+```
+
+`createEncodedReadable` is your own producer. These snippets show alternative return shapes. Register one appropriate handler per source and keep its behavior explicit.
+
+The host also accepts HTTP(S) strings, file-path strings, and encoded Node Readables in appropriate contexts.
+
+| Source | Embedded node | Remote node |
+| --- | --- | --- |
+| HTTP(S) URL | Supported | Supported when the server can access it |
+| File path | Supported on bot host | Supported only when that file exists on server |
+| Encoded Node Readable | Supported | Not transferable to remote runtime |
+| In-memory stream or buffer | Local binding capability | Not part of the remote source protocol |
+
+## Encoded streams, not PCM pipes
+
+Readable inputs contain encoded media that FFmpeg can demux or decode. They are **not** an invitation to bypass Remedia's decoder with arbitrary PCM or Opus pipe objects from older applications.
+
+A `stream.transform` operation can replace an encoded Readable locally. A transform must handle AbortSignal cancellation and should not retain unbounded chunks.
+
+## Remote source design
+
+The source plugin host currently runs on the bot side. A remote Remedia node cannot call your local JavaScript source plugin or consume its Node.js Readable directly. Resolve a server-accessible URL or file instead.
+
+```ts
+ctx.on('track.stream', async ({ track }, { signal }) => {
+  signal.throwIfAborted();
+  return { url: await obtainRemoteAccessibleUrl(track) };
+});
+```
+
+`obtainRemoteAccessibleUrl` is application code and must enforce access controls and token expiration. Do not assume private local files are available on another server.
+
+<NextStep href="/docs/plugins/legacy-extractors" label="Understand extractor emulation" />
