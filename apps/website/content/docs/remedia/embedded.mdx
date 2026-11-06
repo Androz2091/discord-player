@@ -1,0 +1,36 @@
+---
+title: Embedded playback
+description: Run Remedia's Rust engine inside your Node.js process with direct native audio calls.
+---
+
+Embedded mode is the simplest topology for one bot or a small deployment. `@remedia/client` uses `@remedia/node` through N-API. It does **not** start a local WebSocket server.
+
+```ts
+const player = new Player({
+  nodes: [{ type: 'embedded', id: 'local', capacity: 8 }],
+  send: (guildId, packet) => sendGateway(guildId, packet),
+});
+await player.initialize(botUserId);
+```
+
+The engine performs native decoding and voice transport in the application process while JavaScript manages queues and plugins.
+
+## Before starting
+
+1. Use Node.js 22.18+ with ESM.
+2. Install `discord-player`; the embedded runtime must also have `@remedia/node` available. See [Remedia bindings](https://github.com/twlite/remedia/tree/main/packages/remedia-node).
+3. Install the correct FFmpeg 7 shared library ABI on the bot machine, **not** only an FFmpeg executable.
+4. Allow optional native platform dependencies during package installation.
+5. Test loading and decoding using the [FFmpeg smoke test](/docs/installation/ffmpeg#nodejs-smoke-test).
+
+The source plugin can return a local encoded `Readable` or buffer in this mode because the native decoder shares the same host.
+
+## Resource planning
+
+Each concurrent player has its own playback and voice state. Size node capacity according to actual CPU and memory usage for your codecs, filters, and song mix, not just the queue length. An embedded engine still needs error handling and orderly shutdown.
+
+```ts
+await player.destroy(); // Release queues and the Remedia client
+```
+
+<NextStep href="/docs/remedia/remote" label="Deploy remote Remedia when needed" />
