@@ -1,0 +1,121 @@
+.site {
+  --accent: #b58aff;
+  --muted: #aca9b4;
+  color: #f5f4f7;
+  min-height: 100svh;
+  background: radial-gradient(ellipse at 78% 39%, #25182b2b, transparent 60%), #0d0d10;
+  color-scheme: dark;
+}
+.site * { box-sizing: border-box; }
+.header { border-bottom: 1px solid #ffffff10; }
+.headerInner {
+  max-width: 1410px;
+  min-height: 72px;
+  margin: 0 auto;
+  padding: 0 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+.brand { display: inline-flex; align-items: center; gap: 13px; font-size: 22px; font-weight: 720; letter-spacing: -0.7px; white-space: nowrap; text-decoration: none; }
+.brand svg { color: var(--accent); }
+.nav { display: flex; gap: clamp(16px, 3vw, 44px); align-items: center; margin-left: 40px; font-size: 14px; }
+.nav a { color: #d1ced7; text-decoration: none; }
+.nav a:hover { color: white; }
+.actions { display: flex; align-items: center; gap: 22px; }
+.github { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid #ffffff17; border-radius: 11px; }
+.github:hover { background: #ffffff0a; }
+.version { position: relative; }
+.version summary { cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 9px 14px; border: 1px solid #ffffff16; background: #ffffff08; border-radius: 22px; font-size: 13px; font-weight: 650; list-style: none; }
+.version summary::-webkit-details-marker { display: none; }
+.versionMenu { position: absolute; top: 43px; right: 0; z-index: 4; width: 195px; padding: 6px; border: 1px solid #ffffff21; background: #1a1920; border-radius: 11px; box-shadow: 0 20px 40px #0009; }
+.versionMenu a { display: block; padding: 10px 12px; border-radius: 7px; font-size: 13px; text-decoration: none; }
+.versionMenu a:hover { background: #ffffff10; }
+.container { max-width: 1410px; margin: 0 auto; padding: 0 38px; }
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(34px, 5vw, 90px); align-items: center; padding: 102px 0 92px; }
+.eyebrow { display: flex; align-items: center; gap: 15px; margin-bottom: 28px; color: #d3d0d9; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; }
+.eyebrow span { width: 36px; height: 2px; background: var(--accent); }
+.heroCopy h1 { max-width: 650px; margin: 0; color: #f7f6f8; font-size: clamp(40px, 4vw, 58px); line-height: 1.08; letter-spacing: -2.2px; font-weight: 710; }
+.lede { max-width: 610px; margin-top: 26px; color: var(--muted); font-size: clamp(16px, 1.45vw, 19px); line-height: 1.62; }
+.heroActions { display: flex; gap: 16px; margin-top: 34px; }
+.primaryButton, .secondaryButton { min-height: 52px; padding: 0 23px; display: inline-flex; align-items: center; justify-content: center; gap: 12px; border-radius: 12px; font-size: 14px; font-weight: 680; text-decoration: none; transition: background .15s ease; }
+.primaryButton { border: 1px solid #fff; color: #151419; background: #fafafa; }
+.primaryButton:hover { background: #eae8ee; }
+.secondaryButton { border: 1px solid #ffffff29; }
+.secondaryButton:hover { background: #ffffff0a; }
+.editor { min-width: 0; border-radius: 15px; overflow: hidden; border: 1px solid #ffffff27; background: #111115; box-shadow: 0 25px 65px #0004; }
+.editorHeader { display: flex; align-items: center; justify-content: space-between; height: 46px; padding: 0 17px; border-bottom: 1px solid #ffffff12; color: #908e98; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.dots { display: flex; align-items: center; gap: 7px; }
+.dots i { width: 11px; height: 11px; display: block; border-radius: 50%; background: #ff5f57; }
+.dots i:nth-child(2) { background: #ffbd2e; }
+.dots i:nth-child(3) { background: #28c840; }
+.codeBadge { border-radius: 8px; padding: 4px 9px; background: #ffffff0a; color: #ddd9e2; }
+.code { overflow: auto; margin: 0; padding: 25px 19px 27px; color: #efedf3; font: 14px/1.9 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.codeLine { display: flex; gap: 22px; white-space: pre; min-width: max-content; }
+.lineNumber { display: inline-block; width: 20px; flex: 0 0 20px; text-align: right; color: #686570; user-select: none; }
+.keyword { color: #c99af4; }
+.string { color: #e6a88e; }
+.editorFooter { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid #ffffff12; padding: 17px 21px; font-size: 12px; color: #aaa7b2; }
+.remediaMark { display: inline-flex; align-items: center; gap: 10px; color: #e5e0e9; font-weight: 600; white-space: nowrap; }
+.remediaMark svg { color: var(--accent); }
+.highlights { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 42px 0 54px; border-top: 1px solid #ffffff18; border-bottom: 1px solid #ffffff18; }
+.highlight { display: flex; align-items: flex-start; gap: 18px; border-left: 1px solid #ffffff13; padding: 0 22px; }
+.highlight:first-child { border-left: 0; padding-left: 0; }
+.highlight:last-child { padding-right: 0; }
+.highlight > svg { flex-shrink: 0; }
+.highlight h2 { margin: 0 0 5px; font-size: 14px; font-weight: 700; }
+.highlight p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.following { display: grid; grid-template-columns: 1fr 1.15fr; align-items: center; gap: 55px; padding: 91px 0 110px; }
+.sectionEyebrow { font-size: 12px; color: #bb96f5; letter-spacing: 1.5px; font-weight: 700; }
+.followingCopy h2 { margin: 11px 0 15px; font-size: clamp(30px, 3vw, 38px); letter-spacing: -1.5px; }
+.followingCopy > p:last-child { color: var(--muted); max-width: 440px; font-size: 15px; line-height: 1.7; }
+.paths { display: grid; gap: 13px; }
+.path { display: flex; gap: 17px; align-items: center; border: 1px solid #ffffff1d; border-radius: 13px; padding: 22px 21px; background: #ffffff04; text-decoration: none; }
+.path:hover { border-color: #b994f16d; background: #ffffff08; }
+.path > svg:first-child { color: var(--accent); }
+.path > svg:last-child { margin-left: auto; color: #aaa6b0; }
+.path span { display: grid; gap: 5px; }
+.path strong { font-size: 15px; }
+.path small { color: var(--muted); font-size: 13px; }
+.footer { max-width: 1410px; margin: auto; padding: 28px 38px 34px; display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid #ffffff16; color: #93909c; font-size: 13px; }
+.footer a { display: inline-flex; align-items: center; gap: 5px; color: #c6bfcd; text-decoration: none; }
+.footer a:hover { color: white; }
+.site a:focus-visible, .site summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 1090px) {
+  .hero { gap: 28px; padding: 75px 0; }
+  .heroCopy h1 { font-size: clamp(35px, 4vw, 48px); letter-spacing: -1.6px; }
+  .code { font-size: 12px; padding-inline: 12px; }
+  .codeLine { gap: 13px; }
+  .nav { margin-left: 0; gap: 20px; }
+  .highlight { padding: 0 12px; gap: 11px; }
+}
+@media (max-width: 800px) {
+  .headerInner, .container { padding-inline: 24px; }
+  .headerInner { height: auto; padding-top: 14px; flex-wrap: wrap; gap: 16px; }
+  .nav { order: 3; width: 100%; justify-content: space-between; padding-bottom: 14px; }
+  .actions { margin-left: auto; }
+  .hero { grid-template-columns: 1fr; padding: 64px 0; gap: 44px; }
+  .heroCopy h1 { max-width: 630px; font-size: clamp(40px, 7vw, 58px); }
+  .editor { max-width: 670px; }
+  .highlights { grid-template-columns: repeat(2, 1fr); gap: 28px 0; }
+  .highlight:nth-child(3) { border-left: none; padding-left: 0; }
+  .following { grid-template-columns: 1fr; padding: 72px 0 88px; gap: 24px; }
+  .footer { padding-inline: 24px; flex-wrap: wrap; }
+}
+@media (max-width: 500px) {
+  .headerInner, .container, .footer { padding-inline: 20px; }
+  .brand { font-size: 19px; }
+  .nav { font-size: 13px; }
+  .github { width: 38px; height: 38px; }
+  .heroCopy h1 { font-size: 39px; }
+  .heroActions { gap: 10px; }
+  .primaryButton, .secondaryButton { padding-inline: 16px; font-size: 13px; }
+  .editorFooter { flex-wrap: wrap; }
+  .highlights { grid-template-columns: 1fr; gap: 20px; }
+  .highlight, .highlight:nth-child(3) { border: 0; padding: 0; }
+  .path { padding: 18px 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site a { transition: none; }
+}

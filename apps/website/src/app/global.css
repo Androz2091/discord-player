@@ -2,11 +2,19 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
-html {
-  scrollbar-gutter: stable;
+:root {
+  --color-fd-primary: #8254cb;
 }
 
+.dark {
+  --color-fd-background: #0d0d10;
+  --color-fd-card: #16151b;
+  --color-fd-primary: #b794f6;
+}
+
+html { scrollbar-gutter: stable; }
+
 html > body[data-scroll-locked] {
-  margin-right: 0px !important;
+  margin-right: 0 !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
