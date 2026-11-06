@@ -1,12 +1,12 @@
 import { Readable } from 'node:stream';
 import { expect, it, vi } from 'vitest';
-import { DiscordPlayer, PluginRegistry, Track, definePlugin } from '../src/index.js';
+import { DiscordPlayer, Track, definePlugin } from '../src/index.js';
 import { deferred } from './mocks/async.js';
 import { settle } from './mocks/async.js';
 import type { SourceStream } from '../src/index.js';
 
 it('rejects invalid registration shapes, unsupported kinds and duplicate operation definitions', async () => {
-  const host = new PluginRegistry();
+  const host = new DiscordPlayer({ nodes: [], send() {} }).plugins;
   for (const descriptor of [null, {}, { definition: { id: 'runtime', kind: 'runtime', setup() {} } }]) {
     await expect(host.register(descriptor as never)).rejects.toThrow('source plugin');
   }
@@ -28,7 +28,7 @@ it('rejects invalid registration shapes, unsupported kinds and duplicate operati
 });
 
 it('cleans every resource on failed setup and retains setup, destroy and cleanup failures', async () => {
-  const host = new PluginRegistry();
+  const host = new DiscordPlayer({ nodes: [], send() {} }).plugins;
   const cleanup = vi.fn(() => {
     throw new Error('resource failed');
   });
@@ -74,7 +74,7 @@ it('cleans every resource on failed setup and retains setup, destroy and cleanup
 });
 
 it.each(['direct', 'wrapped'] as const)('disposes a late %s stream after operation cancellation', async (kind) => {
-  const host = new PluginRegistry();
+  const host = new DiscordPlayer({ nodes: [], send() {} }).plugins;
   const pending = deferred<SourceStream>();
   const stream = Readable.from(['late']);
   const controller = new AbortController();
@@ -98,7 +98,7 @@ it.each(['direct', 'wrapped'] as const)('disposes a late %s stream after operati
 });
 
 it('uses explicit bridge fallback only for declined stream operations and attributes genuine failures', async () => {
-  const host = new PluginRegistry();
+  const host = new DiscordPlayer({ nodes: [], send() {} }).plugins;
   await host.register(
     definePlugin({
       id: 'source',
@@ -143,7 +143,7 @@ it('uses explicit bridge fallback only for declined stream operations and attrib
 });
 
 it('does not execute later snapshot handlers after their registration has been removed', async () => {
-  const host = new PluginRegistry();
+  const host = new DiscordPlayer({ nodes: [], send() {} }).plugins;
   const called = vi.fn();
   await host.register(
     definePlugin({

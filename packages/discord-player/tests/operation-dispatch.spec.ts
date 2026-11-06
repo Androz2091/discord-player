@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 import { it, expect } from 'vitest';
-import { DiscordPlayer, Track, definePlugin, PluginRegistry } from '../src/index.js';
+import { DiscordPlayer, Track, definePlugin } from '../src/index.js';
 import { Legacy } from './mocks/legacy.js';
 
 const player = () => new DiscordPlayer({ nodes: [], send() {} });
@@ -12,7 +12,7 @@ declare module '../src/plugins/types.js' {
 }
 
 it('supports every dispatch policy, stable priority, null/false and scoped removal', async () => {
-  const host = new PluginRegistry();
+  const host = player().plugins;
 
   host.defineOperation('fixture.null', 'first');
 

@@ -5,7 +5,6 @@ import {
   Track,
   definePlugin,
   PluginError,
-  PluginRegistry,
   deserialize,
   type SourceOperationMap as Operations,
 } from '../src/index.js';
@@ -46,7 +45,7 @@ it('owns independent lifecycle, options, subscriptions and cleanup on each Playe
 });
 
 it('rejects remote streams and buffers while accepting URLs and server files', async () => {
-  const host = new PluginRegistry();
+  const host = new DiscordPlayer({ nodes: [], send() {} }).plugins;
   let source: Operations['track.stream']['output'] = Readable.from(['encoded']);
 
   await host.register(

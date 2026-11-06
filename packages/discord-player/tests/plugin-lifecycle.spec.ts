@@ -1,11 +1,11 @@
 import { it, expect, vi } from 'vitest';
-import { DiscordPlayer, Track, definePlugin, PluginRegistry } from '../src/index.js';
+import { DiscordPlayer, Track, definePlugin } from '../src/index.js';
 import { settle as tick } from './mocks/async.js';
 
 const player = () => new DiscordPlayer({ nodes: [], send() {} });
 
 it('rejects duplicate IDs and attributes setup, handler and teardown failures', async () => {
-  const host = new PluginRegistry();
+  const host = player().plugins;
   const cleanup = vi.fn();
   const failed = definePlugin({
     id: 'failed',
@@ -47,7 +47,7 @@ it('rejects duplicate IDs and attributes setup, handler and teardown failures', 
 });
 
 it('aborts and drains in-flight handlers before cleanup and propagates caller cancellation', async () => {
-  const host = new PluginRegistry();
+  const host = player().plugins;
   const order: string[] = [];
 
   await host.register(
@@ -119,7 +119,7 @@ it('cleans setup failures without leaking other constructor registrations', asyn
 });
 
 it('drains setup/removal races and executes cleanup exactly once in reverse order', async () => {
-  const host = new PluginRegistry();
+  const host = player().plugins;
   let release!: () => void;
   const seen: number[] = [];
   const setup = host.register(
