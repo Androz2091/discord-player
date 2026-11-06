@@ -14,12 +14,21 @@ export const player = new DiscordPlayer({
   },
 });
 
+await import('./_legacy-extractor-test/extractor-001.ts' as string)
+  .then((e) => {
+    return player.extractors.register(e.default);
+  })
+  .catch(console.error);
+
 function notify(queue: GuildQueue, title: string, description: string, color?: number): void {
   // Use the event's queue directly: creation happens before caching and deletion happens after eviction.
   const channel = (queue.metadata as QueueMetadata | undefined)?.textChannel;
   if (!channel?.isSendable()) return;
   void channel
-    .send({ embeds: [musicEmbed(title, description, color)], allowedMentions: { parse: [] } })
+    .send({
+      embeds: [musicEmbed(title, description, color)],
+      allowedMentions: { parse: [] },
+    })
     .catch((error) => {
       console.error('Could not send a playback update:', error);
     });

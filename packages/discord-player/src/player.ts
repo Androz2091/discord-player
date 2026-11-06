@@ -82,7 +82,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   static readonly version = packageVersion;
 
   /** Shared execution host for modern and legacy sources. */
-  public readonly plugins = new PluginRegistry(() => this.options.blockExtractors ?? []);
+  public readonly plugins: PluginRegistry;
 
   /** Legacy constructor-only registration adapter. */
   public readonly extractors = new ExtractorExecutionContext(this);
@@ -120,6 +120,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   ) {
     super();
 
+    this.plugins = new PluginRegistry(this, () => this.options.blockExtractors ?? []);
     this.initialPlugins = Promise.all((options.plugins ?? []).map((plugin) => this.plugins.register(plugin))).then(
       () => undefined,
     );
@@ -342,7 +343,10 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     }
 
     for (const track of result.tracks) {
-      track.sourceReference ??= { pluginId: match.pluginId, data: { url: track.url } };
+      track.sourceReference ??= {
+        pluginId: match.pluginId,
+        data: { url: track.url },
+      };
 
       if (options.requestedBy !== undefined) {
         track.requestedBy = options.requestedBy;
@@ -394,7 +398,10 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       guildId: _guildId,
       ...playOptions
     } = options;
-    const result = await queue.play(searchResult, { ...playOptions, channelId });
+    const result = await queue.play(searchResult, {
+      ...playOptions,
+      channelId,
+    });
 
     return { queue, resource, searchResult, ...result };
   }

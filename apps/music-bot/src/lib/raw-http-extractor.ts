@@ -7,6 +7,10 @@ function parseHTTPURL(query: string): URL | null {
   try {
     const url = new URL(query.trim());
 
+    if (process.env.DISALLOWED_HOSTNAME && url.hostname.includes(process.env.DISALLOWED_HOSTNAME)) {
+      return null;
+    }
+
     return url.protocol === 'http:' || url.protocol === 'https:' ? url : null;
   } catch {
     return null;
@@ -38,15 +42,31 @@ export const rawHTTPExtractor = definePlugin({
       const url = parseHTTPURL(query);
 
       if (url) {
+        const metadata = await ctx.player
+          .getRemedia(false)
+          ?.probe(
+            {
+              url: url.toString(),
+            },
+            { signal },
+          )
+          .catch(() => null);
+
         return {
           playlist: null,
           tracks: [
             new Track({
-              title: url.pathname.split('/').filter(Boolean).at(-1) || url.hostname,
-              author: url.hostname,
+              title:
+                metadata?.metadata?.title ||
+                metadata?.metadata?.album ||
+                url.pathname.split('/').filter(Boolean).at(-1) ||
+                url.hostname,
+              author: metadata?.metadata?.artist || metadata?.metadata?.albumArtist || url.hostname,
               url: url.href,
+              durationMS: metadata?.durationMs ?? undefined,
               requestedBy: options?.requestedBy,
               source: 'arbitrary',
+              metadata,
             }),
           ],
         };
@@ -59,19 +79,36 @@ export const rawHTTPExtractor = definePlugin({
       const files = await searchMusicFiles(query, signal);
       signal.throwIfAborted();
 
+      const tracksWithMetadata = await Promise.all(
+        files.map(async (file) => {
+          const metadata = await ctx.player
+            .getRemedia(false)
+            ?.probe(
+              {
+                file: pathToFileURL(file.path).href,
+              },
+              { signal },
+            )
+            .catch(() => null);
+
+          return new Track({
+            title: metadata?.metadata?.title || metadata?.metadata?.album || basename(file.path),
+            author: metadata?.metadata?.artist || metadata?.metadata?.albumArtist || 'Local library',
+            url: pathToFileURL(file.path).href,
+            requestedBy: options?.requestedBy,
+            source: 'arbitrary',
+            sourceReference: {
+              pluginId: 'org.example.raw-http',
+              data: { file: file.relativePath },
+            },
+            durationMS: metadata?.durationMs ?? undefined,
+            metadata,
+          });
+        }),
+      );
       return {
         playlist: null,
-        tracks: files.map(
-          (file) =>
-            new Track({
-              title: basename(file.path),
-              author: 'Local library',
-              url: pathToFileURL(file.path).href,
-              requestedBy: options?.requestedBy,
-              source: 'arbitrary',
-              sourceReference: { pluginId: 'org.example.raw-http', data: { file: file.relativePath } },
-            }),
-        ),
+        tracks: tracksWithMetadata,
       };
     });
 

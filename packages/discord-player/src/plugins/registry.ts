@@ -13,6 +13,7 @@ import type {
   PluginRegistration,
   SourceOperationMap,
 } from './types.js';
+import type { DiscordPlayer } from '../player.js';
 
 export { PluginError } from './plugin-error.js';
 export type { ExecuteOptions, StreamResolutionOptions } from './execution-options.js';
@@ -26,9 +27,13 @@ export class PluginRegistry {
   private destroyed = false;
 
   /** Create an independent host.
+   * @param player Owning Player instance.
    * @param blocked Default disabled source IDs supplied by the owning Player.
    */
-  public constructor(private readonly blocked: () => readonly string[] = () => []) {}
+  public constructor(
+    public readonly player: DiscordPlayer,
+    private readonly blocked: () => readonly string[] = () => [],
+  ) {}
 
   private definitions = new Map<OperationName, DispatchPolicy>([
     ['search.query.match', 'collect'],
@@ -106,6 +111,7 @@ export class PluginRegistry {
     };
 
     entry.context = {
+      player: this.player,
       options: registration.options,
       signal: controller.signal,
       on: (operation, fn, options = {}) => {
@@ -115,7 +121,13 @@ export class PluginRegistry {
           throw new Error(`Undefined operation: ${operation}`);
         }
 
-        const handler: Handler = { entry, operation, fn, ...options, order: this.order++ };
+        const handler: Handler = {
+          entry,
+          operation,
+          fn,
+          ...options,
+          order: this.order++,
+        };
 
         this.handlers.push(handler);
 

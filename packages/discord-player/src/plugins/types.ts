@@ -4,6 +4,7 @@ import type { Track } from '../structures/track.js';
 import type { SearchResultData } from '../structures/search-result.js';
 import type { SearchOptions } from '../types.js';
 import type { JSONValue } from '../utils/serialization.js';
+import type { DiscordPlayer } from '../player.js';
 
 /** Serializable provider identity; never put credentials or live objects in this payload. */
 export type SourceReference = {
@@ -150,6 +151,9 @@ export interface SourcePluginContext<Options> {
   /** Registration lifetime signal. */
   readonly signal: AbortSignal;
 
+  /** Player instance hosting this registration. */
+  readonly player: DiscordPlayer;
+
   /** Register an owned operation handler.
    * @param operation Operation name.
    * @param handler Typed implementation.
@@ -216,5 +220,8 @@ export type PluginFactory<Options> = {} extends Options
 export function definePlugin<Options = Record<string, never>>(
   definition: SourcePluginDefinition<Options>,
 ): PluginFactory<Options> {
-  return ((options: Options = {} as Options) => ({ definition, options })) as PluginFactory<Options>;
+  return ((options: Options = {} as Options) => ({
+    definition,
+    options,
+  })) as PluginFactory<Options>;
 }
