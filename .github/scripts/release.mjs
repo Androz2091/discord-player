@@ -4,6 +4,8 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const RELEASE_BRANCHES = Object.freeze(['v8', 'master']);
+// GitHub account IDs remain stable when usernames change.
+export const RELEASE_AUTHORITIES = Object.freeze(['46562212', '42497995']); // twlite, Androz2091
 export const OFFICIAL_REPOSITORY = 'Androz2091/discord-player';
 export const REGISTRY_URL = 'https://registry.npmjs.org';
 
@@ -62,13 +64,17 @@ export function parseReleaseSubject(subject) {
 
 /**
  * Decide whether a release subject may publish in this workflow context.
- * @param {{subject: string, eventName: string, branch: string, repository: string}} context GitHub event and HEAD context.
+ * @param {{subject: string, eventName: string, branch: string, repository: string, actorId: string, triggeringActorId: string}} context GitHub event, actor IDs, and HEAD context.
  * @returns {{release: false, malformed?: boolean, error?: string} | ({release: true} & ReturnType<typeof parseReleaseSubject>)} Detection result.
  */
 export function detectRelease(context) {
   const allowedEvent = context.eventName === 'push' || context.eventName === 'workflow_dispatch';
   const authorized =
-    allowedEvent && context.repository === OFFICIAL_REPOSITORY && RELEASE_BRANCHES.includes(context.branch);
+    allowedEvent &&
+    context.repository === OFFICIAL_REPOSITORY &&
+    RELEASE_BRANCHES.includes(context.branch) &&
+    RELEASE_AUTHORITIES.includes(context.actorId) &&
+    RELEASE_AUTHORITIES.includes(context.triggeringActorId);
 
   if (!authorized) return { release: false };
 
@@ -79,6 +85,39 @@ export function detectRelease(context) {
     if (!(error instanceof ReleaseError)) throw error;
     return { release: false, malformed: true, error: error.message };
   }
+}
+
+/**
+ * Resolve the account that starts this attempt, including workflow reruns.
+ * @param {{actor: string, actorId: string, triggeringActor: string, fetchImpl?: typeof fetch}} context Runner-provided identities and injectable GitHub API.
+ * @returns {Promise<string | null>} Numeric triggering account ID, or null when identity is missing.
+ */
+export async function resolveTriggeringActorId({ actor, actorId, triggeringActor, fetchImpl = fetch }) {
+  if (!actor || !actorId || !triggeringActor) return null;
+  if (actor === triggeringActor) return actorId;
+  const response = await fetchImpl(`https://api.github.com/users/${encodeURIComponent(triggeringActor)}`, {
+    headers: { accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28' },
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!response.ok)
+    throw new ReleaseError(`Cannot verify release triggering actor: GitHub returned HTTP ${response.status}.`);
+  const user = await response.json();
+  if (!user || !Number.isSafeInteger(user.id) || user.id <= 0) {
+    throw new ReleaseError('GitHub returned an invalid triggering actor ID.');
+  }
+  return String(user.id);
+}
+
+async function getReleaseActorContext() {
+  const actorId = process.env.GITHUB_ACTOR_ID;
+  // An unapproved original actor can never be authorized by a later rerun.
+  if (!RELEASE_AUTHORITIES.includes(actorId)) return { actorId, triggeringActorId: null };
+  const triggeringActorId = await resolveTriggeringActorId({
+    actor: process.env.GITHUB_ACTOR,
+    actorId,
+    triggeringActor: process.env.GITHUB_TRIGGERING_ACTOR,
+  });
+  return { actorId, triggeringActorId };
 }
 
 /**
@@ -647,12 +686,15 @@ function writeGithubOutputs(values) {
 async function main() {
   const [command, value] = process.argv.slice(2);
   if (command === 'detect') {
-    const result = detectRelease({
+    const context = {
       subject: value ?? getHeadSubject(),
       eventName: process.env.GITHUB_EVENT_NAME ?? 'push',
       branch: process.env.GITHUB_REF_NAME ?? 'v8',
       repository: process.env.GITHUB_REPOSITORY ?? OFFICIAL_REPOSITORY,
-    });
+      actorId: process.env.GITHUB_ACTOR_ID,
+    };
+    let result = detectRelease({ ...context, triggeringActorId: context.actorId });
+    if (result.release) result = detectRelease({ ...context, ...(await getReleaseActorContext()) });
     if (result.malformed) process.stderr.write(`::error title=Invalid release commit subject::${result.error}\n`);
     writeGithubOutputs({
       release: String(result.release),
@@ -666,6 +708,15 @@ async function main() {
           }
         : {}),
     });
+    return;
+  }
+  if (command === 'authorize') {
+    const { actorId, triggeringActorId } = await getReleaseActorContext();
+    if (!RELEASE_AUTHORITIES.includes(actorId) || !RELEASE_AUTHORITIES.includes(triggeringActorId)) {
+      throw new ReleaseError(
+        `Release requires an authorized GitHub actor and triggering actor (${RELEASE_AUTHORITIES.join(', ')}).`,
+      );
+    }
     return;
   }
   if (command === 'validate-subject') {
@@ -706,7 +757,7 @@ async function main() {
     return;
   }
   throw new ReleaseError(
-    'Usage: node .github/scripts/release.mjs <detect|validate-subject|sync|verify-build|pack|publish> [value].',
+    'Usage: node .github/scripts/release.mjs <detect|authorize|validate-subject|sync|verify-build|pack|publish> [value].',
   );
 }
 

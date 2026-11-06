@@ -34,6 +34,7 @@ jobs:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ACTOR_ID: ${{ github.actor_id }}
         run: node .github/scripts/release.mjs detect
 
   validate:
@@ -162,6 +163,9 @@ jobs:
         with:
           node-version: 24
 
+      - name: Verify release authority for this attempt
+        run: node .github/scripts/release.mjs authorize
+
       - name: Install npm CLI with trusted publishing support
         run: npm install --global npm@11.21.0
 
@@ -198,6 +202,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+
+      - name: Verify release authority for this attempt
+        run: node .github/scripts/release.mjs authorize
 
       - name: Create or finalize GitHub release
         env:

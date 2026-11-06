@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import {
+  RELEASE_AUTHORITIES,
   ReleaseError,
   compareSemver,
   detectRelease,
@@ -16,6 +17,7 @@ import {
   parseReleaseSubject,
   publishMissingPackages,
   publishRelease,
+  resolveTriggeringActorId,
   syncPackageVersions,
   validateTarball,
   verifyPublishedVersions,
@@ -95,6 +97,8 @@ const releaseContext = (overrides = {}) => ({
   eventName: 'push',
   branch: 'v8',
   repository: 'Androz2091/discord-player',
+  actorId: '46562212',
+  triggeringActorId: '46562212',
   ...overrides,
 });
 
@@ -142,6 +146,110 @@ test('suppresses release detection for pull requests, forks, and non-release bra
     release: false,
   });
   assert.deepEqual(detectRelease(releaseContext({ subject: 'chore: release no-version' })).malformed, true);
+});
+
+test('only release authority IDs may trigger pushes and manual dispatches', () => {
+  assert.deepEqual(RELEASE_AUTHORITIES, ['46562212', '42497995']);
+  for (const eventName of ['push', 'workflow_dispatch']) {
+    for (const actorId of RELEASE_AUTHORITIES) {
+      for (const triggeringActorId of RELEASE_AUTHORITIES) {
+        assert.equal(detectRelease(releaseContext({ eventName, actorId, triggeringActorId })).release, true);
+      }
+    }
+    for (const actorId of [undefined, null, '', '1', 'twlite', '42497995 ']) {
+      assert.deepEqual(detectRelease(releaseContext({ eventName, actorId })), { release: false });
+    }
+    for (const triggeringActorId of [undefined, null, '', '1']) {
+      assert.deepEqual(detectRelease(releaseContext({ eventName, triggeringActorId })), { release: false });
+    }
+  }
+});
+
+test('resolves rerun accounts by numeric ID and fails closed on unverified identities', async () => {
+  assert.equal(
+    await resolveTriggeringActorId({
+      actor: 'twlite',
+      actorId: '46562212',
+      triggeringActor: 'twlite',
+      fetchImpl: async () => assert.fail('Same actor must use the runner-provided ID.'),
+    }),
+    '46562212',
+  );
+  assert.equal(await resolveTriggeringActorId({ actor: 'twlite', actorId: '46562212' }), null);
+  for (const id of [42497995, 12345]) {
+    assert.equal(
+      await resolveTriggeringActorId({
+        actor: 'twlite',
+        actorId: '46562212',
+        triggeringActor: 'someone',
+        fetchImpl: async (url) => {
+          assert.equal(url, 'https://api.github.com/users/someone');
+          return response(200, { id });
+        },
+      }),
+      String(id),
+    );
+  }
+  for (const body of [null, {}, { id: '42497995' }]) {
+    await assert.rejects(
+      resolveTriggeringActorId({
+        actor: 'twlite',
+        actorId: '46562212',
+        triggeringActor: 'someone',
+        fetchImpl: async () => response(200, body),
+      }),
+      /invalid triggering actor ID/,
+    );
+  }
+  await assert.rejects(
+    resolveTriggeringActorId({
+      actor: 'twlite',
+      actorId: '46562212',
+      triggeringActor: 'someone',
+      fetchImpl: async () => response(500, {}),
+    }),
+    /HTTP 500/,
+  );
+  await assert.rejects(
+    resolveTriggeringActorId({
+      actor: 'twlite',
+      actorId: '46562212',
+      triggeringActor: 'someone',
+      fetchImpl: async () => {
+        throw new Error('offline');
+      },
+    }),
+    /offline/,
+  );
+});
+
+test('CLI detection and downstream authorization reject missing or unauthorized actors', () => {
+  const baseEnv = {
+    ...process.env,
+    GITHUB_EVENT_NAME: 'push',
+    GITHUB_REF_NAME: 'v8',
+    GITHUB_REPOSITORY: 'Androz2091/discord-player',
+    GITHUB_ACTOR: 'twlite',
+    GITHUB_TRIGGERING_ACTOR: 'twlite',
+    GITHUB_OUTPUT: '',
+  };
+  for (const actorId of ['', '12345', ...RELEASE_AUTHORITIES]) {
+    const env = { ...baseEnv, GITHUB_ACTOR_ID: actorId };
+    const detected = JSON.parse(
+      execFileSync(process.execPath, ['.github/scripts/release.mjs', 'detect', 'chore: release 8.0.0'], {
+        encoding: 'utf8',
+        env,
+      }),
+    );
+    assert.equal(detected.release, String(RELEASE_AUTHORITIES.includes(actorId)));
+    const authorize = () =>
+      execFileSync(process.execPath, ['.github/scripts/release.mjs', 'authorize'], {
+        env,
+        stdio: 'pipe',
+      });
+    if (RELEASE_AUTHORITIES.includes(actorId)) assert.doesNotThrow(authorize);
+    else assert.throws(authorize, /authorized GitHub actor/);
+  }
 });
 
 test('synchronizes every public packages/ package idempotently and leaves private app versions alone', () => {
