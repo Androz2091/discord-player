@@ -53,7 +53,7 @@ test('/play passes a real URL Track through player.play without requiring /join'
   const playMock = vi.spyOn(player, 'play').mockImplementation(async (channel, track, options) => {
     assert.equal(channel.id, 'voice');
     assert.ok(track instanceof Track);
-    assert.deepEqual(await track.getStreamableSource(), { url: 'https://example.test/audio.mp3' });
+    assert.deepEqual(await player.plugins.resolveStream(track), { url: 'https://example.test/audio.mp3' });
     assert.equal(track.requestedBy, 'requester');
     assert.equal(options.nodeOptions.metadata.textChannel, request.channel);
     return { queue: { size: 1 }, track, playerResult: null };

@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from 'vitest';
+import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 import {
   decode,
   deserialize,
@@ -259,4 +259,30 @@ describe('versioned serialization', () => {
     if (!(result instanceof Track)) throw new Error('Expected a Track instance.');
     expect(result.metadata).toEqual({ values: [1, true, null, 'x'] });
   });
+});
+
+it('validates strict versioned schemas and portable source references with Zod', () => {
+  const payload = makeTrack({
+    sourceReference: { pluginId: 'org.example.raw', data: { url: 'https://example.test/audio.mp3' } },
+  }).serialize();
+  const invalid: unknown[] = [
+    { ...payload, extra: true },
+    { ...payload, data: { ...payload.data, unexpected: true } },
+    { ...payload, data: { ...payload.data, views: -1 } },
+    { ...payload, data: { ...payload.data, durationMS: '1000' } },
+    { ...payload, data: { ...payload.data, requestedBy: 42 } },
+    { ...payload, data: { ...payload.data, sourceReference: { pluginId: 42, data: null } } },
+    { ...payload, data: { ...payload.data, sourceReference: { pluginId: 'org.example.raw' } } },
+    {
+      ...payload,
+      data: { ...payload.data, sourceReference: { pluginId: 'org.example.raw', data: null, extra: true } },
+    },
+  ];
+  for (const value of invalid) expect(() => deserialize(value)).toThrow(SerializationError);
+  expect((deserialize(payload) as Track).sourceReference).toEqual(payload.data.sourceReference);
+  const getter = vi.fn(() => 'title');
+  const unsafe = { ...payload, data: { ...payload.data } };
+  Object.defineProperty(unsafe.data, 'title', { get: getter, enumerable: true });
+  expect(() => deserialize(unsafe)).toThrow(SerializationError);
+  expect(getter).not.toHaveBeenCalled();
 });

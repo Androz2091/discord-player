@@ -177,7 +177,16 @@ export class Queue<T> implements Iterable<T> {
    * @returns `true` when both indexes were valid.
    */
   public swap(left: number, right: number): boolean {
-    if (left < 0 || left >= this.size || right < 0 || right >= this.size) return false;
+    if (
+      !Number.isInteger(left) ||
+      !Number.isInteger(right) ||
+      left < 0 ||
+      left >= this.size ||
+      right < 0 ||
+      right >= this.size
+    ) {
+      return false;
+    }
     [this.items[left], this.items[right]] = [this.items[right]!, this.items[left]!];
     return true;
   }

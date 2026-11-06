@@ -19,3 +19,11 @@ export * from './structures/search-result.js';
 export * from './structures/common/queue.js';
 export * from './structures/common/stack.js';
 export * from './utils/serde.js';
+
+export * from './plugins/types.js';
+export * from './plugins/registry.js';
+export * from './compat/extractors.js';
+export * from './compat/utils.js';
+
+/** Legacy history class name mapped to the managed v8 history facade. */
+export { GuildQueueHistoryManager as GuildQueueHistory } from './managers/guild-queue-history.manager.js';

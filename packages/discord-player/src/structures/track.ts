@@ -1,133 +1,61 @@
+import type { TrackData, TrackJSON, TrackRequester, TrackSource, SerializedTrack } from './track-types.js';
+import type { DiscordPlayer } from '../player.js';
+import type { BaseExtractor, SearchQueryType } from '../compat/extractors.js';
+import type { SourceReference } from '../plugins/types.js';
 import { randomUUID } from 'node:crypto';
 import type { MediaSource } from '@remedia/client';
 import { SerializationError, SourceUnavailableError } from '../errors.js';
-import {
-  cloneJSONValue,
-  SERIALIZATION_SCHEMA_VERSION,
-  type JSONValue,
-  type Serializable,
-  type SerializedEntity,
-} from '../utils/serialization.js';
-import { Playlist, type PlaylistData, type PlaylistJSON } from './playlist.js';
+import { cloneJSONValue, SERIALIZATION_SCHEMA_VERSION, type Serializable } from '../utils/serialization.js';
+import { Playlist } from './playlist.js';
 
-/** Name or identifier for a Track's source integration. */
-export type TrackSource = 'soundcloud' | 'youtube' | 'spotify' | 'apple_music' | 'arbitrary' | string;
-/** Requester identifier or a structural requester object. */
-export type TrackRequester = string | { id?: string; username?: string; [key: string]: unknown };
-
-export interface TrackData<Metadata = unknown> {
-  /** Stable track identifier. */
-  id?: string;
-  /** Display title. */
-  title?: string;
-  /** Track author or artist. */
-  author?: string;
-  /** Track description. */
-  description?: string;
-  /** Source page URL. */
-  url?: string;
-  /** Thumbnail URL. */
-  thumbnail?: string;
-  /** Human-readable duration. */
-  duration?: string;
-  /** Duration in milliseconds when known. */
-  durationMS?: number;
-  /** View or play count when available. */
-  views?: number;
-  /** User or application identity that requested this track. */
-  requestedBy?: TrackRequester | null;
-  /** Alias for `requestedBy`. */
-  requester?: TrackRequester | null;
-  /** Source name, such as YouTube, Spotify, or arbitrary. */
-  source?: TrackSource;
-  /** Whether this is a live stream without a fixed duration. */
-  live?: boolean;
-  /** Arbitrary source-plugin metadata. */
-  metadata?: Metadata | null;
-  /** Playlist containing this track, when present. */
-  playlist?: Playlist | PlaylistData | null;
-}
-
-/** JSON-compatible representation of a Track. */
-export interface TrackJSON<Metadata = unknown> extends TrackData<Metadata> {
-  /** Stable track identifier. */
-  id: string;
-  /** Display title. */
-  title: string;
-  /** Track author or artist. */
-  author: string;
-  /** Track description. */
-  description: string;
-  /** Source page URL. */
-  url: string;
-  /** Thumbnail URL. */
-  thumbnail: string;
-  /** Human-readable duration. */
-  duration: string;
-  /** Duration in milliseconds. */
-  durationMS: number;
-  /** View or play count. */
-  views: number;
-  /** Serialized requester identity, or null when no requester is known. */
-  requestedBy: string | null;
-  /** Serialized playlist metadata, or null when omitted. */
-  playlist: PlaylistJSON | null;
-}
-
-/** Public Track fields stored by the versioned persistence format. */
-export type SerializedTrackData = {
-  /** Stable Track identifier. */
-  id: string;
-  /** Display title. */
-  title: string;
-  /** Track author or artist. */
-  author: string;
-  /** Track description. */
-  description: string;
-  /** Source page URL. */
-  url: string;
-  /** Thumbnail URL. */
-  thumbnail: string;
-  /** Duration in milliseconds. */
-  durationMS: number;
-  /** View or play count when available. */
-  views: number;
-  /** Portable requester identity, or null when unknown. */
-  requestedBy: string | null;
-  /** Source identifier such as `youtube` or `arbitrary`. */
-  source: string;
-  /** Whether the Track is a live stream. */
-  live: boolean;
-  /** JSON-safe application metadata, or null when absent. */
-  metadata: JSONValue | null;
-};
-
-/** Version 1 persistence representation of a Track. */
-export type SerializedTrack = SerializedEntity<'track', SerializedTrackData, typeof SERIALIZATION_SCHEMA_VERSION>;
+export type * from './track-types.js';
 
 function parseDuration(value: string): number {
-  if (!value || value === 'LIVE') return 0;
+  if (!value || value === 'LIVE') {
+    return 0;
+  }
+
   const parts = value.split(':').map(Number);
-  if (parts.some((part) => !Number.isFinite(part))) return 0;
+
+  if (parts.some((part) => !Number.isFinite(part))) {
+    return 0;
+  }
+
   return parts.reduce((total, part) => total * 60 + part, 0) * 1000;
 }
 
 function formatDuration(durationMS: number, live: boolean): string {
-  if (live) return 'LIVE';
-  if (durationMS === 0) return '';
+  if (live) {
+    return 'LIVE';
+  }
+
+  if (durationMS === 0) {
+    return '';
+  }
+
   const seconds = Math.floor(Math.max(0, durationMS) / 1000);
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainder = seconds % 60;
+
   return hours > 0
     ? `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`
     : `${minutes}:${String(remainder).padStart(2, '0')}`;
 }
 
 function requesterIdentity(requester: TrackRequester | null): string | null {
-  if (requester === null) return null;
-  if (typeof requester === 'string') return requester;
-  if (typeof requester === 'object' && requester !== null && typeof requester.id === 'string') return requester.id;
+  if (requester === null) {
+    return null;
+  }
+
+  if (typeof requester === 'string') {
+    return requester;
+  }
+
+  if (typeof requester === 'object' && requester !== null && typeof requester.id === 'string') {
+    return requester.id;
+  }
+
   throw new SerializationError('Track requester objects must have a string id to be persisted.');
 }
 
@@ -135,28 +63,96 @@ function requesterIdentity(requester: TrackRequester | null): string | null {
 export class Track<Metadata = unknown> implements Serializable<SerializedTrack> {
   /** Stable identifier for this Track instance. */
   public readonly id: string;
+
   /** Display title. */
   public title: string;
+
   /** Track author or artist. */
   public author: string;
+
   /** Track description. */
   public description: string;
+
   /** Source page URL. */
   public url: string;
+
   /** Thumbnail URL. */
   public thumbnail: string;
+
   /** Human-readable duration. */
   public duration: string;
+
   /** View or play count when available. */
   public views: number;
+
   /** User or application identity that requested this track. */
   public requestedBy: TrackRequester | null;
-  /** Source name, such as YouTube, Spotify, or arbitrary. */
+
+  /** Provider-defined source name or identifier. */
   public source: TrackSource;
+
   /** Whether this is a live stream without a fixed duration. */
   public live: boolean;
+
   /** Playlist containing this track, when present. */
   public playlist: Playlist | null;
+
+  /** Portable source identity used by the plugin host. */
+  public sourceReference?: SourceReference;
+
+  /** Process-local v7 raw payload. Never serialized. */
+  public readonly raw: Record<string, any>;
+
+  /** Legacy query hint. */
+  public queryType?: SearchQueryType;
+
+  /** Legacy display title. */
+  public cleanTitle: string;
+
+  /** Legacy owning Player, absent for modern data-only tracks. */
+  public readonly player?: DiscordPlayer;
+
+  /** Process-local v7 bridge provider; never used by core queue playback. */
+  public bridgedExtractor: BaseExtractor<any> | null = null;
+
+  /** Process-local v7 bridge metadata; never persisted. */
+  public bridgedTrack: Track | null = null;
+
+  private legacyExtractor: BaseExtractor<any> | null = null;
+  private metadataProvider?: () => Promise<Metadata | null>;
+
+  /** Compatibility extractor reference. Assigning it stamps a portable provider identity. */
+  public get extractor(): BaseExtractor<any> | null {
+    return this.legacyExtractor;
+  }
+
+  /** Associate a legacy extractor.
+   * @param value Legacy owner, or null to clear the process-local reference.
+   */
+  public set extractor(value: BaseExtractor<any> | null) {
+    this.legacyExtractor = value;
+
+    if (value) {
+      this.sourceReference = { pluginId: value.identifier, data: { url: this.url, queryType: this.queryType ?? null } };
+    }
+  }
+
+  /** Request legacy metadata; the callback remains process-local. */
+  public async requestMetadata(): Promise<Metadata | null> {
+    if (this.metadataProvider) {
+      this.trackMetadata = await this.metadataProvider();
+    }
+
+    return this.trackMetadata;
+  }
+
+  /** Replace legacy metadata.
+   * @param value New metadata.
+   */
+  public setMetadata(value: Metadata | null): void {
+    this.trackMetadata = value;
+  }
+
   private trackMetadata: Metadata | null;
   private explicitDurationMs: number | undefined;
 
@@ -164,7 +160,26 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
    * Create a Track model without resolving its media source.
    * @param data Track metadata and optional source-plugin payload.
    */
-  public constructor(data: TrackData<Metadata> = {}) {
+  /** Legacy construction; Player is not needed by modern source plugins.
+   * @param player Owning legacy Player.
+   * @param data Legacy metadata and local engine payload.
+   */
+  public constructor(player: DiscordPlayer, data: TrackData<Metadata>);
+
+  /** Create a modern data-only track.
+   * @param data Track metadata and portable provider identity.
+   */
+  public constructor(data?: TrackData<Metadata>);
+
+  public constructor(input: TrackData<Metadata> | DiscordPlayer = {}, legacyData?: TrackData<Metadata>) {
+    const data = legacyData ?? (input as TrackData<Metadata>);
+
+    this.player = legacyData ? (input as DiscordPlayer) : undefined;
+    this.sourceReference = data.sourceReference;
+    this.raw = { ...data, ...data.raw };
+    this.queryType = data.queryType;
+    this.cleanTitle = data.cleanTitle ?? data.title ?? '';
+    this.metadataProvider = data.requestMetadata;
     this.id = data.id ?? randomUUID();
     this.title = data.title ?? '';
     this.author = data.author ?? '';
@@ -177,8 +192,10 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
     this.requestedBy = data.requestedBy ?? data.requester ?? null;
     this.source = data.source ?? 'arbitrary';
     this.live = data.live ?? false;
+
     this.playlist =
       data.playlist instanceof Playlist ? data.playlist : data.playlist ? Playlist.deserialize(data.playlist) : null;
+
     this.trackMetadata = data.metadata ?? null;
   }
 
@@ -186,6 +203,7 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
   public get requester(): TrackRequester | null {
     return this.requestedBy;
   }
+
   /**
    * Set the requester through the shorter alias.
    * @param value Requesting user or application identity.
@@ -193,10 +211,12 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
   public set requester(value: TrackRequester | null) {
     this.requestedBy = value;
   }
+
   /** Arbitrary source-plugin metadata. */
   public get metadata(): Metadata | null {
     return this.trackMetadata;
   }
+
   /**
    * Replace arbitrary source-plugin metadata.
    * @param value Metadata value to attach, or null to clear it.
@@ -204,10 +224,12 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
   public set metadata(value: Metadata | null) {
     this.trackMetadata = value;
   }
+
   /** Whether source-plugin metadata is present. */
   public get hasMetadata(): boolean {
     return this.trackMetadata !== null;
   }
+
   /** Track duration in milliseconds, parsed from `duration` when not supplied. */
   public get durationMS(): number {
     return this.explicitDurationMs ?? parseDuration(this.duration);
@@ -221,17 +243,14 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
     return this as unknown as Track<NewMetadata>;
   }
 
-  /**
-   * Source plugins may override this method to return a Remedia MediaSource.
-   * The base implementation rejects with `SourceUnavailableError` while source integrations are deferred.
-   * @param options Optional signal for cancelling source preparation.
-   * @returns A resolved Remedia media source.
+  /** Deprecated compatibility stub. Playback resolves sources through player.plugins.
+   * @param options Unused cancellation options.
+   * @returns Always rejects; register a source plugin instead.
+   * @deprecated Use player.plugins.resolveStream(track).
    */
-  public async getStreamableSource(
-    /** Signal for cancelling asynchronous source preparation. */
-    options?: { signal?: AbortSignal },
-  ): Promise<MediaSource> {
+  public async getStreamableSource(options?: { signal?: AbortSignal }): Promise<MediaSource> {
     void options;
+
     throw new SourceUnavailableError(this.title || this.id);
   }
 
@@ -263,7 +282,8 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
       requestedBy: typeof this.requestedBy === 'string' ? this.requestedBy : (this.requestedBy?.id ?? null),
       source: this.source,
       live: this.live,
-      metadata: this.trackMetadata,
+      metadata: this.player ? null : this.trackMetadata,
+      sourceReference: this.sourceReference,
       playlist: hidePlaylist ? null : (this.playlist?.toJSON(false) ?? null),
     };
   }
@@ -290,10 +310,21 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
         requestedBy: requesterIdentity(this.requestedBy),
         source: this.source,
         live,
-        metadata: this.trackMetadata === null ? null : cloneJSONValue(this.trackMetadata, '$.data.metadata'),
+        metadata:
+          this.player || this.trackMetadata === null ? null : cloneJSONValue(this.trackMetadata, '$.data.metadata'),
+        ...(this.sourceReference
+          ? {
+              sourceReference: cloneJSONValue(
+                this.sourceReference,
+                '$.data.sourceReference',
+              ) as unknown as SourceReference,
+            }
+          : {}),
       },
     };
+
     cloneJSONValue(serialized, '$');
+
     return serialized;
   }
 
@@ -313,6 +344,7 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
    */
   public static fromSerialized(serialized: SerializedTrack): Track {
     const data = serialized.data;
+
     return Track.deserialize({
       ...data,
       duration: formatDuration(data.durationMS, data.live),

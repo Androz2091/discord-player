@@ -1,11 +1,11 @@
-import { EventEmitter } from 'node:events';
-import { randomUUID } from 'node:crypto';
+import { TestTrack, setup } from './mocks/queue.js';
+import { settle } from './mocks/async.js';
 import { describe, expect, it, vi } from 'vitest';
-import type { DiscordSessionOptions, MediaSource, PlayOptions } from '@remedia/client';
+import type { MediaSource } from '@remedia/client';
 import {
   DiscordPlayer,
+  definePlugin,
   GuildQueueEvents,
-  type GuildQueueOptions,
   NoResultError,
   Playlist,
   Queue,
@@ -19,251 +19,37 @@ import {
   decode,
 } from '../src/index.js';
 
-/** Minimal deterministic Remedia session used by lifecycle tests. */
-class FakeSession extends EventEmitter {
-  /** Stable identity exposed in lifecycle events. */
-  public readonly sessionId = randomUUID();
-  /** Bot guild identifier. */
-  public readonly guildId: string;
-  /** Current voice channel identifier. */
-  public channelId: string;
-  /** Bot user identifier. */
-  public readonly userId = 'bot-user';
-  /** Selected Remedia node identifier. */
-  public readonly nodeId: string;
-  /** Embedded or remote node kind. */
-  public readonly nodeType: 'embedded' | 'remote';
-  /** Current raw playback state. */
-  public state: 'idle' | 'playing' | 'paused' | 'stopped' | 'completed' | 'failed' = 'idle';
-  /** Current voice connection state. */
-  public connectionState: 'connected' | 'disconnected' = 'disconnected';
-  /** Current linear gain value. */
-  public volume: number;
-  /** Current Gateway self-deaf setting. */
-  public selfDeaf: boolean;
-  /** Current Gateway self-mute setting. */
-  public selfMute: boolean;
-  /** Current position snapshot. */
-  public position = {
-    mediaMs: 0 as number | null,
-    mediaPositionAccuracy: 'estimated' as const,
-    submittedMs: 0,
-    playedMs: 0 as number | null,
-  };
-  /** Current source duration. */
-  public durationMs: number | null = 60_000;
-  /** Filtergraph controls exposed by Remedia. */
-  public filters = {
-    graph: null as string | null,
-    set: async (graph: string) => {
-      this.filters.graph = graph;
-    },
-    clear: async () => {
-      this.filters.graph = null;
-    },
-  };
-  /** Persistent session configuration snapshot. */
-  public get snapshot() {
-    return { filterGraph: this.filters.graph };
-  }
-  /** Count of raw play calls. */
-  public playCalls = 0;
-  /** Count of disconnect calls. */
-  public disconnectCalls = 0;
-  /** Current Remedia generation. */
-  public generation = 0;
-  /** Metadata attached to the current raw generation. */
-  public customMetadata: unknown;
-
-  /** Create a deterministic fake session. */
-  public constructor(options: DiscordSessionOptions, nodeType: 'embedded' | 'remote') {
-    super();
-    this.guildId = options.guildId;
-    this.channelId = options.channelId;
-    this.nodeId = options.nodeId ?? 'fake-node';
-    this.nodeType = nodeType;
-    this.volume = options.volume ?? 1;
-    this.selfDeaf = options.selfDeaf ?? true;
-    this.selfMute = options.selfMute ?? false;
-    this.filters.graph = options.filterGraph ?? null;
-  }
-
-  /** Mark the fake voice session connected. */
-  public async connect(): Promise<void> {
-    this.connectionState = 'connected';
-  }
-  /** Move this logical session to another voice channel. */
-  public async move(channelId: string): Promise<void> {
-    this.channelId = channelId;
-    this.connectionState = 'connected';
-  }
-  /** Stop and disconnect the fake voice session. */
-  public async disconnect(): Promise<void> {
-    this.disconnectCalls++;
-    this.connectionState = 'disconnected';
-  }
-  /** Set linear gain. */
-  public async setVolume(gain: number): Promise<void> {
-    this.volume = gain;
-  }
-  /** Set the Gateway self-deaf flag. */
-  public async setSelfDeaf(enabled: boolean): Promise<void> {
-    this.selfDeaf = enabled;
-  }
-  /** Set the Gateway self-mute flag. */
-  public async setSelfMute(enabled: boolean): Promise<void> {
-    this.selfMute = enabled;
-  }
-  /** Pause raw playback. */
-  public async pause(): Promise<void> {
-    this.state = 'paused';
-  }
-  /** Resume raw playback. */
-  public async resume(): Promise<void> {
-    this.state = 'playing';
-  }
-  /** Seek raw playback. */
-  public async seek(positionMs: number): Promise<void> {
-    this.position = { ...this.position, mediaMs: positionMs, playedMs: positionMs };
-  }
-
-  /** Start one raw Remedia generation and emit its start lifecycle event. */
-  public async play(
-    _source: MediaSource,
-    options?: PlayOptions<unknown>,
-  ): Promise<{
-    streamIndex: number;
-    codec: string;
-    sampleRate: number;
-    channels: number;
-    channelLayout: string;
-    durationMs: number | null;
-    bitRate: number;
-    metadata: Record<string, string>;
-  }> {
-    this.playCalls++;
-    this.generation++;
-    this.state = 'playing';
-    this.customMetadata = options?.customMetadata;
-    const event = {
-      sessionId: this.sessionId,
-      guildId: this.guildId,
-      nodeId: this.nodeId,
-      generation: this.generation,
-      customMetadata: this.customMetadata,
-      state: 'playing' as const,
-      info: {
-        streamIndex: 0,
-        codec: 'opus',
-        sampleRate: 48_000,
-        channels: 2,
-        channelLayout: 'stereo',
-        durationMs: this.durationMs,
-        bitRate: 128_000,
-        metadata: {},
-      },
-    };
-    this.emit('playbackStarted', event);
-    return event.info;
-  }
-
-  /** Emit natural completion for the current generation. */
-  public complete(reconstructed = false): void {
-    this.state = 'completed';
-    this.emit('playbackCompleted', {
-      sessionId: this.sessionId,
-      guildId: this.guildId,
-      nodeId: this.nodeId,
-      generation: this.generation,
-      customMetadata: this.customMetadata,
-      reconstructed,
-      state: 'completed',
-      position: this.position,
-    });
-  }
-
-  /** Emit a stop event for the current generation. */
-  public async stop(): Promise<void> {
-    this.state = 'stopped';
-    this.emit('playbackStopped', {
-      sessionId: this.sessionId,
-      guildId: this.guildId,
-      nodeId: this.nodeId,
-      generation: this.generation,
-      customMetadata: this.customMetadata,
-      state: 'stopped',
-      reason: 'test-stop',
-    });
-  }
-
-  /** Emit a failed event for the current generation. */
-  public fail(error = new Error('decode failed')): void {
-    this.state = 'failed';
-    this.emit('playbackFailed', {
-      sessionId: this.sessionId,
-      guildId: this.guildId,
-      nodeId: this.nodeId,
-      generation: this.generation,
-      customMetadata: this.customMetadata,
-      state: 'failed',
-      error,
-    });
-  }
-}
-
-/** Track fixture with a deterministic Remedia source. */
-class TestTrack extends Track {
-  /** Optional source preparation function. */
-  public resolver: (signal?: AbortSignal) => Promise<MediaSource>;
-
-  /** Create one controlled Track fixture. */
-  public constructor(title: string, resolver?: (signal?: AbortSignal) => Promise<MediaSource>) {
-    super({ title, author: 'fixture', duration: '1:00', url: `https://example.test/${title}` });
-    this.resolver = resolver ?? (async () => ({ url: this.url }));
-  }
-
-  /** Resolve this fixture to a controlled Remedia source. */
-  public override getStreamableSource(options?: { signal?: AbortSignal }): Promise<MediaSource> {
-    return this.resolver(options?.signal);
-  }
-}
-
-/** Create a Player, mocked Remedia client, connected queue, and fake session. */
-async function setup(
-  options: {
-    nodeType?: 'embedded' | 'remote';
-    maxSize?: number;
-    maxHistorySize?: number;
-    queueOptions?: Partial<GuildQueueOptions>;
-  } = {},
-) {
-  const player = new DiscordPlayer({ nodes: [], send: vi.fn() });
-  player.getClientId = () => 'bot-user';
-  const sessions: FakeSession[] = [];
-  player.remedia = {
-    nodes: [{ id: 'fake-node', type: options.nodeType ?? 'embedded' }],
-    createDiscordSession: (sessionOptions: DiscordSessionOptions) => {
-      const session = new FakeSession(sessionOptions, options.nodeType ?? 'embedded');
-      sessions.push(session);
-      return session;
-    },
-    receive: vi.fn(),
-  } as unknown as NonNullable<typeof player.remedia>;
-  const queue = await player.queues.create('guild-one', {
-    maxSize: options.maxSize,
-    maxHistorySize: options.maxHistorySize,
-    ...options.queueOptions,
-  });
-  const session = (await queue.connect({ channelId: 'voice-one' })) as unknown as FakeSession;
-  return { player, queue, session, sessions };
-}
-
-/** Let queued async lock continuations and event callbacks finish. */
-async function settle(): Promise<void> {
-  await new Promise<void>((resolve) => setImmediate(resolve));
-}
-
 describe('managed queue playback', () => {
+  it('routes Player.search through a source plugin, portable Track, queue and Remedia playback', async () => {
+    const { player, queue, session } = await setup();
+    const stream = vi.fn(({ track }: { track: Track }) => ({ url: track.url }));
+    await player.plugins.register(
+      definePlugin({
+        id: 'org.example.http',
+        kind: 'source',
+        setup(ctx) {
+          ctx.on('search.query.match', ({ query }) => (/^https?:/.test(query) ? { score: 100 } : null));
+          ctx.on('search.query.resolve', ({ query }) => ({
+            playlist: null,
+            tracks: [new Track({ title: 'raw audio', url: query })],
+          }));
+          ctx.on('track.stream', stream);
+        },
+      })(),
+    );
+    const play = vi.spyOn(session, 'play');
+    const result = await player.search('https://example.test/audio.mp3');
+    expect(result.tracks[0]!.sourceReference?.pluginId).toBe('org.example.http');
+    const restored = deserialize(result.tracks[0]!.serialize()) as Track;
+    await queue.play(restored);
+    expect(stream).toHaveBeenCalledOnce();
+    expect(play.mock.calls[0]![0]).toEqual({ url: 'https://example.test/audio.mp3' });
+    session.complete();
+    await settle();
+    expect(queue.history.tracks.toArray()).toContain(restored);
+    await player.destroy();
+  });
+
   it('applies GuildQueueOptions defaults when creating its Remedia session', async () => {
     const { queue, session } = await setup({
       queueOptions: {
@@ -299,6 +85,7 @@ describe('managed queue playback', () => {
     expect(queue.tracks.toArray()).toEqual([secondTrack, thirdTrack]);
     expect(secondPlay.playerResult).toBeNull();
 
+    await settle();
     releaseSource({ url: firstTrack.url });
     const result = await firstPlay;
     expect(result.track).toBe(firstTrack);
@@ -339,6 +126,7 @@ describe('managed queue playback', () => {
         }),
     );
     const playStopped = queue.play(pending);
+    await settle();
     await queue.stop();
     resolveStop({ url: pending.url });
     await expect(playStopped).resolves.toMatchObject({ playerResult: null });

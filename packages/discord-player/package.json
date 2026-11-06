@@ -36,14 +36,18 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "vitest run"
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@discordjs/collection": "^2.1.1",
-    "@remedia/client": "0.1.0-dev.1"
+    "@remedia/client": "0.1.0-dev.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "5.1.0",
     "typescript": "^7.0.2",
     "vitest": "^5.1.0"
   }

@@ -604,6 +604,10 @@ export class GuildQueue<Metadata = unknown> {
       const items = this.tracks.toArray();
       const index = this.resolveTrackIndex(items, target);
       if (index < 0) return null;
+      if (!this.node.getSession(false)) {
+        throw new Error('Cannot start a managed Track without a connected Remedia session.');
+      }
+
       targetTrack = items.splice(index, 1)[0] ?? null;
       this.replaceTracks(items);
       const operation = this.#operation;
@@ -636,6 +640,10 @@ export class GuildQueue<Metadata = unknown> {
       using _lock = await this.tasks.acquire('queue.playback-transition');
       this.assertAlive();
       if (this.#operation) return this.#currentTrack;
+      if (this.size && !this.node.getSession(false)) {
+        throw new Error('Cannot start a managed Track without a connected Remedia session.');
+      }
+
       selected = this.takeNextTrack() ?? null;
       if (selected) work = this.beginTrackLocked(selected, { customMetadata: this.#lastCustomMetadata });
     }
@@ -902,8 +910,13 @@ export class GuildQueue<Metadata = unknown> {
     signal: AbortSignal,
   ): Promise<PlayRawResult<GuildQueuePlaybackMetadata<PlaybackMetadata>> | null> {
     try {
-      const source = await operation.track.getStreamableSource({ signal });
-      if (!source) throw new Error('Track.getStreamableSource() returned no Remedia MediaSource.');
+      const source = await this.manager.player.plugins.resolveStream(operation.track, {
+        signal,
+        remote:
+          this.manager.player.getRemedia().nodes.find((node) => node.id === operation.session.nodeId)?.type ===
+          'remote',
+        blocked: this.manager.player.options.blockExtractors,
+      });
       using _lock = await this.tasks.acquire('queue.playback-transition', {
         signal: this.#destroyed ? AbortSignal.abort() : undefined,
       });
@@ -934,6 +947,7 @@ export class GuildQueue<Metadata = unknown> {
     using _lock = await this.tasks.acquire('queue.playback-transition');
     if (this.#destroyed || this.#operation !== operation || operation.terminal) return;
     operation.terminal = true;
+    operation.controller.abort(new Error('Playback preparation failed.'));
     this.#operation = null;
     this.#currentTrack = null;
     this.tracks.insert(operation.track, 0);

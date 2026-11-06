@@ -29,7 +29,7 @@ Music controls require the member to share the bot's voice channel. All command 
 
 ## Playback and announcements
 
-`UrlTrack` is a minimal example source adapter: it wraps the input URL in a real `Track` and returns `{ url }` from `getStreamableSource()`. `/play` calls `player.play(channel, track, options)`, allowing Discord Player to manage insertion, repeat/shuffle, history, and progression. Enter direct media URLs that Remedia can open; search queries and site page extraction are not implemented.
+`UrlTrack` wraps the input URL in a data-only `Track` with a portable source reference. The registered `rawHTTPSource` plugin returns `{ url }` from its `track.stream` handler. `/play` calls `player.play(channel, track, options)`, allowing Discord Player to manage insertion, repeat/shuffle, history, and progression. Enter direct media URLs that Remedia can open; search queries and site page extraction are not implemented.
 
 Pause, resume, seek, and volume use `queue.node` controls. Scheduling commands use the queue, and filters use `queue.node.filters` with a small set of app-owned raw filtergraph presets. Each preset replaces the previous graph.
 

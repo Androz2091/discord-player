@@ -154,9 +154,12 @@ export class Stack<T> implements Iterable<T> {
    * @param count Optional sample size; omitted to return one value.
    */
   public random(count?: number): T | T[] | undefined {
+    if (count !== undefined && (!Number.isInteger(count) || count < 0)) {
+      throw new RangeError('count must be a non-negative integer.');
+    }
+
     if (this.isEmpty()) return count === undefined ? undefined : [];
     if (count === undefined) return this.items[randomInt(this.items.length)];
-    if (!Number.isInteger(count) || count < 0) throw new RangeError('count must be a non-negative integer.');
     return Array.from({ length: count }, () => this.items[randomInt(this.items.length)]!);
   }
 

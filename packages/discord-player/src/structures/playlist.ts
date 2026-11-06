@@ -1,3 +1,4 @@
+import type { DiscordPlayer } from '../player.js';
 import { Track, type SerializedTrack, type TrackData, type TrackSource } from './track.js';
 import {
   cloneJSONValue,
@@ -10,20 +11,28 @@ import {
 export interface PlaylistData {
   /** Stable source playlist identifier. */
   id?: string;
+
   /** Source page URL. */
   url?: string;
+
   /** Display title. */
   title?: string;
+
   /** Playlist description. */
   description?: string;
+
   /** Thumbnail URL. */
   thumbnail?: string;
+
   /** Album or playlist classification. */
   type?: 'album' | 'playlist';
+
   /** Source name. */
   source?: TrackSource;
+
   /** Playlist author name and source URL. */
   author?: { name: string; url: string };
+
   /** Playlist entries. */
   tracks?: Array<Track | TrackData>;
 }
@@ -32,20 +41,28 @@ export interface PlaylistData {
 export interface PlaylistJSON {
   /** Stable source playlist identifier. */
   id: string;
+
   /** Source page URL. */
   url: string;
+
   /** Display title. */
   title: string;
+
   /** Playlist description. */
   description: string;
+
   /** Thumbnail URL. */
   thumbnail: string;
+
   /** Album or playlist classification. */
   type: 'album' | 'playlist';
+
   /** Source name. */
   source: TrackSource;
+
   /** Playlist author name and source URL. */
   author: { name: string; url: string };
+
   /** JSON-compatible playlist entries. */
   tracks: ReturnType<Track['toJSON']>[];
 }
@@ -54,20 +71,28 @@ export interface PlaylistJSON {
 export type SerializedPlaylistData = {
   /** Stable source playlist identifier. */
   id: string;
+
   /** Source page URL. */
   url: string;
+
   /** Display title. */
   title: string;
+
   /** Playlist description. */
   description: string;
+
   /** Thumbnail URL. */
   thumbnail: string;
+
   /** Album or playlist classification. */
   type: 'album' | 'playlist';
+
   /** Source name. */
   source: TrackSource;
+
   /** Playlist author name and source URL. */
   author: { name: string; url: string };
+
   /** Serialized Tracks in playlist order, without parent references. */
   tracks: SerializedTrack[];
 };
@@ -83,20 +108,28 @@ export type SerializedPlaylist = SerializedEntity<
 export class Playlist implements Iterable<Track>, Serializable<SerializedPlaylist> {
   /** Stable source playlist identifier. */
   public readonly id: string;
+
   /** Source page URL. */
   public url: string;
+
   /** Display title. */
   public title: string;
+
   /** Playlist description. */
   public description: string;
+
   /** Thumbnail URL. */
   public thumbnail: string;
+
   /** Album or playlist classification. */
   public type: 'album' | 'playlist';
+
   /** Source name. */
   public source: TrackSource;
+
   /** Playlist author name and source URL. */
   public author: { name: string; url: string };
+
   /** Tracks in this playlist, in source order. */
   public tracks: Track[];
 
@@ -104,7 +137,17 @@ export class Playlist implements Iterable<Track>, Serializable<SerializedPlaylis
    * Create a playlist from public metadata and Track entries.
    * @param data Playlist metadata and entries in source order.
    */
-  public constructor(data: PlaylistData = {}) {
+  public constructor(data?: PlaylistData);
+
+  /** Legacy playlist construction.
+   * @param player Legacy Player; retained only for call compatibility.
+   * @param data Playlist metadata.
+   */
+  public constructor(player: DiscordPlayer, data: PlaylistData);
+
+  public constructor(input: PlaylistData | DiscordPlayer = {}, legacyData?: PlaylistData) {
+    const data = legacyData ?? (input as PlaylistData);
+
     this.id = data.id ?? '';
     this.url = data.url ?? '';
     this.title = data.title ?? '';
@@ -127,6 +170,7 @@ export class Playlist implements Iterable<Track>, Serializable<SerializedPlaylis
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainder = seconds % 60;
+
     return hours > 0
       ? `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`
       : `${minutes}:${String(remainder).padStart(2, '0')}`;
@@ -171,7 +215,9 @@ export class Playlist implements Iterable<Track>, Serializable<SerializedPlaylis
         tracks: this.tracks.map((track) => track.serialize()),
       },
     };
+
     cloneJSONValue(serialized, '$');
+
     return serialized;
   }
 
@@ -181,7 +227,11 @@ export class Playlist implements Iterable<Track>, Serializable<SerializedPlaylis
    */
   public static deserialize(data: PlaylistData): Playlist {
     const playlist = new Playlist(data);
-    for (const track of playlist.tracks) track.playlist = playlist;
+
+    for (const track of playlist.tracks) {
+      track.playlist = playlist;
+    }
+
     return playlist;
   }
 
