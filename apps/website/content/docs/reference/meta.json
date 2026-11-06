@@ -1,0 +1,12 @@
+{
+  "title": "API reference",
+  "pages": [
+    "index",
+    "player",
+    "queue",
+    "plugins",
+    "models",
+    "events",
+    "remedia"
+  ]
+}

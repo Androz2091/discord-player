@@ -1,0 +1,54 @@
+---
+title: Plugin API
+description: The public definition, registration, operations, and compatibility contracts.
+---
+
+Source plugins are defined with `definePlugin<Options>(definition)` and registered with `player.plugins`.
+
+```ts
+import { definePlugin } from 'discord-player';
+
+const source = definePlugin({
+  id: 'example.source',
+  kind: 'source',
+  setup(ctx) {
+    ctx.on('track.stream', ({ track }) => ({ url: track.url }));
+  },
+});
+```
+
+## Definitions
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `id` | `string` | Unique registration identifier |
+| `kind` | `'source'` | Only implemented plugin kind |
+| `setup(ctx)` | `void | Promise<void>` | Register operation handlers |
+| `destroy?(ctx)` | `void | Promise<void>` | Optional teardown |
+| `ctx.options` | `Options` | Registration-local configuration |
+| `ctx.signal` | `AbortSignal` | Aborted on removal |
+| `ctx.on(operation, handler, options?)` | `() => void` | Register a typed handler |
+| `ctx.onCleanup(fn)` | `void` | Register owned cleanup |
+
+## Registry
+
+| Method | Contract |
+| --- | --- |
+| `register(registration)` | Register and await plugin setup |
+| `unregister(id)` | Abort/await handlers and cleanup; returns `boolean` |
+| `has(id)` | Registration present? |
+| `ready()` | Wait for registrations |
+| `execute(operation, input, options?)` | Dispatch typed operation |
+| `resolveStream(track, options?)` | Return normalized Remedia MediaSource |
+| `defineOperation(name, policy)` | Register a custom operation policy |
+| `destroy()` | Release all owned registrations |
+
+## Operations
+
+`search.query.match`, `search.query.resolve`, `track.stream`, `track.related`, `track.bridge`, `stream.transform`, and `track.stream.resolved` are the built-in typed operations. See [dispatch behavior](/docs/plugins/operations) for their policies.
+
+## Compatibility
+
+`BaseExtractor` subclasses can be registered via `player.extractors.register(MyExtractor)`. A compatibility wrapper maps supported methods to this same host. There is **no** separate extractor execution pipeline.
+
+<NextStep href="/docs/reference/models" label="Track and Playlist models" />

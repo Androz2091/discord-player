@@ -1,0 +1,50 @@
+---
+title: Event reference
+description: Public Player and GuildQueue events, argument ordering, and terminal semantics.
+---
+
+There are two event emitters:
+
+- `player.on()` for Player-level `debug`, `error`, and voice-state diagnostics.
+- `player.events.on()` for queue-scoped lifecycle and playback events. The first argument is the owning queue.
+
+## Queue events
+
+| Name | Arguments after queue |
+| --- | --- |
+| `queueCreate` | none |
+| `queueDelete` | none |
+| `connection` | none |
+| `connectionDestroyed` | none |
+| `disconnect` | none |
+| `audioTrackAdd` | `track` |
+| `audioTracksAdd` | `tracks` |
+| `audioTrackRemove` | `track` |
+| `audioTracksRemove` | `tracks` |
+| `playerStart` | `track, rawEvent?` |
+| `playerFinish` | `track, rawEvent?` |
+| `playerSkip` | `track, reason, description, rawEvent?` |
+| `playerStop` | `trackOrNull, rawEvent?` |
+| `playerError` | `error, track, rawEvent?` |
+| `playerPause` | `rawEvent` |
+| `playerResume` | `rawEvent` |
+| `playerSeek` | `rawEvent` |
+| `voiceStateUpdate` | `event` |
+| `volumeChange` | `oldPercentage, newPercentage` |
+| `emptyQueue`, `emptyChannel` | none |
+| `willPlayTrack`, `willAutoPlay` | `track` |
+| `error` | `error` |
+
+The exported `GuildQueueEvents` constant contains the canonical string identifiers. Some historic event names are retained for type compatibility, but that does not mean every old DSP pipeline is recreated.
+
+## Example
+
+```ts
+player.events.on('playerSkip', (queue, track, reason, description) => {
+  console.log(queue.guildId, track.title, reason, description);
+});
+```
+
+Treat terminal events separately. A natural finish advances differently from a stop, skip, or failure, and should not be conflated in analytics or music-command responses.
+
+<NextStep href="/docs/reference/remedia" label="Remedia configuration reference" />

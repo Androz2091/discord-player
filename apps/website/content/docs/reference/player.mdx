@@ -1,0 +1,66 @@
+---
+title: Player
+description: Constructor configuration, initialization, source discovery, queue management, and lifecycle.
+---
+
+`DiscordPlayer` is exported as both `DiscordPlayer` and the compatibility alias `Player`.
+
+```ts
+import { Player } from 'discord-player';
+
+const player = new Player({
+  nodes: [{ type: 'embedded', id: 'local' }],
+  send: (guildId, packet) => sendGateway(guildId, packet),
+});
+
+await player.initialize(botUserId);
+```
+
+## Constructor
+
+`new Player(options: DiscordPlayerOptions)`
+
+| Option | Type | Meaning |
+| --- | --- | --- |
+| `nodes` | `RemediaNodeConfig[]` | Embedded and/or remote audio nodes |
+| `send` | `(guildId, payload) => void | Promise<void>` | Forward voice-state requests to your Gateway library |
+| `plugins?` | `PluginRegistration[]` | Initial source registrations |
+| `blockExtractors?` | `string[]` | Disabled source identifiers |
+| `probeTimeout?` | `number` | Compatibility metadata-probing option |
+
+The options extend relevant `@remedia/client` configuration without exposing its `botUserId` or `selectNode` directly. Queue-level node selection uses `GuildQueueOptions.selectNode`.
+
+## Main methods
+
+| Method | Returns | Notes |
+| --- | --- | --- |
+| `initialize(botUserId)` | `Promise<void>` | Initialize plugins and Remedia, call after READY |
+| `receive(payload)` | `void` | Accept raw Gateway dispatch; filters voice events |
+| `search(query, options?)` | `Promise<SearchResult>` | String queries require a matching plugin |
+| `play(channel, resource, options?)` | `Promise<PlayerNodeInitializationResult>` | Create/retrieve queue and delegate managed playback |
+| `createQueue(guildId, options?)` | `Promise<GuildQueue>` | Reuse or create guild queue |
+| `getQueue(guildId)` | `GuildQueue | undefined` | Fetch existing queue |
+| `deleteQueue(guildId)` | `Promise<void>` | Delete queue and release its session |
+| `getRemedia()` | `RemediaClient` | Requires initialization |
+| `destroy()` | `Promise<void>` | Dispose queues and Remedia |
+
+## Important properties
+
+`player.queues` is the queue manager. `player.nodes` is an alias for the same manager, **not** the native node pool. `player.nodeSnapshots` exposes Remedia node status. `player.plugins` is the source registry, `player.extractors` the compatibility registration API, and `player.events` the guild event emitter.
+
+## Play result
+
+```ts
+const { queue, track, playerResult, searchResult } = await player.play(
+  { guildId, channelId },
+  query,
+);
+```
+
+`track` is `null` for an empty search. `playerResult` is the immediate Remedia play result when a Track started, otherwise `null`. The result also contains the original `resource`.
+
+## Input types
+
+`resource` accepts a string query, Track, Track array, Playlist, or SearchResult. The channel can be a structural voice-channel object, explicit `{ guildId, channelId }`, or a channel ID string **with an explicit `guildId` option**.
+
+<NextStep href="/docs/reference/queue" label="GuildQueue API" />
