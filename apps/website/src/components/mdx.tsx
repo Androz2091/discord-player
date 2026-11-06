@@ -1,9 +1,11 @@
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
+import { NextStep } from './next-step';
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
+    NextStep,
     ...components,
   } satisfies MDXComponents;
 }
