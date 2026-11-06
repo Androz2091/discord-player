@@ -14,7 +14,8 @@ export const player = new DiscordPlayer({
   },
 });
 
-await import('./_legacy-extractor-test/extractor-001.ts' as string)
+const localTest = './_legacy-extractor-test/extractor-001.ts' as string;
+await import(localTest)
   .then((e) => {
     return player.extractors.register(e.default);
   })
