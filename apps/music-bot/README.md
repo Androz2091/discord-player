@@ -1,8 +1,16 @@
 # Discord Player music bot
 
-A small CommandKit bot demonstrating Discord Player v8's Player, guild queue, history, and player-node APIs with an embedded Remedia node.
+A small CommandKit bot demonstrating Discord Player v8's Player, guild queue, history, and player-node APIs with an embedded or remote Remedia node.
 
 Copy `.env.example` to `.env`, set `DISCORD_TOKEN`, and run `pnpm --filter music-bot dev` from the workspace root. Set `MUSIC_DIRECTORY` to a local music folder to enable filename search. Relative directory paths resolve from the bot's working directory. The bot needs permission to send messages and embeds, connect to voice, and speak.
+
+## Remedia execution mode
+
+By default the bot uses the in-process `@remedia/node` addon. Set `REMEDIA_MODE=remote` and configure `REMEDIA_URL`, `REMEDIA_USERNAME`, and `REMEDIA_PASSWORD` to use an authenticated standalone `remedia-server` instead. The remote URL can use `remedias://` for TLS. Missing or invalid configuration fails startup rather than silently falling back to embedded.
+
+The remote server and this bot should use matching Remedia `0.1.0-dev.3` builds. Embedded mode requires FFmpeg 9 shared libraries on the bot host; remote mode requires them only on the server. Local file matches from `MUSIC_DIRECTORY` refer to paths on the bot host, so they are generally not playable by a separate server unless that path is also accessible and allowed on the server. HTTP(S) sources must be allowed by the server's media URL policy.
+
+See [remote installation](../website/content/docs/remedia/remote.mdx) and [voice recovery](../website/content/docs/remedia/voice-recovery.mdx).
 
 ## Commands
 

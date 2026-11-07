@@ -4,9 +4,10 @@ import { escapeMarkdown } from 'discord.js';
 import type { QueueMetadata } from './common.ts';
 import { musicEmbed } from './embeds.ts';
 import { rawHTTPExtractor } from './raw-http-extractor.ts';
+import { createRemediaNodes } from './remedia-config.ts';
 
 export const player = new DiscordPlayer({
-  nodes: [{ id: 'local', type: 'embedded' }],
+  nodes: createRemediaNodes(),
   plugins: [rawHTTPExtractor()],
   send(guildId, payload) {
     const client = useClient<true>();
