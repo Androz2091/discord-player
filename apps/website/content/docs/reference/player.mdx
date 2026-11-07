@@ -27,6 +27,7 @@ await player.initialize(botUserId);
 | `plugins?` | `PluginRegistration[]` | Initial source registrations |
 | `blockExtractors?` | `string[]` | Disabled source identifiers |
 | `probeTimeout?` | `number` | Compatibility metadata-probing option |
+| `requestTimeoutMs?` | `number` | Ordinary Remedia RPC timeout (15,000 ms default); voice setup has its own longer deadline |
 
 The options extend relevant `@remedia/client` configuration without exposing its `botUserId` or `selectNode` directly. Queue-level node selection uses `GuildQueueOptions.selectNode`.
 
@@ -54,8 +55,11 @@ The options extend relevant `@remedia/client` configuration without exposing its
 const { queue, track, playerResult, searchResult } = await player.play(
   { guildId, channelId },
   query,
+  { connectTimeoutMs: 120_000 },
 );
 ```
+
+The optional `connectTimeoutMs` overrides the overall initial voice join timeout (100 seconds by default). It also works on `queue.connect()`. It does not override a voice-channel move's internal deadline.
 
 `track` is `null` for an empty search. `playerResult` is the immediate Remedia play result when a Track started, otherwise `null`. The result also contains the original `resource`.
 

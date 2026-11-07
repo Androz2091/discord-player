@@ -21,7 +21,7 @@ These majors are confirmed against [FFmpeg 9.0.2](https://ffmpeg.org/download.ht
 
 ## Linux: glibc x64 and ARM64
 
-If the distribution supplies matching FFmpeg 9 shared libraries, install its FFmpeg package and development headers. Many LTS distributions still have older ABI majors. For predictable builds and CI parity, the repository uses pinned conda-forge packages:
+If the distribution supplies matching FFmpeg 9 shared libraries, install its FFmpeg package and development headers. Many LTS distributions still have older ABI majors. For predictable builds and CI parity, the Remedia repository uses pinned conda-forge packages:
 
 ```bash
 micromamba create -n remedia-ffmpeg9 -c conda-forge 'ffmpeg=9.0.2' 'pkg-config=0.29.2'
@@ -49,7 +49,7 @@ On macOS, inspect the exact linked install names using `otool -L` if the addon s
 
 ## Windows: x64 MSVC
 
-CI uses pinned conda-forge FFmpeg 9 libraries and build-time clang. With micromamba:
+Remedia CI uses pinned conda-forge FFmpeg 9 libraries and build-time clang. With micromamba:
 
 ```powershell
 micromamba create -n remedia-ffmpeg9 -c conda-forge ffmpeg=9.0.2 pkg-config=0.29.2
@@ -64,7 +64,7 @@ Add the `Library\bin` directory to the environment of the **actual process** lau
 
 ## FreeBSD, musl, ARMv7, and Android
 
-FreeBSD x64 is tested in a FreeBSD VM against a pinned FFmpeg 9.0.2 source build. Other targets may lack FFmpeg 9 packages for their operating system or CPU. The repository cross-compiles FFmpeg at commit `946fcce07b6dcd0331c8cc609192aeff5e1924f8` for Linux musl, Linux ARMv7, and Android API 24 builds; these are **build-only** targets and do not constitute runtime compatibility guarantees.
+FreeBSD x64 is tested in a FreeBSD VM against a pinned FFmpeg 9.0.2 source build. Other targets may lack FFmpeg 9 packages for their operating system or CPU. The Remedia repository cross-compiles FFmpeg at commit `946fcce07b6dcd0331c8cc609192aeff5e1924f8` for Linux musl, Linux ARMv7, and Android API 24 builds; these are **build-only** targets and do not constitute runtime compatibility guarantees.
 
 For 32-bit targets, the build workflow applies a version-checked correction to the `ffmpeg-sys-next 9.0.1` Vulkan bindgen shim's pointer-size assertion. It does not change the Vulkan structure or its target-specific layout. This temporary workaround is required until the upstream binding crate ships a corrected assertion.
 
@@ -80,7 +80,7 @@ done
 
 The major versions should be **63, 63, 61, 12, 7**, in that order. The runtime also requires each matching shared library file, not only `pkg-config` metadata. Inspect the compiled addon with `ldd` (Linux / FreeBSD), `otool -L` (macOS), or `dumpbin /DEPENDENTS` (Windows).
 
-For the repository's exact build and runtime assertions, see [`verify-native-deps.mjs`](https://github.com/twlite/remedia/blob/main/.github/scripts/verify-native-deps.mjs). These checks run in CI for native build and test targets.
+For Remedia's exact build and runtime assertions, see [`verify-native-deps.mjs`](https://github.com/twlite/remedia/blob/main/.github/scripts/verify-native-deps.mjs). These checks run in CI for native build and test targets.
 
 ## Upgrading an existing deployment
 

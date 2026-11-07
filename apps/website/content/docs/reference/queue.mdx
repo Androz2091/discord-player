@@ -14,7 +14,7 @@ const queue = await player.createQueue(guildId, {
   metadata: { textChannelId },
 });
 
-await queue.connect({ channelId, volume: 75 });
+await queue.connect({ channelId, volume: 75, connectTimeoutMs: 120_000 });
 await queue.play(track);
 ```
 
@@ -34,6 +34,10 @@ await queue.play(track);
 | `setSelfDeaf(bool)`, `setSelfMute(bool)` | Update voice flags |
 | `destroy()`, `delete()` | Release queue resources |
 | `clear()` | Clear upcoming Tracks and history |
+
+## Connection deadline
+
+`connectTimeoutMs` is optional and applies to a new voice join or an explicit reconnect. Remedia defaults to 100 seconds. It does not change the independent 80-second `voice.connect` RPC deadline or a channel move's internal timeout. `player.play(channel, resource, { connectTimeoutMs })` forwards the same option. See [voice recovery](/docs/remedia/voice-recovery).
 
 ## Queue state
 
