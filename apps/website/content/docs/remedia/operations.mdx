@@ -38,6 +38,8 @@ A selection callback can apply an application-specific policy, but it should con
 | Failure isolation | Shared bot process | Independent audio service |
 | Scaling | Scale whole bot process | Add audio nodes independently |
 
+For remote servers, run `remedia-server --list` on the server host to see locally discovered instances, active players, current connections, resident memory when available, and health. `remedia-server doctor --config ./remedia.config.json --env-file .env` checks the loaded FFmpeg 9 libraries and server configuration. These are administrative commands, not methods on `player.getRemedia()`.
+
 For metrics and debugging, use Remedia's [observability documentation](https://github.com/twlite/remedia/tree/main/apps/docs/content/docs/observability). Limit sensitive media locations and authentication details in logs.
 
 <NextStep href="/docs/architecture" label="Read the architecture" />

@@ -9,7 +9,7 @@ Start by locating the layer that failed. A missing source plugin and a failed na
 
 **Symptom:** `ERR_DLOPEN_FAILED`, missing `.node` addon, `avcodec`/FFmpeg shared library errors, or missing Windows DLLs.
 
-**Check:** Node.js version, CPU architecture, platform optional dependencies, and the five required FFmpeg 7 shared library ABI majors. Run the [native loading checklist and smoke test](/docs/installation/ffmpeg#troubleshooting). Embedded hosts need the libraries locally; remote-only bot hosts do not.
+**Check:** Node.js version, CPU architecture, platform optional dependencies, and the five required FFmpeg 9 shared library ABI majors (63, 63, 61, 12, 7). Run the [native loading checklist and smoke test](/docs/installation/ffmpeg#troubleshooting). Embedded hosts need the libraries locally; remote-only bot hosts do not.
 
 ## No matching tracks
 
@@ -26,6 +26,14 @@ Start by locating the layer that failed. A missing source plugin and a failed na
 ## Voice never becomes connected
 
 **Check:** Guild voice permissions, botUserId, the correct shard in `send`, and forwarding of `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE`. `player.receive()` should run on raw Gateway dispatches, not just a high-level voice-state callback.
+
+## Concurrent voice joins fail
+
+**Symptom:** one guild joins while others fail with `RemediaRpcError: request_timeout` or Discord voice WebSocket close `4022`.
+
+**Check:** deploy the `0.1.0-dev.3` Remedia client and server, or a compatible newer release. The fixed client has a dedicated `voice.connect` deadline and retries eligible initial failures with fresh Gateway credentials. Ordinary `requestTimeoutMs` does not govern voice negotiation. Verify that OP 4 is routed to each guild's shard and that raw voice Gateway events reach `player.receive()`.
+
+Use `Promise.allSettled` when testing independent guild joins. Correlate gateway joins/leaves with each RPC and voice socket close; `4022` alone does not prove which event caused termination. See [voice recovery and concurrent joins](/docs/remedia/voice-recovery).
 
 ## Playback stops, skips, or repeats unexpectedly
 

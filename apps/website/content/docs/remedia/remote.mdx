@@ -28,7 +28,32 @@ await player.initialize(botUserId);
 
 ## Deploy the server
 
-Install compatible FFmpeg libraries **on the remote machine**. Start an authenticated `remedia-server` with its `remedia.config.json`; see the [server configuration reference](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/configuration.mdx) and [deployment guide](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/deployment.mdx).
+Install the [matching Remedia server release](https://github.com/twlite/remedia/releases/tag/v0.1.0-dev.3) on the audio host, not on the bot host. Use the official [server installation guide](https://github.com/twlite/remedia/blob/v0.1.0-dev.3/apps/docs/content/docs/server/installation.mdx). The standalone CLI supports:
+
+```sh
+remedia-server --generate-config-file
+remedia-server doctor --config ./remedia.config.json --env-file .env
+remedia-server serve --config ./remedia.config.json --env-file .env
+remedia-server --list
+```
+
+The generated configuration denies playback URLs and file paths until you authorize sources. Set the referenced password in `.env`. The `--env-file` argument requires an existing file; `--optional-env-file` ignores a missing file. Neither loads values into the process-global environment.
+
+The lightweight administrative CLI can run without FFmpeg. Native `serve` and `doctor` still require FFmpeg **9** shared libraries on the server. `--list` discovers running Remedia processes for the same local OS user and reports their health, resource counts, and listening ports; it is not a LAN scanner or process manager.
+
+## Connection timing
+
+Remedia `0.1.0-dev.3` uses a dedicated 80-second `voice.connect` client RPC timeout and allows 75 seconds on the server, independent of regular RPC timeout settings. The default overall join deadline is 100 seconds.
+
+```ts
+await queue.connect({ channelId, connectTimeoutMs: 120_000 });
+```
+
+Do not globally serialize guild joins to avoid timeouts. Each guild has an independent session. Read [voice recovery and concurrent joins](/docs/remedia/voice-recovery) before changing connection settings.
+
+## Server setup details
+
+Install compatible FFmpeg libraries **on the remote machine**. Start an authenticated `remedia-server` with its `remedia.config.json`; see the [server configuration reference](https://github.com/twlite/remedia/blob/v0.1.0-dev.3/apps/docs/content/docs/server/configuration.mdx) and [deployment guide](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/deployment.mdx).
 
 For a public network, put TLS in front of the service, restrict source access, and protect credentials. Never expose your server with anonymous playback privileges.
 

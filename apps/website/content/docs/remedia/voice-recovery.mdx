@@ -1,0 +1,71 @@
+---
+title: Voice recovery and concurrent guilds
+description: Diagnose concurrent voice joins and understand Remedia's connection deadlines and recovery behavior.
+---
+
+Every guild has its own Remedia voice transport. Concurrent joins are not serialized globally, so one successful guild does not imply that the others reached Discord voice readiness.
+
+## Version and timeouts
+
+Use `@remedia/client` **0.1.0-dev.3** or later compatible builds and a `remedia-server` from the same release. Earlier `dev.2` clients could time out `voice.connect` after only 15 seconds, while the server was still negotiating voice.
+
+| Operation | Default |
+| --- | --- |
+| Ordinary remote RPC | 15 seconds (`requestTimeoutMs`) |
+| Remote `voice.connect` RPC | At least 80 seconds |
+| Server-side `voice.connect` request | At least 75 seconds |
+| Initial Gateway and voice connection | 100 seconds |
+
+These are independent deadlines. Raising the ordinary `requestTimeoutMs` is not the remedy for a slow `voice.connect`. In Discord Player, set `connectTimeoutMs` on an initial `queue.connect()` or a `player.play()` request. Channel moves use Remedia's separate, internal timeout.
+
+## Connect several guilds independently
+
+Use the guild and channel IDs from your Discord application. When diagnosing a multi-guild failure, prefer `Promise.allSettled` so a single rejected join cannot hide the others:
+
+```ts
+const destinations = [
+  { guildId: '111111111111111111', channelId: '222222222222222222' },
+  { guildId: '333333333333333333', channelId: '444444444444444444' },
+  // Add more guild and channel pairs.
+];
+
+const results = await Promise.allSettled(
+  destinations.map(async ({ guildId, channelId }) => {
+    const queue = await player.createQueue(guildId);
+    await queue.connect({ channelId, connectTimeoutMs: 120_000 });
+    return { guildId, state: queue.node.session?.connectionState };
+  }),
+);
+
+for (const [index, result] of results.entries()) {
+  console.log(destinations[index]!.guildId, result);
+}
+```
+
+This tests only the voice connection. It does not require an audio source plugin or a playable Track. Use real Discord snowflake IDs rather than the illustrative IDs above.
+
+## Do not silently drop Gateway requests
+
+`player.receive(packet)` must receive raw `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` dispatches. The `send(guildId, payload)` callback must forward OP 4 to the guild's owning Gateway shard. Throw or reject when that guild cannot be routed. Optional chaining that returns `undefined` when the guild is missing can leave the attempt pending until timeout.
+
+Different bot accounts have different Discord voice identities, even in the same channel. Keep their Player instances, Gateway dispatches, and Remedia sessions independent.
+
+## Initial connection recovery
+
+Remedia `dev.3` retries eligible initial remote transport failures with a bounded budget and fresh Gateway credentials. Explicit leaves and queue destruction still end the session. Intentional channel moves use a different recovery path and can fail without rejoining automatically.
+
+Discord voice WebSocket close code `4022` indicates a terminated voice call. It is not the rate-limit close code. A `4022` log alone cannot tell whether Discord ended the call first or whether the application's cleanup triggered the close.
+
+Correlate per-guild timestamps for OP 4 join and leave, incoming Gateway voice events, the `voice.connect` RPC, DAVE setup, and socket closure. Log IDs and error categories, but never log Discord voice tokens, session secrets, or signed media URLs.
+
+## Check the server
+
+```sh
+remedia-server --list
+remedia-server --list --json
+remedia-server doctor --config ./remedia.config.json --env-file .env
+```
+
+The commands run on the audio-server host. `--list` enumerates the current operating-system user's local Remedia processes, not arbitrary servers on the network. `doctor` verifies FFmpeg 9 loading and configuration, not your bot's Gateway shard routing.
+
+<NextStep href="/docs/troubleshooting" label="Troubleshoot voice and playback" />
