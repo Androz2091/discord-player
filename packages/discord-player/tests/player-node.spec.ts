@@ -55,6 +55,31 @@ it('forwards a per-join timeout to Remedia without putting it in session configu
   await player.destroy();
 });
 
+it('connects five guild queues independently without a shared voice deadline', async () => {
+  const { player, backend } = await setup({ nodeType: 'remote' });
+  const destinations = Array.from({ length: 5 }, (_, index) => ({
+    guildId: `guild-${index}`,
+    channelId: `voice-${index}`,
+  }));
+  const queues = await Promise.all(destinations.map(({ guildId }) => player.createQueue(guildId)));
+
+  const results = await Promise.allSettled(
+    queues.map((queue, index) =>
+      queue.connect({ channelId: destinations[index]!.channelId, connectTimeoutMs: 120_000 }),
+    ),
+  );
+
+  expect(results.every((result) => result.status === 'fulfilled')).toBe(true);
+  const sessions = backend.sessions.filter((session) => session.guildId.startsWith('guild-'));
+  expect(sessions).toHaveLength(5);
+  expect(new Set(sessions.map((session) => session.sessionId)).size).toBe(5);
+  for (const session of sessions) {
+    expect(session.connectionState).toBe('connected');
+    expect(session.connectOptions).toEqual([{ timeoutMs: 120_000 }]);
+  }
+
+  await player.destroy();
+});
 it('cleans up sessions whose connect method rejects and permits a subsequent connection', async () => {
   const { queue, player, backend } = await setup();
   await queue.node.destroySession();
