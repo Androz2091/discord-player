@@ -40,6 +40,47 @@ it('creates, replaces, reconnects and destroys sessions while retaining configur
   await expect(node.createSession({ channelId: 'no' })).rejects.toThrow('destroyed');
 });
 
+it('forwards a per-join timeout to Remedia without putting it in session configuration', async () => {
+  const { queue, player, backend } = await setup();
+  await queue.node.destroySession();
+  await queue.connect({ channelId: 'new', connectTimeoutMs: 120_000 });
+  const session = backend.sessions.at(-1)!;
+  expect(backend.client.createDiscordSession.mock.lastCall?.[0]).not.toHaveProperty('connectTimeoutMs');
+  expect(session.connectOptions.at(-1)).toEqual({ timeoutMs: 120_000 });
+
+  const connect = vi.spyOn(session, 'connect');
+  session.connectionState = 'disconnected';
+  await queue.connect({ channelId: 'new', connectTimeoutMs: 110_000 });
+  expect(connect).toHaveBeenCalledWith({ timeoutMs: 110_000 });
+  await player.destroy();
+});
+
+it('connects five guild queues independently without a shared voice deadline', async () => {
+  const { player, backend } = await setup({ nodeType: 'remote' });
+  const destinations = Array.from({ length: 5 }, (_, index) => ({
+    guildId: `guild-${index}`,
+    channelId: `voice-${index}`,
+  }));
+  const queues = await Promise.all(destinations.map(({ guildId }) => player.createQueue(guildId)));
+
+  const results = await Promise.allSettled(
+    queues.map((queue, index) =>
+      queue.connect({ channelId: destinations[index]!.channelId, connectTimeoutMs: 120_000 }),
+    ),
+  );
+
+  expect(results.every((result) => result.status === 'fulfilled')).toBe(true);
+  const guildIds = new Set(destinations.map(({ guildId }) => guildId));
+  const sessions = backend.sessions.filter((session) => guildIds.has(session.guildId));
+  expect(sessions).toHaveLength(5);
+  expect(new Set(sessions.map((session) => session.sessionId)).size).toBe(5);
+  for (const session of sessions) {
+    expect(session.connectionState).toBe('connected');
+    expect(session.connectOptions).toEqual([{ timeoutMs: 120_000 }]);
+  }
+
+  await player.destroy();
+});
 it('cleans up sessions whose connect method rejects and permits a subsequent connection', async () => {
   const { queue, player, backend } = await setup();
   await queue.node.destroySession();

@@ -9,7 +9,7 @@ Discord Player v8 keeps the familiar `Player` and `GuildQueue` object model whil
 ```ts
 import { Player, QueueRepeatMode, Track, useHistory, useQueue } from 'discord-player';
 
-const player = new Player({ nodes: [], send: sendDiscordGatewayPayload });
+const player = new Player({ nodes: [{ type: 'embedded', id: 'local' }], send: sendDiscordGatewayPayload });
 await player.initialize(botUserId);
 
 const queue = await player.createQueue(guildId, {
@@ -22,6 +22,7 @@ await queue.connect({
   selfDeaf: true,
   volume: 80,
   filterGraph: 'bass=gain=8',
+  connectTimeoutMs: 120_000, // Optional initial-join deadline
 });
 
 // A source integration must provide a Track subclass or bridge that resolves
@@ -216,7 +217,7 @@ plugins, remote plugin execution/protocols and automatic distribution are deferr
 
 ## Remedia capabilities
 
-Discord Player uses Remedia `0.1.0-dev.1`. Queue connection settings initialize `DiscordSession` with self-deaf, self-mute, linear volume, and raw filtergraph configuration. Queue volume remains a 0–100 percentage and is converted to Remedia gain internally. Channel changes call `DiscordSession.move(channelId)` on the existing session, retaining the queue, current Track, filters, volume, and history. `queue.setSelfDeaf()` and `queue.setSelfMute()` update the connected session and queue defaults.
+Discord Player uses Remedia `0.1.0-dev.3` and FFmpeg 9 shared libraries for embedded playback. Remote voice connections use an 80-second RPC deadline and a 100-second default overall initial join deadline, with bounded retries using fresh Gateway credentials. Queue connection settings initialize `DiscordSession` with self-deaf, self-mute, linear volume, and raw filtergraph configuration. Queue volume remains a 0–100 percentage and is converted to Remedia gain internally. Channel changes call `DiscordSession.move(channelId)` on the existing session, retaining the queue, current Track, filters, volume, and history. `queue.setSelfDeaf()` and `queue.setSelfMute()` update the connected session and queue defaults.
 
 ## Audio filters
 

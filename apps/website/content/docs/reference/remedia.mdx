@@ -11,7 +11,7 @@ The Player receives a Remedia node pool through `DiscordPlayerOptions.nodes`. Th
 nodes: [{ type: 'embedded', id: 'local', capacity: 8 }]
 ```
 
-An embedded node uses `@remedia/node` directly inside the application and needs FFmpeg 7 shared libraries on that host.
+An embedded node uses `@remedia/node` directly inside the application and needs FFmpeg 9 shared libraries with ABI majors 63, 63, 61, 12, 7 on that host.
 
 ## Remote node
 
@@ -39,11 +39,13 @@ const remedia = player.getRemedia();
 console.log(player.nodeSnapshots);
 ```
 
-The bot forwards raw Gateway dispatches with `player.receive(packet)`. `botUserId` scopes sessions and identifies the account for Discord voice; a single server can serve independent bot clients.
+The bot forwards raw Gateway dispatches with `player.receive(packet)`. The `send` callback must reach the correct owning shard, and must reject instead of silently ignoring a missing guild. `botUserId` scopes sessions and identifies the account for Discord voice; a single server can serve independent bot clients.
 
 ## Placement and media limits
 
 A guild assignment stays sticky to its selected healthy node. Queue-specific `selectNode` options can influence placement. Embedded mode can consume local binary Readables; remote mode accepts only server-accessible URLs or file paths from discord-player's source resolution.
+
+Remedia `0.1.0-dev.3` gives `voice.connect` a dedicated 80-second client RPC timeout and an overall 100-second initial join deadline. Ordinary RPCs still default to 15 seconds. `connectTimeoutMs` on `queue.connect()` or `player.play()` overrides an initial join deadline; channel moves retain Remedia's internal deadline.
 
 For details on low-level session migration, event generations, reconnection, and protocol, refer to the [Remedia client reference](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/client/overview.mdx).
 

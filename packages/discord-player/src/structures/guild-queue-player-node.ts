@@ -8,7 +8,10 @@ import type { Track } from './track.js';
  * Remedia session configuration supplied when a queue node creates or connects its raw session.
  * `volume` is Remedia's linear gain, from 0 through 2; queue APIs accept percentages instead.
  */
-export interface GuildQueuePlayerNodeSessionCreateOptions extends Omit<DiscordSessionOptions, 'guildId' | 'userId'> {}
+export interface GuildQueuePlayerNodeSessionCreateOptions extends Omit<DiscordSessionOptions, 'guildId' | 'userId'> {
+  /** Deadline for the initial Discord voice join, in milliseconds; defaults to Remedia's 100 seconds. */
+  connectTimeoutMs?: number;
+}
 
 /** Formatting options for a text progress bar. */
 export interface PlayerProgressbarOptions {
@@ -105,8 +108,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
     this.assertQueueAlive();
     await this.destroySessionUnlocked();
+    const { connectTimeoutMs: _connectTimeoutMs, ...sessionOptions } = options;
     const session = this.player.getRemedia().createDiscordSession({
-      ...options,
+      ...sessionOptions,
       guildId: this.queue.guildId,
       userId: this.player.getClientId(),
     });
@@ -144,22 +148,25 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       }
 
       if (options.channelId !== existing.channelId) await existing.move(options.channelId);
-      if (existing.connectionState !== 'connected') await existing.connect();
+      if (existing.connectionState !== 'connected') {
+        await existing.connect(options.connectTimeoutMs === undefined ? {} : { timeoutMs: options.connectTimeoutMs });
+      }
       this.rememberSessionConfiguration(existing);
       if (existing.volume !== previousVolume)
         this.queue.emit('volumeChange', previousVolume * 100, existing.volume * 100);
       return existing as DiscordSession<M>;
     }
 
+    const { connectTimeoutMs, ...sessionOptions } = options;
     const session = this.player.getRemedia().createDiscordSession({
-      ...options,
+      ...sessionOptions,
       guildId: this.queue.guildId,
       userId: this.player.getClientId(),
     });
     this.session = session;
     this.attachSessionListeners(session);
     try {
-      await session.connect();
+      await session.connect(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs });
       this.rememberSessionConfiguration(session);
     } catch (error) {
       await this.destroySessionUnlocked();

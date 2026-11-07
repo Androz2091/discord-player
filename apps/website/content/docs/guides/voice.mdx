@@ -21,7 +21,7 @@ await player.initialize(botUserId);
 
 `gateway.sendToGuildShard` and `gateway.onDispatch` are application integration points, **not** discord-player exports. For an executable discord.js example, see [create a player](/docs/getting-started/create-player).
 
-Only `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` are passed through to Remedia. Each bot account must use its own authenticated user identity, even if multiple bots share a guild or voice channel.
+Only `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` are passed through to Remedia. `send` must reject when a guild cannot be routed to a shard; do not silently swallow missing guilds. Each bot account must use its own authenticated user identity, even if multiple bots share a guild or voice channel.
 
 ## Connect or move channels
 
@@ -33,6 +33,7 @@ await queue.connect({
   selfDeaf: true,
   selfMute: false,
   volume: 70,
+  connectTimeoutMs: 120_000, // Optional initial-join timeout
 });
 
 await queue.connect({ channelId: nextVoiceChannelId });
@@ -59,6 +60,8 @@ player.events.on('voiceStateUpdate', (queue, event) => {
 });
 ```
 
+Remedia `0.1.0-dev.3` retries transient initial remote join failures with fresh Gateway credentials. The default initial join deadline is 100 seconds. Ordinary remote requests retain their separate 15-second timeout.
+
 Avoid treating a brief voice reconnect as a completed Track. The queue and Remedia have separate state machines. A channel move is not the same thing as moving a decoder to another Remedia node.
 
-<NextStep href="/docs/guides/filters" label="Apply audio filters" />
+<NextStep href="/docs/remedia/voice-recovery" label="Diagnose concurrent voice joins" />

@@ -16,7 +16,9 @@ export const client = new Client({
 export const player = new Player({
   nodes: [{ id: 'local', type: 'embedded' }],
   send(guildId, payload) {
-    return client.guilds.cache.get(guildId)?.shard?.send(payload);
+    const guild = client.guilds.cache.get(guildId);
+    if (!guild) throw new Error(`Voice Gateway shard not found for guild ${guildId}`);
+    return guild.shard.send(payload);
   },
 });
 
@@ -35,7 +37,7 @@ await client.login(process.env.DISCORD_TOKEN);
 ## Why these calls are required
 
 1. `nodes` configures which Remedia engine(s) run audio. An embedded node runs in your Node.js process.
-2. `send(guildId, payload)` forwards Discord voice-state requests to the correct shard. Use your own Gateway library's equivalent.
+2. `send(guildId, payload)` forwards Discord voice-state requests to the correct shard. Use your Gateway library's equivalent and reject when shard routing fails. A silent no-op leaves the join pending.
 3. `player.receive(payload)` forwards only `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` dispatches to Remedia.
 4. `initialize(botUserId)` creates the Remedia client and activates plugin registrations. Call it once the bot user ID exists, **before issuing playback commands**.
 

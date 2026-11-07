@@ -25,7 +25,7 @@ player.events.on('playerError', (queue, error, track) => {
 | --- | --- |
 | `player.search(query)` returns no Tracks | Is a source plugin registered and matching the query? |
 | `No source plugin handled ...` | Does the Track have a portable source reference, or can another plugin bridge it? |
-| Native library loading failure | Verify FFmpeg 7 shared libraries on the **audio host** |
+| Native library loading failure | Verify FFmpeg 9 shared libraries on the **audio host** |
 | Voice connection fails | Bot voice permissions, Gateway forwarding, correct user ID and guild/shard routing |
 | Remote playback rejects a stream | Remote nodes cannot consume a client-side Node.js Readable |
 | A filter update rejects | Validate the raw FFmpeg graph on the target Remedia runtime |
