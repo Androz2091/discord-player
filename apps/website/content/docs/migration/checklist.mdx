@@ -8,13 +8,16 @@ Use this as a release gate. The items below are designed to expose the most comm
 ## Runtime and voice
 
 - [ ] Bot starts on Node.js 22.18+ with ESM.
-- [ ] Embedded host loads FFmpeg 7 and Remedia native bindings; or remote server loads them successfully.
+- [ ] Embedded host loads FFmpeg 9 and matching Remedia native bindings; or remote server loads them successfully.
 - [ ] `initialize(botUserId)` completes after Gateway READY.
 - [ ] Raw `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` are forwarded once.
 - [ ] Bot joins and leaves a voice channel correctly.
 - [ ] Moving channels retains queue metadata and existing playback policy.
 - [ ] Self-deaf and self-mute can be changed while connected.
 - [ ] Reconnect and voice-region changes do not generate a false `playerFinish`.
+- [ ] Five simultaneous guild joins connect independently without unexpected voice leaves.
+- [ ] Transient initial transport failures recover using fresh Gateway credentials.
+- [ ] The bot client and remote server include the `0.1.0-dev.3` voice-recovery fixes.
 
 ## Sources and plugins
 
