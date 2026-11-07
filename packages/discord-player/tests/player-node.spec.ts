@@ -70,7 +70,8 @@ it('connects five guild queues independently without a shared voice deadline', a
   );
 
   expect(results.every((result) => result.status === 'fulfilled')).toBe(true);
-  const sessions = backend.sessions.filter((session) => session.guildId.startsWith('guild-'));
+  const guildIds = new Set(destinations.map(({ guildId }) => guildId));
+  const sessions = backend.sessions.filter((session) => guildIds.has(session.guildId));
   expect(sessions).toHaveLength(5);
   expect(new Set(sessions.map((session) => session.sessionId)).size).toBe(5);
   for (const session of sessions) {
