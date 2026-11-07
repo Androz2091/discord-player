@@ -104,6 +104,8 @@ export interface GuildQueuePlayOptions<Metadata = unknown> extends PlayOptions<M
   volume?: number;
   /** Raw Remedia filtergraph to apply before playback; null clears filtering. */
   filterGraph?: string | null;
+  /** Initial voice join timeout in milliseconds; defaults to Remedia's 100 seconds. */
+  connectTimeoutMs?: number;
 }
 
 /** Result of a queue-managed playback request. */
@@ -1022,6 +1024,7 @@ export class GuildQueue<Metadata = unknown> {
     const session = await this.node.connect({
       channelId: options.channelId,
       ...(options.nodeId ? { nodeId: options.nodeId } : {}),
+      ...(options.connectTimeoutMs === undefined ? {} : { connectTimeoutMs: options.connectTimeoutMs }),
       ...(selfDeaf !== undefined ? { selfDeaf } : {}),
       ...(selfMute !== undefined ? { selfMute } : {}),
       ...(volume !== undefined ? { volume: volume / 100 } : {}),

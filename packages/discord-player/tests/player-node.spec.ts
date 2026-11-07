@@ -40,6 +40,22 @@ it('creates, replaces, reconnects and destroys sessions while retaining configur
   await expect(node.createSession({ channelId: 'no' })).rejects.toThrow('destroyed');
 });
 
+it('forwards a per-join timeout to Remedia without putting it in session configuration', async () => {
+  const { queue, player, backend } = await setup();
+  await queue.node.destroySession();
+  await queue.connect({ channelId: 'new', connectTimeoutMs: 120_000 });
+  const session = backend.sessions.at(-1)!;
+  expect(backend.client.createDiscordSession).toHaveBeenLastCalledWith(
+    expect.not.objectContaining({ connectTimeoutMs: expect.anything() }),
+  );
+
+  const connect = vi.spyOn(session, 'connect');
+  session.connectionState = 'disconnected';
+  await queue.connect({ channelId: 'new', connectTimeoutMs: 110_000 });
+  expect(connect).toHaveBeenCalledWith({ timeoutMs: 110_000 });
+  await player.destroy();
+});
+
 it('cleans up sessions whose connect method rejects and permits a subsequent connection', async () => {
   const { queue, player, backend } = await setup();
   await queue.node.destroySession();
