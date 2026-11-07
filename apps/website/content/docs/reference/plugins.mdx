@@ -23,8 +23,8 @@ const source = definePlugin({
 | --- | --- | --- |
 | `id` | `string` | Unique registration identifier |
 | `kind` | `'source'` | Only implemented plugin kind |
-| `setup(ctx)` | `void | Promise<void>` | Register operation handlers |
-| `destroy?(ctx)` | `void | Promise<void>` | Optional teardown |
+| `setup(ctx)` | `void \| Promise<void>` | Register operation handlers |
+| `destroy?(ctx)` | `void \| Promise<void>` | Optional teardown |
 | `ctx.options` | `Options` | Registration-local configuration |
 | `ctx.signal` | `AbortSignal` | Aborted on removal |
 | `ctx.on(operation, handler, options?)` | `() => void` | Register a typed handler |

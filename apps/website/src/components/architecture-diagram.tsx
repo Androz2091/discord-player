@@ -1,4 +1,4 @@
-/** A dependency-free overview. The full machine-readable Mermaid source lives in the MDX page. */
+/** A dependency-free overview, complemented by the detailed Mermaid diagram in the MDX page. */
 export function ArchitectureDiagram() {
   const nodes = [
     { x: 38, y: 38, w: 258, title: 'Bot application', detail: 'Commands + Discord Gateway', color: '#8b77aa' },
@@ -43,7 +43,7 @@ export function ArchitectureDiagram() {
           </g>
         ))}
       </svg>
-      <p className="mt-2 text-center text-xs text-fd-muted-foreground">Arrows show control, source, and media flow. The detailed Mermaid source follows below.</p>
+      <p className="mt-2 text-center text-xs text-fd-muted-foreground">Arrows show control, source, and media flow. The detailed component diagram follows below.</p>
     </div>
   );
 }
