@@ -1225,6 +1225,7 @@ packages:
     resolution: {integrity: sha512-qAPG/t3HqML1TlN7sY/pTbEjzFVAKsMjNNMGheyDosro+kT4iw2KCUoHcVdmliwWjorm4elZbgNQyU2eD97eDg==}
 
   '@remedia/client@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/client/-/client-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     peerDependencies:
       '@remedia/node': 0.1.0-dev.3
@@ -1233,75 +1234,89 @@ packages:
         optional: true
 
   '@remedia/node-android-arm-eabi@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-android-arm-eabi/-/node-android-arm-eabi-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [arm]
     os: [android]
 
   '@remedia/node-android-arm64@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-android-arm64/-/node-android-arm64-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [android]
 
   '@remedia/node-darwin-arm64@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-darwin-arm64/-/node-darwin-arm64-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [darwin]
 
   '@remedia/node-darwin-x64@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-darwin-x64/-/node-darwin-x64-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [darwin]
 
   '@remedia/node-freebsd-x64@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-freebsd-x64/-/node-freebsd-x64-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [freebsd]
 
   '@remedia/node-linux-arm-gnueabihf@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-linux-arm-gnueabihf/-/node-linux-arm-gnueabihf-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [arm]
     os: [linux]
 
   '@remedia/node-linux-arm64-gnu@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-linux-arm64-gnu/-/node-linux-arm64-gnu-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
   '@remedia/node-linux-arm64-musl@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-linux-arm64-musl/-/node-linux-arm64-musl-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
   '@remedia/node-linux-x64-gnu@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-linux-x64-gnu/-/node-linux-x64-gnu-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
   '@remedia/node-linux-x64-musl@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-linux-x64-musl/-/node-linux-x64-musl-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
   '@remedia/node-win32-arm64-msvc@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-win32-arm64-msvc/-/node-win32-arm64-msvc-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [win32]
 
   '@remedia/node-win32-ia32-msvc@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-win32-ia32-msvc/-/node-win32-ia32-msvc-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [ia32]
     os: [win32]
 
   '@remedia/node-win32-x64-msvc@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node-win32-x64-msvc/-/node-win32-x64-msvc-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [win32]
 
   '@remedia/node@0.1.0-dev.3':
+    resolution: {tarball: https://registry.npmjs.org/@remedia/node/-/node-0.1.0-dev.3.tgz}
     engines: {node: '>=22.18.0'}
 
   '@rolldown/binding-android-arm-eabi@1.2.16':
