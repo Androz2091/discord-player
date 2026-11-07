@@ -45,9 +45,8 @@ it('forwards a per-join timeout to Remedia without putting it in session configu
   await queue.node.destroySession();
   await queue.connect({ channelId: 'new', connectTimeoutMs: 120_000 });
   const session = backend.sessions.at(-1)!;
-  expect(backend.client.createDiscordSession).toHaveBeenLastCalledWith(
-    expect.not.objectContaining({ connectTimeoutMs: expect.anything() }),
-  );
+  expect(backend.client.createDiscordSession.mock.lastCall?.[0]).not.toHaveProperty('connectTimeoutMs');
+  expect(session.connectOptions.at(-1)).toEqual({ timeoutMs: 120_000 });
 
   const connect = vi.spyOn(session, 'connect');
   session.connectionState = 'disconnected';

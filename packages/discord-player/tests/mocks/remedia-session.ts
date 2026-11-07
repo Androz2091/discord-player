@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { randomUUID } from 'node:crypto';
-import type { DiscordSession, DiscordSessionOptions, MediaSource, PlayOptions } from '@remedia/client';
+import type { DiscordConnectOptions, DiscordSession, DiscordSessionOptions, MediaSource, PlayOptions } from '@remedia/client';
 
 /** Minimal deterministic Remedia session used by lifecycle tests. */
 export class FakeSession
@@ -70,6 +70,8 @@ export class FakeSession
   public playCalls = 0;
   /** Count of disconnect calls. */
   public disconnectCalls = 0;
+  /** Initial and repeated voice connection options passed by Discord Player. */
+  public connectOptions: DiscordConnectOptions[] = [];
   /** Current Remedia generation. */
   public generation = 0;
   /** Metadata attached to the current raw generation. */
@@ -89,7 +91,8 @@ export class FakeSession
   }
 
   /** Mark the fake voice session connected. */
-  public async connect(): Promise<void> {
+  public async connect(options: DiscordConnectOptions = {}): Promise<void> {
+    this.connectOptions.push(options);
     this.connectionState = 'connected';
   }
   /** Move this logical session to another voice channel. */
