@@ -90,11 +90,13 @@
   .nav { margin-left: 0; gap: 20px; }
   .highlight { padding: 0 12px; gap: 11px; }
 }
-@media (max-width: 800px) {
-  .headerInner, .container { padding-inline: 24px; }
+@media (max-width: 1000px) {
   .headerInner { height: auto; padding-top: 14px; flex-wrap: wrap; gap: 16px; }
   .nav { order: 3; width: 100%; justify-content: space-between; padding-bottom: 14px; }
   .actions { margin-left: auto; }
+}
+@media (max-width: 800px) {
+  .headerInner, .container { padding-inline: 24px; }
   .hero { grid-template-columns: 1fr; padding: 64px 0; gap: 44px; }
   .heroCopy h1 { max-width: 630px; font-size: clamp(40px, 7vw, 58px); }
   .editor { max-width: 670px; }

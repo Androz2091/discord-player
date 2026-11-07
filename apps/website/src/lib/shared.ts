@@ -1,6 +1,7 @@
 import { createGetUrl } from 'fumadocs-core/source';
 
 export const appName = 'discord-player';
+export const discordInviteUrl = 'https://androz2091.fr/discord';
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
 export const docsContentRoute = '/llms.mdx/docs';

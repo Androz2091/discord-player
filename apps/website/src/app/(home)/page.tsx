@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { DiscordInvite } from '@/components/discord-invite';
+import { discordInviteUrl } from '@/lib/shared';
 import {
   ArrowRight,
   AudioLines,
@@ -111,6 +113,7 @@ export default function HomePage() {
             <Link href="/docs/reference/player">API</Link>
             <Link href="/docs/plugins">Plugins</Link>
             <Link href="/docs/migration">Migration</Link>
+            <a href={discordInviteUrl} target="_blank" rel="noopener noreferrer">Discord</a>
           </nav>
           <div className={styles.actions}>
             <a
@@ -158,6 +161,7 @@ export default function HomePage() {
                 <GitHubIcon size={19} /> GitHub
               </a>
             </div>
+            <DiscordInvite />
           </div>
           <CodePreview />
         </section>
