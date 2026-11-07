@@ -1,7 +1,0 @@
-examples/
-node_modules/
-dist/
-.github/
-docs/
-
-*.d.ts

@@ -1,0 +1,35 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+
+catalog:
+  '@types/node': ^26.6.5
+  '@types/react': ^19.3.0
+  '@types/react-dom': ^19.3.0
+  '@vitest/coverage-v8': 5.1.0
+  oxfmt: 0.75.0
+  oxlint: 1.91.0
+  typescript: ^7.0.2
+  vitest: ^5.1.0
+
+preferWorkspacePackages: true
+
+allowBuilds:
+  esbuild: false
+
+minimumReleaseAgeExclude:
+  - '@remedia/client'
+  - '@remedia/node-android-arm-eabi'
+  - '@remedia/node-android-arm64'
+  - '@remedia/node-darwin-arm64'
+  - '@remedia/node-darwin-x64'
+  - '@remedia/node-freebsd-x64'
+  - '@remedia/node-linux-arm-gnueabihf'
+  - '@remedia/node-linux-arm64-gnu'
+  - '@remedia/node-linux-arm64-musl'
+  - '@remedia/node-linux-x64-gnu'
+  - '@remedia/node-linux-x64-musl'
+  - '@remedia/node-win32-arm64-msvc'
+  - '@remedia/node-win32-ia32-msvc'
+  - '@remedia/node-win32-x64-msvc'
+  - '@remedia/node'

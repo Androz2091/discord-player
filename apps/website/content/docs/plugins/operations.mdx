@@ -1,0 +1,60 @@
+---
+title: Plugin operations
+description: Discover exactly how operations dispatch, what constitutes a decline, and how handler priority works.
+---
+
+Every handler registers by a typed name. The operation definition decides whether the host stops at the first result, collects results, runs a pipeline, or broadcasts notifications.
+
+## Built-in operations
+
+| Operation | Dispatch policy | Result |
+| --- | --- | --- |
+| `search.query.match` | `collect` | Scored source candidates |
+| `search.query.resolve` | `first` | Tracks and optional Playlist |
+| `track.stream` | `first` | Media source, URL, or encoded Readable |
+| `track.related` | `first` | Related Tracks |
+| `track.bridge` | `first` | Explicit fallback stream |
+| `stream.transform` | `pipe` | Replacement encoded stream passed downstream |
+| `track.stream.resolved` | `broadcast` | Informational notification |
+
+These definitions are available from `SourceOperationMap` in `discord-player`.
+
+## Matching and resolution
+
+```ts
+ctx.on(
+  'search.query.match',
+  ({ query }) => (query.startsWith('https://') ? { score: 90 } : null),
+  { priority: 10 },
+);
+```
+
+The host orders candidates by handler priority first, then match score. Equal rank preserves registration order. One winning source then resolves metadata. `null` means *no match* for `search.query.match`.
+
+`undefined` is the only general-purpose decline value in first-result operations. A handler returning `null` or `false` where the operation type allows it is considered a result, not an implicit request to continue.
+
+## Target and filter registrations
+
+```ts
+await player.search(query, { pluginId: 'example.direct-audio' });
+
+// Legacy targeting syntax remains supported:
+await player.search(query, { searchEngine: 'ext:example.direct-audio' });
+```
+
+The `blockExtractors` option applies to modern and compatibility source IDs. It affects matching, direct execution, stream resolution, and bridging.
+
+## Cancellation and errors
+
+Each handler receives `{ signal }`. It combines caller cancellation and registration removal. Always cooperate with cancellation for operations that perform I/O:
+
+```ts
+ctx.on('track.stream', async ({ track }, { signal }) => {
+  signal.throwIfAborted();
+  return { url: track.url };
+});
+```
+
+An operation failure rejects with `PluginError` and includes the plugin and operation identity. The host does **not** silently fall through to another source after a genuine error.
+
+<NextStep href="/docs/plugins/lifecycle" label="Own plugin lifetime correctly" />

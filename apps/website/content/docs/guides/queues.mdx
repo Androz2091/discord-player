@@ -1,0 +1,77 @@
+---
+title: Queues and scheduling
+description: Understand current versus upcoming Tracks, capacity, repeat, shuffle, and managed progression.
+---
+
+A `GuildQueue` is owned by one `Player` and identified by a guild ID. It controls one managed playback operation at a time. Remedia handles the actual audio; discord-player decides what plays next.
+
+## Retrieve or create a queue
+
+```ts
+const queue = await player.createQueue(guildId, {
+  maxSize: 100,
+  maxHistorySize: 50,
+  repeatMode: QueueRepeatMode.OFF,
+});
+
+const existing = player.getQueue(guildId);
+```
+
+`maxSize` limits the *upcoming* queue, not the active track. `queue.size` also excludes the current track. Queue options are defaults used when the queue is first created.
+
+## Two paths to playback
+
+```ts
+const result = await player.play({ guildId, channelId }, query);
+const queue = result.queue;
+```
+
+If you already have Track objects, use `queue.play(trackOrBatch, { channelId })`. If the queue is connected, `channelId` may be omitted. The queue resolves media through source plugins and starts the first Track immediately when idle.
+
+```ts
+queue.addTrack(track); // Upcoming only
+queue.addTracks(moreTracks);
+await queue.playNext(); // Start the next when idle
+```
+
+`queue.node.play({ url })` bypasses managed Track scheduling. It is intended for direct Remedia use, not normal music commands.
+
+## Inspect queue state
+
+| API | Meaning |
+| --- | --- |
+| `queue.currentTrack` | Active or paused Track, otherwise `null` |
+| `queue.tracks` | Ordered upcoming Track collection |
+| `queue.size` | Number of upcoming Tracks |
+| `queue.isPlaying()` | Managed playback is active, including paused |
+| `queue.estimatedDuration` | Sum of upcoming Track durations |
+| `queue.maxSize` | Upcoming-track capacity |
+| `queue.history` | Previous-track navigation and storage |
+
+## Repeat and shuffle
+
+```ts
+import { QueueRepeatMode } from 'discord-player';
+
+queue.repeatMode = QueueRepeatMode.TRACK;
+queue.repeatMode = QueueRepeatMode.QUEUE;
+queue.repeatMode = QueueRepeatMode.OFF;
+
+queue.enableShuffle(); // Dynamic selection
+queue.disableShuffle();
+```
+
+| Mode | Behavior |
+| --- | --- |
+| `OFF` | Advance through upcoming Tracks, then finish |
+| `TRACK` | Replay the current Track until changed |
+| `QUEUE` | Append completed Tracks to the end |
+| `AUTOPLAY` | Reach an event boundary for app/plugin-provided related Tracks |
+
+`AUTOPLAY` is **not** a guarantee that every source has related tracks. Listen for `willAutoPlay` and implement a policy before relying on it.
+
+## Safe modifications
+
+`queue.removeTrack()`, `moveTrack()`, `swapTracks()`, `prepend()`, and `insertTrack()` operate on upcoming entries. `queue.clear()` clears upcoming Tracks and history without stopping the current playback. Destruction releases the current Remedia session and clears all queue state.
+
+<NextStep href="/docs/guides/playback-controls" label="Control the active session" />

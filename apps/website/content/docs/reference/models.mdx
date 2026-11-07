@@ -1,0 +1,50 @@
+---
+title: Models and serialization
+description: Track, Playlist, SearchResult, and portable model persistence.
+---
+
+## Track
+
+`Track` stores metadata and a `sourceReference`, not an open native decoder.
+
+```ts
+import { Track } from 'discord-player';
+
+const track = new Track({
+  title: 'Example',
+  author: 'Artist',
+  url: 'https://media.example.com/track.mp3',
+  durationMS: 180_000,
+});
+```
+
+Common fields include `id`, `title`, `author`, `url`, `description`, `thumbnail`, `durationMS`, `requestedBy`, `source`, `live`, `playlist`, and `sourceReference`. Compatibility fields include `extractor`, `raw`, and `queryType`, but these are not reliable portable storage.
+
+## Playlist
+
+`Playlist` contains ordered Tracks and metadata such as title, author, thumbnail, source, URL, and type. It implements `Iterable<Track>`.
+
+```ts
+for (const track of playlist) {
+  console.log(track.title);
+}
+```
+
+## SearchResult
+
+`player.search()` returns a SearchResult containing `tracks`, an optional `playlist`, and helper accessors such as `first()` and `isEmpty()`. A string query that matches no plugin returns an empty SearchResult rather than an exception.
+
+## Storage
+
+```ts
+import { serialize, deserialize, encode, decode } from 'discord-player';
+
+const encoded = encode(serialize(track));
+const restored = deserialize(decode(encoded));
+```
+
+Do not treat `toJSON()` as the storage schema. The `Serializable` contract is versioned; `serialize()` validates JSON-safe data and `deserialize()` validates unknown input.
+
+See [persistence](/docs/guides/persistence) and [data migration](/docs/migration/data) for edge cases.
+
+<NextStep href="/docs/reference/events" label="Event reference" />

@@ -1,0 +1,90 @@
+.card {
+  max-width: 500px;
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid #ffffff1d;
+  border-radius: 14px;
+  background: #ffffff04;
+}
+
+.eyebrow {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+}
+
+.server {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 14px;
+  min-width: 230px;
+}
+
+.icon {
+  flex-shrink: 0;
+  border: 1px solid #ffffff12;
+  border-radius: 12px;
+}
+
+.name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.name a {
+  color: #f5f4f7;
+  text-decoration: none;
+}
+
+.name a:hover {
+  text-decoration: underline;
+}
+
+.description {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.join {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 17px;
+  border-radius: 8px;
+  color: #fff;
+  background: #248046;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.join:hover {
+  background: #1a6334;
+}
+
+@media (max-width: 500px) {
+  .join {
+    width: 100%;
+  }
+
+  .server {
+    min-width: 0;
+  }
+}

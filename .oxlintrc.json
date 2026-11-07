@@ -1,0 +1,62 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "import", "nextjs", "node"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "rules": {
+    "no-unused-vars": "error",
+    "no-underscore-dangle": "off",
+    "react/react-in-jsx-scope": "off",
+    "typescript/triple-slash-reference": "off",
+    "typescript/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "fixStyle": "separate-type-imports"
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["apps/docs/**/*.tsx"],
+      "rules": {
+        "react/react-in-jsx-scope": "off"
+      }
+    },
+    {
+      "files": ["apps/docs/src/app/layout.tsx"],
+      "rules": {
+        "import/no-unassigned-import": "off"
+      }
+    }
+  ],
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "node": true
+  },
+  "settings": {
+    "next": {
+      "rootDir": ["apps/docs"]
+    },
+    "react": {
+      "version": "19.3.1"
+    }
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/target/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/.next/**",
+    "**/.source/**",
+    "**/generated/**",
+    "**/*.generated.js",
+    "**/*.generated.jsx",
+    "**/*.generated.ts",
+    "**/*.generated.tsx"
+  ]
+}

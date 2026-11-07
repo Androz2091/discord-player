@@ -1,39 +1,34 @@
 {
-  "name": "website",
+  "name": "@discord-player/website",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "start": "next start",
-    "postinstall": "fumadocs-mdx",
-    "fumadocs": "fumadocs"
+    "start": "serve out",
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "class-variance-authority": "0.7.1",
-    "clsx": "^2.1.1",
-    "fumadocs-core": "14.7.7",
-    "fumadocs-docgen": "^1.3.2",
-    "fumadocs-mdx": "11.1.2",
-    "fumadocs-ui": "14.7.7",
-    "next": "15.0.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "semver": "^7.6.3",
-    "tailwind-merge": "^2.5.5"
+    "beautiful-mermaid": "^1.1.3",
+    "cn": "^0.5.0",
+    "fumadocs-core": "16.17.10",
+    "fumadocs-mdx": "15.4.10",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.17.10",
+    "lucide-react": "^1.61.0",
+    "next": "16.4.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@fumadocs/cli": "^0.0.4",
-    "@types/mdx": "^2.0.13",
-    "@types/node": "^22.10.7",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@types/semver": "^7",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^8",
-    "eslint-config-next": "15.0.3",
-    "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.16",
-    "typescript": "^5.7.2"
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "oxlint": "catalog:",
+    "postcss": "^8.5.31",
+    "serve": "^14.2.6",
+    "tailwindcss": "^4.3.3",
+    "typescript": "catalog:"
   }
 }

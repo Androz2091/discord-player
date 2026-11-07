@@ -1,0 +1,77 @@
+---
+title: Migrate from v7 to v8
+description: 'Upgrade in a controlled order: runtime, Gateway integration, sources, playback, compatibility, and persisted data.'
+---
+
+v8 keeps the familiar Player, GuildQueue, Track, and Playlist concepts, but changes the runtime underneath them. Remedia now handles audio processing and Discord voice. The framework exposes a typed source plugin system, while supported legacy extractors run through an emulation layer.
+
+**Treat this as a major migration.** Existing music commands may look familiar, but a v7 initialization and an old extractor bundle are not enough to run a v8 bot.
+
+## Migration plan
+
+<Steps>
+### Confirm runtime and deployment mode
+
+Use Node.js **22.18 or newer**, ESM, and choose an [embedded or remote Remedia node](/docs/installation). Embedded nodes require FFmpeg 7 shared libraries, not only a CLI executable.
+
+### Replace Player initialization
+
+Change `new Player(discordClient)` into `new Player({ nodes, send, plugins })`. Forward raw Gateway voice events with `player.receive()`, then call `await player.initialize(botUserId)`.
+
+### Migrate your source integrations
+
+Register a modern `definePlugin()` source or adapt a supported `BaseExtractor` subclass through `player.extractors.register(ExtractorConstructor)`. Do not assume every historical extractor package works unmodified.
+
+### Convert audio controls
+
+Use `queue.node.pause()`, `resume()`, `seek(ms)`, `setVolume(percent)`, and `queue.node.filters`. Remove old stream pipes and raw audio processing overrides.
+
+### Update persistence
+
+Use `serialize()` and `deserialize()` for versioned portable Track and Playlist data. Restore an appropriate source plugin before playing recovered Tracks.
+
+### Run the regression checklist
+
+Verify joins, moves, two-song queue progression, skip, stop, filters, failures, history, persistence, and remote media accessibility before enabling the new runtime in production.
+</Steps>
+
+## Initialization: before and after
+
+### v7
+
+```ts
+import { Player } from 'discord-player';
+
+const player = new Player(client);
+await player.extractors.loadMulti(DefaultExtractors);
+```
+
+### v8
+
+```ts
+import { Player } from 'discord-player';
+
+const player = new Player({
+  nodes: [{ id: 'local', type: 'embedded' }],
+  plugins: [mySourcePlugin()],
+  send: (guildId, packet) => sendToShard(guildId, packet),
+});
+
+client.on('raw', (packet) => player.receive(packet));
+await player.initialize(client.user.id);
+```
+
+`mySourcePlugin()` is your source registration and `sendToShard` is your Gateway integration, not a bundled provider or automatic adapter. See [create a player](/docs/getting-started/create-player) and [build a source plugin](/docs/plugins/build-source) for complete implementations.
+
+<Callout type="warn" title="Avoid a partial runtime migration">
+Do not keep an old voice/audio dispatcher alongside Remedia for the same guild. Let Remedia own the voice transport and let GuildQueue manage Track progression. Mixing ownership paths can create duplicate events and conflicting sessions.
+</Callout>
+
+<Cards>
+  <Card title="API changes" href="/docs/migration/api-changes" description="Detailed changes to constructors, queues, controls, and events." />
+  <Card title="Extractor migration" href="/docs/migration/extractors" description="Keep supported extractors temporarily or port them to plugins." />
+  <Card title="Persisted data" href="/docs/migration/data" description="Import compatible v7 entities and establish a portable schema." />
+  <Card title="Release checklist" href="/docs/migration/checklist" description="A realistic verification and rollout plan." />
+</Cards>
+
+<NextStep href="/docs/migration/api-changes" label="Review v7 versus v8 APIs" />

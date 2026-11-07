@@ -34,4 +34,4 @@ lerna-debug.log*
 # other
 **/*.DS_Store
 .temp-example
-*.pcm
+_legacy-extractor-test/

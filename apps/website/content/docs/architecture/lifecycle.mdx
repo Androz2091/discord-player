@@ -1,0 +1,61 @@
+---
+title: Playback lifecycle
+description: Follow one managed Track from query matching through the Rust decoder and back to queue progression.
+---
+
+Consider a call to:
+
+```ts
+await player.play({ guildId, channelId }, 'https://media.example.com/song.mp3');
+```
+
+The call crosses several ownership boundaries. Each has a different failure and cancellation policy.
+
+## Request and execution path
+
+```mermaid
+sequenceDiagram
+  participant Bot as Bot command
+  participant P as Player
+  participant Q as GuildQueue
+  participant S as PluginRegistry
+  participant R as RemediaClient
+  participant E as Remedia engine
+  participant D as Discord voice
+
+  Bot->>P: play(channel, query)
+  P->>S: search.query.match
+  S-->>P: scored candidates
+  P->>S: search.query.resolve (winner)
+  S-->>P: Tracks + sourceReference
+  P->>Q: queue.play(SearchResult)
+  Q->>R: DiscordSession.connect()
+  R->>Bot: send(OP 4)
+  Bot->>R: receive(VOICE_STATE/VOICE_SERVER)
+  R->>E: connect voice
+  Q->>S: track.stream(current Track)
+  S-->>Q: MediaSource (URL / file / Readable)
+  Q->>R: session.play(source, metadata)
+  R->>E: start generation
+  E->>D: Opus / voice packets
+  E-->>R: playbackStarted / Completed / Failed
+  R-->>Q: Correlated generation event
+  Q-->>Bot: playerStart / Finish / Error
+  Q->>Q: Update history and select next Track
+```
+
+## Why generations matter
+
+A queue may receive an event before the original `play()` request has finished. It cannot rely on event arrival order alone. v8 associates each managed operation with a queue token, an operation ID, the exact Remedia session, and a playback generation. This prevents a stale terminal event from completing the wrong Track after a skip, replay, or reconnect.
+
+## When a Track ends
+
+Natural completion records history when appropriate and advances according to the repeat mode. A skip is a separate terminal transition. A stop leaves upcoming Tracks intact. A playback failure returns the Track to the head of the upcoming queue for deliberate retry.
+
+Application listeners such as `player.events.on('playerFinish')` are notifications. They do not need to issue `queue.playNext()` for normal progression.
+
+## Why a local stream is special
+
+A Node.js Readable can supply encoded bytes to an embedded native engine. A remote engine cannot consume that same in-process object. If your application uses remote nodes, a source plugin must resolve to an URL or path accessible from that remote machine.
+
+<NextStep href="/docs/architecture/design-decisions" label="Understand the design trade-offs" />

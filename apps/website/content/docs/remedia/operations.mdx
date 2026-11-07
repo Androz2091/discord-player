@@ -1,0 +1,43 @@
+---
+title: Node capacity and operations
+description: Inspect the active Remedia pool, understand sticky guild assignment, and choose how to deploy.
+---
+
+A Remedia node hosts multiple independent player sessions. A guild queue uses one selected session; future audio tracks on that queue reuse it until the session changes.
+
+## Inspect nodes
+
+```ts
+const remedia = player.getRemedia();
+console.log(player.nodeSnapshots);
+console.log(remedia.nodes);
+```
+
+`player.nodes` is the legacy queue-manager alias. The actual audio-node state is on `player.remedia` and `player.nodeSnapshots`.
+
+## Select a node for a queue
+
+```ts
+const queue = await player.createQueue(guildId, {
+  selectNode(nodes) {
+    return nodes[0]!.id;
+  },
+});
+```
+
+A selection callback can apply an application-specific policy, but it should consider node health and capacity; always provide a usable node ID. The example picks the first offered candidate only for clarity, not as a production placement algorithm.
+
+## Practical trade-offs
+
+| Concern | Embedded | Remote |
+| --- | --- | --- |
+| Process model | Audio in bot process | Separate Rust service |
+| Native FFmpeg libraries | Bot machine | Audio server |
+| Transport control | Direct native binding | Authenticated WebSocket RPC |
+| Local Node Readables | Available | Not transferred |
+| Failure isolation | Shared bot process | Independent audio service |
+| Scaling | Scale whole bot process | Add audio nodes independently |
+
+For metrics and debugging, use Remedia's [observability documentation](https://github.com/twlite/remedia/tree/main/apps/docs/content/docs/observability). Limit sensitive media locations and authentication details in logs.
+
+<NextStep href="/docs/architecture" label="Read the architecture" />

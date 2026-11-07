@@ -1,0 +1,42 @@
+---
+title: Errors and recovery
+description: Diagnose source, voice, and native playback failures without losing the managed queue.
+---
+
+Different failures occur at different layers. Handle errors at their source and keep user-facing responses specific.
+
+## Attach listeners before playback
+
+```ts
+player.on('error', (error) => console.error('Player:', error));
+
+player.events.on('error', (queue, error) => {
+  console.error('Queue:', queue.guildId, error);
+});
+
+player.events.on('playerError', (queue, error, track) => {
+  console.error('Track failed:', track.url, error);
+});
+```
+
+## Common causes
+
+| Symptom | Check |
+| --- | --- |
+| `player.search(query)` returns no Tracks | Is a source plugin registered and matching the query? |
+| `No source plugin handled ...` | Does the Track have a portable source reference, or can another plugin bridge it? |
+| Native library loading failure | Verify FFmpeg 7 shared libraries on the **audio host** |
+| Voice connection fails | Bot voice permissions, Gateway forwarding, correct user ID and guild/shard routing |
+| Remote playback rejects a stream | Remote nodes cannot consume a client-side Node.js Readable |
+| A filter update rejects | Validate the raw FFmpeg graph on the target Remedia runtime |
+| `playerError` after source start | Inspect source accessibility and native error, then retry deliberately |
+
+## Failure behavior matters
+
+A failed managed Track is returned to the upcoming queue head; it is not silently marked complete and is not written to history. A skip and a natural completion have distinct events.
+
+Plugins throw `PluginError` with operation and plugin identity when a handler fails. Returning `undefined` declines an operation; throwing is an actual failure, not a request to try another plugin.
+
+During deployment, enable Remedia diagnostics as described in [runtime overview](/docs/remedia) and log operation-specific errors. Do not log provider tokens or signed URLs.
+
+<NextStep href="/docs/plugins" label="Understand source plugins" />

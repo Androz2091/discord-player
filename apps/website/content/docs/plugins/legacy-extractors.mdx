@@ -1,0 +1,73 @@
+---
+title: Legacy extractor emulation
+description: Use supported v7 BaseExtractor subclasses through v8's single plugin host without a second dispatcher.
+---
+
+v8 keeps `player.extractors` as a compatibility entry point. The adapter creates a source plugin for each registered `BaseExtractor` subclass. All work then runs through the same typed operation registry as modern plugins.
+
+## Register a legacy extractor
+
+```ts
+import { BaseExtractor, Track } from 'discord-player';
+import type { ExtractorSearchContext } from 'discord-player';
+
+class DirectMediaExtractor extends BaseExtractor {
+  static identifier = 'example.legacy-direct';
+
+  async validate(query: string) {
+    return /^https?:\/\//.test(query);
+  }
+
+  async handle(query: string, context: ExtractorSearchContext) {
+    return this.createResponse(null, [
+      new Track(this.context.player, {
+        title: 'Direct media',
+        url: query,
+        requestedBy: context.requestedBy,
+        engine: query,
+      }),
+    ]);
+  }
+
+  async stream(track: Track) {
+    return track.raw.engine as string;
+  }
+}
+
+await player.extractors.register(DirectMediaExtractor, {});
+```
+
+Register **the constructor**, not an instantiated extractor or a plugin factory. `register()` returns the owned compatibility instance; new plugins instead use `player.plugins.register(myPlugin())`.
+
+## How the emulation layer works
+
+| Legacy method | v8 operation |
+| --- | --- |
+| `activate()` | Plugin `setup()` |
+| `deactivate()` | Plugin `destroy()` |
+| `validate()` | `search.query.match` |
+| `handle()` | `search.query.resolve` |
+| `stream()` | `track.stream` |
+| `getRelatedTracks()` | `track.related` |
+| `bridge()` | `track.bridge` |
+| `handlePostStream()` | Local `stream.transform` |
+
+The adapter preserves legacy priority and protocols where possible. It stamps Tracks with portable references so future resolution uses the same source identity.
+
+## Supported registration methods
+
+`register()`, `unregister()`, `unregisterAll()`, `get()`, `isRegistered()`, `loadMulti()`, and `reconfigure()` are supported. Reconfigure replaces the owned instance; fetch a fresh reference through `get()`.
+
+## Compatibility boundaries
+
+The API is an **emulation layer**, not the old audio pipeline. In particular:
+
+- It does not restore the former stream dispatcher, raw audio resources, or custom PCM/Opus format overrides.
+- Runtime extractor session internals are not available.
+- A local encoded Readable still cannot travel to a remote Remedia node.
+- Extractor runtime objects, private engines, and callbacks are not portable serialized state.
+- A restored Track must be resolved with currently registered source information.
+
+Existing source integrations can migrate incrementally. The preferred long-term API is a modern `definePlugin()` source.
+
+<NextStep href="/docs/plugins/advanced" label="Extend the operation system" />
