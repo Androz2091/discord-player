@@ -8,7 +8,7 @@ The Player receives a Remedia node pool through `DiscordPlayerOptions.nodes`. Th
 ## Embedded node
 
 ```ts
-nodes: [{ type: 'embedded', id: 'local', capacity: 8 }]
+nodes: [{ type: 'embedded', id: 'local', capacity: 8 }];
 ```
 
 An embedded node uses `@remedia/node` directly inside the application and needs FFmpeg 9 shared libraries with ABI majors 63, 63, 61, 12, 7 on that host.
@@ -16,12 +16,14 @@ An embedded node uses `@remedia/node` directly inside the application and needs 
 ## Remote node
 
 ```ts
-nodes: [{
-  type: 'remote',
-  id: 'audio-1',
-  url: 'remedias://audio.example.com',
-  auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
-}]
+nodes: [
+  {
+    type: 'remote',
+    id: 'audio-1',
+    url: 'remedias://audio.example.com',
+    auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
+  },
+];
 ```
 
 A remote node runs the same Rust engine in `remedia-server`. The bot host does not need FFmpeg if it uses only remote nodes. Use TLS and server-side source access controls.

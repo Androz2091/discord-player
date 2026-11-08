@@ -29,14 +29,14 @@ A selection callback can apply an application-specific policy, but it should con
 
 ## Practical trade-offs
 
-| Concern | Embedded | Remote |
-| --- | --- | --- |
-| Process model | Audio in bot process | Separate Rust service |
-| Native FFmpeg libraries | Bot machine | Audio server |
-| Transport control | Direct native binding | Authenticated WebSocket RPC |
-| Local Node Readables | Available | Not transferred |
-| Failure isolation | Shared bot process | Independent audio service |
-| Scaling | Scale whole bot process | Add audio nodes independently |
+| Concern                 | Embedded                | Remote                        |
+| ----------------------- | ----------------------- | ----------------------------- |
+| Process model           | Audio in bot process    | Separate Rust service         |
+| Native FFmpeg libraries | Bot machine             | Audio server                  |
+| Transport control       | Direct native binding   | Authenticated WebSocket RPC   |
+| Local Node Readables    | Available               | Not transferred               |
+| Failure isolation       | Shared bot process      | Independent audio service     |
+| Scaling                 | Scale whole bot process | Add audio nodes independently |
 
 For remote servers, run `remedia-server --list` on the server host to see locally discovered instances, active players, current connections, resident memory when available, and health. `remedia-server doctor --config ./remedia.config.json --env-file .env` checks the loaded FFmpeg 9 libraries and server configuration. These are administrative commands, not methods on `player.getRemedia()`.
 

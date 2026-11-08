@@ -48,7 +48,8 @@ Set `DISCORD_TOKEN` on your machine and start the module. You should see `discor
 The Player has no source registrations yet. A query such as a music URL will return an empty result until you add a source plugin.
 
 <Callout type="warn" title="Do not forward events twice">
-Only one application-level Gateway handler should call `player.receive()` for a dispatch. Remedia manages Discord voice credentials and transport; your application still owns the Gateway connection.
+  Only one application-level Gateway handler should call `player.receive()` for a dispatch. Remedia manages Discord
+  voice credentials and transport; your application still owns the Gateway connection.
 </Callout>
 
 <NextStep href="/docs/getting-started/source-plugin" label="2. Resolve a media source" />

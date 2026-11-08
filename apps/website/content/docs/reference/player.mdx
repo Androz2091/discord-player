@@ -20,30 +20,30 @@ await player.initialize(botUserId);
 
 `new Player(options: DiscordPlayerOptions)`
 
-| Option | Type | Meaning |
-| --- | --- | --- |
-| `nodes` | `RemediaNodeConfig[]` | Embedded and/or remote audio nodes |
-| `send` | `(guildId, payload) => void \| Promise<void>` | Forward voice-state requests to your Gateway library |
-| `plugins?` | `PluginRegistration[]` | Initial source registrations |
-| `blockExtractors?` | `string[]` | Disabled source identifiers |
-| `probeTimeout?` | `number` | Compatibility metadata-probing option |
-| `requestTimeoutMs?` | `number` | Ordinary Remedia RPC timeout (15,000 ms default); voice setup has its own longer deadline |
+| Option              | Type                                          | Meaning                                                                                   |
+| ------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `nodes`             | `RemediaNodeConfig[]`                         | Embedded and/or remote audio nodes                                                        |
+| `send`              | `(guildId, payload) => void \| Promise<void>` | Forward voice-state requests to your Gateway library                                      |
+| `plugins?`          | `PluginRegistration[]`                        | Initial source registrations                                                              |
+| `blockExtractors?`  | `string[]`                                    | Disabled source identifiers                                                               |
+| `probeTimeout?`     | `number`                                      | Compatibility metadata-probing option                                                     |
+| `requestTimeoutMs?` | `number`                                      | Ordinary Remedia RPC timeout (15,000 ms default); voice setup has its own longer deadline |
 
 The options extend relevant `@remedia/client` configuration without exposing its `botUserId` or `selectNode` directly. Queue-level node selection uses `GuildQueueOptions.selectNode`.
 
 ## Main methods
 
-| Method | Returns | Notes |
-| --- | --- | --- |
-| `initialize(botUserId)` | `Promise<void>` | Initialize plugins and Remedia, call after READY |
-| `receive(payload)` | `void` | Accept raw Gateway dispatch; filters voice events |
-| `search(query, options?)` | `Promise<SearchResult>` | String queries require a matching plugin |
+| Method                              | Returns                                   | Notes                                               |
+| ----------------------------------- | ----------------------------------------- | --------------------------------------------------- |
+| `initialize(botUserId)`             | `Promise<void>`                           | Initialize plugins and Remedia, call after READY    |
+| `receive(payload)`                  | `void`                                    | Accept raw Gateway dispatch; filters voice events   |
+| `search(query, options?)`           | `Promise<SearchResult>`                   | String queries require a matching plugin            |
 | `play(channel, resource, options?)` | `Promise<PlayerNodeInitializationResult>` | Create/retrieve queue and delegate managed playback |
-| `createQueue(guildId, options?)` | `Promise<GuildQueue>` | Reuse or create guild queue |
-| `getQueue(guildId)` | `GuildQueue \| null` | Fetch existing queue |
-| `deleteQueue(guildId)` | `Promise<boolean>` | Delete queue and release its session |
-| `getRemedia()` | `RemediaClient` | Requires initialization |
-| `destroy()` | `Promise<void>` | Dispose queues and Remedia |
+| `createQueue(guildId, options?)`    | `Promise<GuildQueue>`                     | Reuse or create guild queue                         |
+| `getQueue(guildId)`                 | `GuildQueue \| null`                      | Fetch existing queue                                |
+| `deleteQueue(guildId)`              | `Promise<boolean>`                        | Delete queue and release its session                |
+| `getRemedia()`                      | `RemediaClient`                           | Requires initialization                             |
+| `destroy()`                         | `Promise<void>`                           | Dispose queues and Remedia                          |
 
 ## Important properties
 
@@ -52,11 +52,9 @@ The options extend relevant `@remedia/client` configuration without exposing its
 ## Play result
 
 ```ts
-const { queue, track, playerResult, searchResult } = await player.play(
-  { guildId, channelId },
-  query,
-  { connectTimeoutMs: 120_000 },
-);
+const { queue, track, playerResult, searchResult } = await player.play({ guildId, channelId }, query, {
+  connectTimeoutMs: 120_000,
+});
 ```
 
 The optional `connectTimeoutMs` overrides the overall initial voice join timeout (100 seconds by default). It also works on `queue.connect()`. It does not override a voice-channel move's internal deadline.

@@ -3,7 +3,7 @@ title: Architecture
 description: A detailed map of discord-player v8, Remedia, plugins, queues, and Discord voice delivery.
 ---
 
-v8 is built around **clear ownership**. Discord Player decides *which* Track should play, plugins resolve *where* its media lives, and Remedia handles *how* bytes become audio. This separation lets the same queue API use an embedded engine or a remote audio server.
+v8 is built around **clear ownership**. Discord Player decides _which_ Track should play, plugins resolve _where_ its media lives, and Remedia handles _how_ bytes become audio. This separation lets the same queue API use an embedded engine or a remote audio server.
 
 ## The system at a glance
 
@@ -90,8 +90,16 @@ The `BaseExtractor` compatibility adapter translates its supported methods into 
 ## Read the rest in order
 
 <Cards>
-  <Card title="Track lifecycle" href="/docs/architecture/lifecycle" description="The sequence from a query to terminal playback and the next Track." />
-  <Card title="Design decisions" href="/docs/architecture/design-decisions" description="Why the boundaries exist, including trade-offs and known limits." />
+  <Card
+    title="Track lifecycle"
+    href="/docs/architecture/lifecycle"
+    description="The sequence from a query to terminal playback and the next Track."
+  />
+  <Card
+    title="Design decisions"
+    href="/docs/architecture/design-decisions"
+    description="Why the boundaries exist, including trade-offs and known limits."
+  />
   <Card title="Plugins" href="/docs/plugins" description="How source integrations plug into the dispatch system." />
 </Cards>
 

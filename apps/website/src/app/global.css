@@ -12,7 +12,9 @@
   --color-fd-primary: #b794f6;
 }
 
-html { scrollbar-gutter: stable; }
+html {
+  scrollbar-gutter: stable;
+}
 
 html > body[data-scroll-locked] {
   margin-right: 0 !important;

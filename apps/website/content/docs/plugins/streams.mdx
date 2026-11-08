@@ -23,12 +23,12 @@ ctx.on('track.stream', async ({ track }) => ({
 
 The host also accepts HTTP(S) strings, file-path strings, and encoded Node Readables in appropriate contexts.
 
-| Source | Embedded node | Remote node |
-| --- | --- | --- |
-| HTTP(S) URL | Supported | Supported when the server can access it |
-| File path | Supported on bot host | Supported only when that file exists on server |
-| Encoded Node Readable | Supported | Not transferable to remote runtime |
-| In-memory stream or buffer | Local binding capability | Not part of the remote source protocol |
+| Source                     | Embedded node            | Remote node                                    |
+| -------------------------- | ------------------------ | ---------------------------------------------- |
+| HTTP(S) URL                | Supported                | Supported when the server can access it        |
+| File path                  | Supported on bot host    | Supported only when that file exists on server |
+| Encoded Node Readable      | Supported                | Not transferable to remote runtime             |
+| In-memory stream or buffer | Local binding capability | Not part of the remote source protocol         |
 
 ## Encoded streams, not PCM pipes
 

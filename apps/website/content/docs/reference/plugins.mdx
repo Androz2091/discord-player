@@ -19,29 +19,29 @@ const source = definePlugin({
 
 ## Definitions
 
-| Field | Type | Purpose |
-| --- | --- | --- |
-| `id` | `string` | Unique registration identifier |
-| `kind` | `'source'` | Only implemented plugin kind |
-| `setup(ctx)` | `void \| Promise<void>` | Register operation handlers |
-| `destroy?(ctx)` | `void \| Promise<void>` | Optional teardown |
-| `ctx.options` | `Options` | Registration-local configuration |
-| `ctx.signal` | `AbortSignal` | Aborted on removal |
-| `ctx.on(operation, handler, options?)` | `() => void` | Register a typed handler |
-| `ctx.onCleanup(fn)` | `void` | Register owned cleanup |
+| Field                                  | Type                    | Purpose                          |
+| -------------------------------------- | ----------------------- | -------------------------------- |
+| `id`                                   | `string`                | Unique registration identifier   |
+| `kind`                                 | `'source'`              | Only implemented plugin kind     |
+| `setup(ctx)`                           | `void \| Promise<void>` | Register operation handlers      |
+| `destroy?(ctx)`                        | `void \| Promise<void>` | Optional teardown                |
+| `ctx.options`                          | `Options`               | Registration-local configuration |
+| `ctx.signal`                           | `AbortSignal`           | Aborted on removal               |
+| `ctx.on(operation, handler, options?)` | `() => void`            | Register a typed handler         |
+| `ctx.onCleanup(fn)`                    | `void`                  | Register owned cleanup           |
 
 ## Registry
 
-| Method | Contract |
-| --- | --- |
-| `register(registration)` | Register and await plugin setup |
-| `unregister(id)` | Abort/await handlers and cleanup; returns `boolean` |
-| `has(id)` | Registration present? |
-| `ready()` | Wait for registrations |
-| `execute(operation, input, options?)` | Dispatch typed operation |
-| `resolveStream(track, options?)` | Return normalized Remedia MediaSource |
-| `defineOperation(name, policy)` | Register a custom operation policy |
-| `destroy()` | Release all owned registrations |
+| Method                                | Contract                                            |
+| ------------------------------------- | --------------------------------------------------- |
+| `register(registration)`              | Register and await plugin setup                     |
+| `unregister(id)`                      | Abort/await handlers and cleanup; returns `boolean` |
+| `has(id)`                             | Registration present?                               |
+| `ready()`                             | Wait for registrations                              |
+| `execute(operation, input, options?)` | Dispatch typed operation                            |
+| `resolveStream(track, options?)`      | Return normalized Remedia MediaSource               |
+| `defineOperation(name, policy)`       | Register a custom operation policy                  |
+| `destroy()`                           | Release all owned registrations                     |
 
 ## Operations
 

@@ -6,9 +6,21 @@ description: Pick a playback mode, install the required runtime, and verify nati
 Use **Node.js 22.18 or newer** and an **ESM** application. This branch uses Remedia `0.1.0-dev.3`. discord-player v8 depends on `@remedia/client`. Where audio runs determines whether the bot needs native FFmpeg libraries.
 
 <Cards>
-  <Card title="Embedded playback" href="/docs/remedia/embedded" description="Run the Rust engine inside your bot process." />
-  <Card title="Remote playback" href="/docs/remedia/remote" description="Connect to an independently deployed remedia-server." />
-  <Card title="Install FFmpeg 9 libraries" href="/docs/installation/ffmpeg" description="Verified ABI majors, platform commands, and runtime checks." />
+  <Card
+    title="Embedded playback"
+    href="/docs/remedia/embedded"
+    description="Run the Rust engine inside your bot process."
+  />
+  <Card
+    title="Remote playback"
+    href="/docs/remedia/remote"
+    description="Connect to an independently deployed remedia-server."
+  />
+  <Card
+    title="Install FFmpeg 9 libraries"
+    href="/docs/installation/ffmpeg"
+    description="Verified ABI majors, platform commands, and runtime checks."
+  />
 </Cards>
 
 ## Install discord-player
@@ -24,7 +36,7 @@ For the [discord.js example](/docs/getting-started/create-player), also install 
 ### Embedded mode
 
 ```ts
-nodes: [{ id: 'local', type: 'embedded' }]
+nodes: [{ id: 'local', type: 'embedded' }];
 ```
 
 The bot loads the native Remedia addon and FFmpeg shared libraries on its own host. Install [FFmpeg 9](/docs/installation/ffmpeg) **before** starting the bot. Native packages are selected by the package manager's optional dependencies.
@@ -32,12 +44,14 @@ The bot loads the native Remedia addon and FFmpeg shared libraries on its own ho
 ### Remote mode
 
 ```ts
-nodes: [{
-  id: 'media-1',
-  type: 'remote',
-  url: 'wss://audio.example.com/v1/ws',
-  auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
-}]
+nodes: [
+  {
+    id: 'media-1',
+    type: 'remote',
+    url: 'wss://audio.example.com/v1/ws',
+    auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
+  },
+];
 ```
 
 The remote server owns FFmpeg, playback, and Discord voice packet delivery. Your bot still forwards Discord Gateway credentials to Remedia. Use a secure WebSocket connection and keep credentials out of source control.

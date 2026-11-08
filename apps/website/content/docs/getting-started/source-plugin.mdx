@@ -3,7 +3,7 @@ title: 2. Resolve a media source
 description: Register a small, fully implemented source plugin for direct HTTP(S) audio.
 ---
 
-Unlike a static metadata record, a source plugin answers two separate questions: *does this query match?* and *how does this Track become playable audio?* Define a plugin for direct media URLs.
+Unlike a static metadata record, a source plugin answers two separate questions: _does this query match?_ and _how does this Track become playable audio?_ Define a plugin for direct media URLs.
 
 ```ts title="src/direct-media.ts"
 import { definePlugin, Track } from 'discord-player';
@@ -13,9 +13,7 @@ export const directMedia = definePlugin({
   kind: 'source',
   setup(ctx) {
     ctx.on('search.query.match', ({ query }) =>
-      /^https?:\/\/.*\.(mp3|ogg|wav)(\?.*)?$/i.test(query)
-        ? { score: 100 }
-        : null,
+      /^https?:\/\/.*\.(mp3|ogg|wav)(\?.*)?$/i.test(query) ? { score: 100 } : null,
     );
 
     ctx.on('search.query.resolve', ({ query }) => ({
@@ -60,7 +58,9 @@ console.log(result.tracks[0]?.title);
 The result includes one Track and a portable source reference. When playback starts, `track.stream` returns `{ url }` for Remedia to decode.
 
 <Callout type="warn" title="Example, not an unrestricted URL proxy">
-This tiny source is intentionally limited to direct URLs with recognizable audio extensions. In a production bot, enforce URL/domain policies, handle redirects safely, and validate sources before allowing public users to submit arbitrary addresses.
+  This tiny source is intentionally limited to direct URLs with recognizable audio extensions. In a production bot,
+  enforce URL/domain policies, handle redirects safely, and validate sources before allowing public users to submit
+  arbitrary addresses.
 </Callout>
 
 A plugin is **required** for string queries. A plain `new Track({ url })` with no matching source registration is metadata, not an audio decoder.

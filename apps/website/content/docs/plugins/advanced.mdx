@@ -10,11 +10,7 @@ import type { Operation } from 'discord-player';
 
 declare module 'discord-player' {
   interface SourceOperationMap {
-    'track.audit': Operation<
-      { sourceId: string },
-      { accepted: boolean },
-      'first'
-    >;
+    'track.audit': Operation<{ sourceId: string }, { accepted: boolean }, 'first'>;
   }
 }
 

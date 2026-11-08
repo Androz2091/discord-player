@@ -1,10 +1,4 @@
 {
   "title": "Remedia runtime",
-  "pages": [
-    "index",
-    "embedded",
-    "remote",
-    "voice-recovery",
-    "operations"
-  ]
+  "pages": ["index", "embedded", "remote", "voice-recovery", "operations"]
 }

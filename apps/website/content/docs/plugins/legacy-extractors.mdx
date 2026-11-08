@@ -41,15 +41,15 @@ Register **the constructor**, not an instantiated extractor or a plugin factory.
 
 ## How the emulation layer works
 
-| Legacy method | v8 operation |
-| --- | --- |
-| `activate()` | Plugin `setup()` |
-| `deactivate()` | Plugin `destroy()` |
-| `validate()` | `search.query.match` |
-| `handle()` | `search.query.resolve` |
-| `stream()` | `track.stream` |
-| `getRelatedTracks()` | `track.related` |
-| `bridge()` | `track.bridge` |
+| Legacy method        | v8 operation             |
+| -------------------- | ------------------------ |
+| `activate()`         | Plugin `setup()`         |
+| `deactivate()`       | Plugin `destroy()`       |
+| `validate()`         | `search.query.match`     |
+| `handle()`           | `search.query.resolve`   |
+| `stream()`           | `track.stream`           |
+| `getRelatedTracks()` | `track.related`          |
+| `bridge()`           | `track.bridge`           |
 | `handlePostStream()` | Local `stream.transform` |
 
 The adapter preserves legacy priority and protocols where possible. It stamps Tracks with portable references so future resolution uses the same source identity.

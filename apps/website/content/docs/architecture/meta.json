@@ -1,8 +1,4 @@
 {
   "title": "Architecture",
-  "pages": [
-    "index",
-    "lifecycle",
-    "design-decisions"
-  ]
+  "pages": ["index", "lifecycle", "design-decisions"]
 }

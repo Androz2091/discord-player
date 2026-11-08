@@ -9,12 +9,12 @@ Every guild has its own Remedia voice transport. Concurrent joins are not serial
 
 Use `@remedia/client` **0.1.0-dev.3** or later compatible builds and a `remedia-server` from the same release. Earlier `dev.2` clients could time out `voice.connect` after only 15 seconds, while the server was still negotiating voice.
 
-| Operation | Default |
-| --- | --- |
-| Ordinary remote RPC | 15 seconds (`requestTimeoutMs`) |
-| Remote `voice.connect` RPC | At least 80 seconds |
-| Server-side `voice.connect` request | At least 75 seconds |
-| Initial Gateway and voice connection | 100 seconds |
+| Operation                            | Default                         |
+| ------------------------------------ | ------------------------------- |
+| Ordinary remote RPC                  | 15 seconds (`requestTimeoutMs`) |
+| Remote `voice.connect` RPC           | At least 80 seconds             |
+| Server-side `voice.connect` request  | At least 75 seconds             |
+| Initial Gateway and voice connection | 100 seconds                     |
 
 These are independent deadlines. Raising the ordinary `requestTimeoutMs` is not the remedy for a slow `voice.connect`. In Discord Player, set `connectTimeoutMs` on an initial `queue.connect()` or a `player.play()` request. Channel moves use Remedia's separate, internal timeout.
 

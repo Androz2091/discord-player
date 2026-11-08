@@ -1,6 +1,12 @@
 import { EventEmitter } from 'node:events';
 import { randomUUID } from 'node:crypto';
-import type { DiscordConnectOptions, DiscordSession, DiscordSessionOptions, MediaSource, PlayOptions } from '@remedia/client';
+import type {
+  DiscordConnectOptions,
+  DiscordSession,
+  DiscordSessionOptions,
+  MediaSource,
+  PlayOptions,
+} from '@remedia/client';
 
 /** Minimal deterministic Remedia session used by lifecycle tests. */
 export class FakeSession

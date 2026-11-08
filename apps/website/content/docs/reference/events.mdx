@@ -10,30 +10,30 @@ There are two event emitters:
 
 ## Queue events
 
-| Name | Arguments after queue |
-| --- | --- |
-| `queueCreate` | none |
-| `queueDelete` | none |
-| `connection` | none |
-| `connectionDestroyed` | none |
-| `disconnect` | none |
-| `audioTrackAdd` | `track` |
-| `audioTracksAdd` | `tracks` |
-| `audioTrackRemove` | `track` |
-| `audioTracksRemove` | `tracks` |
-| `playerStart` | `track, rawEvent?` |
-| `playerFinish` | `track, rawEvent?` |
-| `playerSkip` | `track, reason, description, rawEvent?` |
-| `playerStop` | `trackOrNull, rawEvent?` |
-| `playerError` | `error, track, rawEvent?` |
-| `playerPause` | `rawEvent` |
-| `playerResume` | `rawEvent` |
-| `playerSeek` | `rawEvent` |
-| `voiceStateUpdate` | `event` |
-| `volumeChange` | `oldPercentage, newPercentage` |
-| `emptyQueue`, `emptyChannel` | none |
-| `willPlayTrack`, `willAutoPlay` | `track` |
-| `error` | `error` |
+| Name                            | Arguments after queue                   |
+| ------------------------------- | --------------------------------------- |
+| `queueCreate`                   | none                                    |
+| `queueDelete`                   | none                                    |
+| `connection`                    | none                                    |
+| `connectionDestroyed`           | none                                    |
+| `disconnect`                    | none                                    |
+| `audioTrackAdd`                 | `track`                                 |
+| `audioTracksAdd`                | `tracks`                                |
+| `audioTrackRemove`              | `track`                                 |
+| `audioTracksRemove`             | `tracks`                                |
+| `playerStart`                   | `track, rawEvent?`                      |
+| `playerFinish`                  | `track, rawEvent?`                      |
+| `playerSkip`                    | `track, reason, description, rawEvent?` |
+| `playerStop`                    | `trackOrNull, rawEvent?`                |
+| `playerError`                   | `error, track, rawEvent?`               |
+| `playerPause`                   | `rawEvent`                              |
+| `playerResume`                  | `rawEvent`                              |
+| `playerSeek`                    | `rawEvent`                              |
+| `voiceStateUpdate`              | `event`                                 |
+| `volumeChange`                  | `oldPercentage, newPercentage`          |
+| `emptyQueue`, `emptyChannel`    | none                                    |
+| `willPlayTrack`, `willAutoPlay` | `track`                                 |
+| `error`                         | `error`                                 |
 
 The exported `GuildQueueEvents` constant contains the canonical string identifiers. Some historic event names are retained for type compatibility, but that does not mean every old DSP pipeline is recreated.
 

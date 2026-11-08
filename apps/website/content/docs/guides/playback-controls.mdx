@@ -17,13 +17,13 @@ await queue.node.setVolume(75); // 0–100 percent
 
 ## Managed lifecycle controls
 
-| Call | Effect |
-| --- | --- |
-| `await queue.skip()` | End the current managed Track and advance |
-| `await queue.skipTo(trackOrIndex)` | Skip to an upcoming Track |
-| `await queue.jump(trackOrIndex)` | Jump within the upcoming queue |
-| `await queue.stop()` | Stop managed playback, preserve upcoming Tracks |
-| `await queue.destroy()` | Dispose voice, history, and the queue |
+| Call                               | Effect                                          |
+| ---------------------------------- | ----------------------------------------------- |
+| `await queue.skip()`               | End the current managed Track and advance       |
+| `await queue.skipTo(trackOrIndex)` | Skip to an upcoming Track                       |
+| `await queue.jump(trackOrIndex)`   | Jump within the upcoming queue                  |
+| `await queue.stop()`               | Stop managed playback, preserve upcoming Tracks |
+| `await queue.destroy()`            | Dispose voice, history, and the queue           |
 
 For a raw session, `queue.node.stopSession()` stops its audio without following the queue's managed lifecycle. Use `queue.stop()` for ordinary music commands.
 

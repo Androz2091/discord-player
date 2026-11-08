@@ -7,29 +7,25 @@ Every handler registers by a typed name. The operation definition decides whethe
 
 ## Built-in operations
 
-| Operation | Dispatch policy | Result |
-| --- | --- | --- |
-| `search.query.match` | `collect` | Scored source candidates |
-| `search.query.resolve` | `first` | Tracks and optional Playlist |
-| `track.stream` | `first` | Media source, URL, or encoded Readable |
-| `track.related` | `first` | Related Tracks |
-| `track.bridge` | `first` | Explicit fallback stream |
-| `stream.transform` | `pipe` | Replacement encoded stream passed downstream |
-| `track.stream.resolved` | `broadcast` | Informational notification |
+| Operation               | Dispatch policy | Result                                       |
+| ----------------------- | --------------- | -------------------------------------------- |
+| `search.query.match`    | `collect`       | Scored source candidates                     |
+| `search.query.resolve`  | `first`         | Tracks and optional Playlist                 |
+| `track.stream`          | `first`         | Media source, URL, or encoded Readable       |
+| `track.related`         | `first`         | Related Tracks                               |
+| `track.bridge`          | `first`         | Explicit fallback stream                     |
+| `stream.transform`      | `pipe`          | Replacement encoded stream passed downstream |
+| `track.stream.resolved` | `broadcast`     | Informational notification                   |
 
 These definitions are available from `SourceOperationMap` in `discord-player`.
 
 ## Matching and resolution
 
 ```ts
-ctx.on(
-  'search.query.match',
-  ({ query }) => (query.startsWith('https://') ? { score: 90 } : null),
-  { priority: 10 },
-);
+ctx.on('search.query.match', ({ query }) => (query.startsWith('https://') ? { score: 90 } : null), { priority: 10 });
 ```
 
-The host orders candidates by handler priority first, then match score. Equal rank preserves registration order. One winning source then resolves metadata. `null` means *no match* for `search.query.match`.
+The host orders candidates by handler priority first, then match score. Equal rank preserves registration order. One winning source then resolves metadata. `null` means _no match_ for `search.query.match`.
 
 `undefined` is the only general-purpose decline value in first-result operations. A handler returning `null` or `false` where the operation type allows it is considered a result, not an implicit request to continue.
 

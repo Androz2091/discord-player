@@ -33,6 +33,7 @@ Use `serialize()` and `deserialize()` for versioned portable Track and Playlist 
 ### Run the regression checklist
 
 Verify joins, moves, two-song queue progression, skip, stop, filters, failures, history, persistence, and remote media accessibility before enabling the new runtime in production.
+
 </Steps>
 
 ## Initialization: before and after
@@ -64,14 +65,32 @@ await player.initialize(client.user.id);
 `mySourcePlugin()` is your source registration and `sendToShard` is your Gateway integration, not a bundled provider or automatic adapter. See [create a player](/docs/getting-started/create-player) and [build a source plugin](/docs/plugins/build-source) for complete implementations.
 
 <Callout type="warn" title="Avoid a partial runtime migration">
-Do not keep an old voice/audio dispatcher alongside Remedia for the same guild. Let Remedia own the voice transport and let GuildQueue manage Track progression. Mixing ownership paths can create duplicate events and conflicting sessions.
+  Do not keep an old voice/audio dispatcher alongside Remedia for the same guild. Let Remedia own the voice transport
+  and let GuildQueue manage Track progression. Mixing ownership paths can create duplicate events and conflicting
+  sessions.
 </Callout>
 
 <Cards>
-  <Card title="API changes" href="/docs/migration/api-changes" description="Detailed changes to constructors, queues, controls, and events." />
-  <Card title="Extractor migration" href="/docs/migration/extractors" description="Keep supported extractors temporarily or port them to plugins." />
-  <Card title="Persisted data" href="/docs/migration/data" description="Import compatible v7 entities and establish a portable schema." />
-  <Card title="Release checklist" href="/docs/migration/checklist" description="A realistic verification and rollout plan." />
+  <Card
+    title="API changes"
+    href="/docs/migration/api-changes"
+    description="Detailed changes to constructors, queues, controls, and events."
+  />
+  <Card
+    title="Extractor migration"
+    href="/docs/migration/extractors"
+    description="Keep supported extractors temporarily or port them to plugins."
+  />
+  <Card
+    title="Persisted data"
+    href="/docs/migration/data"
+    description="Import compatible v7 entities and establish a portable schema."
+  />
+  <Card
+    title="Release checklist"
+    href="/docs/migration/checklist"
+    description="A realistic verification and rollout plan."
+  />
 </Cards>
 
 <NextStep href="/docs/migration/api-changes" label="Review v7 versus v8 APIs" />

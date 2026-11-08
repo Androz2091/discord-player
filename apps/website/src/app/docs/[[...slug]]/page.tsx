@@ -1,7 +1,11 @@
 import { source } from '@/lib/source';
 import {
-  DocsBody, DocsDescription, DocsPage, DocsTitle,
-  MarkdownCopyButton, ViewOptionsPopover,
+  DocsBody,
+  DocsDescription,
+  DocsPage,
+  DocsTitle,
+  MarkdownCopyButton,
+  ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';

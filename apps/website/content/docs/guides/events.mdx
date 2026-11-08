@@ -23,22 +23,22 @@ player.on('error', (error) => console.error('Player error:', error));
 
 ## Common queue events
 
-| Event | Arguments after `queue` | When it fires |
-| --- | --- | --- |
-| `queueCreate` / `queueDelete` | none | Queue lifecycle |
-| `connection` / `connectionDestroyed` | none | Remedia voice session lifecycle |
-| `audioTrackAdd` | `track` | Upcoming Track added |
-| `audioTracksAdd` | `tracks` | Batch added |
-| `playerStart` | `track, rawEvent?` | A managed generation starts |
-| `playerFinish` | `track, rawEvent?` | Natural completion |
-| `playerSkip` | `track, reason, description, rawEvent?` | Explicit skip |
-| `playerStop` | `trackOrNull, rawEvent?` | Managed stop |
-| `playerError` | `error, track, rawEvent?` | Playback failed |
-| `playerPause` / `playerResume` | `rawEvent` | Native pause/resume |
-| `playerSeek` | `rawEvent` | Native seek completed |
-| `voiceStateUpdate` | `event` | Native voice state changed |
-| `emptyQueue` | none | No further upcoming Tracks |
-| `willAutoPlay` | `track` | AUTOPLAY scheduling boundary |
+| Event                                | Arguments after `queue`                 | When it fires                   |
+| ------------------------------------ | --------------------------------------- | ------------------------------- |
+| `queueCreate` / `queueDelete`        | none                                    | Queue lifecycle                 |
+| `connection` / `connectionDestroyed` | none                                    | Remedia voice session lifecycle |
+| `audioTrackAdd`                      | `track`                                 | Upcoming Track added            |
+| `audioTracksAdd`                     | `tracks`                                | Batch added                     |
+| `playerStart`                        | `track, rawEvent?`                      | A managed generation starts     |
+| `playerFinish`                       | `track, rawEvent?`                      | Natural completion              |
+| `playerSkip`                         | `track, reason, description, rawEvent?` | Explicit skip                   |
+| `playerStop`                         | `trackOrNull, rawEvent?`                | Managed stop                    |
+| `playerError`                        | `error, track, rawEvent?`               | Playback failed                 |
+| `playerPause` / `playerResume`       | `rawEvent`                              | Native pause/resume             |
+| `playerSeek`                         | `rawEvent`                              | Native seek completed           |
+| `voiceStateUpdate`                   | `event`                                 | Native voice state changed      |
+| `emptyQueue`                         | none                                    | No further upcoming Tracks      |
+| `willAutoPlay`                       | `track`                                 | AUTOPLAY scheduling boundary    |
 
 The first argument is always the owning `queue`. Terminal events are intentionally different: a skipped track is not a naturally completed track.
 

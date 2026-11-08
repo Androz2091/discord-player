@@ -50,9 +50,7 @@ export const mySource = definePlugin({
   id: 'my.source',
   kind: 'source',
   setup(ctx) {
-    ctx.on('search.query.match', ({ query }) =>
-      query.startsWith('https://') ? { score: 100 } : null,
-    );
+    ctx.on('search.query.match', ({ query }) => (query.startsWith('https://') ? { score: 100 } : null));
     ctx.on('search.query.resolve', ({ query }) => ({
       playlist: null,
       tracks: [new Track({ title: 'Audio', url: query })],
@@ -66,15 +64,15 @@ Register `plugins: [mySource()]` before Player initialization, or `await player.
 
 ## The emulation contract
 
-| Legacy hook | Modern operation |
-| --- | --- |
-| `validate` | `search.query.match` |
-| `handle` | `search.query.resolve` |
-| `stream` | `track.stream` |
-| `getRelatedTracks` | `track.related` |
-| `bridge` | `track.bridge` |
-| `handlePostStream` | Local `stream.transform` |
-| `activate / deactivate` | `setup / destroy` |
+| Legacy hook             | Modern operation         |
+| ----------------------- | ------------------------ |
+| `validate`              | `search.query.match`     |
+| `handle`                | `search.query.resolve`   |
+| `stream`                | `track.stream`           |
+| `getRelatedTracks`      | `track.related`          |
+| `bridge`                | `track.bridge`           |
+| `handlePostStream`      | Local `stream.transform` |
+| `activate / deactivate` | `setup / destroy`        |
 
 ## Known incompatibilities
 

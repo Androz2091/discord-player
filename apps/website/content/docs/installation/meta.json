@@ -1,7 +1,4 @@
 {
   "title": "Installation",
-  "pages": [
-    "index",
-    "ffmpeg"
-  ]
+  "pages": ["index", "ffmpeg"]
 }

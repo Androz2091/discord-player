@@ -9,10 +9,7 @@ Once the bot has initialized and `directMedia()` is registered, call `player.pla
 const guildId = interaction.guildId;
 if (!guildId) throw new Error('Use this command in a server');
 
-const result = await player.play(
-  { guildId, channelId: voiceChannel.id },
-  'https://media.example.com/track.mp3',
-);
+const result = await player.play({ guildId, channelId: voiceChannel.id }, 'https://media.example.com/track.mp3');
 
 if (!result.track) {
   throw new Error('No matching track');
@@ -50,7 +47,8 @@ player.on('error', console.error);
 An empty search does not throw: `result.track` is `null`. Missing permissions, inaccessible audio, or a disconnected voice session are actual failures you should handle.
 
 <Callout title="Queue-managed versus raw playback">
-Use `player.play()` or `queue.play()` for tracks that should participate in history, repeat, skip, and automatic queue progression. `queue.node.play(source)` sends a raw media source to Remedia and **does not** advance the managed queue.
+  Use `player.play()` or `queue.play()` for tracks that should participate in history, repeat, skip, and automatic queue
+  progression. `queue.node.play(source)` sends a raw media source to Remedia and **does not** advance the managed queue.
 </Callout>
 
 <NextStep href="/docs/getting-started/next-steps" label="4. Control playback and handle events" />

@@ -17,9 +17,21 @@ discord-player supplies track selection, source resolution, guild queues, histor
 ## Embedded and remote
 
 <Cards>
-  <Card title="Embedded node" href="/docs/remedia/embedded" description="Native Rust engine in your Node.js bot. No loopback service required." />
-  <Card title="Remote node" href="/docs/remedia/remote" description="Authenticated WebSocket control of the same Rust engine on another host." />
-  <Card title="How a command reaches audio" href="/docs/architecture" description="Detailed graph of plugin operations, queue ownership, and voice output." />
+  <Card
+    title="Embedded node"
+    href="/docs/remedia/embedded"
+    description="Native Rust engine in your Node.js bot. No loopback service required."
+  />
+  <Card
+    title="Remote node"
+    href="/docs/remedia/remote"
+    description="Authenticated WebSocket control of the same Rust engine on another host."
+  />
+  <Card
+    title="How a command reaches audio"
+    href="/docs/architecture"
+    description="Detailed graph of plugin operations, queue ownership, and voice output."
+  />
 </Cards>
 
 Both deployment modes reuse Remedia's core playback implementation. They do not share one in-memory decoder across machines; a remote node runs its own instance of that engine.

@@ -6,10 +6,26 @@ description: Learn discord-player v8 in order, from the first voice connection t
 discord-player v8 manages Discord music queues and delegates audio playback and voice transport to [Remedia](https://github.com/twlite/remedia), a Rust engine. You own the Discord client and forward Gateway payloads; discord-player handles queues, source selection, history, events, and playback control.
 
 <Cards>
-  <Card title="Start from scratch" href="/docs/getting-started" description="A step-by-step path to a working music bot with a real source plugin." />
-  <Card title="Upgrade a v7 bot" href="/docs/migration" description="A feature-by-feature migration sequence with compatibility boundaries." />
-  <Card title="Understand the architecture" href="/docs/architecture" description="Follow the path from a slash command through the source host, queue, and Rust engine." />
-  <Card title="Explore the API" href="/docs/reference" description="Signatures, return values, and ownership rules for the v8 public API." />
+  <Card
+    title="Start from scratch"
+    href="/docs/getting-started"
+    description="A step-by-step path to a working music bot with a real source plugin."
+  />
+  <Card
+    title="Upgrade a v7 bot"
+    href="/docs/migration"
+    description="A feature-by-feature migration sequence with compatibility boundaries."
+  />
+  <Card
+    title="Understand the architecture"
+    href="/docs/architecture"
+    description="Follow the path from a slash command through the source host, queue, and Rust engine."
+  />
+  <Card
+    title="Explore the API"
+    href="/docs/reference"
+    description="Signatures, return values, and ownership rules for the v8 public API."
+  />
 </Cards>
 
 ## A recommended learning path
@@ -34,21 +50,23 @@ Follow [Create a player](/docs/getting-started/create-player). The client suppli
 ### Go further
 
 Extend the [plugin host](/docs/plugins), run [remote Remedia](/docs/remedia/remote), or use the [migration guide](/docs/migration).
+
 </Steps>
 
 ## What v8 owns
 
-| discord-player | Remedia |
-| --- | --- |
-| Source matching, metadata, stream resolution | Demux, decode, resample, filters |
-| Per-guild queues, repeat, shuffle, history | Playback timeline, pause, seek, volume |
-| Player and queue events | Native Discord voice transport and session lifecycle |
-| Typed source plugins and legacy adapter | Embedded or authenticated remote audio nodes |
+| discord-player                               | Remedia                                              |
+| -------------------------------------------- | ---------------------------------------------------- |
+| Source matching, metadata, stream resolution | Demux, decode, resample, filters                     |
+| Per-guild queues, repeat, shuffle, history   | Playback timeline, pause, seek, volume               |
+| Player and queue events                      | Native Discord voice transport and session lifecycle |
+| Typed source plugins and legacy adapter      | Embedded or authenticated remote audio nodes         |
 
 The same Remedia engine is used for embedded and remote playback. The plugin host currently runs with discord-player on the application side; remote plugin execution is not a v8 guarantee.
 
 <Callout title="Requirements">
-Node.js 22.18 or newer, ESM, and an installed v8 package. Embedded hosts need FFmpeg 9 shared libraries; remote-only bot hosts do not. Read [installation](/docs/installation) before copying the runtime example.
+  Node.js 22.18 or newer, ESM, and an installed v8 package. Embedded hosts need FFmpeg 9 shared libraries; remote-only
+  bot hosts do not. Read [installation](/docs/installation) before copying the runtime example.
 </Callout>
 
 <NextStep href="/docs/getting-started" label="Follow the first-run tutorial" />

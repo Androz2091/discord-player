@@ -20,20 +20,20 @@ await queue.play(track);
 
 ## Queue methods
 
-| Method | Purpose |
-| --- | --- |
-| `addTrack(trackOrArrayOrPlaylist)` | Append future Tracks |
-| `addTracks(tracks)` | Append multiple Tracks |
-| `prepend(...)`, `append(...)`, `insertTrack(...)` | Reorder upcoming Tracks |
-| `removeTrack(...)`, `moveTrack(...)`, `swapTracks(...)` | Modify future ordering |
-| `play(resource, options?)` | Queue-managed playback |
-| `playNext()` | Start next upcoming Track when idle |
-| `skip(reason?)`, `skipTo(...)`, `jump(...)` | Managed navigation |
-| `stop()` | Stop managed playback, retain upcoming Tracks |
-| `connect(options)` | Connect/move channel through Remedia |
-| `setSelfDeaf(bool)`, `setSelfMute(bool)` | Update voice flags |
-| `destroy()`, `delete()` | Release queue resources |
-| `clear()` | Clear upcoming Tracks and history |
+| Method                                                  | Purpose                                       |
+| ------------------------------------------------------- | --------------------------------------------- |
+| `addTrack(trackOrArrayOrPlaylist)`                      | Append future Tracks                          |
+| `addTracks(tracks)`                                     | Append multiple Tracks                        |
+| `prepend(...)`, `append(...)`, `insertTrack(...)`       | Reorder upcoming Tracks                       |
+| `removeTrack(...)`, `moveTrack(...)`, `swapTracks(...)` | Modify future ordering                        |
+| `play(resource, options?)`                              | Queue-managed playback                        |
+| `playNext()`                                            | Start next upcoming Track when idle           |
+| `skip(reason?)`, `skipTo(...)`, `jump(...)`             | Managed navigation                            |
+| `stop()`                                                | Stop managed playback, retain upcoming Tracks |
+| `connect(options)`                                      | Connect/move channel through Remedia          |
+| `setSelfDeaf(bool)`, `setSelfMute(bool)`                | Update voice flags                            |
+| `destroy()`, `delete()`                                 | Release queue resources                       |
+| `clear()`                                               | Clear upcoming Tracks and history             |
 
 ## Connection deadline
 
@@ -41,18 +41,18 @@ await queue.play(track);
 
 ## Queue state
 
-| Property | Value |
-| --- | --- |
-| `guildId` | Owning guild ID |
-| `currentTrack` | Active or paused Track or `null` |
-| `tracks` | Upcoming Track collection |
-| `size` | Upcoming Track count, excludes current |
-| `history` | Previous-track manager |
-| `node` | GuildQueuePlayerNode |
-| `metadata` | App-defined metadata |
-| `repeatMode` | OFF, TRACK, QUEUE, AUTOPLAY |
-| `isShuffling` | Shuffle state |
-| `isPlaying()` | Managed active status (includes paused) |
+| Property       | Value                                   |
+| -------------- | --------------------------------------- |
+| `guildId`      | Owning guild ID                         |
+| `currentTrack` | Active or paused Track or `null`        |
+| `tracks`       | Upcoming Track collection               |
+| `size`         | Upcoming Track count, excludes current  |
+| `history`      | Previous-track manager                  |
+| `node`         | GuildQueuePlayerNode                    |
+| `metadata`     | App-defined metadata                    |
+| `repeatMode`   | OFF, TRACK, QUEUE, AUTOPLAY             |
+| `isShuffling`  | Shuffle state                           |
+| `isPlaying()`  | Managed active status (includes paused) |
 
 ## Node/session API
 
@@ -67,17 +67,17 @@ const session = queue.node.getSession();
 console.log(session.nodeId);
 ```
 
-| Node method/property | Meaning |
-| --- | --- |
-| `play(source, options?)` | **Raw** Remedia playback, not managed Track scheduling |
-| `playRaw(source, options?)` | Alias to raw playback |
-| `stopSession()` | Stop raw session audio |
-| `pause()`, `resume()`, `setPaused(bool)` | Raw playback state |
-| `seek(ms)`, `setVolume(percent)` | Raw timing and gain controls |
-| `playbackTime`, `totalDuration` | Millisecond timeline |
-| `getTimestamp()`, `createProgressBar()` | Display helpers |
-| `isIdle()`, `isPlaying()`, `isPaused()` | Raw session status |
-| `filters` | Named/raw FFmpeg filtergraph API |
+| Node method/property                     | Meaning                                                |
+| ---------------------------------------- | ------------------------------------------------------ |
+| `play(source, options?)`                 | **Raw** Remedia playback, not managed Track scheduling |
+| `playRaw(source, options?)`              | Alias to raw playback                                  |
+| `stopSession()`                          | Stop raw session audio                                 |
+| `pause()`, `resume()`, `setPaused(bool)` | Raw playback state                                     |
+| `seek(ms)`, `setVolume(percent)`         | Raw timing and gain controls                           |
+| `playbackTime`, `totalDuration`          | Millisecond timeline                                   |
+| `getTimestamp()`, `createProgressBar()`  | Display helpers                                        |
+| `isIdle()`, `isPlaying()`, `isPaused()`  | Raw session status                                     |
+| `filters`                                | Named/raw FFmpeg filtergraph API                       |
 
 The managed queue serializes conflicting transitions and correlates playback generations. Prefer its methods for user commands.
 

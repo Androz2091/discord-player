@@ -20,15 +20,15 @@ await filters.clear();
 
 ## Named presets and raw graphs
 
-| Method | Description |
-| --- | --- |
-| `set(nameOrNames)` | Replace the graph with preset(s) |
-| `get(name)` | Check whether a named preset is enabled |
-| `get()` | Read the complete filtergraph, if present |
-| `toggle(name, enabled?)` | Change a named preset |
-| `remove(nameOrNames)` | Remove named presets |
-| `setRaw(graph)` | Replace with an opaque FFmpeg filtergraph |
-| `clear()` | Remove all filters |
+| Method                   | Description                               |
+| ------------------------ | ----------------------------------------- |
+| `set(nameOrNames)`       | Replace the graph with preset(s)          |
+| `get(name)`              | Check whether a named preset is enabled   |
+| `get()`                  | Read the complete filtergraph, if present |
+| `toggle(name, enabled?)` | Change a named preset                     |
+| `remove(nameOrNames)`    | Remove named presets                      |
+| `setRaw(graph)`          | Replace with an opaque FFmpeg filtergraph |
+| `clear()`                | Remove all filters                        |
 
 Preset names include `8d`, `bassboost`, `nightcore`, and others listed in the [public preset map](https://github.com/Androz2091/discord-player/blob/v8/packages/discord-player/src/structures/audio-filter-presets.ts).
 
@@ -39,7 +39,8 @@ When you call `setRaw()`, the graph is opaque. Toggle/remove operates on managed
 Filters can be prepared before voice connection. Connected changes call the native session under a serialized operation lock, so an invalid FFmpeg graph rejects instead of silently replacing a working configuration.
 
 <Callout type="warn" title="Filters change sound and sometimes timing">
-Time-altering filters can affect the relationship between source duration and playback position. Always display the Remedia-backed timeline, not an independently incremented timer.
+  Time-altering filters can affect the relationship between source duration and playback position. Always display the
+  Remedia-backed timeline, not an independently incremented timer.
 </Callout>
 
 <NextStep href="/docs/guides/history" label="Navigate playback history" />

@@ -19,14 +19,14 @@ queue.history.clear();
 
 ## Which tracks are recorded?
 
-| Terminal outcome | History behavior |
-| --- | --- |
-| Natural completion with repeat `OFF` or `AUTOPLAY` | Store the completed Track |
-| Explicit skip | Store the skipped Track |
-| Repeat `TRACK` or `QUEUE` | Do not store each replay |
-| Playback failure | Return the Track to the upcoming queue head |
-| Stop | Leave history unchanged |
-| `queue.clear()` or destruction | Clear history |
+| Terminal outcome                                   | History behavior                            |
+| -------------------------------------------------- | ------------------------------------------- |
+| Natural completion with repeat `OFF` or `AUTOPLAY` | Store the completed Track                   |
+| Explicit skip                                      | Store the skipped Track                     |
+| Repeat `TRACK` or `QUEUE`                          | Do not store each replay                    |
+| Playback failure                                   | Return the Track to the upcoming queue head |
+| Stop                                               | Leave history unchanged                     |
+| `queue.clear()` or destruction                     | Clear history                               |
 
 `queue.history.previous()`, `back()`, and `next()` are asynchronous because navigation may replace the currently playing native generation.
 
