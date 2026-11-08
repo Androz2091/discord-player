@@ -1,0 +1,59 @@
+---
+title: Automatic crossfading
+description: Enable native transitions once, then queue tracks through ordinary playback APIs.
+---
+
+Crossfading is disabled by default. Enable it globally, register your ordinary source plugins, and queue tracks normally:
+
+```ts
+import { DiscordPlayer } from 'discord-player';
+
+const player = new DiscordPlayer({
+  nodes: [{ id: 'local', type: 'embedded' }],
+  crossfade: { enabled: true, durationMs: 5000 },
+  send: (guildId, payload) => sendGateway(guildId, payload),
+});
+await player.initialize(botUserId);
+// trackA, trackB, and trackC are ordinary Tracks resolved by your source plugins.
+await player.play(channel, trackA);
+await player.play(channel, trackB);
+await player.play(channel, trackC);
+```
+
+A queue override takes precedence, including `false` to disable a global default:
+
+```ts
+const queue = await player.createQueue(guildId, {
+  crossfade: { enabled: true, durationMs: 8000, prepareBeforeMs: 30000 },
+});
+```
+
+`durationMs` defaults to 5000. `prepareBeforeMs` defaults to 30000 milliseconds **before the fade begins**. The only supported `curve` is `'equalPower'`. Crossfading decodes PCM and mixes two sources, which can require more processing than ordinary Opus passthrough.
+
+These options apply when a session is created. Changing queue options, moving voice channels, or reconnecting an existing session does not replace its native playback worker. Destroy and recreate the queue to change the session policy.
+
+## Preparation and promotion
+
+Remedia decides when preparation is needed. Discord Player reserves one upcoming queue occurrence and resolves it through `track.stream`, `track.bridge`, and `stream.transform`, using the same plugin registry as ordinary playback. Enqueuing a track does not resolve its stream.
+
+The reserved track stays in the upcoming queue until it becomes audible. Native promotion commits it once, updates `currentTrack`, and emits the normal `playerStart`. The outgoing generation remains tracked until completion updates history and finish statistics and emits `playerFinish`. Incoming starts can therefore precede outgoing finishes. A promoted source never receives a second `play()` call.
+
+Repeated references to the same Track have separate queue occurrence identities. Revision fencing prevents an obsolete resolver response from replacing a newer decision. Preparation failures report `playerError` while preserving ordinary queue progression. Stage readiness, promotion, cancellation and capability fallback are logged through the Player's `debug` event.
+
+## Queue policies and controls
+
+- `OFF` prepares the next upcoming occurrence.
+- `TRACK` prepares a new occurrence of the current Track.
+- `QUEUE` prepares the upcoming Track and rotates the outgoing Track on completion; an otherwise empty queue repeats the current Track.
+- `AUTOPLAY` uses an already selected upcoming Track and preserves the existing autoplay boundary when none exists.
+- Dynamic shuffle chooses once during preparation and commits that same occurrence during promotion.
+
+Removing or reordering the selected occurrence cancels its preparation and selects again. `clear()` cancels upcoming preparation while current playback continues. Direct writes through `tracks.store` conservatively invalidate occurrence identities; prefer queue mutation methods.
+
+Skip, history navigation, seek, stop and disconnect cancel preparation. Pause/resume preserve it. During an overlap, `currentTrack` identifies the incoming source, so skip applies to that track. A cancelled native transition can restore the outgoing generation and retain the failed incoming Track for later playback. Transport recovery uses native staged state and playback snapshots to reconcile a missed promotion.
+
+## Embedded and remote nodes
+
+Embedded sessions receive the application's crossfade policy directly. Remote servers must also enable native crossfading and advertise `capabilities.crossfade.available`. Discord Player checks the selected node before opting the guild session in. Unsupported nodes continue ordinary playback and emit a debug message. Node selection policies and sticky assignments remain authoritative; crossfading does not migrate active guilds.
+
+The music bot supports ordinary `/play` testing with `REMEDIA_CROSSFADE=true` and optional `REMEDIA_CROSSFADE_DURATION_MS=5000`. Detailed stage diagnostics go to console logs.

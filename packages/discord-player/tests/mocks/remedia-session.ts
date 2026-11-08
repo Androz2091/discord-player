@@ -6,6 +6,8 @@ import type {
   DiscordSessionOptions,
   MediaSource,
   PlayOptions,
+  StageNextOptions,
+  StageSnapshot,
 } from '@remedia/client';
 
 /** Minimal deterministic Remedia session used by lifecycle tests. */
@@ -69,8 +71,94 @@ export class FakeSession
     },
   };
   /** Persistent session configuration snapshot. */
-  public get snapshot() {
-    return { filterGraph: this.filters.graph };
+  public get snapshot(): Pick<
+    DiscordSession['snapshot'],
+    'filterGraph' | 'crossfade' | 'generation' | 'source' | 'state' | 'staged'
+  > {
+    return {
+      filterGraph: this.filters.graph,
+      crossfade: this.crossfade
+        ? { durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower', ...this.crossfade }
+        : null,
+      generation: this.generation,
+      source: this.info,
+      state: this.state,
+      staged: this.stage,
+    };
+  }
+  /** Negotiated native crossfade policy. */
+  public crossfade: DiscordSessionOptions['crossfade'];
+  /** Current staged source. */
+  public stage: StageSnapshot | null = null;
+  /** Submitted stage identities and metadata. */
+  public stageOptions: StageNextOptions[] = [];
+  /** Current decoded source information. */
+  public info = {
+    streamIndex: 0,
+    codec: 'opus',
+    sampleRate: 48000,
+    channels: 2,
+    channelLayout: 'stereo',
+    durationMs: 60000,
+    bitRate: 128000,
+    metadata: {},
+  };
+  /** Request automatic upcoming source preparation. */
+  public requestPreparation(): void {
+    this.emit('prepareRequested', {
+      sessionId: this.sessionId,
+      generation: this.generation,
+      customMetadata: this.customMetadata,
+      remainingMs: 35000,
+      transitionInMs: 30000,
+    });
+  }
+  /** Submit a staged source without starting another play operation. */
+  public async stageNext(_source: MediaSource, options: StageNextOptions): Promise<StageSnapshot> {
+    this.stageOptions.push(options);
+    this.stage = {
+      expectedGeneration: options.expectedGeneration!,
+      entryId: options.entryId,
+      queueRevision: options.queueRevision,
+      sourceRevision: options.sourceRevision ?? 0,
+      state: 'ready',
+      bufferedMs: 2000,
+      info: this.info,
+      error: null,
+    };
+    this.emit('stageReady', { ...this.stage, sessionId: this.sessionId, generation: this.generation });
+    return this.stage;
+  }
+  /** Release staged media. */
+  public async clearStage(): Promise<void> {
+    this.stage = null;
+  }
+  /** Inspect staged media. */
+  public async stagedSource(): Promise<StageSnapshot | null> {
+    return this.stage;
+  }
+  /** Promote the staged source, returning the outgoing completion for delayed delivery. */
+  public promote(): () => void {
+    const options = this.stageOptions.at(-1)!;
+    const outgoing = {
+      sessionId: this.sessionId,
+      generation: this.generation,
+      customMetadata: this.customMetadata,
+      state: 'completed',
+      continuation: { type: 'promoted', generation: this.generation + 1, entryId: options.entryId },
+    };
+    this.generation++;
+    this.customMetadata = options.customMetadata;
+    this.stage = null;
+    this.emit('playbackStarted', {
+      sessionId: this.sessionId,
+      generation: this.generation,
+      customMetadata: this.customMetadata,
+      state: 'playing',
+      info: this.info,
+      transition: { type: 'crossfade', outgoingGeneration: outgoing.generation, entryId: options.entryId },
+    });
+    return () => this.emit('playbackCompleted', outgoing);
   }
   /** Count of raw play calls. */
   public playCalls = 0;
@@ -86,6 +174,7 @@ export class FakeSession
   /** Create a deterministic fake session. */
   public constructor(options: DiscordSessionOptions, nodeType: 'embedded' | 'remote') {
     super();
+    this.crossfade = options.crossfade;
     this.guildId = options.guildId;
     this.channelId = options.channelId;
     this.nodeId = options.nodeId ?? 'fake-node';

@@ -75,3 +75,7 @@ queue.disableShuffle();
 `queue.removeTrack()`, `moveTrack()`, `swapTracks()`, `prepend()`, and `insertTrack()` operate on upcoming entries. `queue.clear()` clears upcoming Tracks and history without stopping the current playback. Destruction releases the current Remedia session and clears all queue state.
 
 <NextStep href="/docs/guides/playback-controls" label="Control the active session" />
+
+## Automatic crossfading
+
+Configure `crossfade` globally or per queue to prepare upcoming occurrences and promote them automatically. Crossfading is disabled by default. Reserved tracks remain upcoming until audible; incoming `playerStart` can precede outgoing `playerFinish`. See the [crossfade guide](/docs/guides/crossfade).

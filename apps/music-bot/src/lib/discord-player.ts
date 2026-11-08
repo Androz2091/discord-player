@@ -8,6 +8,13 @@ import { createRemediaNodes } from './remedia-config.ts';
 
 export const player = new DiscordPlayer({
   nodes: createRemediaNodes(),
+  crossfade:
+    process.env.REMEDIA_CROSSFADE === 'true'
+      ? {
+          enabled: true,
+          durationMs: Number(process.env.REMEDIA_CROSSFADE_DURATION_MS ?? 5000),
+        }
+      : false,
   plugins: [rawHTTPExtractor()],
   send(guildId, payload) {
     const client = useClient<true>();
@@ -178,3 +185,5 @@ player.events.on('error', (queue, error) => {
   notify(queue, 'Queue error', 'A queue or voice operation failed. Check the bot logs for details.', 0xed4245);
 });
 player.on('error', (error) => console.error('Player error:', error));
+
+player.on('debug', (message) => console.debug(message));

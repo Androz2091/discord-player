@@ -1,4 +1,4 @@
-import { randomInt } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 
 function normalizeLimit(limit: number): number {
   if (!Number.isFinite(limit) || limit <= 0) return Infinity;
@@ -9,6 +9,23 @@ function normalizeLimit(limit: number): number {
 export class Queue<T> implements Iterable<T> {
   /** Values held by the queue in FIFO order. Mutating this array bypasses capacity checks. */
   private items: T[] = [];
+  private identities: string[] = [];
+  private storeView?: T[];
+  /** Optional observer called after collection mutations, including compatibility store writes. */
+  public onMutation?: () => void;
+
+  /**
+   * Read the stable identity of a queued occurrence.
+   * @param index Zero-based occurrence index.
+   * @returns An occurrence ID, or undefined outside the queue.
+   */
+  public entryId(index: number): string | undefined {
+    return this.identities[index];
+  }
+
+  private changed(): void {
+    this.onMutation?.();
+  }
   /** Maximum retained item count, or `Infinity` for an unbounded queue. */
   private readonly limit: number;
 
@@ -22,7 +39,24 @@ export class Queue<T> implements Iterable<T> {
 
   /** Compatibility view used by older collection consumers. */
   public get store(): T[] {
-    return this.items;
+    return (this.storeView ??= new Proxy(this.items, {
+      set: (target, key, value) => {
+        Reflect.set(target, key, value);
+        if (target === this.items) {
+          this.identities = target.map(() => randomUUID());
+          this.changed();
+        }
+        return true;
+      },
+      deleteProperty: (target, key) => {
+        Reflect.deleteProperty(target, key);
+        if (target === this.items) {
+          this.identities = target.map(() => randomUUID());
+          this.changed();
+        }
+        return true;
+      },
+    }));
   }
 
   /**
@@ -33,12 +67,17 @@ export class Queue<T> implements Iterable<T> {
   public enqueue(item: T): boolean {
     if (this.isFull()) return false;
     this.items.push(item);
+    this.identities.push(randomUUID());
+    this.changed();
     return true;
   }
 
   /** Remove and return the oldest value. */
   public dequeue(): T | undefined {
-    return this.items.shift();
+    this.identities.shift();
+    const item = this.items.shift();
+    this.changed();
+    return item;
   }
 
   /** Alias for {@link Queue.dequeue}. */
@@ -55,6 +94,8 @@ export class Queue<T> implements Iterable<T> {
     const values = other instanceof Queue ? other.toArray() : Array.from(other);
     const accepted = Number.isFinite(this.limit) ? values.slice(0, Math.max(0, this.limit - this.size)) : values;
     this.items.push(...accepted);
+    this.identities.push(...accepted.map(() => randomUUID()));
+    this.changed();
     return accepted.length;
   }
 
@@ -93,6 +134,9 @@ export class Queue<T> implements Iterable<T> {
   /** Remove every value. */
   public clear(): void {
     this.items = [];
+    this.storeView = undefined;
+    this.identities = [];
+    this.changed();
   }
 
   /** Whether this queue contains no values. */
@@ -123,6 +167,8 @@ export class Queue<T> implements Iterable<T> {
     const incoming = Array.isArray(values) ? Array.from(values) : [values as T];
     const accepted = incoming.slice(0, this.getCapacity());
     this.items.splice(index, 0, ...accepted);
+    this.identities.splice(index, 0, ...accepted.map(() => randomUUID()));
+    this.changed();
     return accepted.length;
   }
 
@@ -135,6 +181,8 @@ export class Queue<T> implements Iterable<T> {
     const index = this.items.indexOf(item);
     if (index < 0) return false;
     this.items.splice(index, 1);
+    this.identities.splice(index, 1);
+    this.changed();
     return true;
   }
 
@@ -145,7 +193,10 @@ export class Queue<T> implements Iterable<T> {
    */
   public removeAt(index: number): T | undefined {
     if (!Number.isInteger(index) || index < 0 || index >= this.size) return undefined;
-    return this.items.splice(index, 1)[0];
+    const item = this.items.splice(index, 1)[0];
+    this.identities.splice(index, 1);
+    this.changed();
+    return item;
   }
 
   /**
@@ -167,6 +218,9 @@ export class Queue<T> implements Iterable<T> {
     }
     const [value] = this.items.splice(from, 1);
     this.items.splice(to, 0, value!);
+    const [id] = this.identities.splice(from, 1);
+    this.identities.splice(to, 0, id!);
+    this.changed();
     return true;
   }
 
@@ -188,6 +242,8 @@ export class Queue<T> implements Iterable<T> {
       return false;
     }
     [this.items[left], this.items[right]] = [this.items[right]!, this.items[left]!];
+    [this.identities[left], this.identities[right]] = [this.identities[right]!, this.identities[left]!];
+    this.changed();
     return true;
   }
 
@@ -196,7 +252,9 @@ export class Queue<T> implements Iterable<T> {
     for (let index = this.items.length - 1; index > 0; index--) {
       const target = randomInt(index + 1);
       [this.items[index], this.items[target]] = [this.items[target]!, this.items[index]!];
+      [this.identities[index], this.identities[target]] = [this.identities[target]!, this.identities[index]!];
     }
+    this.changed();
   }
 
   /**

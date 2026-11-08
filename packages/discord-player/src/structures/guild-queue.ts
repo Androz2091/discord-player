@@ -49,8 +49,24 @@ export enum TrackSkipReason {
 /** Reason attached to the familiar `playerTrigger` event. */
 export type PlayerTriggeredReason = 'filters' | 'normal';
 
+/** Automatic PCM crossfading policy. Changes apply to newly created sessions only. */
+export type CrossfadeOptions =
+  | false
+  | {
+      /** Explicitly opt in to native crossfading. */
+      enabled: true;
+      /** Overlap duration in milliseconds; defaults to 5000. */
+      durationMs?: number;
+      /** Preparation lead before the fade begins; defaults to 30000 milliseconds. */
+      prepareBeforeMs?: number;
+      /** Native mixing curve; only equal power is supported. */
+      curve?: 'equalPower';
+    };
+
 /** Initialization defaults and policies for one guild queue. */
 export interface GuildQueueOptions<Metadata = unknown> {
+  /** Automatic crossfading for this queue; overrides the Player default at session creation. */
+  crossfade?: CrossfadeOptions;
   /** Arbitrary application metadata stored on the queue. */
   metadata?: Metadata;
   /** Optional Remedia node selection policy for this guild. */
@@ -150,6 +166,15 @@ interface ManagedOperation {
   startEmitted: boolean;
 }
 
+interface Reservation {
+  operation: ManagedOperation;
+  outgoing: ManagedOperation;
+  entryId: string;
+  queueRevision: number;
+  sourceRevision: number;
+  repeat: boolean;
+}
+
 type StartedEvent = DiscordSessionEvents['playbackStarted'][0];
 type TerminalEvent =
   | DiscordSessionEvents['playbackCompleted'][0]
@@ -185,6 +210,13 @@ export class GuildQueue<Metadata = unknown> {
   };
   #currentTrack: Track | null = null;
   #operation: ManagedOperation | null = null;
+  #outgoing = new Map<number, ManagedOperation>();
+  #failedIncoming: ManagedOperation | null = null;
+  #reservation: Reservation | null = null;
+  #prepareRequest: { session: DiscordSession; event: DiscordSessionEvents['prepareRequested'][0] } | null = null;
+  #decisionRevision = 0;
+  #sourceRevision = 0;
+  #committing = false;
   #destroyed = false;
   #queueToken = randomUUID();
   #maxSize: number;
@@ -219,6 +251,7 @@ export class GuildQueue<Metadata = unknown> {
     this.#repeatMode = options.repeatMode ?? QueueRepeatMode.OFF;
     this.tracks = new Queue<Track>();
     this.tasks = new AsyncQueue();
+    this.tracks.onMutation = () => this.queueChanged();
     this.node = new GuildQueuePlayerNode(this);
     this.history = new GuildQueueHistoryManager(this);
     this.emit(GuildQueueEvents.QueueCreate);
@@ -342,8 +375,7 @@ export class GuildQueue<Metadata = unknown> {
         ? track
         : items.findIndex((item) => item === track || item.id === track || item.title === track || item.url === track);
     if (!Number.isInteger(index) || index < 0 || index >= items.length) return undefined;
-    const [removed] = items.splice(index, 1);
-    this.replaceTracks(items);
+    const removed = this.tracks.removeAt(index);
     if (removed) this.emit(GuildQueueEvents.AudioTrackRemove, removed);
     return removed;
   }
@@ -392,9 +424,7 @@ export class GuildQueue<Metadata = unknown> {
     const source = this.resolveTrackIndex(items, track);
     if (source < 0) return;
     this.assertIndex(index, items.length);
-    const [moved] = items.splice(source, 1);
-    items.splice(Math.min(index, items.length), 0, moved!);
-    this.replaceTracks(items);
+    this.tracks.move(source, Math.min(index, items.length - 1));
   }
 
   /**
@@ -421,8 +451,7 @@ export class GuildQueue<Metadata = unknown> {
     const left = this.resolveTrackIndex(items, source);
     const right = this.resolveTrackIndex(items, destination);
     if (left < 0 || right < 0) return;
-    [items[left], items[right]] = [items[right]!, items[left]!];
-    this.replaceTracks(items);
+    this.tracks.swap(left, right);
   }
 
   /** Clear upcoming Tracks and previous-track history; the current playback continues. */
@@ -484,6 +513,7 @@ export class GuildQueue<Metadata = unknown> {
   public setRepeatMode(mode: QueueRepeatMode): void {
     if (!Object.values(QueueRepeatMode).includes(mode)) throw new RangeError(`Unknown repeat mode: ${mode}`);
     this.#repeatMode = mode;
+    this.policyChanged();
   }
 
   /**
@@ -492,6 +522,7 @@ export class GuildQueue<Metadata = unknown> {
    * @returns `true` after enabling or applying a shuffle.
    */
   public enableShuffle(dynamic = true): boolean {
+    this.policyChanged();
     if (dynamic) this.#shuffle = true;
     else this.tracks.shuffle();
     return true;
@@ -499,6 +530,7 @@ export class GuildQueue<Metadata = unknown> {
 
   /** Disable dynamic random selection. An earlier in-place shuffle is not reversible. */
   public disableShuffle(): boolean {
+    this.policyChanged();
     this.#shuffle = false;
     return true;
   }
@@ -513,6 +545,7 @@ export class GuildQueue<Metadata = unknown> {
       this.tracks.shuffle();
       return true;
     }
+    this.policyChanged();
     this.#shuffle = !this.#shuffle;
     return this.#shuffle;
   }
@@ -618,6 +651,7 @@ export class GuildQueue<Metadata = unknown> {
         throw new Error('Cannot start a managed Track without a connected Remedia session.');
       }
 
+      await this.cancelPreparation();
       targetTrack = items.splice(index, 1)[0] ?? null;
       this.replaceTracks(items);
       const operation = this.#operation;
@@ -678,6 +712,7 @@ export class GuildQueue<Metadata = unknown> {
     if (this.#destroyed) return;
     const operation = this.#operation;
     if (!operation) return;
+    await this.cancelPreparation();
     operation.requestedReason = 'stop';
     if (operation.phase === 'preparing') operation.controller.abort(new Error('Playback stopped.'));
     else await this.node.stopSession();
@@ -689,6 +724,9 @@ export class GuildQueue<Metadata = unknown> {
   public async destroy(): Promise<void> {
     if (this.#destroyed) return;
     this.#destroyed = true;
+    void this.cancelPreparation();
+    for (const operation of this.#outgoing.values()) operation.controller.abort();
+    this.#outgoing.clear();
     this.#operation?.controller.abort(new Error('Guild queue destroyed.'));
     using _lock = await this.tasks.acquire('queue.playback-transition');
     this.#operation = null;
@@ -731,6 +769,7 @@ export class GuildQueue<Metadata = unknown> {
       using _lock = await this.tasks.acquire('queue.playback-transition');
       this.assertAlive();
       const operation = this.#operation;
+      await this.cancelPreparation();
       const current = this.#currentTrack;
       if (current && preserveCurrent && current !== track) this.tracks.insert(current, 0);
       if (operation) {
@@ -753,6 +792,11 @@ export class GuildQueue<Metadata = unknown> {
    * @param event Generation-aware Remedia playback-start event.
    */
   public handlePlaybackStarted(session: DiscordSession, event: StartedEvent): void {
+    if (event.transition) this.promote(session, event);
+    else if (session === this.node.session && !this.matchOperation(session, event)) {
+      this.#prepareRequest = null;
+      void this.cancelPreparation();
+    }
     const operation = this.matchOperation(session, event);
     if (this.#destroyed || !operation || operation.terminal || operation.pendingTerminal || operation.startEmitted)
       return;
@@ -773,6 +817,21 @@ export class GuildQueue<Metadata = unknown> {
    */
   public handlePlaybackTerminal(session: DiscordSession, kind: PlaybackTerminalKind, event: TerminalEvent): void {
     if (this.#destroyed) return;
+    if ('continuation' in event && event.continuation && this.#reservation) {
+      const reservation = this.#reservation;
+      const info = session.snapshot.source;
+      if (info && event.continuation.entryId === reservation.entryId)
+        this.handlePlaybackStarted(session, {
+          sessionId: session.sessionId,
+          nodeId: session.nodeId,
+          guildId: this.guildId,
+          generation: event.continuation.generation,
+          state: 'playing',
+          info,
+          customMetadata: { __discordPlayer: { queueToken: this.#queueToken, operationId: reservation.operation.id } },
+          transition: { type: 'crossfade', outgoingGeneration: event.generation, entryId: reservation.entryId },
+        });
+    }
     const operation = this.matchOperation(session, event);
     if (!operation || operation.terminal) return;
     if (operation.generation !== null && operation.generation !== event.generation) return;
@@ -787,6 +846,279 @@ export class GuildQueue<Metadata = unknown> {
     );
   }
 
+  /**
+   * Cancel an upcoming reservation without removing its queue occurrence.
+   * @returns Resolves after native staged media is released.
+   */
+  public async cancelPreparation(): Promise<void> {
+    const reservation = this.#reservation;
+    if (!reservation) return;
+    this.#reservation = null;
+    if (reservation.operation.phase === 'preparing')
+      reservation.operation.controller.abort(new Error('Crossfade reservation invalidated.'));
+    using _lock = await this.tasks.acquire('queue.crossfade-stage');
+    await reservation.operation.session
+      .clearStage()
+      .catch((error) => this.debugCrossfade(`clear failed: ${String(error)}`));
+    reservation.operation.controller.abort();
+  }
+
+  private debugCrossfade(message: string): void {
+    this.manager.player.emit('debug', `Queue ${this.guildId}: crossfade ${message}`);
+  }
+
+  private policyChanged(): void {
+    this.#decisionRevision++;
+    this.reprepareAfterMutation();
+  }
+
+  private queueChanged(): void {
+    this.#decisionRevision++;
+    if (!this.#committing && this.#prepareRequest && (!this.#reservation || !this.reservationValid(this.#reservation)))
+      this.reprepareAfterMutation();
+  }
+
+  private reprepareAfterMutation(): void {
+    const request = this.#prepareRequest;
+    void this.cancelPreparation().then(() => {
+      if (request && request === this.#prepareRequest) this.handlePrepareRequested(request.session, request.event);
+    });
+  }
+
+  private reservationValid(reservation: Reservation): boolean {
+    if (
+      this.#destroyed ||
+      this.node.session !== reservation.operation.session ||
+      this.#operation !== reservation.outgoing ||
+      reservation.outgoing.terminal
+    )
+      return false;
+    if (reservation.repeat)
+      return (
+        this.#repeatMode === QueueRepeatMode.TRACK || (this.#repeatMode === QueueRepeatMode.QUEUE && this.size === 0)
+      );
+    const index = this.tracks
+      .toArray()
+      .findIndex((_, occurrenceIndex) => this.tracks.entryId(occurrenceIndex) === reservation.entryId);
+    return (
+      index >= 0 &&
+      this.tracks.at(index) === reservation.operation.track &&
+      (this.#shuffle || index === 0) &&
+      this.#repeatMode !== QueueRepeatMode.TRACK
+    );
+  }
+
+  /**
+   * Resolve one upcoming occurrence only when Remedia requests preparation.
+   * @param session Exact session requesting preparation.
+   * @param event Generation and session identity supplied by Remedia.
+   */
+  public handlePrepareRequested(session: DiscordSession, event: DiscordSessionEvents['prepareRequested'][0]): void {
+    const outgoing = this.matchOperation(session, event);
+    if (
+      !outgoing ||
+      outgoing !== this.#operation ||
+      outgoing.terminal ||
+      outgoing.generation !== event.generation ||
+      !session.snapshot.crossfade?.enabled
+    )
+      return;
+    this.#prepareRequest = { session, event };
+    if (this.#reservation) return;
+    const repeat =
+      this.#repeatMode === QueueRepeatMode.TRACK || (this.#repeatMode === QueueRepeatMode.QUEUE && !this.size);
+    const index = this.#shuffle && this.size ? randomInt(this.size) : 0;
+    const track = repeat ? outgoing.track : this.tracks.at(index);
+    if (!track) return;
+    const operation: ManagedOperation = {
+      id: randomUUID(),
+      track,
+      session,
+      generation: null,
+      controller: new AbortController(),
+      phase: 'preparing',
+      terminal: false,
+      startEmitted: false,
+    };
+    const reservation: Reservation = {
+      operation,
+      outgoing,
+      repeat,
+      entryId: repeat ? randomUUID() : this.tracks.entryId(index)!,
+      queueRevision: ++this.#decisionRevision,
+      sourceRevision: ++this.#sourceRevision,
+    };
+    this.#reservation = reservation;
+    this.debugCrossfade(`preparation requested for ${reservation.entryId}`);
+    void this.prepareStage(reservation).catch((error) => {
+      if (this.#reservation === reservation) {
+        void this.cancelPreparation();
+        this.emit(GuildQueueEvents.PlayerError, asError(error), track, undefined);
+      }
+    });
+  }
+
+  private async prepareStage(reservation: Reservation): Promise<void> {
+    const { operation } = reservation;
+    const source = await this.manager.player.plugins.resolveStream(operation.track, {
+      signal: operation.controller.signal,
+      remote:
+        this.manager.player.getRemedia().nodes.find((node) => node.id === operation.session.nodeId)?.type === 'remote',
+      blocked: this.manager.player.options.blockExtractors,
+    });
+    using _lock = await this.tasks.acquire('queue.crossfade-stage');
+    if (this.#reservation !== reservation || !this.reservationValid(reservation) || operation.controller.signal.aborted)
+      return;
+    operation.phase = 'starting';
+    await operation.session.stageNext(source, {
+      expectedGeneration: reservation.outgoing.generation!,
+      entryId: reservation.entryId,
+      queueRevision: reservation.queueRevision,
+      sourceRevision: reservation.sourceRevision,
+      ...('expiresAtMs' in source && typeof source.expiresAtMs === 'number' && Number.isFinite(source.expiresAtMs)
+        ? { expiresAtMs: source.expiresAtMs }
+        : {}),
+      customMetadata: {
+        __discordPlayer: { queueToken: this.#queueToken, operationId: operation.id },
+        userMetadata: this.#lastCustomMetadata,
+      },
+    });
+  }
+
+  private promote(session: DiscordSession, event: StartedEvent): void {
+    const reservation = this.#reservation;
+    if (
+      event.sessionId !== session.sessionId ||
+      !reservation ||
+      event.generation <= (reservation.outgoing.generation ?? Infinity) ||
+      event.transition?.entryId !== reservation.entryId ||
+      event.transition.outgoingGeneration !== reservation.outgoing.generation ||
+      session !== reservation.operation.session
+    )
+      return;
+    if (!this.reservationValid(reservation)) {
+      void this.cancelPreparation();
+      return;
+    }
+    const { operation, outgoing } = reservation;
+    this.#reservation = null;
+    this.#committing = true;
+    try {
+      if (!reservation.repeat) {
+        const index = this.tracks
+          .toArray()
+          .findIndex((_, occurrenceIndex) => this.tracks.entryId(occurrenceIndex) === reservation.entryId);
+        this.tracks.removeAt(index);
+      }
+    } finally {
+      this.#committing = false;
+    }
+    this.#prepareRequest = null;
+    this.#outgoing.set(outgoing.generation!, outgoing);
+    this.#operation = operation;
+    this.#currentTrack = operation.track;
+    operation.generation = event.generation;
+    operation.phase = 'playing';
+    this.debugCrossfade(`promoted ${reservation.entryId} as generation ${event.generation}`);
+  }
+
+  /**
+   * Reconcile native stage readiness, invalidation, failures, and cancelled transitions.
+   * @param session Exact session emitting the event.
+   * @param name Native lifecycle event name.
+   * @param event Generation-aware stage or cancellation identity.
+   */
+  public handleStageEvent(
+    session: DiscordSession,
+    name: 'stageReady' | 'stageFailed' | 'stageInvalidated' | 'transitionCancelled',
+    event: DiscordSessionEvents['stageReady'][0] | DiscordSessionEvents['transitionCancelled'][0],
+  ): void {
+    if (session !== this.node.session || event.sessionId !== session.sessionId) return;
+    this.debugCrossfade(`${name} for ${event.entryId}`);
+    if (
+      name === 'stageFailed' &&
+      this.#reservation?.entryId === event.entryId &&
+      'sourceRevision' in event &&
+      event.sourceRevision === this.#reservation.sourceRevision
+    ) {
+      this.emit(
+        GuildQueueEvents.PlayerError,
+        new Error('reason' in event ? String(event.reason) : 'Crossfade staging failed.'),
+        this.#reservation.operation.track,
+        undefined,
+      );
+    }
+    if (name === 'transitionCancelled' && 'failedGeneration' in event) {
+      const outgoing = this.#outgoing.get(event.generation);
+      const incoming = this.#operation ?? this.#failedIncoming;
+      if (outgoing && !outgoing.pendingTerminal && incoming?.generation === event.failedGeneration) {
+        this.#outgoing.delete(event.generation);
+        const alreadyFailed = incoming.terminal;
+        incoming.terminal = true;
+        incoming.controller.abort();
+        this.#operation = outgoing;
+        this.#currentTrack = outgoing.track;
+        if (!alreadyFailed) this.tracks.insert(incoming.track, 0);
+        if (!alreadyFailed) this.stats.tracksFailed++;
+        this.#failedIncoming = null;
+        this.emit(
+          GuildQueueEvents.PlayerError,
+          new Error('Crossfade transition cancelled; outgoing source retained.'),
+          incoming.track,
+          undefined,
+        );
+      }
+    }
+    const reservation = this.#reservation;
+    if (
+      reservation?.entryId === event.entryId &&
+      name !== 'stageReady' &&
+      (!('sourceRevision' in event) || event.sourceRevision === reservation.sourceRevision)
+    )
+      void this.cancelPreparation();
+  }
+
+  /**
+   * Recover a promotion missed during transport recovery from the native playback snapshot.
+   * @param session Reconnected session whose native state should be inspected.
+   */
+  public async reconcileCrossfade(session: DiscordSession): Promise<void> {
+    const reservation = this.#reservation;
+    if (!reservation || session !== this.node.session) return;
+    const stage = await session.stagedSource();
+    if (this.#reservation !== reservation) return;
+    const snapshot = session.snapshot;
+    if (
+      !stage &&
+      ['playing', 'paused'].includes(snapshot.state) &&
+      snapshot.generation > (reservation.outgoing.generation ?? Infinity) &&
+      snapshot.source
+    ) {
+      this.handlePlaybackStarted(session, {
+        sessionId: session.sessionId,
+        guildId: this.guildId,
+        nodeId: session.nodeId,
+        generation: snapshot.generation,
+        state: 'playing',
+        info: snapshot.source,
+        customMetadata: { __discordPlayer: { queueToken: this.#queueToken, operationId: reservation.operation.id } },
+        transition: {
+          type: 'crossfade',
+          outgoingGeneration: reservation.outgoing.generation!,
+          entryId: reservation.entryId,
+        },
+      });
+    } else if (!stage) await this.cancelPreparation();
+  }
+
+  /** Reconcile outgoing sources after a session-wide stop has completed. */
+  public handleSessionStopped(): void {
+    for (const operation of this.#outgoing.values()) {
+      const pending = operation.pendingTerminal;
+      this.finalizeLocked(operation, pending?.kind ?? 'stopped', pending?.event);
+    }
+  }
+
   private async processTerminal(
     operation: ManagedOperation,
     kind: PlaybackTerminalKind,
@@ -795,7 +1127,7 @@ export class GuildQueue<Metadata = unknown> {
     let nextWork: Promise<PlayRawResult | null> | null = null;
     {
       using _lock = await this.tasks.acquire('queue.playback-transition');
-      if (this.#destroyed || this.#operation !== operation || operation.terminal) return;
+      if (this.#destroyed || operation.terminal) return;
       nextWork = this.finalizeLocked(operation, kind, event);
     }
     if (nextWork) await nextWork.catch(() => undefined);
@@ -809,7 +1141,32 @@ export class GuildQueue<Metadata = unknown> {
     skipReason: TrackSkipReason = TrackSkipReason.Manual,
     skipDescription = 'Skipped by user',
   ): Promise<PlayRawResult | null> | null {
-    if (operation.terminal || this.#operation !== operation) return null;
+    if (operation.terminal) return null;
+    if (this.#operation !== operation) {
+      if (operation.generation === null || this.#outgoing.get(operation.generation) !== operation) return null;
+      this.#outgoing.delete(operation.generation);
+      operation.terminal = true;
+      operation.controller.abort();
+      if (terminal === 'natural') {
+        this.stats.tracksFinished++;
+        if (this.#repeatMode === QueueRepeatMode.OFF || this.#repeatMode === QueueRepeatMode.AUTOPLAY)
+          this.history.push(operation.track);
+        if (this.#repeatMode === QueueRepeatMode.QUEUE) this.tracks.enqueue(operation.track);
+        this.emit(GuildQueueEvents.PlayerFinish, operation.track, event?.state === 'completed' ? event : undefined);
+      } else if (terminal === 'stopped') {
+        this.emit(GuildQueueEvents.PlayerStop, operation.track, event?.state === 'stopped' ? event : undefined);
+      } else if (terminal === 'failed') {
+        this.stats.tracksFailed++;
+        this.emit(
+          GuildQueueEvents.PlayerError,
+          event?.state === 'failed' ? event.error : new Error('Outgoing source failed'),
+          operation.track,
+          undefined,
+        );
+      }
+      return null;
+    }
+    void this.cancelPreparation();
     operation.terminal = true;
     operation.controller.abort(new Error('Playback generation ended.'));
     const track = operation.track;
@@ -827,6 +1184,7 @@ export class GuildQueue<Metadata = unknown> {
       const stopEvent = event?.state === 'stopped' ? event : undefined;
       this.emit(GuildQueueEvents.PlayerSkip, track, skipReason, skipDescription, stopEvent);
     } else if (reason === 'failed') {
+      if (this.#outgoing.size) this.#failedIncoming = operation;
       this.stats.tracksFailed++;
       const failure = event?.state === 'failed' ? event.error : new Error('Managed playback stopped unexpectedly.');
       this.emit(GuildQueueEvents.PlayerError, failure, track, event?.state === 'failed' ? event : undefined);
@@ -876,6 +1234,7 @@ export class GuildQueue<Metadata = unknown> {
     let nextWork: Promise<PlayRawResult | null> | null = null;
     const requestedOperation = this.#operation;
     if (!requestedOperation || this.#destroyed) return null;
+    await this.cancelPreparation();
     requestedOperation.requestedReason = kind;
     if (requestedOperation.phase === 'preparing') {
       requestedOperation.controller.abort(new Error(kind === 'skip' ? 'Playback skipped.' : 'Playback stopped.'));
@@ -914,6 +1273,8 @@ export class GuildQueue<Metadata = unknown> {
       terminal: false,
       startEmitted: false,
     };
+    this.#prepareRequest = null;
+    this.#failedIncoming = null;
     this.#operation = operation;
     this.#currentTrack = track;
     return this.prepareAndPlay(operation, options, signal);
@@ -993,8 +1354,13 @@ export class GuildQueue<Metadata = unknown> {
     if (nextWork) await nextWork.catch(() => undefined);
   }
 
-  private matchOperation(session: DiscordSession, event: StartedEvent | TerminalEvent): ManagedOperation | null {
-    const operation = this.#operation;
+  private matchOperation(
+    session: DiscordSession,
+    event: Pick<StartedEvent, 'sessionId' | 'customMetadata'>,
+  ): ManagedOperation | null {
+    const markerId = (event.customMetadata as Partial<GuildQueuePlaybackMetadata> | undefined)?.__discordPlayer
+      ?.operationId;
+    const operation = [this.#operation, ...this.#outgoing.values()].find((item) => item?.id === markerId);
     if (!operation || operation.session !== session || operation.session.sessionId !== event.sessionId) return null;
     const metadata = event.customMetadata as Partial<GuildQueuePlaybackMetadata> | undefined;
     const marker = metadata?.__discordPlayer;

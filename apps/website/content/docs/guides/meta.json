@@ -4,6 +4,7 @@
     "index",
     "queues",
     "playback-controls",
+    "crossfade",
     "events",
     "voice",
     "filters",

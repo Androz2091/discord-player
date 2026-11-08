@@ -47,3 +47,7 @@ File, URL, and buffer seeking follow Remedia's decoder capabilities. One-shot st
 discord-player uses a percentage (0–100). Remedia's low-level session uses linear gain, so discord-player converts `80` to `0.8` when configuring the native session.
 
 <NextStep href="/docs/guides/events" label="Handle lifecycle events" />
+
+## Crossfades and controls
+
+With automatic crossfading, `currentTrack` follows the incoming source as soon as it becomes audible. Skip, seek, stop and history navigation cancel upcoming preparation. Pause and resume retain it. See the [crossfade guide](/docs/guides/crossfade).

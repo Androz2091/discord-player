@@ -34,3 +34,7 @@ await player.destroy(); // Release queues and the Remedia client
 ```
 
 <NextStep href="/docs/remedia/remote" label="Deploy remote Remedia when needed" />
+
+## Automatic crossfading
+
+Set `crossfade: { enabled: true }` on the Player or queue before connecting. Embedded sessions receive this policy directly. PCM decoding and overlapping mixing can cost more processing than Opus passthrough. See the [crossfade guide](/docs/guides/crossfade).

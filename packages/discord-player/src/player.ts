@@ -5,7 +5,7 @@ import { randomInt, randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { RemediaClient, type RemediaClientOptions } from '@remedia/client';
 import { GuildQueueManager } from './managers/guild-queue.manager.js';
-import type { GuildQueueOptions } from './structures/guild-queue.js';
+import type { CrossfadeOptions, GuildQueueOptions } from './structures/guild-queue.js';
 import type { GuildQueueEventsMap } from './structures/common/guild-queue-events.js';
 import { Playlist } from './structures/playlist.js';
 import { SearchResult } from './structures/search-result.js';
@@ -25,6 +25,9 @@ const packageVersion = (createRequire(import.meta.url)('../package.json') as { v
 
 /** Options for a Discord Player instance and its Remedia client. */
 export type DiscordPlayerOptions = Omit<RemediaClientOptions, 'selectNode' | 'botUserId'> & {
+  /** Automatic queue crossfading; disabled by default. Uses PCM decoding and additional processing. */
+  crossfade?: CrossfadeOptions;
+
   /** Source registrations initialized with this Player. */
   plugins?: readonly PluginRegistration<any>[];
 
@@ -199,6 +202,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     this.#clientId = clientId;
 
     const {
+      crossfade: _crossfade,
       plugins: _plugins,
       blockExtractors: _blocked,
       probeTimeout: _probeTimeout,

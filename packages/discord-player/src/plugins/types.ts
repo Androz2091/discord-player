@@ -16,7 +16,13 @@ export type SourceReference = {
 };
 
 /** Supported local source results. Readables and byte buffers require embedded Remedia. */
-export type SourceStream = MediaSource | string | Readable;
+export type SourceStream =
+  | (MediaSource & {
+      /** Trustworthy absolute URL/source expiration supplied by the provider, in Unix milliseconds. Omit when unknown. */
+      expiresAtMs?: number;
+    })
+  | string
+  | Readable;
 
 /** Operation dispatch behavior. */
 export type DispatchPolicy = 'first' | 'collect' | 'pipe' | 'broadcast';

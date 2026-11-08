@@ -5,7 +5,7 @@ import { FakeSession } from './remedia-session.js';
 export { FakeSession } from './remedia-session.js';
 
 /** Reusable backend fake. Casts only bridge Remedia's private class fields; public methods are checked above. */
-export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded') {
+export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', crossfadeAvailable = false) {
   const sessions: FakeSession[] = [];
   const nodes = [
     {
@@ -19,10 +19,20 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded') 
       capacity: 100,
       assignedGuilds: [],
       lastError: null,
+      capabilities: {
+        crossfade: {
+          available: crossfadeAvailable,
+          configured: crossfadeAvailable,
+          durationMs: 5000,
+          prepareBeforeMs: 30000,
+          curve: 'equalPower',
+        },
+      },
     },
   ] satisfies NodeSnapshot[];
   const client = {
     nodes,
+    getAssignment: vi.fn(() => undefined),
     createDiscordSession: vi.fn((options: DiscordSessionOptions) => {
       const session = new FakeSession(options, nodeType);
       sessions.push(session);

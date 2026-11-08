@@ -28,7 +28,7 @@ await player.initialize(botUserId);
 
 ## Deploy the server
 
-Install the [matching Remedia server release](https://github.com/twlite/remedia/releases/tag/v0.1.0-dev.3) on the audio host, not on the bot host. Use the official [server installation guide](https://github.com/twlite/remedia/blob/v0.1.0-dev.3/apps/docs/content/docs/server/installation.mdx). The standalone CLI supports:
+Install the [matching Remedia server release](https://github.com/twlite/remedia/releases/tag/v0.1.0-dev.4) on the audio host, not on the bot host. Use the official [server installation guide](https://github.com/twlite/remedia/blob/v0.1.0-dev.4/apps/docs/content/docs/server/installation.mdx). The standalone CLI supports:
 
 ```sh
 remedia-server --generate-config-file
@@ -53,7 +53,7 @@ Do not globally serialize guild joins to avoid timeouts. Each guild has an indep
 
 ## Server setup details
 
-Install compatible FFmpeg libraries **on the remote machine**. Start an authenticated `remedia-server` with its `remedia.config.json`; see the [server configuration reference](https://github.com/twlite/remedia/blob/v0.1.0-dev.3/apps/docs/content/docs/server/configuration.mdx) and [deployment guide](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/deployment.mdx).
+Install compatible FFmpeg libraries **on the remote machine**. Start an authenticated `remedia-server` with its `remedia.config.json`; see the [server configuration reference](https://github.com/twlite/remedia/blob/v0.1.0-dev.4/apps/docs/content/docs/server/configuration.mdx) and [deployment guide](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/deployment.mdx).
 
 For a public network, put TLS in front of the service, restrict source access, and protect credentials. Never expose your server with anonymous playback privileges.
 
@@ -68,3 +68,7 @@ Remedia assigns sessions to healthy nodes and keeps a guild sticky to its node. 
 Connected Remedia sessions have an explicit cross-node migration operation in the engine client, but a cutover may require reconnecting and reopening audio. Do not assume a gapless decoder transfer or automatic load shedding in discord-player.
 
 <NextStep href="/docs/remedia/operations" label="Understand capacity and failure behavior" />
+
+## Crossfade capability negotiation
+
+Use Remedia 0.1.0-dev.4 or newer with server crossfading enabled. The selected node must advertise `capabilities.crossfade.available`; the guild must also opt in at session creation. Unsupported nodes fall back to ordinary playback with a debug message. Existing sticky assignments are retained. See the [crossfade guide](/docs/guides/crossfade).

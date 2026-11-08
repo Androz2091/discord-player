@@ -1,6 +1,12 @@
 import { vi } from 'vitest';
 import type { MediaSource } from '@remedia/client';
-import { DiscordPlayer, Track, definePlugin, type GuildQueueOptions } from '../../src/index.js';
+import {
+  DiscordPlayer,
+  Track,
+  definePlugin,
+  type DiscordPlayerOptions,
+  type GuildQueueOptions,
+} from '../../src/index.js';
 import { createRemediaMock } from './remedia.js';
 
 /** Track fixture with a deterministic Remedia source. */
@@ -25,12 +31,14 @@ export class TestTrack extends Track {
 export async function setup(
   options: {
     nodeType?: 'embedded' | 'remote';
+    crossfadeAvailable?: boolean;
+    playerOptions?: Partial<DiscordPlayerOptions>;
     maxSize?: number;
     maxHistorySize?: number;
     queueOptions?: Partial<GuildQueueOptions>;
   } = {},
 ) {
-  const player = new DiscordPlayer({ nodes: [], send: vi.fn() });
+  const player = new DiscordPlayer({ nodes: [], send: vi.fn(), ...options.playerOptions });
   await player.plugins.register(
     definePlugin({
       id: 'fixture',
@@ -41,7 +49,7 @@ export async function setup(
     })(),
   );
   player.getClientId = () => 'bot-user';
-  const backend = createRemediaMock(options.nodeType);
+  const backend = createRemediaMock(options.nodeType, options.crossfadeAvailable);
   const { sessions } = backend;
   player.remedia = backend.asClient();
   const queue = await player.queues.create('guild-one', {

@@ -82,3 +82,7 @@ console.log(session.nodeId);
 The managed queue serializes conflicting transitions and correlates playback generations. Prefer its methods for user commands.
 
 <NextStep href="/docs/reference/plugins" label="Plugin API reference" />
+
+## Crossfade configuration
+
+`GuildQueueOptions.crossfade` overrides `DiscordPlayerOptions.crossfade`. The type is `false | { enabled: true; durationMs?: number; prepareBeforeMs?: number; curve?: "equalPower" }`. Defaults are disabled, 5000 ms overlap, and 30000 ms preparation lead before the fade. Configuration changes apply to newly created sessions. See the [crossfade guide](/docs/guides/crossfade).

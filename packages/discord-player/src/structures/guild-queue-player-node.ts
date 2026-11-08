@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto';
 import { GuildQueuePlayerAudioFilters } from './guild-queue-player-audio-filters.js';
 import type { AudioStreamInfo, DiscordSession, DiscordSessionOptions, MediaSource, PlayOptions } from '@remedia/client';
 import type { DiscordPlayer } from '../player.js';
@@ -109,8 +110,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     this.assertQueueAlive();
     await this.destroySessionUnlocked();
     const { connectTimeoutMs: _connectTimeoutMs, ...sessionOptions } = options;
+    const negotiated = await this.sessionPolicy(sessionOptions);
     const session = this.player.getRemedia().createDiscordSession({
-      ...sessionOptions,
+      ...negotiated,
       guildId: this.queue.guildId,
       userId: this.player.getClientId(),
     });
@@ -158,8 +160,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     }
 
     const { connectTimeoutMs, ...sessionOptions } = options;
+    const negotiated = await this.sessionPolicy(sessionOptions);
     const session = this.player.getRemedia().createDiscordSession({
-      ...sessionOptions,
+      ...negotiated,
       guildId: this.queue.guildId,
       userId: this.player.getClientId(),
     });
@@ -186,12 +189,55 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     if (!session) return;
     this.rememberSessionConfiguration(session);
     this.session = null;
+    await this.queue.cancelPreparation();
     session.removeAllListeners();
     await session.disconnect();
     this.queue.emit('connectionDestroyed');
   }
 
+  private async sessionPolicy(
+    options: GuildQueuePlayerNodeSessionCreateOptions,
+  ): Promise<GuildQueuePlayerNodeSessionCreateOptions> {
+    const requested = this.queue.options.crossfade ?? this.player.options.crossfade;
+    if (!requested) return options;
+    const client = this.player.getRemedia();
+    const assigned = client.getAssignment(this.queue.guildId);
+    const nodes = client.nodes;
+    let nodeId = options.nodeId ?? assigned?.nodeId;
+    if (!nodeId) {
+      const candidates = nodes.filter(
+        (node) =>
+          node.status === 'healthy' &&
+          node.capacity > 0 &&
+          Math.max(node.statistics?.playersActive ?? 0, node.assignedGuilds.length) < node.capacity &&
+          node.statistics?.transportHealth !== 'degraded' &&
+          node.statistics?.processingHealth !== 'degraded',
+      );
+      nodeId = this.queue.options.selectNode
+        ? await this.queue.options.selectNode(candidates, { guildId: this.queue.guildId })
+        : candidates.length
+          ? candidates[randomInt(candidates.length)]!.id
+          : undefined;
+    }
+    const selected = nodes.find((node) => node.id === nodeId);
+    const available = selected?.type === 'embedded' || selected?.capabilities?.crossfade.available === true;
+    if (!available)
+      this.player.emit(
+        'debug',
+        `Queue ${this.queue.guildId}: crossfade unavailable on node ${nodeId}; using ordinary playback.`,
+      );
+    return {
+      ...options,
+      ...(nodeId ? { nodeId } : {}),
+      crossfade: available ? { durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower', ...requested } : false,
+    };
+  }
+
   private attachSessionListeners(session: DiscordSession): void {
+    session.on('prepareRequested', (event) => this.queue.handlePrepareRequested(session, event));
+    for (const name of ['stageReady', 'stageFailed', 'stageInvalidated', 'transitionCancelled'] as const) {
+      session.on(name, (event) => this.queue.handleStageEvent(session, name, event));
+    }
     session.on('playbackStarted', (event) => this.queue.handlePlaybackStarted(session, event));
     session.on('playbackCompleted', (event) => this.queue.handlePlaybackTerminal(session, 'natural', event));
     session.on('playbackStopped', (event) => this.queue.handlePlaybackTerminal(session, 'stopped', event));
@@ -199,7 +245,11 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     session.on('playbackPaused', (event) => this.queue.emit('playerPause', event));
     session.on('playbackResumed', (event) => this.queue.emit('playerResume', event));
     session.on('playbackSeeked', (event) => this.queue.emit('playerSeek', event));
-    session.on('voiceStateChanged', (event) => this.queue.emit('voiceStateUpdate', event));
+    session.on('voiceStateChanged', (event) => {
+      this.queue.emit('voiceStateUpdate', event);
+      if (event.state === 'connected')
+        void this.queue.reconcileCrossfade(session).catch((error) => this.player.emit('debug', String(error)));
+    });
     session.on('voiceFailed', (event) => this.queue.emit('error', event.error));
   }
 
@@ -264,6 +314,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    */
   public async seek(positionMs: number): Promise<void> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
+    await this.queue.cancelPreparation();
     await this.getSession().seek(Math.max(0, positionMs));
   }
 
@@ -319,6 +370,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
     const session = this.getSession(false);
     if (session) await session.stop();
+    this.queue.handleSessionStopped();
   }
 
   /** Current volume in Discord Player's 0–100 percentage convention. */
