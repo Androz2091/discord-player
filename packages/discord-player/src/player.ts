@@ -1,15 +1,14 @@
-import { PluginRegistry } from './plugins/registry.js';
+import { SourcePluginRuntime } from '@discord-player/plugin-host';
+import type { PluginRegistry } from './plugins/registry.js';
 import type { PluginRegistration } from './plugins/types.js';
-import { ExtractorExecutionContext } from './compat/extractors.js';
+import type { ExtractorExecutionContext } from './compat/extractors.js';
 import { randomInt, randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { RemediaClient, type RemediaClientOptions } from '@remedia/client';
 import { GuildQueueManager } from './managers/guild-queue.manager.js';
 import type { CrossfadeOptions, GuildQueueOptions } from './structures/guild-queue.js';
 import type { GuildQueueEventsMap } from './structures/common/guild-queue-events.js';
-import { Playlist } from './structures/playlist.js';
-import { SearchResult } from './structures/search-result.js';
-import { Track } from './structures/track.js';
+import type { SearchResult } from './structures/search-result.js';
 import type {
   MediaResource,
   PlayerChannelResolvable,
@@ -88,7 +87,10 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   public readonly plugins: PluginRegistry;
 
   /** Legacy constructor-only registration adapter. */
-  public readonly extractors = new ExtractorExecutionContext(this);
+  public readonly extractors: ExtractorExecutionContext;
+
+  /** Source execution independent of queue and voice orchestration. */
+  public readonly sources: SourcePluginRuntime;
 
   private initialPlugins: Promise<void>;
 
@@ -123,7 +125,9 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   ) {
     super();
 
-    this.plugins = new PluginRegistry(this, () => this.options.blockExtractors ?? []);
+    this.sources = new SourcePluginRuntime({ player: this });
+    this.plugins = this.sources.plugins;
+    this.extractors = this.sources.extractors;
     this.initialPlugins = Promise.all((options.plugins ?? []).map((plugin) => this.plugins.register(plugin))).then(
       () => undefined,
     );
@@ -289,75 +293,8 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     options: SearchOptions = {},
   ): Promise<SearchResult> {
     options.signal?.throwIfAborted();
-
-    if (query instanceof SearchResult) {
-      return query;
-    }
-
-    if (query instanceof Track) {
-      return new SearchResult({ tracks: [query], playlist: null });
-    }
-
-    if (Array.isArray(query)) {
-      return new SearchResult({ tracks: query, playlist: null });
-    }
-
-    if (query instanceof Playlist) {
-      return new SearchResult({ tracks: query.tracks, playlist: query });
-    }
-
-    await this.initialPlugins;
-
-    const blocked = [...(this.options.blockExtractors ?? []), ...(options.blockExtractors ?? [])];
-    const target =
-      options.pluginId ?? (options.searchEngine?.startsWith('ext:') ? options.searchEngine.slice(4) : undefined);
-
-    await this.plugins.ready();
-
-    const prefix = /^([\w.-]+):(?:\/\/)?(.*)$/s.exec(query);
-    const protocol =
-      prefix && this.plugins.supportsProtocol(prefix[1]!, { pluginId: target, blocked }) ? prefix[1] : undefined;
-    const input = {
-      query: protocol ? prefix![2]! : query,
-      protocol,
-      options: {
-        ...options,
-        searchEngine: target
-          ? undefined
-          : (options.searchEngine ?? options.source ?? (/^https?:\/\//i.test(query) ? 'arbitrary' : 'auto')),
-      },
-    };
-    const execution = { signal: options.signal, blocked, pluginId: target };
-    const matches = target
-      ? [{ pluginId: target, score: 0 }]
-      : await this.plugins.execute('search.query.match', input, execution);
-    const match = matches.find((item) => item !== null && item.score >= 0);
-
-    if (!match?.pluginId) {
-      return SearchResult.empty();
-    }
-
-    const result = await this.plugins.execute('search.query.resolve', input, {
-      ...execution,
-      pluginId: match.pluginId,
-    });
-
-    if (!result) {
-      return SearchResult.empty();
-    }
-
-    for (const track of result.tracks) {
-      track.sourceReference ??= {
-        pluginId: match.pluginId,
-        data: { url: track.url },
-      };
-
-      if (options.requestedBy !== undefined) {
-        track.requestedBy = options.requestedBy;
-      }
-    }
-
-    return new SearchResult(result);
+    if (typeof query === 'string') await this.initialPlugins;
+    return this.sources.search(query, options);
   }
 
   /** Resolve a structural channel, create its guild queue, and delegate playback to `queue.play()`.

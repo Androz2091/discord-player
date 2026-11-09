@@ -41,6 +41,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@discord-player/plugin-host": "workspace:*",
     "@discordjs/collection": "^2.1.1",
     "@remedia/client": "0.1.0-dev.4",
     "zod": "^4.6.7"

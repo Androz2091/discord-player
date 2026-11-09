@@ -164,6 +164,9 @@ settings:
 
 catalogs:
   default:
+    '@remedia/plugin-host':
+      specifier: 0.1.0-dev.0
+      version: 0.1.0-dev.0
     '@types/node':
       specifier: ^26.6.5
       version: 26.6.6
@@ -300,12 +303,43 @@ importers:
 
   packages/discord-player:
     dependencies:
+      '@discord-player/plugin-host':
+        specifier: workspace:*
+        version: link:../plugin-host
       '@discordjs/collection':
         specifier: ^2.1.1
         version: 2.1.1
       '@remedia/client':
         specifier: 0.1.0-dev.4
         version: 0.1.0-dev.4(@remedia/node@0.1.0-dev.4)
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 5.1.0(vitest@5.1.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 5.1.0(@types/node@26.6.6)(@vitest/coverage-v8@5.1.0)(vite@8.3.6(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+
+  packages/plugin-host:
+    dependencies:
+      '@discordjs/collection':
+        specifier: ^2.1.1
+        version: 2.1.1
+      '@remedia/client':
+        specifier: 0.1.0-dev.4
+        version: 0.1.0-dev.4(@remedia/node@0.1.0-dev.4)
+      '@remedia/plugin-host':
+        specifier: 'catalog:'
+        version: 0.1.0-dev.0
       zod:
         specifier: ^4.6.7
         version: 4.6.7
@@ -1311,6 +1345,10 @@ packages:
 
   '@remedia/node@0.1.0-dev.4':
     resolution: {integrity: sha512-oGf5JCAEvDW0M7Q2EUdhsSefckRBFIqJwh5oeJdtRGLcvCYe0D2DS2pGvm924LOPFzemcAFmm1w6IQR9fR9QOQ==}
+    engines: {node: '>=22.18.0'}
+
+  '@remedia/plugin-host@0.1.0-dev.0':
+    resolution: {integrity: sha512-+WmQ0KErS/hZ+sgW555156MB52McxTEz94j5f1MaPCJg9nwEIXfU1P+eVhp3JgCIAfEQX/eTsfQZgIpZlKYSiw==}
     engines: {node: '>=22.18.0'}
 
   '@rolldown/binding-android-arm-eabi@1.2.16':
@@ -4482,6 +4520,8 @@ snapshots:
       '@remedia/node-win32-arm64-msvc': 0.1.0-dev.4
       '@remedia/node-win32-ia32-msvc': 0.1.0-dev.4
       '@remedia/node-win32-x64-msvc': 0.1.0-dev.4
+
+  '@remedia/plugin-host@0.1.0-dev.0': {}
 
   '@rolldown/binding-android-arm-eabi@1.2.16':
     optional: true

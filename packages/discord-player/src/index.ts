@@ -30,3 +30,6 @@ export { GuildQueueHistoryManager as GuildQueueHistory } from './managers/guild-
 
 export * from './structures/guild-queue-player-audio-filters.js';
 export * from './structures/audio-filter-presets.js';
+
+export { SourcePluginRuntime } from '@discord-player/plugin-host';
+export type { LegacyPlayerContext, SourceRuntimeEvents, SourcePluginRuntimeOptions } from '@discord-player/plugin-host';

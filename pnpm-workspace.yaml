@@ -3,6 +3,7 @@ packages:
   - 'apps/*'
 
 catalog:
+  '@remedia/plugin-host': 0.1.0-dev.0
   '@types/node': ^26.6.5
   '@types/react': ^19.3.0
   '@types/react-dom': ^19.3.0
@@ -33,3 +34,4 @@ minimumReleaseAgeExclude:
   - '@remedia/node-win32-ia32-msvc'
   - '@remedia/node-win32-x64-msvc'
   - '@remedia/node'
+  - '@remedia/plugin-host@0.1.0-dev.0'

@@ -91,6 +91,7 @@ jobs:
         with:
           name: release-build-${{ github.sha }}
           path: |
+            packages/plugin-host/dist/
             packages/discord-player/dist/
             packages/create-music-bot/dist/
           if-no-files-found: error
