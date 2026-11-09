@@ -1,5 +1,5 @@
 /** Fixed v7-compatible FFmpeg filtergraph presets. Native validation remains owned by Remedia. */
-export const AudioFilterPresets = Object.freeze({
+export const AudioFilterPresets = {
   /** Low bass boost. */
   bassboost_low: 'bass=g=15:f=110:w=0.3',
 
@@ -104,10 +104,31 @@ export const AudioFilterPresets = Object.freeze({
 
   /** silenceremove FFmpeg preset. */
   silenceremove: 'silenceremove=1:0:-50dB',
-} as const);
+};
 
 /** Canonical built-in audio filter preset names. */
 export type AudioFilterPresetName = keyof typeof AudioFilterPresets;
 
 /** Accepted preset names, including a lowercase alias for the legacy spatial preset. */
 export type AudioFilterName = AudioFilterPresetName | '8d';
+
+export const AudioFilter = {
+  /**
+   * Define an audio filter
+   * @param name The name to reference the filter by
+   * @param filterString The FFmpeg filter string to be associated with the name
+   */
+  define(name: string, filterString: string) {
+    AudioFilterPresets[name as AudioFilterPresetName] = filterString;
+  },
+
+  /**
+   * Bulk define audio filters
+   * @param filters Array of filters containing the filter name and ffmpeg filter strings
+   */
+  defineBulk(filters: { name: string, value: string }[]) {
+    for (const filter of filters) {
+      this.define(filter.name, filter.value);
+    }
+  }
+} as const;
