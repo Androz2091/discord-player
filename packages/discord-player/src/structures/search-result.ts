@@ -1,1 +1,2 @@
-export * from '@discord-player/plugin-host/structures/search-result.js';
+export { SearchResult } from '@discord-player/plugin-host';
+export type { SearchResultData } from '@discord-player/plugin-host';

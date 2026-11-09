@@ -1,7 +1,7 @@
 # @discord-player/plugin-host
 
 Standalone source execution for Discord Player v8, built on the published
-`@remedia/plugin-host@0.1.0-dev.0`. Requires Node.js 22.18 or newer.
+`@remedia/plugin-host`. Requires Node.js 22.18 or newer.
 
 ```text
 discord-player → @discord-player/plugin-host → @remedia/plugin-host

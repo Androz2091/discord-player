@@ -1,1 +1,7 @@
-export * from '@discord-player/plugin-host/structures/playlist.js';
+export { Playlist } from '@discord-player/plugin-host';
+export type {
+  PlaylistData,
+  PlaylistJSON,
+  SerializedPlaylistData,
+  SerializedPlaylist,
+} from '@discord-player/plugin-host';

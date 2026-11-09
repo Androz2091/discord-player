@@ -1,1 +1,2 @@
-export * from '@discord-player/plugin-host/utils/safe-event-emitter.js';
+export { SafeEventEmitter } from '@discord-player/plugin-host';
+export type { EventMap } from '@discord-player/plugin-host';

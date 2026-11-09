@@ -1,1 +1,9 @@
-export * from '@discord-player/plugin-host/compat/extractor-types.js';
+export type {
+  ExtractorInfo,
+  ExtractorStreamable,
+  NextFunction,
+  ExtractorSearchContext,
+  ExtractorConstructor,
+  ExtractorResolvable,
+  ExtractorExecutionResult,
+} from '@discord-player/plugin-host';

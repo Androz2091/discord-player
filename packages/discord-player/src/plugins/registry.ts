@@ -1,1 +1,2 @@
-export * from '@discord-player/plugin-host/plugins/registry.js';
+export { PluginRegistry, PluginError } from '@discord-player/plugin-host';
+export type { ExecuteOptions, StreamResolutionOptions } from '@discord-player/plugin-host';

@@ -1,1 +1,26 @@
-export * from '@discord-player/plugin-host/plugins/types.js';
+export { definePlugin } from '@discord-player/plugin-host';
+export type {
+  SourceReference,
+  SourceStream,
+  DispatchPolicy,
+  Operation,
+  SourceQuery,
+  SourceMatch,
+  SourceTrackRequest,
+  SourceRelatedRequest,
+  SourceBridgeRequest,
+  SourceStreamTransform,
+  SourceOperationMap,
+  OperationName,
+  OperationInput,
+  OperationOutput,
+  OperationResult,
+  OperationContext,
+  OperationHandler,
+  HandlerOptions,
+  SourcePluginContext,
+  SourcePluginDefinition,
+  RuntimePluginDefinition,
+  PluginRegistration,
+  PluginFactory,
+} from '@discord-player/plugin-host';

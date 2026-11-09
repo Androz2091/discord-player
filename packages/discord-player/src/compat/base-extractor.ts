@@ -1,1 +1,1 @@
-export * from '@discord-player/plugin-host/compat/base-extractor.js';
+export { BaseExtractor } from '@discord-player/plugin-host';

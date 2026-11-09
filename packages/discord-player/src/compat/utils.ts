@@ -1,1 +1,2 @@
-export * from '@discord-player/plugin-host/compat/utils.js';
+export { Util } from '@discord-player/plugin-host';
+export type { LegacyTimeData } from '@discord-player/plugin-host';

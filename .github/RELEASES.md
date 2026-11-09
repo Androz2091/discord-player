@@ -4,13 +4,10 @@
 
 ## Release commits
 
-Only complete HEAD subjects in this form are release candidates:
+Only complete HEAD subjects in this form are release candidates. Replace `<version>` with a stable SemVer version or a numbered `dev`, `beta`, or `rc` prerelease:
 
 ```text
-chore: release 8.0.0
-chore: release 8.0.0-dev.1
-chore: release 8.0.0-beta.2
-chore: release 8.0.0-rc.1
+chore: release <version>
 ```
 
 Publication is enabled only for pushes and manual reruns on `v8` or `master` in `Androz2091/discord-player`. Pull requests, forks, and other branches run checks only. The authorized branches are listed in `RELEASE_BRANCHES` in `scripts/release.mjs`.

@@ -1,5 +1,10 @@
 import { DiscordPlayerError, DiscordPlayerErrorCode } from '@discord-player/plugin-host';
-export * from '@discord-player/plugin-host/errors.js';
+export {
+  DiscordPlayerError,
+  DiscordPlayerErrorCode,
+  SourceUnavailableError,
+  SerializationError,
+} from '@discord-player/plugin-host';
 
 /** Error thrown when public queue insertion exceeds `maxSize`. */
 export class QueueCapacityError extends DiscordPlayerError {

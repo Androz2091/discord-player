@@ -1,1 +1,1 @@
-export * from '@discord-player/plugin-host/plugins/execution-options.js';
+export type { ExecuteOptions, StreamResolutionOptions } from '@discord-player/plugin-host';

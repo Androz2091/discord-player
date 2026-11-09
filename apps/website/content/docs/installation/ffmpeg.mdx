@@ -3,7 +3,7 @@ title: Installing FFmpeg 9 libraries
 description: Install the FFmpeg 9 runtime required by Discord Player v8's embedded Remedia engine.
 ---
 
-Discord Player v8 uses Remedia `0.1.0-dev.3`, whose native engine uses **FFmpeg 9.0.2** headers and shared libraries. It dynamically links FFmpeg rather than bundling it inside the npm addon or standalone server. This is an **ABI-breaking update from FFmpeg 7**: replacing the executable alone is not enough, and older `.so`, `.dylib`, or `.dll` major versions will not satisfy the runtime loader.
+Discord Player v8 uses Remedia, whose native engine uses **FFmpeg 9.0.2** headers and shared libraries. It dynamically links FFmpeg rather than bundling it inside the npm addon or standalone server. This is an **ABI-breaking update from FFmpeg 7**: replacing the executable alone is not enough, and older `.so`, `.dylib`, or `.dll` major versions will not satisfy the runtime loader.
 
 Remote-only `@remedia/client` installations do **not** need FFmpeg on the bot host. Install FFmpeg on the host running `remedia-server`. Embedded `@remedia/node` requires FFmpeg on the Node.js host.
 
@@ -90,7 +90,7 @@ For Remedia's exact build and runtime assertions, see [`verify-native-deps.mjs`]
 4. Restart the application. Do not mix an FFmpeg 7-linked addon with FFmpeg 9 libraries.
 5. Test startup, probing, decoding, filtering, and Discord voice on your deployment platform.
 
-The native addon does not download FFmpeg during `npm install`; the application operator is responsible for installing and maintaining compatible shared libraries. See [Remedia package distribution](https://github.com/twlite/remedia/blob/v0.1.0-dev.3/apps/docs/content/docs/node/distribution.mdx) for platform coverage and [Remedia licensing](https://github.com/twlite/remedia/blob/v0.1.0-dev.3/apps/docs/content/docs/licensing.mdx) for redistribution implications.
+The native addon does not download FFmpeg during `npm install`; the application operator is responsible for installing and maintaining compatible shared libraries. See [Remedia package distribution](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/node/distribution.mdx) for platform coverage and [Remedia licensing](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/licensing.mdx) for redistribution implications.
 
 ## Node.js smoke test
 

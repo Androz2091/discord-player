@@ -1,1 +1,2 @@
-export * from '@discord-player/plugin-host/compat/query-types.js';
+export { QueryType } from '@discord-player/plugin-host';
+export type { SearchQueryType } from '@discord-player/plugin-host';

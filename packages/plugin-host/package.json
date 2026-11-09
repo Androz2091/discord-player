@@ -1,6 +1,6 @@
 {
   "name": "@discord-player/plugin-host",
-  "version": "8.0.0-dev",
+  "version": "8.0.0-dev.0",
   "description": "Standalone Discord Player source runtime and Remedia plugin protocol adapter",
   "keywords": [
     "api",
@@ -38,126 +38,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./compat/base-extractor.js": {
-      "types": "./dist/compat/base-extractor.d.ts",
-      "import": "./dist/compat/base-extractor.js"
-    },
-    "./compat/extractor-execution-context.js": {
-      "types": "./dist/compat/extractor-execution-context.d.ts",
-      "import": "./dist/compat/extractor-execution-context.js"
-    },
-    "./compat/extractor-plugin.js": {
-      "types": "./dist/compat/extractor-plugin.d.ts",
-      "import": "./dist/compat/extractor-plugin.js"
-    },
-    "./compat/extractor-types.js": {
-      "types": "./dist/compat/extractor-types.d.ts",
-      "import": "./dist/compat/extractor-types.js"
-    },
-    "./compat/extractors.js": {
-      "types": "./dist/compat/extractors.d.ts",
-      "import": "./dist/compat/extractors.js"
-    },
-    "./compat/query-types.js": {
-      "types": "./dist/compat/query-types.d.ts",
-      "import": "./dist/compat/query-types.js"
-    },
-    "./compat/utils.js": {
-      "types": "./dist/compat/utils.d.ts",
-      "import": "./dist/compat/utils.js"
-    },
-    "./errors.js": {
-      "types": "./dist/errors.d.ts",
-      "import": "./dist/errors.js"
-    },
-    "./host.js": {
-      "types": "./dist/host.d.ts",
-      "import": "./dist/host.js"
-    },
-    "./legacy-player.js": {
-      "types": "./dist/legacy-player.d.ts",
-      "import": "./dist/legacy-player.js"
-    },
-    "./plugins/execution-options.js": {
-      "types": "./dist/plugins/execution-options.d.ts",
-      "import": "./dist/plugins/execution-options.js"
-    },
-    "./plugins/operation-dispatch.js": {
-      "types": "./dist/plugins/operation-dispatch.d.ts",
-      "import": "./dist/plugins/operation-dispatch.js"
-    },
-    "./plugins/plugin-error.js": {
-      "types": "./dist/plugins/plugin-error.d.ts",
-      "import": "./dist/plugins/plugin-error.js"
-    },
-    "./plugins/registry-internals.js": {
-      "types": "./dist/plugins/registry-internals.d.ts",
-      "import": "./dist/plugins/registry-internals.js"
-    },
-    "./plugins/registry.js": {
-      "types": "./dist/plugins/registry.d.ts",
-      "import": "./dist/plugins/registry.js"
-    },
-    "./plugins/stream-resolver.js": {
-      "types": "./dist/plugins/stream-resolver.d.ts",
-      "import": "./dist/plugins/stream-resolver.js"
-    },
-    "./plugins/types.js": {
-      "types": "./dist/plugins/types.d.ts",
-      "import": "./dist/plugins/types.js"
-    },
-    "./protocol.js": {
-      "types": "./dist/protocol.d.ts",
-      "import": "./dist/protocol.js"
-    },
-    "./runtime.js": {
-      "types": "./dist/runtime.d.ts",
-      "import": "./dist/runtime.js"
-    },
-    "./structures/playlist.js": {
-      "types": "./dist/structures/playlist.d.ts",
-      "import": "./dist/structures/playlist.js"
-    },
-    "./structures/search-result.js": {
-      "types": "./dist/structures/search-result.d.ts",
-      "import": "./dist/structures/search-result.js"
-    },
-    "./structures/track-types.js": {
-      "types": "./dist/structures/track-types.d.ts",
-      "import": "./dist/structures/track-types.js"
-    },
-    "./structures/track.js": {
-      "types": "./dist/structures/track.d.ts",
-      "import": "./dist/structures/track.js"
-    },
-    "./types.js": {
-      "types": "./dist/types.d.ts",
-      "import": "./dist/types.js"
-    },
-    "./utils/legacy-serialization-schemas.js": {
-      "types": "./dist/utils/legacy-serialization-schemas.d.ts",
-      "import": "./dist/utils/legacy-serialization-schemas.js"
-    },
-    "./utils/parse-serialized-entity.js": {
-      "types": "./dist/utils/parse-serialized-entity.d.ts",
-      "import": "./dist/utils/parse-serialized-entity.js"
-    },
-    "./utils/safe-event-emitter.js": {
-      "types": "./dist/utils/safe-event-emitter.d.ts",
-      "import": "./dist/utils/safe-event-emitter.js"
-    },
-    "./utils/serde.js": {
-      "types": "./dist/utils/serde.d.ts",
-      "import": "./dist/utils/serde.js"
-    },
-    "./utils/serialization-schemas.js": {
-      "types": "./dist/utils/serialization-schemas.d.ts",
-      "import": "./dist/utils/serialization-schemas.js"
-    },
-    "./utils/serialization.js": {
-      "types": "./dist/utils/serialization.d.ts",
-      "import": "./dist/utils/serialization.js"
     }
   },
   "scripts": {

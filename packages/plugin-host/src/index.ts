@@ -12,3 +12,5 @@ export * from './legacy-player.js';
 export * from './runtime.js';
 export * from './host.js';
 export * from './protocol.js';
+export { cloneJSONValue } from './utils/serialization.js';
+export { SafeEventEmitter, type EventMap } from './utils/safe-event-emitter.js';

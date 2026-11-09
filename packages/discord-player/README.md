@@ -217,7 +217,7 @@ plugins, remote plugin execution/protocols and automatic distribution are deferr
 
 ## Remedia capabilities
 
-Discord Player uses Remedia `0.1.0-dev.3` and FFmpeg 9 shared libraries for embedded playback. Remote voice connections use an 80-second RPC deadline and a 100-second default overall initial join deadline, with bounded retries using fresh Gateway credentials. Queue connection settings initialize `DiscordSession` with self-deaf, self-mute, linear volume, and raw filtergraph configuration. Queue volume remains a 0–100 percentage and is converted to Remedia gain internally. Channel changes call `DiscordSession.move(channelId)` on the existing session, retaining the queue, current Track, filters, volume, and history. `queue.setSelfDeaf()` and `queue.setSelfMute()` update the connected session and queue defaults.
+Discord Player uses Remedia and FFmpeg 9 shared libraries for embedded playback. Remote voice connections use an 80-second RPC deadline and a 100-second default overall initial join deadline, with bounded retries using fresh Gateway credentials. Queue connection settings initialize `DiscordSession` with self-deaf, self-mute, linear volume, and raw filtergraph configuration. Queue volume remains a 0–100 percentage and is converted to Remedia gain internally. Channel changes call `DiscordSession.move(channelId)` on the existing session, retaining the queue, current Track, filters, volume, and history. `queue.setSelfDeaf()` and `queue.setSelfMute()` update the connected session and queue defaults.
 
 ## Audio filters
 
