@@ -1,7 +1,7 @@
 import type { MediaSource } from '@remedia/client';
 import type { Track } from '../structures/track.js';
 import { PluginError } from './plugin-error.js';
-import { dispatchOperation } from './operation-dispatch.js';
+import { dispatchOperation, selectHandlers } from './operation-dispatch.js';
 import { resolveTrackStream } from './stream-resolver.js';
 import type { ExecuteOptions, StreamResolutionOptions } from './execution-options.js';
 import type { Entry, Handler, HandledCallback } from './registry-internals.js';
@@ -307,13 +307,38 @@ export class PluginRegistry {
     return result;
   }
 
+  /** Inspect byte transformations using the same selection rules as execution.
+   * @internal
+   * @param pluginId Actual stream owner; absent means unrestricted dispatch.
+   * @param options Additional provider blocking.
+   * @returns Whether a byte transformation would be invoked.
+   */
+  hasStreamTransforms(pluginId?: string, options: StreamResolutionOptions = {}): boolean {
+    return (
+      selectHandlers(
+        'stream.transform',
+        {},
+        { ...options, pluginId },
+        {
+          handlers: this.handlers,
+          definitions: this.definitions,
+          blocked: () => this.blocked(),
+          resultOwners: this.resultOwners,
+        },
+      ).length > 0
+    );
+  }
+
   /** Resolve and normalize a track for the already selected Remedia node.
    * @param track Data model with a portable provider reference.
    * @param options Target node mode and cancellation.
    */
   public async resolveStream(track: Track, options: StreamResolutionOptions = {}): Promise<MediaSource> {
-    return resolveTrackStream(track, options, (operation, input, execution, handled) =>
-      this.run(operation, input, execution, handled),
+    return resolveTrackStream(
+      track,
+      options,
+      (operation, input, execution, handled) => this.run(operation, input, execution, handled),
+      (owner) => this.hasStreamTransforms(owner, options),
     );
   }
 }

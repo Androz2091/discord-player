@@ -24,7 +24,8 @@ import { createSourcePluginHost, SOURCE_PLUGIN_ID } from '@discord-player/plugin
 import { MyExtractor } from './my-extractor.js';
 import { mySourcePlugin } from './my-source-plugin.js';
 
-const host = createSourcePluginHost({ name: 'My Source Host', hostId: 'sources-eu-1' });
+// Local-only handle() usage may omit hostId.
+const host = createSourcePluginHost({ name: 'My Source Host' });
 await host.extractors.register(MyExtractor);
 await host.plugins.register(mySourcePlugin());
 
@@ -64,7 +65,7 @@ import { serve } from '@hono/node-server';
 import { createSourcePluginHost } from '@discord-player/plugin-host';
 import { MyExtractor } from './my-extractor.js';
 
-const host = createSourcePluginHost({ name: 'Sources', publicUrl: 'http://localhost:3000' });
+const host = createSourcePluginHost({ name: 'Sources', hostId: 'sources-eu-1', publicUrl: 'http://localhost:3000' });
 await host.extractors.register(MyExtractor);
 const app = new Hono();
 app.all('*', (c) => host.fetch(c.req.raw));
@@ -85,7 +86,7 @@ import { createNodeMiddleware } from '@remedia/plugin-host/node';
 import { createSourcePluginHost } from '@discord-player/plugin-host';
 import { MyExtractor } from './my-extractor.js';
 
-const host = createSourcePluginHost({ name: 'Sources', publicUrl: 'http://localhost:3000' });
+const host = createSourcePluginHost({ name: 'Sources', hostId: 'sources-eu-1', publicUrl: 'http://localhost:3000' });
 await host.extractors.register(MyExtractor);
 const app = express();
 app.use(createNodeMiddleware(host));
@@ -169,8 +170,10 @@ provider metadata. Ordinary queue/history insertion retains the same Track and i
 token. Host identity persists in `sourceReference.hostId`, separate from
 `sourceReference.pluginId` and the provider's source name/data.
 
-Configure a stable non-secret `hostId` for restart recovery. The default is a
-random process identifier and intentionally does not survive restarts. Two hosts
+HTTP hosts must configure a stable non-secret `hostId`, including deployments
+that do not configure `publicUrl`. Construction with `publicUrl` requires it, and
+`fetch()` rejects HTTP use without it. Local-only `handle()` hosts may omit it and
+receive a generated process identifier that intentionally does not survive restarts. Two hosts
 can use the same provider IDs, but cannot redeem one another's Tracks. The embedded
 registry explicitly rejects hosted Tracks until generic server forwarding exists.
 Do not put endpoints, bearer tokens or credentials in sourceReference.
@@ -269,12 +272,37 @@ Default proxy delivery resolves media on grant redemption. Expired provider
 sources are rejected rather than fetching expired credentials; request a fresh
 `source.stream` grant. Provider expiration survives materialization and stream
 transforms. Grant expiration is a separate deadline managed by Remedia.
-`mediaDelivery: 'direct-url'` opts into returning accessible provider URLs directly,
-with their expiration and without a proxy request. This resolves at source.stream
-invocation, never search. URL sources then follow local URL semantics (no byte
-transforms); use proxy delivery when transforms or host-side authentication are
-required. The consuming node must independently enforce DNS/redirect policies.
-Readables/files/buffers still use media grants in this mode.
+`mediaDelivery: 'direct-url'` enables direct delivery for explicitly declared
+`directUrlProviders` only. Invoking an arbitrary `track.stream` handler may already
+open a Readable, so unknown or mixed-source providers must stay deferred. Declare
+only trusted providers whose handlers return URL metadata without opening media:
+
+```ts
+const host = createSourcePluginHost({
+  name: 'Sources',
+  hostId: 'sources-eu-1',
+  publicUrl: 'https://sources.example.com',
+  mediaDelivery: 'direct-url',
+  directUrlProviders: ['example.url-provider'],
+});
+```
+
+These providers resolve URL metadata at `source.stream` invocation, never search.
+The dispatcher checks active, unblocked transformations for the actual stream
+owner. Applicable byte transforms force the existing secure proxy path, and run
+once on redemption. Unrelated providers' transforms do not prevent direct delivery.
+The check repeats after asynchronous URL preparation so newly registered transforms
+cannot be skipped. A declining URL-only handler defers bridge resolution; a handler
+that returns bytes despite its declaration fails explicitly and its stream is
+destroyed, without a retry. Do not list legacy or mixed-result providers.
+
+All other providers, including Readables, files and buffers, resolve and materialize
+only when their grant is redeemed. There is no eager byte-source fallback or retained
+live stream in an unredeemed grant. Cancellation, expiration, provider removal and
+shutdown release transport resources; an old grant cannot bind a replacement
+registration. Provider URL expiration remains intact. The consuming node must still
+independently enforce its DNS/redirect policy for direct URLs. Authentication or
+byte transformations requiring the host must use proxy delivery.
 
 **Remote execution is not end-to-end ready.** Published single-use media grants
 reject FFmpeg's default Range probing. See [the implementable Remedia contract and

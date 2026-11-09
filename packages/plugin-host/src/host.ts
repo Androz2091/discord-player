@@ -14,6 +14,7 @@ import { SourcePluginRuntime, type SourcePluginRuntimeOptions } from './runtime.
 import { Track } from './structures/track.js';
 import type { SearchResultData } from './structures/search-result.js';
 import { deserialize } from './utils/serde.js';
+import { DeferredSourceRequired } from './plugins/stream-resolver.js';
 import { serializeSourceTrack } from './protocol.js';
 import { cloneJSONValue } from './utils/serialization.js';
 import type { SearchOptions } from './types.js';
@@ -23,13 +24,18 @@ export const SOURCE_PLUGIN_ID = 'discord-player.source';
 
 /** Standalone source host configuration. */
 export interface SourcePluginHostOptions extends PluginHostOptions, Omit<SourcePluginRuntimeOptions, 'player'> {
-  /** Stable non-secret deployment ID. Configure identically after restart. Default: a random process ID. */
+  /** Stable non-secret deployment ID. Required for HTTP; generated only for local handle() usage. */
   hostId?: string;
   /** Return provider URLs directly when no byte transforms are needed. Default proxy.
    * Opt in only when the consuming node can enforce its own DNS/redirect policy and access these URLs.
-   * Source resolution then happens at source.stream invocation (never during search).
+   * Declared URL-only providers resolve at source.stream invocation; all byte sources remain deferred.
    */
   mediaDelivery?: 'proxy' | 'direct-url';
+  /** Providers guaranteed to return only URLs without opening byte resources during track.stream.
+   * Required for direct URL optimization; other providers stay lazy. Applicable transforms always force proxying.
+   * A provider that violates this promise fails explicitly; legacy and mixed-source providers should be omitted.
+   */
+  directUrlProviders?: readonly string[];
   /** Remote materialization policy; files and private networks are denied by default. */
   mediaPolicy?: MediaAccessPolicy;
   /** Maximum retained process-local Track references; default 1000. */
@@ -52,6 +58,7 @@ export class SourcePluginHost {
   readonly hostId: string;
   private readonly mediaPolicy: MediaAccessPolicy;
   private readonly sweep: ReturnType<typeof setInterval>;
+  private readonly explicitHostId: boolean;
   private boundary = new AsyncLocalStorage<boolean>();
   private states = new Map<string, { track: Track; expires: number; signal?: AbortSignal }>();
   private ttl: number;
@@ -66,6 +73,9 @@ export class SourcePluginHost {
     if (!Number.isSafeInteger(this.ttl) || this.ttl < 1 || !Number.isSafeInteger(this.capacity) || this.capacity < 1) {
       throw new RangeError('Track state limits must be positive safe integers.');
     }
+    this.explicitHostId = options.hostId !== undefined;
+    if (options.publicUrl !== undefined && !this.explicitHostId)
+      throw new TypeError('HTTP source hosts require an explicit hostId');
     this.hostId = options.hostId ?? randomUUID();
     if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/.test(this.hostId)) throw new TypeError('Invalid hostId');
     this.mediaPolicy = { ...options.mediaPolicy };
@@ -109,12 +119,28 @@ export class SourcePluginHost {
           if (!this.boundary.getStore()) {
             return this.plugins.resolveStream(await this.restore(this.record(input).track, signal), { signal });
           }
-          if (options.mediaDelivery === 'direct-url') {
-            const track = await this.restore(this.record(input).track, signal);
-            const source = await this.plugins.resolveStream(track, {
-              signal,
-              prepareSource: async (media, lifetime) => {
-                if ('url' in media) {
+          const value = this.record(input).track;
+          const payload = cloneJSONValue(value instanceof Track ? serializeSourceTrack(value) : value);
+          const { sourceState: _state, ...entity } = this.record(payload);
+          const metadata = deserialize(entity);
+          if (!(metadata instanceof Track)) throw new TypeError('Expected a serialized Track');
+          this.assertHost(metadata);
+          const providerId = metadata.sourceReference?.pluginId;
+          await this.plugins.ready();
+          const registration = this.plugins.registrationSignal(providerId ?? '');
+          if (
+            options.mediaDelivery === 'direct-url' &&
+            providerId &&
+            options.directUrlProviders?.includes(providerId) &&
+            !this.plugins.hasStreamTransforms(providerId)
+          ) {
+            try {
+              const track = await this.restore(payload, signal);
+              return await this.plugins.resolveStream(track, {
+                signal,
+                directUrlOnly: true,
+                prepareSource: async (media, lifetime) => {
+                  if (!('url' in media)) throw new Error('Expected a direct media URL');
                   await authorizeMediaURL(new URL(media.url), this.mediaPolicy, lifetime ?? signal);
                   if (
                     'expiresAtMs' in media &&
@@ -122,28 +148,21 @@ export class SourcePluginHost {
                   )
                     throw new Error('Media source credentials have expired');
                   return media;
-                }
-                return this.prepareMedia(media, lifetime);
-              },
-            });
-            if ('url' in source) return source;
-            if (!('stream' in source)) throw new Error('Expected encoded media');
-            return createMediaSource({
-              open: () => source.stream,
-              dispose: () => {
-                source.stream.destroy();
-              },
-            });
+                },
+              });
+            } catch (error) {
+              if (!(error instanceof DeferredSourceRequired)) throw error;
+            }
           }
-          // Resolve only when the media grant is redeemed: queued tracks do not hold live streams.
-          const value = this.record(input).track;
-          const payload = cloneJSONValue(value instanceof Track ? serializeSourceTrack(value) : value);
+          // Unknown source types and transformed URLs resolve only on grant redemption.
           return createMediaSource({
             open: async ({ signal: mediaSignal }) => {
-              const track = await this.restore(payload, mediaSignal);
+              const lifetime = registration ? AbortSignal.any([mediaSignal, registration]) : mediaSignal;
+              lifetime.throwIfAborted();
+              const track = await this.restore(payload, lifetime);
               const source = await this.plugins.resolveStream(track, {
-                signal: mediaSignal,
-                prepareSource: (media, lifetime) => this.prepareMedia(media, lifetime),
+                signal: lifetime,
+                prepareSource: (media, sourceSignal) => this.prepareMedia(media, sourceSignal),
               });
               if ('stream' in source) return source.stream;
               throw new Error('Expected a materialized encoded media stream');
@@ -311,9 +330,10 @@ export class SourcePluginHost {
   }
 
   /** Execute HTTP through Remedia's transport and the same operation handlers.
-   * @param request Fetch request.
+   * @param request Fetch request. An explicitly configured hostId is required even without publicUrl.
    */
   fetch(request: Request): Promise<Response> {
+    if (!this.explicitHostId) return Promise.reject(new TypeError('HTTP source hosts require an explicit hostId'));
     return this.boundary.run(true, () => this.remedia.fetch(request));
   }
 

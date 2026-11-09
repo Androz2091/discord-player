@@ -230,6 +230,7 @@ it('returns accessible direct URLs with expiration without proxying bytes when e
     name: 'Direct',
     hostId: 'direct',
     mediaDelivery: 'direct-url',
+    directUrlProviders: ['url'],
     mediaPolicy: { allowPrivateNetworks: true },
   });
   const expiresAtMs = Date.now() + 10000;

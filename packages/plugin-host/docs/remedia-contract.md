@@ -11,9 +11,9 @@ The generic TypeScript host has a protocolVersion 1 manifest, plugin IDs and
 operation names, direct `handle`/`execute`, authenticated JSON HTTP execution,
 deferred encoded-byte factories, and expiring single-use HTTP media grants.
 Manifest `name` is a display name, not a stable deployment ID. Its configuration
-has no deployment identifier. The source adapter therefore carries a configured
-opaque `hostId` in its application's portable source reference. A network endpoint
-and its credentials belong in operator configuration, never Track metadata.
+has no deployment identifier. The source adapter requires a configured
+opaque `hostId` for HTTP execution and carries it in its application's portable
+source reference. A network endpoint and its credentials belong in operator configuration, never Track metadata.
 
 Rust `crates/remedia-server/src/rpc/params.rs::PlaySource` currently accepts only
 `file {path}` and `url {url}`. Neither that enum nor server configuration exposes

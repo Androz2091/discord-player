@@ -5,6 +5,35 @@ import type { ExecuteOptions } from './execution-options.js';
 import type { DispatchState, HandledCallback } from './registry-internals.js';
 import type { OperationInput, OperationName, OperationResult } from './types.js';
 
+/** Select active, permitted handlers using the dispatcher's own routing rules.
+ * @internal
+ * @param operation Operation being inspected.
+ * @param input Routing input.
+ * @param options Provider targeting and block list.
+ * @param state Current registry state.
+ * @returns Ordered applicable subscriptions without invoking them.
+ */
+export function selectHandlers(
+  operation: OperationName,
+  input: unknown,
+  options: ExecuteOptions,
+  state: DispatchState,
+) {
+  return state.handlers
+    .filter(
+      (handler) =>
+        handler.operation === operation &&
+        handler.entry.active &&
+        (!options.pluginId || handler.entry.id === options.pluginId) &&
+        !options.blocked?.includes(handler.entry.id) &&
+        !state.blocked().includes(handler.entry.id) &&
+        (!(input as { protocol?: string }).protocol ||
+          !handler.protocols?.length ||
+          handler.protocols.includes((input as { protocol: string }).protocol)),
+    )
+    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0) || a.order - b.order);
+}
+
 /** Dispatch a typed operation against initialized host state.
  * @internal
  * @param operation Operation name.
@@ -27,19 +56,7 @@ export async function dispatchOperation<K extends OperationName>(
     throw new Error(`Undefined operation: ${operation}`);
   }
 
-  const handlers = state.handlers
-    .filter(
-      (handler) =>
-        handler.operation === operation &&
-        handler.entry.active &&
-        (!options.pluginId || handler.entry.id === options.pluginId) &&
-        !options.blocked?.includes(handler.entry.id) &&
-        !state.blocked().includes(handler.entry.id) &&
-        (!(input as { protocol?: string }).protocol ||
-          !handler.protocols?.length ||
-          handler.protocols.includes((input as { protocol: string }).protocol)),
-    )
-    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0) || a.order - b.order);
+  const handlers = selectHandlers(operation, input, options, state);
   const results: unknown[] = [];
   let value: unknown = input;
 
