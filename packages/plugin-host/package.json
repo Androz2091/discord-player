@@ -29,7 +29,8 @@
     "url": "git+https://github.com/Androz2091/discord-player.git"
   },
   "files": [
-    "dist"
+    "dist",
+    "docs/remedia-contract.md"
   ],
   "type": "module",
   "main": "dist/index.js",

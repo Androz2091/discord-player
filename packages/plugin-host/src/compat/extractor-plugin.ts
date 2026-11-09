@@ -98,7 +98,7 @@ export function createExtractorPlugin(
 
       ctx.on(
         'track.related',
-        async ({ track, history }) => stamp(await instance.getRelatedTracks(track, history)),
+        async ({ track, history }) => stamp(await instance.getRelatedTracks(track, history ?? { tracks: [] })),
         metadata,
       );
 
@@ -140,12 +140,21 @@ export function createExtractorPlugin(
         async ({ track, stream }, { signal }) => ({
           track,
           stream: await new Promise<Readable>((resolve, reject) => {
-            const abort = () => reject(signal.reason);
+            signal.throwIfAborted();
+            const abort = () => {
+              stream.destroy();
+              reject(signal.reason);
+            };
 
             signal.addEventListener('abort', abort, { once: true });
 
             const next: NextFunction = (error, result) => {
               signal.removeEventListener('abort', abort);
+              if (signal.aborted) {
+                result?.destroy();
+                reject(signal.reason);
+                return;
+              }
 
               if (error) {
                 reject(error);

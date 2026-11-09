@@ -24,7 +24,7 @@ import { createSourcePluginHost, SOURCE_PLUGIN_ID } from '@discord-player/plugin
 import { MyExtractor } from './my-extractor.js';
 import { mySourcePlugin } from './my-source-plugin.js';
 
-const host = createSourcePluginHost({ name: 'My Source Host' });
+const host = createSourcePluginHost({ name: 'My Source Host', hostId: 'sources-eu-1' });
 await host.extractors.register(MyExtractor);
 await host.plugins.register(mySourcePlugin());
 
@@ -160,17 +160,33 @@ Direct calls retain native descriptors; HTTP never returns nested Readables.
 
 ## Portable metadata and process-local state
 
-HTTP results contain version 1 Track and Playlist data. A `PortableSourceTrack`
-adds an optional opaque `sourceState` field. `deserializeSourceResult()` removes
-that transport extension before strict versioned deserialization and links the
-shared Track instances to their Playlist. For raw `deserialize()`, remove the
-`sourceState` extension first. Provider identity remains in `sourceReference`.
+HTTP results contain version 1 Track and Playlist data. `deserializeSourceResult()`
+retains the opaque `sourceState` token on the normal Track and links Playlist
+instances. Pass `serializeSourceTrack(track)` to source operations; no second HTTP
+payload needs to be retained. `serialize()` and `toJSON()` deliberately omit the
+temporary token. Persistence and clones made through persistence reconstruct from
+provider metadata. Ordinary queue/history insertion retains the same Track and its
+token. Host identity persists in `sourceReference.hostId`, separate from
+`sourceReference.pluginId` and the provider's source name/data.
 
-The host retains original Track objects (including `raw.engine`, extractor
-identity and metadata callbacks) in a bounded cache: 10000 tracks and one hour by
-default, configurable with `maxTrackStates` and `trackStateTtlMs`. Expiration is
-checked on use; eviction releases references. Cache entries are invalidated by
-provider removal and host shutdown. No media streams are retained by this cache.
+Configure a stable non-secret `hostId` for restart recovery. The default is a
+random process identifier and intentionally does not survive restarts. Two hosts
+can use the same provider IDs, but cannot redeem one another's Tracks. The embedded
+registry explicitly rejects hosted Tracks until generic server forwarding exists.
+Do not put endpoints, bearer tokens or credentials in sourceReference.
+
+The per-host FIFO cache defaults to 1000 Track states for ten minutes. Previous
+10000/one-hour defaults could retain substantial provider payloads and playlists.
+Periodic cleanup runs even while idle (at most every 30 seconds), with additional
+checks on use, provider lifetime changes and shutdown. Cached snapshots omit
+Playlist links and metadata callbacks so one entry cannot retain the whole result
+through those links. This is a count limit, not a byte memory guarantee: trusted
+providers can still attach large engines. Tune limits for the deployment.
+
+Concurrent remote playback receives copied engine/public metadata, never the
+cached Track itself. Non-cloneable engines are reconstructed instead. Copies use
+snapshot metadata rather than callbacks closing over the original Track. Direct
+execution retains original object identity and the caller's ownership contract.
 
 After eviction, expiration, or restart, modern plugins receive reconstructed
 Track metadata and their portable sourceReference. Legacy extractors re-run
@@ -217,7 +233,51 @@ custom IPC transport or automatic remote registry is claimed by this package.
 ## Validation
 
 `pnpm build`, `pnpm typecheck`, `pnpm test`, `pnpm lint`, and `pnpm format:check`
-cover the workspace. Source tests use synthetic encoded bytes and local fixtures,
-without public media-provider access. CI builds the host before discord-player,
+cover the workspace. Tests include the published optional extractor collection (SDK calls stubbed),
+real HTTP disconnect/shutdown, and real FFmpeg decoding of generated MP3, Ogg/Opus
+and faststart M4A. FFmpeg must be installed; CI installs it explicitly. No personal
+media files or third-party service access are needed. CI builds the host before discord-player,
 includes its dist artifacts, and publishes it before dependent packages using the
 shared release inventory.
+
+## Remote media policy
+
+`mediaPolicy` denies private, loopback, link-local, reserved and transition IP
+ranges by default. DNS results are checked and the selected address is pinned to
+the connection, preserving TLS hostname verification. Every redirect is checked;
+TLS downgrades and URL user/password credentials are rejected. Optional
+`allowedHosts` restricts exact hostnames. No inbound authorization or provider
+request headers are copied to upstreams. Providers needing custom authorization
+must return an encoded Readable opened by their trusted SDK. Plugins execute
+trusted code and can open their own network/file resources; this policy does not
+sandbox extractor `handle()` or provider-created streams.
+
+File descriptors require explicit `allowedFileRoots`. Canonical paths are checked,
+then regular files are opened through owned handles. Authorized roots and parent
+directories must be administrator-owned; concurrent hostile filesystem mutation is
+outside this policy's trust boundary. Default limits are 32 active streams, 512 MiB
+per stream, 30 minutes total, five redirects and 30 seconds upstream socket idle.
+Tune `maxConcurrent`, `maxBytes`, `timeoutMs`, and `allowPrivateNetworks` for trusted
+private deployments. Buffers are already allocated by providers; the host bounds
+output bytes but cannot undo that allocation. Streaming uses backpressure; abort,
+consumer disconnect, byte/deadline errors and host shutdown release resources.
+After headers, errors terminate the body/socket, never masquerade as successful
+JSON responses. Use Remedia's Node middleware to connect network disconnects to
+Fetch cancellation. Configure `token` and HTTPS for remote authorization.
+
+Default proxy delivery resolves media on grant redemption. Expired provider
+sources are rejected rather than fetching expired credentials; request a fresh
+`source.stream` grant. Provider expiration survives materialization and stream
+transforms. Grant expiration is a separate deadline managed by Remedia.
+`mediaDelivery: 'direct-url'` opts into returning accessible provider URLs directly,
+with their expiration and without a proxy request. This resolves at source.stream
+invocation, never search. URL sources then follow local URL semantics (no byte
+transforms); use proxy delivery when transforms or host-side authentication are
+required. The consuming node must independently enforce DNS/redirect policies.
+Readables/files/buffers still use media grants in this mode.
+
+**Remote execution is not end-to-end ready.** Published single-use media grants
+reject FFmpeg's default Range probing. See [the implementable Remedia contract and
+acceptance tests](docs/remedia-contract.md) for routing, sequential playback,
+seeking, probing, reopening and recovery requirements. No Range support is
+claimed here.

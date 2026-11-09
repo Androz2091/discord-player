@@ -4,7 +4,11 @@ import { SERIALIZATION_SCHEMA_VERSION } from './serialization.js';
 /** Shared finite non-negative numeric constraint. */
 export const nonNegative = z.number().nonnegative();
 
-const sourceReferenceSchema = z.strictObject({ pluginId: z.string(), data: z.json() });
+const sourceReferenceSchema = z.strictObject({
+  pluginId: z.string(),
+  hostId: z.string().min(1).max(128).optional(),
+  data: z.json(),
+});
 
 const authorSchema = z.strictObject({ name: z.string(), url: z.string() });
 

@@ -8,6 +8,9 @@ import type { LegacyPlayerContext } from '../legacy-player.js';
 
 /** Serializable provider identity; never put credentials or live objects in this payload. */
 export type SourceReference = {
+  /** Deployment identity, separate from the provider ID. Omit for ordinary embedded sources. */
+  hostId?: string;
+
   /** Registered source plugin ID. */
   pluginId: string;
 

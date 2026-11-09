@@ -384,7 +384,7 @@ export function packReleasePackages({ root = projectRoot, destination, pack = ru
   const ordered = orderPackagesByDependencies(packages.map((pkg) => ({ ...pkg, manifest: pkg.manifest })));
   const tarballs = [];
   for (const pkg of ordered) {
-    const tarball = join(destination, `${pkg.name.replace('/', '-')}-${pkg.manifest.version}.tgz`);
+    const tarball = join(destination, `${pkg.name.replace(/^@/, '').replace('/', '-')}-${pkg.manifest.version}.tgz`);
     if (existsSync(tarball))
       throw new ReleaseError(`Refusing to overwrite existing release tarball ${basename(tarball)}.`);
     pack(pkg.directory, destination);
@@ -574,7 +574,9 @@ export async function publishRelease({ root = projectRoot, directory, version, .
   if (!['latest', 'dev', 'beta', 'rc'].includes(distTag))
     throw new ReleaseError(`Unsupported release channel in ${version}.`);
   const expected = discoverReleasePackages({ root });
-  const expectedTarballs = new Set(expected.map(({ name }) => `${name.replace('/', '-')}-${version}.tgz`));
+  const expectedTarballs = new Set(
+    expected.map(({ name }) => `${name.replace(/^@/, '').replace('/', '-')}-${version}.tgz`),
+  );
   let artifactEntries;
   try {
     artifactEntries = readdirSync(directory, { withFileTypes: true });
@@ -592,7 +594,7 @@ export async function publishRelease({ root = projectRoot, directory, version, .
     }
   }
   const tarballs = expected.map(({ name }) => {
-    const path = join(directory, `${name.replace('/', '-')}-${version}.tgz`);
+    const path = join(directory, `${name.replace(/^@/, '').replace('/', '-')}-${version}.tgz`);
     return validateTarball(path, { name, version, root });
   });
   const summary = await publishMissingPackages({ packages: tarballs, distTag, ...options });

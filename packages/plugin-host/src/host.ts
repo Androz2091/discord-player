@@ -1,10 +1,8 @@
 import type { MediaSource as ClientMediaSource } from '@remedia/client';
-import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
+import { authorizeMediaURL, openMedia, type MediaAccessPolicy } from './media.js';
 import type { PortableSourceResult } from './protocol.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
-import { createReadStream } from 'node:fs';
-import { Readable } from 'node:stream';
 import {
   createMediaSource,
   createPluginHost,
@@ -16,6 +14,7 @@ import { SourcePluginRuntime, type SourcePluginRuntimeOptions } from './runtime.
 import { Track } from './structures/track.js';
 import type { SearchResultData } from './structures/search-result.js';
 import { deserialize } from './utils/serde.js';
+import { serializeSourceTrack } from './protocol.js';
 import { cloneJSONValue } from './utils/serialization.js';
 import type { SearchOptions } from './types.js';
 
@@ -24,9 +23,18 @@ export const SOURCE_PLUGIN_ID = 'discord-player.source';
 
 /** Standalone source host configuration. */
 export interface SourcePluginHostOptions extends PluginHostOptions, Omit<SourcePluginRuntimeOptions, 'player'> {
-  /** Maximum retained process-local Track references; default 10000. */
+  /** Stable non-secret deployment ID. Configure identically after restart. Default: a random process ID. */
+  hostId?: string;
+  /** Return provider URLs directly when no byte transforms are needed. Default proxy.
+   * Opt in only when the consuming node can enforce its own DNS/redirect policy and access these URLs.
+   * Source resolution then happens at source.stream invocation (never during search).
+   */
+  mediaDelivery?: 'proxy' | 'direct-url';
+  /** Remote materialization policy; files and private networks are denied by default. */
+  mediaPolicy?: MediaAccessPolicy;
+  /** Maximum retained process-local Track references; default 1000. */
   maxTrackStates?: number;
-  /** State lifetime in milliseconds; default one hour. Expired tracks are reconstructed by URL. */
+  /** State lifetime in milliseconds; default ten minutes. Expired tracks are reconstructed by URL. */
   trackStateTtlMs?: number;
 }
 
@@ -40,6 +48,10 @@ export class SourcePluginHost {
   readonly extractors;
   /** Underlying generic host; exposes discovery, middleware matching and transport. */
   readonly remedia;
+  /** Stable deployment identity, independent of provider identifiers and network addresses. */
+  readonly hostId: string;
+  private readonly mediaPolicy: MediaAccessPolicy;
+  private readonly sweep: ReturnType<typeof setInterval>;
   private boundary = new AsyncLocalStorage<boolean>();
   private states = new Map<string, { track: Track; expires: number; signal?: AbortSignal }>();
   private ttl: number;
@@ -49,15 +61,20 @@ export class SourcePluginHost {
    * @param options Transport and source settings.
    */
   constructor(options: SourcePluginHostOptions) {
-    this.ttl = options.trackStateTtlMs ?? 3600000;
-    this.capacity = options.maxTrackStates ?? 10000;
+    this.ttl = options.trackStateTtlMs ?? 600000;
+    this.capacity = options.maxTrackStates ?? 1000;
     if (!Number.isSafeInteger(this.ttl) || this.ttl < 1 || !Number.isSafeInteger(this.capacity) || this.capacity < 1) {
       throw new RangeError('Track state limits must be positive safe integers.');
     }
-    this.runtime = new SourcePluginRuntime(options);
+    this.hostId = options.hostId ?? randomUUID();
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/.test(this.hostId)) throw new TypeError('Invalid hostId');
+    this.mediaPolicy = { ...options.mediaPolicy };
+    this.remedia = createPluginHost(options);
+    this.runtime = new SourcePluginRuntime({ ...options, hostId: this.hostId });
+    this.sweep = setInterval(() => this.prune(), Math.max(1000, Math.min(this.ttl, 30000)));
+    this.sweep.unref();
     this.plugins = this.runtime.plugins;
     this.extractors = this.runtime.extractors;
-    this.remedia = createPluginHost(options);
     this.remedia.register({
       id: SOURCE_PLUGIN_ID,
       operations: {
@@ -92,8 +109,35 @@ export class SourcePluginHost {
           if (!this.boundary.getStore()) {
             return this.plugins.resolveStream(await this.restore(this.record(input).track, signal), { signal });
           }
+          if (options.mediaDelivery === 'direct-url') {
+            const track = await this.restore(this.record(input).track, signal);
+            const source = await this.plugins.resolveStream(track, {
+              signal,
+              prepareSource: async (media, lifetime) => {
+                if ('url' in media) {
+                  await authorizeMediaURL(new URL(media.url), this.mediaPolicy, lifetime ?? signal);
+                  if (
+                    'expiresAtMs' in media &&
+                    (!Number.isFinite(Number(media.expiresAtMs)) || Number(media.expiresAtMs) <= Date.now())
+                  )
+                    throw new Error('Media source credentials have expired');
+                  return media;
+                }
+                return this.prepareMedia(media, lifetime);
+              },
+            });
+            if ('url' in source) return source;
+            if (!('stream' in source)) throw new Error('Expected encoded media');
+            return createMediaSource({
+              open: () => source.stream,
+              dispose: () => {
+                source.stream.destroy();
+              },
+            });
+          }
           // Resolve only when the media grant is redeemed: queued tracks do not hold live streams.
-          const payload = cloneJSONValue(this.record(input).track);
+          const value = this.record(input).track;
+          const payload = cloneJSONValue(value instanceof Track ? serializeSourceTrack(value) : value);
           return createMediaSource({
             open: async ({ signal: mediaSignal }) => {
               const track = await this.restore(payload, mediaSignal);
@@ -108,6 +152,7 @@ export class SourcePluginHost {
         },
       },
       dispose: async () => {
+        clearInterval(this.sweep);
         this.states.clear();
         await this.runtime.destroy();
       },
@@ -115,21 +160,7 @@ export class SourcePluginHost {
   }
 
   private async prepareMedia(source: ClientMediaSource, signal?: AbortSignal): Promise<ClientMediaSource> {
-    if ('stream' in source) return source;
-    if ('buffer' in source) return { stream: Readable.from([source.buffer]) };
-    if ('file' in source)
-      return {
-        stream: createReadStream(source.file.startsWith('file:') ? new URL(source.file) : source.file, { signal }),
-      };
-    const url = new URL(source.url);
-    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password)
-      throw new Error('Expected a public HTTP(S) media URL');
-    const response = await fetch(url, { signal });
-    if (!response.ok || !response.body) {
-      await response.body?.cancel();
-      throw new Error(`Media upstream returned ${response.status}`);
-    }
-    return { stream: Readable.fromWeb(response.body as NodeReadableStream) };
+    return openMedia(source, this.mediaPolicy, signal);
   }
 
   private record(input: unknown): Record<string, unknown> {
@@ -181,10 +212,15 @@ export class SourcePluginHost {
     this.prune();
     const tracks = result.tracks.map((track) => {
       // serialize first; never retain an invalid or unsafe response.
+      if (track.sourceReference) track.sourceReference.hostId = this.hostId;
       const serialized = track.serialize();
       const stateId = randomUUID();
       this.states.set(stateId, {
-        track,
+        track: Object.assign(Object.create(Object.getPrototypeOf(track)), track, {
+          playlist: null,
+          raw: { ...track.raw, playlist: undefined, requestMetadata: undefined },
+          metadataProvider: undefined,
+        }),
         expires: Date.now() + this.ttl,
         signal: this.plugins.registrationSignal(track.sourceReference?.pluginId ?? ''),
       });
@@ -195,11 +231,20 @@ export class SourcePluginHost {
   }
 
   private async restore(input: unknown, signal: AbortSignal): Promise<Track> {
-    if (input instanceof Track && !this.boundary.getStore()) return input;
+    signal.throwIfAborted();
+    if (input instanceof Track && !this.boundary.getStore()) {
+      this.assertHost(input);
+      // A consumer-side model has no host-local engine. Ordinary local models retain identity.
+      if (input.sourceState || (this.extractors.get(input.sourceReference?.pluginId ?? '') && !input.extractor)) {
+        return this.restore(serializeSourceTrack(input), signal);
+      }
+      return input;
+    }
     const payload = this.record(input);
     const { sourceState: _state, ...entity } = payload;
     const track = deserialize(entity);
     if (!(track instanceof Track)) throw new TypeError('Expected a serialized Track');
+    this.assertHost(track);
     this.prune();
     const cached = typeof payload.sourceState === 'string' ? this.states.get(payload.sourceState)?.track : undefined;
     if (
@@ -207,25 +252,62 @@ export class SourcePluginHost {
       cached.id === track.id &&
       cached.url === track.url &&
       cached.sourceReference?.pluginId === track.sourceReference?.pluginId
-    )
-      return cached;
+    ) {
+      // Copy mutable extractor data per invocation. Opaque/non-cloneable engines are reconstructed below.
+      try {
+        const { requestMetadata: _callback, playlist: _playlist, ...rawData } = cached.raw;
+        const engine = rawData.engine;
+        if (
+          engine &&
+          typeof engine === 'object' &&
+          !Array.isArray(engine) &&
+          Object.getPrototypeOf(engine) !== Object.prototype
+        )
+          throw new Error('Opaque engine requires reconstruction');
+        const raw = structuredClone(rawData);
+        const copy = Object.assign(Object.create(Object.getPrototypeOf(cached)), cached, { raw });
+        copy.sourceReference = structuredClone(cached.sourceReference);
+        copy.trackMetadata = structuredClone(cached.metadata);
+        copy.metadataProvider = undefined;
+        copy.requestedBy = track.requestedBy;
+        copy.playlist = null;
+        copy.bridgedTrack = null;
+        copy.bridgedExtractor = null;
+        return copy;
+      } catch {
+        // Legacy callbacks/classes cannot be safely copied; resolve their public location again.
+      }
+    }
     const pluginId = track.sourceReference?.pluginId;
     if (!pluginId || !this.plugins.has(pluginId))
       throw new Error('Track source is unavailable; register its provider and search again');
     if (!this.extractors.get(pluginId)) return track;
     // Re-run legacy metadata resolution rather than guessing the meaning of raw.engine.
-    const result = await this.runtime.search(track.url, { pluginId, signal });
+    const data = track.sourceReference?.data;
+    const queryType = data && typeof data === 'object' && 'queryType' in data ? data.queryType : undefined;
+    const result = await this.runtime.search(track.url, {
+      pluginId,
+      signal,
+      searchEngine: typeof queryType === 'string' ? queryType : undefined,
+    });
     const restored = result.tracks.find((item) => item.url === track.url);
     if (!restored) throw new Error(`Source ${pluginId} could not reconstruct expired Track state; search again`);
     restored.requestedBy = track.requestedBy;
+    restored.sourceReference = track.sourceReference;
     return restored;
+  }
+
+  private assertHost(track: Track): void {
+    if (track.sourceReference?.hostId !== this.hostId) {
+      throw new Error('Track belongs to another source host or has no host affinity; resolve it on this host first');
+    }
   }
 
   /** Execute directly without serialization; caller owns returned media.
    * @param request Generic Remedia request targeting discord-player.source.
    */
   handle(request: PluginRequest): Promise<ExecuteResult> {
-    return this.remedia.handle(request);
+    return this.boundary.run(false, () => this.remedia.handle(request));
   }
 
   /** Execute HTTP through Remedia's transport and the same operation handlers.

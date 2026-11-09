@@ -47,6 +47,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@discord-player/extractor": "7.2.0",
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "typescript": "catalog:",

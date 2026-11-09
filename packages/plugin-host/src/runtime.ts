@@ -10,6 +10,8 @@ import type { MediaResource, SearchOptions } from './types.js';
 
 /** Standalone source configuration; no playback services are created. */
 export interface SourcePluginRuntimeOptions {
+  /** Stable deployment identifier for standalone execution. */
+  hostId?: string;
   /** Actual Player context when embedded. */
   player?: LegacyPlayerContext;
   /** Disabled provider IDs. */
@@ -36,7 +38,7 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
     super();
     this.player = options.player ?? this;
     this.options = options.player?.options ?? options;
-    this.plugins = new PluginRegistry(this.player, () => this.options.blockExtractors ?? []);
+    this.plugins = new PluginRegistry(this.player, () => this.options.blockExtractors ?? [], options.hostId);
     this.extractors = new ExtractorExecutionContext(this.player);
   }
 
@@ -116,9 +118,10 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
       protocol,
       options: {
         ...options,
-        searchEngine: target
-          ? undefined
-          : (options.searchEngine ?? options.source ?? (/^https?:\/\//i.test(query) ? 'arbitrary' : 'auto')),
+        searchEngine:
+          (options.searchEngine?.startsWith('ext:') ? undefined : options.searchEngine) ??
+          options.source ??
+          (/^https?:\/\//i.test(query) ? 'arbitrary' : 'auto'),
       },
     };
     const execution = { signal: options.signal, blocked, pluginId: target };

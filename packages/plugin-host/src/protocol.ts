@@ -4,7 +4,7 @@ import { SearchResult } from './structures/search-result.js';
 import { deserialize } from './utils/serde.js';
 
 /** Versioned metadata plus an optional, expiring host-owned process-state hint.
- * Keep this whole payload when requesting source.stream; the hint is never required for persistence.
+ * Use serializeSourceTrack() for operation requests; serialize() deliberately omits the hint.
  */
 export type PortableSourceTrack = SerializedTrack & {
   /** Opaque source-host state reference. Never identifies credentials or stream resources. */
@@ -20,7 +20,7 @@ export interface PortableSourceResult {
 }
 
 /** Reconstruct source-host metadata in a consumer process without restoring private extractor objects.
- * Keep the original portable tracks separately when requesting media, to retain ephemeral state hints.
+ * The normal Track retains the transient hint without requiring a second representation.
  * @param result HTTP result payload (after unwrapping Remedia's handled/result envelope).
  * @returns Shared model instances suitable for application metadata display and persistence.
  */
@@ -28,6 +28,8 @@ export function deserializeSourceResult(result: PortableSourceResult): SearchRes
   const tracks = result.tracks.map(({ sourceState: _state, ...entity }) => {
     const track = deserialize(entity);
     if (!(track instanceof Track)) throw new TypeError('Expected source Track metadata');
+    if (_state !== undefined && typeof _state !== 'string') throw new TypeError('Invalid source state');
+    track.sourceState = _state;
     return track;
   });
   const playlist = result.playlist ? deserialize(result.playlist) : null;
@@ -37,4 +39,12 @@ export function deserializeSourceResult(result: PortableSourceResult): SearchRes
     for (const track of tracks) track.playlist = playlist;
   }
   return new SearchResult({ tracks, playlist });
+}
+
+/** Encode a queued Track for a host operation, retaining its transient state hint.
+ * @param track Normal model from search, queue, or history.
+ * @returns Portable metadata with an optional opaque state token. Persistence should use serialize().
+ */
+export function serializeSourceTrack(track: Track): PortableSourceTrack {
+  return { ...track.serialize(), ...(track.sourceState ? { sourceState: track.sourceState } : {}) };
 }

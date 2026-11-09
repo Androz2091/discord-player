@@ -76,7 +76,7 @@ function makeTarball(directory, { name = 'discord-player', version = '8.0.0', ma
   writeFileSync(join(packageDir, 'dist/index.js'), 'export {};\n');
   writeFileSync(join(packageDir, 'dist/index.d.ts'), 'export {};\n');
   writeFileSync(join(packageDir, 'README.md'), `# ${name}\n`);
-  const tarball = join(directory, `${name.replace('/', '-')}-${version}.tgz`);
+  const tarball = join(directory, `${name.replace(/^@/, '').replace('/', '-')}-${version}.tgz`);
   execFileSync('tar', ['-czf', tarball, 'package'], { cwd: directory });
   rmSync(packageDir, { recursive: true, force: true });
   return tarball;
@@ -706,4 +706,58 @@ test('pnpm packing inspects generated tarballs without rebuilding package source
     packed.map(({ name, version }) => [name, version]),
     [['discord-player', '8.0.0']],
   );
+});
+
+test('scoped plugin host tarballs use pnpm filenames and publish before their dependent without real publication', async () => {
+  const root = createWorkspace(['discord-player']);
+  const hostDir = join(root, 'packages/plugin-host');
+  mkdirSync(hostDir, { recursive: true });
+  writeJson(join(hostDir, 'package.json'), packageManifest('@discord-player/plugin-host', '8.0.0'));
+  writeJson(join(root, '.github/release-packages.json'), {
+    packages: ['discord-player', '@discord-player/plugin-host'],
+  });
+  writeJson(
+    join(root, 'packages/discord-player/package.json'),
+    packageManifest('discord-player', '8.0.0', { dependencies: { '@discord-player/plugin-host': 'workspace:*' } }),
+  );
+  const destination = join(root, 'artifacts');
+  const packed = packReleasePackages({
+    root,
+    destination,
+    pack(directory, output) {
+      const manifest = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'));
+      const fixture = tempDir();
+      const tarball = makeTarball(fixture, {
+        name: manifest.name,
+        version: manifest.version,
+        manifest: {
+          dependencies: manifest.name === 'discord-player' ? { '@discord-player/plugin-host': '8.0.0' } : {},
+        },
+      });
+      writeFileSync(
+        join(output, `${manifest.name.replace(/^@/, '').replace('/', '-')}-${manifest.version}.tgz`),
+        readFileSync(tarball),
+      );
+    },
+  });
+  assert.deepEqual(
+    packed.map(({ name }) => name),
+    ['@discord-player/plugin-host', 'discord-player'],
+  );
+  const calls = [];
+  const visible = new Set();
+  await publishRelease({
+    root,
+    directory: destination,
+    version: '8.0.0',
+    lookupVersion: async (name) => visible.has(name),
+    lookupTag: async () => null,
+    publish: async (_path, metadata) => {
+      calls.push(metadata.name);
+      visible.add(metadata.name);
+    },
+    log: () => {},
+    sleep: async () => {},
+  });
+  assert.deepEqual(calls, ['@discord-player/plugin-host', 'discord-player']);
 });

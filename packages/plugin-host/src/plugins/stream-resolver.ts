@@ -85,7 +85,7 @@ export async function resolveTrackStream(
       );
 
       if (transformed) {
-        source = { stream: transformed.stream };
+        source = { ...source, stream: transformed.stream };
         streams.add(transformed.stream);
       }
     }

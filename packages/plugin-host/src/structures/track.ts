@@ -100,6 +100,9 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
   /** Portable source identity used by the plugin host. */
   public sourceReference?: SourceReference;
 
+  /** Opaque, expiring host state hint. Excluded from toJSON() and serialize(); retain only in memory. */
+  public sourceState?: string;
+
   /** Process-local v7 raw payload. Never serialized. */
   public readonly raw: Record<string, any>;
 
