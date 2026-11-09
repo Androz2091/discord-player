@@ -1,5 +1,12 @@
 import { expect, it, vi } from 'vitest';
-import { AudioFilter, type AudioFilterPresetName, AudioFilterPresets, DiscordPlayer, GuildQueuePlayerAudioFilters, type AudioFilterName } from '../src/index.js';
+import {
+  AudioFilter,
+  type AudioFilterPresetName,
+  AudioFilterPresets,
+  DiscordPlayer,
+  GuildQueuePlayerAudioFilters,
+  type AudioFilterName,
+} from '../src/index.js';
 import { setup } from './mocks/queue.js';
 import { deferred, settle } from './mocks/async.js';
 
@@ -183,34 +190,34 @@ it('rejects empty graphs and unknown named filters without changing configuratio
   await player.destroy();
 });
 
-it("should define new filters", async () => {
+it('should define new filters', async () => {
   const { player, queue } = await setup();
   const filters = queue.node.filters;
 
-  AudioFilter.define("underwater", "lowpass=f=600,aecho=0.8:0.7:40:0.5");
+  AudioFilter.define('underwater', 'lowpass=f=600,aecho=0.8:0.7:40:0.5');
 
-  expect(Object.keys(AudioFilterPresets)).includes("underwater");
-  expect(await filters.toggle("underwater" as AudioFilterPresetName)).toBe(true);
-  expect(filters.enabled).toEqual(["underwater"]);
+  expect(Object.keys(AudioFilterPresets)).includes('underwater');
+  expect(await filters.toggle('underwater' as AudioFilterPresetName)).toBe(true);
+  expect(filters.enabled).toEqual(['underwater']);
 
   const newFilters = [
     {
-      name: "true8d",
-      value: "apulsator=mode=sine:hz=0.125:amount=0.6,crossfeed=strength=0.4,aecho=0.9:0.9:40|70:0.15|0.1"
+      name: 'true8d',
+      value: 'apulsator=mode=sine:hz=0.125:amount=0.6,crossfeed=strength=0.4,aecho=0.9:0.9:40|70:0.15|0.1',
     },
     {
-      name: "reverb",
-      value: "aecho=0.8:0.7:40:0.5"
-    }
-  ]
+      name: 'reverb',
+      value: 'aecho=0.8:0.7:40:0.5',
+    },
+  ];
 
   AudioFilter.defineBulk(newFilters);
 
-  expect(Object.keys(AudioFilterPresets)).includes("reverb");
-  expect(Object.keys(AudioFilterPresets)).includes("true8d");
-  expect(await filters.toggle("true8d" as AudioFilterPresetName)).toBe(true);
-  expect(await filters.toggle("reverb" as AudioFilterPresetName)).toBe(true);
-  expect(filters.enabled).toEqual(["underwater", "true8d", "reverb"]);
+  expect(Object.keys(AudioFilterPresets)).includes('reverb');
+  expect(Object.keys(AudioFilterPresets)).includes('true8d');
+  expect(await filters.toggle('true8d' as AudioFilterPresetName)).toBe(true);
+  expect(await filters.toggle('reverb' as AudioFilterPresetName)).toBe(true);
+  expect(filters.enabled).toEqual(['underwater', 'true8d', 'reverb']);
 
   await player.destroy();
 });

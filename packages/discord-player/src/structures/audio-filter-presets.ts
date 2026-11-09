@@ -126,9 +126,9 @@ export const AudioFilter = {
    * Bulk define audio filters
    * @param filters Array of filters containing the filter name and ffmpeg filter strings
    */
-  defineBulk(filters: { name: string, value: string }[]) {
+  defineBulk(filters: { name: string; value: string }[]) {
     for (const filter of filters) {
       this.define(filter.name, filter.value);
     }
-  }
+  },
 } as const;
