@@ -24,6 +24,7 @@ export class BaseExtractor<Options extends object = object> {
   constructor(
     /** Owning legacy registration context. */
     public context: ExtractorExecutionContext,
+
     /** Original local extractor configuration. */
     public options: Options = {} as Options,
   ) {}

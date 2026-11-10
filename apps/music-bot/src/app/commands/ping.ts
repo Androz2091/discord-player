@@ -8,6 +8,7 @@ export const command: CommandData = {
 
 export const chatInput = musicCommand((interaction) => {
   const latency = interaction.client.ws.ping;
+
   return latency < 0
     ? 'Connected to Discord; gateway latency is not available yet.'
     : `Gateway latency: **${latency} ms**`;

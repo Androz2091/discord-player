@@ -21,9 +21,13 @@ export type { ExecuteOptions, StreamResolutionOptions } from './execution-option
 /** Context-owned source execution registry. Removal aborts and drains calls before teardown. */
 export class PluginRegistry {
   private entries = new Map<string, Entry>();
+
   private handlers: Handler[] = [];
+
   private order = 0;
+
   private resultOwners = new WeakMap<object, Entry>();
+
   private destroyed = false;
 
   /** Create an independent host.
@@ -33,7 +37,9 @@ export class PluginRegistry {
    */
   public constructor(
     public readonly player: LegacyPlayerContext,
+
     private readonly blocked: () => readonly string[] = () => [],
+
     private readonly hostId?: string,
   ) {}
 
@@ -125,6 +131,7 @@ export class PluginRegistry {
       player: this.player,
       options: registration.options,
       signal: controller.signal,
+
       on: (operation, fn, options = {}) => {
         controller.signal.throwIfAborted();
 
@@ -146,6 +153,7 @@ export class PluginRegistry {
           this.handlers = this.handlers.filter((item) => item !== handler);
         };
       },
+
       onCleanup: (callback) => {
         controller.signal.throwIfAborted();
         entry.cleanups.push(callback);
@@ -278,11 +286,13 @@ export class PluginRegistry {
     handled?: HandledCallback,
   ): Promise<OperationResult<K>> {
     const track = input && typeof input === 'object' && 'track' in input ? input.track : undefined;
+
     if (track?.sourceReference?.hostId && track.sourceReference.hostId !== this.hostId) {
       throw new Error(
         `Source host ${track.sourceReference.hostId} is unavailable in this runtime; execute this Track on its owning source host`,
       );
     }
+
     options.signal?.throwIfAborted();
     await this.ready();
     options.signal?.throwIfAborted();
@@ -294,16 +304,20 @@ export class PluginRegistry {
       {
         handlers: this.handlers,
         definitions: this.definitions,
+
         blocked: () => this.blocked(),
+
         resultOwners: this.resultOwners,
       },
       handled,
     );
+
     if (this.hostId && result && (operation === 'search.query.resolve' || operation === 'track.related')) {
       for (const item of (result as { tracks: Track[] }).tracks) {
         if (item.sourceReference) item.sourceReference.hostId = this.hostId;
       }
     }
+
     return result;
   }
 
@@ -322,7 +336,9 @@ export class PluginRegistry {
         {
           handlers: this.handlers,
           definitions: this.definitions,
+
           blocked: () => this.blocked(),
+
           resultOwners: this.resultOwners,
         },
       ).length > 0

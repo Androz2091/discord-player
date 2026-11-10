@@ -8,6 +8,8 @@ export const command: CommandData = {
 
 export const chatInput = musicCommand(async (interaction) => {
   const queue = requireQueue(interaction);
+
   await queue.delete();
+
   return 'Disconnected and deleted the music queue.';
 });

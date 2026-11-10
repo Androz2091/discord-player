@@ -9,8 +9,11 @@ export function createSocialImage({
   home = false,
 }: {
   title: string;
+
   description?: string | undefined;
+
   section?: string;
+
   home?: boolean;
 }) {
   return new ImageResponse(

@@ -12,10 +12,13 @@ import type { MediaResource, SearchOptions } from './types.js';
 export interface SourcePluginRuntimeOptions {
   /** Stable deployment identifier for standalone execution. */
   hostId?: string;
+
   /** Actual Player context when embedded. */
   player?: LegacyPlayerContext;
+
   /** Disabled provider IDs. */
   blockExtractors?: readonly string[];
+
   /** Legacy probe timeout hint. */
   probeTimeout?: number;
 }
@@ -24,10 +27,13 @@ export interface SourcePluginRuntimeOptions {
 export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> implements LegacyPlayerContext {
   /** Canonical operation registry and lifecycle owner. */
   public readonly plugins: PluginRegistry;
+
   /** Legacy constructor adapter sharing the same registry. */
   public readonly extractors: ExtractorExecutionContext;
+
   /** Actual Player or this runtime's source facade. */
   public readonly player: LegacyPlayerContext;
+
   /** Source compatibility options. */
   public readonly options: LegacyPlayerContext['options'];
 
@@ -46,24 +52,31 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
   get queues(): never {
     throw new Error('SourcePluginRuntime does not provide queues; use DiscordPlayer for playback');
   }
+
   /** Voice nodes require an actual DiscordPlayer. */
   get nodes(): never {
     throw new Error('SourcePluginRuntime does not provide voice nodes; use DiscordPlayer for playback');
   }
+
   /** Audio clients are unavailable in standalone source execution. */
   get remedia(): never {
     throw new Error('SourcePluginRuntime does not initialize a Remedia audio client');
   }
+
   /** Required audio access is unavailable in standalone execution. */
   getRemedia(): RemediaClient;
+
   /** Optional audio access returns null.
    * @param throwOnMissing Optional lookup flag.
    */
   getRemedia(throwOnMissing: false): RemediaClient | null;
+
   getRemedia(throwOnMissing = true): RemediaClient | null {
     if (throwOnMissing) throw new Error('SourcePluginRuntime does not initialize an audio client; use DiscordPlayer');
+
     return null;
   }
+
   /** Playback is outside the source compatibility API. */
   play(): never {
     throw new Error('SourcePluginRuntime cannot play audio; use DiscordPlayer');

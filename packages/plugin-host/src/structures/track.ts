@@ -122,6 +122,7 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
   public bridgedTrack: Track | null = null;
 
   private legacyExtractor: BaseExtractor<any> | null = null;
+
   private metadataProvider?: () => Promise<Metadata | null>;
 
   /** Compatibility extractor reference. Assigning it stamps a portable provider identity. */
@@ -157,6 +158,7 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
   }
 
   private trackMetadata: Metadata | null;
+
   private explicitDurationMs: number | undefined;
 
   /**

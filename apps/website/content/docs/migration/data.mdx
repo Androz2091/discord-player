@@ -30,6 +30,7 @@ for (const legacyRecord of historicalRecords) {
   try {
     const model = deserialize(legacyRecord);
     const v8Entity = serialize(model);
+
     await saveNewRecord(v8Entity);
   } catch (error) {
     await quarantineRecord(legacyRecord, error);

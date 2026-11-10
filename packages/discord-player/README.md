@@ -10,6 +10,7 @@ Discord Player v8 keeps the familiar `Player` and `GuildQueue` object model whil
 import { Player, QueueRepeatMode, Track, useHistory, useQueue } from 'discord-player';
 
 const player = new Player({ nodes: [{ type: 'embedded', id: 'local' }], send: sendDiscordGatewayPayload });
+
 await player.initialize(botUserId);
 
 const queue = await player.createQueue(guildId, {
@@ -28,6 +29,7 @@ await queue.connect({
 // A source integration must provide a Track subclass or bridge that resolves
 // this Track to a Remedia MediaSource before queue-managed playback can start.
 const track = new Track({ title: 'Example track', author: 'Example artist' });
+
 await queue.play(track);
 
 player.events.on('playerStart', (queue, track, rawEvent) => {
@@ -95,14 +97,18 @@ import { DiscordPlayer, Track, definePlugin } from 'discord-player';
 const rawHTTP = definePlugin<{ userAgent?: string }>({
   id: 'org.example.raw-http',
   kind: 'source',
+
   setup(ctx) {
     ctx.on('search.query.match', ({ query }) => (/^https?:\/\//i.test(query) ? { score: 100 } : null));
+
     ctx.on('search.query.resolve', ({ query }) => ({
       playlist: null,
       tracks: [new Track({ title: 'Direct media', url: query })],
     }));
+
     ctx.on('track.stream', ({ track }, { signal }) => {
       signal.throwIfAborted();
+
       return { url: track.url };
     });
   },
@@ -110,11 +116,16 @@ const rawHTTP = definePlugin<{ userAgent?: string }>({
 
 const player = new DiscordPlayer({
   nodes: [{ type: 'embedded', id: 'local' }],
+
   send: (guildId, payload) => gatewaySend(guildId, payload),
+
   plugins: [rawHTTP()],
 });
+
 await player.initialize(botUserId);
+
 const result = await player.search('https://example.test/audio.mp3');
+
 // Use player.play(channel, result) or queue.play(result) for managed playback.
 await player.plugins.execute('search.query.resolve', { query: 'https://example.test/audio.mp3' });
 ```
@@ -169,9 +180,11 @@ Remedia playback without managed queue/history integration.
 ```ts
 class RawExtractor extends BaseExtractor<{ root?: string }> {
   static identifier = 'org.example.legacy-raw';
+
   async validate(query: string) {
     return query.startsWith('https://');
   }
+
   async handle(query: string, context: ExtractorSearchContext) {
     const track = new Track(this.context.player, {
       title: 'Direct media',
@@ -179,13 +192,17 @@ class RawExtractor extends BaseExtractor<{ root?: string }> {
       requestedBy: context.requestedBy,
       engine: query,
     });
+
     track.extractor = this;
+
     return this.createResponse(null, [track]);
   }
+
   async stream(track: Track) {
     return track.raw.engine as string;
   }
 }
+
 await player.extractors.register(RawExtractor, {});
 ```
 
@@ -227,6 +244,7 @@ stream pipeline or custom preset-registration APIs.
 
 ```ts
 const filters = queue.node.filters;
+
 await filters.set(['8d', 'nightcore']); // Replace the chain with named presets.
 filters.get('8D'); // true; both spellings are accepted.
 filters.get(); // Complete raw FFmpeg filtergraph, or null.

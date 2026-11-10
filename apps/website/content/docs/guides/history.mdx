@@ -7,6 +7,7 @@ The queue owns a `GuildQueueHistoryManager`. It records previous Tracks and prov
 
 ```ts
 const queue = player.getQueue(guildId);
+
 if (!queue) return;
 
 console.log(queue.history.size);

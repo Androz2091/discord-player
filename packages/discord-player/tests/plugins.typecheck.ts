@@ -3,6 +3,7 @@ import { BaseExtractor, type DiscordPlayer, type Track, definePlugin, type Plugi
 const source = definePlugin<{ path: string; enabled?: boolean }>({
   id: 'org.example.file',
   kind: 'source',
+
   setup(ctx) {
     const path: string = ctx.options.path;
 

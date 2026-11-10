@@ -1,4 +1,5 @@
 import type { MediaSource } from '@remedia/client';
+
 /** Optional dispatch targeting and cancellation. */
 export interface ExecuteOptions {
   /** Restrict execution to one provider. */

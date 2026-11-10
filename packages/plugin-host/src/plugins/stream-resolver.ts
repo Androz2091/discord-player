@@ -33,6 +33,7 @@ export async function resolveTrackStream(
 
   if (result === undefined) {
     if (options.directUrlOnly) throw new DeferredSourceRequired();
+
     result = await run('track.bridge', { track, sourcePluginId: pluginId }, options, handled);
   }
 
@@ -48,23 +49,30 @@ export async function resolveTrackStream(
       : result instanceof Readable
         ? { stream: result }
         : result;
+
   if (options.directUrlOnly) {
     if (!('url' in source)) {
       if ('stream' in source) source.stream.destroy();
+
       throw new Error('A directUrlProviders entry must return only URLs; remove it to use lazy media grants');
     }
+
     if (hasTransforms(owner)) throw new DeferredSourceRequired();
   }
+
   const signal =
     options.signal && lifetime ? AbortSignal.any([options.signal, lifetime]) : (options.signal ?? lifetime);
+
   if (options.prepareSource) {
     try {
       source = await options.prepareSource(source, signal);
     } catch (error) {
       if ('stream' in source) source.stream.destroy();
+
       throw error;
     }
   }
+
   const streams = new Set<Readable>();
 
   if ('stream' in source) {
@@ -79,6 +87,7 @@ export async function resolveTrackStream(
 
   try {
     signal?.throwIfAborted();
+
     if (options.directUrlOnly && hasTransforms(owner)) throw new DeferredSourceRequired();
 
     if (options.remote && ('stream' in source || 'buffer' in source)) {

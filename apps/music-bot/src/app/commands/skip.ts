@@ -6,6 +6,8 @@ export const command: CommandData = { name: 'skip', description: 'Skip the curre
 export const chatInput = musicCommand(async (interaction) => {
   const queue = requireQueue(interaction);
   const track = requireTrack(queue);
+
   await queue.skip();
+
   return `Skipped ${displayTrack(track)}.${queue.currentTrack ? '' : ' The queue is empty.'}`;
 });

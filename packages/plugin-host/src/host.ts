@@ -26,20 +26,25 @@ export const SOURCE_PLUGIN_ID = 'discord-player.source';
 export interface SourcePluginHostOptions extends PluginHostOptions, Omit<SourcePluginRuntimeOptions, 'player'> {
   /** Stable non-secret deployment ID. Required for HTTP; generated only for local handle() usage. */
   hostId?: string;
+
   /** Return provider URLs directly when no byte transforms are needed. Default proxy.
    * Opt in only when the consuming node can enforce its own DNS/redirect policy and access these URLs.
    * Declared URL-only providers resolve at source.stream invocation; all byte sources remain deferred.
    */
   mediaDelivery?: 'proxy' | 'direct-url';
+
   /** Providers guaranteed to return only URLs without opening byte resources during track.stream.
    * Required for direct URL optimization; other providers stay lazy. Applicable transforms always force proxying.
    * A provider that violates this promise fails explicitly; legacy and mixed-source providers should be omitted.
    */
   directUrlProviders?: readonly string[];
+
   /** Remote materialization policy; files and private networks are denied by default. */
   mediaPolicy?: MediaAccessPolicy;
+
   /** Maximum retained process-local Track references; default 1000. */
   maxTrackStates?: number;
+
   /** State lifetime in milliseconds; default ten minutes. Expired tracks are reconstructed by URL. */
   trackStateTtlMs?: number;
 }
@@ -48,20 +53,31 @@ export interface SourcePluginHostOptions extends PluginHostOptions, Omit<SourceP
 export class SourcePluginHost {
   /** Source execution independent of transport. */
   readonly runtime: SourcePluginRuntime;
+
   /** Canonical source plugin registry. */
   readonly plugins;
+
   /** Legacy constructor registration adapter. */
   readonly extractors;
+
   /** Underlying generic host; exposes discovery, middleware matching and transport. */
   readonly remedia;
+
   /** Stable deployment identity, independent of provider identifiers and network addresses. */
   readonly hostId: string;
+
   private readonly mediaPolicy: MediaAccessPolicy;
+
   private readonly sweep: ReturnType<typeof setInterval>;
+
   private readonly explicitHostId: boolean;
+
   private boundary = new AsyncLocalStorage<boolean>();
+
   private states = new Map<string, { track: Track; expires: number; signal?: AbortSignal }>();
+
   private ttl: number;
+
   private capacity: number;
 
   /** Create a host without starting a listener.
@@ -70,14 +86,20 @@ export class SourcePluginHost {
   constructor(options: SourcePluginHostOptions) {
     this.ttl = options.trackStateTtlMs ?? 600000;
     this.capacity = options.maxTrackStates ?? 1000;
+
     if (!Number.isSafeInteger(this.ttl) || this.ttl < 1 || !Number.isSafeInteger(this.capacity) || this.capacity < 1) {
       throw new RangeError('Track state limits must be positive safe integers.');
     }
+
     this.explicitHostId = options.hostId !== undefined;
+
     if (options.publicUrl !== undefined && !this.explicitHostId)
       throw new TypeError('HTTP source hosts require an explicit hostId');
+
     this.hostId = options.hostId ?? randomUUID();
+
     if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/.test(this.hostId)) throw new TypeError('Invalid hostId');
+
     this.mediaPolicy = { ...options.mediaPolicy };
     this.remedia = createPluginHost(options);
     this.runtime = new SourcePluginRuntime({ ...options, hostId: this.hostId });
@@ -85,27 +107,36 @@ export class SourcePluginHost {
     this.sweep.unref();
     this.plugins = this.runtime.plugins;
     this.extractors = this.runtime.extractors;
+
     this.remedia.register({
       id: SOURCE_PLUGIN_ID,
       operations: {
         'source.search': async (input, { signal }) => {
           const request = this.record(input);
+
           if (typeof request.query !== 'string') throw new TypeError('query must be a string');
+
           const hints = this.searchOptions(request.options);
           const result = await this.runtime.search(request.query, { ...hints, signal });
+
           return this.boundary.getStore() ? this.portable(result) : result;
         },
+
         'source.resolve': async (input, { signal }) => {
           const request = this.record(input);
+
           if (typeof request.query !== 'string' || typeof request.pluginId !== 'string')
             throw new TypeError('query and pluginId are required');
+
           const result = await this.runtime.search(request.query, {
             ...this.searchOptions(request.options),
             pluginId: request.pluginId,
             signal,
           });
+
           return this.boundary.getStore() ? this.portable(result) : result;
         },
+
         'source.related': async (input, { signal }) => {
           const track = await this.restore(this.record(input).track, signal);
           const result = await this.plugins.execute(
@@ -113,21 +144,30 @@ export class SourcePluginHost {
             { track },
             { pluginId: track.sourceReference?.pluginId, signal },
           );
+
           return result && this.boundary.getStore() ? this.portable(result) : result;
         },
+
         'source.stream': async (input, { signal }) => {
           if (!this.boundary.getStore()) {
             return this.plugins.resolveStream(await this.restore(this.record(input).track, signal), { signal });
           }
+
           const value = this.record(input).track;
           const payload = cloneJSONValue(value instanceof Track ? serializeSourceTrack(value) : value);
           const { sourceState: _state, ...entity } = this.record(payload);
           const metadata = deserialize(entity);
+
           if (!(metadata instanceof Track)) throw new TypeError('Expected a serialized Track');
+
           this.assertHost(metadata);
+
           const providerId = metadata.sourceReference?.pluginId;
+
           await this.plugins.ready();
+
           const registration = this.plugins.registrationSignal(providerId ?? '');
+
           if (
             options.mediaDelivery === 'direct-url' &&
             providerId &&
@@ -136,17 +176,22 @@ export class SourcePluginHost {
           ) {
             try {
               const track = await this.restore(payload, signal);
+
               return await this.plugins.resolveStream(track, {
                 signal,
                 directUrlOnly: true,
+
                 prepareSource: async (media, lifetime) => {
                   if (!('url' in media)) throw new Error('Expected a direct media URL');
+
                   await authorizeMediaURL(new URL(media.url), this.mediaPolicy, lifetime ?? signal);
+
                   if (
                     'expiresAtMs' in media &&
                     (!Number.isFinite(Number(media.expiresAtMs)) || Number(media.expiresAtMs) <= Date.now())
                   )
                     throw new Error('Media source credentials have expired');
+
                   return media;
                 },
               });
@@ -154,22 +199,29 @@ export class SourcePluginHost {
               if (!(error instanceof DeferredSourceRequired)) throw error;
             }
           }
+
           // Unknown source types and transformed URLs resolve only on grant redemption.
           return createMediaSource({
             open: async ({ signal: mediaSignal }) => {
               const lifetime = registration ? AbortSignal.any([mediaSignal, registration]) : mediaSignal;
+
               lifetime.throwIfAborted();
+
               const track = await this.restore(payload, lifetime);
               const source = await this.plugins.resolveStream(track, {
                 signal: lifetime,
+
                 prepareSource: (media, sourceSignal) => this.prepareMedia(media, sourceSignal),
               });
+
               if ('stream' in source) return source.stream;
+
               throw new Error('Expected a materialized encoded media stream');
             },
           });
         },
       },
+
       dispose: async () => {
         clearInterval(this.sweep);
         this.states.clear();
@@ -185,35 +237,47 @@ export class SourcePluginHost {
   private record(input: unknown): Record<string, unknown> {
     if (!input || typeof input !== 'object' || Array.isArray(input))
       throw new TypeError('Expected an operation input object');
+
     return input as Record<string, unknown>;
   }
 
   private searchOptions(input: unknown): SearchOptions {
     if (input === undefined) return {};
+
     if (!this.boundary.getStore()) return this.record(input) as SearchOptions;
+
     const value = this.record(input);
     // Only portable hints cross the boundary. Request options and credentials never do.
     const result: SearchOptions = {};
+
     for (const key of ['pluginId', 'searchEngine', 'source'] as const) {
       if (value[key] !== undefined) {
         if (typeof value[key] !== 'string') throw new TypeError(`${key} must be a string`);
+
         result[key] = value[key];
       }
     }
+
     if (value.limit !== undefined) {
       if (!Number.isSafeInteger(value.limit) || Number(value.limit) < 1) throw new TypeError('limit must be positive');
+
       result.limit = Number(value.limit);
     }
+
     if (value.requestedBy !== undefined) {
       if (typeof value.requestedBy !== 'string' && value.requestedBy !== null)
         throw new TypeError('requestedBy must be an identity string');
+
       result.requestedBy = value.requestedBy;
     }
+
     if (value.blockExtractors !== undefined) {
       if (!Array.isArray(value.blockExtractors) || !value.blockExtractors.every((id) => typeof id === 'string'))
         throw new TypeError('blockExtractors must contain strings');
+
       result.blockExtractors = value.blockExtractors;
     }
+
     return result;
   }
 
@@ -229,11 +293,14 @@ export class SourcePluginHost {
 
   private portable(result: SearchResultData): PortableSourceResult {
     this.prune();
+
     const tracks = result.tracks.map((track) => {
       // serialize first; never retain an invalid or unsafe response.
       if (track.sourceReference) track.sourceReference.hostId = this.hostId;
+
       const serialized = track.serialize();
       const stateId = randomUUID();
+
       this.states.set(stateId, {
         track: Object.assign(Object.create(Object.getPrototypeOf(track)), track, {
           playlist: null,
@@ -243,29 +310,40 @@ export class SourcePluginHost {
         expires: Date.now() + this.ttl,
         signal: this.plugins.registrationSignal(track.sourceReference?.pluginId ?? ''),
       });
+
       while (this.states.size > this.capacity) this.states.delete(this.states.keys().next().value!);
+
       return { ...serialized, sourceState: stateId };
     });
+
     return { tracks, playlist: result.playlist?.serialize() ?? null };
   }
 
   private async restore(input: unknown, signal: AbortSignal): Promise<Track> {
     signal.throwIfAborted();
+
     if (input instanceof Track && !this.boundary.getStore()) {
       this.assertHost(input);
+
       // A consumer-side model has no host-local engine. Ordinary local models retain identity.
       if (input.sourceState || (this.extractors.get(input.sourceReference?.pluginId ?? '') && !input.extractor)) {
         return this.restore(serializeSourceTrack(input), signal);
       }
+
       return input;
     }
+
     const payload = this.record(input);
     const { sourceState: _state, ...entity } = payload;
     const track = deserialize(entity);
+
     if (!(track instanceof Track)) throw new TypeError('Expected a serialized Track');
+
     this.assertHost(track);
     this.prune();
+
     const cached = typeof payload.sourceState === 'string' ? this.states.get(payload.sourceState)?.track : undefined;
+
     if (
       cached &&
       cached.id === track.id &&
@@ -276,6 +354,7 @@ export class SourcePluginHost {
       try {
         const { requestMetadata: _callback, playlist: _playlist, ...rawData } = cached.raw;
         const engine = rawData.engine;
+
         if (
           engine &&
           typeof engine === 'object' &&
@@ -283,8 +362,10 @@ export class SourcePluginHost {
           Object.getPrototypeOf(engine) !== Object.prototype
         )
           throw new Error('Opaque engine requires reconstruction');
+
         const raw = structuredClone(rawData);
         const copy = Object.assign(Object.create(Object.getPrototypeOf(cached)), cached, { raw });
+
         copy.sourceReference = structuredClone(cached.sourceReference);
         copy.trackMetadata = structuredClone(cached.metadata);
         copy.metadataProvider = undefined;
@@ -292,15 +373,20 @@ export class SourcePluginHost {
         copy.playlist = null;
         copy.bridgedTrack = null;
         copy.bridgedExtractor = null;
+
         return copy;
       } catch {
         // Legacy callbacks/classes cannot be safely copied; resolve their public location again.
       }
     }
+
     const pluginId = track.sourceReference?.pluginId;
+
     if (!pluginId || !this.plugins.has(pluginId))
       throw new Error('Track source is unavailable; register its provider and search again');
+
     if (!this.extractors.get(pluginId)) return track;
+
     // Re-run legacy metadata resolution rather than guessing the meaning of raw.engine.
     const data = track.sourceReference?.data;
     const queryType = data && typeof data === 'object' && 'queryType' in data ? data.queryType : undefined;
@@ -310,9 +396,12 @@ export class SourcePluginHost {
       searchEngine: typeof queryType === 'string' ? queryType : undefined,
     });
     const restored = result.tracks.find((item) => item.url === track.url);
+
     if (!restored) throw new Error(`Source ${pluginId} could not reconstruct expired Track state; search again`);
+
     restored.requestedBy = track.requestedBy;
     restored.sourceReference = track.sourceReference;
+
     return restored;
   }
 
@@ -334,6 +423,7 @@ export class SourcePluginHost {
    */
   fetch(request: Request): Promise<Response> {
     if (!this.explicitHostId) return Promise.reject(new TypeError('HTTP source hosts require an explicit hostId'));
+
     return this.boundary.run(true, () => this.remedia.fetch(request));
   }
 

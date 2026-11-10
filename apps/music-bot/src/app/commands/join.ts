@@ -10,11 +10,17 @@ export const command: CommandData = {
 
 export const chatInput = musicCommand(async (interaction) => {
   const channel = requireVoiceChannel(interaction);
+
   if (!channel.joinable) throw new MusicCommandError('I cannot join your voice channel. Check my permissions.');
+
   const textChannel = interaction.channel;
+
   if (!textChannel?.isSendable()) throw new MusicCommandError('Use a channel where I can send playback updates.');
+
   const queue = await player.queues.create<QueueMetadata>(interaction.guildId, { metadata: { textChannel } });
+
   queue.metadata = { textChannel };
   await queue.connect({ channelId: channel.id });
+
   return `Connected to <#${channel.id}>.`;
 });

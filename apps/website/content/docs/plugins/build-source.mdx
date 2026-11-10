@@ -13,9 +13,11 @@ import { definePlugin, Track } from 'discord-player';
 export const directAudio = definePlugin({
   id: 'example.direct-audio',
   kind: 'source',
+
   setup(ctx) {
     ctx.on('search.query.match', ({ query }) => {
       const valid = /^https?:\/\/.*\.(mp3|ogg|wav)(\?.*)?$/i.test(query);
+
       return valid ? { score: 100 } : null;
     });
 
@@ -26,6 +28,7 @@ export const directAudio = definePlugin({
 
     ctx.on('track.stream', ({ track }, { signal }) => {
       signal.throwIfAborted();
+
       return { url: track.url };
     });
   },
@@ -38,8 +41,10 @@ Register it when creating the Player:
 const player = new Player({
   nodes: [{ id: 'local', type: 'embedded' }],
   plugins: [directAudio()],
+
   send: (guildId, packet) => sendGateway(guildId, packet),
 });
+
 await player.initialize(botUserId);
 ```
 
@@ -68,6 +73,7 @@ type Options = { userAgent?: string };
 export const configurableSource = definePlugin<Options>({
   id: 'example.configurable-source',
   kind: 'source',
+
   setup(ctx) {
     console.log(ctx.options.userAgent);
   },

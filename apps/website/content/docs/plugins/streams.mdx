@@ -43,6 +43,7 @@ The source plugin host currently runs on the bot side. A remote Remedia node can
 ```ts
 ctx.on('track.stream', async ({ track }, { signal }) => {
   signal.throwIfAborted();
+
   return { url: await obtainRemoteAccessibleUrl(track) };
 });
 ```

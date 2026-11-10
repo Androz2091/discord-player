@@ -11,8 +11,10 @@ import { DiscordPlayer } from 'discord-player';
 const player = new DiscordPlayer({
   nodes: [{ id: 'local', type: 'embedded' }],
   crossfade: { enabled: true, durationMs: 5000 },
+
   send: (guildId, payload) => sendGateway(guildId, payload),
 });
+
 await player.initialize(botUserId);
 // trackA, trackB, and trackC are ordinary Tracks resolved by your source plugins.
 await player.play(channel, trackA);

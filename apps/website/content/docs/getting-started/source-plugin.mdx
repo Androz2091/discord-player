@@ -11,6 +11,7 @@ import { definePlugin, Track } from 'discord-player';
 export const directMedia = definePlugin({
   id: 'example.direct-media',
   kind: 'source',
+
   setup(ctx) {
     ctx.on('search.query.match', ({ query }) =>
       /^https?:\/\/.*\.(mp3|ogg|wav)(\?.*)?$/i.test(query) ? { score: 100 } : null,
@@ -28,6 +29,7 @@ export const directMedia = definePlugin({
 
     ctx.on('track.stream', ({ track }, { signal }) => {
       signal.throwIfAborted();
+
       return { url: track.url };
     });
   },
@@ -42,6 +44,7 @@ import { directMedia } from './direct-media.js';
 const player = new Player({
   nodes: [{ id: 'local', type: 'embedded' }],
   plugins: [directMedia()],
+
   send: (guildId, payload) => sendGateway(guildId, payload),
 });
 ```
@@ -52,6 +55,7 @@ Here `sendGateway` is your own function from [step 1](/docs/getting-started/crea
 
 ```ts
 const result = await player.search('https://media.example.com/track.mp3');
+
 console.log(result.tracks[0]?.title);
 ```
 

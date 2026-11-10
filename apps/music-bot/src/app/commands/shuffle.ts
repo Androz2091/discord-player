@@ -17,8 +17,10 @@ export const command: CommandData = {
 export const chatInput = musicCommand((interaction) => {
   const queue = requireQueue(interaction);
   const enabled = interaction.options.getBoolean('enabled');
+
   if (enabled === null) queue.toggleShuffle();
   else if (enabled) queue.enableShuffle();
   else queue.disableShuffle();
+
   return `Shuffle is ${queue.isShuffling ? 'on' : 'off'}.`;
 });

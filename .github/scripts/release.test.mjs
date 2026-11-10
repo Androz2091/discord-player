@@ -31,25 +31,32 @@ test.after(() => {
 
 function tempDir() {
   const directory = mkdtempSync(join(tmpdir(), 'discord-player-release-test-'));
+
   tempDirs.push(directory);
+
   return directory;
 }
 
 function createWorkspace(packageNames = ['discord-player', 'create-music-bot']) {
   const root = tempDir();
+
   mkdirSync(join(root, '.github'), { recursive: true });
   mkdirSync(join(root, 'packages'), { recursive: true });
   mkdirSync(join(root, 'apps/music-bot'), { recursive: true });
   writeJson(join(root, '.github/release-packages.json'), { packages: packageNames });
+
   for (const name of packageNames) {
     const packageDir = join(root, 'packages', name);
+
     mkdirSync(join(packageDir, 'dist'), { recursive: true });
     writeJson(join(packageDir, 'package.json'), packageManifest(name, '0.0.0'));
     writeFileSync(join(packageDir, 'dist/index.js'), 'export {};\n');
     writeFileSync(join(packageDir, 'dist/index.d.ts'), 'export {};\n');
     writeFileSync(join(packageDir, 'README.md'), `# ${name}\n`);
   }
+
   writeJson(join(root, 'apps/music-bot/package.json'), { name: 'music-bot', version: '0.1.0', private: true });
+
   return root;
 }
 
@@ -71,14 +78,18 @@ function writeJson(path, value) {
 
 function makeTarball(directory, { name = 'discord-player', version = '8.0.0', manifest = {} } = {}) {
   const packageDir = join(directory, 'package');
+
   mkdirSync(join(packageDir, 'dist'), { recursive: true });
   writeJson(join(packageDir, 'package.json'), packageManifest(name, version, manifest));
   writeFileSync(join(packageDir, 'dist/index.js'), 'export {};\n');
   writeFileSync(join(packageDir, 'dist/index.d.ts'), 'export {};\n');
   writeFileSync(join(packageDir, 'README.md'), `# ${name}\n`);
+
   const tarball = join(directory, `${name.replace(/^@/, '').replace('/', '-')}-${version}.tgz`);
+
   execFileSync('tar', ['-czf', tarball, 'package'], { cwd: directory });
   rmSync(packageDir, { recursive: true, force: true });
+
   return tarball;
 }
 
@@ -86,6 +97,7 @@ function response(status, body) {
   return {
     status,
     ok: status >= 200 && status < 300,
+
     async json() {
       return body;
     },
@@ -129,6 +141,7 @@ test('rejects malformed SemVer, missing versions, and invalid prerelease sequenc
   ]) {
     assert.throws(() => parseReleaseSubject(subject), ReleaseError, subject);
   }
+
   assert.equal(parseReleaseSubject('fix: release 8.0.0'), null);
   assert.equal(parseReleaseSubject('chore: releasing 8.0.0'), null);
   assert.throws(() => parseReleaseSubject('chore: release 8.0.0 extra'), /Invalid release commit subject/);
@@ -150,15 +163,18 @@ test('suppresses release detection for pull requests, forks, and non-release bra
 
 test('only release authority IDs may trigger pushes and manual dispatches', () => {
   assert.deepEqual(RELEASE_AUTHORITIES, ['46562212', '42497995']);
+
   for (const eventName of ['push', 'workflow_dispatch']) {
     for (const actorId of RELEASE_AUTHORITIES) {
       for (const triggeringActorId of RELEASE_AUTHORITIES) {
         assert.equal(detectRelease(releaseContext({ eventName, actorId, triggeringActorId })).release, true);
       }
     }
+
     for (const actorId of [undefined, null, '', '1', 'twlite', '42497995 ']) {
       assert.deepEqual(detectRelease(releaseContext({ eventName, actorId })), { release: false });
     }
+
     for (const triggeringActorId of [undefined, null, '', '1']) {
       assert.deepEqual(detectRelease(releaseContext({ eventName, triggeringActorId })), { release: false });
     }
@@ -171,50 +187,60 @@ test('resolves rerun accounts by numeric ID and fails closed on unverified ident
       actor: 'twlite',
       actorId: '46562212',
       triggeringActor: 'twlite',
+
       fetchImpl: async () => assert.fail('Same actor must use the runner-provided ID.'),
     }),
     '46562212',
   );
   assert.equal(await resolveTriggeringActorId({ actor: 'twlite', actorId: '46562212' }), null);
+
   for (const id of [42497995, 12345]) {
     assert.equal(
       await resolveTriggeringActorId({
         actor: 'twlite',
         actorId: '46562212',
         triggeringActor: 'someone',
+
         fetchImpl: async (url) => {
           assert.equal(url, 'https://api.github.com/users/someone');
+
           return response(200, { id });
         },
       }),
       String(id),
     );
   }
+
   for (const body of [null, {}, { id: '42497995' }]) {
     await assert.rejects(
       resolveTriggeringActorId({
         actor: 'twlite',
         actorId: '46562212',
         triggeringActor: 'someone',
+
         fetchImpl: async () => response(200, body),
       }),
       /invalid triggering actor ID/,
     );
   }
+
   await assert.rejects(
     resolveTriggeringActorId({
       actor: 'twlite',
       actorId: '46562212',
       triggeringActor: 'someone',
+
       fetchImpl: async () => response(500, {}),
     }),
     /HTTP 500/,
   );
+
   await assert.rejects(
     resolveTriggeringActorId({
       actor: 'twlite',
       actorId: '46562212',
       triggeringActor: 'someone',
+
       fetchImpl: async () => {
         throw new Error('offline');
       },
@@ -233,6 +259,7 @@ test('CLI detection and downstream authorization reject missing or unauthorized 
     GITHUB_TRIGGERING_ACTOR: 'twlite',
     GITHUB_OUTPUT: '',
   };
+
   for (const actorId of ['', '12345', ...RELEASE_AUTHORITIES]) {
     const env = { ...baseEnv, GITHUB_ACTOR_ID: actorId };
     const detected = JSON.parse(
@@ -241,12 +268,15 @@ test('CLI detection and downstream authorization reject missing or unauthorized 
         env,
       }),
     );
+
     assert.equal(detected.release, String(RELEASE_AUTHORITIES.includes(actorId)));
+
     const authorize = () =>
       execFileSync(process.execPath, ['.github/scripts/release.mjs', 'authorize'], {
         env,
         stdio: 'pipe',
       });
+
     if (RELEASE_AUTHORITIES.includes(actorId)) assert.doesNotThrow(authorize);
     else assert.throws(authorize, /authorized GitHub actor/);
   }
@@ -255,18 +285,23 @@ test('CLI detection and downstream authorization reject missing or unauthorized 
 test('synchronizes every public packages/ package idempotently and leaves private app versions alone', () => {
   const root = createWorkspace();
   const beforeApp = readFileSync(join(root, 'apps/music-bot/package.json'), 'utf8');
+
   assert.deepEqual(
     discoverReleasePackages({ root }).map(({ name }) => name),
     ['discord-player', 'create-music-bot'],
   );
   assert.deepEqual(syncPackageVersions('8.0.0-dev.4', { root }), ['discord-player', 'create-music-bot']);
+
   const first = ['discord-player', 'create-music-bot'].map((name) =>
     readFileSync(join(root, 'packages', name, 'package.json'), 'utf8'),
   );
+
   syncPackageVersions('8.0.0-dev.4', { root });
+
   const second = ['discord-player', 'create-music-bot'].map((name) =>
     readFileSync(join(root, 'packages', name, 'package.json'), 'utf8'),
   );
+
   assert.deepEqual(second, first);
   assert.deepEqual(
     second.map((content) => JSON.parse(content).version),
@@ -277,23 +312,30 @@ test('synchronizes every public packages/ package idempotently and leaves privat
 
 test('fails closed when a new public package is omitted from the release inventory', () => {
   const root = createWorkspace();
+
   mkdirSync(join(root, 'packages/forgotten-package'));
   writeJson(join(root, 'packages/forgotten-package/package.json'), { name: 'forgotten-package', version: '1.0.0' });
+
   assert.throws(() => discoverReleasePackages({ root }), /Release package inventory mismatch/);
 });
 
 test('validates entrypoints and packed manifests, including exact workspace dependency resolution', () => {
   const root = createWorkspace();
+
   syncPackageVersions('8.0.0', { root });
+
   const main = join(root, 'packages/discord-player');
   const bot = join(root, 'packages/create-music-bot');
+
   writeJson(join(bot, 'package.json'), packageManifest('create-music-bot', '8.0.0'));
+
   writeJson(
     join(main, 'package.json'),
     packageManifest('discord-player', '8.0.0', {
       dependencies: { 'create-music-bot': '8.0.0' },
     }),
   );
+
   assert.deepEqual(
     orderPackagesByDependencies([
       { name: 'discord-player', manifest: JSON.parse(readFileSync(join(main, 'package.json'), 'utf8')) },
@@ -303,12 +345,15 @@ test('validates entrypoints and packed manifests, including exact workspace depe
   );
 
   const artifactDir = join(root, 'artifacts');
+
   mkdirSync(artifactDir);
+
   const validTarball = makeTarball(artifactDir, {
     name: 'discord-player',
     version: '8.0.0',
     manifest: { dependencies: { 'create-music-bot': '8.0.0' } },
   });
+
   assert.equal(
     validateTarball(validTarball, { name: 'discord-player', version: '8.0.0', root }).manifest.dependencies[
       'create-music-bot'
@@ -317,12 +362,15 @@ test('validates entrypoints and packed manifests, including exact workspace depe
   );
 
   const invalidDir = join(root, 'invalid');
+
   mkdirSync(invalidDir);
+
   const workspaceTarball = makeTarball(invalidDir, {
     name: 'discord-player',
     version: '8.0.0',
     manifest: { dependencies: { 'create-music-bot': 'workspace:*' } },
   });
+
   assert.throws(
     () => validateTarball(workspaceTarball, { name: 'discord-player', version: '8.0.0', root }),
     /unresolved dependencies/,
@@ -332,17 +380,24 @@ test('validates entrypoints and packed manifests, including exact workspace depe
 test('rejects missing or incomplete npm tarballs before publication', async () => {
   const root = tempDir();
   const missing = join(root, 'missing.tgz');
+
   assert.throws(() => validateTarball(missing, { name: 'discord-player', version: '8.0.0' }), /Missing npm tarball/);
 
   const incompleteDir = join(root, 'incomplete');
+
   mkdirSync(incompleteDir);
+
   const tarball = makeTarball(incompleteDir, { name: 'discord-player', version: '8.0.0' });
   const unpackDir = join(root, 'unpacked');
+
   mkdirSync(unpackDir);
   execFileSync('tar', ['-xzf', tarball, '-C', unpackDir]);
   rmSync(join(unpackDir, 'package/dist/index.d.ts'));
+
   const incomplete = join(root, 'incomplete.tgz');
+
   execFileSync('tar', ['-czf', incomplete, 'package'], { cwd: unpackDir });
+
   assert.throws(
     () => validateTarball(incomplete, { name: 'discord-player', version: '8.0.0' }),
     /missing declared entrypoint/,
@@ -356,36 +411,44 @@ test('npm exact-version lookup accepts exact metadata and treats only HTTP 404 a
       version: '8.0.0',
       dist: { tarball: 'https://registry.npmjs.org/discord-player/-/discord-player-8.0.0.tgz' },
     });
+
   assert.equal(await lookupNpmVersion('discord-player', '8.0.0', { fetchImpl: exact }), true);
   assert.equal(await lookupNpmVersion('discord-player', '8.0.0', { fetchImpl: async () => response(404, {}) }), false);
+
   await assert.rejects(
     lookupNpmVersion('discord-player', '8.0.0', { fetchImpl: async () => response(500, {}), attempts: 1 }),
     /HTTP 500/,
   );
+
   await assert.rejects(
     lookupNpmVersion('discord-player', '8.0.0', {
       fetchImpl: async () => {
         throw new Error('offline');
       },
+
       attempts: 1,
     }),
     /offline/,
   );
+
   await assert.rejects(
     lookupNpmVersion('discord-player', '8.0.0', {
       fetchImpl: async () => response(200, { name: 'wrong', version: '8.0.0' }),
     }),
     /invalid metadata/,
   );
+
   await assert.rejects(
     lookupNpmVersion('discord-player', '8.0.0', { fetchImpl: async () => response(200, null) }),
     /invalid metadata/,
   );
+
   await assert.rejects(
     lookupNpmVersion('discord-player', '8.0.0', {
       fetchImpl: async () => ({
         status: 200,
         ok: true,
+
         async json() {
           throw new Error('invalid');
         },
@@ -408,6 +471,7 @@ test('npm dist-tag lookup validates registry responses and absent tags', async (
     }),
     null,
   );
+
   await assert.rejects(
     lookupNpmDistTag('discord-player', 'latest', {
       fetchImpl: async () => response(200, { name: 'wrong', 'dist-tags': {} }),
@@ -420,8 +484,10 @@ test('publishes every missing package in dependency order with stable or prerele
   const root = tempDir();
   const playerTarball = join(root, 'discord-player.tgz');
   const creatorTarball = join(root, 'create-music-bot.tgz');
+
   writeFileSync(playerTarball, 'verified player tarball');
   writeFileSync(creatorTarball, 'verified creator tarball');
+
   const packages = [
     { name: 'discord-player', version: '8.0.0', path: playerTarball, dependencies: { 'create-music-bot': '8.0.0' } },
     { name: 'create-music-bot', version: '8.0.0', path: creatorTarball, dependencies: {} },
@@ -431,15 +497,21 @@ test('publishes every missing package in dependency order with stable or prerele
   const summary = await publishMissingPackages({
     packages,
     distTag: 'latest',
+
     lookupVersion: async (name) => visibleVersions.has(name),
+
     lookupTag: async () => null,
+
     publish: async (path, options) => {
       calls.push({ path, ...options });
       visibleVersions.add(options.name);
     },
+
     sleep: async () => {},
+
     log: () => {},
   });
+
   assert.deepEqual(
     calls.map(({ name }) => name),
     ['create-music-bot', 'discord-player'],
@@ -455,18 +527,25 @@ test('publishes every missing package in dependency order with stable or prerele
 
   const prereleaseCalls = [];
   let prereleaseVisible = false;
+
   await publishMissingPackages({
     packages: [{ name: 'discord-player', version: '8.0.0-beta.2', path: playerTarball }],
     distTag: 'beta',
+
     lookupVersion: async () => prereleaseVisible,
+
     lookupTag: async () => null,
+
     publish: async (path, options) => {
       prereleaseCalls.push(options);
       prereleaseVisible = true;
     },
+
     sleep: async () => {},
+
     log: () => {},
   });
+
   assert.deepEqual(
     prereleaseCalls.map(({ distTag }) => distTag),
     ['beta'],
@@ -476,25 +555,35 @@ test('publishes every missing package in dependency order with stable or prerele
 test('waits through bounded npm propagation 404s after publication', async () => {
   const root = tempDir();
   const tarball = join(root, 'package.tgz');
+
   writeFileSync(tarball, 'tarball');
+
   let visible = false;
   let checks = 0;
   const result = await publishMissingPackages({
     packages: [{ name: 'discord-player', version: '8.0.0', path: tarball }],
     distTag: 'latest',
+
     lookupVersion: async () => {
       checks += 1;
+
       return visible;
     },
+
     lookupTag: async () => null,
+
     publish: async () => {
       visible = true;
     },
+
     verifyAttempts: 3,
     verifyDelayMs: 0,
+
     sleep: async () => {},
+
     log: () => {},
   });
+
   assert.equal(result.packages[0].status, 'published');
   assert.equal(checks, 2);
 });
@@ -503,8 +592,10 @@ test('skips every existing version, resumes a partial publish, and leaves existi
   const root = tempDir();
   const first = join(root, 'player.tgz');
   const second = join(root, 'creator.tgz');
+
   writeFileSync(first, 'tarball');
   writeFileSync(second, 'tarball');
+
   const packages = [
     { name: 'discord-player', version: '8.0.0-dev.4', path: first },
     { name: 'create-music-bot', version: '8.0.0-dev.4', path: second },
@@ -514,14 +605,19 @@ test('skips every existing version, resumes a partial publish, and leaves existi
   const firstRun = await publishMissingPackages({
     packages,
     distTag: 'dev',
+
     lookupVersion: async (name) => existing.has(name),
+
     lookupTag: async () => null,
+
     publish: async (path, options) => {
       published.push(options.name);
       existing.add(options.name);
     },
+
     log: () => {},
   });
+
   assert.deepEqual(
     firstRun.packages.map(({ status }) => status),
     ['skipped', 'published'],
@@ -531,13 +627,18 @@ test('skips every existing version, resumes a partial publish, and leaves existi
   const secondRun = await publishMissingPackages({
     packages,
     distTag: 'dev',
+
     lookupVersion: async (name) => existing.has(name),
+
     lookupTag: async () => {
       throw new Error('Existing package dist-tags must not be changed.');
     },
+
     publish: async () => assert.fail('Rerun republished an existing package.'),
+
     log: () => {},
   });
+
   assert.deepEqual(
     secondRun.packages.map(({ status }) => status),
     ['skipped', 'skipped'],
@@ -548,9 +649,12 @@ test('fails before a dependent publish when its missing dependency cannot publis
   const root = tempDir();
   const dependency = join(root, 'dependency.tgz');
   const dependent = join(root, 'dependent.tgz');
+
   writeFileSync(dependency, 'tarball');
   writeFileSync(dependent, 'tarball');
+
   const calls = [];
+
   await assert.rejects(
     publishMissingPackages({
       packages: [
@@ -558,48 +662,67 @@ test('fails before a dependent publish when its missing dependency cannot publis
         { name: 'create-music-bot', version: '8.0.0', path: dependency, dependencies: {} },
       ],
       distTag: 'latest',
+
       lookupVersion: async () => false,
+
       lookupTag: async () => null,
+
       publish: async (path, options) => {
         calls.push(options.name);
+
         throw new Error('publish failed');
       },
+
       log: () => {},
     }),
     /publish failed/,
   );
+
   assert.deepEqual(calls, ['create-music-bot']);
 });
 
 test('publication errors, registry errors, missing tarballs, and latest-tag downgrades fail closed', async () => {
   const root = tempDir();
   const tarball = join(root, 'package.tgz');
+
   writeFileSync(tarball, 'tarball');
+
   const pkg = [{ name: 'discord-player', version: '8.0.0', path: tarball }];
+
   await assert.rejects(
     publishMissingPackages({
       packages: pkg,
       distTag: 'latest',
+
       lookupVersion: async () => false,
+
       lookupTag: async () => null,
+
       publish: async () => {
         throw new Error('npm failed');
       },
+
       log: () => {},
     }),
     /npm failed/,
   );
+
   await assert.rejects(
     publishMissingPackages({
       packages: pkg,
       distTag: 'latest',
+
       lookupVersion: async () => false,
+
       lookupTag: async () => '8.1.0',
+
       publish: async () => assert.fail('Should refuse dist-tag regression.'),
+
       log: () => {},
     }),
     /backward/,
   );
+
   await assert.rejects(
     publishMissingPackages({
       packages: [{ ...pkg[0], path: join(root, 'absent.tgz') }],
@@ -607,10 +730,12 @@ test('publication errors, registry errors, missing tarballs, and latest-tag down
     }),
     /Missing npm tarball/,
   );
+
   await assert.rejects(
     verifyPublishedVersions({
       packages: ['discord-player', 'create-music-bot'],
       version: '8.0.0',
+
       lookupVersion: async (name) => name === 'discord-player',
     }),
     /create-music-bot@8.0.0 is not published/,
@@ -622,9 +747,12 @@ test('retries transient registry failures but does not misread them as unpublish
   const found = await lookupNpmVersion('discord-player', '8.0.0', {
     attempts: 3,
     delayMs: 0,
+
     sleep: async () => {},
+
     fetchImpl: async () => {
       calls += 1;
+
       return calls === 1
         ? response(503, {})
         : response(200, {
@@ -634,6 +762,7 @@ test('retries transient registry failures but does not misread them as unpublish
           });
     },
   });
+
   assert.equal(found, true);
   assert.equal(calls, 2);
   assert.equal(compareSemver('8.0.0-rc.1', '8.0.0'), -1);
@@ -642,21 +771,30 @@ test('retries transient registry failures but does not misread them as unpublish
 
 test('validates package artifacts before contacting npm and supports simulated partial release runs', async () => {
   const root = createWorkspace();
+
   syncPackageVersions('8.0.0-dev.4', { root });
+
   const artifactDir = join(root, 'artifacts');
+
   mkdirSync(artifactDir);
   makeTarball(artifactDir, { name: 'discord-player', version: '8.0.0-dev.4' });
   makeTarball(artifactDir, { name: 'create-music-bot', version: '8.0.0-dev.4' });
+
   const seen = new Set(['discord-player']);
   const summary = await publishRelease({
     root,
     directory: artifactDir,
     version: '8.0.0-dev.4',
+
     lookupVersion: async (name) => seen.has(name),
+
     lookupTag: async () => null,
+
     publish: async (_path, { name }) => seen.add(name),
+
     log: () => {},
   });
+
   assert.deepEqual(
     summary.packages.map(({ status }) => status),
     ['skipped', 'published'],
@@ -665,43 +803,58 @@ test('validates package artifacts before contacting npm and supports simulated p
 
 test('rejects unexpected release artifact files before any registry call', async () => {
   const root = createWorkspace();
+
   syncPackageVersions('8.0.0', { root });
+
   const artifactDir = join(root, 'artifacts');
+
   mkdirSync(artifactDir);
   makeTarball(artifactDir, { name: 'discord-player', version: '8.0.0' });
   makeTarball(artifactDir, { name: 'create-music-bot', version: '8.0.0' });
   writeFileSync(join(artifactDir, 'unreviewed.txt'), 'not a tarball');
+
   let registryCalls = 0;
+
   await assert.rejects(
     publishRelease({
       root,
       directory: artifactDir,
       version: '8.0.0',
+
       lookupVersion: async () => {
         registryCalls += 1;
+
         return false;
       },
     }),
     /Unexpected release artifact/,
   );
+
   assert.equal(registryCalls, 0);
 });
 
 test('pnpm packing inspects generated tarballs without rebuilding package sources', () => {
   const root = createWorkspace(['discord-player']);
+
   syncPackageVersions('8.0.0', { root });
+
   const destination = join(root, 'release-artifacts');
   const packed = packReleasePackages({
     root,
     destination,
+
     pack: (directory, output) => {
       const manifest = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'));
       const targetDir = join(output, 'fixture');
+
       mkdirSync(targetDir, { recursive: true });
+
       const tarball = makeTarball(targetDir, { name: manifest.name, version: manifest.version });
+
       writeFileSync(join(output, `${manifest.name}-${manifest.version}.tgz`), readFileSync(tarball));
     },
   });
+
   assert.deepEqual(
     packed.map(({ name, version }) => [name, version]),
     [['discord-player', '8.0.0']],
@@ -711,19 +864,24 @@ test('pnpm packing inspects generated tarballs without rebuilding package source
 test('scoped plugin host tarballs use pnpm filenames and publish before their dependent without real publication', async () => {
   const root = createWorkspace(['discord-player']);
   const hostDir = join(root, 'packages/plugin-host');
+
   mkdirSync(hostDir, { recursive: true });
   writeJson(join(hostDir, 'package.json'), packageManifest('@discord-player/plugin-host', '8.0.0'));
+
   writeJson(join(root, '.github/release-packages.json'), {
     packages: ['discord-player', '@discord-player/plugin-host'],
   });
+
   writeJson(
     join(root, 'packages/discord-player/package.json'),
     packageManifest('discord-player', '8.0.0', { dependencies: { '@discord-player/plugin-host': 'workspace:*' } }),
   );
+
   const destination = join(root, 'artifacts');
   const packed = packReleasePackages({
     root,
     destination,
+
     pack(directory, output) {
       const manifest = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'));
       const fixture = tempDir();
@@ -734,31 +892,41 @@ test('scoped plugin host tarballs use pnpm filenames and publish before their de
           dependencies: manifest.name === 'discord-player' ? { '@discord-player/plugin-host': '8.0.0' } : {},
         },
       });
+
       writeFileSync(
         join(output, `${manifest.name.replace(/^@/, '').replace('/', '-')}-${manifest.version}.tgz`),
         readFileSync(tarball),
       );
     },
   });
+
   assert.deepEqual(
     packed.map(({ name }) => name),
     ['@discord-player/plugin-host', 'discord-player'],
   );
+
   const calls = [];
   const visible = new Set();
+
   await publishRelease({
     root,
     directory: destination,
     version: '8.0.0',
+
     lookupVersion: async (name) => visible.has(name),
+
     lookupTag: async () => null,
+
     publish: async (_path, metadata) => {
       calls.push(metadata.name);
       visible.add(metadata.name);
     },
+
     log: () => {},
+
     sleep: async () => {},
   });
+
   assert.deepEqual(calls, ['@discord-player/plugin-host', 'discord-player']);
 });
 
@@ -766,9 +934,11 @@ test('allows only the source host contract documentation outside dist', () => {
   const root = tempDir();
   const name = '@discord-player/plugin-host';
   const tarball = makeTarball(root, { name, version: '8.0.0' });
+
   execFileSync('tar', ['-xzf', tarball, '-C', root]);
 
   const docs = join(root, 'package/docs');
+
   mkdirSync(docs);
   writeFileSync(join(docs, 'remedia-contract.md'), '# Source protocol\n');
   execFileSync('tar', ['-czf', tarball, 'package'], { cwd: root });

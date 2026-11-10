@@ -31,7 +31,10 @@ export const chatInput = musicCommand((interaction) => {
   const queue = requireQueue(interaction);
   const choice = interaction.options.getString('mode', true);
   const mode = modes[choice];
+
   if (mode === undefined) throw new MusicCommandError('Choose off, track, or queue.');
+
   queue.setRepeatMode(mode);
+
   return `Loop mode: ${choice}.`;
 });

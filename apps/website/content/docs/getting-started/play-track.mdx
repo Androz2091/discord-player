@@ -7,6 +7,7 @@ Once the bot has initialized and `directMedia()` is registered, call `player.pla
 
 ```ts title="Inside your play command"
 const guildId = interaction.guildId;
+
 if (!guildId) throw new Error('Use this command in a server');
 
 const result = await player.play({ guildId, channelId: voiceChannel.id }, 'https://media.example.com/track.mp3');

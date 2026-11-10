@@ -11,6 +11,7 @@ import { definePlugin } from 'discord-player';
 const source = definePlugin({
   id: 'example.source',
   kind: 'source',
+
   setup(ctx) {
     ctx.on('track.stream', ({ track }) => ({ url: track.url }));
   },

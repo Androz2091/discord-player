@@ -26,11 +26,13 @@ export class RawStreamExtractor extends BaseExtractor {
 
   public async validate(query: string, type?: SearchQueryType | null | undefined): Promise<boolean> {
     if (typeof query !== 'string') return false;
+
     return ([QueryType.ARBITRARY, QueryType.FILE] as SearchQueryType[]).some((r) => r === type);
   }
 
   public async getRelatedTracks(track: Track) {
     void track;
+
     return this.createResponse();
   }
 
@@ -38,6 +40,7 @@ export class RawStreamExtractor extends BaseExtractor {
     switch (context.type) {
       case QueryType.ARBITRARY: {
         const data = (await downloadStream(query, context.requestOptions)) as IncomingMessage;
+
         if (!ATTACHMENT_HEADER.some((r) => !!data.headers['content-type']?.startsWith(r))) return this.emptyResponse();
 
         const trackInfo = {
@@ -64,6 +67,7 @@ export class RawStreamExtractor extends BaseExtractor {
           // eslint-disable-next-line
           const mediaplex = require('mediaplex') as {
             probeStream: (input: unknown) => Promise<{ result: { duration: number } | null; stream: Readable }>;
+
             readMetadata: (input: unknown) => { author?: string; title?: string };
           };
           const timeout = this.context.player.options.probeTimeout ?? 5000;
@@ -79,7 +83,9 @@ export class RawStreamExtractor extends BaseExtractor {
             trackInfo.duration = result.duration * 1000;
 
             const metadata = mediaplex.readMetadata(result);
+
             if (metadata.author) trackInfo.author = metadata.author;
+
             if (metadata.title) trackInfo.title = metadata.title;
 
             trackInfo.description = `${trackInfo.title} by ${trackInfo.author}`;
@@ -103,6 +109,7 @@ export class RawStreamExtractor extends BaseExtractor {
           engine: trackInfo.url,
           queryType: context.type,
           metadata: trackInfo,
+
           async requestMetadata() {
             return trackInfo;
           },
@@ -121,7 +128,9 @@ export class RawStreamExtractor extends BaseExtractor {
       }
       case QueryType.FILE: {
         if (!existsSync(query)) return this.emptyResponse();
+
         const fstat = await stat(query);
+
         if (!fstat.isFile()) return this.emptyResponse();
 
         const fileExt = path.extname(query).toLowerCase();
@@ -129,6 +138,7 @@ export class RawStreamExtractor extends BaseExtractor {
           .fromFile(query)
           .then((v) => {
             if (v) return v;
+
             if (/\.(opus|pcm)$/.test(fileExt)) return { mime: `raw/${fileExt.replace('.', '')}` };
           })
           .catch(() => null);
@@ -153,6 +163,7 @@ export class RawStreamExtractor extends BaseExtractor {
               // eslint-disable-next-line
               require('mediaplex') as {
                 probeStream: (input: unknown) => Promise<{ result: { duration: number } | null; stream: Readable }>;
+
                 readMetadata: (input: unknown) => { author?: string; title?: string };
               };
 
@@ -174,7 +185,9 @@ export class RawStreamExtractor extends BaseExtractor {
               trackInfo.duration = result.duration * 1000;
 
               const metadata = mediaplex.readMetadata(result);
+
               if (metadata.author) trackInfo.author = metadata.author;
+
               if (metadata.title) trackInfo.title = metadata.title;
 
               trackInfo.description = `${trackInfo.title} by ${trackInfo.author}`;
@@ -215,6 +228,7 @@ export class RawStreamExtractor extends BaseExtractor {
           engine: trackInfo.url,
           queryType: context.type,
           metadata: trackInfo,
+
           async requestMetadata() {
             return trackInfo;
           },

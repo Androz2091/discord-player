@@ -7,6 +7,7 @@ With a track playing, retrieve its queue:
 
 ```ts
 const queue = player.getQueue(guildId);
+
 if (!queue) return;
 
 await queue.node.pause();

@@ -7,6 +7,7 @@ import type { ExtractorInfo, ExtractorStreamable, NextFunction } from './extract
 function checkLegacyStream(result: ExtractorStreamable | undefined): ExtractorStreamable | undefined {
   if (result && typeof result === 'object' && '$fmt' in result && /^(?:pcm|opus)$/i.test(result.$fmt)) {
     result.stream.destroy();
+
     throw new Error(`Legacy raw ${result.$fmt} streams require migration to an encoded Remedia source.`);
   }
 
@@ -41,9 +42,11 @@ export function createExtractorPlugin(
 
     return response;
   };
+
   return definePlugin({
     id: instance.identifier,
     kind: 'source',
+
     setup: async (ctx) => {
       await instance.activate();
       onActivate();
@@ -141,6 +144,7 @@ export function createExtractorPlugin(
           track,
           stream: await new Promise<Readable>((resolve, reject) => {
             signal.throwIfAborted();
+
             const abort = () => {
               stream.destroy();
               reject(signal.reason);
@@ -150,9 +154,11 @@ export function createExtractorPlugin(
 
             const next: NextFunction = (error, result) => {
               signal.removeEventListener('abort', abort);
+
               if (signal.aborted) {
                 result?.destroy();
                 reject(signal.reason);
+
                 return;
               }
 
@@ -174,6 +180,7 @@ export function createExtractorPlugin(
         metadata,
       );
     },
+
     destroy: async () => {
       try {
         await instance.deactivate();

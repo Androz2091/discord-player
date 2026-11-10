@@ -12,6 +12,7 @@ it('adapts legacy lifecycle, raw data, protocols, priority, blocking and reconfi
     definePlugin({
       id: 'modern',
       kind: 'source',
+
       setup(ctx) {
         ctx.on('search.query.match', () => ({ score: 100 }));
         ctx.on('search.query.resolve', () => ({ tracks: [new Track({ title: 'modern' })], playlist: null }));
@@ -28,13 +29,18 @@ it('adapts legacy lifecycle, raw data, protocols, priority, blocking and reconfi
   expect(track.serialize().data.metadata).toBeNull();
   expect(await p.plugins.resolveStream(track)).toEqual({ url: track.url });
   expect((await p.search('query', { blockExtractors: [Legacy.identifier] })).tracks[0]!.title).toBe('modern');
+
   await legacy.reconfigure({ prefix: 'new:' });
+
   expect(legacy.deactivated).toBe(1);
   expect((await p.search('query')).tracks[0]!.title).toBe('new:query');
   expect(await p.plugins.execute('search.query.match', { query: 'x' })).toHaveLength(2);
+
   await p.extractors.unregister(Legacy.identifier);
+
   expect(p.plugins.has(Legacy.identifier)).toBe(false);
   expect(p.extractors.size).toBe(0);
+
   await p.destroy();
 });
 
@@ -94,7 +100,10 @@ it('routes legacy bridging, related tracks and post-stream processing through th
   const related = await p.plugins.execute('track.related', { track }, { pluginId: Bridge.identifier });
 
   expect(related!.tracks[0]!.sourceReference?.pluginId).toBe(Bridge.identifier);
+
   await p.extractors.unregister(Bridge.identifier);
+
   expect(input.destroyed).toBe(true);
+
   await p.destroy();
 });

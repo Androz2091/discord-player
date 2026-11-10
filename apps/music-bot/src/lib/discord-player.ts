@@ -13,17 +13,21 @@ export const player = new DiscordPlayer({
     durationMs: Number(process.env.REMEDIA_CROSSFADE_DURATION_MS ?? 5000),
   },
   plugins: [rawHTTPExtractor()],
+
   send(guildId, payload) {
     const client = useClient<true>();
     const guild = client.guilds.cache.get(guildId);
+
     if (!guild) {
       throw new Error(`Cannot dispatch Discord voice request: guild ${guildId} is not cached on this client.`);
     }
+
     return guild.shard.send(payload);
   },
 });
 
 const localTest = './_legacy-extractor-test/extractor-001.ts' as string;
+
 await import(localTest)
   .then((e) => {
     return player.extractors.register(e.default);
@@ -33,7 +37,9 @@ await import(localTest)
 function notify(queue: GuildQueue, title: string, description: string, color?: number): void {
   // Use the event's queue directly: creation happens before caching and deletion happens after eviction.
   const channel = (queue.metadata as QueueMetadata | undefined)?.textChannel;
+
   if (!channel?.isSendable()) return;
+
   void channel
     .send({
       embeds: [musicEmbed(title, description, color)],
@@ -61,11 +67,16 @@ player.events.on('queueDelete', (queue) => {
 
 player.events.on('connection', (queue) => {
   const session = queue.node.session;
+
   if (!session) return;
+
   const identity = `${session.sessionId}:${session.channelId}`;
   const previous = voiceConnections.get(queue);
+
   if (previous === identity) return;
+
   voiceConnections.set(queue, identity);
+
   notify(
     queue,
     previous ? '🔊 Voice channel changed' : '🔊 Voice connected',
@@ -77,12 +88,14 @@ player.events.on('connection', (queue) => {
 player.events.on('connectionDestroyed', (queue) => {
   voiceConnections.delete(queue);
   recoveringQueues.delete(queue);
+
   if (!queue.destroyed) notify(queue, 'Voice disconnected', 'The voice connection was closed.');
 });
 
 player.events.on('voiceStateUpdate', (queue, event) => {
   if (event.state === 'reconnecting' && !recoveringQueues.has(queue)) {
     recoveringQueues.add(queue);
+
     notify(
       queue,
       'Reconnecting voice',
@@ -104,6 +117,7 @@ player.events.on('audioTracksAdd', (queue, tracks) => {
     .slice(0, 5)
     .map((track) => `• ${trackTitle(track)}`)
     .join('\n');
+
   notify(
     queue,
     '➕ Tracks added',
@@ -126,8 +140,11 @@ player.events.on('emptyQueue', (queue) => {
 player.events.on('playerStart', (queue, track, rawEvent) => {
   const title = rawEvent?.info.metadata.title;
   const artist = rawEvent?.info.metadata.artist;
+
   if (title) track.title = title;
+
   if (artist) track.author = artist;
+
   notify(queue, '🎶 Now playing', trackTitle(track), 0x57f287);
 });
 
@@ -169,6 +186,7 @@ player.events.on('volumeChange', (queue, previous, current) => {
 
 player.events.on('playerError', (queue, error, track) => {
   console.error(`Playback failed for Track ${track.id}:`, error);
+
   notify(
     queue,
     'Playback failed',
@@ -181,6 +199,7 @@ player.events.on('error', (queue, error) => {
   console.error(`Queue ${queue.guildId} failed:`, error);
   notify(queue, 'Queue error', 'A queue or voice operation failed. Check the bot logs for details.', 0xed4245);
 });
+
 player.on('error', (error) => console.error('Player error:', error));
 
 player.on('debug', (message) => console.debug(message));

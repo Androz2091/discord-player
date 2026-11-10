@@ -8,8 +8,10 @@ export class PluginError extends Error {
   constructor(
     /** Responsible source registration. */
     public readonly pluginId: string,
+
     /** Failed lifecycle stage or operation. */
     public readonly operation: string,
+
     cause: unknown,
   ) {
     super(`Plugin ${pluginId} failed during ${operation}: ${cause instanceof Error ? cause.message : String(cause)}`, {

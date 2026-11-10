@@ -73,12 +73,17 @@ export const autocomplete: AutocompleteCommand = async ({ interaction }) => {
 
 export const chatInput = musicCommand(async (interaction) => {
   const channel = requireVoiceChannel(interaction);
+
   if (!channel.joinable) throw new MusicCommandError('I cannot join your voice channel. Check my permissions.');
+
   const existingQueue = player.queues.get<QueueMetadata>(interaction.guildId);
+
   if (existingQueue?.node.session && existingQueue.node.session.channelId !== channel.id) {
     throw new MusicCommandError('Join my voice channel to add music, or use /join to move me.');
   }
+
   const textChannel = interaction.channel;
+
   if (!textChannel?.isSendable()) throw new MusicCommandError('Use a channel where I can send playback updates.');
 
   const query = interaction.options.getString('query', true);
@@ -96,13 +101,16 @@ export const chatInput = musicCommand(async (interaction) => {
   const result = await player.play<QueueMetadata>(channel, searchResult, {
     nodeOptions: { metadata: { textChannel } },
   });
+
   if (result.playerResult) {
     const duration = result.playerResult.audioStream.durationMs;
+
     return musicEmbed('🎶 Playback started', displayTrack(track), 0x57f287).addFields(
       { name: 'Voice channel', value: `<#${channel.id}>`, inline: true },
       { name: 'Duration', value: duration === null ? 'Unknown' : formatTime(duration), inline: true },
     );
   }
+
   return musicEmbed('➕ Added to queue', displayTrack(track)).addFields({
     name: 'Upcoming tracks',
     value: String(result.queue.size),

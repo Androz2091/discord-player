@@ -10,6 +10,7 @@ it('rejects duplicate IDs and attributes setup, handler and teardown failures', 
   const failed = definePlugin({
     id: 'failed',
     kind: 'source',
+
     setup(ctx) {
       ctx.onCleanup(cleanup);
 
@@ -18,17 +19,20 @@ it('rejects duplicate IDs and attributes setup, handler and teardown failures', 
   });
 
   await expect(host.register(failed())).rejects.toMatchObject({ pluginId: 'failed', operation: 'setup' });
+
   expect(cleanup).toHaveBeenCalledOnce();
   expect(host.has('failed')).toBe(false);
 
   const source = definePlugin({
     id: 'source',
     kind: 'source',
+
     setup(ctx) {
       ctx.on('track.stream', () => {
         throw new Error('stream failed');
       });
     },
+
     destroy() {
       throw new Error('cleanup failed');
     },
@@ -43,6 +47,7 @@ it('rejects duplicate IDs and attributes setup, handler and teardown failures', 
   });
 
   await expect(host.unregister('source')).rejects.toThrow('cleanup failed');
+
   expect(host.has('source')).toBe(false);
 });
 
@@ -54,6 +59,7 @@ it('aborts and drains in-flight handlers before cleanup and propagates caller ca
     definePlugin({
       id: 'slow',
       kind: 'source',
+
       setup(ctx) {
         ctx.on('track.stream', async (_, { signal }) => {
           await new Promise<void>((resolve) =>
@@ -72,6 +78,7 @@ it('aborts and drains in-flight handlers before cleanup and propagates caller ca
           return 'https://example.test/a';
         });
       },
+
       destroy() {
         order.push('destroy');
       },
@@ -84,6 +91,7 @@ it('aborts and drains in-flight handlers before cleanup and propagates caller ca
   await tick();
   await host.unregister('slow');
   await rejected;
+
   expect(order).toEqual(['abort', 'drained', 'destroy']);
 
   await expect(
@@ -95,11 +103,14 @@ it('cleans setup failures without leaking other constructor registrations', asyn
   const cleanup = vi.fn();
   const p = new DiscordPlayer({
     nodes: [],
+
     send() {},
+
     plugins: [
       definePlugin({
         id: 'good',
         kind: 'source',
+
         setup(ctx) {
           ctx.onCleanup(cleanup);
         },
@@ -107,6 +118,7 @@ it('cleans setup failures without leaking other constructor registrations', asyn
       definePlugin({
         id: 'bad',
         kind: 'source',
+
         setup() {
           throw new Error('failed');
         },
@@ -115,6 +127,7 @@ it('cleans setup failures without leaking other constructor registrations', asyn
   });
 
   await expect(p.initialize('bot')).rejects.toThrow('failed');
+
   expect(cleanup).toHaveBeenCalledOnce();
 });
 
@@ -126,6 +139,7 @@ it('drains setup/removal races and executes cleanup exactly once in reverse orde
     definePlugin({
       id: 'pending',
       kind: 'source',
+
       async setup(ctx) {
         ctx.onCleanup(() => {
           seen.push(1);
@@ -139,6 +153,7 @@ it('drains setup/removal races and executes cleanup exactly once in reverse orde
           release = resolve;
         });
       },
+
       destroy() {
         seen.push(3);
       },
@@ -152,6 +167,7 @@ it('drains setup/removal races and executes cleanup exactly once in reverse orde
 
   release();
   await Promise.all([setup, removed, twice]);
+
   expect(seen).toEqual([3, 2, 1]);
   expect(host.has('pending')).toBe(false);
 
@@ -159,6 +175,7 @@ it('drains setup/removal races and executes cleanup exactly once in reverse orde
     definePlugin({
       id: 'pending',
       kind: 'source',
+
       setup(ctx) {
         const remove = ctx.on('track.stream', () => 'https://example.test/removed');
 
@@ -169,6 +186,7 @@ it('drains setup/removal races and executes cleanup exactly once in reverse orde
   );
 
   expect(await host.execute('track.stream', { track: new Track() })).toBeUndefined();
+
   await host.destroy();
 });
 
@@ -180,7 +198,9 @@ it('removes all registrations even when one destructor fails', async () => {
     definePlugin({
       id: 'failure',
       kind: 'source',
+
       setup() {},
+
       destroy() {
         throw new Error('failure');
       },
@@ -191,6 +211,7 @@ it('removes all registrations even when one destructor fails', async () => {
     definePlugin({
       id: 'success',
       kind: 'source',
+
       setup(ctx) {
         ctx.onCleanup(cleanup);
       },
@@ -198,6 +219,7 @@ it('removes all registrations even when one destructor fails', async () => {
   );
 
   await expect(p.destroy()).rejects.toThrow('cleanup failed');
+
   expect(cleanup).toHaveBeenCalledOnce();
   expect(p.plugins.has('failure')).toBe(false);
   expect(p.plugins.has('success')).toBe(false);

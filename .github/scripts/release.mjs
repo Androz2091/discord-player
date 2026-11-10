@@ -33,14 +33,17 @@ export class ReleaseError extends Error {
  */
 export function parseReleaseSubject(subject) {
   if (typeof subject !== 'string') throw new ReleaseError('Release commit subject must be a string.');
+
   if (!subject.startsWith(RELEASE_SUBJECT_PREFIX)) return null;
 
   const match = RELEASE_SUBJECT_PATTERN.exec(subject);
+
   if (!match || match[0] !== subject)
     throw new ReleaseError(`Invalid release commit subject: ${JSON.stringify(subject)}. ${RELEASE_SUBJECT_HELP}`);
 
   const version = match[1];
   const semver = parseSemver(version);
+
   if (!semver || semver.build) {
     throw new ReleaseError(
       `Invalid release version in commit subject: ${JSON.stringify(subject)}. ${RELEASE_SUBJECT_HELP}`,
@@ -48,6 +51,7 @@ export function parseReleaseSubject(subject) {
   }
 
   const channel = semver.prerelease.length > 0 ? semver.prerelease[0] : 'latest';
+
   if (semver.prerelease.length > 0 && (semver.prerelease.length !== 2 || !['dev', 'beta', 'rc'].includes(channel))) {
     throw new ReleaseError(
       `Unsupported release channel in commit subject: ${JSON.stringify(subject)}. ${RELEASE_SUBJECT_HELP}`,
@@ -80,9 +84,11 @@ export function detectRelease(context) {
 
   try {
     const release = parseReleaseSubject(context.subject);
+
     return release ? { release: true, ...release } : { release: false };
   } catch (error) {
     if (!(error instanceof ReleaseError)) throw error;
+
     return { release: false, malformed: true, error: error.message };
   }
 }
@@ -94,29 +100,38 @@ export function detectRelease(context) {
  */
 export async function resolveTriggeringActorId({ actor, actorId, triggeringActor, fetchImpl = fetch }) {
   if (!actor || !actorId || !triggeringActor) return null;
+
   if (actor === triggeringActor) return actorId;
+
   const response = await fetchImpl(`https://api.github.com/users/${encodeURIComponent(triggeringActor)}`, {
     headers: { accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28' },
     signal: AbortSignal.timeout(15000),
   });
+
   if (!response.ok)
     throw new ReleaseError(`Cannot verify release triggering actor: GitHub returned HTTP ${response.status}.`);
+
   const user = await response.json();
+
   if (!user || !Number.isSafeInteger(user.id) || user.id <= 0) {
     throw new ReleaseError('GitHub returned an invalid triggering actor ID.');
   }
+
   return String(user.id);
 }
 
 async function getReleaseActorContext() {
   const actorId = process.env.GITHUB_ACTOR_ID;
+
   // An unapproved original actor can never be authorized by a later rerun.
   if (!RELEASE_AUTHORITIES.includes(actorId)) return { actorId, triggeringActorId: null };
+
   const triggeringActorId = await resolveTriggeringActorId({
     actor: process.env.GITHUB_ACTOR,
     actorId,
     triggeringActor: process.env.GITHUB_TRIGGERING_ACTOR,
   });
+
   return { actorId, triggeringActorId };
 }
 
@@ -127,9 +142,13 @@ async function getReleaseActorContext() {
  */
 export function parseSemver(version) {
   if (typeof version !== 'string') return null;
+
   const match = SEMVER_PATTERN.exec(version);
+
   if (!match || match[0] !== version) return null;
+
   const prerelease = match[4] ? match[4].split('.') : [];
+
   if (
     prerelease.some((identifier) => /^\d+$/.test(identifier) && identifier.length > 1 && identifier.startsWith('0'))
   ) {
@@ -155,6 +174,7 @@ export function parseSemver(version) {
 export function compareSemver(left, right) {
   const a = parseSemver(left);
   const b = parseSemver(right);
+
   if (!a || !b)
     throw new ReleaseError(
       `Cannot compare invalid SemVer versions ${JSON.stringify(left)} and ${JSON.stringify(right)}.`,
@@ -162,28 +182,38 @@ export function compareSemver(left, right) {
 
   for (const key of ['major', 'minor', 'patch']) {
     if (a[key] < b[key]) return -1;
+
     if (a[key] > b[key]) return 1;
   }
+
   if (a.prerelease.length === 0 || b.prerelease.length === 0) {
     if (a.prerelease.length === b.prerelease.length) return 0;
+
     return a.prerelease.length === 0 ? 1 : -1;
   }
 
   const count = Math.max(a.prerelease.length, b.prerelease.length);
+
   for (let index = 0; index < count; index += 1) {
     const leftIdentifier = a.prerelease[index];
     const rightIdentifier = b.prerelease[index];
+
     if (leftIdentifier === undefined || rightIdentifier === undefined) {
       return leftIdentifier === rightIdentifier ? 0 : leftIdentifier === undefined ? -1 : 1;
     }
+
     if (leftIdentifier === rightIdentifier) continue;
 
     const leftNumeric = /^\d+$/.test(leftIdentifier);
     const rightNumeric = /^\d+$/.test(rightIdentifier);
+
     if (leftNumeric && rightNumeric) return BigInt(leftIdentifier) < BigInt(rightIdentifier) ? -1 : 1;
+
     if (leftNumeric !== rightNumeric) return leftNumeric ? -1 : 1;
+
     return leftIdentifier < rightIdentifier ? -1 : 1;
   }
+
   return 0;
 }
 
@@ -196,9 +226,11 @@ export function compareSemver(left, right) {
 export function discoverReleasePackages({ root = projectRoot } = {}) {
   const manifestPath = join(root, '.github/release-packages.json');
   const releaseManifest = readJson(manifestPath);
+
   if (!Array.isArray(releaseManifest.packages) || releaseManifest.packages.length === 0) {
     throw new ReleaseError('The release manifest must list at least one package.');
   }
+
   if (new Set(releaseManifest.packages).size !== releaseManifest.packages.length) {
     throw new ReleaseError('The release manifest contains duplicate package names.');
   }
@@ -208,6 +240,7 @@ export function discoverReleasePackages({ root = projectRoot } = {}) {
     .filter((entry) => entry.isDirectory() && existsSync(join(packageRoot, entry.name, 'package.json')))
     .map((entry) => {
       const directory = join(packageRoot, entry.name);
+
       return { directory, manifest: readJson(join(directory, 'package.json')) };
     });
   const publicNames = discovered
@@ -215,6 +248,7 @@ export function discoverReleasePackages({ root = projectRoot } = {}) {
     .map(({ manifest }) => manifest.name)
     .sort();
   const configuredNames = [...releaseManifest.packages].sort();
+
   if (JSON.stringify(publicNames) !== JSON.stringify(configuredNames)) {
     throw new ReleaseError(
       `Release package inventory mismatch. Manifest: ${configuredNames.join(', ')}. Public workspace packages: ${publicNames.join(', ') || '(none)'}.`,
@@ -223,10 +257,14 @@ export function discoverReleasePackages({ root = projectRoot } = {}) {
 
   return releaseManifest.packages.map((name) => {
     const item = discovered.find(({ manifest }) => manifest.name === name);
+
     if (!item)
       throw new ReleaseError(`Release manifest package ${JSON.stringify(name)} was not found under packages/.`);
+
     if (item.manifest.private === true) throw new ReleaseError(`Release manifest package ${name} is private.`);
+
     if (item.manifest.name !== name) throw new ReleaseError(`Package directory metadata does not match ${name}.`);
+
     return { name, ...item };
   });
 }
@@ -239,6 +277,7 @@ export function discoverReleasePackages({ root = projectRoot } = {}) {
  */
 export function syncPackageVersions(version, { root = projectRoot } = {}) {
   const parsed = parseSemver(version);
+
   if (
     !parsed ||
     parsed.build ||
@@ -248,10 +287,12 @@ export function syncPackageVersions(version, { root = projectRoot } = {}) {
   }
 
   const packages = discoverReleasePackages({ root });
+
   for (const { directory, manifest } of packages) {
     manifest.version = version;
     writeFileSync(join(directory, 'package.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   }
+
   return packages.map(({ name }) => name);
 }
 
@@ -263,11 +304,14 @@ export function syncPackageVersions(version, { root = projectRoot } = {}) {
 export function verifyBuiltPackages({ root = projectRoot } = {}) {
   return discoverReleasePackages({ root }).map(({ name, directory, manifest }) => {
     const targets = collectEntrypoints(manifest);
+
     if (targets.length === 0) throw new ReleaseError(`${name} does not declare a JS or type entrypoint.`);
+
     for (const target of targets) {
       if (!existsSync(join(directory, target)))
         throw new ReleaseError(`${name} is missing declared build entrypoint ${target}.`);
     }
+
     return { name, version: manifest.version, entrypoints: targets };
   });
 }
@@ -284,23 +328,31 @@ export function orderPackagesByDependencies(packages) {
   const ordered = [];
   const visit = (pkg) => {
     if (visited.has(pkg.name)) return;
+
     if (visiting.has(pkg.name)) throw new ReleaseError(`Circular release package dependency involving ${pkg.name}.`);
+
     visiting.add(pkg.name);
+
     const manifest = pkg.manifest ?? pkg;
     const dependencies = {
       ...(manifest.dependencies ?? {}),
       ...(manifest.optionalDependencies ?? {}),
       ...(manifest.peerDependencies ?? {}),
     };
+
     for (const name of Object.keys(dependencies)) {
       const dependency = byName.get(name);
+
       if (dependency) visit(dependency);
     }
+
     visiting.delete(pkg.name);
     visited.add(pkg.name);
     ordered.push(pkg);
   };
+
   for (const pkg of packages) visit(pkg);
+
   return ordered;
 }
 
@@ -312,8 +364,10 @@ export function orderPackagesByDependencies(packages) {
  */
 export function validateTarball(tarball, { name, version, root = projectRoot, expectedPackages } = {}) {
   if (!existsSync(tarball)) throw new ReleaseError(`Missing npm tarball for ${name ?? 'package'}: ${tarball}`);
+
   let files;
   let manifestText;
+
   try {
     files = execFileSync('tar', ['-tzf', tarball], { encoding: 'utf8' }).split(/\r?\n/).filter(Boolean);
     manifestText = execFileSync('tar', ['-xOzf', tarball, 'package/package.json'], { encoding: 'utf8' });
@@ -322,25 +376,33 @@ export function validateTarball(tarball, { name, version, root = projectRoot, ex
   }
 
   let manifest;
+
   try {
     manifest = JSON.parse(manifestText);
   } catch (error) {
     throw new ReleaseError(`Tarball ${tarball} contains an invalid package.json.`, { cause: error });
   }
+
   if (manifest.name !== name)
     throw new ReleaseError(`Tarball package name mismatch: expected ${name}, found ${manifest.name}.`);
+
   if (manifest.version !== version) {
     throw new ReleaseError(`Tarball version mismatch for ${name}: expected ${version}, found ${manifest.version}.`);
   }
+
   if (manifest.private === true) throw new ReleaseError(`Tarball ${name}@${version} is marked private.`);
 
   const allowedPaths = files.map((entry) => entry.replace(/\/$/, '')).filter((entry) => entry !== 'package');
+
   for (const entry of allowedPaths) {
     if (!entry.startsWith('package/'))
       throw new ReleaseError(`Tarball ${name}@${version} contains an unexpected archive path ${entry}.`);
+
     const packagePath = entry.slice('package/'.length);
+
     if (packagePath === 'package.json' || packagePath === 'README.md' || /^LICENSE(?:\..*)?$/.test(packagePath))
       continue;
+
     if (
       name === '@discord-player/plugin-host' &&
       (packagePath === 'docs' || packagePath === 'docs/remedia-contract.md')
@@ -353,13 +415,16 @@ export function validateTarball(tarball, { name, version, root = projectRoot, ex
 
   const fileSet = new Set(allowedPaths);
   const targets = collectEntrypoints(manifest);
+
   if (targets.length === 0) throw new ReleaseError(`${name}@${version} does not declare a JS or type entrypoint.`);
+
   for (const target of targets) {
     if (!fileSet.has(`package/${target}`))
       throw new ReleaseError(`${name}@${version} tarball is missing declared entrypoint ${target}.`);
   }
 
   const packageNames = expectedPackages ?? discoverReleasePackages({ root }).map((pkg) => pkg.name);
+
   for (const field of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
     for (const [dependency, specifier] of Object.entries(manifest[field] ?? {})) {
       if (typeof specifier !== 'string' || /^(?:workspace:|catalog:)/.test(specifier)) {
@@ -367,6 +432,7 @@ export function validateTarball(tarball, { name, version, root = projectRoot, ex
           `${name}@${version} has unresolved ${field} entry ${dependency}: ${JSON.stringify(specifier)}.`,
         );
       }
+
       if (packageNames.includes(dependency) && specifier !== version) {
         throw new ReleaseError(
           `${name}@${version} must depend on release package ${dependency} at exact version ${version}; found ${specifier}.`,
@@ -385,17 +451,23 @@ export function validateTarball(tarball, { name, version, root = projectRoot, ex
  */
 export function packReleasePackages({ root = projectRoot, destination, pack = runPnpmPack } = {}) {
   if (!destination) throw new ReleaseError('A tarball destination directory is required.');
+
   mkdirSync(destination, { recursive: true });
+
   const packages = discoverReleasePackages({ root });
   const ordered = orderPackagesByDependencies(packages.map((pkg) => ({ ...pkg, manifest: pkg.manifest })));
   const tarballs = [];
+
   for (const pkg of ordered) {
     const tarball = join(destination, `${pkg.name.replace(/^@/, '').replace('/', '-')}-${pkg.manifest.version}.tgz`);
+
     if (existsSync(tarball))
       throw new ReleaseError(`Refusing to overwrite existing release tarball ${basename(tarball)}.`);
+
     pack(pkg.directory, destination);
     tarballs.push(validateTarball(tarball, { name: pkg.name, version: pkg.manifest.version, root }));
   }
+
   return tarballs;
 }
 
@@ -412,28 +484,36 @@ export async function lookupNpmVersion(
   { fetchImpl = fetch, attempts = 4, delayMs = 1000, sleep = delay } = {},
 ) {
   const url = `${REGISTRY_URL}/${encodeURIComponent(name)}/${encodeURIComponent(version)}`;
+
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     let response;
+
     try {
       response = await fetchImpl(url, { headers: { accept: 'application/vnd.npm.install-v1+json' } });
     } catch (error) {
       if (attempt === attempts)
         throw new ReleaseError(`npm registry lookup failed for ${name}@${version}: ${error.message}`, { cause: error });
+
       await sleep(delayMs * attempt);
       continue;
     }
+
     if (response.status === 404) return false;
+
     if (response.status === 429 || response.status >= 500) {
       if (attempt === attempts)
         throw new ReleaseError(
           `npm registry returned HTTP ${response.status} for ${name}@${version} after ${attempts} attempts.`,
         );
+
       await sleep(delayMs * attempt);
       continue;
     }
+
     if (!response.ok) throw new ReleaseError(`npm registry returned HTTP ${response.status} for ${name}@${version}.`);
 
     const metadata = await parseRegistryJson(response, `${name}@${version}`);
+
     if (
       !metadata ||
       typeof metadata !== 'object' ||
@@ -444,8 +524,10 @@ export async function lookupNpmVersion(
     ) {
       throw new ReleaseError(`npm registry returned invalid metadata while checking ${name}@${version}.`);
     }
+
     return true;
   }
+
   throw new ReleaseError(`npm registry lookup exhausted retries for ${name}@${version}.`);
 }
 
@@ -462,8 +544,10 @@ export async function lookupNpmDistTag(
   { fetchImpl = fetch, attempts = 4, delayMs = 1000, sleep = delay } = {},
 ) {
   const url = `${REGISTRY_URL}/${encodeURIComponent(name)}`;
+
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     let response;
+
     try {
       response = await fetchImpl(url, { headers: { accept: 'application/vnd.npm.install-v1+json' } });
     } catch (error) {
@@ -471,20 +555,27 @@ export async function lookupNpmDistTag(
         throw new ReleaseError(`npm registry lookup failed for ${name} dist-tag ${tag}: ${error.message}`, {
           cause: error,
         });
+
       await sleep(delayMs * attempt);
       continue;
     }
+
     if (response.status === 404) return null;
+
     if (response.status === 429 || response.status >= 500) {
       if (attempt === attempts)
         throw new ReleaseError(
           `npm registry returned HTTP ${response.status} for ${name} dist-tags after ${attempts} attempts.`,
         );
+
       await sleep(delayMs * attempt);
       continue;
     }
+
     if (!response.ok) throw new ReleaseError(`npm registry returned HTTP ${response.status} for ${name} dist-tags.`);
+
     const metadata = await parseRegistryJson(response, `${name} dist-tags`);
+
     if (
       !metadata ||
       typeof metadata !== 'object' ||
@@ -496,13 +587,18 @@ export async function lookupNpmDistTag(
     ) {
       throw new ReleaseError(`npm registry returned invalid dist-tag metadata for ${name}.`);
     }
+
     const tagVersion = metadata['dist-tags']?.[tag];
+
     if (tagVersion === undefined) return null;
+
     if (typeof tagVersion !== 'string' || !parseSemver(tagVersion)) {
       throw new ReleaseError(`npm registry returned an invalid ${tag} dist-tag version for ${name}.`);
     }
+
     return tagVersion;
   }
+
   throw new ReleaseError(`npm registry lookup exhausted retries for ${name} dist-tag ${tag}.`);
 }
 
@@ -524,6 +620,7 @@ export async function publishMissingPackages({
 }) {
   if (!['latest', 'dev', 'beta', 'rc'].includes(distTag))
     throw new ReleaseError(`Unsupported npm dist-tag ${JSON.stringify(distTag)}.`);
+
   for (const pkg of packages) {
     if (!existsSync(pkg.path))
       throw new ReleaseError(`Missing npm tarball for ${pkg.name}@${pkg.version}: ${pkg.path}`);
@@ -531,6 +628,7 @@ export async function publishMissingPackages({
 
   const ordered = orderPackagesByDependencies(packages);
   const published = [];
+
   for (const pkg of ordered) {
     if (await lookupVersion(pkg.name, pkg.version)) {
       log(`Skipping ${pkg.name}@${pkg.version}; the exact version already exists on npm.`);
@@ -539,6 +637,7 @@ export async function publishMissingPackages({
     }
 
     const currentTagVersion = await lookupTag(pkg.name, distTag);
+
     if (currentTagVersion && compareSemver(currentTagVersion, pkg.version) > 0) {
       throw new ReleaseError(
         `Refusing to move npm dist-tag ${distTag} for ${pkg.name} backward from ${currentTagVersion} to ${pkg.version}.`,
@@ -547,23 +646,31 @@ export async function publishMissingPackages({
 
     log(`Publishing ${pkg.name}@${pkg.version} with npm dist-tag ${distTag}.`);
     await publish(pkg.path, { name: pkg.name, version: pkg.version, distTag });
+
     let visible = false;
     let verificationError;
+
     for (let attempt = 1; attempt <= verifyAttempts; attempt += 1) {
       try {
         visible = await lookupVersion(pkg.name, pkg.version);
       } catch (error) {
         verificationError = error;
       }
+
       if (visible) break;
+
       if (attempt < verifyAttempts) await sleep(verifyDelayMs * attempt);
     }
+
     if (!visible) {
       const message = `npm publish completed but ${pkg.name}@${pkg.version} could not be verified on the registry after ${verifyAttempts} attempts.`;
+
       throw new ReleaseError(message, verificationError ? { cause: verificationError } : undefined);
     }
+
     published.push({ name: pkg.name, version: pkg.version, status: 'published' });
   }
+
   return { distTag, packages: published };
 }
 
@@ -574,36 +681,46 @@ export async function publishMissingPackages({
  */
 export async function publishRelease({ root = projectRoot, directory, version, ...options }) {
   const parsedVersion = parseSemver(version);
+
   if (!parsedVersion || parsedVersion.build)
     throw new ReleaseError(`Invalid release version ${JSON.stringify(version)}.`);
+
   const distTag = parsedVersion.prerelease[0] ?? 'latest';
+
   if (!['latest', 'dev', 'beta', 'rc'].includes(distTag))
     throw new ReleaseError(`Unsupported release channel in ${version}.`);
+
   const expected = discoverReleasePackages({ root });
   const expectedTarballs = new Set(
     expected.map(({ name }) => `${name.replace(/^@/, '').replace('/', '-')}-${version}.tgz`),
   );
   let artifactEntries;
+
   try {
     artifactEntries = readdirSync(directory, { withFileTypes: true });
   } catch (error) {
     throw new ReleaseError(`Unable to read release artifact directory ${directory}.`, { cause: error });
   }
+
   for (const entry of artifactEntries) {
     if (!entry.isFile() || !expectedTarballs.has(entry.name)) {
       throw new ReleaseError(`Unexpected release artifact ${entry.name} in ${directory}.`);
     }
   }
+
   for (const expectedTarball of expectedTarballs) {
     if (!artifactEntries.some((entry) => entry.isFile() && entry.name === expectedTarball)) {
       throw new ReleaseError(`Missing expected release artifact ${expectedTarball}.`);
     }
   }
+
   const tarballs = expected.map(({ name }) => {
     const path = join(directory, `${name.replace(/^@/, '').replace('/', '-')}-${version}.tgz`);
+
     return validateTarball(path, { name, version, root });
   });
   const summary = await publishMissingPackages({ packages: tarballs, distTag, ...options });
+
   return { version, ...summary };
 }
 
@@ -621,17 +738,22 @@ export async function verifyPublishedVersions({ packages, version, lookupVersion
 
 function collectEntrypoints(manifest) {
   const targets = new Set();
+
   for (const field of ['main', 'module', 'types', 'typings']) {
     if (typeof manifest[field] === 'string') targets.add(normalizeEntry(manifest[field]));
   }
+
   const visit = (exports) => {
     if (typeof exports === 'string' && exports.startsWith('.')) targets.add(normalizeEntry(exports));
     else if (exports && typeof exports === 'object') Object.values(exports).forEach(visit);
   };
+
   visit(manifest.exports);
+
   if (typeof manifest.bin === 'string') targets.add(normalizeEntry(manifest.bin));
   else if (manifest.bin && typeof manifest.bin === 'object')
     Object.values(manifest.bin).forEach((target) => targets.add(normalizeEntry(target)));
+
   return [...targets];
 }
 
@@ -687,12 +809,14 @@ function getHeadSubject() {
 
 function writeGithubOutputs(values) {
   const lines = Object.entries(values).map(([key, value]) => `${key}=${value}`);
+
   if (process.env.GITHUB_OUTPUT) writeFileSync(process.env.GITHUB_OUTPUT, `${lines.join('\n')}\n`, { flag: 'a' });
   else process.stdout.write(`${JSON.stringify(values)}\n`);
 }
 
 async function main() {
   const [command, value] = process.argv.slice(2);
+
   if (command === 'detect') {
     const context = {
       subject: value ?? getHeadSubject(),
@@ -702,8 +826,11 @@ async function main() {
       actorId: process.env.GITHUB_ACTOR_ID,
     };
     let result = detectRelease({ ...context, triggeringActorId: context.actorId });
+
     if (result.release) result = detectRelease({ ...context, ...(await getReleaseActorContext()) });
+
     if (result.malformed) process.stderr.write(`::error title=Invalid release commit subject::${result.error}\n`);
+
     writeGithubOutputs({
       release: String(result.release),
       malformed: String(Boolean(result.malformed)),
@@ -716,45 +843,67 @@ async function main() {
           }
         : {}),
     });
+
     return;
   }
+
   if (command === 'authorize') {
     const { actorId, triggeringActorId } = await getReleaseActorContext();
+
     if (!RELEASE_AUTHORITIES.includes(actorId) || !RELEASE_AUTHORITIES.includes(triggeringActorId)) {
       throw new ReleaseError(
         `Release requires an authorized GitHub actor and triggering actor (${RELEASE_AUTHORITIES.join(', ')}).`,
       );
     }
+
     return;
   }
+
   if (command === 'validate-subject') {
     const subject = value ?? getHeadSubject();
+
     parseReleaseSubject(subject);
+
     return;
   }
+
   if (command === 'sync') {
     const version = value ?? process.env.RELEASE_VERSION;
+
     if (!version) throw new ReleaseError('Provide a release version as an argument or in RELEASE_VERSION.');
+
     process.stdout.write(`${JSON.stringify({ version, packages: syncPackageVersions(version) })}\n`);
+
     return;
   }
+
   if (command === 'verify-build') {
     process.stdout.write(`${JSON.stringify(verifyBuiltPackages())}\n`);
+
     return;
   }
+
   if (command === 'pack') {
     const destination = value ?? process.env.RELEASE_TARBALL_DIR;
+
     if (!destination) throw new ReleaseError('Provide a tarball destination as an argument or in RELEASE_TARBALL_DIR.');
+
     process.stdout.write(`${JSON.stringify(packReleasePackages({ destination: resolve(destination) }))}\n`);
+
     return;
   }
+
   if (command === 'publish') {
     const directory = value ?? process.env.RELEASE_TARBALL_DIR;
     const version = process.env.RELEASE_VERSION;
+
     if (!directory || !version)
       throw new ReleaseError('Set RELEASE_TARBALL_DIR and RELEASE_VERSION before publishing.');
+
     const summary = await publishRelease({ directory: resolve(directory), version });
+
     process.stdout.write(`${JSON.stringify(summary)}\n`);
+
     if (process.env.GITHUB_OUTPUT) {
       writeFileSync(
         process.env.GITHUB_OUTPUT,
@@ -762,8 +911,10 @@ async function main() {
         { flag: 'a' },
       );
     }
+
     return;
   }
+
   throw new ReleaseError(
     'Usage: node .github/scripts/release.mjs <detect|authorize|validate-subject|sync|verify-build|pack|publish> [value].',
   );

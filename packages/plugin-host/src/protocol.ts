@@ -15,6 +15,7 @@ export type PortableSourceTrack = SerializedTrack & {
 export interface PortableSourceResult {
   /** Ordered versioned Track metadata with optional ephemeral state hints. */
   tracks: PortableSourceTrack[];
+
   /** Versioned playlist metadata, when present. */
   playlist: SerializedPlaylist | null;
 }
@@ -27,17 +28,25 @@ export interface PortableSourceResult {
 export function deserializeSourceResult(result: PortableSourceResult): SearchResult {
   const tracks = result.tracks.map(({ sourceState: _state, ...entity }) => {
     const track = deserialize(entity);
+
     if (!(track instanceof Track)) throw new TypeError('Expected source Track metadata');
+
     if (_state !== undefined && typeof _state !== 'string') throw new TypeError('Invalid source state');
+
     track.sourceState = _state;
+
     return track;
   });
   const playlist = result.playlist ? deserialize(result.playlist) : null;
+
   if (playlist !== null && !(playlist instanceof Playlist)) throw new TypeError('Expected source Playlist metadata');
+
   if (playlist) {
     playlist.tracks = tracks;
+
     for (const track of tracks) track.playlist = playlist;
   }
+
   return new SearchResult({ tracks, playlist });
 }
 

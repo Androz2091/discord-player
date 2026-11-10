@@ -44,6 +44,7 @@ Verify joins, moves, two-song queue progression, skip, stop, filters, failures, 
 import { Player } from 'discord-player';
 
 const player = new Player(client);
+
 await player.extractors.loadMulti(DefaultExtractors);
 ```
 
@@ -55,6 +56,7 @@ import { Player } from 'discord-player';
 const player = new Player({
   nodes: [{ id: 'local', type: 'embedded' }],
   plugins: [mySourcePlugin()],
+
   send: (guildId, packet) => sendToShard(guildId, packet),
 });
 

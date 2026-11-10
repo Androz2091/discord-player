@@ -9,17 +9,24 @@ it('rejects data properties that cannot survive JSON without silently losing inf
     get() {
       throw new Error('getter executed');
     },
+
     enumerable: true,
   });
   const sparse = Array(2);
   const extra = Object.assign([1], { extra: 2 });
+
   for (const value of [symbolKey, hidden, getterArray, sparse, extra, new Map(), undefined, Infinity]) {
     expect(() => cloneJSONValue(value)).toThrow(SerializationError);
   }
+
   const nullPrototype = Object.assign(Object.create(null), { value: 1 });
+
   expect(cloneJSONValue(nullPrototype)).toEqual({ value: 1 });
+
   const shared = { value: 1 };
+
   expect(cloneJSONValue({ one: shared, two: shared })).toEqual({ one: { value: 1 }, two: { value: 1 } });
+
   const proxy = new Proxy(
     {},
     {
@@ -28,6 +35,7 @@ it('rejects data properties that cannot survive JSON without silently losing inf
       },
     },
   );
+
   expect(() => cloneJSONValue(proxy)).toThrow(SerializationError);
 });
 
@@ -48,6 +56,7 @@ it('wraps arbitrary encoder and structural serializer failures in stable seriali
       },
     }),
   ).toThrow('already wrapped');
+
   const metadata = new Proxy(
     {},
     {
@@ -56,6 +65,7 @@ it('wraps arbitrary encoder and structural serializer failures in stable seriali
       },
     },
   );
+
   expect(() =>
     encode({ ...new Track().serialize(), data: { ...new Track().serialize().data, metadata } } as never),
   ).toThrow(SerializationError);
@@ -74,6 +84,7 @@ it('validates nested entities, supported versions and strict metadata fields', (
     { ...track, data: { ...track.data, live: 'false' } },
     { ...track, data: { ...track.data, metadata: { missing: undefined } } },
   ];
+
   for (const value of invalid) expect(() => deserialize(value)).toThrow(SerializationError);
 });
 
@@ -88,10 +99,12 @@ it('migrates supported legacy variants and rejects incomplete or non-finite dura
     extractor: 'org.example.legacy',
     requestedBy: 'user',
   };
+
   expect((deserialize({ ...base, id: 'kept', durationMS: 1250 }) as Track).durationMS).toBe(1250);
   expect((deserialize({ ...base, duration: 'LIVE' }) as Track).live).toBe(true);
   expect((deserialize({ ...base, duration: '' }) as Track).durationMS).toBe(0);
   expect((deserialize({ ...base, duration: '1:02.5' }) as Track).durationMS).toBe(62500);
+
   for (const change of [
     { duration: '1:2:3:4' },
     { duration: 'invalid' },
@@ -102,6 +115,7 @@ it('migrates supported legacy variants and rejects incomplete or non-finite dura
   ]) {
     expect(() => deserialize({ ...base, ...change })).toThrow(SerializationError);
   }
+
   const legacyPlaylist = {
     $type: 'playlist',
     id: 'p',
@@ -113,5 +127,6 @@ it('migrates supported legacy variants and rejects incomplete or non-finite dura
     author: { name: 'Artist', url: '' },
     tracks: [new Track().serialize()],
   };
+
   expect((deserialize(legacyPlaylist) as Playlist).tracks).toHaveLength(1);
 });

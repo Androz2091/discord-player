@@ -10,6 +10,7 @@ import type { ExtractorConstructor, ExtractorExecutionResult } from './extractor
 /** Small legacy ownership adapter; all execution goes through player.plugins. */
 export class ExtractorExecutionContext {
   private bridgeAttempts = new AsyncLocalStorage<Set<string>>();
+
   private instances = new Collection<string, BaseExtractor<any>>();
 
   /** Read-only view of registered legacy instances. */

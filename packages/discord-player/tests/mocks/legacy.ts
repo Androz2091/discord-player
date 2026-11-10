@@ -30,6 +30,7 @@ export class Legacy extends BaseExtractor<{ prefix: string }> {
       url: 'https://example.test/audio.mp3',
       engine: { processLocal: true },
       metadata: { value: 1 },
+
       requestMetadata: async () => ({ value: 2 }),
     });
 

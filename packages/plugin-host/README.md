@@ -37,6 +37,7 @@ const player = new Player({
 });
 
 const result = await player.search('some song', { hostId: 'sources-1' });
+
 await player.play(channel, result);
 ```
 
@@ -59,6 +60,7 @@ import { mySourcePlugin } from './my-source-plugin.js';
 
 // Local-only handle() usage may omit hostId.
 const host = createSourcePluginHost({ name: 'My Source Host' });
+
 await host.extractors.register(MyExtractor);
 await host.plugins.register(mySourcePlugin());
 
@@ -67,15 +69,20 @@ const response = await host.handle({
   operation: 'source.search',
   input: { query: 'example' },
 });
+
 if (response.handled) console.log(response.result);
+
 // Or use typed source APIs directly:
 const result = await host.runtime.search('example');
 const track = result.first();
+
 if (track) {
   const source = await host.plugins.resolveStream(track);
+
   // Caller owns consumption and destruction of returned Readables.
   console.log(source);
 }
+
 await host.close();
 ```
 
@@ -99,10 +106,15 @@ import { createSourcePluginHost } from '@discord-player/plugin-host';
 import { MyExtractor } from './my-extractor.js';
 
 const host = createSourcePluginHost({ name: 'Sources', hostId: 'sources-eu-1', publicUrl: 'http://localhost:3000' });
+
 await host.extractors.register(MyExtractor);
+
 const app = new Hono();
+
 app.all('*', (c) => host.fetch(c.req.raw));
+
 const server = serve({ fetch: app.fetch, port: 3000 });
+
 process.once('SIGTERM', () => {
   server.close();
   void host.close();
@@ -120,11 +132,16 @@ import { createSourcePluginHost } from '@discord-player/plugin-host';
 import { MyExtractor } from './my-extractor.js';
 
 const host = createSourcePluginHost({ name: 'Sources', hostId: 'sources-eu-1', publicUrl: 'http://localhost:3000' });
+
 await host.extractors.register(MyExtractor);
+
 const app = express();
+
 app.use(createNodeMiddleware(host));
 app.use(express.json());
+
 const server = app.listen(3000);
+
 process.once('SIGTERM', () => {
   server.close();
   void host.close();
@@ -161,10 +178,15 @@ const response = await fetch('http://localhost:3000/remedia/v1/execute', {
   headers: { 'content-type': 'application/json' },
   body: JSON.stringify({ pluginId: SOURCE_PLUGIN_ID, operation: 'source.search', input: { query: 'example' } }),
 });
+
 if (!response.ok) throw new Error(`Source search failed: ${response.status}`);
+
 const search = (await response.json()) as { handled: boolean; result: PortableSourceResult };
+
 if (!search.handled) throw new Error('Unhandled search');
+
 const localModels = deserializeSourceResult(search.result);
+
 console.log(localModels.first());
 
 // Send the original portable representation back, including its optional state hint.
@@ -177,11 +199,16 @@ const mediaResponse = await fetch('http://localhost:3000/remedia/v1/execute', {
     input: { track: search.result.tracks[0] },
   }),
 });
+
 if (!mediaResponse.ok) throw new Error(`Source stream failed: ${mediaResponse.status}`);
+
 const media = (await mediaResponse.json()) as { handled: boolean; result: { url: string; expiresAtMs: number } };
+
 if (!media.handled) throw new Error('Unhandled media');
+
 // Redeem media.result.url before expiresAtMs; this is a short-lived, single-use grant.
 const bytes = await fetch(media.result.url);
+
 console.log(bytes.body);
 ```
 

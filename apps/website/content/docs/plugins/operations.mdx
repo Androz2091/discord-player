@@ -47,6 +47,7 @@ Each handler receives `{ signal }`. It combines caller cancellation and registra
 ```ts
 ctx.on('track.stream', async ({ track }, { signal }) => {
   signal.throwIfAborted();
+
   return { url: track.url };
 });
 ```

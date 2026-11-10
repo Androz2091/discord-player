@@ -49,12 +49,15 @@ import { definePlugin, Track } from 'discord-player';
 export const mySource = definePlugin({
   id: 'my.source',
   kind: 'source',
+
   setup(ctx) {
     ctx.on('search.query.match', ({ query }) => (query.startsWith('https://') ? { score: 100 } : null));
+
     ctx.on('search.query.resolve', ({ query }) => ({
       playlist: null,
       tracks: [new Track({ title: 'Audio', url: query })],
     }));
+
     ctx.on('track.stream', ({ track }) => ({ url: track.url }));
   },
 });

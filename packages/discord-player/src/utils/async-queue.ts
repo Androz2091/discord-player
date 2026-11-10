@@ -5,13 +5,17 @@ export interface AsyncQueueAcquireOptions {
 
 type LockWaiter = {
   resolve: () => void;
+
   reject: (reason?: unknown) => void;
+
   signal?: AbortSignal;
+
   onAbort?: () => void;
 };
 
 type LockState = {
   held: boolean;
+
   waiters: LockWaiter[];
 };
 
@@ -75,20 +79,25 @@ export class AsyncQueue {
     }
 
     const state = this.locks.get(lockId);
+
     if (!state) {
       this.locks.set(lockId, { held: true, waiters: [] });
+
       return Promise.resolve(new AsyncQueueLock(() => this.release(lockId)));
     }
 
     return new Promise<AsyncQueueLock>((resolve, reject) => {
       const waiter: LockWaiter = {
         resolve: () => resolve(new AsyncQueueLock(() => this.release(lockId))),
+
         reject,
         signal: options.signal,
       };
       const onAbort = (): void => {
         const index = state.waiters.indexOf(waiter);
+
         if (index !== -1) state.waiters.splice(index, 1);
+
         this.cleanupLock(lockId, state);
         reject(options.signal?.reason);
       };
@@ -107,14 +116,17 @@ export class AsyncQueue {
    */
   private release(lockId: string): void {
     const state = this.locks.get(lockId);
+
     if (!state) {
       throw new Error(`Cannot release lock "${lockId}" because it is not held.`);
     }
 
     const waiter = state.waiters.shift();
+
     if (!waiter) {
       state.held = false;
       this.locks.delete(lockId);
+
       return;
     }
 

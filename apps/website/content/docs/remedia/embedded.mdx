@@ -8,8 +8,10 @@ Embedded mode is the simplest topology for one bot or a small deployment. `@reme
 ```ts
 const player = new Player({
   nodes: [{ type: 'embedded', id: 'local', capacity: 8 }],
+
   send: (guildId, packet) => sendGateway(guildId, packet),
 });
+
 await player.initialize(botUserId);
 ```
 

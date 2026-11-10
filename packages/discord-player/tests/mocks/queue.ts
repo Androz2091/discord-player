@@ -23,6 +23,7 @@ export class TestTrack extends Track {
       duration: '1:00',
       url: `https://example.test/${title}`,
     });
+
     this.resolver = resolver ?? (async () => ({ url: this.url }));
   }
 }
@@ -31,32 +32,44 @@ export class TestTrack extends Track {
 export async function setup(
   options: {
     nodeType?: 'embedded' | 'remote';
+
     crossfadeAvailable?: boolean;
+
     playerOptions?: Partial<DiscordPlayerOptions>;
+
     maxSize?: number;
+
     maxHistorySize?: number;
+
     queueOptions?: Partial<GuildQueueOptions>;
   } = {},
 ) {
   const player = new DiscordPlayer({ nodes: [], send: vi.fn(), ...options.playerOptions });
+
   await player.plugins.register(
     definePlugin({
       id: 'fixture',
       kind: 'source',
+
       setup(ctx) {
         ctx.on('track.stream', ({ track }, { signal }) => (track as TestTrack).resolver(signal));
       },
     })(),
   );
+
   player.getClientId = () => 'bot-user';
+
   const backend = createRemediaMock(options.nodeType, options.crossfadeAvailable);
   const { sessions } = backend;
+
   player.remedia = backend.asClient();
+
   const queue = await player.queues.create('guild-one', {
     maxSize: options.maxSize,
     maxHistorySize: options.maxHistorySize,
     ...options.queueOptions,
   });
   const session = backend.asSession(await queue.connect({ channelId: 'voice-one' }));
+
   return { player, queue, session, sessions, backend };
 }

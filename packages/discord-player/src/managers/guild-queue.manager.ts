@@ -33,6 +33,7 @@ export class GuildQueueManager {
    */
   public resolve<Metadata = unknown>(guild: GuildQueueResolvable): GuildQueue<Metadata> | null {
     const guildId = typeof guild === 'string' ? guild : 'guildId' in guild ? guild.guildId : guild.id;
+
     return this.get<Metadata>(guildId);
   }
 
@@ -51,8 +52,11 @@ export class GuildQueueManager {
    */
   public async delete(guildId: string): Promise<boolean> {
     const queue = this.cache.get(guildId);
+
     if (!queue) return false;
+
     await queue.destroy();
+
     return true;
   }
 
@@ -67,9 +71,13 @@ export class GuildQueueManager {
     options: GuildQueueOptions<Metadata> = {},
   ): Promise<GuildQueue<Metadata>> {
     const existing = this.get<Metadata>(guildId);
+
     if (existing) return existing;
+
     const queue = new GuildQueue(this, guildId, options);
+
     this.cache.set(guildId, queue);
+
     return queue;
   }
 

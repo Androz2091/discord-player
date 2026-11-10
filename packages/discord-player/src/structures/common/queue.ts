@@ -2,6 +2,7 @@ import { randomInt, randomUUID } from 'node:crypto';
 
 function normalizeLimit(limit: number): number {
   if (!Number.isFinite(limit) || limit <= 0) return Infinity;
+
   return Math.floor(limit);
 }
 
@@ -9,8 +10,11 @@ function normalizeLimit(limit: number): number {
 export class Queue<T> implements Iterable<T> {
   /** Values held by the queue in FIFO order. Mutating this array bypasses capacity checks. */
   private items: T[] = [];
+
   private identities: string[] = [];
+
   private storeView?: T[];
+
   /** Optional observer called after collection mutations, including compatibility store writes. */
   public onMutation?: () => void;
 
@@ -26,6 +30,7 @@ export class Queue<T> implements Iterable<T> {
   private changed(): void {
     this.onMutation?.();
   }
+
   /** Maximum retained item count, or `Infinity` for an unbounded queue. */
   private readonly limit: number;
 
@@ -42,18 +47,23 @@ export class Queue<T> implements Iterable<T> {
     return (this.storeView ??= new Proxy(this.items, {
       set: (target, key, value) => {
         Reflect.set(target, key, value);
+
         if (target === this.items) {
           this.identities = target.map(() => randomUUID());
           this.changed();
         }
+
         return true;
       },
+
       deleteProperty: (target, key) => {
         Reflect.deleteProperty(target, key);
+
         if (target === this.items) {
           this.identities = target.map(() => randomUUID());
           this.changed();
         }
+
         return true;
       },
     }));
@@ -66,17 +76,22 @@ export class Queue<T> implements Iterable<T> {
    */
   public enqueue(item: T): boolean {
     if (this.isFull()) return false;
+
     this.items.push(item);
     this.identities.push(randomUUID());
     this.changed();
+
     return true;
   }
 
   /** Remove and return the oldest value. */
   public dequeue(): T | undefined {
     this.identities.shift();
+
     const item = this.items.shift();
+
     this.changed();
+
     return item;
   }
 
@@ -93,9 +108,11 @@ export class Queue<T> implements Iterable<T> {
   public merge(other: Queue<T> | readonly T[]): number {
     const values = other instanceof Queue ? other.toArray() : Array.from(other);
     const accepted = Number.isFinite(this.limit) ? values.slice(0, Math.max(0, this.limit - this.size)) : values;
+
     this.items.push(...accepted);
     this.identities.push(...accepted.map(() => randomUUID()));
     this.changed();
+
     return accepted.length;
   }
 
@@ -164,11 +181,14 @@ export class Queue<T> implements Iterable<T> {
     if (!Number.isInteger(index) || index < 0 || index > this.size) {
       throw new RangeError(`Queue index must be an integer between 0 and ${this.size}.`);
     }
+
     const incoming = Array.isArray(values) ? Array.from(values) : [values as T];
     const accepted = incoming.slice(0, this.getCapacity());
+
     this.items.splice(index, 0, ...accepted);
     this.identities.splice(index, 0, ...accepted.map(() => randomUUID()));
     this.changed();
+
     return accepted.length;
   }
 
@@ -179,10 +199,13 @@ export class Queue<T> implements Iterable<T> {
    */
   public remove(item: T): boolean {
     const index = this.items.indexOf(item);
+
     if (index < 0) return false;
+
     this.items.splice(index, 1);
     this.identities.splice(index, 1);
     this.changed();
+
     return true;
   }
 
@@ -193,9 +216,12 @@ export class Queue<T> implements Iterable<T> {
    */
   public removeAt(index: number): T | undefined {
     if (!Number.isInteger(index) || index < 0 || index >= this.size) return undefined;
+
     const item = this.items.splice(index, 1)[0];
+
     this.identities.splice(index, 1);
     this.changed();
+
     return item;
   }
 
@@ -216,11 +242,16 @@ export class Queue<T> implements Iterable<T> {
     ) {
       return false;
     }
+
     const [value] = this.items.splice(from, 1);
+
     this.items.splice(to, 0, value!);
+
     const [id] = this.identities.splice(from, 1);
+
     this.identities.splice(to, 0, id!);
     this.changed();
+
     return true;
   }
 
@@ -241,9 +272,11 @@ export class Queue<T> implements Iterable<T> {
     ) {
       return false;
     }
+
     [this.items[left], this.items[right]] = [this.items[right]!, this.items[left]!];
     [this.identities[left], this.identities[right]] = [this.identities[right]!, this.identities[left]!];
     this.changed();
+
     return true;
   }
 
@@ -251,9 +284,11 @@ export class Queue<T> implements Iterable<T> {
   public shuffle(): void {
     for (let index = this.items.length - 1; index > 0; index--) {
       const target = randomInt(index + 1);
+
       [this.items[index], this.items[target]] = [this.items[target]!, this.items[index]!];
       [this.identities[index], this.identities[target]] = [this.identities[target]!, this.identities[index]!];
     }
+
     this.changed();
   }
 
@@ -264,6 +299,7 @@ export class Queue<T> implements Iterable<T> {
   public find(predicate: (item: T) => boolean): T | undefined {
     return this.items.find(predicate);
   }
+
   /**
    * Return all values matching a predicate.
    * @param predicate Test applied to each value in FIFO order.
@@ -271,6 +307,7 @@ export class Queue<T> implements Iterable<T> {
   public filter(predicate: (item: T) => boolean): T[] {
     return this.items.filter(predicate);
   }
+
   /**
    * Map values in FIFO order.
    * @param callback Mapping function applied to each value.
@@ -278,6 +315,7 @@ export class Queue<T> implements Iterable<T> {
   public map<U>(callback: (item: T) => U): U[] {
     return this.items.map(callback);
   }
+
   /**
    * Visit values in FIFO order.
    * @param callback Function called for each value.
@@ -285,6 +323,7 @@ export class Queue<T> implements Iterable<T> {
   public forEach(callback: (item: T) => void): void {
     this.items.forEach(callback);
   }
+
   /**
    * Test whether any value matches a predicate.
    * @param predicate Test applied to each value in FIFO order.
@@ -292,6 +331,7 @@ export class Queue<T> implements Iterable<T> {
   public some(predicate: (item: T) => boolean): boolean {
     return this.items.some(predicate);
   }
+
   /**
    * Test whether every value matches a predicate.
    * @param predicate Test applied to each value in FIFO order.
@@ -299,6 +339,7 @@ export class Queue<T> implements Iterable<T> {
   public every(predicate: (item: T) => boolean): boolean {
     return this.items.every(predicate);
   }
+
   /**
    * Find the first index of a value.
    * @param item Value to find.
@@ -306,10 +347,12 @@ export class Queue<T> implements Iterable<T> {
   public indexOf(item: T): number {
     return this.items.indexOf(item);
   }
+
   /** Copy values into a new array in FIFO order. */
   public toArray(): T[] {
     return Array.from(this.items);
   }
+
   /** Iterate over values in FIFO order. */
   public [Symbol.iterator](): Iterator<T> {
     return this.items[Symbol.iterator]();

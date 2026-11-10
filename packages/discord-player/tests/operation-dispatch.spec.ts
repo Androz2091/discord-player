@@ -27,6 +27,7 @@ it('supports every dispatch policy, stable priority, null/false and scoped remov
       definePlugin({
         id,
         kind: 'source',
+
         setup(ctx) {
           ctx.on('fixture.null', () => (id === 'b' ? false : null), { priority });
 
@@ -55,6 +56,7 @@ it('supports every dispatch policy, stable priority, null/false and scoped remov
   const track = new Track();
 
   await host.execute('track.stream.resolved', { track });
+
   expect(seen).toEqual(['b', 'c', 'a']);
 
   const transformed = await host.execute('stream.transform', { track, stream: Readable.from([]) });
@@ -65,7 +67,9 @@ it('supports every dispatch policy, stable priority, null/false and scoped remov
   }
 
   expect(chunks).toEqual(['a']);
+
   await host.unregister('b');
+
   expect((await host.execute('search.query.match', { query: 'x' })).map((m) => m?.pluginId)).toEqual(['c', 'a']);
 });
 
@@ -80,6 +84,7 @@ it('uses match confidence within a priority tier and preserves explicit targetin
       definePlugin({
         id,
         kind: 'source',
+
         setup(ctx) {
           ctx.on('search.query.match', () => ({ score }));
 
@@ -95,6 +100,7 @@ it('uses match confidence within a priority tier and preserves explicit targetin
   expect((await p.search('query')).tracks[0]!.title).toBe('high:query');
   expect((await p.search('query', { pluginId: 'low' })).tracks[0]!.title).toBe('low:query');
   expect((await p.search('unknown:query')).tracks[0]!.title).toBe('high:unknown:query');
+
   await p.extractors.register(Legacy, { prefix: 'legacy:' });
 
   class HigherPriority extends Legacy {
@@ -106,7 +112,9 @@ it('uses match confidence within a priority tier and preserves explicit targetin
   }
 
   await p.extractors.register(HigherPriority, { prefix: 'other:' });
+
   expect((await p.search('raw://query')).tracks[0]!.title).toBe('legacy:query');
   expect((await p.search('query', { searchEngine: 'ext:low' })).tracks[0]!.title).toBe('low:query');
+
   await p.destroy();
 });

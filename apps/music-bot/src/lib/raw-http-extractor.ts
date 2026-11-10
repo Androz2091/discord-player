@@ -25,6 +25,7 @@ function hasProtocol(query: string): boolean {
 export const rawHTTPExtractor = definePlugin({
   id: 'org.example.raw-http',
   kind: 'source',
+
   setup(ctx) {
     ctx.on('search.query.match', ({ query }, { signal }) => {
       signal.throwIfAborted();
@@ -77,6 +78,7 @@ export const rawHTTPExtractor = definePlugin({
       }
 
       const files = await searchMusicFiles(query, signal);
+
       signal.throwIfAborted();
 
       const tracksWithMetadata = await Promise.all(
@@ -106,6 +108,7 @@ export const rawHTTPExtractor = definePlugin({
           });
         }),
       );
+
       return {
         playlist: null,
         tracks: tracksWithMetadata,
@@ -119,6 +122,7 @@ export const rawHTTPExtractor = definePlugin({
 
       if (data && typeof data === 'object' && !Array.isArray(data) && typeof data.file === 'string') {
         const file = await resolveMusicFile(data.file, signal);
+
         signal.throwIfAborted();
 
         if (!file) {

@@ -38,20 +38,26 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', 
     createDiscordSession: vi.fn((options: DiscordSessionOptions) => {
       if (activeSessions.has(options.guildId))
         throw new Error(`a Discord session already exists for guild ${options.guildId}`);
+
       const session = new FakeSession(options, nodeType, () => {
         if (activeSessions.get(options.guildId) === session) activeSessions.delete(options.guildId);
       });
+
       activeSessions.set(options.guildId, session);
       sessions.push(session);
+
       return session;
     }),
     receive: vi.fn<RemediaClient['receive']>(),
   };
+
   return {
     client,
     sessions,
     activeSessions,
+
     asClient: () => client as unknown as RemediaClient,
+
     asSession: (session: DiscordSession) => session as unknown as FakeSession,
   };
 }

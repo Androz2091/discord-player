@@ -43,7 +43,9 @@ export class Context<Value> {
     receiver: ContextReceiver<Result>,
   ): Result {
     if (value === undefined) throw new Error('Context value may not be undefined.');
+
     if (typeof receiver !== 'function') throw new TypeError('Context receiver must be a function.');
+
     return this.storage.run(value, receiver);
   }
 
@@ -85,16 +87,22 @@ export function useContext<Value>(
 export interface PlayerContextValue {
   /** Player instance that established this scope. */
   player: DiscordPlayer;
+
   /** Optional guild ID used to resolve the scoped queue. */
   guildId?: string;
+
   /** Optional structural guild object. */
   guild?: { id: string } | null;
+
   /** Optional pre-resolved queue. */
   queue?: GuildQueue | null;
+
   /** Application metadata attached to the command context. */
   metadata?: unknown;
+
   /** Contextual volume override. */
   volume?: number;
+
   /** Contextual player timeline override. */
   timeline?: PlayerTimestamp | null;
 }
@@ -103,14 +111,19 @@ export interface PlayerContextValue {
 export interface PlayerContextInput {
   /** Optional guild ID used to resolve the scoped queue. */
   guildId?: string;
+
   /** Optional structural guild object. */
   guild?: { id: string } | null;
+
   /** Optional pre-resolved queue. */
   queue?: GuildQueue | null;
+
   /** Application metadata attached to the command context. */
   metadata?: unknown;
+
   /** Contextual volume override. */
   volume?: number;
+
   /** Contextual player timeline override. */
   timeline?: PlayerTimestamp | null;
 }
@@ -149,6 +162,7 @@ export class PlayerContext extends Context<PlayerContextValue> {
       guildId,
       queue: value.queue ?? (guildId ? this.owner.queues.get(guildId) : null),
     };
+
     return activePlayerContext.run(scoped, () => super.provide(scoped, receiver));
   }
 }
@@ -172,9 +186,13 @@ export function useQueue(
   guildId?: string,
 ): GuildQueue | null {
   const context = activePlayerContext.getStore();
+
   if (!context) return null;
+
   if (guildId) return context.player.queues.get(guildId);
+
   if (context.queue) return context.queue;
+
   return context.guildId ? context.player.queues.get(context.guildId) : null;
 }
 
@@ -186,20 +204,26 @@ export function useHistory(): GuildQueueHistoryManager | null {
 /** Read command metadata first, then the active queue metadata. */
 export function useMetadata<Value = unknown>(): Value | undefined {
   const context = activePlayerContext.getStore();
+
   if (!context) return undefined;
+
   return (context.metadata ?? context.queue?.metadata) as Value | undefined;
 }
 
 /** Read contextual volume or the active queue node's percentage volume. */
 export function useVolume(): number | null {
   const context = activePlayerContext.getStore();
+
   if (!context) return null;
+
   return context.volume ?? context.queue?.node.volume ?? null;
 }
 
 /** Read contextual timeline or the active queue node's current timeline. */
 export function useTimeline(): PlayerTimestamp | null {
   const context = activePlayerContext.getStore();
+
   if (!context) return null;
+
   return context.timeline ?? context.queue?.node.getTimestamp() ?? null;
 }

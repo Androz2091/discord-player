@@ -115,6 +115,7 @@ export class RemoteSourceHosts {
 
       // Discover on every call so restarts and changed registrations do not leave stale manifests.
       const manifest = await request('/.well-known/remedia');
+
       if (
         manifest?.protocolVersion !== 1 ||
         !Array.isArray(manifest.plugins) ||
@@ -128,6 +129,7 @@ export class RemoteSourceHosts {
         if (options[key] !== undefined) hints[key] = options[key];
 
       const requester = typeof options.requestedBy === 'object' ? options.requestedBy?.id : options.requestedBy;
+
       if (requester !== undefined) hints.requestedBy = requester;
 
       const provider =
@@ -137,12 +139,14 @@ export class RemoteSourceHosts {
         operation: provider ? 'source.resolve' : 'source.search',
         input: { query, ...(provider ? { pluginId: provider } : {}), options: hints },
       });
+
       if (envelope?.handled === false) continue;
 
       let result: SearchResult;
 
       try {
         if (envelope?.handled !== true) throw new Error();
+
         result = deserializeSourceResult(envelope.result as PortableSourceResult);
 
         const target =
@@ -166,6 +170,7 @@ export class RemoteSourceHosts {
       }
 
       signal.throwIfAborted();
+
       if (!result.isEmpty()) return result;
     }
 

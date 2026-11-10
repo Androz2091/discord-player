@@ -7,6 +7,7 @@ beforeEach(() => {
     'fetch',
     vi.fn<typeof fetch>().mockRejectedValue(new Error('Unexpected HTTP request. Install mockFetch().')),
   );
+
   vi.spyOn(RemediaClient, 'create').mockRejectedValue(
     new Error('Unexpected Remedia initialization. Install a mock backend.'),
   );

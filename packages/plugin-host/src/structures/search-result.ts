@@ -5,6 +5,7 @@ import type { Track } from './track.js';
 export interface SearchResultData {
   /** Search result Tracks in source relevance order. */
   tracks: Track[];
+
   /** Playlist associated with the result, or null when the result is not a playlist. */
   playlist: Playlist | null;
 }
@@ -13,6 +14,7 @@ export interface SearchResultData {
 export class SearchResult {
   /** Tracks returned by the search operation. */
   public readonly tracks: Track[];
+
   /** Playlist metadata returned with the tracks, when available. */
   public readonly playlist: Playlist | null;
 
@@ -40,8 +42,10 @@ export class SearchResult {
 
   /** Retrieve the first Track in the search result. Null if no tracks are available. */
   public first(): Track | null;
+
   /** Retrieve the first N Tracks in the search result. */
   public first(count: number): Track[];
+
   public first(count?: number): Track | Track[] | null {
     if (typeof count !== 'number') {
       return this.tracks[0] ?? null;

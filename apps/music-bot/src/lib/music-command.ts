@@ -44,25 +44,31 @@ export function musicCommand(
         embeds: [musicEmbed('Server command', 'Use this command in a server.', 0xed4245)],
         flags: MessageFlags.Ephemeral,
       });
+
       return;
     }
+
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
     try {
       const response = await action(interaction);
       const embed =
         response instanceof EmbedBuilder
           ? response
           : musicEmbed(commandTitles[interaction.commandName] ?? 'Music', response);
+
       embed.setFooter({
         text: `Requested by ${interaction.user.displayName}`,
         iconURL: interaction.user.displayAvatarURL(),
       });
+
       await interaction.editReply({
         embeds: [embed],
         allowedMentions: { parse: [] },
       });
     } catch (error) {
       if (!(error instanceof MusicCommandError)) console.error(`/${interaction.commandName} failed:`, error);
+
       await interaction.editReply({
         embeds: [
           musicEmbed(
@@ -84,7 +90,9 @@ export function musicCommand(
  */
 export function requireVoiceChannel(interaction: ChatInputCommandInteraction<'cached'>) {
   const channel = interaction.member.voice.channel;
+
   if (!channel) throw new MusicCommandError('Join a voice channel first.');
+
   return channel;
 }
 
@@ -96,10 +104,13 @@ export function requireVoiceChannel(interaction: ChatInputCommandInteraction<'ca
 export function requireQueue(interaction: ChatInputCommandInteraction<'cached'>): GuildQueue<QueueMetadata> {
   const channel = requireVoiceChannel(interaction);
   const queue = player.queues.get<QueueMetadata>(interaction.guildId);
+
   if (!queue?.node.session) throw new MusicCommandError('There is no connected music queue. Use /play or /join first.');
+
   if (queue.node.session.channelId !== channel.id) {
     throw new MusicCommandError('Join my voice channel to control playback.');
   }
+
   return queue;
 }
 
@@ -110,6 +121,7 @@ export function requireQueue(interaction: ChatInputCommandInteraction<'cached'>)
  */
 export function requireTrack(queue: GuildQueue): Track {
   if (!queue.currentTrack) throw new MusicCommandError('There is no track playing.');
+
   return queue.currentTrack;
 }
 
@@ -132,5 +144,6 @@ export function formatTime(milliseconds: number): string {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainder = String(seconds % 60).padStart(2, '0');
+
   return hours ? `${hours}:${String(minutes).padStart(2, '0')}:${remainder}` : `${minutes}:${remainder}`;
 }

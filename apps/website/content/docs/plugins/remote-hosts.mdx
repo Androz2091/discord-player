@@ -113,16 +113,19 @@ const player = new Player({
     },
   ],
   crossfade: { enabled: true },
+
   send(guildId, packet) {
     client.guilds.cache.get(guildId)?.shard.send(packet);
   },
 });
 
 client.on('raw', (packet) => player.receive(packet));
+
 client.once('clientReady', async () => {
   await player.initialize(client.user!.id);
 
   const result = await player.search('fixture', { hostId: 'sources-1', pluginId: 'example.audio' });
+
   await player.play({ guildId: process.env.GUILD_ID!, channelId: process.env.CHANNEL_ID! }, result);
 });
 

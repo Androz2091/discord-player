@@ -18,14 +18,19 @@ export interface GuildQueuePlayerNodeSessionCreateOptions extends Omit<DiscordSe
 export interface PlayerProgressbarOptions {
   /** Whether to include current and total time labels around the bar. */
   timecodes?: boolean;
+
   /** Number of cells in the bar, excluding the indicator. */
   length?: number;
+
   /** Character repeated before the indicator. */
   leftChar?: string;
+
   /** Character repeated after the indicator. */
   rightChar?: string;
+
   /** Text placed between time labels and the bar. */
   separator?: string;
+
   /** Marker placed at the current progress position. */
   indicator?: string;
 }
@@ -34,8 +39,10 @@ export interface PlayerProgressbarOptions {
 export interface PlayerTimestamp {
   /** Current playback position and its formatted label. */
   current: { label: string; value: number };
+
   /** Total duration and its formatted label. */
   total: { label: string; value: number };
+
   /** Playback progress from zero through one hundred. */
   progress: number;
 }
@@ -44,6 +51,7 @@ export interface PlayerTimestamp {
 export interface PlayRawResult<Metadata = unknown> {
   /** Audio stream information reported by Remedia. */
   audioStream: AudioStreamInfo;
+
   /** Remedia session that owns the playback generation. */
   session: DiscordSession<Metadata>;
 }
@@ -56,6 +64,7 @@ function timecode(milliseconds: number): string {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainder = seconds % 60;
+
   return hours > 0
     ? `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`
     : `${minutes}:${String(remainder).padStart(2, '0')}`;
@@ -65,10 +74,13 @@ function timecode(milliseconds: number): string {
 export class GuildQueuePlayerNode<Metadata = unknown> {
   /** Current Remedia session, or `null` before connecting. */
   public session: DiscordSession | null = null;
+
   /** Parent Player that owns Remedia and gateway orchestration. */
   public readonly player: DiscordPlayer;
+
   /** Queue-owned named presets and raw filtergraph controls, available before connection. */
   public readonly filters: GuildQueuePlayerAudioFilters<Metadata>;
+
   #volume = 100;
 
   /**
@@ -86,15 +98,18 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /** Get the connected session, throwing when one does not exist. */
   public getSession<M = unknown>(): DiscordSession<M>;
+
   /**
    * Optionally return `null` when no session exists.
    * @param throwOnMissingSession Pass `false` to return `null` instead of throwing.
    */
   public getSession<M = unknown>(throwOnMissingSession: false): DiscordSession<M> | null;
+
   public getSession<M = unknown>(throwOnMissingSession = true): DiscordSession<M> | null {
     if (!this.session && throwOnMissingSession) {
       throw new Error('DiscordSession is not initialized. Call queue.connect() first.');
     }
+
     return this.session as DiscordSession<M> | null;
   }
 
@@ -107,8 +122,10 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     options: GuildQueuePlayerNodeSessionCreateOptions,
   ): Promise<DiscordSession<M>> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
+
     this.assertQueueAlive();
     await this.destroySessionUnlocked();
+
     const { connectTimeoutMs: _connectTimeoutMs, ...sessionOptions } = options;
     const negotiated = await this.sessionPolicy(sessionOptions);
     const session = this.player.getRemedia().createDiscordSession({
@@ -116,9 +133,11 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       guildId: this.queue.guildId,
       userId: this.player.getClientId(),
     });
+
     this.session = session;
     this.rememberSessionConfiguration(session);
     this.attachSessionListeners(session);
+
     return session as DiscordSession<M>;
   }
 
@@ -131,32 +150,44 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    */
   public async connect<M = unknown>(options: GuildQueuePlayerNodeSessionCreateOptions): Promise<DiscordSession<M>> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
+
     this.assertQueueAlive();
+
     const existing = this.session;
+
     if (existing) {
       this.assertHosts(existing.nodeId, options.pluginHosts ?? []);
+
       if (options.nodeId && options.nodeId !== existing.nodeId) {
         throw new Error('Changing a Remedia node while preserving this session is not supported.');
       }
 
       if (options.selfDeaf !== undefined && options.selfDeaf !== existing.selfDeaf)
         await existing.setSelfDeaf(options.selfDeaf);
+
       if (options.selfMute !== undefined && options.selfMute !== existing.selfMute)
         await existing.setSelfMute(options.selfMute);
+
       const previousVolume = existing.volume;
+
       if (options.volume !== undefined && options.volume !== previousVolume) await existing.setVolume(options.volume);
+
       if (options.filterGraph !== undefined && options.filterGraph !== existing.filters.graph) {
         if (options.filterGraph === null) await existing.filters.clear();
         else await existing.filters.set(options.filterGraph);
       }
 
       if (options.channelId !== existing.channelId) await existing.move(options.channelId);
+
       if (existing.connectionState !== 'connected') {
         await existing.connect(options.connectTimeoutMs === undefined ? {} : { timeoutMs: options.connectTimeoutMs });
       }
+
       this.rememberSessionConfiguration(existing);
+
       if (existing.volume !== previousVolume)
         this.queue.emit('volumeChange', previousVolume * 100, existing.volume * 100);
+
       return existing as DiscordSession<M>;
     }
 
@@ -167,27 +198,34 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       guildId: this.queue.guildId,
       userId: this.player.getClientId(),
     });
+
     this.session = session;
     this.attachSessionListeners(session);
+
     try {
       await session.connect(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs });
       this.rememberSessionConfiguration(session);
     } catch (error) {
       await this.destroySessionUnlocked();
+
       throw error;
     }
+
     return session as DiscordSession<M>;
   }
 
   /** Disconnect and clear the current Remedia session. */
   public async destroySession(): Promise<void> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
+
     await this.destroySessionUnlocked();
   }
 
   private async destroySessionUnlocked(): Promise<void> {
     const session = this.session;
+
     if (!session) return;
+
     this.rememberSessionConfiguration(session);
     this.session = null;
     await this.queue.cancelPreparation();
@@ -201,16 +239,21 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     options: GuildQueuePlayerNodeSessionCreateOptions,
   ): Promise<GuildQueuePlayerNodeSessionCreateOptions> {
     const requested = this.queue.options.crossfade ?? this.player.options.crossfade;
+
     if (!requested) {
       const assigned = this.player.getRemedia().getAssignment(this.queue.guildId);
       const nodeId = options.nodeId ?? assigned?.nodeId;
+
       if (nodeId) this.assertHosts(nodeId, options.pluginHosts ?? []);
+
       return options;
     }
+
     const client = this.player.getRemedia();
     const assigned = client.getAssignment(this.queue.guildId);
     const nodes = client.nodes;
     let nodeId = options.nodeId ?? assigned?.nodeId;
+
     if (!nodeId) {
       const candidates = nodes.filter(
         (node) =>
@@ -224,20 +267,25 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
           node.statistics?.transportHealth !== 'degraded' &&
           node.statistics?.processingHealth !== 'degraded',
       );
+
       nodeId = this.queue.options.selectNode
         ? await this.queue.options.selectNode(candidates, { guildId: this.queue.guildId })
         : candidates.length
           ? candidates[randomInt(candidates.length)]!.id
           : undefined;
     }
+
     if (nodeId) this.assertHosts(nodeId, options.pluginHosts ?? []);
+
     const selected = nodes.find((node) => node.id === nodeId);
     const available = selected?.type === 'embedded' || selected?.capabilities?.crossfade.available === true;
+
     if (!available)
       this.player.emit(
         'debug',
         `Queue ${this.queue.guildId}: crossfade unavailable on node ${nodeId}; using ordinary playback.`,
       );
+
     return {
       ...options,
       ...(nodeId ? { nodeId } : {}),
@@ -247,7 +295,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   private assertHosts(nodeId: string | null, hosts: readonly string[]): void {
     if (!hosts.length) return;
+
     const node = this.player.getRemedia().nodes.find((item) => item.id === nodeId);
+
     if (
       node?.type !== 'remote' ||
       !node.capabilities?.pluginOperations?.available ||
@@ -258,9 +308,11 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   private attachSessionListeners(session: DiscordSession): void {
     session.on('prepareRequested', (event) => this.queue.handlePrepareRequested(session, event));
+
     for (const name of ['stageReady', 'stageFailed', 'stageInvalidated', 'transitionCancelled'] as const) {
       session.on(name, (event) => this.queue.handleStageEvent(session, name, event));
     }
+
     session.on('playbackStarted', (event) => this.queue.handlePlaybackStarted(session, event));
     session.on('playbackCompleted', (event) => this.queue.handlePlaybackTerminal(session, 'natural', event));
     session.on('playbackStopped', (event) => this.queue.handlePlaybackTerminal(session, 'stopped', event));
@@ -268,11 +320,14 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     session.on('playbackPaused', (event) => this.queue.emit('playerPause', event));
     session.on('playbackResumed', (event) => this.queue.emit('playerResume', event));
     session.on('playbackSeeked', (event) => this.queue.emit('playerSeek', event));
+
     session.on('voiceStateChanged', (event) => {
       this.queue.emit('voiceStateUpdate', event);
+
       if (event.state === 'connected')
         void this.queue.reconcileCrossfade(session).catch((error) => this.player.emit('debug', String(error)));
     });
+
     session.on('voiceFailed', (event) => this.queue.emit('error', event.error));
   }
 
@@ -296,9 +351,12 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    */
   public async play<M = unknown>(source: MediaSource, options?: PlayOptions<M>): Promise<PlayRawResult<M>> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
+
     this.assertQueueAlive();
+
     const session = this.getSession<M>();
     const audioStream = await session.play(source, options);
+
     return { audioStream, session };
   }
 
@@ -320,14 +378,21 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     if (!Number.isFinite(volumePercentage) || volumePercentage < 0 || volumePercentage > 100) {
       throw new RangeError('Volume must be a finite percentage between 0 and 100.');
     }
+
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
+
     this.assertQueueAlive();
+
     const previous = this.volume;
     const session = this.getSession(false);
+
     if (session) await session.setVolume(volumePercentage / 100);
+
     this.#volume = volumePercentage;
     this.queue.options.volume = volumePercentage;
+
     if (previous !== volumePercentage) this.queue.emit('volumeChange', previous, volumePercentage);
+
     return this.#volume;
   }
 
@@ -337,6 +402,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    */
   public async seek(positionMs: number): Promise<void> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
+
     await this.queue.cancelPreparation();
     await this.getSession().seek(Math.max(0, positionMs));
   }
@@ -344,12 +410,14 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   /** Pause raw playback in the current Remedia session. */
   public async pause(): Promise<void> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
+
     await this.getSession().pause();
   }
 
   /** Resume raw playback in the current Remedia session. */
   public async resume(): Promise<void> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
+
     await this.getSession().resume();
   }
 
@@ -359,6 +427,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    */
   public async setPaused(paused: boolean): Promise<void> {
     if (paused) return this.pause();
+
     return this.resume();
   }
 
@@ -366,6 +435,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   public skip(): Promise<Track | null> {
     return this.queue.skip();
   }
+
   /**
    * Skip to an upcoming Track.
    * @param track Track reference or upcoming queue index.
@@ -373,6 +443,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   public skipTo(track: Track | number): Promise<Track | null> {
     return this.queue.skipTo(track);
   }
+
   /**
    * Alias for `skipTo()`.
    * @param track Track reference or upcoming queue index.
@@ -380,6 +451,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   public jump(track: Track | number): Promise<Track | null> {
     return this.queue.jump(track);
   }
+
   /** Stop queue-managed playback while retaining upcoming tracks. */
   public stop(): Promise<void> {
     return this.queue.stop();
@@ -392,7 +464,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   public async stopSession(): Promise<void> {
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
     const session = this.getSession(false);
+
     if (session) await session.stop();
+
     this.queue.handleSessionStopped();
   }
 
@@ -400,27 +474,34 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   public get volume(): number {
     return this.session ? this.session.volume * 100 : this.#volume;
   }
+
   /** Current media position in milliseconds, or zero when Remedia has no position. */
   public get playbackTime(): number {
     const position = this.session?.position;
+
     return position?.mediaMs ?? position?.playedMs ?? 0;
   }
+
   /** Total session duration in milliseconds, falling back to the current Track's duration. */
   public get totalDuration(): number {
     return this.session?.durationMs ?? this.queue.currentTrack?.durationMS ?? 0;
   }
+
   /** Compatibility alias for {@link GuildQueuePlayerNode.playbackTime}. */
   public get streamTime(): number {
     return this.playbackTime;
   }
+
   /** Whether the raw session is absent or in a terminal/idle state. */
   public isIdle(): boolean {
     return !this.session || ['idle', 'stopped', 'completed', 'failed'].includes(this.session.state);
   }
+
   /** Whether the raw session is starting, playing, or resuming. */
   public isPlaying(): boolean {
     return !!this.session && ['starting', 'playing', 'resuming'].includes(this.session.state);
   }
+
   /** Whether the raw session is paused or pausing. */
   public isPaused(): boolean {
     return !!this.session && ['paused', 'pausing'].includes(this.session.state);
@@ -429,8 +510,10 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   /** Return the formatted timeline for the current queue Track, or `null` when no Track is selected. */
   public getTimestamp(): PlayerTimestamp | null {
     if (!this.queue.currentTrack) return null;
+
     const current = this.playbackTime;
     const total = this.totalDuration;
+
     return {
       current: { label: timecode(current), value: current },
       total: { label: timecode(total), value: total },
@@ -445,16 +528,21 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    */
   public createProgressBar(options: PlayerProgressbarOptions = {}): string | null {
     const timestamp = this.getTimestamp();
+
     if (!timestamp) return null;
+
     const length = options.length ?? 15;
+
     if (!Number.isInteger(length) || length < 0)
       throw new RangeError('Progress bar length must be a non-negative integer.');
+
     const left = options.leftChar ?? '▬';
     const right = options.rightChar ?? '▬';
     const indicator = options.indicator ?? '🔘';
     const separator = options.separator ?? '┃';
     const index = timestamp.total.value > 0 ? Math.min(length, Math.floor((timestamp.progress * length) / 100)) : 0;
     const bar = `${left.repeat(index)}${indicator}${right.repeat(Math.max(0, length - index - 1))}`;
+
     return options.timecodes === false
       ? bar
       : `${timestamp.current.label} ${separator} ${bar} ${separator} ${timestamp.total.label}`;

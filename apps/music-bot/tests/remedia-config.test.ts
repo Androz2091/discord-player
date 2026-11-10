@@ -27,6 +27,7 @@ describe('Remedia bot mode configuration', () => {
 
   it('rejects invalid or incomplete configuration without leaking credentials', () => {
     expect(() => createRemediaNodes({ REMEDIA_MODE: 'invalid' })).toThrow(/REMEDIA_MODE/);
+
     for (const missing of ['REMEDIA_URL', 'REMEDIA_USERNAME', 'REMEDIA_PASSWORD'] as const) {
       const env = {
         REMEDIA_MODE: 'remote',
@@ -34,7 +35,9 @@ describe('Remedia bot mode configuration', () => {
         REMEDIA_USERNAME: 'music',
         REMEDIA_PASSWORD: 'secret',
       };
+
       delete (env as Record<string, string | undefined>)[missing];
+
       expect(() => createRemediaNodes(env)).toThrow(/requires REMEDIA_URL/);
     }
   });

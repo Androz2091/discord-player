@@ -19,7 +19,10 @@ export const command: CommandData = {
 export const chatInput = musicCommand(async (interaction) => {
   const queue = requireQueue(interaction);
   const percent = interaction.options.getInteger('percent');
+
   if (percent === null) return `Current volume: ${Math.round(queue.node.volume)}%.`;
+
   await queue.node.setVolume(percent);
+
   return `Volume set to ${percent}%.`;
 });

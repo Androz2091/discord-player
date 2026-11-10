@@ -58,8 +58,11 @@ describe('versioned serialization', () => {
 
     const jsonRoundTrip: unknown = JSON.parse(JSON.stringify(serialized));
     const restored = deserialize(decode(encode(serialized)));
+
     expect(restored).toBeInstanceOf(Track);
+
     if (!(restored instanceof Track)) throw new Error('Expected a Track instance.');
+
     expect(restored.id).toBe(track.id);
     expect(restored.durationMS).toBe(track.durationMS);
     expect(restored.requestedBy).toBe('user-42');
@@ -84,12 +87,16 @@ describe('versioned serialization', () => {
     });
 
     const serialized = playlist.serialize();
+
     expect(serialized.data.tracks.map((track) => track.data.id)).toEqual(['first', 'second']);
     expect('playlist' in serialized.data.tracks[0]!.data).toBe(false);
+
     const restored = deserialize(JSON.parse(JSON.stringify(serialized)));
 
     expect(restored).toBeInstanceOf(Playlist);
+
     if (!(restored instanceof Playlist)) throw new Error('Expected a Playlist instance.');
+
     expect(restored.id).toBe('playlist-1');
     expect(restored.tracks.map((track) => track.id)).toEqual(['first', 'second']);
     expect(restored.tracks.every((track) => track instanceof Track)).toBe(true);
@@ -114,17 +121,26 @@ describe('versioned serialization', () => {
     expect(serialized.data).not.toHaveProperty('duration');
     expect(serialized.data).not.toHaveProperty('playlist');
     expect(track.toJSON()).toHaveProperty('duration', '');
+
     const restoredTrack = deserialize(serialized);
+
     expect(restoredTrack).toBeInstanceOf(Track);
+
     if (!(restoredTrack instanceof Track)) throw new Error('Expected a Track instance.');
+
     expect(restoredTrack.duration).toBe('');
+
     const liveTrack = deserialize(new Track({ duration: 'LIVE' }).serialize());
+
     expect(liveTrack).toBeInstanceOf(Track);
+
     if (!(liveTrack instanceof Track)) throw new Error('Expected a Track instance.');
+
     expect(liveTrack.live).toBe(true);
     expect(liveTrack.duration).toBe('LIVE');
 
     const emptyPlaylist = new Playlist();
+
     expect(emptyPlaylist.serialize().data.tracks).toEqual([]);
     expect(emptyPlaylist.toJSON().tracks).toEqual([]);
   });
@@ -154,7 +170,9 @@ describe('versioned serialization', () => {
 
   it('rejects metadata that JSON.stringify would silently lose or corrupt', () => {
     const circular: { self?: unknown } = {};
+
     circular.self = circular;
+
     const invalidMetadata: unknown[] = [
       () => 'function',
       1n,
@@ -169,6 +187,7 @@ describe('versioned serialization', () => {
     for (const metadata of invalidMetadata) {
       expect(() => new Track({ metadata }).serialize()).toThrow(SerializationError);
     }
+
     expect(() => new Track({ requestedBy: { username: 'missing-id' } }).serialize()).toThrow(SerializationError);
     expect(() => new Track({ metadata: 1n }).serialize()).toThrowError(
       expect.objectContaining({ code: DiscordPlayerErrorCode.Serialization }),
@@ -209,11 +228,14 @@ describe('versioned serialization', () => {
 
     const restoredTrack = deserialize(legacyTrack);
     const restoredPlaylist = deserialize(JSON.parse(JSON.stringify(legacyPlaylist)));
+
     expect(restoredTrack).toBeInstanceOf(Track);
     expect(restoredPlaylist).toBeInstanceOf(Playlist);
+
     if (!(restoredTrack instanceof Track) || !(restoredPlaylist instanceof Playlist)) {
       throw new Error('Expected legacy data to reconstruct framework models.');
     }
+
     expect(restoredTrack.id).toBeTruthy(); // v7 did not persist Track IDs.
     expect(restoredTrack.durationMS).toBe(150_000);
     expect(restoredTrack.requestedBy).toBe('legacy-user');
@@ -222,6 +244,7 @@ describe('versioned serialization', () => {
     expect(restoredPlaylist.tracks[0]?.playlist).toBe(restoredPlaylist);
     expect(restoredPlaylist.serialize()).not.toHaveProperty('$encoder_version');
     expect(restoredPlaylist.serialize().data.tracks[0]!.data).not.toHaveProperty('extractor');
+
     await expect(restoredTrack.getStreamableSource()).rejects.toBeInstanceOf(SourceUnavailableError);
   });
 
@@ -256,7 +279,9 @@ describe('versioned serialization', () => {
 
   it('keeps reconstructed metadata JSON-compatible', () => {
     const result = deserialize(makeTrack({ metadata: { values: [1, true, null, 'x'] } }).serialize());
+
     if (!(result instanceof Track)) throw new Error('Expected a Track instance.');
+
     expect(result.metadata).toEqual({ values: [1, true, null, 'x'] });
   });
 });
@@ -278,11 +303,16 @@ it('validates strict versioned schemas and portable source references with Zod',
       data: { ...payload.data, sourceReference: { pluginId: 'org.example.raw', data: null, extra: true } },
     },
   ];
+
   for (const value of invalid) expect(() => deserialize(value)).toThrow(SerializationError);
+
   expect((deserialize(payload) as Track).sourceReference).toEqual(payload.data.sourceReference);
+
   const getter = vi.fn(() => 'title');
   const unsafe = { ...payload, data: { ...payload.data } };
+
   Object.defineProperty(unsafe.data, 'title', { get: getter, enumerable: true });
+
   expect(() => deserialize(unsafe)).toThrow(SerializationError);
   expect(getter).not.toHaveBeenCalled();
 });

@@ -79,10 +79,13 @@ export type OperationRunner = <K extends OperationName>(
 export interface DispatchState {
   /** Subscriptions visible to the current dispatch. */
   handlers: Handler[];
+
   /** Operation dispatch policies. */
   definitions: Map<OperationName, DispatchPolicy>;
+
   /** Owning Player's disabled provider IDs. */
   blocked: () => readonly string[];
+
   /** Provider provenance retained for nested bridge results. */
   resultOwners: WeakMap<object, Entry>;
 }

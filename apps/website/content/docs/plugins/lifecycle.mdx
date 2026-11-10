@@ -11,15 +11,19 @@ import { definePlugin } from 'discord-player';
 const mySource = definePlugin({
   id: 'example.network-source',
   kind: 'source',
+
   async setup(ctx) {
     const resource = await acquireResource();
+
     ctx.onCleanup(() => resource.close());
 
     ctx.on('track.stream', async ({ track }, { signal }) => {
       signal.throwIfAborted();
+
       return resolveMedia(track, { signal, resource });
     });
   },
+
   async destroy() {
     // Optional. Setup resources also have onCleanup handlers.
   },

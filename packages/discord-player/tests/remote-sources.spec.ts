@@ -37,6 +37,7 @@ class RemoteExtractor extends BaseExtractor {
 
   override async stream(track: Track) {
     if (!(track.raw.engine as { private?: boolean })?.private) throw new Error('Missing host state');
+
     return Readable.from(['encoded bytes']);
   }
 }
@@ -46,13 +47,19 @@ async function deployment(hostId = 'sources-1', token?: string) {
   const requests: { path: string; body: any }[] = [];
   const server = createServer(async (req, res) => {
     const controller = new AbortController();
+
     res.on('close', () => {
       if (!res.writableEnded) controller.abort();
     });
+
     const chunks: Buffer[] = [];
+
     for await (const chunk of req) chunks.push(chunk);
+
     const body = Buffer.concat(chunks).toString();
+
     requests.push({ path: req.url!, body: body ? JSON.parse(body) : undefined });
+
     const response = await host.fetch(
       new Request(`${url}${req.url}`, {
         method: req.method,
@@ -61,6 +68,7 @@ async function deployment(hostId = 'sources-1', token?: string) {
         ...(body ? { body } : {}),
       }),
     );
+
     res.writeHead(response.status, Object.fromEntries(response.headers));
     res.end(Buffer.from(await response.arrayBuffer()));
   });
@@ -76,6 +84,7 @@ async function deployment(hostId = 'sources-1', token?: string) {
     publicUrl: url,
     token,
     maxTrackStates: 1,
+
     onError: () => {},
   });
 
@@ -93,6 +102,7 @@ async function deployment(hostId = 'sources-1', token?: string) {
     requests,
     hostId,
     token,
+
     async restart() {
       await host.close();
 
@@ -107,6 +117,7 @@ function player(sourceHosts: { hostId: string; url: string; token?: string; time
   const instance = new DiscordPlayer({ nodes: [], send() {}, sourceHosts });
 
   cleanup.push(() => instance.destroy());
+
   return instance;
 }
 
@@ -127,6 +138,7 @@ it('searches real HTTP, reconstructs canonical models and retains only durable i
   expect(track.sourceState).toBeTypeOf('string');
 
   const restored = deserialize(track.serialize()) as Track;
+
   expect(restored.sourceReference).toEqual(track.sourceReference);
   expect(restored.sourceState).toBeUndefined();
   expect(JSON.stringify(host.requests)).not.toMatch(/local credential|Discord object|secret/);
@@ -144,8 +156,10 @@ it('routes overlapping provider IDs by deployment, local first and remote in dec
   ).toBe('b');
 
   await bot.extractors.register(RemoteExtractor);
+
   expect((await bot.search('local')).tracks[0]?.sourceReference?.hostId).toBeUndefined();
   expect((await bot.search('blocked', { blockExtractors: [RemoteExtractor.identifier] })).isEmpty()).toBe(true);
+
   await expect(bot.search('missing', { hostId: 'missing' })).rejects.toThrow('not configured');
 });
 
@@ -156,6 +170,7 @@ it('never retries authentication failures on another host', async () => {
   const bot = player([{ ...a, token: 'incorrect' }, b]);
 
   await expect(bot.search('music')).rejects.toThrow('HTTP 401');
+
   expect(b.requests).toHaveLength(0);
   expect(a.requests).toHaveLength(2);
 });
@@ -172,14 +187,18 @@ it.each(['caller', 'timeout', 'destroy'] as const)('aborts real HTTP metadata re
   });
 
   await host.host.plugins.unregister(RemoteExtractor.identifier);
+
   await host.host.plugins.register(
     definePlugin({
       id: 'slow',
       kind: 'source',
+
       setup(ctx) {
         ctx.on('search.query.match', () => ({ score: 1 }));
+
         ctx.on('search.query.resolve', async (_, { signal }) => {
           enter();
+
           await new Promise<void>((r) =>
             signal.addEventListener(
               'abort',
@@ -190,7 +209,9 @@ it.each(['caller', 'timeout', 'destroy'] as const)('aborts real HTTP metadata re
               { once: true },
             ),
           );
+
           signal.throwIfAborted();
+
           return undefined;
         });
       },
@@ -203,7 +224,9 @@ it.each(['caller', 'timeout', 'destroy'] as const)('aborts real HTTP metadata re
   const rejected = expect(pending).rejects.toThrow();
 
   await entered;
+
   if (mode === 'caller') controller.abort();
+
   if (mode === 'destroy') await bot.destroy();
 
   await rejected;
@@ -226,6 +249,7 @@ it('queues and stages operation descriptors without local extraction or a bot me
 
   cleanup.push(() => bot.destroy());
   backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: [host.hostId] };
+
   const a = (await bot.search('a')).tracks[0]!;
   const b = (await bot.search('b')).tracks[0]!;
   const local = vi.spyOn(bot.plugins, 'resolveStream');
@@ -243,17 +267,20 @@ it('queues and stages operation descriptors without local extraction or a bot me
 
   session.requestPreparation();
   await settle();
+
   expect(stage.mock.calls[0]?.[0]).toMatchObject({ hostId: host.hostId, operation: 'source.stream' });
   expect(local).not.toHaveBeenCalled();
   expect(host.requests.every((r) => r.body?.operation !== 'source.stream')).toBe(true);
 
   session.promote()();
   await settle();
+
   expect(queue.currentTrack).toBe(b);
   expect(queue.history.tracks.toArray()[0]?.sourceState).toBe(a.sourceState);
   expect(session.playCalls).toBe(1);
 
   await queue.stop();
+
   expect(session.stage).toBeNull();
 });
 
@@ -264,9 +291,12 @@ it.each(['embedded', 'remote'] as const)(
     const { player: bot, queue } = await setup({ nodeType, playerOptions: { sourceHosts: [host] } });
 
     cleanup.push(() => bot.destroy());
+
     const track = (await bot.search('audio')).tracks[0]!;
     const local = vi.spyOn(bot.plugins, 'resolveStream');
+
     await expect(queue.play(track)).rejects.toThrow('cannot access source host');
+
     expect(local).not.toHaveBeenCalled();
   },
 );
@@ -287,12 +317,15 @@ it('carries all queued host requirements into session creation and fences custom
   });
 
   cleanup.push(() => bot.destroy());
+
   const first = (await bot.search('a', { hostId: 'a' })).tracks[0]!;
   const second = (await bot.search('b', { hostId: 'b' })).tracks[0]!;
+
   await queue.node.destroySession();
   backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: ['a', 'b'] };
 
   await queue.play([first, second], { channelId: 'voice' });
+
   expect(backend.client.createDiscordSession.mock.lastCall?.[0].pluginHosts).toEqual(['a', 'b']);
   expect(selectNode.mock.lastCall?.[0]).toHaveLength(1);
 
@@ -300,16 +333,19 @@ it('carries all queued host requirements into session creation and fences custom
   await queue.node.destroySession();
   backend.client.nodes[0]!.capabilities.pluginOperations.hosts = ['a'];
   await expect(queue.play([first, second], { channelId: 'voice' })).rejects.toThrow('required source hosts');
+
   expect(selectNode.mock.lastCall?.[0]).toHaveLength(0);
 });
 
 it('rejects an unavailable host without retaining a URL and accepts recovery at the configured endpoint', async () => {
   const host = await deployment();
   const bot = player([host]);
+
   await host.host.close();
   await expect(bot.search('unavailable')).rejects.toThrow('Source host sources-1');
 
   await host.restart();
+
   expect((await bot.search('recovered')).tracks[0]?.sourceReference?.hostId).toBe(host.hostId);
 });
 
@@ -324,6 +360,7 @@ it.each(['skip', 'stop', 'delete'] as const)('cancels pending native operation p
 
   cleanup.push(() => bot.destroy());
   backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: [host.hostId] };
+
   const track = (await bot.search('pending')).tracks[0]!;
   let entered!: () => void;
   const started = new Promise<void>((resolve) => {
@@ -336,10 +373,12 @@ it.each(['skip', 'stop', 'delete'] as const)('cancels pending native operation p
     entered();
     await new Promise<void>((resolve) => signal?.addEventListener('abort', () => resolve(), { once: true }));
     signal?.throwIfAborted();
+
     throw new Error('Expected native operation cancellation');
   });
 
   const pending = queue.play(track);
+
   await started;
   await queue[control]();
 
@@ -365,8 +404,10 @@ it('clears a pending native stage before waiting for its preparation lock', asyn
 
   cleanup.push(() => bot.destroy());
   backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: [host.hostId] };
+
   const a = (await bot.search('a')).tracks[0]!;
   const b = (await bot.search('b')).tracks[0]!;
+
   await queue.play([a, b]);
 
   let entered!: () => void;
@@ -377,11 +418,14 @@ it('clears a pending native stage before waiting for its preparation lock', asyn
   const cancelled = new Promise<void>((resolve) => {
     cleared = resolve;
   });
+
   vi.spyOn(session, 'stageNext').mockImplementationOnce(async () => {
     entered();
     await cancelled;
+
     throw new Error('Native stage cancelled');
   });
+
   const clear = vi.spyOn(session, 'clearStage').mockImplementation(async () => {
     cleared();
     session.stage = null;
@@ -404,9 +448,12 @@ it('rejects provider failures and mismatched deployment identity without retryin
   const bot = player([a, b]);
 
   await expect(bot.search('provider-failure')).rejects.toThrow('HTTP 502');
+
   expect(b.requests).toHaveLength(0);
 
   const incorrect = player([{ ...a, hostId: 'wrong-deployment' }, b]);
+
   await expect(incorrect.search('music')).rejects.toThrow('invalid Track identity');
+
   expect(b.requests).toHaveLength(0);
 });

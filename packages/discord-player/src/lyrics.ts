@@ -5,10 +5,13 @@ import { NoResultError } from './errors.js';
 export interface LrcSearchParams {
   /** Free-form query. Either `q` or `trackName` is required. */
   q?: string;
+
   /** Track title. Either `q` or `trackName` is required. */
   trackName?: string;
+
   /** Artist name filter. */
   artistName?: string;
+
   /** Album name filter. */
   albumName?: string;
 }
@@ -23,18 +26,25 @@ export interface LrcGetParams extends LrcSearchParams {
 export interface LrcSearchResult {
   /** LRCLIB record ID. */
   id: number;
+
   /** Display name supplied by LRCLIB. */
   name: string;
+
   /** Track title. */
   trackName: string;
+
   /** Artist name. */
   artistName: string;
+
   /** Album name. */
   albumName: string;
+
   /** Track duration in seconds. */
   duration: number;
+
   /** Whether the recording is instrumental. */
   instrumental: boolean;
+
   /** Plain lyric text, when available. */
   plainLyrics: string;
 }
@@ -45,11 +55,15 @@ export type LrcGetResult = Omit<LrcSearchResult, 'name'>;
 
 function toSnakeCase(params: LrcGetParams): URLSearchParams {
   const result = new URLSearchParams();
+
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null || value === '') continue;
+
     const snake = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
     result.set(snake, String(value));
   }
+
   return result;
 }
 
@@ -57,10 +71,13 @@ function toSnakeCase(params: LrcGetParams): URLSearchParams {
 export class LrcLib {
   /** Base API URL. */
   public api = 'https://lrclib.net/api';
+
   /** Request timeout in milliseconds. */
   public timeout = 15_000;
+
   /** Maximum retry count for rate limits and server errors. */
   public retryLimit = 5;
+
   #tail: Promise<void> = Promise.resolve();
 
   /**
@@ -82,6 +99,7 @@ export class LrcLib {
   ): void {
     if (!Number.isFinite(timeout) || timeout <= 0)
       throw new RangeError('Request timeout must be a positive finite number.');
+
     this.timeout = timeout;
   }
 
@@ -94,6 +112,7 @@ export class LrcLib {
     limit: number,
   ): void {
     if (!Number.isInteger(limit) || limit < 0) throw new RangeError('Retry limit must be a non-negative integer.');
+
     this.retryLimit = limit;
   }
 
@@ -139,6 +158,7 @@ export class LrcLib {
     params: LrcSearchParams,
   ): Promise<LrcSearchResult[]> {
     if (!params.q && !params.trackName) throw new TypeError('Provide either q or trackName when searching lyrics.');
+
     return this.request(`search?${toSnakeCase(params)}`);
   }
 
@@ -159,11 +179,15 @@ export class LrcLib {
       release = resolve;
     });
     const previous = this.#tail;
+
     this.#tail = previous.then(() => turn);
     await previous;
+
     try {
       const url = `${this.api}${path.startsWith('/') ? path : `/${path}`}`;
+
       this.player.debug(`[LrcLib] Requesting ${path}`);
+
       for (let attempt = 0; ; attempt++) {
         const response = await fetch(url, {
           method: 'GET',
@@ -176,14 +200,18 @@ export class LrcLib {
             ...options.headers,
           },
         });
+
         if (response.ok) return (await response.json()) as Result;
+
         if ((response.status === 429 || response.status >= 500) && attempt < this.retryLimit) {
           const retryAfter = Number(response.headers.get('retry-after'));
           const delay =
             Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : Math.min(250 * 2 ** attempt, 4000);
+
           await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         }
+
         throw new NoResultError(`LRCLIB request failed with HTTP ${response.status} ${response.statusText}.`);
       }
     } finally {

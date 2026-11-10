@@ -15,19 +15,25 @@ import { settle } from './mocks/async.js';
 
 it('isolates generic asynchronous scopes, fallback values and explicit exits', async () => {
   const context = createContext('fallback');
+
   expect(context.isLost).toBe(true);
   expect(useContext(context)).toBe('fallback');
+
   await Promise.all(
     ['one', 'two'].map((value) =>
       context.provide(value, async () => {
         await settle();
+
         expect(useContext(context)).toBe(value);
         expect(context.isLost).toBe(false);
+
         context.exit(() => expect(context.consume()).toBe('fallback'));
+
         expect(context.consume()).toBe(value);
       }),
     ),
   );
+
   expect(() => context.provide(undefined as never, () => {})).toThrow('undefined');
   expect(() => context.provide('value', null as never)).toThrow(TypeError);
   expect(createContext().consume()).toBeUndefined();
@@ -36,6 +42,7 @@ it('isolates generic asynchronous scopes, fallback values and explicit exits', a
 it('scopes every hook to the owning Player and restores outside values', async () => {
   const a = await setup({ queueOptions: { metadata: { owner: 'queue' } } });
   const b = await setup();
+
   expect(useMainPlayer()).toBeNull();
   expect(usePlayer()).toBeNull();
   expect(useQueue()).toBeNull();
@@ -43,8 +50,10 @@ it('scopes every hook to the owning Player and restores outside values', async (
   expect(useMetadata()).toBeUndefined();
   expect(useVolume()).toBeNull();
   expect(useTimeline()).toBeNull();
+
   await a.player.context.provide({ guild: { id: a.queue.id } }, async () => {
     await settle();
+
     expect(usePlayer()).toBe(a.player);
     expect(useQueue()).toBe(a.queue);
     expect(useQueue(a.queue.id)).toBe(a.queue);
@@ -53,6 +62,7 @@ it('scopes every hook to the owning Player and restores outside values', async (
     expect(useMetadata()).toEqual({ owner: 'queue' });
     expect(useVolume()).toBe(100);
     expect(useTimeline()).toBeNull();
+
     b.player.context.provide(
       {
         queue: b.queue,
@@ -68,13 +78,17 @@ it('scopes every hook to the owning Player and restores outside values', async (
         expect(useTimeline()?.current.value).toBe(1000);
       },
     );
+
     expect(usePlayer()).toBe(a.player);
   });
+
   a.player.context.provide({}, () => {
     expect(useQueue()).toBeNull();
     expect(useVolume()).toBeNull();
     expect(useTimeline()).toBeNull();
   });
+
   expect(useMainPlayer()).toBeNull();
+
   await Promise.all([a.player.destroy(), b.player.destroy()]);
 });

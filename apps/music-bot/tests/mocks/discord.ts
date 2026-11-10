@@ -35,10 +35,13 @@ export function interaction(commandName: string, values: OptionValues = {}) {
   return {
     commandName,
     guildId: 'guild',
+
     inCachedGuild: () => true,
+
     member: { voice: { channel: { id: 'voice', joinable: true } as { id: string; joinable: boolean } | null } },
     channel: {
       isSendable: () => true,
+
       send: async (message: Reply) => {
         announcements.push(message);
       },
@@ -47,20 +50,28 @@ export function interaction(commandName: string, values: OptionValues = {}) {
     client: { ws: { ping: 25 } },
     options: {
       getString: (key: string) => (typeof values[key] === 'string' ? values[key] : null),
+
       getNumber: (key: string) => (typeof values[key] === 'number' ? values[key] : null),
+
       getInteger: (key: string) => (typeof values[key] === 'number' ? values[key] : null),
+
       getBoolean: (key: string) => (typeof values[key] === 'boolean' ? values[key] : null),
+
       getSubcommand: () => (typeof values.action === 'string' ? values.action : 'list'),
     },
+
     deferReply: async (options: { flags: number }) => {
       expect(options.flags).toBe(64);
     },
+
     reply: async (reply: Reply) => {
       replies.push(reply);
     },
+
     editReply: async (reply: Reply) => {
       replies.push(reply);
     },
+
     replies,
     announcements,
   };
@@ -81,7 +92,9 @@ export function embed(reply: Reply | undefined) {
   expect(reply, 'command should produce a response').toBeDefined();
   expect(reply!.content, 'responses must use embeds').toBeUndefined();
   expect(reply!.embeds).toHaveLength(1);
+
   const data = reply!.embeds[0]!.toJSON();
+
   expect(data.title).toBeTruthy();
   expect(data.description).toBeTruthy();
   expect(data.color).toBeTruthy();

@@ -18,12 +18,17 @@ export const command: CommandData = {
 
 export const chatInput = musicCommand(async (interaction) => {
   const queue = requireQueue(interaction);
+
   requireTrack(queue);
+
   const position = interaction.options.getNumber('seconds', true) * 1000;
   const duration = queue.node.totalDuration;
+
   if (duration > 0 && position > duration) {
     throw new MusicCommandError(`Choose a position before ${formatTime(duration)}.`);
   }
+
   await queue.node.seek(position);
+
   return `Seeked to ${formatTime(position)}.`;
 });

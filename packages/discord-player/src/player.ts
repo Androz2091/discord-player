@@ -136,6 +136,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     this.sources = new SourcePluginRuntime({ player: this });
     this.plugins = this.sources.plugins;
     this.extractors = this.sources.extractors;
+
     this.initialPlugins = Promise.all((options.plugins ?? []).map((plugin) => this.plugins.register(plugin))).then(
       () => undefined,
     );
@@ -226,6 +227,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       this.remedia = await RemediaClient.create({
         ...remediaOptions,
         botUserId: clientId,
+
         selectNode: async (nodes, context) => {
           const queue = this.queues.get(context.guildId);
 
@@ -302,6 +304,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     options: SearchOptions = {},
   ): Promise<SearchResult> {
     options.signal?.throwIfAborted();
+
     if (typeof query === 'string') await this.initialPlugins;
 
     if (typeof query !== 'string') return this.sources.search(query, options);
@@ -352,6 +355,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
         operation: 'source.stream',
         input: { track: serializeSourceTrack(track) },
       };
+
       return source;
     }
 

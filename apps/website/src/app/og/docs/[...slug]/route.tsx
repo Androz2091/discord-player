@@ -8,6 +8,7 @@ export const dynamic = 'force-static';
 export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...slug]'>) {
   const { slug } = await params;
   const page = source.getPage(slug.slice(0, -1));
+
   if (!page) notFound();
 
   return createSocialImage({

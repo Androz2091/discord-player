@@ -10,6 +10,7 @@ discord-player does not open a Discord Gateway connection itself. Your bot libra
 ```ts
 const player = new Player({
   nodes: [{ id: 'local', type: 'embedded' }],
+
   send(guildId, packet) {
     return gateway.sendToGuildShard(guildId, packet);
   },

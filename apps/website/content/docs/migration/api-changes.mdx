@@ -38,6 +38,7 @@ This lets you use different Discord libraries without packaging a library-specif
 
 ```ts
 const queue = player.getQueue(guildId);
+
 if (!queue) return;
 
 await queue.node.pause();

@@ -8,6 +8,7 @@ import { NoResultError } from '../errors.js';
 export class GuildQueueHistoryManager<Metadata = unknown> {
   /** Player instance that owns this history manager. */
   public readonly player: DiscordPlayer;
+
   /** Tracks ordered from oldest to newest, with the most recent track at the top. */
   public readonly tracks: Stack<Track>;
 
@@ -27,18 +28,22 @@ export class GuildQueueHistoryManager<Metadata = unknown> {
   public get currentTrack(): Track | null {
     return this.queue.currentTrack;
   }
+
   /** The next upcoming track, if any. */
   public get nextTrack(): Track | null {
     return this.queue.tracks.peek() ?? null;
   }
+
   /** Most recently completed or skipped track, if history is enabled. */
   public get previousTrack(): Track | null {
     return this.tracks.peek() ?? null;
   }
+
   /** Whether history collection is disabled for this queue. */
   public get disabled(): boolean {
     return this.queue.options.disableHistory ?? false;
   }
+
   /** Number of retained previous tracks. */
   public get size(): number {
     return this.tracks.size;
@@ -51,8 +56,10 @@ export class GuildQueueHistoryManager<Metadata = unknown> {
    */
   public push(track: Track | Track[]): boolean {
     if (this.disabled) return false;
+
     this.tracks.add(track);
     this.resize();
+
     return true;
   }
 
@@ -60,10 +67,12 @@ export class GuildQueueHistoryManager<Metadata = unknown> {
   public clear(): void {
     this.tracks.clear();
   }
+
   /** Get the number of retained previous Tracks. */
   public getSize(): number {
     return this.size;
   }
+
   /** Whether there are no retained previous Tracks. */
   public isEmpty(): boolean {
     return this.tracks.isEmpty();
@@ -75,6 +84,7 @@ export class GuildQueueHistoryManager<Metadata = unknown> {
    */
   public async next(): Promise<void> {
     if (!this.nextTrack) throw new NoResultError('No next track in the queue.');
+
     if (this.queue.isPlaying())
       await this.queue.skip(TrackSkipReason.HistoryNext, 'Skipped by GuildQueueHistory.next().');
     else await this.queue.playNext();
@@ -87,11 +97,14 @@ export class GuildQueueHistoryManager<Metadata = unknown> {
    */
   public async previous(preserveCurrent = true): Promise<void> {
     const track = this.tracks.pop();
+
     if (!track) throw new NoResultError('No previous track in history.');
+
     try {
       await this.queue.playHistoryTrack(track, preserveCurrent);
     } catch (error) {
       this.tracks.push(track);
+
       throw error;
     }
   }

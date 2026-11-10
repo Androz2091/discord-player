@@ -3,6 +3,7 @@ import type { GuildQueuePlayerNode } from './guild-queue-player-node.js';
 
 type FilterState = {
   raw: string | null;
+
   enabled: AudioFilterPresetName[];
 };
 
@@ -23,6 +24,7 @@ function presetName(name: AudioFilterName): AudioFilterPresetName {
  */
 export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
   private state: FilterState = { raw: null, enabled: [] };
+
   private appliedGraph: string | null = null;
 
   /** Create filter controls for one queue node.
@@ -90,6 +92,7 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
   public async remove(names: AudioFilterName | readonly AudioFilterName[]): Promise<void> {
     await this.update((state) => {
       const removed = new Set((typeof names === 'string' ? [names] : names).map(presetName));
+
       return { raw: state.raw, enabled: state.enabled.filter((name) => !removed.has(name)) };
     });
   }

@@ -4,6 +4,7 @@ import { randomInt } from 'node:crypto';
 export class Stack<T> implements Iterable<T> {
   /** Values held by the stack from oldest to newest. */
   private items: T[] = [];
+
   /** Maximum retained item count, or `Infinity` for an unbounded stack. */
   private limit: number;
 
@@ -26,6 +27,7 @@ export class Stack<T> implements Iterable<T> {
    */
   public push(item: T): void {
     if (Number.isFinite(this.limit) && this.items.length >= this.limit) this.items.shift();
+
     this.items.push(item);
   }
 
@@ -45,14 +47,17 @@ export class Stack<T> implements Iterable<T> {
   public pop(): T | undefined {
     return this.items.pop();
   }
+
   /** Alias for {@link Stack.pop}. */
   public dispatch(): T | undefined {
     return this.pop();
   }
+
   /** Return the newest value without removing it. */
   public peek(): T | undefined {
     return this.items.at(-1);
   }
+
   /**
    * Return the value at an array-style index without removing it.
    * @param index Zero-based index; negative values count from the end.
@@ -60,10 +65,12 @@ export class Stack<T> implements Iterable<T> {
   public at(index: number): T | undefined {
     return this.items.at(index);
   }
+
   /** Number of values currently stored. */
   public get size(): number {
     return this.items.length;
   }
+
   /** Configured item limit, or `Infinity` when unbounded. */
   public get maxSize(): number {
     return this.limit;
@@ -75,6 +82,7 @@ export class Stack<T> implements Iterable<T> {
    */
   public setMaxSize(maxSize: number): void {
     this.limit = Number.isFinite(maxSize) && maxSize > 0 ? Math.floor(maxSize) : Infinity;
+
     if (Number.isFinite(this.limit) && this.items.length > this.limit) {
       this.items.splice(0, this.items.length - this.limit);
     }
@@ -84,14 +92,17 @@ export class Stack<T> implements Iterable<T> {
   public clear(): void {
     this.items = [];
   }
+
   /** Whether this stack contains no values. */
   public isEmpty(): boolean {
     return this.items.length === 0;
   }
+
   /** Whether this stack has reached a finite capacity limit. */
   public isFull(): boolean {
     return Number.isFinite(this.limit) && this.items.length >= this.limit;
   }
+
   /**
    * Find the first value matching a predicate.
    * @param predicate Test applied to values from oldest to newest.
@@ -99,6 +110,7 @@ export class Stack<T> implements Iterable<T> {
   public find(predicate: (item: T) => boolean): T | undefined {
     return this.items.find(predicate);
   }
+
   /**
    * Return all values matching a predicate.
    * @param predicate Test applied to values from oldest to newest.
@@ -106,6 +118,7 @@ export class Stack<T> implements Iterable<T> {
   public filter(predicate: (item: T) => boolean): T[] {
     return this.items.filter(predicate);
   }
+
   /**
    * Map values from oldest to newest.
    * @param callback Mapping function applied to each value.
@@ -113,6 +126,7 @@ export class Stack<T> implements Iterable<T> {
   public map<U>(callback: (item: T) => U): U[] {
     return this.items.map(callback);
   }
+
   /**
    * Visit values from oldest to newest.
    * @param callback Function called for each value.
@@ -120,6 +134,7 @@ export class Stack<T> implements Iterable<T> {
   public forEach(callback: (item: T) => void): void {
     this.items.forEach(callback);
   }
+
   /**
    * Test whether any value matches a predicate.
    * @param predicate Test applied to values from oldest to newest.
@@ -127,6 +142,7 @@ export class Stack<T> implements Iterable<T> {
   public some(predicate: (item: T) => boolean): boolean {
     return this.items.some(predicate);
   }
+
   /**
    * Test whether every value matches a predicate.
    * @param predicate Test applied to values from oldest to newest.
@@ -134,6 +150,7 @@ export class Stack<T> implements Iterable<T> {
   public every(predicate: (item: T) => boolean): boolean {
     return this.items.every(predicate);
   }
+
   /**
    * Find the first index of a value.
    * @param item Value to find.
@@ -144,11 +161,13 @@ export class Stack<T> implements Iterable<T> {
 
   /** Return one random value. */
   public random(): T | undefined;
+
   /**
    * Return a sample of random values with replacement.
    * @param count Number of values to sample; must be a non-negative integer.
    */
   public random(count: number): T[];
+
   /**
    * Return a random value or a sample with replacement.
    * @param count Optional sample size; omitted to return one value.
@@ -159,7 +178,9 @@ export class Stack<T> implements Iterable<T> {
     }
 
     if (this.isEmpty()) return count === undefined ? undefined : [];
+
     if (count === undefined) return this.items[randomInt(this.items.length)];
+
     return Array.from({ length: count }, () => this.items[randomInt(this.items.length)]!);
   }
 
@@ -167,6 +188,7 @@ export class Stack<T> implements Iterable<T> {
   public toArray(): T[] {
     return Array.from(this.items);
   }
+
   /** Iterate over values from oldest to newest. */
   public [Symbol.iterator](): Iterator<T> {
     return this.items[Symbol.iterator]();

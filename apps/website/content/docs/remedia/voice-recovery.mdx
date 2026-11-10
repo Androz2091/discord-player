@@ -32,7 +32,9 @@ const destinations = [
 const results = await Promise.allSettled(
   destinations.map(async ({ guildId, channelId }) => {
     const queue = await player.createQueue(guildId);
+
     await queue.connect({ channelId, connectTimeoutMs: 120_000 });
+
     return { guildId, state: queue.node.session?.connectionState };
   }),
 );

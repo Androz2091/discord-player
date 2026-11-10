@@ -15,9 +15,12 @@ export const client = new Client({
 
 export const player = new Player({
   nodes: [{ id: 'local', type: 'embedded' }],
+
   send(guildId, payload) {
     const guild = client.guilds.cache.get(guildId);
+
     if (!guild) throw new Error(`Voice Gateway shard not found for guild ${guildId}`);
+
     return guild.shard.send(payload);
   },
 });

@@ -12,6 +12,7 @@ export function wireV7CommandHandler(
     const queueId: string = eventQueue.id;
     const title: string = eventTrack.title;
     const event: DiscordSessionEvents['playbackStarted'][0] | undefined = rawEvent;
+
     void [queueId, title, event];
   });
 
@@ -32,13 +33,16 @@ export function wireV7CommandHandler(
 export async function configureAudioFilters(queue: GuildQueue): Promise<void> {
   const graph: string | null = queue.node.filters.get();
   const enabled: boolean = queue.node.filters.get('nightcore');
+
   void [graph, enabled];
 
   await queue.node.filters.set(['8d', 'nightcore']);
   await queue.node.filters.set('volume=0.5');
   await queue.node.filters.setRaw('tremolo');
   await queue.node.filters.remove(['nightcore', '8D']);
+
   const toggled: boolean = await queue.node.filters.toggle('vaporwave');
+
   void toggled;
 
   // @ts-expect-error only built-in preset names can be toggled

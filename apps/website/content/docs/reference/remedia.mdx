@@ -33,11 +33,14 @@ A remote node runs the same Rust engine in `remedia-server`. The bot host does n
 ```ts
 const player = new Player({
   nodes,
+
   send: (guildId, packet) => sendToShard(guildId, packet),
 });
+
 await player.initialize(botUserId);
 
 const remedia = player.getRemedia();
+
 console.log(player.nodeSnapshots);
 ```
 

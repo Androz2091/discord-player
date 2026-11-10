@@ -15,6 +15,7 @@ it('owns independent lifecycle, options, subscriptions and cleanup on each Playe
   const source = definePlugin<{ prefix: string }>({
     id: 'org.example.source',
     kind: 'source',
+
     async setup(ctx) {
       let calls = 0;
 
@@ -28,6 +29,7 @@ it('owns independent lifecycle, options, subscriptions and cleanup on each Playe
 
       ctx.on('track.stream', ({ track }) => track.url);
     },
+
     destroy,
   });
   const a = new DiscordPlayer({ nodes: [], send() {}, plugins: [source({ prefix: 'a' })] });
@@ -37,9 +39,13 @@ it('owns independent lifecycle, options, subscriptions and cleanup on each Playe
   expect(track.title).toBe('aquery:1');
   expect((await b.search('query')).tracks[0]!.title).toBe('bquery:1');
   expect(await a.plugins.resolveStream(deserialize(track.serialize()) as Track)).toEqual({ url: track.url });
+
   await a.plugins.unregister('org.example.source');
+
   expect((await a.search('query')).isEmpty()).toBe(true);
+
   await Promise.all([a.destroy(), b.destroy()]);
+
   expect(cleanup).toHaveBeenCalledTimes(2);
   expect(destroy).toHaveBeenCalledTimes(2);
 });
@@ -52,6 +58,7 @@ it('rejects remote streams and buffers while accepting URLs and server files', a
     definePlugin({
       id: 'raw',
       kind: 'source',
+
       setup(ctx) {
         ctx.on('track.stream', () => source);
       },
@@ -62,7 +69,10 @@ it('rejects remote streams and buffers while accepting URLs and server files', a
   source = { buffer: Buffer.from('audio') };
   await expect(host.resolveStream(new Track(), { remote: true })).rejects.toThrow('server-accessible');
   source = '/server/audio.mp3';
+
   expect(await host.resolveStream(new Track(), { remote: true })).toEqual({ file: source });
+
   source = Readable.from(['encoded']);
+
   expect(await host.resolveStream(new Track())).toEqual({ stream: source });
 });

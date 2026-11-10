@@ -10,6 +10,7 @@ import { Player } from 'discord-player';
 
 const player = new Player({
   nodes: [{ type: 'embedded', id: 'local' }],
+
   send: (guildId, packet) => sendGateway(guildId, packet),
 });
 

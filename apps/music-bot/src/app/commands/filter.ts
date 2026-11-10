@@ -33,8 +33,11 @@ export const command: CommandData = {
 export const chatInput = musicCommand(async (interaction) => {
   const queue = requireQueue(interaction);
   const filters = queue.node.filters;
+
   if (!queue.node.session) throw new MusicCommandError('Connect to a voice channel first.');
+
   const choice = interaction.options.getString('preset');
+
   if (choice === null) {
     const names = filters.enabled.map(
       (name) => presets.find((preset) => preset.value.toLowerCase() === name.toLowerCase())?.name ?? name,
@@ -46,11 +49,16 @@ export const chatInput = musicCommand(async (interaction) => {
 
   if (choice === 'off') {
     await filters.clear();
+
     return 'Audio filters cleared.';
   }
+
   const preset = presets.find((item) => item.value === choice);
+
   if (!preset) throw new MusicCommandError('Choose one of the listed filter presets.');
+
   const enabled = await filters.toggle(preset.value);
+
   if (preset.value === 'bassboost' && isAudioFilterName('normalizer')) {
     await filters.toggle('normalizer', enabled);
   }

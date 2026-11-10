@@ -5,8 +5,12 @@ export const command: CommandData = { name: 'pause', description: 'Pause the cur
 
 export const chatInput = musicCommand(async (interaction) => {
   const queue = requireQueue(interaction);
+
   requireTrack(queue);
+
   if (queue.node.isPaused()) return 'Playback is already paused.';
+
   await queue.node.pause();
+
   return 'Playback paused. Use /resume to continue.';
 });

@@ -23,30 +23,42 @@ describe('managed queue playback', () => {
   it('routes Player.search through a source plugin, portable Track, queue and Remedia playback', async () => {
     const { player, queue, session } = await setup();
     const stream = vi.fn(({ track }: { track: Track }) => ({ url: track.url }));
+
     await player.plugins.register(
       definePlugin({
         id: 'org.example.http',
         kind: 'source',
+
         setup(ctx) {
           ctx.on('search.query.match', ({ query }) => (/^https?:/.test(query) ? { score: 100 } : null));
+
           ctx.on('search.query.resolve', ({ query }) => ({
             playlist: null,
             tracks: [new Track({ title: 'raw audio', url: query })],
           }));
+
           ctx.on('track.stream', stream);
         },
       })(),
     );
+
     const play = vi.spyOn(session, 'play');
     const result = await player.search('https://example.test/audio.mp3');
+
     expect(result.tracks[0]!.sourceReference?.pluginId).toBe('org.example.http');
+
     const restored = deserialize(result.tracks[0]!.serialize()) as Track;
+
     await queue.play(restored);
+
     expect(stream).toHaveBeenCalledOnce();
     expect(play.mock.calls[0]![0]).toEqual({ url: 'https://example.test/audio.mp3' });
+
     session.complete();
     await settle();
+
     expect(queue.history.tracks.toArray()).toContain(restored);
+
     await player.destroy();
   });
 
@@ -59,6 +71,7 @@ describe('managed queue playback', () => {
         selfMute: true,
       },
     });
+
     expect(session.volume).toBe(0.65);
     expect(session.filters.graph).toBe('bass=gain=6');
     expect(session.selfDeaf).toBe(false);
@@ -81,18 +94,22 @@ describe('managed queue playback', () => {
 
     const firstPlay = queue.play(firstTrack);
     const secondPlay = await queue.play([secondTrack, thirdTrack]);
+
     expect(queue.currentTrack).toBe(firstTrack);
     expect(queue.tracks.toArray()).toEqual([secondTrack, thirdTrack]);
     expect(secondPlay.playerResult).toBeNull();
 
     await settle();
     releaseSource({ url: firstTrack.url });
+
     const result = await firstPlay;
+
     expect(result.track).toBe(firstTrack);
     expect(session.playCalls).toBe(1);
 
     session.complete();
     await settle();
+
     expect(queue.currentTrack).toBe(secondTrack);
     expect(queue.tracks.toArray()).toEqual([thirdTrack]);
   });
@@ -102,6 +119,7 @@ describe('managed queue playback', () => {
     const tracks = [new TestTrack('one'), new TestTrack('two'), new TestTrack('three')];
     const finishes: Track[] = [];
     const skips: Track[] = [];
+
     player.events.on(GuildQueueEvents.PlayerFinish, (_queue, track) => finishes.push(track));
     player.events.on(GuildQueueEvents.PlayerSkip, (_queue, track) => skips.push(track));
     await queue.play(tracks);
@@ -126,10 +144,12 @@ describe('managed queue playback', () => {
         }),
     );
     const playStopped = queue.play(pending);
+
     await settle();
     await queue.stop();
     resolveStop({ url: pending.url });
     await expect(playStopped).resolves.toMatchObject({ playerResult: null });
+
     expect(session.playCalls).toBe(0);
     expect(queue.currentTrack).toBeNull();
 
@@ -142,11 +162,15 @@ describe('managed queue playback', () => {
         }),
     );
     const playDestroyed = queue.play(pendingDestroy);
+
     await settle();
+
     const destroyed = queue.destroy();
+
     await destroyed;
     resolveDestroy({ url: pendingDestroy.url });
     await expect(playDestroyed).resolves.toMatchObject({ playerResult: null });
+
     expect(player.queues.has(queue.guildId)).toBe(false);
     expect(sessions[0]!.disconnectCalls).toBe(1);
     expect(session.playCalls).toBe(0);
@@ -158,9 +182,11 @@ describe('managed queue playback', () => {
       throw new Error('source failed');
     });
     const errors: Array<{ track: Track; error: Error }> = [];
+
     player.events.on(GuildQueueEvents.PlayerError, (_queue, error, track) => errors.push({ track, error }));
 
     await expect(queue.play(failed)).rejects.toThrow('source failed');
+
     expect(queue.currentTrack).toBeNull();
     expect(queue.tracks.peek()).toBe(failed);
     expect(errors).toHaveLength(1);
@@ -176,6 +202,7 @@ describe('managed queue playback', () => {
     ];
     let finishCount = 0;
     let skipCount = 0;
+
     player.events.on(GuildQueueEvents.PlayerFinish, () => finishCount++);
     player.events.on(GuildQueueEvents.PlayerSkip, () => skipCount++);
     await queue.play([first!, second!, third!]);
@@ -189,14 +216,17 @@ describe('managed queue playback', () => {
       state: 'completed' as const,
       position: session.position,
     };
+
     session.complete();
     session.emit('playbackCompleted', completion);
     await settle();
+
     expect(finishCount).toBe(1);
     expect(queue.history.tracks.toArray()).toEqual([first]);
 
     await queue.skip();
     await settle();
+
     expect(skipCount).toBe(1);
     expect(queue.history.tracks.toArray()).toEqual([first, second]);
   });
@@ -205,29 +235,37 @@ describe('managed queue playback', () => {
     const { queue, session, player } = await setup();
     const first = new TestTrack('repeat-one');
     const second = new TestTrack('repeat-two');
+
     queue.setRepeatMode(QueueRepeatMode.TRACK);
     await queue.play([first, second]);
     session.complete();
     await settle();
+
     expect(queue.currentTrack).toBe(first);
     expect(queue.tracks.toArray()).toEqual([second]);
 
     queue.setRepeatMode(QueueRepeatMode.QUEUE);
     session.complete();
     await settle();
+
     expect(queue.currentTrack).toBe(second);
     expect(queue.tracks.toArray()).toEqual([first]);
+
     session.complete();
     await settle();
+
     expect(queue.currentTrack).toBe(first);
     expect(queue.history.isEmpty()).toBe(true);
 
     queue.setRepeatMode(QueueRepeatMode.AUTOPLAY);
     queue.clear();
+
     const autoplayBoundary = vi.fn();
+
     player.events.on(GuildQueueEvents.WillAutoPlay, autoplayBoundary);
     session.complete();
     await settle();
+
     expect(autoplayBoundary).toHaveBeenCalledOnce();
     expect(queue.currentTrack).toBeNull();
   });
@@ -235,8 +273,11 @@ describe('managed queue playback', () => {
   it('supports dynamic shuffle and immediate in-place shuffle', async () => {
     const { queue, session } = await setup();
     const tracks = ['shuffle-one', 'shuffle-two', 'shuffle-three', 'shuffle-four'].map((title) => new TestTrack(title));
+
     queue.addTracks(tracks);
+
     const originalOrder = queue.tracks.toArray();
+
     expect(queue.enableShuffle(true)).toBe(true);
     expect(queue.isShuffling).toBe(true);
     expect(queue.tracks.toArray()).toEqual(originalOrder);
@@ -244,15 +285,21 @@ describe('managed queue playback', () => {
     await queue.playNext();
     session.complete();
     await settle();
+
     expect(originalOrder).toContain(queue.currentTrack);
     expect(queue.size).toBe(2);
 
     queue.disableShuffle();
+
     expect(queue.isShuffling).toBe(false);
+
     queue.tracks.clear();
     queue.addTracks(tracks);
+
     const beforeStatic = queue.tracks.toArray();
+
     queue.enableShuffle(false);
+
     expect(queue.isShuffling).toBe(false);
     expect(queue.tracks.toArray().sort((a, b) => a.id.localeCompare(b.id))).toEqual(
       beforeStatic.sort((a, b) => a.id.localeCompare(b.id)),
@@ -262,8 +309,11 @@ describe('managed queue playback', () => {
   it('keeps raw node playback separate from managed queue progression', async () => {
     const { queue, session, player } = await setup();
     const upcoming = new TestTrack('raw-upcoming');
+
     queue.addTrack(upcoming);
+
     const finish = vi.fn();
+
     player.events.on(GuildQueueEvents.PlayerFinish, finish);
 
     await queue.node.play({ url: 'https://example.test/raw' });
@@ -280,6 +330,7 @@ describe('managed queue playback', () => {
     const track = new TestTrack('event-track');
     const starts: unknown[][] = [];
     const finishes: unknown[][] = [];
+
     player.events.on(GuildQueueEvents.PlayerStart, (...args) => starts.push(args));
     player.events.on(GuildQueueEvents.PlayerFinish, (...args) => finishes.push(args));
     await queue.play(track);
@@ -298,10 +349,12 @@ describe('managed queue playback', () => {
     const { queue, session } = await setup({ nodeType });
     const first = new TestTrack(`${nodeType}-first`);
     const second = new TestTrack(`${nodeType}-second`);
+
     await queue.play([first, second]);
     session.complete(true);
     session.complete(true);
     await settle();
+
     expect(queue.currentTrack).toBe(second);
     expect(queue.stats.tracksFinished).toBe(1);
   });
@@ -309,14 +362,20 @@ describe('managed queue playback', () => {
   it('cleans sessions on reconnect cycles and preserves queue state during channel moves', async () => {
     const { queue, sessions } = await setup();
     const previous = new TestTrack('existing-history');
+
     queue.history.push(previous);
+
     const current = new TestTrack('moving-current');
+
     await queue.play(current);
+
     const session = queue.node.getSession();
+
     await queue.node.setVolume(76);
     await queue.node.filters?.set('bass=gain=8');
 
     const moved = await queue.connect({ channelId: 'voice-two' });
+
     expect(moved).toBe(session);
     expect(queue.currentTrack).toBe(current);
     expect(queue.history.previousTrack).toBe(previous);
@@ -327,6 +386,7 @@ describe('managed queue playback', () => {
     await queue.stop();
     await queue.node.destroySession();
     await queue.connect({ channelId: 'voice-two' });
+
     expect(sessions).toHaveLength(2);
     expect(sessions[0]!.disconnectCalls).toBe(1);
     expect(sessions[1]!.volume).toBe(0.76);
@@ -337,11 +397,14 @@ describe('managed queue playback', () => {
     'initializes Remedia voice flags, linear gain, and filters for %s sessions',
     async (nodeType) => {
       const { queue, sessions } = await setup({ nodeType });
+
       expect(sessions[0]!.selfDeaf).toBe(true);
       expect(sessions[0]!.selfMute).toBe(false);
       expect(sessions[0]!.volume).toBe(1);
       expect(sessions[0]!.filters.graph).toBeNull();
+
       await queue.node.destroySession();
+
       await queue.connect({
         channelId: 'voice-configured',
         selfDeaf: false,
@@ -349,7 +412,9 @@ describe('managed queue playback', () => {
         volume: 80,
         filterGraph: 'bass=gain=8',
       });
+
       const configured = sessions.at(-1)!;
+
       expect(configured.channelId).toBe('voice-configured');
       expect(configured.selfDeaf).toBe(false);
       expect(configured.selfMute).toBe(true);
@@ -365,14 +430,19 @@ describe('managed queue playback', () => {
   it('moves the same session and rejects attempts to switch its Remedia node', async () => {
     const { queue } = await setup();
     const track = new TestTrack('moving-session');
+
     await queue.play(track);
+
     const session = queue.node.getSession();
     const moved = await queue.connect({ channelId: 'voice-two' });
+
     expect(moved).toBe(session);
     expect(session.channelId).toBe('voice-two');
+
     await expect(queue.connect({ channelId: 'voice-three', nodeId: 'another-node' })).rejects.toThrow(
       'Changing a Remedia node while preserving this session',
     );
+
     expect(queue.node.getSession()).toBe(session);
     expect(queue.currentTrack).toBe(track);
   });
@@ -382,20 +452,27 @@ describe('managed queue playback', () => {
     const [one, two, three, four] = ['nav-one', 'nav-two', 'nav-three', 'nav-four'].map(
       (title) => new TestTrack(title),
     );
+
     queue.addTracks([one!, two!]);
     queue.insertTrack(three!, 1);
+
     expect(queue.tracks.toArray()).toEqual([one, three, two]);
     expect(queue.isFull()).toBe(true);
     expect(queue.getCapacity()).toBe(0);
     expect(() => queue.addTrack(four!)).toThrow('remaining capacity');
 
     queue.moveTrack(two!, 0);
+
     expect(queue.tracks.toArray()).toEqual([two, one, three]);
+
     queue.swapTracks(two!, three!);
+
     expect(queue.tracks.toArray()).toEqual([three, one, two]);
     expect(queue.removeTrack(one!)).toBe(one);
     expect(queue.getSize()).toBe(2);
+
     queue.copyTrack(two!, 1);
+
     expect(queue.size).toBe(3);
     expect(queue.id).toBe(queue.guildId);
     expect(player.nodes).toBe(player.queues);
@@ -407,17 +484,21 @@ describe('managed queue playback', () => {
     const [first, second, third] = ['nav-history-one', 'nav-history-two', 'nav-history-three'].map(
       (title) => new TestTrack(title),
     );
+
     await queue.play([first!, second!, third!]);
     session.complete();
     await settle();
+
     expect(queue.currentTrack).toBe(second);
 
     await queue.history.back();
+
     expect(queue.currentTrack).toBe(first);
     expect(queue.tracks.toArray()).toEqual([second, third]);
     expect(queue.history.previousTrack).toBeNull();
 
     await queue.history.next();
+
     expect(queue.currentTrack).toBe(second);
     expect(queue.tracks.toArray()).toEqual([third]);
   });
@@ -429,13 +510,16 @@ describe('managed queue playback', () => {
     const secondQueue = await secondPlayer.queues.create('guild-b');
     const first = firstPlayer.context.provide({ guildId: 'guild-a' }, async () => {
       await new Promise((resolve) => setTimeout(resolve, 5));
+
       return { main: useMainPlayer(), queue: useQueue() };
     });
     const second = secondPlayer.context.provide({ guildId: 'guild-b' }, async () => {
       await new Promise((resolve) => setTimeout(resolve, 1));
+
       return { main: useMainPlayer(), queue: useQueue() };
     });
     const [firstResult, secondResult] = await Promise.all([first, second]);
+
     expect(firstResult).toEqual({ main: firstPlayer, queue: firstQueue });
     expect(secondResult).toEqual({ main: secondPlayer, queue: secondQueue });
   });
@@ -450,42 +534,57 @@ describe('managed queue playback', () => {
     });
     const decodedPlaylist = deserialize(decode(encode(playlist.serialize())));
     const decodedTrack = deserialize(track.serialize());
+
     expect(decodedPlaylist).toBeInstanceOf(Playlist);
     expect(decodedTrack).toBeInstanceOf(Track);
+
     if (!(decodedPlaylist instanceof Playlist) || !(decodedTrack instanceof Track))
       throw new Error('Unexpected model.');
+
     expect(decodedPlaylist.tracks[0]?.title).toBe(track.title);
     expect(decodedTrack.durationMS).toBe(60_000);
     expect(playlist.durationFormatted).toBe('1:00');
 
     const queue = new Queue<number>(0);
+
     expect(queue.merge([1, 2, 3])).toBe(3);
     expect(queue.isFull()).toBe(false);
     expect(queue.getCapacity()).toBe(Infinity);
+
     const stack = new Stack<number>(0);
+
     stack.push(1);
     stack.push(2);
+
     expect(stack.toArray()).toEqual([1, 2]);
   });
 
   it('reports player and node timeline controls without claiming unsupported metrics', async () => {
     const { player, queue, session } = await setup();
     const track = new TestTrack('controls');
+
     await queue.play(track);
+
     expect(queue.node.isPlaying()).toBe(true);
+
     await queue.node.pause();
+
     expect(queue.node.isPaused()).toBe(true);
     expect(queue.isPlaying()).toBe(true);
+
     await queue.node.resume();
     await queue.node.seek(30_000);
+
     expect(queue.node.playbackTime).toBe(30_000);
     expect(queue.node.getTimestamp()?.current.value).toBe(30_000);
     expect(queue.node.createProgressBar()).toContain('🔘');
     expect(await queue.node.setVolume(80)).toBe(80);
     expect(session.volume).toBe(0.8);
     expect(player.statistics.activeQueues).toBe(1);
+
     await queue.setSelfDeaf(false);
     await queue.setSelfMute(true);
+
     expect(session.selfDeaf).toBe(false);
     expect(session.selfMute).toBe(true);
     expect(queue.options.selfDeaf).toBe(false);
@@ -499,9 +598,12 @@ describe('public collection and history utilities', () => {
     const [one, two, three] = ['history-limit-one', 'history-limit-two', 'history-limit-three'].map(
       (title) => new TestTrack(title),
     );
+
     queue.history.push([one!, two!, three!]);
+
     expect(queue.history.tracks.toArray()).toEqual([two, three]);
     expect(queue.history.previousTrack).toBe(three);
+
     await expect(queue.history.next()).rejects.toBeInstanceOf(NoResultError);
   });
 });

@@ -14,6 +14,7 @@ export const chatInput = musicCommand((interaction) => {
     queue.node.totalDuration > 0
       ? queue.node.createProgressBar()
       : `Position: ${formatTime(queue.node.playbackTime)} (duration unknown)`;
+
   return musicEmbed('🎶 Now playing', `${displayTrack(track)}\n\n${timeline}`).addFields(
     {
       name: 'Status',

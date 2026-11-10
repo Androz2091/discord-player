@@ -24,6 +24,7 @@ export const Util = {
   noop(...args: unknown[]): void {
     void args;
   },
+
   /** Split a duration into clock fields.
    * @param milliseconds Non-negative duration.
    */
@@ -38,6 +39,7 @@ export const Util = {
       milliseconds: value % 1000,
     };
   },
+
   /** Format a duration for legacy Track construction.
    * @param time Split clock fields.
    */
