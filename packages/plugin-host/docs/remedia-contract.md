@@ -1,6 +1,6 @@
 # Remedia source-host integration
 
-Supported with published `@remedia/client@0.1.0-dev.5`, `@remedia/plugin-host@0.1.0-dev.0`,
+Supported with published `@remedia/client@0.1.0-dev.5`, `@remedia/plugin-host@0.1.0-dev.5`,
 and the matching Remedia server (generic operations merged in twlite/remedia PR #13).
 
 The standalone adapter exposes `GET /.well-known/remedia` and

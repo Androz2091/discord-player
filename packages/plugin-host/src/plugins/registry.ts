@@ -280,7 +280,7 @@ export class PluginRegistry {
     const track = input && typeof input === 'object' && 'track' in input ? input.track : undefined;
     if (track?.sourceReference?.hostId && track.sourceReference.hostId !== this.hostId) {
       throw new Error(
-        `Source host ${track.sourceReference.hostId} is unavailable in this runtime; remote host forwarding is not supported by the selected Remedia integration`,
+        `Source host ${track.sourceReference.hostId} is unavailable in this runtime; execute this Track on its owning source host`,
       );
     }
     options.signal?.throwIfAborted();

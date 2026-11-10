@@ -26,7 +26,8 @@ it('shares every runtime class across package paths and retains actual Player co
   expect(RemediaClient.create).not.toHaveBeenCalled();
   await player.destroy();
 });
-it('keeps remote state and affinity through queue and history and fails explicitly until server forwarding exists', async () => {
+
+it('keeps remote state and affinity through queue and history while rejecting local execution', async () => {
   const source = host.createSourcePluginHost({ name: 'Remote', hostId: 'remote-a', publicUrl: 'https://host.test' });
   const player = new DiscordPlayer({ nodes: [], send() {} });
   try {
@@ -51,7 +52,7 @@ it('keeps remote state and affinity through queue and history and fails explicit
     expect(queue.history.previousTrack?.sourceState).toBe(track.sourceState);
     expect(queue.history.previousTrack?.sourceReference?.hostId).toBe('remote-a');
     await expect(player.plugins.resolveStream(queue.tracks.peek()!)).rejects.toThrow(
-      'remote host forwarding is not supported',
+      'execute this Track on its owning source host',
     );
     const media = await source.handle({
       pluginId: host.SOURCE_PLUGIN_ID,

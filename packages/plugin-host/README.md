@@ -258,14 +258,16 @@ compatibility surface does not emulate the whole Player API.
 
 ## Remedia server integration boundary
 
-The inspected Remedia Rust sources do not implement plugin-host discovery or
-source operation routing. Creating a remote Remedia client does not register this
-host with an audio server. A bot can call this HTTP protocol explicitly and redeem
-the media descriptor, or pass a reachable descriptor URL to supported playback
-APIs before the grant expires. Automatic Rust-side routing still requires host
-configuration/discovery, authenticated operation execution, sourceReference
-round-tripping, cancellation, and timely media-grant redemption. No new Rust API,
-custom IPC transport or automatic remote registry is claimed by this package.
+Remedia dev.5 supports generic host discovery, authenticated operation execution,
+native decoding of single-use grants, and cancellation. Configure the deployment
+in the server's `pluginHosts` list and in the bot's `sourceHosts` list. Installing
+`@remedia/plugin-host@0.1.0-dev.5` alone does not register a host with an audio node.
+
+DiscordPlayer sends operation descriptors for playback and staged-next preparation;
+the audio node invokes `source.stream` and consumes encoded bytes directly. The
+bot uses HTTP only for metadata and never redeems a playback grant. Host affinity
+is checked during session selection and before playback/staging. Embedded playback
+continues to execute local registrations and rejects remote-host Tracks.
 
 ## Validation
 
@@ -338,8 +340,9 @@ registration. Provider URL expiration remains intact. The consuming node must st
 independently enforce its DNS/redirect policy for direct URLs. Authentication or
 byte transformations requiring the host must use proxy delivery.
 
-**Remote execution is not end-to-end ready.** Published single-use media grants
-reject FFmpeg's default Range probing. See [the implementable Remedia contract and
-acceptance tests](docs/remedia-contract.md) for routing, sequential playback,
-seeking, probing, reopening and recovery requirements. No Range support is
-claimed here.
+Single-use media grants reject Range requests. Remedia dev.5 opens these operation
+results as sequential, non-seekable FFmpeg inputs, avoiding default Range probing.
+This does not add random access or turn grant URLs into durable source references.
+See [the Remedia integration contract](docs/remedia-contract.md) for the current
+protocol and validation limits. Native Remedia playback and Discord voice delivery
+remain outside this repository's HTTP/client integration tests.

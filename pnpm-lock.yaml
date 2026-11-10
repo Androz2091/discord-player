@@ -165,8 +165,8 @@ settings:
 catalogs:
   default:
     '@remedia/plugin-host':
-      specifier: 0.1.0-dev.0
-      version: 0.1.0-dev.0
+      specifier: 0.1.0-dev.5
+      version: 0.1.0-dev.5
     '@types/node':
       specifier: ^26.6.5
       version: 26.6.6
@@ -342,7 +342,7 @@ importers:
         version: 0.1.0-dev.5(@remedia/node@0.1.0-dev.5)
       '@remedia/plugin-host':
         specifier: 'catalog:'
-        version: 0.1.0-dev.0
+        version: 0.1.0-dev.5
       zod:
         specifier: ^4.6.7
         version: 4.6.7
@@ -1359,8 +1359,8 @@ packages:
     resolution: {integrity: sha512-2d31TfdkJ958k+HnsdzJqFz1fxA8tBbLyCGh13/arcsy9JV/XarA+rPa6zOCOZw8VPNgCi/pnibgknzp+x+S0w==}
     engines: {node: '>=22.18.0'}
 
-  '@remedia/plugin-host@0.1.0-dev.0':
-    resolution: {integrity: sha512-+WmQ0KErS/hZ+sgW555156MB52McxTEz94j5f1MaPCJg9nwEIXfU1P+eVhp3JgCIAfEQX/eTsfQZgIpZlKYSiw==}
+  '@remedia/plugin-host@0.1.0-dev.5':
+    resolution: {integrity: sha512-Xjw00om3r/fs8gxC4v7Rmm1wXFjLv9BD5qPEMfXG2nF1RfnhGnH7qbFNX9ezI+B6TeC7M65Y6drUfrsUqqbV+g==}
     engines: {node: '>=22.18.0'}
 
   '@rolldown/binding-android-arm-eabi@1.2.16':
@@ -4706,7 +4706,7 @@ snapshots:
       '@remedia/node-win32-ia32-msvc': 0.1.0-dev.5
       '@remedia/node-win32-x64-msvc': 0.1.0-dev.5
 
-  '@remedia/plugin-host@0.1.0-dev.0': {}
+  '@remedia/plugin-host@0.1.0-dev.5': {}
 
   '@rolldown/binding-android-arm-eabi@1.2.16':
     optional: true
