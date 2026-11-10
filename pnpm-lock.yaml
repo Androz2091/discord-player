@@ -206,8 +206,8 @@ importers:
   apps/music-bot:
     dependencies:
       '@remedia/node':
-        specifier: 0.1.0-dev.4
-        version: 0.1.0-dev.4
+        specifier: 0.1.0-dev.5
+        version: 0.1.0-dev.5
       commandkit:
         specifier: ^1.2.6
         version: 1.2.6(esbuild@0.28.2)(supports-color@7.2.0)(typescript@7.0.2)
@@ -338,8 +338,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       '@remedia/client':
-        specifier: 0.1.0-dev.4
-        version: 0.1.0-dev.4(@remedia/node@0.1.0-dev.4)
+        specifier: 0.1.0-dev.5
+        version: 0.1.0-dev.5(@remedia/node@0.1.0-dev.5)
       '@remedia/plugin-host':
         specifier: 'catalog:'
         version: 0.1.0-dev.0
@@ -1273,8 +1273,23 @@ packages:
       '@remedia/node':
         optional: true
 
+  '@remedia/client@0.1.0-dev.5':
+    resolution: {integrity: sha512-pYFX05/oW0XJoKMCt0sa4Jd4KtowRJn/CvI1JClUyovFq4ni9/pbxZ18YfEWCEfQdFKiAuaf7Ut6xSkXt1gaZA==}
+    engines: {node: '>=22.18.0'}
+    peerDependencies:
+      '@remedia/node': 0.1.0-dev.5
+    peerDependenciesMeta:
+      '@remedia/node':
+        optional: true
+
   '@remedia/node-android-arm-eabi@0.1.0-dev.4':
     resolution: {integrity: sha512-DphaKo+Yf7tvPQS5+eR06NqrvihAO6fHY1GuL0IhFWCQuVcPyVv7UHLbuyA3GrWOW7JdgRF3LztJ/3Y9d2UnTg==}
+    engines: {node: '>=22.18.0'}
+    cpu: [arm]
+    os: [android]
+
+  '@remedia/node-android-arm-eabi@0.1.0-dev.5':
+    resolution: {integrity: sha512-T8ISzcifdvYUyzFrvstTJPSbyfus0WR6jE2xSaM4GOxXisJozsBf5UV2n+7VvB9E68krWKbfXRK/FM2X+H0lQQ==}
     engines: {node: '>=22.18.0'}
     cpu: [arm]
     os: [android]
@@ -1285,8 +1300,20 @@ packages:
     cpu: [arm64]
     os: [android]
 
+  '@remedia/node-android-arm64@0.1.0-dev.5':
+    resolution: {integrity: sha512-wtfv7IrASm4rQs/NQHqqs4xEhpXMcuBf1D5iVZ5tweHuCIHnVWLN79wV533kZOWMKytXJGhoSfXeY2wdZW6l3w==}
+    engines: {node: '>=22.18.0'}
+    cpu: [arm64]
+    os: [android]
+
   '@remedia/node-darwin-arm64@0.1.0-dev.4':
     resolution: {integrity: sha512-3B9DZ7x6xSnNg5SpFqETopbxhM+e9MzOE9IcAlzQ+fO5V7nQ2V2/VZLkQcotPwRCvOSa9IRmLPESKMNTjRotmw==}
+    engines: {node: '>=22.18.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@remedia/node-darwin-arm64@0.1.0-dev.5':
+    resolution: {integrity: sha512-tgiyd4K/sfIHVypYhdkyZBBgB1c7HST37wgL5w4f0XHmG+1W6/b9PMeU82Bk7on0i07rw8pCd3yQx56vp+ODDA==}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [darwin]
@@ -1297,14 +1324,45 @@ packages:
     cpu: [x64]
     os: [darwin]
 
+  '@remedia/node-darwin-x64@0.1.0-dev.5':
+    resolution: {integrity: sha512-ASby/c80UCsijg67nC+STN2Po2c5/Ea0ZVImV0Zwez9a337yuQ8afLwIyao+11oRkQH7f6o7GB0E7SiCexKtpw==}
+    engines: {node: '>=22.18.0'}
+    cpu: [x64]
+    os: [darwin]
+
   '@remedia/node-freebsd-x64@0.1.0-dev.4':
     resolution: {integrity: sha512-3PPdSy0VZc60yheMeRbk+sPByrlIwmRHikBxEYrWcs9++L5Y9hJ+ofLTlI7VvwoRxMI2liNunhobyXGB2eXAtg==}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [freebsd]
 
+  '@remedia/node-freebsd-x64@0.1.0-dev.5':
+    resolution: {integrity: sha512-fIfbKMk15oi7S0bOUBLgegtIGmHf7wDNKt9NsUJgW2C7YDJknqZuiVqafCA8OLTRRqpOexQ5rdR59Qjdpd7x+g==}
+    engines: {node: '>=22.18.0'}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@remedia/node-linux-arm-gnueabihf@0.1.0-dev.4':
+    resolution: {integrity: sha512-XsG0resZvjd2nodauvEGjg9v3xIPmba0hwChs7p8Munox1P3FJ/7RzS/Jqe7Lls4Qp3KpK+RVU1sSYJwWtYisA==}
+    engines: {node: '>=22.18.0'}
+    cpu: [arm]
+    os: [linux]
+
+  '@remedia/node-linux-arm-gnueabihf@0.1.0-dev.5':
+    resolution: {integrity: sha512-rpJO7y1veBHHB/PNdesPjGeAsSLAuTl8rVO7dUDixQ6jQZLfSR9uDahgIV1LqPJkdAbOhR4xife8oGnPCPqYdw==}
+    engines: {node: '>=22.18.0'}
+    cpu: [arm]
+    os: [linux]
+
   '@remedia/node-linux-arm64-gnu@0.1.0-dev.4':
     resolution: {integrity: sha512-rpWtO9VP+1+CdvSYb/8mzi3viXDtb8Vec6o/SPtA3bv89e7YCKtiTAn/WHOgqPW7ANBxwcTD/EyE+QB/ij4vKw==}
+    engines: {node: '>=22.18.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@remedia/node-linux-arm64-gnu@0.1.0-dev.5':
+    resolution: {integrity: sha512-weisbH5xgIIe6ONXz26LdyX1D+q0pvRyC+nFkjQJ6EzM5HHjV54mdu38WrF0kRSPdOWoZcgq3dZG61yb2732Ww==}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [linux]
@@ -1317,8 +1375,22 @@ packages:
     os: [linux]
     libc: [musl]
 
+  '@remedia/node-linux-arm64-musl@0.1.0-dev.5':
+    resolution: {integrity: sha512-y1VDehorZgOXsmgBSgGJhvxoYv5USTMK4sZx9HAhbLM+hmhOYAeQSlmvWFBvzkAbV5UwCXVkMRPHMJzOEGrSMA==}
+    engines: {node: '>=22.18.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
   '@remedia/node-linux-x64-gnu@0.1.0-dev.4':
     resolution: {integrity: sha512-g5bo3R7pRr9Kfz2dN0OmY4MK/toX4/g46hJcXJekUfTNCoAsRuFylHHnDw6Vlj+R+h1vxlypn/u8SBcAAPvpfg==}
+    engines: {node: '>=22.18.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@remedia/node-linux-x64-gnu@0.1.0-dev.5':
+    resolution: {integrity: sha512-bLiSBFyaVnzEKn7hSOtGp4dTzZN7TTbbh2bTmaM4+kI53oJ728+YePrchU3A5HftuG0rtW2z5BPVnftmo1/nKg==}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [linux]
@@ -1331,8 +1403,21 @@ packages:
     os: [linux]
     libc: [musl]
 
+  '@remedia/node-linux-x64-musl@0.1.0-dev.5':
+    resolution: {integrity: sha512-59dox0o7ZpZ2G+/UYAR4tXOj/Xrw1VubzDYc3VvcWjVR1psldx24GeRlyCVPlroy+/zV/66S8EeymsXH1ANRew==}
+    engines: {node: '>=22.18.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
   '@remedia/node-win32-arm64-msvc@0.1.0-dev.4':
     resolution: {integrity: sha512-alcOCLqz+R4benQdzShyxAC38q5PDjmEw13ryhFSvzK/dUZ1/94k4WF5C8eDe47mw7Q2PtR2jYnNWwYjyHLERA==}
+    engines: {node: '>=22.18.0'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@remedia/node-win32-arm64-msvc@0.1.0-dev.5':
+    resolution: {integrity: sha512-y2f3bBIXrj9xSTDfPAvQ4JmpXNS83xdyn2edcfHJHIJxDWqd+rP4nWie11cWarT0Z4G94LAVQL2Nl5TytVkCSw==}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [win32]
@@ -1343,14 +1428,30 @@ packages:
     cpu: [ia32]
     os: [win32]
 
+  '@remedia/node-win32-ia32-msvc@0.1.0-dev.5':
+    resolution: {integrity: sha512-MYpHrWH2T0bvHPGadaE8JPbqmXpKqQmhYFQRbrZ3aFoz2Xaw4wTXViFXHirjV+C0pET4V8s2jTjxbB3fYbQFew==}
+    engines: {node: '>=22.18.0'}
+    cpu: [ia32]
+    os: [win32]
+
   '@remedia/node-win32-x64-msvc@0.1.0-dev.4':
     resolution: {integrity: sha512-52qUDRmyh1A+/GsW/FZK/byygZITrQdH/FHpKDCPqC2B9TRZwgwMnRsCYiQboSWdGhD5XQIA4UHZ0UiVyg3o8Q==}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [win32]
 
+  '@remedia/node-win32-x64-msvc@0.1.0-dev.5':
+    resolution: {integrity: sha512-MxSIjddIHwtTaiTDxZ9fXFQH6nIDkIndiMGva/CIgA18apU89Hjjn1O6k26++afNZv1r3nHf9xeDZdH6r7A/cA==}
+    engines: {node: '>=22.18.0'}
+    cpu: [x64]
+    os: [win32]
+
   '@remedia/node@0.1.0-dev.4':
     resolution: {integrity: sha512-oGf5JCAEvDW0M7Q2EUdhsSefckRBFIqJwh5oeJdtRGLcvCYe0D2DS2pGvm924LOPFzemcAFmm1w6IQR9fR9QOQ==}
+    engines: {node: '>=22.18.0'}
+
+  '@remedia/node@0.1.0-dev.5':
+    resolution: {integrity: sha512-2d31TfdkJ958k+HnsdzJqFz1fxA8tBbLyCGh13/arcsy9JV/XarA+rPa6zOCOZw8VPNgCi/pnibgknzp+x+S0w==}
     engines: {node: '>=22.18.0'}
 
   '@remedia/plugin-host@0.1.0-dev.0':
@@ -4645,40 +4746,91 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  '@remedia/client@0.1.0-dev.5(@remedia/node@0.1.0-dev.5)':
+    dependencies:
+      ws: 8.22.1
+    optionalDependencies:
+      '@remedia/node': 0.1.0-dev.5
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
   '@remedia/node-android-arm-eabi@0.1.0-dev.4':
+    optional: true
+
+  '@remedia/node-android-arm-eabi@0.1.0-dev.5':
     optional: true
 
   '@remedia/node-android-arm64@0.1.0-dev.4':
     optional: true
 
+  '@remedia/node-android-arm64@0.1.0-dev.5':
+    optional: true
+
   '@remedia/node-darwin-arm64@0.1.0-dev.4':
+    optional: true
+
+  '@remedia/node-darwin-arm64@0.1.0-dev.5':
     optional: true
 
   '@remedia/node-darwin-x64@0.1.0-dev.4':
     optional: true
 
+  '@remedia/node-darwin-x64@0.1.0-dev.5':
+    optional: true
+
   '@remedia/node-freebsd-x64@0.1.0-dev.4':
+    optional: true
+
+  '@remedia/node-freebsd-x64@0.1.0-dev.5':
+    optional: true
+
+  '@remedia/node-linux-arm-gnueabihf@0.1.0-dev.4':
+    optional: true
+
+  '@remedia/node-linux-arm-gnueabihf@0.1.0-dev.5':
     optional: true
 
   '@remedia/node-linux-arm64-gnu@0.1.0-dev.4':
     optional: true
 
+  '@remedia/node-linux-arm64-gnu@0.1.0-dev.5':
+    optional: true
+
   '@remedia/node-linux-arm64-musl@0.1.0-dev.4':
+    optional: true
+
+  '@remedia/node-linux-arm64-musl@0.1.0-dev.5':
     optional: true
 
   '@remedia/node-linux-x64-gnu@0.1.0-dev.4':
     optional: true
 
+  '@remedia/node-linux-x64-gnu@0.1.0-dev.5':
+    optional: true
+
   '@remedia/node-linux-x64-musl@0.1.0-dev.4':
+    optional: true
+
+  '@remedia/node-linux-x64-musl@0.1.0-dev.5':
     optional: true
 
   '@remedia/node-win32-arm64-msvc@0.1.0-dev.4':
     optional: true
 
+  '@remedia/node-win32-arm64-msvc@0.1.0-dev.5':
+    optional: true
+
   '@remedia/node-win32-ia32-msvc@0.1.0-dev.4':
     optional: true
 
+  '@remedia/node-win32-ia32-msvc@0.1.0-dev.5':
+    optional: true
+
   '@remedia/node-win32-x64-msvc@0.1.0-dev.4':
+    optional: true
+
+  '@remedia/node-win32-x64-msvc@0.1.0-dev.5':
     optional: true
 
   '@remedia/node@0.1.0-dev.4':
@@ -4688,6 +4840,7 @@ snapshots:
       '@remedia/node-darwin-arm64': 0.1.0-dev.4
       '@remedia/node-darwin-x64': 0.1.0-dev.4
       '@remedia/node-freebsd-x64': 0.1.0-dev.4
+      '@remedia/node-linux-arm-gnueabihf': 0.1.0-dev.4
       '@remedia/node-linux-arm64-gnu': 0.1.0-dev.4
       '@remedia/node-linux-arm64-musl': 0.1.0-dev.4
       '@remedia/node-linux-x64-gnu': 0.1.0-dev.4
@@ -4695,6 +4848,23 @@ snapshots:
       '@remedia/node-win32-arm64-msvc': 0.1.0-dev.4
       '@remedia/node-win32-ia32-msvc': 0.1.0-dev.4
       '@remedia/node-win32-x64-msvc': 0.1.0-dev.4
+    optional: true
+
+  '@remedia/node@0.1.0-dev.5':
+    optionalDependencies:
+      '@remedia/node-android-arm-eabi': 0.1.0-dev.5
+      '@remedia/node-android-arm64': 0.1.0-dev.5
+      '@remedia/node-darwin-arm64': 0.1.0-dev.5
+      '@remedia/node-darwin-x64': 0.1.0-dev.5
+      '@remedia/node-freebsd-x64': 0.1.0-dev.5
+      '@remedia/node-linux-arm-gnueabihf': 0.1.0-dev.5
+      '@remedia/node-linux-arm64-gnu': 0.1.0-dev.5
+      '@remedia/node-linux-arm64-musl': 0.1.0-dev.5
+      '@remedia/node-linux-x64-gnu': 0.1.0-dev.5
+      '@remedia/node-linux-x64-musl': 0.1.0-dev.5
+      '@remedia/node-win32-arm64-msvc': 0.1.0-dev.5
+      '@remedia/node-win32-ia32-msvc': 0.1.0-dev.5
+      '@remedia/node-win32-x64-msvc': 0.1.0-dev.5
 
   '@remedia/plugin-host@0.1.0-dev.0': {}
 

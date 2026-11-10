@@ -19,19 +19,4 @@ allowBuilds:
   esbuild: false
 
 minimumReleaseAgeExclude:
-  - '@remedia/client'
-  - '@remedia/node-android-arm-eabi'
-  - '@remedia/node-android-arm64'
-  - '@remedia/node-darwin-arm64'
-  - '@remedia/node-darwin-x64'
-  - '@remedia/node-freebsd-x64'
-  - '@remedia/node-linux-arm-gnueabihf'
-  - '@remedia/node-linux-arm64-gnu'
-  - '@remedia/node-linux-arm64-musl'
-  - '@remedia/node-linux-x64-gnu'
-  - '@remedia/node-linux-x64-musl'
-  - '@remedia/node-win32-arm64-msvc'
-  - '@remedia/node-win32-ia32-msvc'
-  - '@remedia/node-win32-x64-msvc'
-  - '@remedia/node'
-  - '@remedia/plugin-host@0.1.0-dev.0'
+  - '@remedia/*'
