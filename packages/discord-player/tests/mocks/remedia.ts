@@ -21,6 +21,7 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', 
       assignedGuilds: [],
       lastError: null,
       capabilities: {
+        pluginOperations: { available: false as boolean, hosts: [] as string[] },
         crossfade: {
           available: crossfadeAvailable,
           configured: crossfadeAvailable,

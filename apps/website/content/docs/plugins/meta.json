@@ -1,4 +1,13 @@
 {
   "title": "Plugins",
-  "pages": ["index", "build-source", "operations", "lifecycle", "streams", "legacy-extractors", "advanced"]
+  "pages": [
+    "index",
+    "build-source",
+    "operations",
+    "lifecycle",
+    "streams",
+    "legacy-extractors",
+    "advanced",
+    "remote-hosts"
+  ]
 }

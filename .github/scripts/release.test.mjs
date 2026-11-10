@@ -761,3 +761,22 @@ test('scoped plugin host tarballs use pnpm filenames and publish before their de
   });
   assert.deepEqual(calls, ['@discord-player/plugin-host', 'discord-player']);
 });
+
+test('allows only the source host contract documentation outside dist', () => {
+  const root = tempDir();
+  const name = '@discord-player/plugin-host';
+  const tarball = makeTarball(root, { name, version: '8.0.0' });
+  execFileSync('tar', ['-xzf', tarball, '-C', root]);
+
+  const docs = join(root, 'package/docs');
+  mkdirSync(docs);
+  writeFileSync(join(docs, 'remedia-contract.md'), '# Source protocol\n');
+  execFileSync('tar', ['-czf', tarball, 'package'], { cwd: root });
+
+  assert.equal(validateTarball(tarball, { name, version: '8.0.0', expectedPackages: [] }).name, name);
+
+  writeFileSync(join(docs, 'unreviewed.txt'), 'unexpected');
+  execFileSync('tar', ['-czf', tarball, 'package'], { cwd: root });
+
+  assert.throws(() => validateTarball(tarball, { name, version: '8.0.0', expectedPackages: [] }), /unexpected file/);
+});

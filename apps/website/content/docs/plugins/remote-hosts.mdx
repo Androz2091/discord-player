@@ -1,0 +1,150 @@
+---
+title: Standalone source hosts
+description: Search on an independent source host and stream directly to a remote Remedia node.
+---
+
+`@discord-player/plugin-host` runs source plugins and legacy extractors without a Player, Discord gateway, voice connection, or queue. A normal application registers local sources on `player.plugins` or `player.extractors`; it only needs an HTTP host when it wants standalone execution.
+
+Remote operation playback requires the published `@remedia/client@0.1.0-dev.5` and a matching Remedia server. The bot needs no Rust toolchain or local native audio binding for remote playback.
+
+## Run the source service
+
+Install `@discord-player/plugin-host` and `@remedia/plugin-host`. This complete local example serves an encoded fixture; replace `MyExtractor` with your provider for production. Set `AUDIO_FILE` to an absolute MP3 or Ogg/Opus filename and `SOURCE_TOKEN` to a secret of at least 16 characters.
+
+```ts
+// source-host.ts (Node.js)
+import { createServer } from 'node:http';
+import { createReadStream } from 'node:fs';
+import { BaseExtractor, Track, createSourcePluginHost } from '@discord-player/plugin-host';
+import { createNodeMiddleware } from '@remedia/plugin-host/node';
+
+class MyExtractor extends BaseExtractor {
+  static identifier = 'example.audio';
+
+  async validate() {
+    return true;
+  }
+
+  async handle(query: string) {
+    return this.createResponse(null, [
+      new Track(this.context.player, {
+        title: query,
+        url: 'https://example.com/audio',
+        duration: '0:10',
+      }),
+    ]);
+  }
+
+  async stream() {
+    return createReadStream(process.env.AUDIO_FILE!);
+  }
+}
+
+const host = createSourcePluginHost({
+  name: 'My Sources',
+  hostId: 'sources-1',
+  publicUrl: 'http://127.0.0.1:8080',
+  token: process.env.SOURCE_TOKEN!,
+});
+
+await host.extractors.register(MyExtractor);
+
+const middleware = createNodeMiddleware(host);
+const server = createServer((req, res) => {
+  void middleware(req, res, () => {
+    res.writeHead(404).end();
+  });
+});
+
+server.listen(8080, '127.0.0.1');
+```
+
+Use an HTTPS public URL reachable from both bot and audio node for separate machines. The host owns provider credentials and encoded streams; credentials never belong in Track metadata.
+
+## Configure the audio node
+
+Generate a normal authenticated `remedia.config.json` using `remedia-server --generate-config-file`. Add this top-level entry to that configuration:
+
+```json
+{
+  "pluginHosts": [
+    {
+      "id": "sources-1",
+      "endpoint": "http://127.0.0.1:8080",
+      "auth": { "type": "bearer", "token": "env(SOURCE_TOKEN)" },
+      "allowInsecureHttp": true,
+      "allowPrivateNetwork": true,
+      "operations": [
+        {
+          "pluginId": "discord-player.source",
+          "operation": "source.stream",
+          "replaySafe": true
+        }
+      ]
+    }
+  ]
+}
+```
+
+The two allow flags are for this loopback example. With public HTTPS endpoints use the defaults. `replaySafe` permits fresh execution when Remedia needs a new single-use grant; only enable it for sources safe to reopen. Start the server with the same `SOURCE_TOKEN` available to its configuration environment. The server discovers the generic manifest and advertises `pluginOperations.hosts`.
+
+## Configure the bot
+
+```ts
+import { Player } from 'discord-player';
+import { Client, GatewayIntentBits } from 'discord.js';
+
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
+const player = new Player({
+  nodes: [
+    {
+      id: 'audio-1',
+      type: 'remote',
+      url: 'remedia://127.0.0.1:2333',
+      auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
+    },
+  ],
+  sourceHosts: [
+    {
+      hostId: 'sources-1',
+      url: 'http://127.0.0.1:8080',
+      token: process.env.SOURCE_TOKEN!,
+      timeoutMs: 15000,
+    },
+  ],
+  crossfade: { enabled: true },
+  send(guildId, packet) {
+    client.guilds.cache.get(guildId)?.shard.send(packet);
+  },
+});
+
+client.on('raw', (packet) => player.receive(packet));
+client.once('clientReady', async () => {
+  await player.initialize(client.user!.id);
+
+  const result = await player.search('fixture', { hostId: 'sources-1', pluginId: 'example.audio' });
+  await player.play({ guildId: process.env.GUILD_ID!, channelId: process.env.CHANNEL_ID! }, result);
+});
+
+await client.login(process.env.DISCORD_TOKEN);
+```
+
+Configure the audio node's username/password and WebSocket port to match the bot. Crossfade also requires `audio.crossfade.enabled: true` on that node and enough audio duration for the configured overlap.
+
+## Routing and lifecycle
+
+- `sourceHosts` is the deployment configuration; local `plugins` and `extractors` retain their existing meaning. Independent hosts can register identical provider IDs.
+- Search tries local sources first, then hosts in declaration order, stopping at the first nonempty result. Each host retains its provider matching, priorities, protocols, and search hints. There is no global comparison of scores across deployments.
+- `search(query, { hostId })` targets one deployment. Add `pluginId` (or legacy `searchEngine: 'ext:provider'`) to target a provider there. Targeted providers use `source.resolve`; ordinary searches use `source.search`. Blocking applies locally and remotely.
+- Only portable hints and requester IDs cross HTTP. Local `requestOptions`, functions, Discord objects, and transport credentials are excluded from operation input. Search cancellation, timeout, and Player destruction abort HTTP requests. Authentication, identity, provider, and transport errors reject immediately without trying another deployment. Empty results may continue routing.
+- HTTP discovery runs for each search, so a restarted host does not leave a stale manifest. Discovery's name is a display label; the configured deployment ID is validated against returned Track references.
+- Tracks retain `sourceReference.hostId`, provider ID, and transient `sourceState` in queues and history. Persistent `serialize()` omits state hints while retaining host affinity. The host reconstructs expired legacy state from the original URL and provider when possible; otherwise search again. Never persist grant URLs.
+- Initial queue connection sends the known incoming/current/upcoming host IDs to Remedia's existing session selection. Custom selectors receive eligible nodes; their returned choice is still validated. Explicit and sticky assignments must satisfy host requirements. Connecting an empty queue first fixes its node before the Track is known.
+- Before each play or stage, discord-player checks the assigned node's operation capability and host list. Embedded nodes, missing bot registrations, and unsupported hosts fail explicitly. Queuing another deployment does not move an existing guild to another node. Configure a node with every host that guild needs.
+- Playback and crossfade staging send `{ hostId, pluginId: 'discord-player.source', operation: 'source.stream', input: { track } }`. Remedia executes it and receives encoded media directly from the host. The bot never asks `source.stream` for a temporary URL or opens that stream.
+- Crossfade uses the existing occurrence, generation, and revision fences. Queue mutations clear native staged work; skip, stop, replacement, and disposal use Remedia's native lifecycle cancellation. Failed preparation cannot promote a Track. Embedded crossfade continues using local sources.
+- Host outages fail preparation on that host; retry explicitly after service recovery. Repeated playback creates another operation, allowing fresh grants and state reconstruction. Node disconnect/recovery remains owned by Remedia, with the same assignment and host identity; discord-player adds no migration or host fallback policy.
+
+## Validation boundary
+
+The deterministic suite tests real source-host HTTP search, cancellation and model reconstruction, plus queue/session operation descriptors, host affinity and crossfade promotion using the existing client test backend. Source-host media tests decode MP3, Ogg/Opus and M4A over HTTP with FFmpeg. These checks do not prove native remote-node decoding or Discord voice delivery. No Rust test harness is required in discord-player.

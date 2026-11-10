@@ -17,6 +17,39 @@ The `@remedia/client` dependency supplies source descriptor types only.
 The official `@discord-player/extractor` collection is an optional, separate package.
 It is neither bundled nor automatically registered.
 
+## Using a host from a bot
+
+Normal applications do not need to create an HTTP host. Register sources locally
+as before, or configure standalone deployments once in Player options:
+
+```ts
+const player = new Player({
+  // Existing Remedia nodes and gateway send callback:
+  ...audioOptions,
+  sourceHosts: [
+    {
+      hostId: 'sources-1',
+      url: 'https://plugins.example.com',
+      token: process.env.SOURCE_TOKEN,
+      timeoutMs: 15000,
+    },
+  ],
+});
+
+const result = await player.search('some song', { hostId: 'sources-1' });
+await player.play(channel, result);
+```
+
+This requires `@remedia/client@0.1.0-dev.5` and a matching remote server configured
+with the same `pluginHosts` ID and the `discord-player.source` / `source.stream`
+operation. The bot searches over HTTP and sends an operation descriptor for play
+and automatic crossfade staging. Encoded bytes flow directly from host to audio
+node. Local sources run locally. Embedded nodes cannot play hosted Tracks.
+
+See the [complete deployment example](https://discord-player.js.org/docs/plugins/remote-hosts).
+The direct HTTP examples below describe protocol consumers; a bot should use
+`player.search()` and queue playback, without fetching media grants itself.
+
 ## Registration and direct execution
 
 ```ts
@@ -175,7 +208,8 @@ that do not configure `publicUrl`. Construction with `publicUrl` requires it, an
 `fetch()` rejects HTTP use without it. Local-only `handle()` hosts may omit it and
 receive a generated process identifier that intentionally does not survive restarts. Two hosts
 can use the same provider IDs, but cannot redeem one another's Tracks. The embedded
-registry explicitly rejects hosted Tracks until generic server forwarding exists.
+registry rejects hosted Tracks when used as local sources. DiscordPlayer routes them
+through configured remote hosts and compatible Remedia nodes instead.
 Do not put endpoints, bearer tokens or credentials in sourceReference.
 
 The per-host FIFO cache defaults to 1000 Track states for ten minutes. Previous

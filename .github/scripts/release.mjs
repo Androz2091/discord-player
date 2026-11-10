@@ -341,6 +341,12 @@ export function validateTarball(tarball, { name, version, root = projectRoot, ex
     const packagePath = entry.slice('package/'.length);
     if (packagePath === 'package.json' || packagePath === 'README.md' || /^LICENSE(?:\..*)?$/.test(packagePath))
       continue;
+    if (
+      name === '@discord-player/plugin-host' &&
+      (packagePath === 'docs' || packagePath === 'docs/remedia-contract.md')
+    )
+      continue;
+
     if (packagePath !== 'dist' && !packagePath.startsWith('dist/'))
       throw new ReleaseError(`Tarball ${name}@${version} contains unexpected file ${packagePath}.`);
   }

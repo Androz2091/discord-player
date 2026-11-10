@@ -177,7 +177,8 @@ export async function openMedia(
         await file.close();
         throw error;
       }
-    } else input = await remote(new URL(source.url), policy, lifetime);
+    } else if ('url' in source) input = await remote(new URL(source.url), policy, lifetime);
+    else throw new Error('A source host cannot materialize another operation source');
     lifetime.throwIfAborted();
     let bytes = 0;
     const output = new Transform({

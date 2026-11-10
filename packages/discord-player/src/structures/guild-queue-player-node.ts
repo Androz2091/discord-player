@@ -134,6 +134,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     this.assertQueueAlive();
     const existing = this.session;
     if (existing) {
+      this.assertHosts(existing.nodeId, options.pluginHosts ?? []);
       if (options.nodeId && options.nodeId !== existing.nodeId) {
         throw new Error('Changing a Remedia node while preserving this session is not supported.');
       }
@@ -200,7 +201,12 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     options: GuildQueuePlayerNodeSessionCreateOptions,
   ): Promise<GuildQueuePlayerNodeSessionCreateOptions> {
     const requested = this.queue.options.crossfade ?? this.player.options.crossfade;
-    if (!requested) return options;
+    if (!requested) {
+      const assigned = this.player.getRemedia().getAssignment(this.queue.guildId);
+      const nodeId = options.nodeId ?? assigned?.nodeId;
+      if (nodeId) this.assertHosts(nodeId, options.pluginHosts ?? []);
+      return options;
+    }
     const client = this.player.getRemedia();
     const assigned = client.getAssignment(this.queue.guildId);
     const nodes = client.nodes;
@@ -209,6 +215,10 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       const candidates = nodes.filter(
         (node) =>
           node.status === 'healthy' &&
+          (!options.pluginHosts?.length ||
+            (node.type === 'remote' &&
+              node.capabilities?.pluginOperations?.available &&
+              options.pluginHosts.every((host) => node.capabilities?.pluginOperations?.hosts.includes(host)))) &&
           node.capacity > 0 &&
           Math.max(node.statistics?.playersActive ?? 0, node.assignedGuilds.length) < node.capacity &&
           node.statistics?.transportHealth !== 'degraded' &&
@@ -220,6 +230,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
           ? candidates[randomInt(candidates.length)]!.id
           : undefined;
     }
+    if (nodeId) this.assertHosts(nodeId, options.pluginHosts ?? []);
     const selected = nodes.find((node) => node.id === nodeId);
     const available = selected?.type === 'embedded' || selected?.capabilities?.crossfade.available === true;
     if (!available)
@@ -232,6 +243,17 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       ...(nodeId ? { nodeId } : {}),
       crossfade: available ? { durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower', ...requested } : false,
     };
+  }
+
+  private assertHosts(nodeId: string | null, hosts: readonly string[]): void {
+    if (!hosts.length) return;
+    const node = this.player.getRemedia().nodes.find((item) => item.id === nodeId);
+    if (
+      node?.type !== 'remote' ||
+      !node.capabilities?.pluginOperations?.available ||
+      !hosts.every((host) => node.capabilities?.pluginOperations?.hosts.includes(host))
+    )
+      throw new Error(`Remedia node ${nodeId} cannot access required source hosts (${hosts.join(', ')})`);
   }
 
   private attachSessionListeners(session: DiscordSession): void {

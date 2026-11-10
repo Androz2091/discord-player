@@ -8,6 +8,9 @@ export type MediaResource = string | Track | Track[] | Playlist | SearchResult;
 
 /** Source search and compatibility options. */
 export interface SearchOptions {
+  /** Explicit standalone deployment ID; interpreted by DiscordPlayer, never a local provider ID. */
+  hostId?: string;
+
   /** Optional explicit plugin ID. */
   pluginId?: string;
 

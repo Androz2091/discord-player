@@ -59,7 +59,7 @@ For a public network, put TLS in front of the service, restrict source access, a
 
 ## What can be streamed remotely?
 
-Return a server-accessible URL or an allowed file path. A local Node.js `Readable`, private buffer, or local-only path cannot be transported through this source API. [Source plugins](/docs/plugins/streams) should resolve a URL the remote server can open.
+For local source registrations, return a server-accessible URL or an allowed file path. For standalone execution, configure [remote source hosts](/docs/plugins/remote-hosts); their Tracks become generic Remedia operation sources and encoded media flows directly from the host to the audio node. A local Node.js `Readable`, private buffer, or local-only path cannot be transported through this source API. [Source plugins](/docs/plugins/streams) should resolve a URL the remote server can open.
 
 ## Recovery and affinity
 

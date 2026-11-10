@@ -1,13 +1,15 @@
-import { SourcePluginRuntime } from '@discord-player/plugin-host';
+import { RemoteSourceHosts, type RemoteSourceHostOptions } from './remote-source-hosts.js';
+import { SourcePluginRuntime, SOURCE_PLUGIN_ID, serializeSourceTrack } from '@discord-player/plugin-host';
 import type { PluginRegistry } from './plugins/registry.js';
 import type { PluginRegistration } from './plugins/types.js';
 import type { ExtractorExecutionContext } from './compat/extractors.js';
 import { randomInt, randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
-import { RemediaClient, type RemediaClientOptions } from '@remedia/client';
+import { RemediaClient, type MediaSource, type OperationMediaSource, type RemediaClientOptions } from '@remedia/client';
 import { GuildQueueManager } from './managers/guild-queue.manager.js';
 import type { CrossfadeOptions, GuildQueueOptions } from './structures/guild-queue.js';
 import type { GuildQueueEventsMap } from './structures/common/guild-queue-events.js';
+import type { Track } from './structures/track.js';
 import type { SearchResult } from './structures/search-result.js';
 import type {
   MediaResource,
@@ -26,6 +28,9 @@ const packageVersion = (createRequire(import.meta.url)('../package.json') as { v
 export type DiscordPlayerOptions = Omit<RemediaClientOptions, 'selectNode' | 'botUserId'> & {
   /** Automatic queue crossfading; disabled by default. Uses PCM decoding and additional processing. */
   crossfade?: CrossfadeOptions;
+
+  /** Standalone HTTP source deployments, searched in order after local sources decline. */
+  sourceHosts?: readonly RemoteSourceHostOptions[];
 
   /** Source registrations initialized with this Player. */
   plugins?: readonly PluginRegistration<any>[];
@@ -92,6 +97,8 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Source execution independent of queue and voice orchestration. */
   public readonly sources: SourcePluginRuntime;
 
+  private readonly remoteSources: RemoteSourceHosts;
+
   private initialPlugins: Promise<void>;
 
   #clientId: string | null = null;
@@ -125,6 +132,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   ) {
     super();
 
+    this.remoteSources = new RemoteSourceHosts(options.sourceHosts ?? []);
     this.sources = new SourcePluginRuntime({ player: this });
     this.plugins = this.sources.plugins;
     this.extractors = this.sources.extractors;
@@ -207,6 +215,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
     const {
       crossfade: _crossfade,
+      sourceHosts: _sourceHosts,
       plugins: _plugins,
       blockExtractors: _blocked,
       probeTimeout: _probeTimeout,
@@ -294,7 +303,63 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   ): Promise<SearchResult> {
     options.signal?.throwIfAborted();
     if (typeof query === 'string') await this.initialPlugins;
-    return this.sources.search(query, options);
+
+    if (typeof query !== 'string') return this.sources.search(query, options);
+
+    if (!options.hostId) {
+      const local = await this.sources.search(query, options);
+
+      if (!local.isEmpty()) return local;
+    }
+
+    return (
+      (await this.remoteSources.search(query, options, this.options.blockExtractors ?? [])) ??
+      this.sources.search([], options)
+    );
+  }
+
+  /** Select a source for the assigned audio node without opening remote media in the bot.
+   * @internal
+   * @param track Queued canonical Track.
+   * @param nodeId Assigned Remedia node ID.
+   * @param signal Playback preparation lifetime.
+   * @returns Native operation descriptor for remote hosts, otherwise the local resolver result.
+   */
+  public async resolvePlaybackSource(track: Track, nodeId: string | null, signal: AbortSignal): Promise<MediaSource> {
+    signal.throwIfAborted();
+
+    const node = this.getRemedia().nodes.find((item) => item.id === nodeId);
+    const hostId = track.sourceReference?.hostId;
+
+    if (hostId) {
+      this.remoteSources.assert(hostId);
+
+      if (!track.sourceReference?.pluginId) throw new Error('Remote Track has no provider identity');
+
+      if (this.options.blockExtractors?.includes(track.sourceReference.pluginId))
+        throw new Error('Track provider is blocked');
+
+      if (
+        node?.type !== 'remote' ||
+        !node.capabilities?.pluginOperations?.available ||
+        !node.capabilities.pluginOperations.hosts.includes(hostId)
+      )
+        throw new Error(`Remedia node ${nodeId} cannot access source host ${hostId}`);
+
+      const source: OperationMediaSource = {
+        hostId,
+        pluginId: SOURCE_PLUGIN_ID,
+        operation: 'source.stream',
+        input: { track: serializeSourceTrack(track) },
+      };
+      return source;
+    }
+
+    return this.plugins.resolveStream(track, {
+      signal,
+      remote: node?.type === 'remote',
+      blocked: this.options.blockExtractors,
+    });
   }
 
   /** Resolve a structural channel, create its guild queue, and delegate playback to `queue.play()`.
@@ -385,6 +450,8 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
   /** Destroy all managed queues owned by this Player. */
   public async destroy(): Promise<void> {
+    this.remoteSources.destroy();
+
     try {
       await this.queues.clear();
     } finally {

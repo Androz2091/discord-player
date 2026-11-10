@@ -591,7 +591,7 @@ export class GuildQueue<Metadata = unknown> {
               : resource;
       if (!incoming?.length) return { track: null, playerResult: null };
       if (options.channelId) {
-        await this.connectLocked({ ...options, channelId: options.channelId });
+        await this.connectLocked({ ...options, channelId: options.channelId }, incoming);
       } else if (!this.node.getSession(false)) {
         throw new Error('This queue has no voice session. Pass channelId or call queue.connect() first.');
       } else if (
@@ -657,7 +657,7 @@ export class GuildQueue<Metadata = unknown> {
       const operation = this.#operation;
       if (operation) {
         operation.requestedReason = 'skip';
-        if (operation.phase === 'preparing') operation.controller.abort(new Error('Playback skipped.'));
+        if (operation.phase !== 'playing') operation.controller.abort(new Error('Playback skipped.'));
         else await this.node.stopSession();
         const pending = operation.pendingTerminal;
         work = this.finalizeLocked(
@@ -714,7 +714,7 @@ export class GuildQueue<Metadata = unknown> {
     if (!operation) return;
     await this.cancelPreparation();
     operation.requestedReason = 'stop';
-    if (operation.phase === 'preparing') operation.controller.abort(new Error('Playback stopped.'));
+    if (operation.phase !== 'playing') operation.controller.abort(new Error('Playback stopped.'));
     else await this.node.stopSession();
     const pending = operation.pendingTerminal;
     this.finalizeLocked(operation, pending?.kind === 'natural' ? 'natural' : 'stopped', pending?.event);
@@ -774,7 +774,7 @@ export class GuildQueue<Metadata = unknown> {
       if (current && preserveCurrent && current !== track) this.tracks.insert(current, 0);
       if (operation) {
         operation.requestedReason = 'history';
-        if (operation.phase === 'preparing')
+        if (operation.phase !== 'playing')
           operation.controller.abort(new Error('History navigation replaced the current track.'));
         else await this.node.stopSession();
         operation.terminal = true;
@@ -856,6 +856,13 @@ export class GuildQueue<Metadata = unknown> {
     this.#reservation = null;
     if (reservation.operation.phase === 'preparing')
       reservation.operation.controller.abort(new Error('Crossfade reservation invalidated.'));
+    // A native stage request may still be resolving source.stream. Clear it before
+    // waiting on its lock, then fence completion with the normal serialized clear.
+    if (reservation.operation.phase === 'starting')
+      await reservation.operation.session
+        .clearStage()
+        .catch((error) => this.debugCrossfade(`clear failed: ${String(error)}`));
+
     using _lock = await this.tasks.acquire('queue.crossfade-stage');
     await reservation.operation.session
       .clearStage()
@@ -960,12 +967,11 @@ export class GuildQueue<Metadata = unknown> {
 
   private async prepareStage(reservation: Reservation): Promise<void> {
     const { operation } = reservation;
-    const source = await this.manager.player.plugins.resolveStream(operation.track, {
-      signal: operation.controller.signal,
-      remote:
-        this.manager.player.getRemedia().nodes.find((node) => node.id === operation.session.nodeId)?.type === 'remote',
-      blocked: this.manager.player.options.blockExtractors,
-    });
+    const source = await this.manager.player.resolvePlaybackSource(
+      operation.track,
+      operation.session.nodeId,
+      operation.controller.signal,
+    );
     using _lock = await this.tasks.acquire('queue.crossfade-stage');
     if (this.#reservation !== reservation || !this.reservationValid(reservation) || operation.controller.signal.aborted)
       return;
@@ -1236,7 +1242,7 @@ export class GuildQueue<Metadata = unknown> {
     if (!requestedOperation || this.#destroyed) return null;
     await this.cancelPreparation();
     requestedOperation.requestedReason = kind;
-    if (requestedOperation.phase === 'preparing') {
+    if (requestedOperation.phase !== 'playing') {
       requestedOperation.controller.abort(new Error(kind === 'skip' ? 'Playback skipped.' : 'Playback stopped.'));
     }
     {
@@ -1244,7 +1250,7 @@ export class GuildQueue<Metadata = unknown> {
       if (this.#destroyed) return null;
       const operation = this.#operation;
       if (!operation || operation !== requestedOperation) return requestedOperation.track;
-      if (operation.phase === 'preparing')
+      if (operation.phase !== 'playing')
         operation.controller.abort(new Error(kind === 'skip' ? 'Playback skipped.' : 'Playback stopped.'));
       else await this.node.stopSession();
       const pending = operation.pendingTerminal;
@@ -1286,31 +1292,37 @@ export class GuildQueue<Metadata = unknown> {
     signal: AbortSignal,
   ): Promise<PlayRawResult<GuildQueuePlaybackMetadata<PlaybackMetadata>> | null> {
     try {
-      const source = await this.manager.player.plugins.resolveStream(operation.track, {
-        signal,
-        remote:
-          this.manager.player.getRemedia().nodes.find((node) => node.id === operation.session.nodeId)?.type ===
-          'remote',
-        blocked: this.manager.player.options.blockExtractors,
-      });
-      using _lock = await this.tasks.acquire('queue.playback-transition', {
-        signal: this.#destroyed ? AbortSignal.abort() : undefined,
-      });
-      if (this.#destroyed || this.#operation !== operation || operation.terminal || signal.aborted) return null;
-      operation.phase = 'starting';
-      const customMetadata: GuildQueuePlaybackMetadata<PlaybackMetadata> = {
-        __discordPlayer: {
-          queueToken: this.#queueToken,
-          operationId: operation.id,
-        },
-        userMetadata: options.customMetadata,
-      };
-      const result = await this.node.play<GuildQueuePlaybackMetadata<PlaybackMetadata>>(source, {
-        customMetadata,
-        signal,
-      });
+      const source = await this.manager.player.resolvePlaybackSource(operation.track, operation.session.nodeId, signal);
+
+      let pending: Promise<PlayRawResult<GuildQueuePlaybackMetadata<PlaybackMetadata>>>;
+
+      {
+        using _lock = await this.tasks.acquire('queue.playback-transition', {
+          signal: this.#destroyed ? AbortSignal.abort() : undefined,
+        });
+        if (this.#destroyed || this.#operation !== operation || operation.terminal || signal.aborted) return null;
+
+        operation.phase = 'starting';
+        const customMetadata: GuildQueuePlaybackMetadata<PlaybackMetadata> = {
+          __discordPlayer: {
+            queueToken: this.#queueToken,
+            operationId: operation.id,
+          },
+          userMetadata: options.customMetadata,
+        };
+
+        pending = this.node.play<GuildQueuePlaybackMetadata<PlaybackMetadata>>(source, {
+          customMetadata,
+          signal,
+        });
+      }
+
+      // Native operation preparation may wait on a remote host. Controls must be able
+      // to acquire the transition lock and abort the Remedia playback signal meanwhile.
+      const result = await pending;
       if (this.#operation === operation && !operation.terminal && operation.phase === 'starting')
         operation.phase = 'playing';
+
       return result;
     } catch (error) {
       if (this.#destroyed || operation.controller.signal.aborted || options.signal?.aborted) {
@@ -1368,7 +1380,10 @@ export class GuildQueue<Metadata = unknown> {
     return operation;
   }
 
-  private async connectLocked(options: GuildQueueConnectOptions): Promise<DiscordSession> {
+  private async connectLocked(
+    options: GuildQueueConnectOptions,
+    incoming: readonly Track[] = [],
+  ): Promise<DiscordSession> {
     if (
       options.volume !== undefined &&
       (!Number.isFinite(options.volume) || options.volume < 0 || options.volume > 100)
@@ -1389,6 +1404,13 @@ export class GuildQueue<Metadata = unknown> {
 
     const session = await this.node.connect({
       channelId: options.channelId,
+      pluginHosts: [
+        ...new Set(
+          [...(this.currentTrack ? [this.currentTrack] : []), ...this.tracks.toArray(), ...incoming].flatMap((track) =>
+            track.sourceReference?.hostId ? [track.sourceReference.hostId] : [],
+          ),
+        ),
+      ],
       ...(options.nodeId ? { nodeId: options.nodeId } : {}),
       ...(options.connectTimeoutMs === undefined ? {} : { connectTimeoutMs: options.connectTimeoutMs }),
       ...(selfDeaf !== undefined ? { selfDeaf } : {}),
