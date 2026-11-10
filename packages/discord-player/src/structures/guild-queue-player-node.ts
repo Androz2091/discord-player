@@ -191,7 +191,8 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     this.session = null;
     await this.queue.cancelPreparation();
     session.removeAllListeners();
-    await session.disconnect();
+    // Disconnect leaves the session registered in Remedia, preventing future queues from joining this guild.
+    await session.dispose();
     this.queue.emit('connectionDestroyed');
   }
 

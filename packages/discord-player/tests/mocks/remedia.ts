@@ -7,6 +7,7 @@ export { FakeSession } from './remedia-session.js';
 /** Reusable backend fake. Casts only bridge Remedia's private class fields; public methods are checked above. */
 export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', crossfadeAvailable = false) {
   const sessions: FakeSession[] = [];
+  const activeSessions = new Map<string, FakeSession>();
   const nodes = [
     {
       id: 'fake-node',
@@ -34,7 +35,12 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', 
     nodes,
     getAssignment: vi.fn(() => undefined),
     createDiscordSession: vi.fn((options: DiscordSessionOptions) => {
-      const session = new FakeSession(options, nodeType);
+      if (activeSessions.has(options.guildId))
+        throw new Error(`a Discord session already exists for guild ${options.guildId}`);
+      const session = new FakeSession(options, nodeType, () => {
+        if (activeSessions.get(options.guildId) === session) activeSessions.delete(options.guildId);
+      });
+      activeSessions.set(options.guildId, session);
       sessions.push(session);
       return session;
     }),
@@ -43,6 +49,7 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', 
   return {
     client,
     sessions,
+    activeSessions,
     asClient: () => client as unknown as RemediaClient,
     asSession: (session: DiscordSession) => session as unknown as FakeSession,
   };

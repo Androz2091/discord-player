@@ -19,6 +19,7 @@ export class FakeSession
       | 'connect'
       | 'move'
       | 'disconnect'
+      | 'dispose'
       | 'setVolume'
       | 'setSelfDeaf'
       | 'setSelfMute'
@@ -164,6 +165,10 @@ export class FakeSession
   public playCalls = 0;
   /** Count of disconnect calls. */
   public disconnectCalls = 0;
+  /** Number of ownership-releasing disposal calls. */
+  public disposeCalls = 0;
+  /** Whether Remedia has unregistered the session. */
+  public disposed = false;
   /** Initial and repeated voice connection options passed by Discord Player. */
   public connectOptions: DiscordConnectOptions[] = [];
   /** Current Remedia generation. */
@@ -172,7 +177,11 @@ export class FakeSession
   public customMetadata: unknown;
 
   /** Create a deterministic fake session. */
-  public constructor(options: DiscordSessionOptions, nodeType: 'embedded' | 'remote') {
+  public constructor(
+    options: DiscordSessionOptions,
+    nodeType: 'embedded' | 'remote',
+    private readonly onDispose?: () => void,
+  ) {
     super();
     this.crossfade = options.crossfade;
     this.guildId = options.guildId;
@@ -199,6 +208,17 @@ export class FakeSession
   public async disconnect(): Promise<void> {
     this.disconnectCalls++;
     this.connectionState = 'disconnected';
+  }
+  /** Disconnect and unregister the fake session exactly once, matching Remedia's dispose contract. */
+  public async dispose(): Promise<void> {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.disposeCalls++;
+    try {
+      await this.disconnect();
+    } finally {
+      this.onDispose?.();
+    }
   }
   /** Set linear gain. */
   public async setVolume(gain: number): Promise<void> {

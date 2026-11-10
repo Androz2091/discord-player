@@ -11,6 +11,7 @@ it('creates, replaces, reconnects and destroys sessions while retaining configur
     await node.createSession({ channelId: 'new', volume: 0.4, selfMute: true, filterGraph: 'volume=0.4' }),
   );
   expect(session.disconnectCalls).toBe(1);
+  expect(session.disposeCalls).toBe(1);
   expect(created.connectionState).toBe('disconnected');
   expect(node.volume).toBe(40);
   await node.connect({ channelId: 'new', volume: 0.5, selfMute: false, selfDeaf: false, filterGraph: null });
@@ -25,6 +26,8 @@ it('creates, replaces, reconnects and destroys sessions while retaining configur
   await expect(node.connect({ channelId: 'moved', nodeId: 'another' })).rejects.toThrow('Changing a Remedia node');
   expect(sessions).toHaveLength(2);
   await node.destroySession();
+  expect(created.disposeCalls).toBe(1);
+  expect(backend.activeSessions.size).toBe(0);
   expect(node.getSession(false)).toBeNull();
   expect(node.filters.graph).toBe(queue.options.filterGraph);
   expect(() => node.getSession()).toThrow('initialized');
@@ -84,19 +87,42 @@ it('connects five guild queues independently without a shared voice deadline', a
 it('cleans up sessions whose connect method rejects and permits a subsequent connection', async () => {
   const { queue, player, backend } = await setup();
   await queue.node.destroySession();
-  let broken!: FakeSession;
-  backend.client.createDiscordSession.mockImplementationOnce((options) => {
-    broken = new FakeSession(options, 'embedded');
-    vi.spyOn(broken, 'connect').mockRejectedValue(new Error('voice failed'));
-    return broken;
-  });
+  const connect = vi.spyOn(FakeSession.prototype, 'connect').mockRejectedValueOnce(new Error('voice failed'));
   await expect(queue.connect({ channelId: 'new' })).rejects.toThrow('voice failed');
+  connect.mockRestore();
+  const broken = backend.sessions.at(-1)!;
   expect(queue.node.getSession(false)).toBeNull();
   expect(broken.disconnectCalls).toBe(1);
+  expect(broken.disposeCalls).toBe(1);
+  expect(backend.activeSessions.has(queue.guildId)).toBe(false);
   expect(broken.eventNames()).toHaveLength(0);
   await queue.connect({ channelId: 'recovered' });
   expect(queue.node.getSession().channelId).toBe('recovered');
   await player.destroy();
+});
+
+it('unregisters deleted queues so a new queue can connect and play in the same guild', async () => {
+  const { queue, player, session, backend } = await setup();
+  await queue.play(new TestTrack('first'));
+  expect(() =>
+    backend.client.createDiscordSession({ guildId: queue.guildId, channelId: 'voice-one', userId: 'bot-user' }),
+  ).toThrow(`a Discord session already exists for guild ${queue.guildId}`);
+
+  expect(await player.deleteQueue(queue.guildId)).toBe(true);
+  expect(session.disposeCalls).toBe(1);
+  expect(session.disconnectCalls).toBe(1);
+  expect(backend.activeSessions.has(queue.guildId)).toBe(false);
+  expect(await player.deleteQueue(queue.guildId)).toBe(false);
+
+  const replacement = await player.createQueue(queue.guildId);
+  const nextSession = backend.asSession(await replacement.connect({ channelId: 'voice-two' }));
+  expect(nextSession).not.toBe(session);
+  await replacement.play(new TestTrack('second'));
+  expect(nextSession.playCalls).toBe(1);
+  expect(backend.activeSessions.get(queue.guildId)).toBe(nextSession);
+  await player.destroy();
+  expect(nextSession.disposeCalls).toBe(1);
+  expect(backend.activeSessions.size).toBe(0);
 });
 
 it('keeps raw controls separate from managed queue state and forwards playback events', async () => {
