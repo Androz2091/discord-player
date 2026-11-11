@@ -1,22 +1,23 @@
 {
-  "title": "discord-player v8",
+  "title": "Discord Player",
   "root": true,
   "pages": [
     "index",
-    "---Start here---",
+    "---Start---",
     "getting-started",
     "installation",
-    "---Build---",
+    "---Use---",
     "guides",
     "---Extend---",
     "plugins",
-    "---Understand---",
+    "---Deploy---",
     "remedia",
-    "architecture",
     "---Upgrade---",
     "migration",
     "---Reference---",
     "reference",
-    "troubleshooting"
+    "troubleshooting",
+    "---Internals---",
+    "architecture"
   ]
 }
