@@ -11,11 +11,11 @@ export interface SearchOptions {
   /** Explicit standalone deployment ID; interpreted by DiscordPlayer, never a local provider ID. */
   hostId?: string;
 
-  /** Optional explicit plugin ID. */
-  pluginId?: string;
-
   /** Legacy type hint or ext:identifier targeting. */
   searchEngine?: string;
+
+  /** Resolve registered custom prefixes before dispatch; defaults to true. */
+  resolveCustomProtocols?: boolean;
 
   /** Structural requester. */
   requestedBy?: TrackRequester | null;
@@ -28,9 +28,6 @@ export interface SearchOptions {
 
   /** Additional disabled provider IDs. */
   blockExtractors?: readonly string[];
-
-  /** Source query type hint. */
-  source?: string;
 
   /** Maximum number of results requested from a source plugin. */
   limit?: number;

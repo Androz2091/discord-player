@@ -121,7 +121,6 @@ it('shares modern and legacy registrations, priorities and cross-provider search
   await h.plugins.register(
     definePlugin({
       id: 'fixture.modern',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('search.query.match', () => ({ score: 0 }), { priority: 10 });
@@ -135,7 +134,9 @@ it('shares modern and legacy registrations, priorities and cross-provider search
   );
 
   expect((await h.runtime.search('test')).tracks[0]?.title).toBe('modern');
-  expect((await h.runtime.search('delegate', { pluginId: LegacyFixture.identifier })).tracks[0]?.title).toBe('modern');
+  expect((await h.runtime.search('delegate', { searchEngine: LegacyFixture.identifier })).tracks[0]?.title).toBe(
+    'modern',
+  );
 
   await h.plugins.unregister('fixture.modern');
 
@@ -153,7 +154,6 @@ it('cancels calls and drains handlers before cleanup', async () => {
   await h.plugins.register(
     definePlugin({
       id: 'cancel',
-      kind: 'source',
 
       setup(ctx) {
         ctx.onCleanup(cleanup);
@@ -195,7 +195,6 @@ it('serves local files, buffers, and transformations without buffering media in 
       await h.plugins.register(
         definePlugin({
           id: 'bytes',
-          kind: 'source',
 
           setup(ctx) {
             ctx.on('search.query.match', () => ({ score: 1 }));
@@ -256,7 +255,6 @@ it('destroys streaming media on HTTP cancellation and cleans up multiple legacy 
   await h.plugins.register(
     definePlugin({
       id: 'endless',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('search.query.resolve', () => ({
@@ -269,7 +267,11 @@ it('destroys streaming media on HTTP cancellation and cleans up multiple legacy 
     })(),
   );
 
-  const search = await http(h, 'source.resolve', { query: 'bytes', pluginId: 'endless' });
+  const search = await http(h, 'metadata.execute', {
+    providerId: 'endless',
+    operation: 'search.query.resolve',
+    input: { query: 'bytes' },
+  });
   const result = await http(h, 'source.stream', { track: search.result.tracks[0] });
   const response = await h.fetch(new Request(result.result.url));
   const reader = response.body!.getReader();
@@ -290,9 +292,6 @@ it('does not provide queue or audio infrastructure', () => {
 
   expect(h.runtime.getRemedia(false)).toBeNull();
   expect(() => h.runtime.getRemedia()).toThrow('does not initialize');
-  expect(() => h.runtime.queues).toThrow('does not provide queues');
-  expect(() => h.runtime.nodes).toThrow('voice nodes');
-  expect(() => h.runtime.play()).toThrow('cannot play');
 });
 
 it('uses bridge fallback and related operations through the aggregate HTTP registration', async () => {
@@ -301,7 +300,6 @@ it('uses bridge fallback and related operations through the aggregate HTTP regis
   await h.plugins.register(
     definePlugin({
       id: 'metadata',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('search.query.resolve', () => ({
@@ -320,7 +318,6 @@ it('uses bridge fallback and related operations through the aggregate HTTP regis
   await h.plugins.register(
     definePlugin({
       id: 'bridge',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('track.bridge', () => Readable.from([Buffer.from('bridged bytes')]));
@@ -328,7 +325,11 @@ it('uses bridge fallback and related operations through the aggregate HTTP regis
     })(),
   );
 
-  const search = await http(h, 'source.resolve', { query: 'bridge', pluginId: 'metadata' });
+  const search = await http(h, 'metadata.execute', {
+    providerId: 'metadata',
+    operation: 'search.query.resolve',
+    input: { query: 'bridge' },
+  });
   const related = await http(h, 'source.related', { track: search.result.tracks[0] });
 
   expect(related.result.tracks[0].data.title).toBe('related');
@@ -460,12 +461,15 @@ it('reconstructs expired state and isolates direct calls nested in an HTTP opera
   await h.plugins.register(
     definePlugin({
       id: 'nested',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('search.query.resolve', async () => {
           const result = await h.handle(
-            request('source.resolve', { query: 'inner', pluginId: LegacyFixture.identifier }),
+            request('metadata.execute', {
+              providerId: LegacyFixture.identifier,
+              operation: 'search.query.resolve',
+              input: { query: 'inner' },
+            }),
           );
 
           if (!result.handled) throw new Error('Unhandled');
@@ -479,7 +483,7 @@ it('reconstructs expired state and isolates direct calls nested in an HTTP opera
   );
 
   await Promise.all([
-    http(h, 'source.resolve', { query: 'outer', pluginId: 'nested' }),
+    http(h, 'metadata.execute', { providerId: 'nested', operation: 'search.query.resolve', input: { query: 'outer' } }),
     h.handle(request('source.search', { query: 'direct' })).then((result) => {
       if (result.handled) expect((result.result as { tracks: Track[] }).tracks[0]).toBeInstanceOf(Track);
     }),
@@ -515,7 +519,7 @@ it('drains an active legacy stream before reconfiguration and disposes its cance
   }
 
   const original = await h.extractors.register(Slow);
-  const track = (await h.runtime.search('test', { pluginId: Slow.identifier })).tracks[0]!;
+  const track = (await h.runtime.search('test', { searchEngine: Slow.identifier })).tracks[0]!;
   const pending = h.handle(request('source.stream', { track }));
   const rejected = expect(pending).rejects.toBeDefined();
 
@@ -539,9 +543,15 @@ it('applies provider blocking and preserves HTTP error redaction without changin
 
   await h.extractors.register(LegacyFixture);
 
-  expect((await h.runtime.search('blocked', { pluginId: LegacyFixture.identifier })).tracks).toEqual([]);
+  expect((await h.runtime.search('blocked', { searchEngine: LegacyFixture.identifier })).tracks).toEqual([]);
   expect(
-    (await http(h, 'source.resolve', { query: 'blocked', pluginId: LegacyFixture.identifier })).result.tracks,
+    (
+      await http(h, 'metadata.execute', {
+        providerId: LegacyFixture.identifier,
+        operation: 'search.query.resolve',
+        input: { query: 'blocked' },
+      })
+    ).result.tracks,
   ).toEqual([]);
 
   const report = vi.fn();
@@ -550,7 +560,6 @@ it('applies provider blocking and preserves HTTP error redaction without changin
   await errors.plugins.register(
     definePlugin({
       id: 'error',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('search.query.resolve', () => {
@@ -560,15 +569,23 @@ it('applies provider blocking and preserves HTTP error redaction without changin
     })(),
   );
 
-  await expect(errors.handle(request('source.resolve', { query: 'test', pluginId: 'error' }))).rejects.toThrow(
-    'private-provider-secret',
-  );
+  await expect(
+    errors.handle(
+      request('metadata.execute', { providerId: 'error', operation: 'search.query.resolve', input: { query: 'test' } }),
+    ),
+  ).rejects.toThrow('private-provider-secret');
 
   const response = await errors.fetch(
     new Request('https://host.test/remedia/v1/execute', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(request('source.resolve', { query: 'test', pluginId: 'error' })),
+      body: JSON.stringify(
+        request('metadata.execute', {
+          providerId: 'error',
+          operation: 'search.query.resolve',
+          input: { query: 'test' },
+        }),
+      ),
     }),
   );
 

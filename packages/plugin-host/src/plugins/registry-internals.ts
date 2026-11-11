@@ -6,7 +6,7 @@ import type {
   OperationName,
   OperationResult,
   PluginRegistration,
-  SourcePluginContext,
+  PluginContext,
 } from './types.js';
 import type { ExecuteOptions } from './execution-options.js';
 
@@ -19,7 +19,7 @@ export type Entry = {
   registration: PluginRegistration<any>;
 
   /** Registration-local setup context. */
-  context: SourcePluginContext<any>;
+  context: PluginContext<any>;
 
   /** Registration lifetime cancellation. */
   controller: AbortController;

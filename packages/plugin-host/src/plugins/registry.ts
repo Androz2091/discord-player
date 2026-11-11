@@ -1,3 +1,4 @@
+import { registerRemote, discoverRemote, type RemotePluginHostOptions, type RemoteProvider } from '../remote.js';
 import type { MediaSource } from '@remedia/client';
 import type { Track } from '../structures/track.js';
 import { PluginError } from './plugin-error.js';
@@ -11,15 +12,18 @@ import type {
   OperationName,
   OperationResult,
   PluginRegistration,
-  SourceOperationMap,
+  ProviderReference,
+  OperationMap,
 } from './types.js';
 import type { LegacyPlayerContext } from '../legacy-player.js';
 
 export { PluginError } from './plugin-error.js';
 export type { ExecuteOptions, StreamResolutionOptions } from './execution-options.js';
 
-/** Context-owned source execution registry. Removal aborts and drains calls before teardown. */
+/** Context-owned capability registry. Removal aborts and drains calls before teardown. */
 export class PluginRegistry {
+  private advertisements = new WeakMap<object, RemoteProvider[]>();
+
   private entries = new Map<string, Entry>();
 
   private handlers: Handler[] = [];
@@ -29,6 +33,8 @@ export class PluginRegistry {
   private resultOwners = new WeakMap<object, Entry>();
 
   private destroyed = false;
+
+  private readonly lifetime = new AbortController();
 
   /** Create an independent host.
    * @param player Structural source context.
@@ -44,6 +50,7 @@ export class PluginRegistry {
   ) {}
 
   private definitions = new Map<OperationName, DispatchPolicy>([
+    ['lyrics.search', 'collect'],
     ['search.query.match', 'collect'],
     ['search.query.resolve', 'first'],
     ['track.stream', 'first'],
@@ -57,7 +64,7 @@ export class PluginRegistry {
    * @param name Operation name.
    * @param policy Dispatch policy matching its contract.
    */
-  public defineOperation<K extends OperationName>(name: K, policy: SourceOperationMap[K]['policy']): void {
+  public defineOperation<K extends OperationName>(name: K, policy: OperationMap[K]['policy']): void {
     if (this.definitions.has(name)) {
       throw new Error(`Operation already defined: ${name}`);
     }
@@ -67,9 +74,12 @@ export class PluginRegistry {
 
   /** Whether an ID is reserved or active.
    * @param id Plugin ID.
+   * @param hostId Optional deployment constraint.
    */
-  public has(id: string): boolean {
-    return this.entries.has(id);
+  public has(id: string, hostId?: string): boolean {
+    return [...this.entries.values()].some(
+      (entry) => entry.id === id && (!hostId || entry.registration.definition.remoteHost?.hostId === hostId),
+    );
   }
 
   /** Registration lifetime for transport-owned ephemeral state.
@@ -81,6 +91,103 @@ export class PluginRegistry {
     return this.entries.get(id)?.controller.signal;
   }
 
+  /** List active provider/deployment references in priority and registration order.
+   * @param operation Capability to inspect.
+   * @returns Unique eligible provider/deployment references.
+   */
+  public providers(operation: OperationName): ProviderReference[] {
+    const seen = new Set<string>();
+    return selectHandlers(
+      operation,
+      {},
+      {},
+      {
+        handlers: this.handlers,
+        definitions: this.definitions,
+        blocked: () => this.blocked(),
+        resultOwners: this.resultOwners,
+      },
+    ).flatMap((handler) => {
+      const pluginId = handler.entry.id;
+      const hostId = handler.entry.registration.definition.remoteHost?.hostId;
+      const key = `${hostId ?? ''}::${pluginId}`;
+      if (seen.has(key)) return [];
+      seen.add(key);
+      return [{ pluginId, ...(hostId ? { hostId } : {}), data: null }];
+    });
+  }
+
+  /** Check whether a deployment has an owned registration.
+   * @param hostId Deployment identity.
+   */
+  public hasHost(hostId: string): boolean {
+    return [...this.entries.values()].some((entry) => entry.registration.definition.remoteHost?.hostId === hostId);
+  }
+
+  /** Advertise only actual local operation handlers.
+   * @returns Serializable provider capability descriptions.
+   */
+  public describe() {
+    return [...this.entries.values()]
+      .filter((entry) => entry.active)
+      .map((entry) => ({
+        id: entry.id,
+        operations: [
+          ...new Set(this.handlers.filter((handler) => handler.entry === entry).map((handler) => handler.operation)),
+        ],
+        protocols: [
+          ...new Set(
+            this.handlers
+              .filter((handler) => handler.entry === entry && handler.operation.startsWith('search.query.'))
+              .flatMap((handler) => handler.protocols ?? []),
+          ),
+        ],
+        priorities: Object.fromEntries(
+          [
+            ...new Set(this.handlers.filter((handler) => handler.entry === entry).map((handler) => handler.operation)),
+          ].map((operation) => [
+            operation,
+            Math.max(
+              ...this.handlers
+                .filter((handler) => handler.entry === entry && handler.operation === operation)
+                .map((handler) => handler.priority ?? 0),
+            ),
+          ]),
+        ),
+      }));
+  }
+
+  /** Register all advertised providers from an existing HTTP deployment.
+   * @param host Existing deployment and authentication.
+   * @param signal Caller lifetime.
+   */
+  public async registerHost(host: RemotePluginHostOptions, signal: AbortSignal = this.lifetime.signal): Promise<void> {
+    signal = AbortSignal.any([signal, this.lifetime.signal]);
+    signal.throwIfAborted();
+    const providers = await discoverRemote(host, signal);
+    const owned: string[] = [];
+    try {
+      for (const provider of providers) {
+        signal.throwIfAborted();
+        if (this.has(provider.id, host.hostId)) continue;
+        const registration = { definition: { id: provider.id, remoteHost: host }, options: {} };
+        this.advertisements.set(registration, providers);
+        await this.register(registration);
+        owned.push(provider.id);
+      }
+      await this.ready();
+      signal.throwIfAborted();
+    } catch (error) {
+      const results = await Promise.allSettled(owned.map((id) => this.unregister(id, host.hostId)));
+      const cleanup = results.filter((result) => result.status === 'rejected').map((result) => result.reason);
+      if (cleanup.length)
+        throw new AggregateError([error, ...cleanup], 'Remote provider registration and cleanup failed', {
+          cause: error,
+        });
+      throw error;
+    }
+  }
+
   /** Whether an active matching handler explicitly accepts a protocol.
    * @param protocol Query prefix without punctuation.
    * @param options Source targeting and block list.
@@ -88,13 +195,42 @@ export class PluginRegistry {
   public supportsProtocol(protocol: string, options: ExecuteOptions = {}): boolean {
     return this.handlers.some(
       (handler) =>
-        handler.operation === 'search.query.match' &&
+        (handler.operation === 'search.query.match' || handler.operation === 'search.query.resolve') &&
         handler.entry.active &&
         (!options.pluginId || handler.entry.id === options.pluginId) &&
+        (options.hostId === undefined ||
+          (handler.entry.registration.definition.remoteHost?.hostId ?? null) === options.hostId) &&
         !this.blocked().includes(handler.entry.id) &&
         !options.blocked?.includes(handler.entry.id) &&
         handler.protocols?.includes(protocol),
     );
+  }
+
+  /** Ordered owners of a custom query protocol.
+   * @param protocol Registered protocol prefix.
+   * @param options Targeting and block list.
+   * @returns Eligible provider identities, in dispatch order.
+   */
+  public protocolMatches(protocol: string, options: ExecuteOptions = {}) {
+    const handlers = (['search.query.match', 'search.query.resolve'] as const)
+      .flatMap((operation) =>
+        selectHandlers(operation, { protocol }, options, {
+          handlers: this.handlers,
+          definitions: this.definitions,
+          blocked: () => this.blocked(),
+          resultOwners: this.resultOwners,
+        }).filter((handler) => handler.protocols?.includes(protocol)),
+      )
+      .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0) || a.order - b.order);
+    const seen = new Set<string>();
+    return handlers.flatMap((handler) => {
+      const pluginId = handler.entry.id;
+      const hostId = handler.entry.registration.definition.remoteHost?.hostId;
+      const key = `${hostId ?? ''}::${pluginId}`;
+      if (seen.has(key)) return [];
+      seen.add(key);
+      return [{ pluginId, hostId, score: 0 }];
+    });
   }
 
   /** Register and initialize a source descriptor, reserving its ID synchronously.
@@ -107,11 +243,18 @@ export class PluginRegistry {
       throw new Error('Plugin host has been destroyed.');
     }
 
-    if (!definition || definition.kind !== 'source' || !definition.id || typeof definition.setup !== 'function') {
-      throw new TypeError('Expected a source plugin registration descriptor.');
+    if (
+      !definition ||
+      'kind' in definition ||
+      !definition.id ||
+      (typeof definition.setup !== 'function' && !definition.remoteHost)
+    ) {
+      throw new TypeError('Expected a plugin registration with setup() or remoteHost.');
     }
 
-    if (this.entries.has(definition.id)) {
+    const key = definition.remoteHost ? `${definition.remoteHost.hostId}::${definition.id}` : definition.id;
+
+    if (this.entries.has(key)) {
       throw new Error(`Duplicate plugin ID: ${definition.id}`);
     }
 
@@ -143,7 +286,9 @@ export class PluginRegistry {
           entry,
           operation,
           fn,
+          priority: definition.priority,
           ...options,
+          ...(definition.remoteHost && definition.priority !== undefined ? { priority: definition.priority } : {}),
           order: this.order++,
         };
 
@@ -160,11 +305,18 @@ export class PluginRegistry {
       },
     };
 
-    this.entries.set(entry.id, entry);
+    this.entries.set(key, entry);
 
     entry.ready = Promise.resolve().then(async () => {
       try {
-        await definition.setup(entry.context);
+        if (definition.remoteHost)
+          await registerRemote(
+            entry.context,
+            definition.id,
+            definition.remoteHost,
+            this.advertisements.get(registration),
+          );
+        await definition.setup?.(entry.context);
         entry.active = !controller.signal.aborted;
       } catch (cause) {
         controller.abort();
@@ -205,9 +357,7 @@ export class PluginRegistry {
       }
     }
 
-    if (this.entries.get(entry.id) === entry) {
-      this.entries.delete(entry.id);
-    }
+    for (const [key, value] of this.entries) if (value === entry) this.entries.delete(key);
 
     if (errors.length) {
       throw new AggregateError(errors, `Plugin ${entry.id} cleanup failed`);
@@ -216,10 +366,14 @@ export class PluginRegistry {
 
   /** Abort new and active work, drain handlers, and release resources. Handlers must cooperate with cancellation.
    * @param id Plugin ID.
+   * @param hostId Optional deployment identity when the provider exists on multiple hosts.
    * @returns Whether the registration existed.
    */
-  public async unregister(id: string): Promise<boolean> {
-    const entry = this.entries.get(id);
+  public async unregister(id: string, hostId?: string): Promise<boolean> {
+    const candidates = [...this.entries.values()].filter((item) => item.id === id);
+    if (!hostId && !this.entries.has(id) && candidates.length > 1)
+      throw new Error(`Plugin ${id} has multiple deployments; supply hostId to unregister one`);
+    const entry = this.entries.get(hostId ? `${hostId}::${id}` : id) ?? (!hostId ? candidates[0] : undefined);
 
     if (!entry) {
       return false;
@@ -256,6 +410,7 @@ export class PluginRegistry {
   /** Destroy all registrations, attempting every cleanup even when one fails. */
   public async destroy(): Promise<void> {
     this.destroyed = true;
+    this.lifetime.abort();
 
     const results = await Promise.allSettled([...this.entries.keys()].map((id) => this.unregister(id)));
     const errors = results.filter((result) => result.status === 'rejected').map((result) => result.reason);
@@ -287,7 +442,16 @@ export class PluginRegistry {
   ): Promise<OperationResult<K>> {
     const track = input && typeof input === 'object' && 'track' in input ? input.track : undefined;
 
-    if (track?.sourceReference?.hostId && track.sourceReference.hostId !== this.hostId) {
+    if (
+      track?.sourceReference?.hostId &&
+      track.sourceReference.hostId !== this.hostId &&
+      !this.handlers.some(
+        (handler) =>
+          handler.operation === operation &&
+          handler.entry.active &&
+          handler.entry.registration.definition.remoteHost?.hostId === track.sourceReference?.hostId,
+      )
+    ) {
       throw new Error(
         `Source host ${track.sourceReference.hostId} is unavailable in this runtime; execute this Track on its owning source host`,
       );

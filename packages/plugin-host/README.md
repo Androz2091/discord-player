@@ -19,27 +19,24 @@ It is neither bundled nor automatically registered.
 
 ## Using a host from a bot
 
-Normal applications do not need to create an HTTP host. Register sources locally
-as before, or configure standalone deployments once in Player options:
+Normal applications register plugins locally. A metadata-only client descriptor can
+register an existing standalone provider without repeating its host configuration:
 
 ```ts
-const player = new Player({
-  // Existing Remedia nodes and gateway send callback:
-  ...audioOptions,
-  sourceHosts: [
-    {
-      hostId: 'sources-1',
-      url: 'https://plugins.example.com',
-      token: process.env.SOURCE_TOKEN,
-      timeoutMs: 15000,
-    },
-  ],
+const remoteSource = definePlugin({
+  id: 'example.source',
+  remoteHost: { hostId: 'sources-1', url: 'https://plugins.example.test', token: process.env.SOURCE_TOKEN },
 });
 
-const result = await player.search('some song', { hostId: 'sources-1' });
-
+const player = new Player({ ...audioOptions, plugins: [remoteSource()] });
+const result = await player.search('some song');
 await player.play(channel, result);
 ```
+
+Advanced clients may register every advertised provider with
+`player.plugins.registerHost(hostOptions)`. The obsolete constructor `sourceHosts`
+option has been removed. Registration validates live provider capabilities and
+deployment identity; it does not install plugins on the service.
 
 This requires `@remedia/client@0.1.0-dev.5` and a matching remote server configured
 with the same `pluginHosts` ID and the `discord-player.source` / `source.stream`
@@ -157,12 +154,11 @@ Configure `token`, `mediaTtlMs`, and `maxMediaTokens` through the host options.
 
 One aggregate registration, `discord-player.source`, advertises:
 
-| Operation        | Input                           | Result                                     |
-| ---------------- | ------------------------------- | ------------------------------------------ |
-| `source.search`  | `{ query, options? }`           | Metadata through normal provider matching  |
-| `source.resolve` | `{ query, pluginId, options? }` | Metadata from an explicit provider         |
-| `source.related` | `{ track }`                     | Related metadata from the track's provider |
-| `source.stream`  | `{ track }`                     | Deferred Remedia media descriptor          |
+| Operation        | Input                 | Result                                     |
+| ---------------- | --------------------- | ------------------------------------------ |
+| `source.search`  | `{ query, options? }` | Metadata through normal provider matching  |
+| `source.related` | `{ track }`           | Related metadata from the track's provider |
+| `source.stream`  | `{ track }`           | Deferred Remedia media descriptor          |
 
 `source.stream` includes normal bridge fallback and post-stream transformations;
 internal operation handlers are not separate Remedia registrations. HTTP options
@@ -287,7 +283,7 @@ compatibility surface does not emulate the whole Player API.
 
 Remedia dev.5 supports generic host discovery, authenticated operation execution,
 native decoding of single-use grants, and cancellation. Configure the deployment
-in the server's `pluginHosts` list and in the bot's `sourceHosts` list. Installing
+in the server's `pluginHosts` list and in the bot plugin's `remoteHost` descriptor. Installing
 `@remedia/plugin-host@0.1.0-dev.5` alone does not register a host with an audio node.
 
 DiscordPlayer sends operation descriptors for playback and staged-next preparation;
@@ -373,3 +369,23 @@ This does not add random access or turn grant URLs into durable source reference
 See [the Remedia integration contract](docs/remedia-contract.md) for the current
 protocol and validation limits. Native Remedia playback and Discord voice delivery
 remain outside this repository's HTTP/client integration tests.
+
+## Optional capabilities
+
+`definePlugin()` has no kind discriminator. Its typed `OperationMap` includes
+`lyrics.search` independently of source operations. A lyrics provider returns an
+array of normalized records with `plain.available` and `synced.available` discriminants;
+only synchronized records carry sorted `{ timestampMs, line }` values. The optional
+`lrclibPlugin()` implementation lives here and is not automatically registered by
+Discord Player. Legacy `BaseExtractor.resolveLyrics()` adapts into that same operation.
+
+HTTP discovery advertises actual provider IDs, protocols, priorities and operation
+handlers. `metadata.execute` carries a typed `MetadataRequest` for normalized search,
+lyrics or related metadata. `source.search` remains the high-level search endpoint;
+`source.resolve` was removed. Portable lyrics requests use versioned Track metadata
+without expiring source-state hints. `source.stream` and native operation-source
+playback retain their existing media policy, cancellation and grant behavior.
+
+Metadata currently travels over direct HTTP. No generic Remedia metadata RPC is
+implemented or assumed. `remote.ts` isolates this boundary for a future supported
+transport without introducing a second search dispatcher.

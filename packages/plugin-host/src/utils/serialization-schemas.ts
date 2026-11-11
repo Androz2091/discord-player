@@ -26,6 +26,7 @@ const trackDataSchema = z.strictObject({
   live: z.boolean(),
   metadata: z.json(),
   sourceReference: sourceReferenceSchema.optional(),
+  lyricsReference: sourceReferenceSchema.optional(),
 });
 
 /** Strict versioned Track persistence schema. */

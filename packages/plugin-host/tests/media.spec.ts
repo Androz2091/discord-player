@@ -121,7 +121,6 @@ it('decodes real MP3, Ogg/Opus and faststart M4A through a real HTTP host with F
     await host.plugins.register(
       definePlugin({
         id: 'encoded',
-        kind: 'source',
 
         setup(ctx) {
           ctx.on('search.query.resolve', () => ({
@@ -168,8 +167,13 @@ it('decodes real MP3, Ogg/Opus and faststart M4A through a real HTTP host with F
         file,
       ]);
 
-      const track = deserializeSourceResult(await operation('source.resolve', { query: 'audio', pluginId: 'encoded' }))
-        .tracks[0]!;
+      const track = deserializeSourceResult(
+        await operation('metadata.execute', {
+          providerId: 'encoded',
+          operation: 'search.query.resolve',
+          input: { query: 'audio' },
+        }),
+      ).tracks[0]!;
       const media = await operation('source.stream', { track: serializeSourceTrack(track) });
 
       // FFmpeg sends Range even for initial probing. Published host rejects it with 416.
@@ -226,7 +230,6 @@ it('closes upstream sockets on real client disconnect and standalone shutdown', 
     await h.plugins.register(
       definePlugin({
         id: 'slow',
-        kind: 'source',
 
         setup(ctx) {
           ctx.on('search.query.resolve', () => ({
@@ -249,7 +252,11 @@ it('closes upstream sockets on real client disconnect and standalone shutdown', 
           })
         ).json()
       ).result;
-    const search = await call('source.resolve', { pluginId: 'slow', query: 'slow' });
+    const search = await call('metadata.execute', {
+      providerId: 'slow',
+      operation: 'search.query.resolve',
+      input: { query: 'slow' },
+    });
     const grant = await call('source.stream', { track: search.tracks[0] });
     const response = await fetch(grant.url);
     const reader = response.body!.getReader();
@@ -292,7 +299,6 @@ it('returns accessible direct URLs with expiration without proxying bytes when e
     await h.plugins.register(
       definePlugin({
         id: 'url',
-        kind: 'source',
 
         setup(ctx) {
           ctx.on('search.query.resolve', () => ({
@@ -317,7 +323,11 @@ it('returns accessible direct URLs with expiration without proxying bytes when e
           )
         ).json()
       ).result;
-    const search = await invoke('source.resolve', { query: 'url', pluginId: 'url' });
+    const search = await invoke('metadata.execute', {
+      providerId: 'url',
+      operation: 'search.query.resolve',
+      input: { query: 'url' },
+    });
 
     expect(await invoke('source.stream', { track: search.tracks[0] })).toEqual({ url: origin, expiresAtMs });
     expect(requests).toBe(0);

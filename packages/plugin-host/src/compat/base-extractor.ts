@@ -1,3 +1,4 @@
+import type { LyricsResult } from '../lyrics.js';
 import type { Readable } from 'node:stream';
 import type { SourceRuntimeEvents } from '../legacy-player.js';
 import type { Track } from '../structures/track.js';
@@ -38,6 +39,12 @@ export class BaseExtractor<Options extends object = object> {
   public get supportsDemux(): boolean {
     return false;
   }
+
+  /** Optional lyrics capability, adapted into the shared operation dispatcher.
+   * @param input Track metadata or a raw lookup query.
+   * @returns Lyrics records, or null when no lyrics were found.
+   */
+  public resolveLyrics?(input: Track | string): Promise<LyricsResult | LyricsResult[] | null>;
 
   /** Acquire extractor resources. */
   public async activate(): Promise<void> {}

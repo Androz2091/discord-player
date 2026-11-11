@@ -25,11 +25,13 @@ export function selectHandlers(
         handler.operation === operation &&
         handler.entry.active &&
         (!options.pluginId || handler.entry.id === options.pluginId) &&
+        (options.hostId === undefined ||
+          (handler.entry.registration.definition.remoteHost?.hostId ?? null) === options.hostId) &&
         !options.blocked?.includes(handler.entry.id) &&
         !state.blocked().includes(handler.entry.id) &&
         (!(input as { protocol?: string }).protocol ||
           !handler.protocols?.length ||
-          handler.protocols.includes((input as { protocol: string }).protocol)),
+          handler.protocols?.includes((input as { protocol: string }).protocol)),
     )
     .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0) || a.order - b.order);
 }
@@ -114,7 +116,13 @@ export async function dispatchOperation<K extends OperationName>(
     }
 
     if (operation === 'search.query.match' && result !== null) {
-      result = { ...(result as object), pluginId: handler.entry.id };
+      result = {
+        ...(result as object),
+        pluginId: handler.entry.id,
+        ...(handler.entry.registration.definition.remoteHost
+          ? { hostId: handler.entry.registration.definition.remoteHost.hostId }
+          : {}),
+      };
     }
 
     if (policy === 'first') {

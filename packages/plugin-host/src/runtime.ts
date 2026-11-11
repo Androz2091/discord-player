@@ -48,21 +48,6 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
     this.extractors = new ExtractorExecutionContext(this.player);
   }
 
-  /** Queue orchestration requires an actual DiscordPlayer. */
-  get queues(): never {
-    throw new Error('SourcePluginRuntime does not provide queues; use DiscordPlayer for playback');
-  }
-
-  /** Voice nodes require an actual DiscordPlayer. */
-  get nodes(): never {
-    throw new Error('SourcePluginRuntime does not provide voice nodes; use DiscordPlayer for playback');
-  }
-
-  /** Audio clients are unavailable in standalone source execution. */
-  get remedia(): never {
-    throw new Error('SourcePluginRuntime does not initialize a Remedia audio client');
-  }
-
   /** Required audio access is unavailable in standalone execution. */
   getRemedia(): RemediaClient;
 
@@ -75,11 +60,6 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
     if (throwOnMissing) throw new Error('SourcePluginRuntime does not initialize an audio client; use DiscordPlayer');
 
     return null;
-  }
-
-  /** Playback is outside the source compatibility API. */
-  play(): never {
-    throw new Error('SourcePluginRuntime cannot play audio; use DiscordPlayer');
   }
 
   /** Emit a source diagnostic.
@@ -118,55 +98,60 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
     }
 
     const blocked = [...(this.options.blockExtractors ?? []), ...(options.blockExtractors ?? [])];
-    const target =
-      options.pluginId ?? (options.searchEngine?.startsWith('ext:') ? options.searchEngine.slice(4) : undefined);
-
     await this.plugins.ready();
 
-    const prefix = /^([\w.-]+):(?:\/\/)?(.*)$/s.exec(query);
+    const engine = options.searchEngine;
+    const legacy = engine?.startsWith('ext:') ? engine.slice(4) : undefined;
+
+    if (legacy !== undefined && !this.extractors.get(legacy))
+      throw new Error(`Legacy extractor ${legacy} is not registered`);
+
+    const target = legacy ?? (engine && this.plugins.has(engine) ? engine : undefined);
+    const prefix =
+      options.resolveCustomProtocols !== false && !/^(?:https?|file):/i.test(query) && !/^[a-z]:/i.test(query)
+        ? /^([a-z][a-z0-9+.-]*):(?:\/\/)?(.*)$/is.exec(query)
+        : null;
     const protocol =
       prefix && this.plugins.supportsProtocol(prefix[1]!, { pluginId: target, blocked }) ? prefix[1] : undefined;
+    const providerHint = target ? undefined : engine;
     const input = {
       query: protocol ? prefix![2]! : query,
       protocol,
+      providerHint,
       options: {
-        ...options,
-        searchEngine:
-          (options.searchEngine?.startsWith('ext:') ? undefined : options.searchEngine) ??
-          options.source ??
-          (/^https?:\/\//i.test(query) ? 'arbitrary' : 'auto'),
+        requestedBy: options.requestedBy,
+        requestOptions: options.requestOptions,
+        limit: options.limit,
+        blockExtractors: options.blockExtractors,
       },
     };
-    const execution = { signal: options.signal, blocked, pluginId: target };
+    const execution = { signal: options.signal, blocked, pluginId: target, hostId: options.hostId };
     const matches = target
-      ? [{ pluginId: target, score: 0 }]
-      : await this.plugins.execute('search.query.match', input, execution);
-    const match = matches.find((item) => item !== null && item.score >= 0);
-
-    if (!match?.pluginId) {
-      return SearchResult.empty();
-    }
-
-    const result = await this.plugins.execute('search.query.resolve', input, {
-      ...execution,
-      pluginId: match.pluginId,
-    });
-
-    if (!result) {
-      return SearchResult.empty();
-    }
-
-    for (const track of result.tracks) {
-      track.sourceReference ??= {
+      ? [{ pluginId: target, score: 0, hostId: options.hostId }]
+      : protocol
+        ? this.plugins.protocolMatches(protocol, execution)
+        : await this.plugins.execute('search.query.match', input, execution);
+    for (const match of matches) {
+      if (!match?.pluginId || match.score < 0) continue;
+      const result = await this.plugins.execute('search.query.resolve', input, {
+        ...execution,
         pluginId: match.pluginId,
-        data: { url: track.url },
-      };
-
-      if (options.requestedBy !== undefined) {
-        track.requestedBy = options.requestedBy;
+        hostId: match.hostId ?? (target ? options.hostId : null),
+      });
+      if (!result?.tracks.length) {
+        if (target) break;
+        continue;
       }
+      for (const track of result.tracks) {
+        track.sourceReference ??= {
+          pluginId: match.pluginId,
+          ...(match.hostId ? { hostId: match.hostId } : {}),
+          data: { url: track.url },
+        };
+        if (options.requestedBy !== undefined) track.requestedBy = options.requestedBy;
+      }
+      return new SearchResult(result);
     }
-
-    return new SearchResult(result);
+    return SearchResult.empty();
   }
 }

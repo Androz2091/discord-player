@@ -11,7 +11,7 @@ import {
   SOURCE_PLUGIN_ID,
   Track,
   type SourcePluginHostOptions,
-  type SourcePluginContext,
+  type PluginContext,
   type SourceStream,
   type SourceStreamTransform,
 } from '../src/index.js';
@@ -58,14 +58,13 @@ async function result(h: ReturnType<typeof host>, operation: string, input: unkn
 async function provider(
   h: ReturnType<typeof host>,
   stream: () => SourceStream | Promise<SourceStream>,
-  setup?: (ctx: SourcePluginContext<Record<string, never>>) => void,
+  setup?: (ctx: PluginContext<Record<string, never>>) => void,
 ) {
   const open = vi.fn(stream);
 
   await h.plugins.register(
     definePlugin({
       id: 'source',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('search.query.resolve', () => ({
@@ -79,7 +78,11 @@ async function provider(
     })(),
   );
 
-  const search = await result(h, 'source.resolve', { query: 'audio', pluginId: 'source' });
+  const search = await result(h, 'metadata.execute', {
+    providerId: 'source',
+    operation: 'search.query.resolve',
+    input: { query: 'audio' },
+  });
 
   return { open, track: search.tracks[0] };
 }
@@ -128,7 +131,6 @@ it('proxies applicable URL transformations once in both delivery modes and prese
     await h.plugins.register(
       definePlugin({
         id: 'other',
-        kind: 'source',
 
         setup(ctx) {
           ctx.on('stream.transform', unrelated);
@@ -282,7 +284,6 @@ it('requires stable HTTP identities while keeping generated local handle identit
   await a.plugins.register(
     definePlugin({
       id: 'local',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('search.query.resolve', () => ({ tracks: [track], playlist: null }));
@@ -298,8 +299,8 @@ it('requires stable HTTP identities while keeping generated local handle identit
 
   const search = await a.handle({
     pluginId: SOURCE_PLUGIN_ID,
-    operation: 'source.resolve',
-    input: { query: 'local', pluginId: 'local' },
+    operation: 'metadata.execute',
+    input: { providerId: 'local', operation: 'search.query.resolve', input: { query: 'local' } },
   });
 
   expect(search.handled && (search.result as { tracks: Track[] }).tracks[0]).toBe(track);
@@ -354,7 +355,6 @@ it('defers URL-only providers which decline to a bridge and applies the bridge o
   await h.plugins.register(
     definePlugin({
       id: 'source',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('search.query.resolve', () => ({
@@ -370,7 +370,6 @@ it('defers URL-only providers which decline to a bridge and applies the bridge o
   await h.plugins.register(
     definePlugin({
       id: 'bridge',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('track.bridge', () => {
@@ -384,7 +383,11 @@ it('defers URL-only providers which decline to a bridge and applies the bridge o
     })(),
   );
 
-  const search = await result(h, 'source.resolve', { query: 'bridge', pluginId: 'source' });
+  const search = await result(h, 'metadata.execute', {
+    providerId: 'source',
+    operation: 'search.query.resolve',
+    input: { query: 'bridge' },
+  });
   const grant = await result(h, 'source.stream', { track: search.tracks[0] });
 
   expect(opened).toBe(0);
@@ -409,7 +412,6 @@ it('rechecks transforms registered while an eager URL is resolving and defers th
     await h.plugins.register(
       definePlugin({
         id: 'source',
-        kind: 'source',
 
         setup(ctx) {
           ctx.on('search.query.resolve', () => ({
@@ -429,7 +431,11 @@ it('rechecks transforms registered while an eager URL is resolving and defers th
       })(),
     );
 
-    const search = await result(h, 'source.resolve', { query: 'url', pluginId: 'source' });
+    const search = await result(h, 'metadata.execute', {
+      providerId: 'source',
+      operation: 'search.query.resolve',
+      input: { query: 'url' },
+    });
     const grant = await result(h, 'source.stream', { track: search.tracks[0] });
 
     expect(transform).not.toHaveBeenCalled();

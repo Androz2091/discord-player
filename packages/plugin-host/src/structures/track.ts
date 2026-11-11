@@ -1,10 +1,9 @@
 import type { TrackData, TrackJSON, TrackRequester, TrackSource, SerializedTrack } from './track-types.js';
 import type { LegacyPlayerContext } from '../legacy-player.js';
 import type { BaseExtractor, SearchQueryType } from '../compat/extractors.js';
-import type { SourceReference } from '../plugins/types.js';
+import type { ProviderReference } from '../plugins/types.js';
 import { randomUUID } from 'node:crypto';
-import type { MediaSource } from '@remedia/client';
-import { SerializationError, SourceUnavailableError } from '../errors.js';
+import { SerializationError } from '../errors.js';
 import { cloneJSONValue, SERIALIZATION_SCHEMA_VERSION, type Serializable } from '../utils/serialization.js';
 import { Playlist } from './playlist.js';
 
@@ -98,7 +97,10 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
   public playlist: Playlist | null;
 
   /** Portable source identity used by the plugin host. */
-  public sourceReference?: SourceReference;
+  public sourceReference?: ProviderReference;
+
+  /** Optional portable lyrics provider affinity. */
+  public lyricsReference?: ProviderReference;
 
   /** Opaque, expiring host state hint. Excluded from toJSON() and serialize(); retain only in memory. */
   public sourceState?: string;
@@ -181,6 +183,7 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
 
     this.player = legacyData ? (input as LegacyPlayerContext) : undefined;
     this.sourceReference = data.sourceReference;
+    this.lyricsReference = data.lyricsReference;
     this.raw = { ...data, ...data.raw };
     this.queryType = data.queryType;
     this.cleanTitle = data.cleanTitle ?? data.title ?? '';
@@ -248,17 +251,6 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
     return this as unknown as Track<NewMetadata>;
   }
 
-  /** Deprecated compatibility stub. Playback resolves sources through player.plugins.
-   * @param options Unused cancellation options.
-   * @returns Always rejects; register a source plugin instead.
-   * @deprecated Use player.plugins.resolveStream(track).
-   */
-  public async getStreamableSource(options?: { signal?: AbortSignal }): Promise<MediaSource> {
-    void options;
-
-    throw new SourceUnavailableError(this.title || this.id);
-  }
-
   /** Format the Track as `title by author`, omitting the author when empty. */
   public toString(): string {
     return this.author ? `${this.title} by ${this.author}` : this.title;
@@ -289,6 +281,7 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
       live: this.live,
       metadata: this.player ? null : this.trackMetadata,
       sourceReference: this.sourceReference,
+      lyricsReference: this.lyricsReference,
       playlist: hidePlaylist ? null : (this.playlist?.toJSON(false) ?? null),
     };
   }
@@ -317,12 +310,15 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
         live,
         metadata:
           this.player || this.trackMetadata === null ? null : cloneJSONValue(this.trackMetadata, '$.data.metadata'),
+        ...(this.lyricsReference
+          ? { lyricsReference: { ...this.lyricsReference, data: cloneJSONValue(this.lyricsReference.data) } }
+          : {}),
         ...(this.sourceReference
           ? {
               sourceReference: cloneJSONValue(
                 this.sourceReference,
                 '$.data.sourceReference',
-              ) as unknown as SourceReference,
+              ) as unknown as ProviderReference,
             }
           : {}),
       },

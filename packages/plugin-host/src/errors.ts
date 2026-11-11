@@ -4,8 +4,6 @@ export const DiscordPlayerErrorCode = {
   QueueCapacity: 'ERR_QUEUE_CAPACITY',
   /** A required queue, session, or track could not be resolved. */
   NoResult: 'ERR_NO_RESULT',
-  /** The installed Remedia client does not provide a requested capability. */
-  UnsupportedRemediaCapability: 'ERR_UNSUPPORTED_REMEDIA_CAPABILITY',
   /** A track has no source plugin to resolve a Remedia source. */
   SourceUnavailable: 'ERR_SOURCE_UNAVAILABLE',
   /** Data could not be serialized or reconstructed. */

@@ -16,3 +16,8 @@ export { cloneJSONValue } from './utils/serialization.js';
 export { SafeEventEmitter, type EventMap } from './utils/safe-event-emitter.js';
 
 export type { MediaAccessPolicy } from './media.js';
+
+export { parseLyrics, normalizeLyrics, searchLyrics } from './lyrics.js';
+export type { LyricsLine, LyricsResult, LyricsRequest } from './lyrics.js';
+export * from './providers/lrclib.js';
+export type { RemotePluginHostOptions } from './remote.js';

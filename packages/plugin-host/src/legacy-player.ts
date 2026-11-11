@@ -14,7 +14,7 @@ export interface SourceRuntimeEvents {
   error: [error: Error];
 
   /** Compatibility event forwarded by a real Player. */
-  voiceStateUpdate: [guildId: string, event: unknown];
+  voiceStateUpdate: [guildId: string, event: Record<string, unknown>];
 }
 
 /** Source-related Player surface shared by actual Players and standalone hosts. */

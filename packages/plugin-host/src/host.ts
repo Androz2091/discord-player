@@ -1,3 +1,4 @@
+import { normalizeLyrics } from './lyrics.js';
 import type { MediaSource as ClientMediaSource } from '@remedia/client';
 import { authorizeMediaURL, openMedia, type MediaAccessPolicy } from './media.js';
 import type { PortableSourceResult } from './protocol.js';
@@ -111,6 +112,58 @@ export class SourcePluginHost {
     this.remedia.register({
       id: SOURCE_PLUGIN_ID,
       operations: {
+        'metadata.execute': async (input, { signal }) => {
+          const request = this.record(input);
+          if (typeof request.providerId !== 'string') throw new TypeError('providerId is required');
+          if (request.operation === 'search.query.resolve' || request.operation === 'search.query.match') {
+            const query = this.record(request.input);
+            if (typeof query.query !== 'string') throw new TypeError('query must be a string');
+            const normalized = {
+              query: query.query,
+              options: this.searchOptions(query.options),
+              ...(typeof query.protocol === 'string' ? { protocol: query.protocol } : {}),
+              ...(typeof query.providerHint === 'string' ? { providerHint: query.providerHint } : {}),
+            };
+            if (request.operation === 'search.query.match')
+              return this.plugins.execute('search.query.match', normalized, { pluginId: request.providerId, signal });
+            const result = await this.plugins.execute('search.query.resolve', normalized, {
+              pluginId: request.providerId,
+              signal,
+            });
+            return result
+              ? this.boundary.getStore()
+                ? this.portable(result)
+                : result
+              : { tracks: [], playlist: null };
+          }
+          if (request.operation === 'track.related') {
+            const track = await this.restore(this.record(request.input).track, signal);
+            const result = await this.plugins.execute(
+              'track.related',
+              { track },
+              { pluginId: request.providerId, signal },
+            );
+            return result
+              ? this.boundary.getStore()
+                ? this.portable(result)
+                : result
+              : { tracks: [], playlist: null };
+          }
+          if (request.operation === 'lyrics.search') {
+            const value = this.record(request.input).input;
+            const restored = typeof value === 'string' || value instanceof Track ? value : deserialize(value);
+            if (!(typeof restored === 'string' || restored instanceof Track))
+              throw new TypeError('Lyrics input must be a string or serialized Track');
+            const groups = await this.plugins.execute(
+              'lyrics.search',
+              { input: restored },
+              { pluginId: request.providerId, signal },
+            );
+            return groups.map((group) => group?.map(normalizeLyrics) ?? null);
+          }
+          throw new Error('Unsupported metadata operation');
+        },
+
         'source.search': async (input, { signal }) => {
           const request = this.record(input);
 
@@ -118,21 +171,6 @@ export class SourcePluginHost {
 
           const hints = this.searchOptions(request.options);
           const result = await this.runtime.search(request.query, { ...hints, signal });
-
-          return this.boundary.getStore() ? this.portable(result) : result;
-        },
-
-        'source.resolve': async (input, { signal }) => {
-          const request = this.record(input);
-
-          if (typeof request.query !== 'string' || typeof request.pluginId !== 'string')
-            throw new TypeError('query and pluginId are required');
-
-          const result = await this.runtime.search(request.query, {
-            ...this.searchOptions(request.options),
-            pluginId: request.pluginId,
-            signal,
-          });
 
           return this.boundary.getStore() ? this.portable(result) : result;
         },
@@ -250,12 +288,18 @@ export class SourcePluginHost {
     // Only portable hints cross the boundary. Request options and credentials never do.
     const result: SearchOptions = {};
 
-    for (const key of ['pluginId', 'searchEngine', 'source'] as const) {
+    for (const key of ['searchEngine'] as const) {
       if (value[key] !== undefined) {
         if (typeof value[key] !== 'string') throw new TypeError(`${key} must be a string`);
 
         result[key] = value[key];
       }
+    }
+
+    if (value.resolveCustomProtocols !== undefined) {
+      if (typeof value.resolveCustomProtocols !== 'boolean')
+        throw new TypeError('resolveCustomProtocols must be a boolean');
+      result.resolveCustomProtocols = value.resolveCustomProtocols;
     }
 
     if (value.limit !== undefined) {
@@ -390,12 +434,15 @@ export class SourcePluginHost {
     // Re-run legacy metadata resolution rather than guessing the meaning of raw.engine.
     const data = track.sourceReference?.data;
     const queryType = data && typeof data === 'object' && 'queryType' in data ? data.queryType : undefined;
-    const result = await this.runtime.search(track.url, {
-      pluginId,
-      signal,
-      searchEngine: typeof queryType === 'string' ? queryType : undefined,
-    });
-    const restored = result.tracks.find((item) => item.url === track.url);
+    const result = await this.plugins.execute(
+      'search.query.resolve',
+      {
+        query: track.url,
+        providerHint: typeof queryType === 'string' ? queryType : undefined,
+      },
+      { pluginId, signal },
+    );
+    const restored = result?.tracks.find((item) => item.url === track.url);
 
     if (!restored) throw new Error(`Source ${pluginId} could not reconstruct expired Track state; search again`);
 
@@ -421,10 +468,32 @@ export class SourcePluginHost {
   /** Execute HTTP through Remedia's transport and the same operation handlers.
    * @param request Fetch request. An explicitly configured hostId is required even without publicUrl.
    */
-  fetch(request: Request): Promise<Response> {
+  async fetch(request: Request): Promise<Response> {
     if (!this.explicitHostId) return Promise.reject(new TypeError('HTTP source hosts require an explicit hostId'));
 
-    return this.boundary.run(true, () => this.remedia.fetch(request));
+    const response = await this.boundary.run(true, () => this.remedia.fetch(request));
+    if (new URL(request.url).pathname !== '/.well-known/remedia' || !response.ok) return response;
+    await this.plugins.ready();
+    const manifest = await response.json();
+    const providers = this.plugins.describe();
+    const operations = new Set(providers.flatMap((provider) => provider.operations));
+    for (const plugin of manifest.plugins) {
+      if (plugin.id !== SOURCE_PLUGIN_ID) continue;
+      plugin.operations = plugin.operations.filter((name: string) => {
+        if (name === 'metadata.execute')
+          return (
+            operations.has('search.query.resolve') || operations.has('lyrics.search') || operations.has('track.related')
+          );
+        if (name === 'source.search') return operations.has('search.query.resolve');
+        if (name === 'source.related') return operations.has('track.related');
+        if (name === 'source.stream') return operations.has('track.stream') || operations.has('track.bridge');
+        return false;
+      });
+    }
+    return Response.json(
+      { ...manifest, hostId: this.hostId, providers },
+      { status: response.status, headers: response.headers },
+    );
   }
 
   /** Identify Remedia routes for Node middleware.

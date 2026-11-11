@@ -1,5 +1,5 @@
 import type { SearchQueryType } from '../compat/query-types.js';
-import type { SourceReference } from '../plugins/types.js';
+import type { ProviderReference } from '../plugins/types.js';
 import type { JSONValue, SerializedEntity, SERIALIZATION_SCHEMA_VERSION } from '../utils/serialization.js';
 import type { Playlist, PlaylistData, PlaylistJSON } from './playlist.js';
 
@@ -12,7 +12,10 @@ export type TrackRequester = string | { id?: string; username?: string; [key: st
 /** Public metadata and optional portable source identity. */
 export interface TrackData<Metadata = unknown> {
   /** Portable provider payload; exclude secrets and live resources. */
-  sourceReference?: SourceReference;
+  sourceReference?: ProviderReference;
+
+  /** Optional portable lyrics provider affinity. */
+  lyricsReference?: ProviderReference;
 
   /** Process-local legacy data, never persisted. */
   raw?: Record<string, any>;
@@ -126,7 +129,10 @@ export interface TrackJSON<Metadata = unknown> extends TrackData<Metadata> {
 /** Public Track fields stored by the versioned persistence format. */
 export type SerializedTrackData = {
   /** Optional provider identity, absent in older version 1 payloads. */
-  sourceReference?: SourceReference;
+  sourceReference?: ProviderReference;
+
+  /** Optional portable lyrics provider affinity. */
+  lyricsReference?: ProviderReference;
 
   /** Stable Track identifier. */
   id: string;

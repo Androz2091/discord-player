@@ -5,6 +5,9 @@ export interface ExecuteOptions {
   /** Restrict execution to one provider. */
   pluginId?: string;
 
+  /** Restrict deployment; null restricts execution to embedded registrations. */
+  hostId?: string | null;
+
   /** Caller cancellation. */
   signal?: AbortSignal;
 

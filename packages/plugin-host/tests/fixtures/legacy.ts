@@ -12,7 +12,7 @@ export class LegacyFixture extends BaseExtractor {
   override async handle(query: string) {
     this.context.player.debug('Resolving source');
 
-    if (query === 'delegate') return this.context.player.search('fixture', { pluginId: 'fixture.modern' });
+    if (query === 'delegate') return this.context.player.search('fixture', { searchEngine: 'fixture.modern' });
 
     const track = new Track(this.context.player, {
       title: query,

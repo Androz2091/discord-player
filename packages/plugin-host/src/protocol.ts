@@ -1,3 +1,4 @@
+import type { SearchOptions } from './types.js';
 import { Track, type SerializedTrack } from './structures/track.js';
 import { Playlist, type SerializedPlaylist } from './structures/playlist.js';
 import { SearchResult } from './structures/search-result.js';
@@ -57,3 +58,30 @@ export function deserializeSourceResult(result: PortableSourceResult): SearchRes
 export function serializeSourceTrack(track: Track): PortableSourceTrack {
   return { ...track.serialize(), ...(track.sourceState ? { sourceState: track.sourceState } : {}) };
 }
+
+/** Portable search input, normalized before crossing the metadata boundary. */
+export interface PortableSourceQuery {
+  /** Prefix-stripped query when a registered custom protocol was selected. */
+  query: string;
+  /** Owned custom protocol. */
+  protocol?: string;
+  /** Generic provider hint, independent of provider/deployment selection. */
+  providerHint?: string;
+  /** Serializable public search hints; never includes request credentials or cancellation. */
+  options?: Omit<
+    SearchOptions,
+    'signal' | 'requestOptions' | 'requestedBy' | 'searchEngine' | 'hostId' | 'resolveCustomProtocols'
+  > & { requestedBy?: string | null };
+}
+
+/** Lyrics metadata request; persistence intentionally excludes runtime source-state hints. */
+export interface PortableLyricsRequest {
+  /** Raw query or versioned Track metadata. */
+  input: string | SerializedTrack;
+}
+
+/** Direct HTTP metadata request, also suitable for future generic forwarding. */
+export type MetadataRequest =
+  | { providerId: string; operation: 'search.query.match' | 'search.query.resolve'; input: PortableSourceQuery }
+  | { providerId: string; operation: 'lyrics.search'; input: PortableLyricsRequest }
+  | { providerId: string; operation: 'track.related'; input: { track: PortableSourceTrack } };

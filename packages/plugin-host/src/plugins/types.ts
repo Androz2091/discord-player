@@ -1,3 +1,5 @@
+import type { RemotePluginHostOptions } from '../remote.js';
+import type { LyricsRequest, LyricsResult } from '../lyrics.js';
 import type { Readable } from 'node:stream';
 import type { MediaSource } from '@remedia/client';
 import type { Track } from '../structures/track.js';
@@ -7,7 +9,7 @@ import type { JSONValue } from '../utils/serialization.js';
 import type { LegacyPlayerContext } from '../legacy-player.js';
 
 /** Serializable provider identity; never put credentials or live objects in this payload. */
-export type SourceReference = {
+export type ProviderReference = {
   /** Deployment identity, separate from the provider ID. Omit for ordinary embedded sources. */
   hostId?: string;
 
@@ -25,6 +27,7 @@ export type SourceStream =
       expiresAtMs?: number;
     })
   | string
+  | Uint8Array
   | Readable;
 
 /** Operation dispatch behavior. */
@@ -47,8 +50,11 @@ export interface SourceQuery {
   /** Search text or source location. */
   query: string;
 
+  /** Generic hint when searchEngine does not select a registered provider. */
+  providerHint?: string;
+
   /** Portable search hints and local cancellation. */
-  options?: SearchOptions;
+  options?: Omit<SearchOptions, 'searchEngine' | 'hostId' | 'signal' | 'resolveCustomProtocols'>;
 
   /** Explicit protocol prefix when present. */
   protocol?: string;
@@ -58,6 +64,9 @@ export interface SourceQuery {
 export interface SourceMatch {
   /** Provider ID; supplied automatically by the host. */
   pluginId?: string;
+
+  /** Deployment selected by matching; absent for embedded handlers. */
+  hostId?: string;
 
   /** Confidence score; higher wins within a priority tier. */
   score: number;
@@ -88,7 +97,10 @@ export interface SourceStreamTransform extends SourceTrackRequest {
 }
 
 /** Extensible source operation contracts. Augmented operations also need host definitions. */
-export interface SourceOperationMap {
+export interface OperationMap {
+  /** Optional lyrics lookup, independent of all source operations. */
+  'lyrics.search': Operation<LyricsRequest, LyricsResult[] | null, 'collect'>;
+
   /** Collect scored providers. */
   'search.query.match': Operation<SourceQuery, SourceMatch | null, 'collect'>;
 
@@ -112,18 +124,18 @@ export interface SourceOperationMap {
 }
 
 /** Names available to source plugins. */
-export type OperationName = keyof SourceOperationMap;
+export type OperationName = keyof OperationMap;
 
 /** Typed input selected by operation name. */
-export type OperationInput<K extends OperationName> = SourceOperationMap[K]['input'];
+export type OperationInput<K extends OperationName> = OperationMap[K]['input'];
 
 /** Typed handler result selected by operation name. */
-export type OperationOutput<K extends OperationName> = SourceOperationMap[K]['output'];
+export type OperationOutput<K extends OperationName> = OperationMap[K]['output'];
 
 /** Dispatch result selected by the declared policy. */
-export type OperationResult<K extends OperationName> = SourceOperationMap[K]['policy'] extends 'collect'
+export type OperationResult<K extends OperationName> = OperationMap[K]['policy'] extends 'collect'
   ? OperationOutput<K>[]
-  : SourceOperationMap[K]['policy'] extends 'broadcast'
+  : OperationMap[K]['policy'] extends 'broadcast'
     ? void
     : OperationOutput<K> | undefined;
 
@@ -153,7 +165,7 @@ export interface HandlerOptions {
 }
 
 /** Source setup context shared by embedded and standalone execution. */
-export interface SourcePluginContext<Options> {
+export interface PluginContext<Options> {
   /** Options belonging to this registration. */
   readonly options: Options;
 
@@ -178,37 +190,31 @@ export interface SourcePluginContext<Options> {
 }
 
 /** Source declaration reusable across Player instances. */
-export interface SourcePluginDefinition<Options> {
+export interface PluginDefinition<Options> {
   /** Unique registration identifier. */
   id: string;
 
-  /** Only source execution is implemented. */
-  kind: 'source';
+  /** Existing HTTP deployment providing this provider's metadata capabilities. */
+  remoteHost?: RemotePluginHostOptions;
+
+  /** Default operation priority. */
+  priority?: number;
 
   /** Initialize owned resources and handlers.
    * @param ctx Registration context.
    */
-  setup(ctx: SourcePluginContext<Options>): void | Promise<void>;
+  setup?(ctx: PluginContext<Options>): void | Promise<void>;
 
   /** Optional teardown after calls have drained.
    * @param ctx Registration context.
    */
-  destroy?(ctx: SourcePluginContext<Options>): void | Promise<void>;
-}
-
-/** Reserved runtime kind; no runtime capabilities are implemented. */
-export interface RuntimePluginDefinition {
-  /** Unique registration identifier. */
-  id: string;
-
-  /** Reserved discriminant, rejected by the source host. */
-  kind: 'runtime';
+  destroy?(ctx: PluginContext<Options>): void | Promise<void>;
 }
 
 /** Registration descriptor produced by a factory. */
 export interface PluginRegistration<Options = unknown> {
   /** Reusable source declaration. */
-  definition: SourcePluginDefinition<Options>;
+  definition: PluginDefinition<Options>;
 
   /** Registration-local options. */
   options: Options;
@@ -227,7 +233,7 @@ export type PluginFactory<Options> = {} extends Options
  * @returns A typed registration factory. Each call supplies independent options.
  */
 export function definePlugin<Options = Record<string, never>>(
-  definition: SourcePluginDefinition<Options>,
+  definition: PluginDefinition<Options>,
 ): PluginFactory<Options> {
   return ((options: Options = {} as Options) => ({
     definition,

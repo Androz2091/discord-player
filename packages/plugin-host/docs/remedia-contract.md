@@ -5,11 +5,11 @@ and the matching Remedia server (generic operations merged in twlite/remedia PR 
 
 The standalone adapter exposes `GET /.well-known/remedia` and
 `POST /remedia/v1/execute`. Its aggregate plugin ID is `discord-player.source`;
-operations are `source.search`, `source.resolve`, `source.related`, and `source.stream`.
+operations are `source.search`, `metadata.execute`, `source.related`, and `source.stream`.
 Discovery names are display labels. Stable deployment `hostId` values belong in
 operator configuration and in each Track's portable source reference.
 
-Configure the bot with `Player({ sourceHosts: [{ hostId, url, token?, timeoutMs? }], ... })`.
+Configure a client plugin with `definePlugin({ id, remoteHost: { hostId, url, token?, timeoutMs? } })`, then pass its factory registration in `Player({ plugins: [remotePlugin()], ... })`.
 The bot performs metadata operations, reconstructing canonical Tracks with
 `deserializeSourceResult()`. It sends remote playback and staged-next sources as:
 

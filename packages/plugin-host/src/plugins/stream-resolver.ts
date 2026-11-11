@@ -1,3 +1,4 @@
+import { SourceUnavailableError } from '../errors.js';
 import { Readable } from 'node:stream';
 import type { MediaSource } from '@remedia/client';
 import type { Track } from '../structures/track.js';
@@ -38,7 +39,7 @@ export async function resolveTrackStream(
   }
 
   if (result === undefined) {
-    throw new Error(`No source plugin handled track.stream for ${pluginId ?? track.id}`);
+    throw new SourceUnavailableError(pluginId ?? track.title ?? track.id);
   }
 
   let source: MediaSource =
@@ -48,7 +49,9 @@ export async function resolveTrackStream(
         : { file: result }
       : result instanceof Readable
         ? { stream: result }
-        : result;
+        : result instanceof Uint8Array
+          ? { buffer: result }
+          : result;
 
   if (options.directUrlOnly) {
     if (!('url' in source)) {
