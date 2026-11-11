@@ -41,7 +41,7 @@ const bar = queue.node.createProgressBar({ length: 20 });
 
 ## Seeking is source-dependent
 
-File, URL, and buffer seeking follow Remedia's decoder capabilities. One-shot streams may have more restricted seeking support and may require consuming intermediate audio. Do not assume every source can seek backward or that seeking to an unknown duration is valid.
+File, URL, and buffer seeking follow Remedia's decoder capabilities. One-shot streams may have more restricted seeking support and may require consuming intermediate audio. Do not assume every source can seek backward or that seeking to an unknown duration is valid. Remote plugin-host operation sources seek forward only: a backward seek is rejected by Remedia with `unsupported` and the source is not reopened.
 
 ## Volume differs at the boundary
 

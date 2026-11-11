@@ -65,7 +65,7 @@ flowchart TB
 
 ## 1. The application boundary
 
-The Discord library supplies commands, guild/channel IDs, and raw Gateway events. `send()` returns voice-state requests to the right shard; `receive()` forwards relevant dispatches. This is why v8 can work with different Discord libraries without shipping separate adapters.
+The Discord library supplies commands, guild/channel IDs, and raw Gateway events. `send()` returns voice-state requests to the right shard; `receive()` takes every raw dispatch; Remedia uses the voice and session packets and ignores the rest. This is why v8 can work with different Discord libraries without shipping separate adapters.
 
 ## 2. The managed queue boundary
 

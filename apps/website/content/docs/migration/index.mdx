@@ -19,7 +19,7 @@ Use Node.js **22.18 or newer**, ESM, and choose an [embedded or remote Remedia n
 
 ### Replace Player initialization
 
-Change `new Player(discordClient)` into `new Player({ nodes, send, plugins })`. Forward raw Gateway voice events with `player.receive()`, then call `await player.initialize(botUserId)`.
+Change `new Player(discordClient)` into `new Player({ nodes, send, plugins })`. Forward every raw Gateway dispatch with `player.receive()`, then call `await player.initialize(botUserId)`.
 
 ### Migrate your source integrations
 

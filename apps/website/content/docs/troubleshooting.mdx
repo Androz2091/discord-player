@@ -25,7 +25,7 @@ Start by locating the layer that failed. A missing source plugin and a failed na
 
 ## Voice never becomes connected
 
-**Check:** Guild voice permissions, botUserId, the correct shard in `send`, and forwarding of `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE`. `player.receive()` should run on raw Gateway dispatches, not just a high-level voice-state callback.
+**Check:** Guild voice permissions, botUserId, the correct shard in `send`, and forwarding of `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE`. `player.receive()` must run on every raw Gateway dispatch, including `READY`, not just a high-level voice-state callback.
 
 ## Concurrent voice joins fail
 

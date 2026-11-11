@@ -48,7 +48,7 @@ This tests only the voice connection. It does not require an audio source plugin
 
 ## Do not silently drop Gateway requests
 
-`player.receive(packet)` must receive raw `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` dispatches. The `send(guildId, payload)` callback must forward OP 4 to the guild's owning Gateway shard. Throw or reject when that guild cannot be routed. Optional chaining that returns `undefined` when the guild is missing can leave the attempt pending until timeout.
+`player.receive(packet)` must receive every raw Gateway dispatch, including `READY`, `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE`. Do not filter packets before calling it. The `send(guildId, payload)` callback must forward OP 4 to the guild's owning Gateway shard. Throw or reject when that guild cannot be routed. Optional chaining that returns `undefined` when the guild is missing can leave the attempt pending until timeout.
 
 Different bot accounts have different Discord voice identities, even in the same channel. Keep their Player instances, Gateway dispatches, and Remedia sessions independent.
 

@@ -31,7 +31,7 @@ sequenceDiagram
   P->>Q: queue.play(SearchResult)
   Q->>R: DiscordSession.connect()
   R->>Bot: send(OP 4)
-  Bot->>R: receive(VOICE_STATE/VOICE_SERVER)
+  Bot->>R: receive(Gateway dispatches incl. VOICE_STATE/VOICE_SERVER)
   R->>E: connect voice
   Q->>S: track.stream(current Track)
   S-->>Q: MediaSource (URL / file / Readable)

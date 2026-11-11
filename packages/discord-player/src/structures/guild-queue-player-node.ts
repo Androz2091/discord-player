@@ -1,4 +1,3 @@
-import { randomInt } from 'node:crypto';
 import { GuildQueuePlayerAudioFilters } from './guild-queue-player-audio-filters.js';
 import type {
   AudioStreamInfo,
@@ -250,59 +249,63 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   private async sessionPolicy(
     options: GuildQueuePlayerNodeSessionCreateOptions,
   ): Promise<GuildQueuePlayerNodeSessionCreateOptions> {
+    const client = this.player.getRemedia();
+    const hosts = options.pluginHosts ?? [];
     const requested = this.queue.options.crossfade ?? this.player.options.crossfade;
+    const selector = this.queue.options.selectNode;
+    let nodeId = options.nodeId ?? client.getAssignment(this.queue.guildId)?.nodeId;
 
-    if (!requested) {
-      const assigned = this.player.getRemedia().getAssignment(this.queue.guildId);
-      const nodeId = options.nodeId ?? assigned?.nodeId;
+    // Without a queue selector, Remedia performs its own capacity-aware placement.
+    if (!nodeId && selector) {
+      const candidates = this.eligibleNodes(hosts);
 
-      if (nodeId) this.assertHosts(nodeId, options.pluginHosts ?? []);
-
-      return options;
+      // An empty pool is reported by Remedia's own placement error.
+      if (candidates.length) nodeId = await selector(candidates, { guildId: this.queue.guildId });
     }
 
-    const client = this.player.getRemedia();
-    const assigned = client.getAssignment(this.queue.guildId);
-    const nodes = client.nodes;
-    let nodeId = options.nodeId ?? assigned?.nodeId;
+    if (nodeId) this.assertHosts(nodeId, hosts);
 
-    if (!nodeId) {
-      const candidates = nodes.filter(
+    const selected = nodeId && nodeId !== options.nodeId ? { ...options, nodeId } : options;
+
+    if (!requested) return selected;
+
+    // Remedia rejects crossfade on nodes without support. Request it only when every node
+    // that can host this session supports it, otherwise play without crossfade.
+    const hostable = nodeId ? client.nodes.filter((node) => node.id === nodeId) : this.eligibleNodes(hosts);
+    const available =
+      hostable.length > 0 &&
+      hostable.every((node) => node.type === 'embedded' || node.capabilities?.crossfade.available === true);
+
+    if (!available)
+      this.player.emit(
+        'debug',
+        nodeId
+          ? `Queue ${this.queue.guildId}: crossfade unavailable on node ${nodeId}; using ordinary playback.`
+          : `Queue ${this.queue.guildId}: automatic placement may choose a node without crossfade support; using ordinary playback. Pin a node or provide selectNode to use crossfade.`,
+      );
+
+    return {
+      ...selected,
+      crossfade: available ? { durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower', ...requested } : false,
+    };
+  }
+
+  /** Nodes Remedia would consider for a new assignment: healthy, with capacity, and hosting every required plugin host. */
+  private eligibleNodes(hosts: readonly string[]) {
+    return this.player
+      .getRemedia()
+      .nodes.filter(
         (node) =>
           node.status === 'healthy' &&
-          (!options.pluginHosts?.length ||
+          (!hosts.length ||
             (node.type === 'remote' &&
               node.capabilities?.pluginOperations?.available &&
-              options.pluginHosts.every((host) => node.capabilities?.pluginOperations?.hosts.includes(host)))) &&
+              hosts.every((host) => node.capabilities?.pluginOperations?.hosts.includes(host)))) &&
           node.capacity > 0 &&
           Math.max(node.statistics?.playersActive ?? 0, node.assignedGuilds.length) < node.capacity &&
           node.statistics?.transportHealth !== 'degraded' &&
           node.statistics?.processingHealth !== 'degraded',
       );
-
-      nodeId = this.queue.options.selectNode
-        ? await this.queue.options.selectNode(candidates, { guildId: this.queue.guildId })
-        : candidates.length
-          ? candidates[randomInt(candidates.length)]!.id
-          : undefined;
-    }
-
-    if (nodeId) this.assertHosts(nodeId, options.pluginHosts ?? []);
-
-    const selected = nodes.find((node) => node.id === nodeId);
-    const available = selected?.type === 'embedded' || selected?.capabilities?.crossfade.available === true;
-
-    if (!available)
-      this.player.emit(
-        'debug',
-        `Queue ${this.queue.guildId}: crossfade unavailable on node ${nodeId}; using ordinary playback.`,
-      );
-
-    return {
-      ...options,
-      ...(nodeId ? { nodeId } : {}),
-      crossfade: available ? { durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower', ...requested } : false,
-    };
   }
 
   private assertHosts(nodeId: string | null, hosts: readonly string[]): void {

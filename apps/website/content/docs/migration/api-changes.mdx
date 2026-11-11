@@ -8,7 +8,7 @@ This table is based on the current v8 source and the v7 branch. It distinguishes
 | v7                                      | v8                                        | Migration note                                                |
 | --------------------------------------- | ----------------------------------------- | ------------------------------------------------------------- |
 | `new Player(discordClient)`             | `new Player({ nodes, send, plugins })`    | No Discord library instance required by the framework         |
-| Automatic client wiring                 | `player.receive(rawGatewayDispatch)`      | You forward voice Gateway events                              |
+| Automatic client wiring                 | `player.receive(rawGatewayDispatch)`      | You forward raw Gateway dispatches                            |
 | Initialized in constructor              | `await player.initialize(botUserId)`      | Must finish before playback                                   |
 | `player.nodes` queue manager            | `player.nodes`                            | `player.nodes` remains a compatibility alias                  |
 | Extractor dispatcher                    | `player.plugins`                          | Modern source operations are the primary API                  |

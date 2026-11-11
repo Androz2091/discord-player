@@ -22,7 +22,7 @@ await player.initialize(botUserId);
 
 `gateway.sendToGuildShard` and `gateway.onDispatch` are application integration points, **not** discord-player exports. For an executable discord.js example, see [create a player](/docs/getting-started/create-player).
 
-Only `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` are passed through to Remedia. `send` must reject when a guild cannot be routed to a shard; do not silently swallow missing guilds. Each bot account must use its own authenticated user identity, even if multiple bots share a guild or voice channel.
+Pass every raw dispatch to `player.receive()`. Remedia receives all packets, including `READY`, and ignores those it does not need; filtering them first can break Gateway-session ordering. Discord Player separately tracks `VOICE_STATE_UPDATE` for queue voice policies. `send` must reject when a guild cannot be routed to a shard; do not silently swallow missing guilds. Each bot account must use its own authenticated user identity, even if multiple bots share a guild or voice channel.
 
 ## Connect or move channels
 

@@ -37,7 +37,7 @@ The options extend relevant `@remedia/client` configuration without exposing its
 | Method                              | Returns                                   | Notes                                               |
 | ----------------------------------- | ----------------------------------------- | --------------------------------------------------- |
 | `initialize(botUserId)`             | `Promise<void>`                           | Initialize plugins and Remedia, call after READY    |
-| `receive(payload)`                  | `void`                                    | Accept raw Gateway dispatch; filters voice events   |
+| `receive(payload)`                  | `void`                                    | Forward every raw Gateway dispatch to Remedia       |
 | `search(query, options?)`           | `Promise<SearchResult>`                   | String queries require a matching plugin            |
 | `play(channel, resource, options?)` | `Promise<PlayerNodeInitializationResult>` | Create/retrieve queue and delegate managed playback |
 | `createQueue(guildId, options?)`    | `Promise<GuildQueue>`                     | Reuse or create guild queue                         |

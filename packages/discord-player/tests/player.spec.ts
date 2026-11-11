@@ -58,28 +58,44 @@ it('initializes sources before Remedia and keeps host options out of the client 
   p.debug('message');
 
   expect(debug).toHaveBeenCalledWith('message');
-
-  p.receive({ t: 'OTHER' });
-  p.receive({});
-  p.receive({ t: 'VOICE_STATE_UPDATE', d: {} });
-  p.receive({ t: 'VOICE_SERVER_UPDATE', d: {} });
-
-  expect(backend.client.receive).toHaveBeenCalledTimes(2);
-
-  const select = create.mock.calls[0]![0].selectNode!;
-
-  await expect(select(backend.client.nodes, { guildId: 'missing' } as never)).rejects.toThrow('No guild queue');
-  await p.createQueue('guild');
-
-  expect(await select(backend.client.nodes, { guildId: 'guild' } as never)).toBe('fake-node');
-
-  await expect(select([], { guildId: 'guild' } as never)).rejects.toThrow('No Remedia nodes');
-
-  const custom = await p.createQueue('custom', { selectNode: () => 'chosen' });
-
-  expect(await select(backend.client.nodes, { guildId: custom.id } as never)).toBe('chosen');
+  expect(create.mock.calls[0]![0]).not.toHaveProperty('selectNode');
 
   await p.destroy();
+});
+
+it('forwards every raw Gateway dispatch to Remedia and tracks only voice states for queues', async () => {
+  const backend = createRemediaMock();
+  vi.spyOn(RemediaClient, 'create').mockResolvedValue(backend.asClient());
+
+  const player = new DiscordPlayer({ nodes: [], send() {} });
+  const queue = await player.createQueue('guild');
+  const voice = vi.spyOn(queue.voice, 'receive');
+  const states = vi.fn();
+
+  player.on('voiceStateUpdate', states);
+  player.receive({ t: 'READY', s: 1, d: { session_id: 'one' } });
+
+  expect(backend.client.receive).not.toHaveBeenCalled();
+
+  await player.initialize('123');
+
+  const ready = { t: 'READY', s: 1, d: { session_id: 'one' } };
+  const message = { t: 'MESSAGE_CREATE', s: 2, d: { guild_id: 'guild' } };
+  const server = { t: 'VOICE_SERVER_UPDATE', s: 3, d: { guild_id: 'guild' } };
+  const state = { t: 'VOICE_STATE_UPDATE', s: 4, d: { guild_id: 'guild', user_id: 'user', channel_id: null } };
+  const malformed = { t: 'VOICE_STATE_UPDATE', s: 5, d: {} };
+  const untyped = { s: 6 };
+
+  for (const packet of [ready, message, server, state, malformed, untyped]) player.receive(packet);
+
+  expect(backend.client.receive.mock.calls).toEqual([[ready], [message], [server], [state], [malformed], [untyped]]);
+  expect(states).toHaveBeenCalledExactlyOnceWith('guild', state);
+  expect(voice).toHaveBeenCalledExactlyOnceWith(state);
+
+  await player.destroy();
+  player.receive(ready);
+
+  expect(backend.client.receive).toHaveBeenCalledTimes(6);
 });
 
 it('cleans source resources when Remedia initialization fails and retains both failures if cleanup fails', async () => {

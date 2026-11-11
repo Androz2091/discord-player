@@ -26,7 +26,11 @@ const queue = await player.createQueue(guildId, {
 });
 ```
 
-A selection callback can apply an application-specific policy, but it should consider node health and capacity; always provide a usable node ID. The example picks the first offered candidate only for clarity, not as a production placement algorithm.
+Without `selectNode`, Remedia places a new guild on the healthy node with the lowest allocation relative to its reported capacity, breaking ties by node ID. Nodes that are degraded, full or disconnected, or that lack a required plugin host, are excluded.
+
+A queue's `selectNode` callback replaces that choice. It receives only those eligible nodes, runs once when the guild's first session is created, and its returned ID is pinned for the session. It is skipped when `nodeId` is passed explicitly or the guild already has a node. Remedia still rejects an unknown or unavailable ID. The example picks the first offered candidate only for clarity, not as a production placement algorithm.
+
+Automatic crossfade is requested only when the chosen node supports it. Without a selector or pinned node, it is requested only if every eligible node supports crossfade; otherwise the queue plays without it and emits a `debug` message. Pin a node with `nodeId` or provide `selectNode` for a mixed pool.
 
 ## Practical trade-offs
 

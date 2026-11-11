@@ -5,11 +5,14 @@ import { FakeSession } from './remedia-session.js';
 
 export { FakeSession } from './remedia-session.js';
 
+/** Node snapshot whose capabilities are always reported. */
+export type MockNode = NodeSnapshot & { capabilities: NonNullable<NodeSnapshot['capabilities']> };
+
 /** Reusable backend fake. Casts only bridge Remedia's private class fields; public methods are checked above. */
 export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', crossfadeAvailable = false) {
   const sessions: FakeSession[] = [];
   const activeSessions = new Map<string, FakeSession>();
-  const nodes = [
+  const nodes: MockNode[] = [
     {
       id: 'fake-node',
       type: nodeType,
@@ -22,7 +25,7 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', 
       assignedGuilds: [],
       lastError: null,
       capabilities: {
-        pluginOperations: { available: false as boolean, hosts: [] as string[] },
+        pluginOperations: { available: false as boolean, hosts: [] as string[], forwarding: false },
         crossfade: {
           available: crossfadeAvailable,
           configured: crossfadeAvailable,
@@ -32,11 +35,11 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', 
         },
       },
     },
-  ] satisfies NodeSnapshot[];
+  ];
   const client = Object.assign(new EventEmitter(), {
     nodes,
     close: vi.fn(async () => {}),
-    getAssignment: vi.fn(() => undefined),
+    getAssignment: vi.fn<RemediaClient['getAssignment']>(() => undefined),
     createDiscordSession: vi.fn((options: DiscordSessionOptions) => {
       if (activeSessions.has(options.guildId))
         throw new Error(`a Discord session already exists for guild ${options.guildId}`);

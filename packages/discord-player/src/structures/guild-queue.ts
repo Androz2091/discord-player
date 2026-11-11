@@ -92,7 +92,12 @@ export interface GuildQueueOptions<Metadata = unknown> extends StreamHooks {
   /** Arbitrary application metadata stored on the queue. */
   metadata?: Metadata;
 
-  /** Optional Remedia node selection policy for this guild. */
+  /**
+   * Optional policy choosing the Remedia node for this guild's first session. It receives the healthy nodes
+   * with spare capacity that host every required plugin host, and its choice is pinned for the session.
+   * It is not called when a node is pinned with `nodeId` or the guild is already assigned. Without it,
+   * Remedia's capacity-aware placement chooses the node.
+   */
   selectNode?: NodeSelection;
 
   /** Maximum number of upcoming tracks accepted by public insertion methods; non-positive values mean unlimited. */

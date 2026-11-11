@@ -1,7 +1,7 @@
 # Remedia source-host integration
 
-Supported with published `@remedia/client@0.1.0-dev.5`, `@remedia/plugin-host@0.1.0-dev.5`,
-and the matching Remedia server (generic operations merged in twlite/remedia PR #13).
+Supported with published `@remedia/client@0.1.0-dev.6`, `@remedia/plugin-host@0.1.0-dev.6`,
+and the matching Remedia server.
 
 The standalone adapter exposes `GET /.well-known/remedia` and
 `POST /remedia/v1/execute`. Its aggregate plugin ID is `discord-player.source`;
@@ -29,8 +29,8 @@ The server advertises `capabilities.pluginOperations`; session creation accepts
 No local provider fallback or automatic guild movement is performed.
 
 Remedia executes source operations during native preparation, fetches and decodes
-single-use encoded media grants, and owns playback/stage cancellation and grant
-reopening. Credentials are origin-bound configuration, never Track data.
+single-use encoded media grants once, and owns playback/stage cancellation. It never
+reopens a grant: replaying a queue entry runs the operation again. Credentials are origin-bound configuration, never Track data.
 `serializeSourceTrack()` carries transient state for operations; persistent
 `Track.serialize()` omits it and preserves durable provider/deployment identity.
 Expired state is reconstructed on the standalone host when possible.
@@ -47,8 +47,9 @@ Discord voice playback, Rust playback, seeking, reconnects or recovery. Small
 MP4/M4A files with a trailing moov atom may happen to fit FFmpeg's internal buffers;
 large or interleaved files can require seeking and must not be advertised as safe.
 
-Remedia dev.5's generic operation path treats host grants as single-use encoded
-inputs and owns native decoding and operation re-execution. A grant is not a
+Remedia dev.6's generic operation path treats host grants as single-use encoded
+inputs, redeems each with one plain GET (no Range, reopen or reconnect), supports
+forward-only seeking, and owns native decoding. Replay re-executes the operation. A grant is not a
 seekable durable URL. Source providers must support reconstruction/reopening for
 recovery; do not advertise arbitrary random-access or tail-moov M4A support from
 the sequential fixture test alone.

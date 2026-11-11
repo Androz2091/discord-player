@@ -38,7 +38,7 @@ Advanced clients may register every advertised provider with
 option has been removed. Registration validates live provider capabilities and
 deployment identity; it does not install plugins on the service.
 
-This requires `@remedia/client@0.1.0-dev.5` and a matching remote server configured
+This requires `@remedia/client@0.1.0-dev.6` and a matching remote server configured
 with the same `pluginHosts` ID and the `discord-player.source` / `source.stream`
 operation. The bot searches over HTTP and sends an operation descriptor for play
 and automatic crossfade staging. Encoded bytes flow directly from host to audio
@@ -281,10 +281,10 @@ compatibility surface does not emulate the whole Player API.
 
 ## Remedia server integration boundary
 
-Remedia dev.5 supports generic host discovery, authenticated operation execution,
+Remedia dev.6 supports generic host discovery, authenticated operation execution,
 native decoding of single-use grants, and cancellation. Configure the deployment
 in the server's `pluginHosts` list and in the bot plugin's `remoteHost` descriptor. Installing
-`@remedia/plugin-host@0.1.0-dev.5` alone does not register a host with an audio node.
+`@remedia/plugin-host@0.1.0-dev.6` alone does not register a host with an audio node.
 
 DiscordPlayer sends operation descriptors for playback and staged-next preparation;
 the audio node invokes `source.stream` and consumes encoded bytes directly. The
@@ -363,9 +363,10 @@ registration. Provider URL expiration remains intact. The consuming node must st
 independently enforce its DNS/redirect policy for direct URLs. Authentication or
 byte transformations requiring the host must use proxy delivery.
 
-Single-use media grants reject Range requests. Remedia dev.5 opens these operation
-results as sequential, non-seekable FFmpeg inputs, avoiding default Range probing.
-This does not add random access or turn grant URLs into durable source references.
+Single-use media grants reject Range requests. Remedia dev.6 redeems each grant with one
+plain GET and feeds a bounded sequential queue to the decoder, so it never issues Range
+requests, reopens or reconnects a grant. Seeking is forward-only. This does not add random
+access or turn grant URLs into durable source references.
 See [the Remedia integration contract](docs/remedia-contract.md) for the current
 protocol and validation limits. Native Remedia playback and Discord voice delivery
 remain outside this repository's HTTP/client integration tests.
@@ -386,6 +387,7 @@ lyrics or related metadata. `source.search` remains the high-level search endpoi
 without expiring source-state hints. `source.stream` and native operation-source
 playback retain their existing media policy, cancellation and grant behavior.
 
-Metadata currently travels over direct HTTP. No generic Remedia metadata RPC is
-implemented or assumed. `remote.ts` isolates this boundary for a future supported
+Metadata currently travels over direct HTTP. Remedia dev.6 can forward generic plugin
+operations to server-configured hosts (`client.plugins.list` / `execute`), but Discord Player
+does not use that path yet. `remote.ts` isolates this boundary for a future supported
 transport without introducing a second search dispatcher.

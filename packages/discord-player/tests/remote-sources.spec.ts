@@ -267,7 +267,7 @@ it('queues and stages operation descriptors without local extraction or a bot me
   });
 
   cleanup.push(() => bot.destroy());
-  backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: [host.hostId] };
+  backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: [host.hostId], forwarding: false };
 
   const a = (await bot.search('a')).tracks[0]!;
   const b = (await bot.search('b')).tracks[0]!;
@@ -348,7 +348,7 @@ it('carries all queued host requirements into session creation and fences custom
   const second = (await bot.search('b', { hostId: 'b' })).tracks[0]!;
 
   await queue.node.destroySession();
-  backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: ['a', 'b'] };
+  backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: ['a', 'b'], forwarding: false };
 
   await queue.play([first, second], { channelId: 'voice' });
 
@@ -358,9 +358,13 @@ it('carries all queued host requirements into session creation and fences custom
   await queue.stop();
   await queue.node.destroySession();
   backend.client.nodes[0]!.capabilities.pluginOperations.hosts = ['a'];
-  await expect(queue.play([first, second], { channelId: 'voice' })).rejects.toThrow('required source hosts');
 
-  expect(selectNode.mock.lastCall?.[0]).toHaveLength(0);
+  const selections = selectNode.mock.calls.length;
+
+  await expect(queue.play([first, second], { channelId: 'voice' })).rejects.toThrow('cannot access source host b');
+
+  // Like Remedia, a selector is never offered an empty candidate pool.
+  expect(selectNode).toHaveBeenCalledTimes(selections);
 });
 
 it('rejects an unavailable deployment registration and accepts recovery at the configured endpoint', async () => {
@@ -390,7 +394,7 @@ it.each(['skip', 'stop', 'delete'] as const)('cancels pending native operation p
   });
 
   cleanup.push(() => bot.destroy());
-  backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: [host.hostId] };
+  backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: [host.hostId], forwarding: false };
 
   const track = (await bot.search('pending')).tracks[0]!;
   let entered!: () => void;
@@ -436,7 +440,7 @@ it('clears a pending native stage before waiting for its preparation lock', asyn
   });
 
   cleanup.push(() => bot.destroy());
-  backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: [host.hostId] };
+  backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: [host.hostId], forwarding: false };
 
   const a = (await bot.search('a')).tracks[0]!;
   const b = (await bot.search('b')).tracks[0]!;

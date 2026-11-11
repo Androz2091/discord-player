@@ -4,7 +4,7 @@ import { SourcePluginRuntime, SOURCE_PLUGIN_ID, serializeSourceTrack } from '@di
 import type { PluginRegistry } from './plugins/registry.js';
 import type { PluginRegistration } from './plugins/types.js';
 import type { ExtractorExecutionContext } from './compat/extractors.js';
-import { randomInt, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import {
   RemediaClient,
@@ -266,26 +266,6 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
         ...remediaOptions,
         nodes: remediaOptions.nodes ?? [{ id: 'local', type: 'embedded' }],
         botUserId: clientId,
-
-        selectNode: async (nodes, context) => {
-          const queue = this.nodes.get(context.guildId);
-
-          if (!queue) {
-            throw new Error(`No guild queue found for guild ID ${context.guildId}.`);
-          }
-
-          if (queue.options.selectNode) {
-            return queue.options.selectNode(nodes, context);
-          }
-
-          const selected = nodes.length ? nodes[randomInt(nodes.length)] : undefined;
-
-          if (!selected) {
-            throw new Error(`No Remedia nodes are available for guild ID ${context.guildId}.`);
-          }
-
-          return selected.id;
-        },
       });
       this.attachClientListeners(this.remedia);
     } catch (error) {
@@ -359,20 +339,18 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     return this.#clientId;
   }
 
-  /** Forward Discord gateway voice payloads to Remedia.
-   * @param payload Raw gateway packet from the Discord client's event adapter.
+  /** Forward every raw Discord Gateway dispatch to Remedia and track voice states for the owning queue.
+   *
+   * Remedia needs the complete dispatch stream, including `READY`, to track Gateway sessions and dispatch
+   * ordering; do not filter packets before calling this method. Discord Player separately consumes
+   * `VOICE_STATE_UPDATE` for queue voice policies. Packets are ignored before `initialize()` and after `destroy()`.
+   * @param payload Raw Gateway dispatch packet from the Discord client's event adapter.
    */
   public receive(
-    /** Raw gateway packet from the Discord client's event adapter. */
+    /** Raw Gateway dispatch packet from the Discord client's event adapter. */
     payload: Record<string, unknown>,
   ): void {
-    if (!this.remedia || typeof payload.t !== 'string') {
-      return;
-    }
-
-    if (payload.t !== 'VOICE_STATE_UPDATE' && payload.t !== 'VOICE_SERVER_UPDATE') {
-      return;
-    }
+    if (!this.remedia) return;
 
     this.remedia.receive(payload);
 
