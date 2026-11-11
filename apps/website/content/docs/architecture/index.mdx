@@ -20,7 +20,7 @@ flowchart TB
   end
   subgraph Framework["discord-player v8 · Node.js"]
     Player["Player / initialize()"]
-    Queues["GuildQueueManager"]
+    Queues["GuildNodeManager"]
     Queue["GuildQueue · tracks + history + repeat"]
     Registry["PluginRegistry · typed operation dispatch"]
     Legacy["BaseExtractor compatibility adapter"]
@@ -69,7 +69,7 @@ The Discord library supplies commands, guild/channel IDs, and raw Gateway events
 
 ## 2. The managed queue boundary
 
-`Player` owns `GuildQueueManager`, and each `GuildQueue` owns upcoming Tracks, the currently active managed operation, history, repeat/shuffle policy, and serialized transitions. The queue selects the next Track and reconciles native lifecycle events, including out-of-order or duplicated notifications.
+`Player` owns `GuildNodeManager`, and each `GuildQueue` owns upcoming Tracks, the currently active managed operation, history, repeat/shuffle policy, and serialized transitions. The queue selects the next Track and reconciles native lifecycle events, including out-of-order or duplicated notifications.
 
 The queue does **not** decode files or send Discord UDP packets. `queue.node.play()` is intentionally raw Remedia playback and must not be mistaken for the managed scheduling API.
 

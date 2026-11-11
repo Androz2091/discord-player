@@ -1,0 +1,49 @@
+---
+title: Resource hooks
+description: Global and scoped source interception before Remedia owns playback.
+---
+
+`onBeforeCreateStream`, `onStreamExtracted` and `onAfterCreateStream` are optional.
+Each supports queue properties, Player constructor options, and global registration,
+in that precedence order. They execute in the owning Player/queue async context.
+
+```ts
+import { onBeforeCreateStream, useMainPlayer } from 'discord-player';
+
+const remove = onBeforeCreateStream(async (track, queryType, queue, signal) => {
+  signal.throwIfAborted();
+  console.log(useMainPlayer().id, queue.guildId, queryType);
+  return null; // Continue normal provider resolution.
+});
+
+queue.onBeforeCreateStream = async (track, queryType, queue, signal) => {
+  signal.throwIfAborted();
+  return { url: track.url };
+};
+```
+
+A replacement bypasses normal source resolution. Accepted resources are URLs,
+`{ url }`, `{ file }`, native media descriptors, encoded Node.js Readables and
+buffers/Uint8Arrays or native buffer descriptors. Local Readables and buffers require an embedded node.
+Remote URLs/files must be accessible to the server and satisfy its access policy.
+Incompatible resources fail explicitly and do not migrate the guild.
+
+The fourth argument is preparation cancellation. Cooperate with it during I/O;
+the queue also checks generation and cancellation after awaited work and closes
+late local resources. Crossfade invokes hooks during staging and reuses that
+prepared native resource during promotion.
+
+`onStreamExtracted(source, track, queue, signal)` intercepts the resolved source
+descriptor and returns its replacement. It works with URLs and operation-source
+descriptors without claiming access to their bytes.
+
+`onAfterCreateStream(stream, queue, track, signal)` requires actual encoded
+bytes in embedded execution (buffers are wrapped as Readables) and returns `{ stream }` or null. When Remedia
+owns URL/file decoding or remote bytes, this callback cannot run: registration
+with such a resource fails with an actionable error. Return a Readable from the
+before hook when local byte processing is required. There is no decoded
+`StreamInterceptor` pipeline in v8.
+
+Global registration returns an ownership-aware removal function. The most recent
+global registration replaces the previous one, preserving v7 precedence semantics.
+Call the removal function when the application component is disposed.

@@ -10,7 +10,6 @@ import { definePlugin } from 'discord-player';
 
 const mySource = definePlugin({
   id: 'example.network-source',
-  kind: 'source',
 
   async setup(ctx) {
     const resource = await acquireResource();

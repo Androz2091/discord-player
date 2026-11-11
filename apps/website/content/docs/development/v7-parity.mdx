@@ -1,0 +1,77 @@
+---
+title: v7 migration matrix
+description: Implemented behavior, deliberate changes, removed experiments and architectural limits.
+---
+
+This audit compares the released v7 checkout with v8 and the installed Remedia
+contracts. Matching method names alone is not evidence of parity. All listed test
+names refer to deterministic suites under the packages' tests directories.
+
+| v7 responsibility       | v8 behavior / migration                                                                                          | Evidence                                                 |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Player / DiscordPlayer  | Register factories, play ordinary Tracks, search using searchEngine                                              | player, source-plugins, capabilities                     |
+| Player.nodes            | Canonical GuildNodeManager; create/get/resolve/delete/clear and structural resolveId                             | queue-operations, player-node                            |
+| Player.play options     | nodeOptions plus flat search options; requester and signal preserved                                             | player, capabilities                                     |
+| Queue/history           | Add/remove/reorder/copy/swap, repeat, shuffle, bounded history and navigation                                    | queue-operations, queue-races, collections               |
+| Queue.node.play(track)  | Delegates to managed playback; no argument selects the next Track                                                | restored-api                                             |
+| Raw native playback     | node.play(nativeDescriptor) retains advanced raw controls without queue progression                              | player-node                                              |
+| Node manipulation       | remove/insert/move/copy/swap/getTrackPosition delegate canonical queue mutations                                 | restored-api                                             |
+| Queue aliases from v7   | player, deleted, filters and syncedLyricsProvider have real backing state                                        | restored-api, synced-lyrics                              |
+| Extractor registration  | BaseExtractor adapter shares the capability registry; activate/deactivate/priority/protocols retained            | legacy-extractors, plugin-lifecycle, official-extractors |
+| Source identity         | Canonical Track, source provider/deployment affinity, operation-source playback                                  | remote-sources, plugin-host delivery/media               |
+| Lyrics                  | Optional lyrics.search handlers; Track affinity, string queries, plain and synced representations                | capabilities                                             |
+| LRCLIB                  | Optional plugin/client outside core, never automatically installed                                               | lyrics                                                   |
+| Synced lyrics           | load/at/subscribe plus legacy callbacks; binary lookup, sequential cursor and native-clock scheduling            | synced-lyrics, 100000-line fixture                       |
+| Stream hooks            | Global, Player options and queue callbacks; cancellation and ALS; staging runs hooks once                        | resource-hooks                                           |
+| Context                 | Existing ALS/first-active Player fallback retained; explicit guild lookup via nodes                              | context                                                  |
+| Voice Gateway           | Normalized previous/current states plus raw packet, bot identity, moves/disconnects/mute/suppress                | voice-policies                                           |
+| Occupancy               | Optional authoritative non-bot IDs; unknown stays unknown, one Set per queue                                     | voice-policies                                           |
+| Empty/populate policies | leaveOnEmpty/cooldown and policy-owned pause/resume                                                              | voice-policies                                           |
+| End/stop policies       | Independent of occupancy; cancellable, condition-checked cooldowns                                               | voice-policies                                           |
+| AUTOPLAY                | Owning provider's track.related operation and v7 tracks/done selection; cancellation supersedes stale results    | restored-api, crossfade                                  |
+| Filters and volume      | Named/raw native graphs, gain converted to percent (0-200 controls); no fake DSP state                           | audio-filters, event-forwarding, restored-api            |
+| Events                  | Existing complete native forwarding and canonical Track tuples retained; Gateway updates separate                | event-forwarding, crossfade, queue-races                 |
+| Track / Playlist        | Shared constructors, metadata helpers, versioned JSON-safe persistence; lyrics affinity added                    | serialization, models, capabilities                      |
+| Lifetimes               | Player/queue signals abort immediately; reentrant destruction shares cleanup, backend closes, failures propagate | lifetime-signals                                         |
+
+## Removed unpublished v8 experiments
+
+`queueOptions`, nested `searchOptions`, public `pluginId`/`source` selectors,
+constructor `sourceHosts`, public `player.sources`, `player.queues`, the plugin kind
+discriminator and reserved runtime kind, source-prefixed generic plugin type names,
+`playRaw`, `GuildQueuePlayerNodePlayResult`, the always-throwing Track
+`getStreamableSource`, the unused derived-emitter wrapper, and standalone queue/voice/play stubs were removed.
+`GuildNodeManager` and `GuildQueueHistory` are the actual manager class names.
+`PlayerNodeInitializerOptions` retains the real v7 spelling.
+
+The duplicate `source.resolve` HTTP endpoint was removed. High-level source.search
+and normalized generic metadata.execute dispatch through the shared registry.
+DSP-specific event declarations without runtime implementations were removed.
+
+## Genuine architecture differences
+
+- Remedia owns decoding, filters, transport and native session recovery. V7's decoded
+  StreamInterceptor, demux/codec plumbing, mutable output bitrate and DSP-object APIs
+  have no pretend replacements. Use native source descriptors and filtergraphs.
+- URL/file resources do not expose bytes to client callbacks. onAfterCreateStream
+  requires an encoded local Readable on an embedded node; descriptor hooks support
+  remote operation sources. Guilds are never silently migrated to accommodate bytes.
+- Generic metadata currently uses direct HTTP. Generic Remedia operation forwarding
+  is future work in Remedia, outside this task. Native operation-source playback is
+  preserved independently.
+- Core Gateway events use normalized states rather than discord.js VoiceState or
+  VoiceConnection objects. Channel occupancy requires an authoritative resolver;
+  stage request-to-speak remains integration-owned.
+- Synced lyrics retain the active line until the next timestamp rather than v7's
+  closest-line/two-second heuristic. Mutable polling interval controls were removed.
+  Native progress has no notification API, so timing includes bounded snapshot rechecks.
+- willPlayTrack is observational; its old decoded StreamConfig/done latch is replaced by awaited resource hooks. willAutoPlay retains its real tracks/done selection contract.
+- Raw native descriptors intentionally use native Remedia types; v7 stream-type and
+  decoded audio resource options are not accepted as if they still worked.
+
+Detached Track and Playlist models keep metadata, display helpers and persistence.
+Use `player.play(channel, trackOrPlaylist)` instead of model-owned play shortcuts;
+use an explicit queue for seek and resource lifetime. Shared standalone models do
+not retain or infer a guild's live AudioResource or global queue ownership. For
+persisted data use `deserialize()` with the versioned format; legacy input remains
+covered by serialization tests. Manager lookups return null when absent.

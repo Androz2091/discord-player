@@ -12,7 +12,6 @@ import { definePlugin, Track } from 'discord-player';
 
 export const directMedia = definePlugin({
   id: 'example.direct-media',
-  kind: 'source',
   setup(ctx) {
     ctx.on('search.query.match', ({ query }) =>
       /^https?:\/\/.*\.(mp3|ogg|wav)(\?.*)?$/i.test(query) ? { score: 100 } : null,

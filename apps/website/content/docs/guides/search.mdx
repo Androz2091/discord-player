@@ -1,0 +1,76 @@
+---
+title: Search routing and protocols
+description: One selector and one dispatcher for local, legacy and hosted metadata.
+---
+
+`searchEngine` is the public selector on both `player.search()` and `player.play()`:
+
+```ts
+await player.search('some query', { searchEngine: 'example.source' });
+await player.play(channel, 'some query', {
+  searchEngine: 'example.source',
+  requestedBy: user,
+  nodeOptions: { leaveOnEnd: true, leaveOnEndCooldown: 30_000 },
+});
+```
+
+An exact registered plugin ID forces that provider. `ext:identifier` forces a
+registered legacy extractor; an absent legacy target throws. Other values become
+`providerHint` in the operation input. Omission selects sources automatically.
+Forced providers do not silently fall back. Blocking and cancellation still apply.
+`pluginId`, `source`, nested `searchOptions`, and `queueOptions` were unpublished
+v8 experiments and have been removed. `nodeOptions` retains the released v7 name.
+
+## Custom protocols
+
+Register ownership on the search match and/or resolution handler:
+
+```ts
+ctx.on(
+  'search.query.resolve',
+  ({ query, protocol }) => ({
+    tracks: [new Track({ title: query, sourceReference: { pluginId: 'example.source', data: { id: query } } })],
+    playlist: null,
+  }),
+  { protocols: ['custom'] },
+);
+```
+
+`player.search('custom:resource-id')` passes `resource-id` and protocol `custom`.
+Only registered protocol owners participate, ordered by priority and registration.
+`BaseExtractor.protocols` uses the same mechanism. An explicit selector takes
+precedence and strips the prefix only if that selected handler owns it.
+
+`resolveCustomProtocols: false` disables prefix handling on search and play. Unknown
+prefixes, HTTP(S)/file URLs and drive paths remain intact. Generic hints are not
+provider IDs. Modern, adapted legacy and HTTP handlers share this normalization.
+
+## Remote registrations
+
+```ts
+const remoteSource = definePlugin({
+  id: 'example.source',
+  remoteHost: {
+    hostId: 'deployment-1',
+    url: 'https://sources.example.test',
+    token: process.env.SOURCE_TOKEN,
+  },
+});
+
+await player.plugins.register(remoteSource());
+```
+
+No local setup or duplicate constructor host configuration is required. Registration
+validates the existing service's advertised capabilities; it does not install
+anything remotely. Its metadata handlers join the same dispatcher, with advertised
+priorities unless the descriptor overrides `priority`. Different deployments of
+the same provider remain distinct; `hostId` can explicitly restrict advanced search.
+`plugins.unregister(id, hostId)` removes a particular deployment.
+
+Advanced applications may use `player.plugins.registerHost(hostOptions)` to register
+all advertised providers through the same registry. The old `sourceHosts` constructor
+option was removed. Metadata currently uses authenticated direct HTTP, not Remedia
+RPC forwarding. The transport boundary is isolated in plugin-host; future Remedia
+forwarding can replace it without changing search or lyrics APIs.
+The standalone host must advertise the current metadata capabilities. Playback
+continues to use operation sources, deployment affinity and native node capabilities.

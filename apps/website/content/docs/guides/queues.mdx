@@ -68,7 +68,7 @@ queue.disableShuffle();
 | `QUEUE`    | Append completed Tracks to the end                             |
 | `AUTOPLAY` | Reach an event boundary for app/plugin-provided related Tracks |
 
-`AUTOPLAY` is **not** a guarantee that every source has related tracks. Listen for `willAutoPlay` and implement a policy before relying on it.
+`AUTOPLAY` is **not** a guarantee that every source has related tracks. The queue requests `track.related` from its owning provider after natural exhaustion; an empty result ends progression. `willAutoPlay(queue, tracks, done)` allows asynchronous v7-style selection. A listener must call done(trackOrNull); without one the queue prefers an unplayed candidate. Stop, skip, mutations and deletion invalidate late selections. No provider failure is disguised as a related Track.
 
 ## Safe modifications
 

@@ -23,7 +23,7 @@ await player.initialize(botUserId);
 
 | Option              | Type                                          | Meaning                                                                                   |
 | ------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `nodes`             | `RemediaNodeConfig[]`                         | Embedded and/or remote audio nodes                                                        |
+| `nodes?`            | `RemediaNodeConfig[]`                         | Advanced audio nodes; defaults to one embedded node                                       |
 | `send`              | `(guildId, payload) => void \| Promise<void>` | Forward voice-state requests to your Gateway library                                      |
 | `plugins?`          | `PluginRegistration[]`                        | Initial source registrations                                                              |
 | `blockExtractors?`  | `string[]`                                    | Disabled source identifiers                                                               |
@@ -48,7 +48,7 @@ The options extend relevant `@remedia/client` configuration without exposing its
 
 ## Important properties
 
-`player.queues` is the queue manager. `player.nodes` is an alias for the same manager, **not** the native node pool. `player.nodeSnapshots` exposes Remedia node status. `player.plugins` is the source registry, `player.extractors` the compatibility registration API, and `player.events` the guild event emitter.
+`player.nodes` is the v7-compatible `GuildNodeManager`, which owns guild queues. `player.nodeSnapshots` exposes the separate native node pool and Remedia status. `player.plugins` is the shared capability registry, `player.extractors` the compatibility registration API, and `player.events` the guild event emitter.
 
 ## Lifetime signal
 

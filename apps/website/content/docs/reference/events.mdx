@@ -10,30 +10,30 @@ There are two event emitters:
 
 ## Queue events
 
-| Name                            | Arguments after queue                     |
-| ------------------------------- | ----------------------------------------- |
-| `queueCreate`                   | none                                      |
-| `queueDelete`                   | none                                      |
-| `connection`                    | none                                      |
-| `connectionDestroyed`           | none                                      |
-| `disconnect`                    | none                                      |
-| `audioTrackAdd`                 | `track`                                   |
-| `audioTracksAdd`                | `tracks`                                  |
-| `audioTrackRemove`              | `track`                                   |
-| `audioTracksRemove`             | `tracks`                                  |
-| `playerStart`                   | `track, rawEvent?`                        |
-| `playerFinish`                  | `track, rawEvent?`                        |
-| `playerSkip`                    | `track, reason, description, rawEvent?`   |
-| `playerStop`                    | `trackOrNull, rawEvent?`                  |
-| `playerError`                   | `error, track, rawEvent?`                 |
-| `playerPause`                   | `rawEvent`                                |
-| `playerResume`                  | `rawEvent`                                |
-| `playerSeek`                    | `rawEvent`                                |
-| `voiceConnectionStateChange`    | `previousState, state, rawEvent`          |
-| `volumeChange`                  | `oldPercentage, newPercentage, rawEvent?` |
-| `emptyQueue`, `emptyChannel`    | none                                      |
-| `willPlayTrack`, `willAutoPlay` | `track`                                   |
-| `error`                         | `error`                                   |
+| Name                         | Arguments after queue                     |
+| ---------------------------- | ----------------------------------------- |
+| `queueCreate`                | none                                      |
+| `queueDelete`                | none                                      |
+| `connection`                 | none                                      |
+| `connectionDestroyed`        | none                                      |
+| `disconnect`                 | `rawGatewayPacket?`                       |
+| `audioTrackAdd`              | `track`                                   |
+| `audioTracksAdd`             | `tracks`                                  |
+| `audioTrackRemove`           | `track`                                   |
+| `audioTracksRemove`          | `tracks`                                  |
+| `playerStart`                | `track, rawEvent?`                        |
+| `playerFinish`               | `track, rawEvent?`                        |
+| `playerSkip`                 | `track, reason, description, rawEvent?`   |
+| `playerStop`                 | `trackOrNull, rawEvent?`                  |
+| `playerError`                | `error, track, rawEvent?`                 |
+| `playerPause`                | `rawEvent`                                |
+| `playerResume`               | `rawEvent`                                |
+| `playerSeek`                 | `rawEvent`                                |
+| `voiceConnectionStateChange` | `previousState, state, rawEvent`          |
+| `volumeChange`               | `oldPercentage, newPercentage, rawEvent?` |
+| `emptyQueue`, `emptyChannel` | none                                      |
+| `willPlayTrack`              | `track`                                   |
+| `error`                      | `error`                                   |
 
 The exported `GuildQueueEvents` constant contains the canonical string identifiers. Some historic event names are retained for type compatibility, but that does not mean every old DSP pipeline is recreated.
 
@@ -108,7 +108,20 @@ reverb, compressor, or other legacy DSP events. Native notifications also update
 queue configuration defaults. Connected convenience methods rely on native volume
 notifications rather than emitting the same change twice.
 
-`voiceConnectionStateChange` describes Remedia transport recovery. It is distinct
-from Discord Gateway member `VOICE_STATE_UPDATE`; gateway membership policy
-restoration is still pending. The previously declared queue `voiceStateUpdate`
-transport mapping is no longer emitted.
+`voiceConnectionStateChange` describes Remedia transport recovery. Discord Gateway
+member updates use `voiceStateUpdate(queue, previousOrNull, current, rawPacket)`.
+Normalized state contains guildId, userId, channelId and the available serverMute
+and suppress flags. `emptyChannel`, `channelPopulate` and `disconnect` are emitted
+by the queue-owned Gateway policy tracker, independently of native observation.
+Legacy DSP-specific declarations without implementations have been removed; use
+`audioFiltersUpdate` and the complete raw filter event for native graph changes.
+
+`willAutoPlay(queue, tracks, done)` preserves v7 related-candidate selection. A
+registered listener must eventually call `done(trackOrNull)`; no listener uses the
+default selection. Stop, skip, queue changes and destruction cancel a pending
+selection and ignore its late callback. This is a selection callback contract,
+separate from observational crossfade preparation events.
+
+`willPlayTrack(queue, track)` is observational in v8. The old decoded StreamConfig
+and done latch are replaced by awaited source/resource hooks; no fake decoded
+pipeline object is supplied.

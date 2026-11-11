@@ -10,7 +10,7 @@ This table is based on the current v8 source and the v7 branch. It distinguishes
 | `new Player(discordClient)`             | `new Player({ nodes, send, plugins })`    | No Discord library instance required by the framework         |
 | Automatic client wiring                 | `player.receive(rawGatewayDispatch)`      | You forward voice Gateway events                              |
 | Initialized in constructor              | `await player.initialize(botUserId)`      | Must finish before playback                                   |
-| `player.nodes` queue manager            | `player.queues`                           | `player.nodes` remains a compatibility alias                  |
+| `player.nodes` queue manager            | `player.nodes`                            | `player.nodes` remains a compatibility alias                  |
 | Extractor dispatcher                    | `player.plugins`                          | Modern source operations are the primary API                  |
 | `player.extractors.register(Extractor)` | Same supported constructor form           | Adapter wraps a legacy extractor as a plugin                  |
 | Default extractor bundle                | Explicit source registration              | No guaranteed built-in provider bundle                        |

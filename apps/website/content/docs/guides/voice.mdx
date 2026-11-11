@@ -65,4 +65,53 @@ Remedia retries transient initial remote join failures with fresh Gateway creden
 
 Avoid treating a brief voice reconnect as a completed Track. The queue and Remedia have separate state machines. A channel move is not the same thing as moving a decoder to another Remedia node.
 
+## Authoritative channel occupancy
+
+Bot joins, moves, disconnects, server mute and stage suppression are recognized
+from the bot identity supplied to `initialize()`, without a membership resolver.
+Raw Gateway packets still reach Remedia. Queue `voiceStateUpdate` listeners receive
+`(queue, previousOrNull, current, rawPacket)` with normalized IDs and available mute
+flags. Unknown previous state stays null; listeners never disable default handling.
+Remedia transport notifications remain separate `voiceConnectionStateChange` events.
+
+For empty-channel behavior, configure `resolveVoiceChannelUsers(guildId, channelId)`
+on the Player. Return non-bot member IDs, `[]` for confirmed empty, or null for an
+unavailable snapshot. Resolver failures emit queue `error` and leave occupancy
+unknown. The core does not infer a complete channel from partial Gateway history.
+
+Requests are coalesced after connection and relevant Gateway changes. Channel,
+session and revision checks reject stale responses. There is one occupancy Set per
+queue, and no mandatory Discord library dependency. An integration adapter may
+supply authoritative IDs from its channel cache when complete.
+
+## Queue leave and pause policies
+
+```ts
+const queue = await player.createQueue(guildId, {
+  leaveOnEmpty: true,
+  leaveOnEmptyCooldown: 30_000,
+  pauseOnEmpty: true,
+  leaveOnEnd: true,
+  leaveOnEndCooldown: 60_000,
+  leaveOnStop: true,
+  leaveOnStopCooldown: 10_000,
+});
+```
+
+Policies are opt-in. `leaveOnEmpty` and `pauseOnEmpty` act only on confirmed occupancy.
+`emptyChannel` and `channelPopulate` report confirmed transitions. An empty cooldown
+revalidates occupancy before deletion. Null snapshots never mean empty.
+
+`leaveOnEnd` follows natural exhaustion (including related-track autoplay declining);
+`leaveOnStop` follows managed stop. Neither needs an occupancy resolver. New playback,
+applicable enqueues, moves, replacement and destruction invalidate obsolete timers.
+Repeat and crossfade continuation do not count as exhaustion; skipping alone does
+not trigger the natural-end leave policy.
+
+Only policy-owned pauses are automatically resumed. Calling `queue.node.pause()`
+explicitly retains the user pause after repopulation. Server mute/suppression also
+pause playback; release resumes only a policy-owned pause. Requesting stage speaking
+permission remains the integration's responsibility because Remedia exposes no
+corresponding request-to-speak API.
+
 <NextStep href="/docs/remedia/voice-recovery" label="Diagnose concurrent voice joins" />

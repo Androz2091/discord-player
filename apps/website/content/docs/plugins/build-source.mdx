@@ -12,7 +12,6 @@ import { definePlugin, Track } from 'discord-player';
 
 export const directAudio = definePlugin({
   id: 'example.direct-audio',
-  kind: 'source',
 
   setup(ctx) {
     ctx.on('search.query.match', ({ query }) => {
@@ -72,7 +71,6 @@ type Options = { userAgent?: string };
 
 export const configurableSource = definePlugin<Options>({
   id: 'example.configurable-source',
-  kind: 'source',
 
   setup(ctx) {
     console.log(ctx.options.userAgent);

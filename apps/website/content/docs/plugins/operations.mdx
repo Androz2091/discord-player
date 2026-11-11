@@ -12,12 +12,13 @@ Every handler registers by a typed name. The operation definition decides whethe
 | `search.query.match`    | `collect`       | Scored source candidates                     |
 | `search.query.resolve`  | `first`         | Tracks and optional Playlist                 |
 | `track.stream`          | `first`         | Media source, URL, or encoded Readable       |
+| `lyrics.search`         | `collect`       | Optional plain/synchronized lyrics           |
 | `track.related`         | `first`         | Related Tracks                               |
 | `track.bridge`          | `first`         | Explicit fallback stream                     |
 | `stream.transform`      | `pipe`          | Replacement encoded stream passed downstream |
 | `track.stream.resolved` | `broadcast`     | Informational notification                   |
 
-These definitions are available from `SourceOperationMap` in `discord-player`.
+These definitions are available from `OperationMap` in `discord-player`.
 
 ## Matching and resolution
 
@@ -25,14 +26,14 @@ These definitions are available from `SourceOperationMap` in `discord-player`.
 ctx.on('search.query.match', ({ query }) => (query.startsWith('https://') ? { score: 90 } : null), { priority: 10 });
 ```
 
-The host orders candidates by handler priority first, then match score. Equal rank preserves registration order. One winning source then resolves metadata. `null` means _no match_ for `search.query.match`.
+The host orders candidates by handler priority first, then match score. Equal rank preserves registration order. Candidates resolve in order until metadata is found. Explicit targeting remains confined to the selected provider. `null` means _no match_ for `search.query.match`.
 
 `undefined` is the only general-purpose decline value in first-result operations. A handler returning `null` or `false` where the operation type allows it is considered a result, not an implicit request to continue.
 
 ## Target and filter registrations
 
 ```ts
-await player.search(query, { pluginId: 'example.direct-audio' });
+await player.search(query, { searchEngine: 'example.direct-audio' });
 
 // Legacy targeting syntax remains supported:
 await player.search(query, { searchEngine: 'ext:example.direct-audio' });

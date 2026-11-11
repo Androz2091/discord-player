@@ -91,7 +91,7 @@ The two allow flags are for this loopback example. With public HTTPS endpoints u
 ## Configure the bot
 
 ```ts
-import { Player } from 'discord-player';
+import { Player, definePlugin } from 'discord-player';
 import { Client, GatewayIntentBits } from 'discord.js';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
@@ -104,13 +104,15 @@ const player = new Player({
       auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
     },
   ],
-  sourceHosts: [
-    {
-      hostId: 'sources-1',
-      url: 'http://127.0.0.1:8080',
-      token: process.env.SOURCE_TOKEN!,
-      timeoutMs: 15000,
-    },
+  plugins: [
+    definePlugin({
+      id: 'example.source',
+      remoteHost: {
+        hostId: 'sources-1',
+        url: 'https://plugins.example.com',
+        token: process.env.SOURCE_TOKEN,
+      },
+    })(),
   ],
   crossfade: { enabled: true },
 
@@ -136,9 +138,9 @@ Configure the audio node's username/password and WebSocket port to match the bot
 
 ## Routing and lifecycle
 
-- `sourceHosts` is the deployment configuration; local `plugins` and `extractors` retain their existing meaning. Independent hosts can register identical provider IDs.
+- Plugin `remoteHost` supplies deployment configuration. Local and remote capabilities share `plugins`; legacy extractors use adapters. Independent deployments can register identical provider IDs.
 - Search tries local sources first, then hosts in declaration order, stopping at the first nonempty result. Each host retains its provider matching, priorities, protocols, and search hints. There is no global comparison of scores across deployments.
-- `search(query, { hostId })` targets one deployment. Add `pluginId` (or legacy `searchEngine: 'ext:provider'`) to target a provider there. Targeted providers use `source.resolve`; ordinary searches use `source.search`. Blocking applies locally and remotely.
+- `search(query, { hostId })` restricts a deployment. `searchEngine: 'provider-id'` selects its registered provider. The client normalizes once and sends matching/resolution through `metadata.execute`; standalone `source.search` uses that same dispatcher. Blocking applies locally and remotely.
 - Only portable hints and requester IDs cross HTTP. Local `requestOptions`, functions, Discord objects, and transport credentials are excluded from operation input. Search cancellation, timeout, and Player destruction abort HTTP requests. Authentication, identity, provider, and transport errors reject immediately without trying another deployment. Empty results may continue routing.
 - HTTP discovery runs for each search, so a restarted host does not leave a stale manifest. Discovery's name is a display label; the configured deployment ID is validated against returned Track references.
 - Tracks retain `sourceReference.hostId`, provider ID, and transient `sourceState` in queues and history. Persistent `serialize()` omits state hints while retaining host affinity. The host reconstructs expired legacy state from the original URL and provider when possible; otherwise search again. Never persist grant URLs.

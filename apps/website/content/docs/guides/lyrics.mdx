@@ -1,0 +1,96 @@
+---
+title: Lyrics and synchronization
+description: Optional lyrics capabilities, provider affinity and queue timeline subscriptions.
+---
+
+Lyrics are opt-in. Constructing a Player never contacts a lyrics service. A lyrics
+plugin uses the same registry, priority, lifetime, cancellation and teardown as a
+source plugin, and does not need to implement search or streaming.
+
+```ts
+import { definePlugin } from 'discord-player';
+
+const lyricsPlugin = definePlugin({
+  id: 'example.lyrics',
+  setup(ctx) {
+    ctx.on('lyrics.search', async ({ input }, { signal }) => {
+      signal.throwIfAborted();
+      const query = typeof input === 'string' ? input : `${input.author} ${input.title}`;
+      return [
+        {
+          plain: { available: true, text: `Local lyrics for ${query}` },
+          synced: { available: false },
+        },
+      ];
+    });
+  },
+});
+
+await player.plugins.register(lyricsPlugin());
+const results = await player.lyrics.search('some song');
+```
+
+For an existing optional service implementation, install `@discord-player/plugin-host`
+and register its `lrclibPlugin()` factory. It is never installed automatically.
+Provider-specific lookup methods remain in that package's optional `LrcLib` client;
+`player.lyrics` exposes the provider-neutral `search()` API.
+
+## Results and affinity
+
+`LyricsResult` contains independently discriminated `plain` and `synced` fields:
+
+```ts
+const results = await player.lyrics.search(track, { signal: commandSignal });
+for (const result of results) {
+  if (result.plain.available) console.log(result.plain.text);
+  if (result.synced.available) queue.syncedLyrics.load(result);
+}
+```
+
+A synchronized representation contains sorted `{ timestampMs, line }` records.
+`provider` identifies the actual plugin/deployment; optional JSON `metadata` retains
+provider-specific information. Track lookups also include trackId, so loading a late
+result for a different active Track fails without replacing current lyrics. Equivalent representations are deduplicated.
+
+`track.lyricsReference = { pluginId, hostId?, data }` associates a non-secret,
+serializable provider with a Track. Lookup prefers that provider, then its source
+provider if lyrics-capable, then remaining providers in dispatch order. Source
+plugins need no lyrics handler. Track persistence preserves lyrics affinity.
+
+No handlers or no results returns `[]`. Provider failures reject; cancellation
+combines the caller's signal with the Player lifetime. Legacy extractors may
+implement `resolveLyrics(input: Track | string)` and return one record, multiple
+records or null; the adapter registers the same operation.
+
+## Synchronized lyrics
+
+```ts
+queue.syncedLyrics.load('[00:01.250]First line\n[00:03.000]Second line');
+console.log(queue.syncedLyrics.at(1500)); // { timestamp: 1250, line: 'First line' }
+const unsubscribe = queue.syncedLyrics.subscribe((line, timestampMs) => {
+  console.log(timestampMs, line);
+});
+```
+
+LRC is parsed once; repeated timestamps and offsets are normalized. Arbitrary
+lookups use binary search, sequential updates use a cursor, and large timeline
+jumps return to binary search. A line stays active until the next timestamp; this
+replaces v7's two-second closest-line heuristic.
+
+Subscriptions share one timer and run only on demand. Pause, seek and filter
+notifications reschedule against Remedia's current **media** position. Native
+snapshots do not expose a progress event: scheduling wakes at the next transition,
+with bounded clock rechecks (one second normally, 250ms with filters), rather than
+scanning on a fixed interval. Recognized tempo/rate graph terms adjust wake timing;
+opaque graphs are always reconciled against the native timeline. Timing accuracy
+is bounded by the native snapshot, especially on remote nodes.
+
+Loading never fetches lyrics. Stop, finish, skip, replay, replacement, promotion
+and deletion release the old Track's lyrics. Load the incoming Track's lyrics in
+its `playerStart` handler, and clear application display state on Track changes.
+No service is automatically queried during playback.
+
+`queue.syncedLyricsProvider` is the v7 spelling for the same object. `onChange()`,
+`onUnsubscribe()`, `subscribe()` without an argument, `unsubscribe()`, `pause()`,
+`resume()` and `isSubscribed()` remain available. The lyrics property exposes a detached read-only timestamp map. Multiple callback subscriptions
+are independent; an unsubscribe function removes only its own subscription.

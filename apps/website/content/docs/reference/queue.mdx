@@ -83,17 +83,16 @@ const session = queue.node.getSession();
 console.log(session.nodeId);
 ```
 
-| Node method/property                     | Meaning                                                |
-| ---------------------------------------- | ------------------------------------------------------ |
-| `play(source, options?)`                 | **Raw** Remedia playback, not managed Track scheduling |
-| `playRaw(source, options?)`              | Alias to raw playback                                  |
-| `stopSession()`                          | Stop raw session audio                                 |
-| `pause()`, `resume()`, `setPaused(bool)` | Raw playback state                                     |
-| `seek(ms)`, `setVolume(percent)`         | Raw timing and gain controls                           |
-| `playbackTime`, `totalDuration`          | Millisecond timeline                                   |
-| `getTimestamp()`, `createProgressBar()`  | Display helpers                                        |
-| `isIdle()`, `isPlaying()`, `isPaused()`  | Raw session status                                     |
-| `filters`                                | Named/raw FFmpeg filtergraph API                       |
+| Node method/property                     | Meaning                                                          |
+| ---------------------------------------- | ---------------------------------------------------------------- |
+| `play(source, options?)`                 | Track input: managed scheduling; native descriptor: raw playback |
+| `stopSession()`                          | Stop raw session audio                                           |
+| `pause()`, `resume()`, `setPaused(bool)` | Raw playback state                                               |
+| `seek(ms)`, `setVolume(percent)`         | Raw timing and gain controls                                     |
+| `playbackTime`, `totalDuration`          | Millisecond timeline                                             |
+| `getTimestamp()`, `createProgressBar()`  | Display helpers                                                  |
+| `isIdle()`, `isPlaying()`, `isPaused()`  | Raw session status                                               |
+| `filters`                                | Named/raw FFmpeg filtergraph API                                 |
 
 The managed queue serializes conflicting transitions and correlates playback generations. Prefer its methods for user commands.
 

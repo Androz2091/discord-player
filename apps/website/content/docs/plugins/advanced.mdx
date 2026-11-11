@@ -3,13 +3,13 @@ title: Extending the operation map
 description: Add typed operations and select explicit dispatch policies without inventing a separate plugin bus.
 ---
 
-The public `SourceOperationMap` is declaration-mergeable. New operations must be defined on the host before handlers register.
+The public `OperationMap` is declaration-mergeable. New operations must be defined on the host before handlers register.
 
 ```ts
 import type { Operation } from 'discord-player';
 
-declare module 'discord-player' {
-  interface SourceOperationMap {
+declare module '@discord-player/plugin-host' {
+  interface OperationMap {
     'track.audit': Operation<{ sourceId: string }, { accepted: boolean }, 'first'>;
   }
 }
@@ -30,7 +30,7 @@ Prefer a named operation for one coherent purpose. Define request/response data 
 
 ## Current host boundary
 
-This is a **local application-side operation system**. It does not automatically serialize a handler, launch a worker process, distribute a plugin to remote Remedia servers, or support a `runtime` kind today.
+Local and advertised HTTP metadata handlers share this operation system. It does not automatically serialize a handler, launch a worker process, distribute a plugin to remote Remedia servers.
 
 For a source that must work with remote audio nodes, return server-accessible media in the existing `track.stream` operation.
 

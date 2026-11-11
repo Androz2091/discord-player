@@ -13,7 +13,7 @@ if (!queue) return;
 await queue.node.pause();
 await queue.node.resume();
 await queue.node.seek(60_000); // Milliseconds
-await queue.node.setVolume(75); // 0–100 percent
+await queue.node.setVolume(75); // 0–200 percent
 ```
 
 ## Managed lifecycle controls
@@ -45,7 +45,7 @@ File, URL, and buffer seeking follow Remedia's decoder capabilities. One-shot st
 
 ## Volume differs at the boundary
 
-discord-player uses a percentage (0–100). Remedia's low-level session uses linear gain, so discord-player converts `80` to `0.8` when configuring the native session.
+discord-player uses a percentage (0–200). Remedia's low-level session uses linear gain, so discord-player converts `80` to `0.8` when configuring the native session.
 
 <NextStep href="/docs/guides/events" label="Handle lifecycle events" />
 

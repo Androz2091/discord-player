@@ -10,6 +10,9 @@
     "filters",
     "history",
     "persistence",
+    "search",
+    "lyrics",
+    "hooks",
     "context",
     "errors"
   ]

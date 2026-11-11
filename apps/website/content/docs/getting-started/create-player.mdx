@@ -15,7 +15,6 @@ export const client = new Client({
 });
 
 export const player = new Player({
-  nodes: [{ id: 'local', type: 'embedded' }],
   plugins: [directMedia()],
   send(guildId, packet) {
     const guild = client.guilds.cache.get(guildId);
