@@ -1,50 +1,33 @@
 ---
-title: 4. Next steps
-description: Control a connected queue, handle errors, and continue to the appropriate topic.
+title: 4. Control playback
+description: Pause, skip, seek, and inspect a queue.
 ---
 
-With a track playing, retrieve its queue:
+Get the queue for a guild:
 
 ```ts
 const queue = player.getQueue(guildId);
-
 if (!queue) return;
+
+console.log(queue.currentTrack?.title);
+console.log(queue.size); // Tracks waiting to play
 
 await queue.node.pause();
 await queue.node.resume();
-await queue.node.seek(30_000);
-await queue.node.setVolume(65); // Percent, not linear 0–1 gain
+await queue.node.seek(30_000); // Milliseconds
+await queue.node.setVolume(70); // Percent
+await queue.skip();
 ```
 
-A queue stores upcoming tracks separately from the current Track:
+`queue.stop()` stops the current track but keeps upcoming tracks. `queue.destroy()` removes the queue and closes its voice session.
 
-```ts
-console.log(queue.currentTrack?.title);
-console.log(queue.size); // Number of upcoming tracks
-console.log(queue.node.playbackTime); // Elapsed media time in milliseconds
-```
-
-Use `await queue.skip()` for a managed skip and `await queue.stop()` to stop the current playback without deleting the upcoming queue. `await queue.destroy()` releases the session and clears state.
-
-## Continue in order
+## Keep building
 
 <Cards>
-  <Card
-    title="Queue lifecycle"
-    href="/docs/guides/queues"
-    description="Tracks, repeat and shuffle policies, and managed progression."
-  />
-  <Card
-    title="Player and queue events"
-    href="/docs/guides/events"
-    description="Differentiate lifecycle notifications from actual errors."
-  />
-  <Card title="Audio filters" href="/docs/guides/filters" description="Use named presets or raw FFmpeg filtergraphs." />
-  <Card
-    title="Architecture"
-    href="/docs/architecture"
-    description="Why there is a queue layer, a source plugin host, and a separate engine."
-  />
+  <Card title="Queues" href="/docs/guides/queues" description="Add tracks, repeat, shuffle, and use history." />
+  <Card title="Events" href="/docs/guides/events" description="Respond to playback and voice events." />
+  <Card title="Filters" href="/docs/guides/filters" description="Change sound with presets or FFmpeg filters." />
+  <Card title="Plugins" href="/docs/plugins" description="Add more media sources." />
 </Cards>
 
-<NextStep href="/docs/guides/queues" label="Learn queue management" />
+<NextStep href="/docs/guides/queues" label="Manage queues" />

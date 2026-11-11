@@ -1,55 +1,41 @@
 ---
-title: 3. Play the first track
-description: Connect to a voice channel and start queue-managed playback through the plugin.
+title: 3. Play a track
+description: Join a voice channel and start audio.
 ---
 
-Once the bot has initialized and `directMedia()` is registered, call `player.play()`. Pass a voice channel (or explicit guild and channel IDs) and a URL that your plugin recognizes.
+In your bot's play command, call `player.play()` with the guild ID, voice channel ID, and a direct audio file:
 
-```ts title="Inside your play command"
-const guildId = interaction.guildId;
+```ts
+const result = await player.play(
+  { guildId: interaction.guildId!, channelId: voiceChannel.id },
+  'https://your-media-host.example/song.mp3',
+);
 
-if (!guildId) throw new Error('Use this command in a server');
-
-const result = await player.play({ guildId, channelId: voiceChannel.id }, 'https://media.example.com/track.mp3');
-
-if (!result.track) {
-  throw new Error('No matching track');
+if (result.track) {
+  console.log('Playing', result.track.title);
+} else {
+  console.log('No matching audio file');
 }
-
-console.log(result.queue.guildId, result.track.title);
 ```
 
-Here `interaction.guildId` must be a non-null guild snowflake, and `voiceChannel` is a voice channel resolved by your Discord client. Replace the example URL with an actual direct audio resource on your own host.
+Use an actual URL for an MP3, Ogg, or WAV file. The example address is a placeholder. `voiceChannel` should be the user's voice channel, resolved using your Discord library. The [Player setup](/docs/getting-started/create-player) must be initialized before playback.
 
-### What happens
+## Listen for events
 
-1. `Player.play()` resolves the channel IDs and creates or retrieves a `GuildQueue`.
-2. `Player.search()` runs `search.query.match` and `search.query.resolve` in the source host.
-3. The queue connects a Remedia `DiscordSession`, requesting Gateway credentials through `send`.
-4. The plugin supplies a `MediaSource` through `track.stream`.
-5. Remedia decodes audio and sends it to Discord. Queue lifecycle events update the current Track and schedule the next item.
-
-### Listen for results and failures
-
-Register events once, when the bot starts:
+Register these once during bot startup:
 
 ```ts
 player.events.on('playerStart', (queue, track) => {
-  console.log('Playing', track.title, 'in', queue.guildId);
+  console.log('Playing', track.title, 'in guild', queue.guildId);
 });
 
 player.events.on('playerError', (queue, error, track) => {
-  console.error('Playback failed', queue.guildId, track.title, error);
+  console.error('Failed to play', track.title, error);
 });
 
 player.on('error', console.error);
 ```
 
-An empty search does not throw: `result.track` is `null`. Missing permissions, inaccessible audio, or a disconnected voice session are actual failures you should handle.
+`player.play()` creates or reuses a guild queue and connects to the selected voice channel. It does not register a Discord slash command. Your Discord library handles command registration and locating the user's channel.
 
-<Callout title="Queue-managed versus raw playback">
-  Use `player.play()` or `queue.play()` for tracks that should participate in history, repeat, skip, and automatic queue
-  progression. `queue.node.play(source)` sends a raw media source to Remedia and **does not** advance the managed queue.
-</Callout>
-
-<NextStep href="/docs/getting-started/next-steps" label="4. Control playback and handle events" />
+<NextStep href="/docs/getting-started/next-steps" label="4. Control playback" />
