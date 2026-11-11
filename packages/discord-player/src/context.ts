@@ -1,3 +1,4 @@
+import { firstActivePlayer } from './active-players.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import type { DiscordPlayer } from './player.js';
 import type { GuildQueue } from './structures/guild-queue.js';
@@ -167,13 +168,19 @@ export class PlayerContext extends Context<PlayerContextValue> {
   }
 }
 
-/** Read the Player explicitly associated with the active async scope. */
-export function useMainPlayer(): DiscordPlayer | null {
-  return activePlayerContext.getStore()?.player ?? null;
+/** Read the scoped Player, otherwise the first active registered Player.
+ * @throws Error When no Player exists in either context.
+ */
+export function useMainPlayer(): DiscordPlayer {
+  const player = activePlayerContext.getStore()?.player ?? firstActivePlayer();
+
+  if (!player) throw new Error('Player context is not available. Create a DiscordPlayer first.');
+
+  return player;
 }
 
 /** Read the Player associated with the current async scope. */
-export function usePlayer(): DiscordPlayer | null {
+export function usePlayer(): DiscordPlayer {
   return useMainPlayer();
 }
 
@@ -187,9 +194,9 @@ export function useQueue(
 ): GuildQueue | null {
   const context = activePlayerContext.getStore();
 
-  if (!context) return null;
+  if (guildId) return (context?.player ?? firstActivePlayer())?.queues.get(guildId) ?? null;
 
-  if (guildId) return context.player.queues.get(guildId);
+  if (!context) return null;
 
   if (context.queue) return context.queue;
 

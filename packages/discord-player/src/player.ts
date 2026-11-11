@@ -28,6 +28,7 @@ import type {
   SearchOptions,
 } from './types.js';
 import { SafeEventEmitter } from './utils/safe-event-emitter.js';
+import { registerPlayer, unregisterPlayer } from './active-players.js';
 import { PlayerContext } from './context.js';
 import { LrcLib } from './lyrics.js';
 
@@ -157,6 +158,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
     // Retain the rejection for initialize/search while preventing an unobserved constructor promise.
     void this.initialPlugins.catch(() => undefined);
+    registerPlayer(this);
   }
 
   /** Identifier of this Player instance. */
@@ -514,6 +516,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
   /** Destroy all managed queues owned by this Player. */
   public async destroy(): Promise<void> {
+    unregisterPlayer(this);
     this.detachClientListeners?.();
     this.detachClientListeners = null;
     this.remoteSources.destroy();

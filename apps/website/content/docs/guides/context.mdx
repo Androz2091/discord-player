@@ -17,7 +17,14 @@ await player.context.provide({ guildId }, async () => {
 });
 ```
 
-The scope survives `await` while the provided callback is active. Outside an active context, optional hooks return `null` or `undefined` rather than selecting a random Player.
+The scope survives `await` while the provided callback is active. `useMainPlayer()` and `usePlayer()` prefer the scoped Player, otherwise resolve the
+first active registered Player. Destroying that Player advances the fallback to the
+next registered instance. Both throw an actionable missing-context error when no
+Player remains.
+
+`useQueue(guildId)` can resolve an explicit guild through that fallback. Without an
+explicit guild or a queue context, queue-dependent hooks return `null` or
+`undefined`; they never infer a guild from global registration.
 
 Other hooks include `useMetadata()`, `useVolume()`, and `useTimeline()`. These read state from the current queue; they are not native audio callbacks.
 

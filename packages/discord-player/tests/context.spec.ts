@@ -43,8 +43,8 @@ it('scopes every hook to the owning Player and restores outside values', async (
   const a = await setup({ queueOptions: { metadata: { owner: 'queue' } } });
   const b = await setup();
 
-  expect(useMainPlayer()).toBeNull();
-  expect(usePlayer()).toBeNull();
+  expect(useMainPlayer()).toBe(a.player);
+  expect(usePlayer()).toBe(a.player);
   expect(useQueue()).toBeNull();
   expect(useHistory()).toBeNull();
   expect(useMetadata()).toBeUndefined();
@@ -88,7 +88,16 @@ it('scopes every hook to the owning Player and restores outside values', async (
     expect(useTimeline()).toBeNull();
   });
 
-  expect(useMainPlayer()).toBeNull();
+  expect(useMainPlayer()).toBe(a.player);
 
-  await Promise.all([a.player.destroy(), b.player.destroy()]);
+  expect(useQueue(a.queue.id)).toBe(a.queue);
+
+  await a.player.destroy();
+
+  expect(useMainPlayer()).toBe(b.player);
+  expect(useQueue()).toBeNull();
+
+  await b.player.destroy();
+
+  expect(() => useMainPlayer()).toThrow('Player context is not available');
 });
