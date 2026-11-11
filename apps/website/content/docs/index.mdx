@@ -1,72 +1,39 @@
 ---
-title: Documentation
-description: Learn discord-player v8 in order, from the first voice connection through source plugins, deployment, and migration.
+title: Discord Player v8
+description: Get a music bot playing, then learn queues, events, and source plugins.
 ---
 
-discord-player v8 manages Discord music queues and delegates audio playback and voice transport to [Remedia](https://github.com/twlite/remedia), a Rust engine. You own the Discord client and forward Gateway payloads; discord-player handles queues, source selection, history, events, and playback control.
+Discord Player manages music queues, playback controls, and events for Discord bots. [Remedia](https://github.com/twlite/remedia) handles audio decoding and voice connections.
 
 <Cards>
-  <Card
-    title="Start from scratch"
-    href="/docs/getting-started"
-    description="A step-by-step path to a working music bot with a real source plugin."
-  />
-  <Card
-    title="Upgrade a v7 bot"
-    href="/docs/migration"
-    description="A feature-by-feature migration sequence with compatibility boundaries."
-  />
-  <Card
-    title="Understand the architecture"
-    href="/docs/architecture"
-    description="Follow the path from a slash command through the source host, queue, and Rust engine."
-  />
-  <Card
-    title="Explore the API"
-    href="/docs/reference"
-    description="Signatures, return values, and ownership rules for the v8 public API."
-  />
+  <Card title="Get started" href="/docs/getting-started" description="Install, connect a bot, and play your first track." />
+  <Card title="Queues and controls" href="/docs/guides" description="Skip, pause, repeat, shuffle, and respond to events." />
+  <Card title="Migrate from v7" href="/docs/migration" description="Update your existing music bot." />
+  <Card title="API reference" href="/docs/reference" description="Find methods, options, and event arguments." />
 </Cards>
 
-## A recommended learning path
+## Play a track
 
-<Steps>
-### Install the runtime
+Once your Player and source plugin are configured:
 
-Choose [embedded or remote playback](/docs/installation) and verify FFmpeg 9 on the machine that actually runs audio.
+```ts
+const { queue, track } = await player.play(
+  { guildId, channelId },
+  'https://your-media-host.example/song.mp3',
+);
 
-### Connect a Discord client
+if (track) await queue.node.setVolume(70);
+```
 
-Follow [Create a player](/docs/getting-started/create-player). The client supplies the bot user ID and forwards Gateway voice events.
+The URL is a placeholder. A source plugin must resolve it to playable audio. Follow the [getting-started tutorial](/docs/getting-started) for setup and a complete source example.
 
-### Add a source
+## Requirements
 
-[Write a direct-media source plugin](/docs/getting-started/source-plugin). Queries are not playable until a plugin resolves both track metadata and a media source.
+- Node.js 22.18+ and ESM.
+- A Discord bot and a gateway library such as discord.js.
+- A source plugin to recognize queries and provide audio.
+- FFmpeg 9 shared libraries on the machine running embedded playback. [Install FFmpeg](/docs/installation/ffmpeg).
 
-### Start playback
+You can run the audio engine inside the bot or use a [remote Remedia node](/docs/remedia/remote).
 
-[Play the first track](/docs/getting-started/play-track), then learn [queue controls](/docs/guides/queues) and [events](/docs/guides/events).
-
-### Go further
-
-Extend the [plugin host](/docs/plugins), run [remote Remedia](/docs/remedia/remote), or use the [migration guide](/docs/migration).
-
-</Steps>
-
-## What v8 owns
-
-| discord-player                               | Remedia                                              |
-| -------------------------------------------- | ---------------------------------------------------- |
-| Source matching, metadata, stream resolution | Demux, decode, resample, filters                     |
-| Per-guild queues, repeat, shuffle, history   | Playback timeline, pause, seek, volume               |
-| Player and queue events                      | Native Discord voice transport and session lifecycle |
-| Typed source plugins and legacy adapter      | Embedded or authenticated remote audio nodes         |
-
-The same Remedia engine is used for embedded and remote playback. The plugin host currently runs with discord-player on the application side; remote plugin execution is not a v8 guarantee.
-
-<Callout title="Requirements">
-  Node.js 22.18 or newer, ESM, and an installed v8 package. Embedded hosts need FFmpeg 9 shared libraries; remote-only
-  bot hosts do not. Read [installation](/docs/installation) before copying the runtime example.
-</Callout>
-
-<NextStep href="/docs/getting-started" label="Follow the first-run tutorial" />
+<NextStep href="/docs/getting-started" label="Build your first music bot" />
