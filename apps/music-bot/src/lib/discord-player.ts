@@ -92,8 +92,8 @@ player.events.on('connectionDestroyed', (queue) => {
   if (!queue.destroyed) notify(queue, 'Voice disconnected', 'The voice connection was closed.');
 });
 
-player.events.on('voiceStateUpdate', (queue, event) => {
-  if (event.state === 'reconnecting' && !recoveringQueues.has(queue)) {
+player.events.on('voiceConnectionStateChange', (queue, _previousState, state) => {
+  if (state === 'reconnecting' && !recoveringQueues.has(queue)) {
     recoveringQueues.add(queue);
 
     notify(
@@ -102,7 +102,7 @@ player.events.on('voiceStateUpdate', (queue, event) => {
       'The voice connection is recovering. Playback will continue when it is ready.',
       0xfee75c,
     );
-  } else if (event.state === 'connected' && recoveringQueues.has(queue)) {
+  } else if (state === 'connected' && recoveringQueues.has(queue)) {
     recoveringQueues.delete(queue);
     notify(queue, '🔊 Voice restored', 'The voice connection is ready again.', 0x57f287);
   }

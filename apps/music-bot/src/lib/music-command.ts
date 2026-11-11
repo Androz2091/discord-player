@@ -103,7 +103,7 @@ export function requireVoiceChannel(interaction: ChatInputCommandInteraction<'ca
  */
 export function requireQueue(interaction: ChatInputCommandInteraction<'cached'>): GuildQueue<QueueMetadata> {
   const channel = requireVoiceChannel(interaction);
-  const queue = player.queues.get<QueueMetadata>(interaction.guildId);
+  const queue = player.nodes.get<QueueMetadata>(interaction.guildId);
 
   if (!queue?.node.session) throw new MusicCommandError('There is no connected music queue. Use /play or /join first.');
 

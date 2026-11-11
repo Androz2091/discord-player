@@ -14,7 +14,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.restoreAllMocks();
-  player.queues.cache.clear();
+  player.nodes.cache.clear();
 });
 
 test('/play resolves a normal Track through the raw HTTP extractor without requiring /join', async () => {
@@ -55,7 +55,7 @@ test('/play rejects invalid sources and another voice channel with formatted err
     expect(embed(request.replies[0]).color).toBe(0xed4245);
   }
 
-  player.queues.cache.set('guild', queueFixture({ node: { session: { channelId: 'another-voice' } } }));
+  player.nodes.cache.set('guild', queueFixture({ node: { session: { channelId: 'another-voice' } } }));
 
   const request = interaction('play', { query: 'https://example.test/audio.mp3' });
 
@@ -132,7 +132,7 @@ test('controls use queue APIs and produce embeds, including /ping', async () => 
     isShuffling: false,
   };
 
-  player.queues.cache.set('guild', queueFixture(queue));
+  player.nodes.cache.set('guild', queueFixture(queue));
 
   const cases: Array<[string, OptionValues]> = [
     ['pause', {}],
@@ -187,7 +187,7 @@ test('validation failures and direct messages also receive embeds', async () => 
 
 test('queue creation/deletion announce outside the cache and connection repeats are deduplicated', async () => {
   const request = interaction('join');
-  const queue = await player.queues.create('guild', { metadata: { textChannel: request.channel } });
+  const queue = await player.nodes.create('guild', { metadata: { textChannel: request.channel } });
 
   expect(embed(request.announcements[0]).title).toMatch(/Queue created/);
 
@@ -204,7 +204,7 @@ test('queue creation/deletion announce outside the cache and connection repeats 
 
   expect(embed(request.announcements[2]).title).toMatch(/Voice channel changed/);
 
-  player.queues.cache.delete('guild');
+  player.nodes.cache.delete('guild');
   player.events.emit('queueDelete', queue);
 
   expect(embed(request.announcements[3]).title).toMatch(/Queue deleted/);
@@ -212,7 +212,7 @@ test('queue creation/deletion announce outside the cache and connection repeats 
 
 test('playback announcements preserve Track arguments and report queue and player changes', async () => {
   const request = interaction('play');
-  const queue = await player.queues.create('guild', { metadata: { textChannel: request.channel } });
+  const queue = await player.nodes.create('guild', { metadata: { textChannel: request.channel } });
   const track = new Track({ title: 'Song', requestedBy: 'requester' });
   const identity = {
     sessionId: '00000000-0000-0000-0000-000000000001' as const,
@@ -250,9 +250,9 @@ test('voice recovery announces once per transition and playback failures use saf
   vi.spyOn(console, 'error').mockImplementation(() => {});
 
   const request = interaction('play');
-  const queue = await player.queues.create('guild', { metadata: { textChannel: request.channel } });
+  const queue = await player.nodes.create('guild', { metadata: { textChannel: request.channel } });
 
-  player.events.emit('voiceStateUpdate', queue, {
+  player.events.emit('voiceConnectionStateChange', queue, 'connected', 'reconnecting', {
     sessionId: 'session',
     guildId: 'guild',
     nodeId: 'node',
@@ -260,7 +260,7 @@ test('voice recovery announces once per transition and playback failures use saf
     state: 'reconnecting',
   });
 
-  player.events.emit('voiceStateUpdate', queue, {
+  player.events.emit('voiceConnectionStateChange', queue, 'connected', 'reconnecting', {
     sessionId: 'session',
     guildId: 'guild',
     nodeId: 'node',
@@ -268,7 +268,7 @@ test('voice recovery announces once per transition and playback failures use saf
     state: 'reconnecting',
   });
 
-  player.events.emit('voiceStateUpdate', queue, {
+  player.events.emit('voiceConnectionStateChange', queue, 'reconnecting', 'connected', {
     sessionId: 'session',
     guildId: 'guild',
     nodeId: 'node',
@@ -276,7 +276,7 @@ test('voice recovery announces once per transition and playback failures use saf
     state: 'connected',
   });
 
-  player.events.emit('voiceStateUpdate', queue, {
+  player.events.emit('voiceConnectionStateChange', queue, 'reconnecting', 'connected', {
     sessionId: 'session',
     guildId: 'guild',
     nodeId: 'node',
@@ -333,7 +333,7 @@ test('/filter toggles named presets, shows combinations, and clears all filters'
     }),
   };
 
-  player.queues.cache.set('guild', queueFixture({ node: { session: { channelId: 'voice' }, filters } }));
+  player.nodes.cache.set('guild', queueFixture({ node: { session: { channelId: 'voice' }, filters } }));
 
   const invoke = async (preset?: string) => {
     const request = interaction('filter', preset === undefined ? {} : { preset });
@@ -377,7 +377,7 @@ test('/filter keeps acompressor synchronized with bass boost', async () => {
     clear: vi.fn(async () => enabled.clear()),
   };
 
-  player.queues.cache.set('guild', queueFixture({ node: { session: { channelId: 'voice' }, filters } }));
+  player.nodes.cache.set('guild', queueFixture({ node: { session: { channelId: 'voice' }, filters } }));
 
   const request = interaction('filter', { preset: 'bassboost' });
 

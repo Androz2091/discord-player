@@ -76,7 +76,7 @@ export const chatInput = musicCommand(async (interaction) => {
 
   if (!channel.joinable) throw new MusicCommandError('I cannot join your voice channel. Check my permissions.');
 
-  const existingQueue = player.queues.get<QueueMetadata>(interaction.guildId);
+  const existingQueue = player.nodes.get<QueueMetadata>(interaction.guildId);
 
   if (existingQueue?.node.session && existingQueue.node.session.channelId !== channel.id) {
     throw new MusicCommandError('Join my voice channel to add music, or use /join to move me.');

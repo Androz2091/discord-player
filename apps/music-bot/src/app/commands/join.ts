@@ -17,7 +17,7 @@ export const chatInput = musicCommand(async (interaction) => {
 
   if (!textChannel?.isSendable()) throw new MusicCommandError('Use a channel where I can send playback updates.');
 
-  const queue = await player.queues.create<QueueMetadata>(interaction.guildId, { metadata: { textChannel } });
+  const queue = await player.nodes.create<QueueMetadata>(interaction.guildId, { metadata: { textChannel } });
 
   queue.metadata = { textChannel };
   await queue.connect({ channelId: channel.id });

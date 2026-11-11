@@ -24,7 +24,6 @@ function hasProtocol(query: string): boolean {
 /** Source extractor for direct HTTP media and files beneath MUSIC_DIRECTORY. */
 export const rawHTTPExtractor = definePlugin({
   id: 'org.example.raw-http',
-  kind: 'source',
 
   setup(ctx) {
     ctx.on('search.query.match', ({ query }, { signal }) => {
