@@ -54,6 +54,21 @@ await queue.play(track);
 | `isShuffling`  | Shuffle state                           |
 | `isPlaying()`  | Managed active status (includes paused) |
 
+## Lifetime signal
+
+`queue.signal` is a read-only `AbortSignal` for this queue instance. It aborts
+synchronously when `queue.destroy()` or `queue.delete()` begins, including deletion
+through the Player or its queue manager. Player destruction also destroys its
+managed queues. The signal remains aborted even if asynchronous cleanup fails.
+Await the destruction promise to wait for cleanup to finish.
+
+Stopping, skipping, pausing, or replacing a voice session does not end the queue's
+lifetime. Recreating a deleted guild queue gives the new instance a fresh signal.
+
+Consumers can pass the signal to cancellable APIs or register an `abort` listener
+with `{ once: true }` for their own cleanup. Before starting work against a retained
+queue reference, check `queue.signal.aborted` or call `queue.signal.throwIfAborted()`.
+
 ## Node/session API
 
 ```ts

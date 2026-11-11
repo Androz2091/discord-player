@@ -50,6 +50,17 @@ The options extend relevant `@remedia/client` configuration without exposing its
 
 `player.queues` is the queue manager. `player.nodes` is an alias for the same manager, **not** the native node pool. `player.nodeSnapshots` exposes Remedia node status. `player.plugins` is the source registry, `player.extractors` the compatibility registration API, and `player.events` the guild event emitter.
 
+## Lifetime signal
+
+`player.signal` is a read-only `AbortSignal` for this Player's lifetime. It starts
+unaborted and aborts synchronously when `player.destroy()` begins, before awaited
+queue and plugin cleanup. Pass it to cancellable operations or subscribe to its
+`abort` event to release application-owned resources. It remains aborted if cleanup
+fails; awaiting `destroy()` is still required to wait for cleanup to finish.
+
+Destroying an individual queue does not abort `player.signal`. Destroying the
+Player also destroys its managed queues and aborts their lifetime signals.
+
 ## Play result
 
 ```ts

@@ -276,6 +276,15 @@ export class GuildQueue<Metadata = unknown> {
 
   #destroyed = false;
 
+  readonly #lifetimeController = new AbortController();
+
+  /** Lifetime signal, aborted synchronously when destroy() or delete() begins, even if cleanup later fails.
+   * Stopping playback or disconnecting a session does not abort this signal.
+   */
+  public get signal(): AbortSignal {
+    return this.#lifetimeController.signal;
+  }
+
   #queueToken = randomUUID();
 
   #maxSize: number;
@@ -873,11 +882,12 @@ export class GuildQueue<Metadata = unknown> {
     this.finalizeLocked(operation, pending?.kind === 'natural' ? 'natural' : 'stopped', pending?.event);
   }
 
-  /** Destroy the queue, abort source preparation, close the session, clear state, and remove it from the manager. */
+  /** Abort the queue lifetime signal and source preparation, close the session, clear state, and remove it from the manager. */
   public async destroy(): Promise<void> {
     if (this.#destroyed) return;
 
     this.#destroyed = true;
+    this.#lifetimeController.abort();
     void this.cancelPreparation();
 
     for (const operation of this.#outgoing.values()) operation.controller.abort();

@@ -52,3 +52,18 @@ export async function configureAudioFilters(queue: GuildQueue): Promise<void> {
   // @ts-expect-error named lookups require a built-in preset
   queue.node.filters.get('unknown');
 }
+
+/** Compile read-only lifetime signals for consumers of the public API. */
+export function consumeLifetimeSignals(player: DiscordPlayer, queue: GuildQueue): void {
+  const playerSignal: AbortSignal = player.signal;
+  const queueSignal: AbortSignal = queue.signal;
+
+  playerSignal.throwIfAborted();
+  queueSignal.throwIfAborted();
+
+  // @ts-expect-error consumers cannot replace the Player lifetime signal
+  player.signal = new AbortController().signal;
+
+  // @ts-expect-error consumers cannot replace the queue lifetime signal
+  queue.signal = new AbortController().signal;
+}

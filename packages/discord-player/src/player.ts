@@ -116,6 +116,15 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
   #clientId: string | null = null;
 
+  readonly #lifetimeController = new AbortController();
+
+  /** Lifetime signal, aborted synchronously when destroy() begins, even if cleanup later fails.
+   * The signal is stable for this Player and remains aborted after destruction.
+   */
+  public get signal(): AbortSignal {
+    return this.#lifetimeController.signal;
+  }
+
   private detachClientListeners: (() => void) | null = null;
 
   /** Guild queue manager. */
@@ -514,8 +523,9 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     return this.queues.delete(guildId);
   }
 
-  /** Destroy all managed queues owned by this Player. */
+  /** Abort the Player lifetime signal, then destroy all managed queues and plugins. */
   public async destroy(): Promise<void> {
+    this.#lifetimeController.abort();
     unregisterPlayer(this);
     this.detachClientListeners?.();
     this.detachClientListeners = null;
