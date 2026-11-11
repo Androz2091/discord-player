@@ -1,62 +1,32 @@
 ---
-title: Plugins
-description: Learn the source plugin host, its typed operations, and how v7 extractors run through compatibility emulation.
+title: Source plugins
+description: Add music providers and customize how audio is resolved.
 ---
 
-v8 replaces the independent extractor dispatcher with a Player-owned, typed operation host. It handles source discovery, metadata, media resolution, and local encoded-stream transformations.
+A source plugin tells Discord Player how to recognize a query, find tracks, and return playable audio. Register plugins for the sources you want your bot to support.
 
 <Cards>
-  <Card
-    title="Build a source plugin"
-    href="/docs/plugins/build-source"
-    description="Create and register a typed source that resolves real media."
-  />
-  <Card
-    title="Operation model"
-    href="/docs/plugins/operations"
-    description="Understand matching, dispatch order, outcomes, and cancellation."
-  />
-  <Card
-    title="Lifecycle"
-    href="/docs/plugins/lifecycle"
-    description="Register, unregister, clean up, and avoid in-flight races."
-  />
-  <Card
-    title="Stream sources"
-    href="/docs/plugins/streams"
-    description="Return URLs, files, or encoded Readables and understand remote limits."
-  />
-  <Card
-    title="Legacy extractor emulation"
-    href="/docs/plugins/legacy-extractors"
-    description="Keep supported v7 extractors while migrating toward source plugins."
-  />
-  <Card
-    title="Advanced operations"
-    href="/docs/plugins/advanced"
-    description="Define new operation contracts and routing policies."
-  />
+  <Card title="Build a source plugin" href="/docs/plugins/build-source" description="Start with a direct-audio example." />
+  <Card title="Existing v7 extractors" href="/docs/plugins/legacy-extractors" description="Use compatible legacy extractors during migration." />
+  <Card title="Streams" href="/docs/plugins/streams" description="Play URLs, files, and encoded streams." />
+  <Card title="Remote source hosts" href="/docs/plugins/remote-hosts" description="Run source plugins on a separate server." />
+  <Card title="Plugin lifecycle" href="/docs/plugins/lifecycle" description="Register, unregister, and clean up." />
+  <Card title="Operations" href="/docs/plugins/operations" description="How matching and resolution work." />
+  <Card title="Advanced plugins" href="/docs/plugins/advanced" description="Custom operations and dispatch behavior." />
 </Cards>
 
-## Why operations instead of a dedicated extractor pipeline?
+## Register a plugin
 
-One source may match a URL, another may resolve related metadata, and a third may transform an encoded stream. Those are distinct tasks with different ownership and failure behavior. The registry provides named, typed operations so plugins can register only what they implement.
-
-```text
-search.query.match → search.query.resolve → Track
-                                        ↓
-                                 track.stream
-                                        ↓
-                                 stream.transform
-                                        ↓
-                              Remedia MediaSource
+```ts
+const player = new Player({
+  nodes: [{ id: 'local', type: 'embedded' }],
+  send: (guildId, packet) => sendGateway(guildId, packet),
+  plugins: [mySourcePlugin()],
+});
 ```
 
-The compatibility adapter translates supported `BaseExtractor` methods into these **same** operations. It does not run a second hidden dispatcher.
+`mySourcePlugin` and `sendGateway` belong to your application. For a complete example, see [getting started](/docs/getting-started/source-plugin).
 
-<Callout title="What is implemented today?">
-  Source plugins are implemented and run in the application process. The `runtime` plugin kind, remote plugin execution,
-  and automatic distribution are not implemented in this version. Do not write plugins that depend on those features.
-</Callout>
+Most bots can register a source plugin and leave the underlying operation details alone.
 
-<NextStep href="/docs/plugins/build-source" label="Implement a source plugin" />
+<NextStep href="/docs/plugins/build-source" label="Build a source plugin" />
