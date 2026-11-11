@@ -6,8 +6,16 @@ description: Get a music bot playing, then learn queues, events, and source plug
 Discord Player manages music queues, playback controls, and events for Discord bots. [Remedia](https://github.com/twlite/remedia) handles audio decoding and voice connections.
 
 <Cards>
-  <Card title="Get started" href="/docs/getting-started" description="Install, connect a bot, and play your first track." />
-  <Card title="Queues and controls" href="/docs/guides" description="Skip, pause, repeat, shuffle, and respond to events." />
+  <Card
+    title="Get started"
+    href="/docs/getting-started"
+    description="Install, connect a bot, and play your first track."
+  />
+  <Card
+    title="Queues and controls"
+    href="/docs/guides"
+    description="Skip, pause, repeat, shuffle, and respond to events."
+  />
   <Card title="Migrate from v7" href="/docs/migration" description="Update your existing music bot." />
   <Card title="API reference" href="/docs/reference" description="Find methods, options, and event arguments." />
 </Cards>
@@ -17,10 +25,7 @@ Discord Player manages music queues, playback controls, and events for Discord b
 Once your Player and source plugin are configured:
 
 ```ts
-const { queue, track } = await player.play(
-  { guildId, channelId },
-  'https://your-media-host.example/song.mp3',
-);
+const { queue, track } = await player.play({ guildId, channelId }, 'https://your-media-host.example/song.mp3');
 
 if (track) await queue.node.setVolume(70);
 ```

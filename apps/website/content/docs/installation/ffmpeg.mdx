@@ -1,13 +1,227 @@
 ---
-title: Installing FFmpeg 9 libraries
-description: Install the FFmpeg 9 runtime required by Discord Player v8's embedded Remedia engine.
+title: Install FFmpeg
+description: Set up the FFmpeg libraries required for Discord Player v8.
 ---
 
-Discord Player v8 uses Remedia, whose native engine uses **FFmpeg 9.0.2** headers and shared libraries. It dynamically links FFmpeg rather than bundling it inside the npm addon or standalone server. This is an **ABI-breaking update from FFmpeg 7**: replacing the executable alone is not enough, and older `.so`, `.dylib`, or `.dll` major versions will not satisfy the runtime loader.
+Discord Player v8 uses [Remedia](https://remedia.twlite.dev) for audio playback. If you're running Remedia inside your bot, you'll need **FFmpeg 9 shared libraries**.
 
-Remote-only `@remedia/client` installations do **not** need FFmpeg on the bot host. Install FFmpeg on the host running `remedia-server`. Embedded `@remedia/node` requires FFmpeg on the Node.js host.
+The easiest way to install them is with Remedia's installer. It handles the setup automatically.
 
-## Required library versions
+<Callout title="Note">You only need one installation method. Start with the recommended option below.</Callout>
+
+## Recommended installation
+
+Choose the command for your operating system.
+
+**Linux and macOS**
+
+```bash
+curl -fsSL https://remedia.twlite.dev/install.sh | sh -s -- --ffmpeg-only
+```
+
+**Windows PowerShell**
+
+```powershell
+& ([scriptblock]::Create((irm https://remedia.twlite.dev/install.ps1))) -FFmpegOnly
+```
+
+That's it. The installer downloads FFmpeg 9.0.2 and its required libraries into `~/.remedia/ffmpeg9`.
+
+`@remedia/node` finds these libraries automatically. You don't need to configure your system PATH or environment variables.
+
+The `--ffmpeg-only` option installs FFmpeg without installing the Remedia server or changing your shell configuration.
+
+Supported platforms include Linux x64/ARM64 (glibc), macOS Intel/Apple Silicon, and Windows x64.
+
+For installer options, see the [Remedia installation documentation](https://remedia.twlite.dev/docs/node/ffmpeg-9).
+
+### Using a remote Remedia server?
+
+You don't need FFmpeg on your bot's machine if you're connecting exclusively to a remote Remedia server.
+
+| Playback mode | Where FFmpeg is needed                  |
+| ------------- | --------------------------------------- |
+| Embedded      | On the machine running your bot         |
+| Remote        | On the machine running `remedia-server` |
+
+For remote playback, follow the [Remedia server installation guide](https://remedia.twlite.dev/docs/server/installation) instead.
+
+## Manual installation
+
+Prefer installing FFmpeg yourself? You can use your operating system's package manager, download prebuilt shared libraries, or use micromamba.
+
+**Pick one of the following approaches for your platform.** You don't need to use micromamba if you've already installed compatible libraries through another method.
+
+### macOS
+
+Homebrew is the simplest manual option on macOS:
+
+```bash
+brew install ffmpeg
+```
+
+Homebrew provides prebuilt packages for supported Intel and Apple Silicon Macs. Check that your installed formula provides the required FFmpeg 9 libraries.
+
+`@remedia/node` automatically searches standard Homebrew installation locations, so no extra configuration is normally needed.
+
+For an isolated installation, see [Using micromamba](#using-micromamba) below.
+
+### Windows
+
+On Windows, install a **shared FFmpeg build** containing the DLLs needed by Remedia.
+
+You have three options.
+
+**Option 1: Winget**
+
+```powershell
+winget install --id Gyan.FFmpeg.Shared --exact
+```
+
+**Option 2: Scoop**
+
+```powershell
+scoop install ffmpeg-shared
+```
+
+**Option 3: Download manually**
+
+Download the `ffmpeg-release-full-shared.7z` archive from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) and extract it.
+
+Whichever method you choose, verify that the installed version contains the required FFmpeg 9 DLLs. Package managers may publish newer versions.
+
+If Remedia cannot automatically locate the libraries, set `REMEDIA_FFMPEG_DIR` to the extracted installation directory:
+
+```powershell
+$env:REMEDIA_FFMPEG_DIR = "C:\path\to\ffmpeg-release-full-shared"
+```
+
+This variable can point to the package root or the directory containing the DLLs.
+
+You don't need to set it if Remedia already detects your installation.
+
+For an isolated installation, see [Using micromamba](#using-micromamba) below.
+
+### Linux
+
+Some Linux distributions provide compatible FFmpeg 9 libraries through their package managers.
+
+**Arch Linux**
+
+```bash
+sudo pacman -S ffmpeg
+```
+
+**Fedora Rawhide**
+
+```bash
+sudo dnf install ffmpeg-free
+```
+
+These commands are appropriate only when the repositories provide the required FFmpeg 9 shared-library versions.
+
+Other distributions may ship an older version. For example, Ubuntu 24.04 and Debian stable do not provide the required FFmpeg 9 libraries through their default repositories.
+
+If your distribution doesn't provide compatible packages, use the [Remedia installer](#recommended-installation) or the micromamba instructions below.
+
+Avoid mixing packages from Debian unstable into a stable installation just to obtain FFmpeg.
+
+## Advanced installation options
+
+The following methods are intended for developers who need an isolated FFmpeg installation, are building Remedia from source, or use an unsupported platform.
+
+You can skip this section if the recommended installer or your system package manager already works.
+
+### Using micromamba
+
+Micromamba installs FFmpeg into an isolated environment rather than replacing your system libraries.
+
+**Linux and macOS**
+
+```bash
+micromamba create -n remedia-ffmpeg9 -c conda-forge 'ffmpeg=9.0.2' 'pkg-config=0.29.2'
+micromamba activate remedia-ffmpeg9
+```
+
+**Windows PowerShell**
+
+```powershell
+micromamba create -n remedia-ffmpeg9 -c conda-forge ffmpeg=9.0.2 pkg-config=0.29.2
+micromamba activate remedia-ffmpeg9
+```
+
+This installation keeps the required FFmpeg version separate from other software on your system.
+
+For native runtime discovery, you can point Remedia directly at the environment using `REMEDIA_FFMPEG_DIR`. When starting a standalone native executable, the operating system's shared-library search paths may also need configuration.
+
+#### Building the native addon from source
+
+If you're compiling Remedia yourself, configure its build environment.
+
+**Linux and macOS**
+
+```bash
+export FFMPEG_DIR="$CONDA_PREFIX"
+export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig"
+```
+
+For standalone native executables on Linux, a custom library location can be exposed through:
+
+```bash
+export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:${LD_LIBRARY_PATH:-}"
+```
+
+On macOS, a custom standalone runtime may require its library install paths or `DYLD_LIBRARY_PATH` to be configured. Protected macOS processes may ignore `DYLD_*` variables.
+
+**Windows PowerShell**
+
+```powershell
+$ffmpegRoot = Join-Path $env:CONDA_PREFIX "Library"
+$env:FFMPEG_DIR = $ffmpegRoot
+$env:PKG_CONFIG_PATH = Join-Path $ffmpegRoot "lib\pkgconfig"
+```
+
+For standalone native executables that rely on Windows DLL search paths:
+
+```powershell
+$env:PATH = "$(Join-Path $ffmpegRoot 'bin');$env:PATH"
+```
+
+These build and loader settings are **not required** when using the default Remedia FFmpeg-only installer with `@remedia/node`.
+
+### Other platforms
+
+FreeBSD x64 can use a compatible custom FFmpeg installation.
+
+Other platforms, including Linux musl, Linux ARMv7, and Android, may require manually supplied libraries or source builds.
+
+If you compile FFmpeg yourself, build FFmpeg 9.0.2 with shared libraries enabled. Ensure that the libraries and their dependencies are compatible with your operating system and CPU architecture.
+
+## Verify your installation
+
+For embedded playback, run this command in the same environment as your bot:
+
+```bash
+node --input-type=module -e "import { Remedia } from '@remedia/node'; const engine = await Remedia.create(); await engine.close(); console.log('Remedia native runtime OK')"
+```
+
+If it prints `Remedia native runtime OK`, the native addon loaded and initialized successfully.
+
+This checks native initialization, not actual audio playback.
+
+If you're running a remote server, use its diagnostic command instead:
+
+```bash
+remedia-server doctor --config ./remedia.config.json --env-file .env
+```
+
+## Troubleshooting
+
+If Remedia cannot load FFmpeg, check that you installed the **shared libraries**, not just the FFmpeg command-line executable.
+
+### Required library versions
+
+Remedia requires the following FFmpeg 9 library versions:
 
 | Library       | ABI major | Linux / FreeBSD      | macOS                   | Windows            |
 | ------------- | --------- | -------------------- | ----------------------- | ------------------ |
@@ -17,60 +231,9 @@ Remote-only `@remedia/client` installations do **not** need FFmpeg on the bot ho
 | libavfilter   | 12        | `libavfilter.so.12`  | `libavfilter.12.dylib`  | `avfilter-12.dll`  |
 | libswresample | 7         | `libswresample.so.7` | `libswresample.7.dylib` | `swresample-7.dll` |
 
-These majors are confirmed against [FFmpeg 9.0.2](https://ffmpeg.org/download.html). FFmpeg 7 or 8 shared libraries **cannot** be substituted by renaming files or creating symlinks.
+All five libraries and their dependencies must be available to the process running Remedia.
 
-## Linux: glibc x64 and ARM64
-
-If the distribution supplies matching FFmpeg 9 shared libraries, install its FFmpeg package and development headers. Many LTS distributions still have older ABI majors. For predictable builds and CI parity, the Remedia repository uses pinned conda-forge packages:
-
-```bash
-micromamba create -n remedia-ffmpeg9 -c conda-forge 'ffmpeg=9.0.2' 'pkg-config=0.29.2'
-micromamba activate remedia-ffmpeg9
-export FFMPEG_DIR="$CONDA_PREFIX"
-export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig"
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:${LD_LIBRARY_PATH:-}"
-```
-
-Load the same environment before starting Node.js or `remedia-server`. The default loader search path differs across distributions; setting `FFMPEG_DIR` alone **does not** configure runtime library discovery. For system installations, use your loader's configured directories and `ldconfig` where appropriate.
-
-## macOS: Intel and Apple Silicon
-
-Homebrew's unversioned `ffmpeg` formula is FFmpeg **9.0.2** as of November 2026 and is also known as `ffmpeg@9`. Check the installed ABI before launching:
-
-```bash
-brew install ffmpeg pkg-config
-ffmpeg_prefix="$(brew --prefix ffmpeg)"
-export FFMPEG_DIR="$ffmpeg_prefix"
-export PKG_CONFIG_PATH="$ffmpeg_prefix/lib/pkgconfig"
-export DYLD_LIBRARY_PATH="$ffmpeg_prefix/lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
-```
-
-On macOS, inspect the exact linked install names using `otool -L` if the addon still fails. Your Node.js architecture and FFmpeg library architecture must match. Some protected launch contexts ignore `DYLD_*` variables. Use compatible installed libraries and their original install paths in those cases.
-
-## Windows: x64 MSVC
-
-Remedia CI uses pinned conda-forge FFmpeg 9 libraries and build-time clang. With micromamba:
-
-```powershell
-micromamba create -n remedia-ffmpeg9 -c conda-forge ffmpeg=9.0.2 pkg-config=0.29.2
-micromamba activate remedia-ffmpeg9
-$ffmpegRoot = Join-Path $env:CONDA_PREFIX "Library"
-$env:PATH = "$(Join-Path $ffmpegRoot 'bin');$env:PATH"
-$env:FFMPEG_DIR = $ffmpegRoot
-$env:PKG_CONFIG_PATH = Join-Path $ffmpegRoot "lib\pkgconfig"
-```
-
-Add the `Library\bin` directory to the environment of the **actual process** launching Remedia. Use the matching Microsoft Visual C++ Redistributable. FFmpeg-dependent DLLs must also be discoverable. Cross-built Windows x86 and ARM64 packages currently have build-only, not runtime, CI coverage.
-
-## FreeBSD, musl, ARMv7, and Android
-
-FreeBSD x64 is tested in a FreeBSD VM against a pinned FFmpeg 9.0.2 source build. Other targets may lack FFmpeg 9 packages for their operating system or CPU. The Remedia repository cross-compiles FFmpeg at commit `946fcce07b6dcd0331c8cc609192aeff5e1924f8` for Linux musl, Linux ARMv7, and Android API 24 builds; these are **build-only** targets and do not constitute runtime compatibility guarantees.
-
-For 32-bit targets, the build workflow applies a version-checked correction to the `ffmpeg-sys-next 9.0.1` Vulkan bindgen shim's pointer-size assertion. It does not change the Vulkan structure or its target-specific layout. This temporary workaround is required until the upstream binding crate ships a corrected assertion.
-
-If your platform lacks prebuilt FFmpeg 9 shared libraries, build FFmpeg 9.0.2 from source with the needed shared components. Ensure the installed libraries, headers, `pkg-config` metadata, and runtime loader paths all describe the **same** build.
-
-## Verify before running
+If you're building from source, you can inspect the installed library versions using:
 
 ```bash
 for library in libavcodec libavformat libavutil libavfilter libswresample; do
@@ -78,28 +241,10 @@ for library in libavcodec libavformat libavutil libavfilter libswresample; do
 done
 ```
 
-The major versions should be **63, 63, 61, 12, 7**, in that order. The runtime also requires each matching shared library file, not only `pkg-config` metadata. Inspect the compiled addon with `ldd` (Linux / FreeBSD), `otool -L` (macOS), or `dumpbin /DEPENDENTS` (Windows).
+You can also inspect native dependencies using `ldd` on Linux and FreeBSD, `otool -L` on macOS, or `dumpbin /DEPENDENTS` on Windows.
 
-For Remedia's exact build and runtime assertions, see [`verify-native-deps.mjs`](https://github.com/twlite/remedia/blob/main/.github/scripts/verify-native-deps.mjs). These checks run in CI for native build and test targets.
+If discovery still fails, check the `FfmpegLoadError` reported by `@remedia/node`. It includes information about attempted library locations and compatibility failures.
 
-## Upgrading an existing deployment
+For a detailed explanation of FFmpeg discovery and custom installations, see the [Remedia FFmpeg documentation](https://remedia.twlite.dev/docs/node/ffmpeg-9).
 
-1. Install FFmpeg 9.0.2 shared libraries and their transitive dependencies alongside or in place of the old packages.
-2. Upgrade the matching `@remedia/node` native addon or `remedia-server` binary built against FFmpeg 9.
-3. Verify the ABI majors and correct loader paths on the **audio host** before restarting.
-4. Restart the application. Do not mix an FFmpeg 7-linked addon with FFmpeg 9 libraries.
-5. Test startup, probing, decoding, filtering, and Discord voice on your deployment platform.
-
-The native addon does not download FFmpeg during `npm install`; the application operator is responsible for installing and maintaining compatible shared libraries. See [Remedia package distribution](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/node/distribution.mdx) for platform coverage and [Remedia licensing](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/licensing.mdx) for redistribution implications.
-
-## Node.js smoke test
-
-Run this with the same loader environment that launches your embedded bot:
-
-```sh
-node --input-type=module -e "import { Remedia } from '@remedia/node'; const engine = await Remedia.create(); await engine.close(); console.log('Remedia native runtime OK')"
-```
-
-This verifies native addon loading and initialization, not actual decoding or Discord voice. Remote-only bot hosts do not need native FFmpeg. Run `remedia-server doctor` on the audio server instead.
-
-<NextStep href="/docs/remedia/voice-recovery" label="Understand concurrent voice connections" />
+<NextStep href="/docs/getting-started" label="Get started with Discord Player" />

@@ -20,7 +20,7 @@ pnpm add @remedia/node
 ```
 
 ```ts
-nodes: [{ id: 'local', type: 'embedded' }]
+nodes: [{ id: 'local', type: 'embedded' }];
 ```
 
 Install [FFmpeg 9 shared libraries](/docs/installation/ffmpeg) on the bot machine. Having an `ffmpeg` command alone doesn't guarantee the required libraries are available.
@@ -32,12 +32,14 @@ This is the simplest option for a first bot.
 Run Remedia on another machine:
 
 ```ts
-nodes: [{
-  id: 'media-1',
-  type: 'remote',
-  url: 'wss://audio.example.com/v1/ws',
-  auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
-}]
+nodes: [
+  {
+    id: 'media-1',
+    type: 'remote',
+    url: 'wss://audio.example.com/v1/ws',
+    auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
+  },
+];
 ```
 
 The audio server needs FFmpeg; the bot machine doesn't. Follow the [remote deployment guide](/docs/remedia/remote) for server setup and authentication.

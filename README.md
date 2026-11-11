@@ -46,10 +46,7 @@ The `directMedia` plugin is defined in the [getting-started tutorial](https://di
 Inside your play command, after initialization:
 
 ```ts
-const result = await player.play(
-  { guildId, channelId },
-  'https://your-media-host.example/song.mp3',
-);
+const result = await player.play({ guildId, channelId }, 'https://your-media-host.example/song.mp3');
 if (result.track) console.log('Playing', result.track.title);
 ```
 

@@ -36,10 +36,7 @@ await player.initialize(client.user.id);
 ## Play and control audio
 
 ```ts
-const { queue, track } = await player.play(
-  { guildId, channelId },
-  'https://your-media-host.example/song.mp3',
-);
+const { queue, track } = await player.play({ guildId, channelId }, 'https://your-media-host.example/song.mp3');
 
 if (!track) throw new Error('No matching track');
 

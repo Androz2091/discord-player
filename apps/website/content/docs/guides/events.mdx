@@ -21,16 +21,16 @@ player.events.on('playerError', (queue, error, track) => {
 
 ## Common events
 
-| Event | When it happens |
-| --- | --- |
-| `playerStart` | A track starts |
-| `playerFinish` | A track finishes naturally |
-| `playerSkip` | A track is skipped |
-| `playerStop` | Playback stops |
-| `playerError` | A track fails |
-| `audioTrackAdd` | A track is added |
-| `emptyQueue` | No upcoming track remains |
-| `connection` | A voice session connects |
+| Event                 | When it happens             |
+| --------------------- | --------------------------- |
+| `playerStart`         | A track starts              |
+| `playerFinish`        | A track finishes naturally  |
+| `playerSkip`          | A track is skipped          |
+| `playerStop`          | Playback stops              |
+| `playerError`         | A track fails               |
+| `audioTrackAdd`       | A track is added            |
+| `emptyQueue`          | No upcoming track remains   |
+| `connection`          | A voice session connects    |
 | `connectionDestroyed` | A voice session is disposed |
 
 The queue advances tracks automatically. Don't call `queue.playNext()` inside a `playerFinish` listener.
