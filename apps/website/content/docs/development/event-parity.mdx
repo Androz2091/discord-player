@@ -1,0 +1,41 @@
+---
+title: Event parity audit
+description: Implemented queue mappings and remaining v7 lifecycle gaps.
+---
+
+This audit compares the local v7 implementation with v8 using @remedia/client
+0.1.0-dev.5. Native payloads use the exported `DiscordSessionEvents` and
+`RemediaClientEvents` interfaces. A declaration alone is not runtime parity.
+
+| v7 event or behavior                                        | Current v8 behavior                                                                                           | Regression coverage                                                   |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Track add/remove, queue create/delete                       | Queue-owned events, no fabricated native payload                                                              | queue, queue-operations, collections                                  |
+| playerStart                                                 | Canonical Track after active playback, native event last                                                      | queue-races, crossfade, event-forwarding                              |
+| playerFinish                                                | Natural terminal handling owns history/progression                                                            | queue-races, crossfade                                                |
+| playerSkip                                                  | Track, reason, description, native stop event last                                                            | queue-races, queue-operations                                         |
+| playerError                                                 | Error then canonical Track, native failure last when available                                                | queue-races, crossfade                                                |
+| playerPause/playerResume                                    | Native event last; stale generations do not emit compatibility events                                         | player-node, event-forwarding                                         |
+| playerStop                                                  | Queue-owned classification; nullable Track for raw control                                                    | queue-races, queue-operations                                         |
+| volumeChange                                                | Previous/current percentages, native gain event last                                                          | event-forwarding                                                      |
+| audioFiltersUpdate                                          | Previous/current raw graphs, native filter event last                                                         | event-forwarding, audio-filters                                       |
+| Other DSP events                                            | Historic declarations remain; no invented DSP payloads                                                        | event-forwarding verifies generic changes do not emit equalizerUpdate |
+| willPlayTrack                                               | Ordinary queue playback selection                                                                             | queue-races                                                           |
+| willPrepareNextTrack                                        | Added for staged selection before resolution; retryable                                                       | event-forwarding                                                      |
+| stageReady/stageFailed/stageInvalidated/transitionCancelled | Native staging observations; nullable Track when uncorrelated                                                 | event-forwarding, crossfade                                           |
+| emptyQueue                                                  | Queue progression, independent of voice membership                                                            | queue-operations                                                      |
+| connection/connectionDestroyed                              | Queue session connect/dispose boundaries                                                                      | player-node                                                           |
+| emptyChannel/channelPopulate/disconnect                     | Full authoritative membership and leave-policy restoration pending                                            | No parity claim                                                       |
+| voiceStateUpdate                                            | Gateway compatibility restoration pending; transport no longer mapped here                                    | No parity claim                                                       |
+| voice transport lifecycle                                   | Separate voiceConnectionStateChange(previousState, state, rawEvent)                                           | event-forwarding                                                      |
+| voice failure                                               | Queue error(error, rawEvent)                                                                                  | event-forwarding                                                      |
+| session disposal                                            | sessionDisposed(rawEvent), ownership cleanup retains external listeners                                       | event-forwarding, player-node                                         |
+| Node health, recovery, event loss, assignments, migration   | All native client notifications on Player; guild recovery and assignment projections only for existing queues | event-forwarding                                                      |
+
+`sessionEvent(queue, name, rawEvent)` provides all native session notifications,
+including uncorrelated raw playback and stale generations, without bypassing queue
+terminal handling. All client native playback events are independently observable
+at Player scope. Neither observation API constructs placeholder Tracks or queues.
+
+The broader plugin, lyrics, hooks, synchronized lyrics, search normalization, and
+voice-policy refactor remains separate outstanding work; this audit documents the
+implemented forwarding subsystem rather than asserting complete v7 parity.

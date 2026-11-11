@@ -35,3 +35,6 @@ export { SourcePluginRuntime } from '@discord-player/plugin-host';
 export type { LegacyPlayerContext, SourceRuntimeEvents, SourcePluginRuntimeOptions } from '@discord-player/plugin-host';
 
 export type { RemoteSourceHostOptions } from './remote-source-hosts.js';
+
+/** Native payload contracts appended to forwarded lifecycle events. */
+export type { DiscordSessionEvents, RemediaClientEvents } from '@remedia/client';

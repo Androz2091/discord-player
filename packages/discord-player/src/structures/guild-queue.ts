@@ -961,6 +961,10 @@ export class GuildQueue<Metadata = unknown> {
    * @param event Generation-aware Remedia playback-start event.
    */
   public handlePlaybackStarted(session: DiscordSession, event: StartedEvent): void {
+    this.applyPlaybackStarted(session, event, event);
+  }
+
+  private applyPlaybackStarted(session: DiscordSession, event: StartedEvent, rawEvent?: StartedEvent): void {
     if (event.transition) this.promote(session, event);
     else if (session === this.node.session && !this.matchOperation(session, event)) {
       this.#prepareRequest = null;
@@ -979,7 +983,7 @@ export class GuildQueue<Metadata = unknown> {
     operation.startEmitted = true;
     this.stats.tracksStarted++;
     this.emit(GuildQueueEvents.PlayerTrigger, operation.track, 'normal');
-    this.emit(GuildQueueEvents.PlayerStart, operation.track, event);
+    this.emit(GuildQueueEvents.PlayerStart, operation.track, rawEvent);
   }
 
   /**
@@ -996,7 +1000,7 @@ export class GuildQueue<Metadata = unknown> {
       const info = session.snapshot.source;
 
       if (info && event.continuation.entryId === reservation.entryId)
-        this.handlePlaybackStarted(session, {
+        this.applyPlaybackStarted(session, {
           sessionId: session.sessionId,
           nodeId: session.nodeId,
           guildId: this.guildId,
@@ -1160,17 +1164,21 @@ export class GuildQueue<Metadata = unknown> {
 
     this.#reservation = reservation;
     this.debugCrossfade(`preparation requested for ${reservation.entryId}`);
+    this.emit(GuildQueueEvents.WillPrepareNextTrack, track, event);
 
     void this.prepareStage(reservation).catch((error) => {
       if (this.#reservation === reservation) {
         void this.cancelPreparation();
-        this.emit(GuildQueueEvents.PlayerError, asError(error), track, undefined);
+        this.emit(GuildQueueEvents.StageFailed, track, asError(error), undefined);
       }
     });
   }
 
   private async prepareStage(reservation: Reservation): Promise<void> {
     const { operation } = reservation;
+
+    if (this.#reservation !== reservation || operation.controller.signal.aborted) return;
+
     const source = await this.manager.player.resolvePlaybackSource(
       operation.track,
       operation.session.nodeId,
@@ -1252,24 +1260,36 @@ export class GuildQueue<Metadata = unknown> {
   public handleStageEvent(
     session: DiscordSession,
     name: 'stageReady' | 'stageFailed' | 'stageInvalidated' | 'transitionCancelled',
-    event: DiscordSessionEvents['stageReady'][0] | DiscordSessionEvents['transitionCancelled'][0],
+    event:
+      | DiscordSessionEvents['stageReady'][0]
+      | DiscordSessionEvents['stageFailed'][0]
+      | DiscordSessionEvents['transitionCancelled'][0],
   ): void {
     if (session !== this.node.session || event.sessionId !== session.sessionId) return;
 
     this.debugCrossfade(`${name} for ${event.entryId}`);
 
-    if (
-      name === 'stageFailed' &&
-      this.#reservation?.entryId === event.entryId &&
-      'sourceRevision' in event &&
-      event.sourceRevision === this.#reservation.sourceRevision
-    ) {
-      this.emit(
-        GuildQueueEvents.PlayerError,
-        new Error('reason' in event ? String(event.reason) : 'Crossfade staging failed.'),
-        this.#reservation.operation.track,
-        undefined,
-      );
+    const staged = this.#reservation;
+    const track =
+      staged?.entryId === event.entryId &&
+      (!('sourceRevision' in event) || event.sourceRevision === staged.sourceRevision)
+        ? staged.operation.track
+        : null;
+
+    switch (name) {
+      case 'stageReady':
+        if ('sourceRevision' in event) this.emit('stageReady', track, event);
+        break;
+      case 'stageFailed':
+        if ('reason' in event) this.emit('stageFailed', track, new Error(String(event.reason)), event);
+        break;
+      case 'stageInvalidated':
+        if ('sourceRevision' in event) this.emit('stageInvalidated', track, event);
+        break;
+      case 'transitionCancelled':
+        if ('failedGeneration' in event)
+          this.emit('transitionCancelled', track ?? this.#operation?.track ?? null, event);
+        break;
     }
 
     if (name === 'transitionCancelled' && 'failedGeneration' in event) {
@@ -1332,7 +1352,7 @@ export class GuildQueue<Metadata = unknown> {
       snapshot.generation > (reservation.outgoing.generation ?? Infinity) &&
       snapshot.source
     ) {
-      this.handlePlaybackStarted(session, {
+      this.applyPlaybackStarted(session, {
         sessionId: session.sessionId,
         guildId: this.guildId,
         nodeId: session.nodeId,

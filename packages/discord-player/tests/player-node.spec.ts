@@ -197,7 +197,7 @@ it('keeps raw controls separate from managed queue state and forwards playback e
 
   for (const volume of [-1, 101, NaN, Infinity]) await expect(node.setVolume(volume)).rejects.toThrow(RangeError);
 
-  const events = ['playerPause', 'playerResume', 'playerSeek', 'voiceStateUpdate', 'error'] as const;
+  const events = ['playerPause', 'playerResume', 'playerSeek', 'voiceConnectionStateChange', 'error'] as const;
   const listeners = events.map((event) => {
     const listener = vi.fn();
 
@@ -206,9 +206,9 @@ it('keeps raw controls separate from managed queue state and forwards playback e
     return listener;
   });
 
-  session.emit('playbackPaused', {});
-  session.emit('playbackResumed', {});
-  session.emit('playbackSeeked', {});
+  session.emit('playbackPaused', { generation: session.generation });
+  session.emit('playbackResumed', { generation: session.generation });
+  session.emit('playbackSeeked', { generation: session.generation });
   session.emit('voiceStateChanged', {});
   session.emit('voiceFailed', { error: new Error('failed') });
 

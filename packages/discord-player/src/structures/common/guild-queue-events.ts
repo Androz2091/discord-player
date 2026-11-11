@@ -1,10 +1,37 @@
-import type { DiscordSessionEvents } from '@remedia/client';
+import type { DiscordSessionEvents, RemediaClientEvents } from '@remedia/client';
 import type { GuildQueue } from '../guild-queue.js';
 import type { PlayerTriggeredReason, TrackSkipReason } from '../guild-queue.js';
 import type { Track } from '../track.js';
 
 /** Familiar event names emitted by GuildQueue instances through `player.events`. */
 export const GuildQueueEvents = {
+  /** Queue observation for willPrepareNextTrack; native context is the final argument. */
+  WillPrepareNextTrack: 'willPrepareNextTrack',
+  /** Queue observation for stageReady; native context is the final argument. */
+  StageReady: 'stageReady',
+  /** Queue observation for stageFailed; native context is the final argument. */
+  StageFailed: 'stageFailed',
+  /** Queue observation for stageInvalidated; native context is the final argument. */
+  StageInvalidated: 'stageInvalidated',
+  /** Queue observation for transitionCancelled; native context is the final argument. */
+  TransitionCancelled: 'transitionCancelled',
+  /** Queue observation for sessionDisposed; native context is the final argument. */
+  SessionDisposed: 'sessionDisposed',
+  /** Queue observation for voiceConnectionStateChange; native context is the final argument. */
+  VoiceConnectionStateChange: 'voiceConnectionStateChange',
+  /** Queue observation for sessionEvent; native context is the final argument. */
+  SessionEvent: 'sessionEvent',
+  /** Queue observation for sessionResumed; native context is the final argument. */
+  SessionResumed: 'sessionResumed',
+  /** Queue observation for sessionLost; native context is the final argument. */
+  SessionLost: 'sessionLost',
+  /** Queue observation for guildAssigned; native context is the final argument. */
+  GuildAssigned: 'guildAssigned',
+  /** Queue observation for guildReleased; native context is the final argument. */
+  GuildReleased: 'guildReleased',
+  /** Queue observation for guildMigrated; native context is the final argument. */
+  GuildMigrated: 'guildMigrated',
+
   /** Emitted when one Track is added to the upcoming queue. */
   AudioTrackAdd: 'audioTrackAdd',
   /** Emitted when multiple Tracks are added to the upcoming queue. */
@@ -89,7 +116,62 @@ export type RawPlaybackTerminalEvent =
   | DiscordSessionEvents['playbackStopped'][0]
   | DiscordSessionEvents['playbackFailed'][0];
 
+/** Discriminated native session observation, including events rejected by queue correlation. */
+export type NativeSessionObservation = {
+  [Name in keyof DiscordSessionEvents]: [name: Name, rawEvent: DiscordSessionEvents[Name][0]];
+}[keyof DiscordSessionEvents];
+
+/** Queue lifecycle and native observation argument tuples. */
 export interface GuildQueueEventsMap {
+  /** Native session notification before queue correlation; never changes state itself. */
+  sessionEvent: QueueEventParams<NativeSessionObservation>;
+
+  /** Selected upcoming Track, before source preparation; retries may select it again. */
+  willPrepareNextTrack: QueueEventParams<[track: Track, rawEvent: DiscordSessionEvents['prepareRequested'][0]]>;
+
+  /** Staged source ready; null Track means its occurrence could not be correlated. */
+  stageReady: QueueEventParams<[track: Track | null, rawEvent: DiscordSessionEvents['stageReady'][0]]>;
+
+  /** Staging failure, separate from active playback failure. Local preparation has no native event. */
+  stageFailed: QueueEventParams<
+    [track: Track | null, error: Error, rawEvent: DiscordSessionEvents['stageFailed'][0] | undefined]
+  >;
+
+  /** Native stage invalidation. */
+  stageInvalidated: QueueEventParams<[track: Track | null, rawEvent: DiscordSessionEvents['stageInvalidated'][0]]>;
+
+  /** Native transition cancellation. */
+  transitionCancelled: QueueEventParams<
+    [track: Track | null, rawEvent: DiscordSessionEvents['transitionCancelled'][0]]
+  >;
+
+  /** Session released its native resources. */
+  sessionDisposed: QueueEventParams<[rawEvent: DiscordSessionEvents['sessionDisposed'][0]]>;
+
+  /** Remedia transport state, distinct from Discord Gateway member state. */
+  voiceConnectionStateChange: QueueEventParams<
+    [
+      previousState: DiscordSessionEvents['voiceStateChanged'][0]['previousState'],
+      state: DiscordSessionEvents['voiceStateChanged'][0]['state'],
+      rawEvent: DiscordSessionEvents['voiceStateChanged'][0],
+    ]
+  >;
+
+  /** Native sessionResumed projected only onto an existing owning queue. */
+  sessionResumed: QueueEventParams<[rawEvent: RemediaClientEvents['sessionResumed'][0]]>;
+
+  /** Native sessionLost projected only onto an existing owning queue. */
+  sessionLost: QueueEventParams<[rawEvent: RemediaClientEvents['sessionLost'][0]]>;
+
+  /** Native guildAssigned projected only onto an existing owning queue. */
+  guildAssigned: QueueEventParams<[rawEvent: RemediaClientEvents['guildAssigned'][0]]>;
+
+  /** Native guildReleased projected only onto an existing owning queue. */
+  guildReleased: QueueEventParams<[rawEvent: RemediaClientEvents['guildReleased'][0]]>;
+
+  /** Native guildMigrated projected only onto an existing owning queue. */
+  guildMigrated: QueueEventParams<[rawEvent: RemediaClientEvents['guildMigrated'][0]]>;
+
   /** One Track was added; arguments are queue and Track. */
   [GuildQueueEvents.AudioTrackAdd]: QueueEventParams<[track: Track]>;
 
@@ -115,7 +197,7 @@ export interface GuildQueueEventsMap {
   [GuildQueueEvents.Debug]: QueueEventParams<[message: string]>;
 
   /** Queue-scoped application error. */
-  [GuildQueueEvents.Error]: QueueEventParams<[error: Error]>;
+  [GuildQueueEvents.Error]: QueueEventParams<[error: Error, rawEvent?: DiscordSessionEvents['voiceFailed'][0]]>;
 
   /** Connected voice channel became empty. */
   [GuildQueueEvents.EmptyChannel]: QueueEventParams<[]>;
@@ -155,7 +237,9 @@ export interface GuildQueueEventsMap {
   [GuildQueueEvents.VoiceStateUpdate]: QueueEventParams<[event: DiscordSessionEvents['voiceStateChanged'][0]]>;
 
   /** Previous and new volume percentages. */
-  [GuildQueueEvents.VolumeChange]: QueueEventParams<[oldVolume: number, newVolume: number]>;
+  [GuildQueueEvents.VolumeChange]: QueueEventParams<
+    [oldVolume: number, newVolume: number, rawEvent?: DiscordSessionEvents['volumeChanged'][0]]
+  >;
 
   /** Remedia pause lifecycle event. */
   [GuildQueueEvents.PlayerPause]: QueueEventParams<[rawEvent: DiscordSessionEvents['playbackPaused'][0]]>;
@@ -181,7 +265,9 @@ export interface GuildQueueEventsMap {
   [GuildQueueEvents.DSPUpdate]: QueueEventParams<[oldFilters: unknown, newFilters: unknown]>;
 
   /** Legacy filter update event retained for consumer type compatibility. */
-  [GuildQueueEvents.AudioFiltersUpdate]: QueueEventParams<[oldFilters: unknown, newFilters: unknown]>;
+  [GuildQueueEvents.AudioFiltersUpdate]: QueueEventParams<
+    [oldFilters: string | null, newFilters: string | null, rawEvent?: DiscordSessionEvents['filterChanged'][0]]
+  >;
 
   /** Legacy channel population event retained for compatibility. */
   [GuildQueueEvents.ChannelPopulate]: QueueEventParams<[]>;

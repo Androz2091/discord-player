@@ -1,3 +1,4 @@
+import { EventEmitter } from 'node:events';
 import { vi } from 'vitest';
 import type { DiscordSession, DiscordSessionOptions, RemediaClient, NodeSnapshot } from '@remedia/client';
 import { FakeSession } from './remedia-session.js';
@@ -32,7 +33,7 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', 
       },
     },
   ] satisfies NodeSnapshot[];
-  const client = {
+  const client = Object.assign(new EventEmitter(), {
     nodes,
     getAssignment: vi.fn(() => undefined),
     createDiscordSession: vi.fn((options: DiscordSessionOptions) => {
@@ -49,7 +50,7 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', 
       return session;
     }),
     receive: vi.fn<RemediaClient['receive']>(),
-  };
+  });
 
   return {
     client,

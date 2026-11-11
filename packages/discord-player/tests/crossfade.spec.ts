@@ -266,7 +266,7 @@ describe('automatic crossfading', () => {
       .mockResolvedValue({ url: 'https://example.test/b' });
     const error = vi.fn();
 
-    player.events.on('playerError', error);
+    player.events.on('stageFailed', error);
     await queue.play([new TestTrack('a'), new TestTrack('b', resolver)]);
     session.requestPreparation();
     await settle();
@@ -314,7 +314,11 @@ describe('automatic crossfading', () => {
   });
 
   it('recovers a lost incoming start from continuation without replaying the source', async () => {
-    const { queue, session, b } = await prepare();
+    const { player, queue, session, b } = await prepare();
+    const start = vi.fn();
+
+    player.events.on('playerStart', start);
+
     const emit = session.emit.bind(session);
     const spy = vi
       .spyOn(session, 'emit')
@@ -326,13 +330,18 @@ describe('automatic crossfading', () => {
     await settle();
 
     expect(queue.currentTrack).toBe(b);
+    expect(start).toHaveBeenCalledExactlyOnceWith(queue, b, undefined);
     expect(queue.stats.tracksStarted).toBe(2);
     expect(queue.stats.tracksFinished).toBe(1);
     expect(session.playCalls).toBe(1);
   });
 
   it('recovers an already promoted source after reconnect', async () => {
-    const { queue, session, b } = await prepare();
+    const { player, queue, session, b } = await prepare();
+    const start = vi.fn();
+
+    player.events.on('playerStart', start);
+
     const emit = session.emit.bind(session);
     const spy = vi
       .spyOn(session, 'emit')
@@ -345,6 +354,7 @@ describe('automatic crossfading', () => {
     await settle();
 
     expect(queue.currentTrack).toBe(b);
+    expect(start).toHaveBeenCalledExactlyOnceWith(queue, b, undefined);
     expect(session.playCalls).toBe(1);
   });
 

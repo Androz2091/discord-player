@@ -54,8 +54,8 @@ These settings update both the connected session and the defaults for subsequent
 ## Handle voice recovery
 
 ```ts
-player.events.on('voiceStateUpdate', (queue, event) => {
-  if (event.state === 'reconnecting') {
+player.events.on('voiceConnectionStateChange', (queue, previousState, state, rawEvent) => {
+  if (state === 'reconnecting') {
     console.log('Recovering voice', queue.guildId);
   }
 });

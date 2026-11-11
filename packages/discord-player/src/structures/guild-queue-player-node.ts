@@ -1,9 +1,17 @@
 import { randomInt } from 'node:crypto';
 import { GuildQueuePlayerAudioFilters } from './guild-queue-player-audio-filters.js';
-import type { AudioStreamInfo, DiscordSession, DiscordSessionOptions, MediaSource, PlayOptions } from '@remedia/client';
+import type {
+  AudioStreamInfo,
+  DiscordSessionEvents,
+  DiscordSession,
+  DiscordSessionOptions,
+  MediaSource,
+  PlayOptions,
+} from '@remedia/client';
 import type { DiscordPlayer } from '../player.js';
 import type { GuildQueue } from './guild-queue.js';
 import type { Track } from './track.js';
+import type { NativeSessionObservation } from './common/guild-queue-events.js';
 
 /**
  * Remedia session configuration supplied when a queue node creates or connects its raw session.
@@ -82,6 +90,8 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   public readonly filters: GuildQueuePlayerAudioFilters<Metadata>;
 
   #volume = 100;
+
+  private detachSessionListeners: (() => void) | null = null;
 
   /**
    * Create raw playback controls for a guild queue.
@@ -185,9 +195,6 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
       this.rememberSessionConfiguration(existing);
 
-      if (existing.volume !== previousVolume)
-        this.queue.emit('volumeChange', previousVolume * 100, existing.volume * 100);
-
       return existing as DiscordSession<M>;
     }
 
@@ -229,9 +236,13 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     this.rememberSessionConfiguration(session);
     this.session = null;
     await this.queue.cancelPreparation();
-    session.removeAllListeners();
-    // Disconnect leaves the session registered in Remedia, preventing future queues from joining this guild.
-    await session.dispose();
+    // Keep native diagnostics attached through disposal, then release only our listeners.
+    try {
+      await session.dispose();
+    } finally {
+      this.detachSessionListeners?.();
+      this.detachSessionListeners = null;
+    }
     this.queue.emit('connectionDestroyed');
   }
 
@@ -307,28 +318,101 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   private attachSessionListeners(session: DiscordSession): void {
-    session.on('prepareRequested', (event) => this.queue.handlePrepareRequested(session, event));
+    this.detachSessionListeners?.();
+
+    const cleanups: (() => void)[] = [];
+    type SessionListener = <Name extends keyof DiscordSessionEvents>(
+      name: Name,
+      handler: (...args: DiscordSessionEvents[Name]) => void,
+    ) => void;
+
+    // Narrow Node's open EventEmitter overloads to Remedia's closed public event contract.
+    const subscribe = session.on.bind(session) as SessionListener;
+    const unsubscribe = session.off.bind(session) as SessionListener;
+    const on: SessionListener = (name, handler) => {
+      subscribe(name, handler);
+      cleanups.push(() => unsubscribe(name, handler));
+    };
+
+    // Native observation remains available even when generation correlation rejects an event.
+    const observe = <Name extends keyof DiscordSessionEvents>(name: Name) => {
+      on(name, (...args) => {
+        // A mapped tuple keeps event names correlated with their exported native payloads.
+        this.queue.emit('sessionEvent', ...([name, args[0]] as NativeSessionObservation));
+      });
+    };
+
+    for (const name of [
+      'playbackStarted',
+      'playbackCompleted',
+      'playbackStopped',
+      'playbackFailed',
+      'playbackPaused',
+      'playbackResumed',
+      'playbackSeeked',
+      'prepareRequested',
+      'stageReady',
+      'stageFailed',
+      'stageInvalidated',
+      'transitionCancelled',
+      'filterChanged',
+      'volumeChanged',
+      'voiceStateChanged',
+      'voiceFailed',
+      'sessionDisposed',
+    ] as const)
+      observe(name);
+
+    const active = () => session === this.session && !this.queue.destroyed;
+
+    on('prepareRequested', (event) => this.queue.handlePrepareRequested(session, event));
 
     for (const name of ['stageReady', 'stageFailed', 'stageInvalidated', 'transitionCancelled'] as const) {
-      session.on(name, (event) => this.queue.handleStageEvent(session, name, event));
+      on(name, (event) => this.queue.handleStageEvent(session, name, event));
     }
 
-    session.on('playbackStarted', (event) => this.queue.handlePlaybackStarted(session, event));
-    session.on('playbackCompleted', (event) => this.queue.handlePlaybackTerminal(session, 'natural', event));
-    session.on('playbackStopped', (event) => this.queue.handlePlaybackTerminal(session, 'stopped', event));
-    session.on('playbackFailed', (event) => this.queue.handlePlaybackTerminal(session, 'failed', event));
-    session.on('playbackPaused', (event) => this.queue.emit('playerPause', event));
-    session.on('playbackResumed', (event) => this.queue.emit('playerResume', event));
-    session.on('playbackSeeked', (event) => this.queue.emit('playerSeek', event));
+    on('playbackStarted', (event) => this.queue.handlePlaybackStarted(session, event));
+    on('playbackCompleted', (event) => this.queue.handlePlaybackTerminal(session, 'natural', event));
+    on('playbackStopped', (event) => this.queue.handlePlaybackTerminal(session, 'stopped', event));
+    on('playbackFailed', (event) => this.queue.handlePlaybackTerminal(session, 'failed', event));
+    on('playbackPaused', (event) => {
+      if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerPause', event);
+    });
+    on('playbackResumed', (event) => {
+      if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerResume', event);
+    });
+    on('playbackSeeked', (event) => {
+      if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerSeek', event);
+    });
+    on('volumeChanged', (event) => {
+      if (!active()) return;
 
-    session.on('voiceStateChanged', (event) => {
-      this.queue.emit('voiceStateUpdate', event);
+      this.#volume = event.volume * 100;
+      this.queue.options.volume = this.#volume;
+      this.queue.emit('volumeChange', event.previousVolume * 100, this.#volume, event);
+    });
+    on('filterChanged', (event) => {
+      if (!active()) return;
+
+      this.queue.options.filterGraph = event.graph;
+      this.queue.emit('audioFiltersUpdate', event.previousGraph, event.graph, event);
+    });
+    on('voiceStateChanged', (event) => {
+      if (!active()) return;
+
+      this.queue.emit('voiceConnectionStateChange', event.previousState, event.state, event);
 
       if (event.state === 'connected')
         void this.queue.reconcileCrossfade(session).catch((error) => this.player.emit('debug', String(error)));
     });
+    on('voiceFailed', (event) => {
+      if (active()) this.queue.emit('error', event.error, event);
+    });
+    on('sessionDisposed', (event) => this.queue.emit('sessionDisposed', event));
 
-    session.on('voiceFailed', (event) => this.queue.emit('error', event.error));
+    this.detachSessionListeners = () => {
+      for (const cleanup of cleanups) cleanup();
+    };
   }
 
   private assertQueueAlive(): void {
@@ -391,7 +475,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     this.#volume = volumePercentage;
     this.queue.options.volume = volumePercentage;
 
-    if (previous !== volumePercentage) this.queue.emit('volumeChange', previous, volumePercentage);
+    if (!session && previous !== volumePercentage) this.queue.emit('volumeChange', previous, volumePercentage);
 
     return this.#volume;
   }

@@ -261,12 +261,28 @@ export class FakeSession
       await this.disconnect();
     } finally {
       this.onDispose?.();
+      this.emit('sessionDisposed', {
+        sessionId: this.sessionId,
+        guildId: this.guildId,
+        nodeId: this.nodeId,
+        generation: this.generation,
+      });
     }
   }
 
   /** Set linear gain. */
   public async setVolume(gain: number): Promise<void> {
+    const previousVolume = this.volume;
+
     this.volume = gain;
+    this.emit('volumeChanged', {
+      sessionId: this.sessionId,
+      guildId: this.guildId,
+      nodeId: this.nodeId,
+      generation: this.generation,
+      previousVolume,
+      volume: gain,
+    });
   }
 
   /** Set the Gateway self-deaf flag. */
