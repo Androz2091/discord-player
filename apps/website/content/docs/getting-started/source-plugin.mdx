@@ -1,9 +1,11 @@
 ---
-title: 2. Resolve a media source
-description: Register a small, fully implemented source plugin for direct HTTP(S) audio.
+title: 2. Add a source
+description: Play direct audio URLs with a small source plugin.
 ---
 
-Unlike a static metadata record, a source plugin answers two separate questions: _does this query match?_ and _how does this Track become playable audio?_ Define a plugin for direct media URLs.
+Discord Player needs a source plugin to turn a query into playable media. For now, we'll support direct MP3, Ogg, and WAV URLs.
+
+Create `src/direct-media.ts`:
 
 ```ts title="src/direct-media.ts"
 import { definePlugin, Track } from 'discord-player';
@@ -11,7 +13,6 @@ import { definePlugin, Track } from 'discord-player';
 export const directMedia = definePlugin({
   id: 'example.direct-media',
   kind: 'source',
-
   setup(ctx) {
     ctx.on('search.query.match', ({ query }) =>
       /^https?:\/\/.*\.(mp3|ogg|wav)(\?.*)?$/i.test(query) ? { score: 100 } : null,
@@ -27,46 +28,15 @@ export const directMedia = definePlugin({
       ],
     }));
 
-    ctx.on('track.stream', ({ track }, { signal }) => {
-      signal.throwIfAborted();
-
-      return { url: track.url };
-    });
+    ctx.on('track.stream', ({ track }) => ({ url: track.url }));
   },
 });
 ```
 
-Add the plugin to the Player constructor **before** `initialize()`:
+The Player in step 1 already registers this plugin with `plugins: [directMedia()]`. Don't create a second Player.
 
-```ts
-import { directMedia } from './direct-media.js';
+This example accepts direct audio file URLs, not website pages or search terms. **Do not allow untrusted users to submit arbitrary URLs to this example in production.** Validate allowed hosts and redirects and block private-network destinations first.
 
-const player = new Player({
-  nodes: [{ id: 'local', type: 'embedded' }],
-  plugins: [directMedia()],
+Once you're ready to add more providers, see [source plugins](/docs/plugins) and [legacy extractor compatibility](/docs/plugins/legacy-extractors).
 
-  send: (guildId, payload) => sendGateway(guildId, payload),
-});
-```
-
-Here `sendGateway` is your own function from [step 1](/docs/getting-started/create-player), not a function exported by discord-player. Add `plugins: [directMedia()]` to that existing Player instead of constructing a second one.
-
-## Test source discovery
-
-```ts
-const result = await player.search('https://media.example.com/track.mp3');
-
-console.log(result.tracks[0]?.title);
-```
-
-The result includes one Track and a portable source reference. When playback starts, `track.stream` returns `{ url }` for Remedia to decode.
-
-<Callout type="warn" title="Example, not an unrestricted URL proxy">
-  This tiny source is intentionally limited to direct URLs with recognizable audio extensions. In a production bot,
-  enforce URL/domain policies, handle redirects safely, and validate sources before allowing public users to submit
-  arbitrary addresses.
-</Callout>
-
-A plugin is **required** for string queries. A plain `new Track({ url })` with no matching source registration is metadata, not an audio decoder.
-
-<NextStep href="/docs/getting-started/play-track" label="3. Play the first track" />
+<NextStep href="/docs/getting-started/play-track" label="3. Play a track" />
