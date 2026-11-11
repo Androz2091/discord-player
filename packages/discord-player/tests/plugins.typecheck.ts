@@ -2,7 +2,6 @@ import { BaseExtractor, type DiscordPlayer, type Track, definePlugin, type Plugi
 
 const source = definePlugin<{ path: string; enabled?: boolean }>({
   id: 'org.example.file',
-  kind: 'source',
 
   setup(ctx) {
     const path: string = ctx.options.path;
@@ -36,9 +35,9 @@ source();
 // @ts-expect-error required field
 source({ enabled: true });
 
-definePlugin<{ optional?: string }>({ id: 'optional', kind: 'source', setup() {} })();
+definePlugin<{ optional?: string }>({ id: 'optional', setup() {} })();
 
-definePlugin({ id: 'none', kind: 'source', setup() {} })();
+definePlugin({ id: 'none', setup() {} })();
 
 // @ts-expect-error runtime execution is reserved
 definePlugin({ id: 'runtime', kind: 'runtime', setup() {} });

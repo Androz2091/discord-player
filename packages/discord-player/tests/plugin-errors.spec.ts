@@ -9,7 +9,7 @@ it('rejects invalid registration shapes, unsupported kinds and duplicate operati
   const host = new DiscordPlayer({ nodes: [], send() {} }).plugins;
 
   for (const descriptor of [null, {}, { definition: { id: 'runtime', kind: 'runtime', setup() {} } }]) {
-    await expect(host.register(descriptor as never)).rejects.toThrow('source plugin');
+    await expect(host.register(descriptor as never)).rejects.toThrow('plugin registration');
   }
 
   expect(() => host.defineOperation('track.stream', 'first')).toThrow('already defined');
@@ -20,7 +20,6 @@ it('rejects invalid registration shapes, unsupported kinds and duplicate operati
     host.register(
       definePlugin({
         id: 'invalid',
-        kind: 'source',
 
         setup(ctx) {
           ctx.on('unknown' as never, () => undefined);
@@ -30,7 +29,7 @@ it('rejects invalid registration shapes, unsupported kinds and duplicate operati
   ).rejects.toThrow('Undefined operation');
 
   await host.destroy();
-  await expect(host.register(definePlugin({ id: 'later', kind: 'source', setup() {} })())).rejects.toThrow('destroyed');
+  await expect(host.register(definePlugin({ id: 'later', setup() {} })())).rejects.toThrow('destroyed');
 });
 
 it('cleans every resource on failed setup and retains setup, destroy and cleanup failures', async () => {
@@ -43,7 +42,6 @@ it('cleans every resource on failed setup and retains setup, destroy and cleanup
     host.register(
       definePlugin({
         id: 'failure',
-        kind: 'source',
 
         setup(ctx) {
           ctx.onCleanup(cleanup);
@@ -69,7 +67,6 @@ it('cleans every resource on failed setup and retains setup, destroy and cleanup
     plugins: [
       definePlugin({
         id: 'good',
-        kind: 'source',
 
         setup() {},
 
@@ -79,7 +76,6 @@ it('cleans every resource on failed setup and retains setup, destroy and cleanup
       })(),
       definePlugin({
         id: 'bad',
-        kind: 'source',
 
         setup() {
           throw new Error('setup failed');
@@ -100,7 +96,6 @@ it.each(['direct', 'wrapped'] as const)('disposes a late %s stream after operati
   await host.register(
     definePlugin({
       id: 'late',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('track.stream', () => pending.promise);
@@ -127,7 +122,6 @@ it('uses explicit bridge fallback only for declined stream operations and attrib
   await host.register(
     definePlugin({
       id: 'source',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('track.stream', () => undefined);
@@ -138,7 +132,6 @@ it('uses explicit bridge fallback only for declined stream operations and attrib
   await host.register(
     definePlugin({
       id: 'bridge',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('track.bridge', () => ({ url: 'https://example.test/fallback' }));
@@ -151,12 +144,11 @@ it('uses explicit bridge fallback only for declined stream operations and attrib
   expect(await host.resolveStream(track)).toEqual({ url: 'https://example.test/fallback' });
 
   await host.unregister('bridge');
-  await expect(host.resolveStream(track)).rejects.toThrow('No source plugin handled');
+  await expect(host.resolveStream(track)).rejects.toThrow('No source plugin is available');
 
   await host.register(
     definePlugin({
       id: 'thrower',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('track.stream', () => {
@@ -184,7 +176,6 @@ it('does not execute later snapshot handlers after their registration has been r
   await host.register(
     definePlugin({
       id: 'first',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on(
@@ -201,7 +192,6 @@ it('does not execute later snapshot handlers after their registration has been r
   await host.register(
     definePlugin({
       id: 'later',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('track.stream.resolved', called);

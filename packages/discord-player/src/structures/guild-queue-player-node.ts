@@ -9,8 +9,8 @@ import type {
   PlayOptions,
 } from '@remedia/client';
 import type { DiscordPlayer } from '../player.js';
-import type { GuildQueue } from './guild-queue.js';
-import type { Track } from './track.js';
+import type { TrackResolvable, GuildQueue, GuildQueuePlayOptions, GuildQueuePlayResult } from './guild-queue.js';
+import { Track } from './track.js';
 import type { NativeSessionObservation } from './common/guild-queue-events.js';
 
 /**
@@ -63,9 +63,6 @@ export interface PlayRawResult<Metadata = unknown> {
   /** Remedia session that owns the playback generation. */
   session: DiscordSession<Metadata>;
 }
-
-/** Raw playback result with an optional application Track association. */
-export type GuildQueuePlayerNodePlayResult<Metadata = unknown> = PlayRawResult<Metadata> & { track?: Track };
 
 function timecode(milliseconds: number): string {
   const seconds = Math.max(0, Math.floor(milliseconds / 1000));
@@ -194,6 +191,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       }
 
       this.rememberSessionConfiguration(existing);
+      this.queue.voice.connected(existing);
 
       return existing as DiscordSession<M>;
     }
@@ -212,6 +210,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     try {
       await session.connect(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs });
       this.rememberSessionConfiguration(session);
+      this.queue.voice.connected(session);
     } catch (error) {
       await this.destroySessionUnlocked();
 
@@ -233,8 +232,10 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     if (!session) return;
 
+    this.queue.invalidateSession(session);
     this.rememberSessionConfiguration(session);
     this.session = null;
+    this.queue.voice.connected(null);
     await this.queue.cancelPreparation();
     // Keep native diagnostics attached through disposal, then release only our listeners.
     try {
@@ -402,6 +403,8 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
       this.queue.emit('voiceConnectionStateChange', event.previousState, event.state, event);
 
+      if (event.state === 'connected') this.queue.voice.connected(session);
+
       if (event.state === 'connected')
         void this.queue.reconcileCrossfade(session).catch((error) => this.player.emit('debug', String(error)));
     });
@@ -427,40 +430,54 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     this.queue.options.filterGraph = session.snapshot.filterGraph;
   }
 
-  /**
-   * Play a resolved Remedia source. This method has no queue or history side effects and never advances the queue.
-   * @param source Resolved Remedia media source.
-   * @param options Remedia playback options and custom metadata.
-   * @returns Remedia stream information and the owning session.
+  /** Play a Track through the managed queue, preserving v7 scheduling.
+   * @param track Canonical Track to enqueue or start.
+   * @param options Managed playback and connection options.
+   * @returns Managed queue result.
    */
-  public async play<M = unknown>(source: MediaSource, options?: PlayOptions<M>): Promise<PlayRawResult<M>> {
+  public play<M = unknown>(track: Track, options?: GuildQueuePlayOptions<M>): Promise<GuildQueuePlayResult<M>>;
+
+  /** Start the next queued Track when idle.
+   * @param track Omit or pass null to select the next occurrence.
+   * @returns Selected Track, or null.
+   */
+  public play(track?: null): Promise<Track | null>;
+
+  /** Play a native descriptor without scheduling managed Tracks.
+   * @param source Resolved native media source.
+   * @param options Native playback options.
+   * @returns Native stream information and owning session.
+   */
+  public play<M = unknown>(source: MediaSource, options?: PlayOptions<M>): Promise<PlayRawResult<M>>;
+
+  public async play<M = unknown>(
+    source?: MediaSource | Track | null,
+    options?: GuildQueuePlayOptions<M>,
+  ): Promise<PlayRawResult<M> | GuildQueuePlayResult<M> | Track | null> {
+    if (source == null) return this.queue.playNext();
+    if (source instanceof Track) return this.queue.play(source, options);
+
+    this.assertQueueAlive();
+    const session = this.getSession<M>();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     this.assertQueueAlive();
 
-    const session = this.getSession<M>();
+    if (session !== this.session) throw new Error('Queue session changed before playback; retry on the current queue.');
+    options?.signal?.throwIfAborted();
     const audioStream = await session.play(source, options);
 
     return { audioStream, session };
   }
 
   /**
-   * Compatibility spelling for the raw play method.
-   * @param source Resolved Remedia media source.
-   * @param options Remedia playback options and custom metadata.
-   */
-  public playRaw<M = unknown>(source: MediaSource, options?: PlayOptions<M>): Promise<PlayRawResult<M>> {
-    return this.play(source, options);
-  }
-
-  /**
-   * Set player volume using Discord Player's 0–100 percentage convention.
-   * @param volumePercentage Volume percentage; Remedia receives a linear gain from zero through one.
+   * Set player volume using Discord Player's 0–200 percentage convention.
+   * @param volumePercentage Volume percentage; Remedia receives a linear gain from zero through two.
    * @returns The applied percentage volume.
    */
   public async setVolume(volumePercentage: number): Promise<number> {
-    if (!Number.isFinite(volumePercentage) || volumePercentage < 0 || volumePercentage > 100) {
-      throw new RangeError('Volume must be a finite percentage between 0 and 100.');
+    if (!Number.isFinite(volumePercentage) || volumePercentage < 0 || volumePercentage > 200) {
+      throw new RangeError('Volume must be a finite percentage between 0 and 200.');
     }
 
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
@@ -480,6 +497,59 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     return this.#volume;
   }
 
+  /** Locate an upcoming Track using the queue's reference resolution.
+   * @param track Track, ID, title, URL or upcoming index.
+   * @returns Index, or -1 when absent.
+   */
+  public getTrackPosition(track: TrackResolvable): number {
+    return this.queue.getTrackPosition(track);
+  }
+
+  /** Whether native source preparation is in progress. */
+  public isBuffering(): boolean {
+    return this.queue.isBuffering() || this.session?.state === 'starting';
+  }
+
+  /** Remove an upcoming Track through the queue's canonical mutation path.
+   * @param track Track reference or upcoming index.
+   * @param emitEvent Whether to emit the queue removal event.
+   */
+  public remove(track: TrackResolvable, emitEvent = true): Track | undefined {
+    return this.queue.removeTrack(track, emitEvent);
+  }
+
+  /** Insert an upcoming Track.
+   * @param track Track to insert.
+   * @param index Upcoming position, default zero.
+   */
+  public insert(track: Track, index = 0): void {
+    this.queue.insertTrack(track, index);
+  }
+
+  /** Move an upcoming Track.
+   * @param track Track reference or upcoming index.
+   * @param index Destination position.
+   */
+  public move(track: TrackResolvable, index = 0): void {
+    this.queue.moveTrack(track, index);
+  }
+
+  /** Copy an upcoming occurrence.
+   * @param track Track reference or upcoming index.
+   * @param index Destination position.
+   */
+  public copy(track: TrackResolvable, index = 0): void {
+    this.queue.copyTrack(track, index);
+  }
+
+  /** Swap upcoming occurrences.
+   * @param first First Track reference or index.
+   * @param second Second Track reference or index.
+   */
+  public swap(first: TrackResolvable, second: TrackResolvable): void {
+    this.queue.swapTracks(first, second);
+  }
+
   /**
    * Seek raw playback to a media position.
    * @param positionMs Requested position in milliseconds; negative values are clamped to zero.
@@ -493,6 +563,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /** Pause raw playback in the current Remedia session. */
   public async pause(): Promise<void> {
+    this.queue.voice.manualPause();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     await this.getSession().pause();
@@ -500,6 +571,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /** Resume raw playback in the current Remedia session. */
   public async resume(): Promise<void> {
+    this.queue.voice.manualPause();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     await this.getSession().resume();
@@ -536,9 +608,11 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     return this.queue.jump(track);
   }
 
-  /** Stop queue-managed playback while retaining upcoming tracks. */
-  public stop(): Promise<void> {
-    return this.queue.stop();
+  /** Stop queue-managed playback while retaining upcoming tracks.
+   * @param force Destroy the queue immediately instead of applying stop policy.
+   */
+  public stop(force = false): Promise<void> {
+    return force ? this.queue.destroy() : this.queue.stop();
   }
 
   /**
@@ -554,7 +628,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     this.queue.handleSessionStopped();
   }
 
-  /** Current volume in Discord Player's 0–100 percentage convention. */
+  /** Current volume in Discord Player's 0–200 percentage convention. */
   public get volume(): number {
     return this.session ? this.session.volume * 100 : this.#volume;
   }

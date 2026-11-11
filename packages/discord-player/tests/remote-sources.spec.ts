@@ -113,8 +113,15 @@ async function deployment(hostId = 'sources-1', token?: string) {
   };
 }
 
-function player(sourceHosts: { hostId: string; url: string; token?: string; timeoutMs?: number }[]) {
-  const instance = new DiscordPlayer({ nodes: [], send() {}, sourceHosts });
+function player(
+  sourceHosts: { hostId: string; url: string; token?: string; timeoutMs?: number }[],
+  providerId = RemoteExtractor.identifier,
+) {
+  const instance = new DiscordPlayer({
+    nodes: [],
+    send() {},
+    plugins: sourceHosts.map((remoteHost) => definePlugin({ id: providerId, remoteHost })()),
+  });
 
   cleanup.push(() => instance.destroy());
 
@@ -142,20 +149,31 @@ it('searches real HTTP, reconstructs canonical models and retains only durable i
   expect(restored.sourceReference).toEqual(track.sourceReference);
   expect(restored.sourceState).toBeUndefined();
   expect(JSON.stringify(host.requests)).not.toMatch(/local credential|Discord object|secret/);
-  expect(host.requests.map((r) => r.path)).toEqual(['/.well-known/remedia', '/remedia/v1/execute']);
+  expect(host.requests.map((r) => r.path)).toEqual([
+    '/.well-known/remedia',
+    '/remedia/v1/execute',
+    '/remedia/v1/execute',
+  ]);
 });
 
-it('routes overlapping provider IDs by deployment, local first and remote in declared order', async () => {
+it('routes overlapping provider IDs by deployment with shared priority and registration order', async () => {
   const a = await deployment('a');
   const b = await deployment('b');
   const bot = player([a, b]);
 
   expect((await bot.search('one')).tracks[0]?.sourceReference?.hostId).toBe('a');
   expect(
-    (await bot.search('two', { hostId: 'b', pluginId: RemoteExtractor.identifier })).tracks[0]?.sourceReference?.hostId,
+    (await bot.search('two', { hostId: 'b', searchEngine: RemoteExtractor.identifier })).tracks[0]?.sourceReference
+      ?.hostId,
   ).toBe('b');
 
   await bot.extractors.register(RemoteExtractor);
+  expect((await bot.search('tie')).tracks[0]?.sourceReference?.hostId).toBe('a');
+  await bot.extractors.unregister(RemoteExtractor.identifier);
+  class PreferredLocal extends RemoteExtractor {
+    override priority = 2;
+  }
+  await bot.extractors.register(PreferredLocal);
 
   expect((await bot.search('local')).tracks[0]?.sourceReference?.hostId).toBeUndefined();
   expect((await bot.search('blocked', { blockExtractors: [RemoteExtractor.identifier] })).isEmpty()).toBe(true);
@@ -171,7 +189,7 @@ it('never retries authentication failures on another host', async () => {
 
   await expect(bot.search('music')).rejects.toThrow('HTTP 401');
 
-  expect(b.requests).toHaveLength(0);
+  expect(b.requests.some((request) => request.body?.input?.operation === 'search.query.resolve')).toBe(false);
   expect(a.requests).toHaveLength(2);
 });
 
@@ -191,7 +209,6 @@ it.each(['caller', 'timeout', 'destroy'] as const)('aborts real HTTP metadata re
   await host.host.plugins.register(
     definePlugin({
       id: 'slow',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('search.query.match', () => ({ score: 1 }));
@@ -218,7 +235,7 @@ it.each(['caller', 'timeout', 'destroy'] as const)('aborts real HTTP metadata re
     })(),
   );
 
-  const bot = player([{ ...host, timeoutMs: mode === 'timeout' ? 500 : 5000 }]);
+  const bot = player([{ ...host, timeoutMs: mode === 'timeout' ? 500 : 5000 }], 'slow');
   const controller = new AbortController();
   const pending = bot.search('slow', { signal: controller.signal });
   const rejected = expect(pending).rejects.toThrow();
@@ -244,7 +261,9 @@ it('queues and stages operation descriptors without local extraction or a bot me
     nodeType: 'remote',
     crossfadeAvailable: true,
     queueOptions: { crossfade: { enabled: true } },
-    playerOptions: { sourceHosts: [host] },
+    playerOptions: {
+      plugins: [host].map((remoteHost) => definePlugin({ id: RemoteExtractor.identifier, remoteHost })()),
+    },
   });
 
   cleanup.push(() => bot.destroy());
@@ -288,7 +307,12 @@ it.each(['embedded', 'remote'] as const)(
   'rejects a %s node lacking host access without local fallback',
   async (nodeType) => {
     const host = await deployment();
-    const { player: bot, queue } = await setup({ nodeType, playerOptions: { sourceHosts: [host] } });
+    const { player: bot, queue } = await setup({
+      nodeType,
+      playerOptions: {
+        plugins: [host].map((remoteHost) => definePlugin({ id: RemoteExtractor.identifier, remoteHost })()),
+      },
+    });
 
     cleanup.push(() => bot.destroy());
 
@@ -313,7 +337,9 @@ it('carries all queued host requirements into session creation and fences custom
     nodeType: 'remote',
     crossfadeAvailable: true,
     queueOptions: { crossfade: { enabled: true }, selectNode },
-    playerOptions: { sourceHosts: [a, b] },
+    playerOptions: {
+      plugins: [a, b].map((remoteHost) => definePlugin({ id: RemoteExtractor.identifier, remoteHost })()),
+    },
   });
 
   cleanup.push(() => bot.destroy());
@@ -337,15 +363,15 @@ it('carries all queued host requirements into session creation and fences custom
   expect(selectNode.mock.lastCall?.[0]).toHaveLength(0);
 });
 
-it('rejects an unavailable host without retaining a URL and accepts recovery at the configured endpoint', async () => {
+it('rejects an unavailable deployment registration and accepts recovery at the configured endpoint', async () => {
   const host = await deployment();
-  const bot = player([host]);
-
+  const bot = new DiscordPlayer({ nodes: [], send() {} });
+  cleanup.push(() => bot.destroy());
+  const registration = definePlugin({ id: RemoteExtractor.identifier, remoteHost: host });
   await host.host.close();
-  await expect(bot.search('unavailable')).rejects.toThrow('Source host sources-1');
-
+  await expect(bot.plugins.register(registration())).rejects.toThrow('Source host sources-1');
   await host.restart();
-
+  await bot.plugins.register(registration());
   expect((await bot.search('recovered')).tracks[0]?.sourceReference?.hostId).toBe(host.hostId);
 });
 
@@ -356,7 +382,12 @@ it.each(['skip', 'stop', 'delete'] as const)('cancels pending native operation p
     queue,
     session,
     backend,
-  } = await setup({ nodeType: 'remote', playerOptions: { sourceHosts: [host] } });
+  } = await setup({
+    nodeType: 'remote',
+    playerOptions: {
+      plugins: [host].map((remoteHost) => definePlugin({ id: RemoteExtractor.identifier, remoteHost })()),
+    },
+  });
 
   cleanup.push(() => bot.destroy());
   backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: [host.hostId] };
@@ -399,7 +430,9 @@ it('clears a pending native stage before waiting for its preparation lock', asyn
     nodeType: 'remote',
     crossfadeAvailable: true,
     queueOptions: { crossfade: { enabled: true } },
-    playerOptions: { sourceHosts: [host] },
+    playerOptions: {
+      plugins: [host].map((remoteHost) => definePlugin({ id: RemoteExtractor.identifier, remoteHost })()),
+    },
   });
 
   cleanup.push(() => bot.destroy());
@@ -449,11 +482,11 @@ it('rejects provider failures and mismatched deployment identity without retryin
 
   await expect(bot.search('provider-failure')).rejects.toThrow('HTTP 502');
 
-  expect(b.requests).toHaveLength(0);
+  expect(b.requests.some((request) => request.body?.input?.operation === 'search.query.resolve')).toBe(false);
 
   const incorrect = player([{ ...a, hostId: 'wrong-deployment' }, b]);
 
-  await expect(incorrect.search('music')).rejects.toThrow('invalid Track identity');
+  await expect(incorrect.search('music')).rejects.toThrow('identity does not match');
 
-  expect(b.requests).toHaveLength(0);
+  expect(b.requests.some((request) => request.body?.input?.operation === 'search.query.resolve')).toBe(false);
 });

@@ -27,7 +27,6 @@ describe('managed queue playback', () => {
     await player.plugins.register(
       definePlugin({
         id: 'org.example.http',
-        kind: 'source',
 
         setup(ctx) {
           ctx.on('search.query.match', ({ query }) => (/^https?:/.test(query) ? { score: 100 } : null));
@@ -171,7 +170,7 @@ describe('managed queue playback', () => {
     resolveDestroy({ url: pendingDestroy.url });
     await expect(playDestroyed).resolves.toMatchObject({ playerResult: null });
 
-    expect(player.queues.has(queue.guildId)).toBe(false);
+    expect(player.nodes.has(queue.guildId)).toBe(false);
     expect(sessions[0]!.disconnectCalls).toBe(1);
     expect(session.playCalls).toBe(0);
   });
@@ -260,7 +259,7 @@ describe('managed queue playback', () => {
     queue.setRepeatMode(QueueRepeatMode.AUTOPLAY);
     queue.clear();
 
-    const autoplayBoundary = vi.fn();
+    const autoplayBoundary = vi.fn((_queue, _tracks, done) => done(null));
 
     player.events.on(GuildQueueEvents.WillAutoPlay, autoplayBoundary);
     session.complete();
@@ -475,7 +474,7 @@ describe('managed queue playback', () => {
 
     expect(queue.size).toBe(3);
     expect(queue.id).toBe(queue.guildId);
-    expect(player.nodes).toBe(player.queues);
+    expect(player.nodes).toBe(player.nodes);
     expect(queue.maxSize).toBe(queue.getMaxSize());
   });
 
@@ -506,8 +505,8 @@ describe('managed queue playback', () => {
   it('isolates AsyncLocalStorage contexts across Player instances and guild IDs', async () => {
     const firstPlayer = new DiscordPlayer({ nodes: [], send: vi.fn() });
     const secondPlayer = new DiscordPlayer({ nodes: [], send: vi.fn() });
-    const firstQueue = await firstPlayer.queues.create('guild-a');
-    const secondQueue = await secondPlayer.queues.create('guild-b');
+    const firstQueue = await firstPlayer.nodes.create('guild-a');
+    const secondQueue = await secondPlayer.nodes.create('guild-b');
     const first = firstPlayer.context.provide({ guildId: 'guild-a' }, async () => {
       await new Promise((resolve) => setTimeout(resolve, 5));
 

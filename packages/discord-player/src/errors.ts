@@ -26,23 +26,6 @@ export class QueueCapacityError extends DiscordPlayerError {
   }
 }
 
-/** Error thrown when an API is waiting for an upstream Remedia capability. */
-export class UnsupportedRemediaCapabilityError extends DiscordPlayerError {
-  /**
-   * Create an unsupported-capability error naming the required API.
-   * @param capability Remedia method or behavior required by the operation.
-   */
-  public constructor(
-    /** Remedia method or behavior required by the operation. */
-    capability: string,
-  ) {
-    super(
-      `This operation requires the Remedia ${capability} API, which is not available in the installed client.`,
-      DiscordPlayerErrorCode.UnsupportedRemediaCapability,
-    );
-  }
-}
-
 /** Error thrown when a navigation or lookup operation has no matching result. */
 export class NoResultError extends DiscordPlayerError {
   /**

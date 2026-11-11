@@ -29,7 +29,7 @@ it('selects explicit skip targets both while idle and during active playback', a
   await queue.destroy();
   await queue.stop();
 
-  expect(player.queues.has(queue.id)).toBe(false);
+  expect(player.nodes.has(queue.id)).toBe(false);
 });
 
 it('cancels a pending source when skipping to a target and never starts the late source', async () => {
@@ -175,14 +175,14 @@ it('validates queue policies and disconnected playback before inserting resource
   expect(() => queue.setRepeatMode(-1 as never)).toThrow(RangeError);
   expect(() => queue.append(new Track(), -1)).toThrow(RangeError);
 
-  await expect(queue.connect({ channelId: 'voice', volume: 101 })).rejects.toThrow(RangeError);
+  await expect(queue.connect({ channelId: 'voice', volume: 201 })).rejects.toThrow(RangeError);
   await queue.node.destroySession();
   await expect(queue.play(new TestTrack('missing-session'))).rejects.toThrow('voice session');
 
   expect(queue.size).toBe(0);
 
-  await player.destroy();
   await expect(player.createQueue('invalid', { volume: -1 })).rejects.toThrow(RangeError);
+  await player.destroy();
 });
 
 it('keeps upcoming tracks when disconnected navigation cannot start playback', async () => {

@@ -1,8 +1,11 @@
+import { SyncedLyricsProvider } from './synced-lyrics.js';
+import type { StreamHooks } from '../hooks.js';
+import { VoiceStateTracker } from '../voice-state.js';
 import { randomInt, randomUUID } from 'node:crypto';
 import type { DiscordSession, DiscordSessionEvents, NodeSelection, PlayOptions } from '@remedia/client';
 import { AsyncQueue } from '../utils/async-queue.js';
-import type { GuildQueueManager } from '../managers/guild-queue.manager.js';
-import { GuildQueueHistoryManager } from '../managers/guild-queue-history.manager.js';
+import type { GuildNodeManager } from '../managers/guild-queue.manager.js';
+import { GuildQueueHistory } from '../managers/guild-queue-history.manager.js';
 import { Queue } from './common/queue.js';
 import { QueueCapacityError } from '../errors.js';
 import { GuildQueueEvents, type GuildQueueEventsMap } from './common/guild-queue-events.js';
@@ -67,9 +70,24 @@ export type CrossfadeOptions =
     };
 
 /** Initialization defaults and policies for one guild queue. */
-export interface GuildQueueOptions<Metadata = unknown> {
+export interface GuildQueueOptions<Metadata = unknown> extends StreamHooks {
   /** Automatic crossfading for this queue; overrides the Player default at session creation. */
   crossfade?: CrossfadeOptions;
+
+  /** Destroy after confirmed voice-channel emptiness; requires an authoritative resolver. */
+  leaveOnEmpty?: boolean;
+  /** Empty-channel leave delay in milliseconds; defaults to zero. */
+  leaveOnEmptyCooldown?: number;
+  /** Destroy after natural queue exhaustion. */
+  leaveOnEnd?: boolean;
+  /** Natural exhaustion leave delay in milliseconds; defaults to zero. */
+  leaveOnEndCooldown?: number;
+  /** Destroy after managed playback stops. */
+  leaveOnStop?: boolean;
+  /** Stop leave delay in milliseconds; defaults to zero. */
+  leaveOnStopCooldown?: number;
+  /** Automatically pause on confirmed empty occupancy and resume only policy-owned pauses. */
+  pauseOnEmpty?: boolean;
 
   /** Arbitrary application metadata stored on the queue. */
   metadata?: Metadata;
@@ -89,7 +107,7 @@ export interface GuildQueueOptions<Metadata = unknown> {
   /** Repeat policy used after natural playback completion. */
   repeatMode?: QueueRepeatMode;
 
-  /** Initial volume percentage, from 0 to 100. */
+  /** Initial volume percentage, from 0 to 200. */
   volume?: number;
 
   /** Raw Remedia filtergraph applied to new sessions; null clears filtering. */
@@ -110,7 +128,7 @@ export interface GuildQueueConnectOptions extends Omit<
   /** Voice channel to connect to or move the existing session into. */
   channelId: string;
 
-  /** Percentage volume to initialize or apply, from zero through one hundred. */
+  /** Percentage volume to initialize or apply, from zero through two hundred. */
   volume?: number;
 
   /** Raw Remedia filtergraph to initialize or apply; null clears filtering. */
@@ -137,7 +155,7 @@ export interface GuildQueuePlayOptions<Metadata = unknown> extends PlayOptions<M
   /** Optional Discord self-mute state to initialize or apply. */
   selfMute?: boolean;
 
-  /** Volume percentage, from zero through one hundred. */
+  /** Volume percentage, from zero through two hundred. */
   volume?: number;
 
   /** Raw Remedia filtergraph to apply before playback; null clears filtering. */
@@ -236,6 +254,21 @@ function asError(value: unknown): Error {
 
 /** OOP manager for upcoming tracks, playback policy, history, and queue lifecycle. */
 export class GuildQueue<Metadata = unknown> {
+  /** Owning Player, preserving the v7 queue access pattern. */
+  public get player() {
+    return this.manager.player;
+  }
+
+  /** V7 deletion state, backed by the same lifetime as destroyed. */
+  public get deleted(): boolean {
+    return this.destroyed;
+  }
+
+  /** Queue filter controls, shared with the raw node. */
+  public get filters() {
+    return this.node.filters;
+  }
+
   /** Upcoming managed tracks, ordered from next to last. */
   public readonly tracks: Queue<Track>;
 
@@ -243,7 +276,7 @@ export class GuildQueue<Metadata = unknown> {
   public readonly node: GuildQueuePlayerNode<Metadata>;
 
   /** Previous-track history and navigation manager. */
-  public readonly history: GuildQueueHistoryManager<Metadata>;
+  public readonly history: GuildQueueHistory<Metadata>;
 
   /** Keyed async locks used to serialize conflicting queue operations. */
   public readonly tasks: AsyncQueue;
@@ -255,6 +288,26 @@ export class GuildQueue<Metadata = unknown> {
     tracksFinished: 0,
     tracksFailed: 0,
   };
+
+  /** Demand-driven synchronized lyrics for the current Track. */
+  public readonly syncedLyrics: SyncedLyricsProvider;
+
+  /** V7 spelling for the same synchronized lyrics provider. */
+  public get syncedLyricsProvider(): SyncedLyricsProvider {
+    return this.syncedLyrics;
+  }
+
+  /** Canonical Gateway state and queue policy tracker. @internal */
+  public readonly voice: VoiceStateTracker;
+
+  /** Queue-scoped source override, before provider resolution. */
+  public onBeforeCreateStream: StreamHooks['onBeforeCreateStream'];
+  /** Queue-scoped descriptor interception. */
+  public onStreamExtracted: StreamHooks['onStreamExtracted'];
+  /** Queue-scoped local encoded-byte interception. */
+  public onAfterCreateStream: StreamHooks['onAfterCreateStream'];
+
+  #autoplayController: AbortController | null = null;
 
   #currentTrack: Track | null = null;
 
@@ -275,6 +328,8 @@ export class GuildQueue<Metadata = unknown> {
   #committing = false;
 
   #destroyed = false;
+
+  #destruction: Promise<void> | null = null;
 
   readonly #lifetimeController = new AbortController();
 
@@ -307,7 +362,7 @@ export class GuildQueue<Metadata = unknown> {
    */
   public constructor(
     /** The manager that owns and caches this queue. */
-    public readonly manager: GuildQueueManager,
+    public readonly manager: GuildNodeManager,
 
     /** Discord guild snowflake or another stable application guild identifier. */
     public readonly guildId: string,
@@ -317,9 +372,14 @@ export class GuildQueue<Metadata = unknown> {
   ) {
     if (
       options.volume !== undefined &&
-      (!Number.isFinite(options.volume) || options.volume < 0 || options.volume > 100)
+      (!Number.isFinite(options.volume) || options.volume < 0 || options.volume > 200)
     ) {
-      throw new RangeError('Queue volume must be a finite percentage between 0 and 100.');
+      throw new RangeError('Queue volume must be a finite percentage between 0 and 200.');
+    }
+
+    for (const cooldown of [options.leaveOnEmptyCooldown, options.leaveOnEndCooldown, options.leaveOnStopCooldown]) {
+      if (cooldown !== undefined && (!Number.isFinite(cooldown) || cooldown < 0 || cooldown > 2147483647))
+        throw new RangeError('Queue leave cooldowns must be finite milliseconds from 0 through 2147483647.');
     }
 
     this.#maxSize = normalizeLimit(options.maxSize, Infinity);
@@ -329,7 +389,12 @@ export class GuildQueue<Metadata = unknown> {
     this.tasks = new AsyncQueue();
     this.tracks.onMutation = () => this.queueChanged();
     this.node = new GuildQueuePlayerNode(this);
-    this.history = new GuildQueueHistoryManager(this);
+    this.history = new GuildQueueHistory(this);
+    this.voice = new VoiceStateTracker(this);
+    this.syncedLyrics = new SyncedLyricsProvider(this);
+    this.onBeforeCreateStream = options.onBeforeCreateStream;
+    this.onStreamExtracted = options.onStreamExtracted;
+    this.onAfterCreateStream = options.onAfterCreateStream;
     this.emit(GuildQueueEvents.QueueCreate);
   }
 
@@ -343,7 +408,11 @@ export class GuildQueue<Metadata = unknown> {
     event: Event,
     ...args: GuildQueueEventsMap[Event] extends [unknown, ...infer Rest] ? Rest : never
   ): boolean {
-    if (this.#destroyed && event !== GuildQueueEvents.QueueDelete) return false;
+    if (this.#destroyed && !['queueDelete', 'sessionEvent', 'sessionDisposed', 'connectionDestroyed'].includes(event))
+      return false;
+
+    this.voice?.onEvent(event);
+    this.syncedLyrics?.handleEvent(event, args[0] instanceof Track ? args[0] : null);
 
     const emitter = this.manager.player.events as unknown as {
       emit(event: string | symbol, ...args: unknown[]): boolean;
@@ -456,12 +525,21 @@ export class GuildQueue<Metadata = unknown> {
     this.addTrack(tracks);
   }
 
+  /** Find an upcoming Track using the canonical queue reference rules.
+   * @param track Track, ID, URL, title or upcoming index.
+   * @returns Upcoming index, or -1 when absent.
+   */
+  public getTrackPosition(track: TrackResolvable): number {
+    return this.resolveTrackIndex(this.tracks.toArray(), track);
+  }
+
   /**
    * Remove the first matching Track, ID, title, URL, or numeric queue index.
    * @param track Track reference, identifier, title, URL, or zero-based upcoming index.
+   * @param emitEvent Whether to emit audioTrackRemove, default true.
    * @returns The removed Track, or `undefined` when no match exists.
    */
-  public removeTrack(track: TrackResolvable): Track | undefined {
+  public removeTrack(track: TrackResolvable, emitEvent = true): Track | undefined {
     this.assertAlive();
 
     const items = this.tracks.toArray();
@@ -474,7 +552,7 @@ export class GuildQueue<Metadata = unknown> {
 
     const removed = this.tracks.removeAt(index);
 
-    if (removed) this.emit(GuildQueueEvents.AudioTrackRemove, removed);
+    if (removed) if (emitEvent) this.emit(GuildQueueEvents.AudioTrackRemove, removed);
 
     return removed;
   }
@@ -674,6 +752,11 @@ export class GuildQueue<Metadata = unknown> {
     return this.#shuffle;
   }
 
+  /** Whether managed source preparation or native startup is pending. */
+  public isBuffering(): boolean {
+    return this.#operation?.phase === 'preparing' || this.#operation?.phase === 'starting';
+  }
+
   /** Whether a queue-managed playback generation is active, including paused playback. */
   public isPlaying(): boolean {
     return !!this.#operation && !this.#operation.terminal;
@@ -766,6 +849,7 @@ export class GuildQueue<Metadata = unknown> {
     reason: TrackSkipReason = TrackSkipReason.Manual,
     description = 'Skipped by user',
   ): Promise<Track | null> {
+    this.#autoplayController?.abort();
     return this.terminateCurrent('skip', reason, description);
   }
 
@@ -863,13 +947,17 @@ export class GuildQueue<Metadata = unknown> {
 
   /** Stop managed playback while retaining upcoming tracks. */
   public async stop(): Promise<void> {
+    this.#autoplayController?.abort();
     using _lock = await this.tasks.acquire('queue.playback-transition');
 
     if (this.#destroyed) return;
 
     const operation = this.#operation;
 
-    if (!operation) return;
+    if (!operation) {
+      this.emit(GuildQueueEvents.PlayerStop, null, undefined);
+      return;
+    }
 
     await this.cancelPreparation();
     operation.requestedReason = 'stop';
@@ -883,27 +971,30 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   /** Abort the queue lifetime signal and source preparation, close the session, clear state, and remove it from the manager. */
-  public async destroy(): Promise<void> {
-    if (this.#destroyed) return;
+  public destroy(): Promise<void> {
+    if (this.#destruction) return this.#destruction;
 
     this.#destroyed = true;
+    this.#destruction = Promise.resolve().then(async () => {
+      await preparation;
+      using _lock = await this.tasks.acquire('queue.playback-transition');
+      this.#operation = null;
+      this.#currentTrack = null;
+      this.tracks.clear();
+      this.history.clear();
+      try {
+        await this.node.destroySession();
+      } finally {
+        this.manager.cache.delete(this.guildId);
+        this.emit(GuildQueueEvents.QueueDelete);
+      }
+    });
     this.#lifetimeController.abort();
-    void this.cancelPreparation();
-
+    const preparation = this.cancelPreparation();
     for (const operation of this.#outgoing.values()) operation.controller.abort();
-
     this.#outgoing.clear();
     this.#operation?.controller.abort(new Error('Guild queue destroyed.'));
-
-    using _lock = await this.tasks.acquire('queue.playback-transition');
-
-    this.#operation = null;
-    this.#currentTrack = null;
-    this.tracks.clear();
-    this.history.clear();
-    await this.node.destroySession();
-    this.manager.cache.delete(this.guildId);
-    this.emit(GuildQueueEvents.QueueDelete);
+    return this.#destruction;
   }
 
   /** Alias for `destroy()`. */
@@ -963,6 +1054,15 @@ export class GuildQueue<Metadata = unknown> {
       work = this.beginTrackLocked(track, {});
     }
     await work;
+  }
+
+  /** Cancel source work owned by a session being replaced or disposed.
+   * @internal
+   * @param session Exact session losing ownership.
+   */
+  public invalidateSession(session: DiscordSession): void {
+    if (this.#operation?.session === session) this.#operation.controller.abort(new Error('Queue session replaced.'));
+    for (const operation of this.#outgoing.values()) if (operation.session === session) operation.controller.abort();
   }
 
   /**
@@ -1080,11 +1180,13 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   private policyChanged(): void {
+    this.#autoplayController?.abort();
     this.#decisionRevision++;
     this.reprepareAfterMutation();
   }
 
   private queueChanged(): void {
+    this.#autoplayController?.abort();
     this.#decisionRevision++;
 
     if (!this.#committing && this.#prepareRequest && (!this.#reservation || !this.reservationValid(this.#reservation)))
@@ -1193,6 +1295,7 @@ export class GuildQueue<Metadata = unknown> {
       operation.track,
       operation.session.nodeId,
       operation.controller.signal,
+      this,
     );
     using _lock = await this.tasks.acquire('queue.crossfade-stage');
 
@@ -1388,6 +1491,90 @@ export class GuildQueue<Metadata = unknown> {
     }
   }
 
+  private async autoplay(track: Track, revision: number): Promise<PlayRawResult | null> {
+    const controller = new AbortController();
+    this.#autoplayController = controller;
+    const signal = AbortSignal.any([controller.signal, this.signal]);
+    try {
+      const reference = track.sourceReference;
+      const result = await this.manager.player.plugins.execute(
+        'track.related',
+        { track },
+        {
+          pluginId: reference?.pluginId,
+          hostId: reference?.hostId ?? null,
+          signal,
+          blocked: this.manager.player.options.blockExtractors,
+        },
+      );
+      if (signal.aborted || this.#operation || this.size || revision !== this.#decisionRevision) return null;
+      const candidates = (result?.tracks ?? []).filter(
+        (item) => item.id !== track.id && (!track.url || item.url !== track.url),
+      );
+      const next = await this.chooseAutoplayTrack(candidates, signal);
+      if (signal.aborted || this.#operation || this.size || revision !== this.#decisionRevision) return null;
+      this.#autoplayController = null;
+      if (next) return (await this.play(next)).playerResult;
+      this.voice.ended();
+      this.emit(GuildQueueEvents.EmptyQueue);
+      return null;
+    } catch (error) {
+      if (!signal.aborted) {
+        this.emit(GuildQueueEvents.Error, asError(error));
+        this.voice.ended();
+        this.emit(GuildQueueEvents.EmptyQueue);
+      }
+      return null;
+    } finally {
+      if (this.#autoplayController === controller) this.#autoplayController = null;
+    }
+  }
+
+  private chooseAutoplayTrack(tracks: Track[], signal: AbortSignal): Promise<Track | null> {
+    signal.throwIfAborted();
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      const abort = () => {
+        if (settled) return;
+        settled = true;
+        signal.removeEventListener('abort', abort);
+        reject(signal.reason);
+      };
+      const done = (track: Track | null) => {
+        if (settled) return;
+        settled = true;
+        signal.removeEventListener('abort', abort);
+        if (track !== null && !(track instanceof Track))
+          reject(new TypeError('willAutoPlay done() requires a Track or null.'));
+        else resolve(track);
+      };
+      signal.addEventListener('abort', abort, { once: true });
+      try {
+        const handled = this.emit(GuildQueueEvents.WillAutoPlay, tracks, done);
+        if (!handled) {
+          const history = this.history.tracks.toArray();
+          done(
+            tracks.find(
+              (candidate) =>
+                !history.some(
+                  (previous) => previous.id === candidate.id || (!!candidate.url && previous.url === candidate.url),
+                ),
+            ) ??
+              tracks[0] ??
+              null,
+          );
+        }
+      } catch (error) {
+        signal.removeEventListener('abort', abort);
+        if (settled) this.emit(GuildQueueEvents.Error, asError(error));
+        else {
+          settled = true;
+          reject(error);
+        }
+      }
+    });
+  }
+
   private async processTerminal(
     operation: ManagedOperation,
     kind: PlaybackTerminalKind,
@@ -1510,13 +1697,11 @@ export class GuildQueue<Metadata = unknown> {
     }
 
     if (!next && reason === 'natural' && this.#repeatMode === QueueRepeatMode.AUTOPLAY) {
-      this.emit(GuildQueueEvents.WillAutoPlay, track);
-      this.emit(GuildQueueEvents.EmptyQueue);
-
-      return null;
+      return this.autoplay(track, this.#decisionRevision);
     }
 
     if (!next) {
+      if (reason === 'natural') this.voice.ended();
       this.emit(GuildQueueEvents.EmptyQueue);
 
       return null;
@@ -1603,7 +1788,12 @@ export class GuildQueue<Metadata = unknown> {
     signal: AbortSignal,
   ): Promise<PlayRawResult<GuildQueuePlaybackMetadata<PlaybackMetadata>> | null> {
     try {
-      const source = await this.manager.player.resolvePlaybackSource(operation.track, operation.session.nodeId, signal);
+      const source = await this.manager.player.resolvePlaybackSource(
+        operation.track,
+        operation.session.nodeId,
+        signal,
+        this,
+      );
 
       let pending: Promise<PlayRawResult<GuildQueuePlaybackMetadata<PlaybackMetadata>>>;
 
@@ -1614,6 +1804,11 @@ export class GuildQueue<Metadata = unknown> {
 
         if (this.#destroyed || this.#operation !== operation || operation.terminal || signal.aborted) return null;
 
+        if (operation.session !== this.node.session) {
+          if ('stream' in source) source.stream.destroy();
+          operation.controller.abort(new Error('Queue session replaced during source preparation.'));
+          throw operation.controller.signal.reason;
+        }
         operation.phase = 'starting';
 
         const customMetadata: GuildQueuePlaybackMetadata<PlaybackMetadata> = {
@@ -1717,9 +1912,9 @@ export class GuildQueue<Metadata = unknown> {
   ): Promise<DiscordSession> {
     if (
       options.volume !== undefined &&
-      (!Number.isFinite(options.volume) || options.volume < 0 || options.volume > 100)
+      (!Number.isFinite(options.volume) || options.volume < 0 || options.volume > 200)
     ) {
-      throw new RangeError('Queue volume must be a finite percentage between 0 and 100.');
+      throw new RangeError('Queue volume must be a finite percentage between 0 and 200.');
     }
 
     const existing = this.node.getSession(false);

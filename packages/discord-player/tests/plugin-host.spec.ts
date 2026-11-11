@@ -60,7 +60,7 @@ it('keeps remote state and affinity through queue and history while rejecting lo
     );
     const result = host.deserializeSourceResult((await response.json()).result);
     const track = result.tracks[0]!;
-    const queue = await player.queues.create('remote-guild');
+    const queue = await player.nodes.create('remote-guild');
 
     queue.addTrack(track);
 

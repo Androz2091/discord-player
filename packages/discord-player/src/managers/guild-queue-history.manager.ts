@@ -5,7 +5,7 @@ import type { Track } from '../structures/track.js';
 import { NoResultError } from '../errors.js';
 
 /** Previous-track history and navigation for a GuildQueue. */
-export class GuildQueueHistoryManager<Metadata = unknown> {
+export class GuildQueueHistory<Metadata = unknown> {
   /** Player instance that owns this history manager. */
   public readonly player: DiscordPlayer;
 

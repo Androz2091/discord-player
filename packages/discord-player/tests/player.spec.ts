@@ -27,7 +27,6 @@ it('initializes sources before Remedia and keeps host options out of the client 
     plugins: [
       definePlugin({
         id: 'source',
-        kind: 'source',
 
         async setup() {
           await settle();
@@ -95,7 +94,6 @@ it('cleans source resources when Remedia initialization fails and retains both f
     plugins: [
       definePlugin({
         id: 'source',
-        kind: 'source',
 
         setup(ctx) {
           ctx.onCleanup(cleanup);
@@ -117,7 +115,6 @@ it('cleans source resources when Remedia initialization fails and retains both f
     plugins: [
       definePlugin({
         id: 'source',
-        kind: 'source',
 
         setup() {},
 
@@ -157,7 +154,7 @@ it('orchestrates channel resolution, queue defaults and managed playback', async
   const { player, queue, session } = await setup();
   const track = new TestTrack('first');
   const result = await player.play({ id: 'voice-one', guild: { id: queue.id } }, track, {
-    queueOptions: { metadata: 'retained' },
+    nodeOptions: { metadata: 'retained' },
     customMetadata: 'one',
   });
 
@@ -166,7 +163,7 @@ it('orchestrates channel resolution, queue defaults and managed playback', async
   expect(session.playCalls).toBe(1);
   expect(player.statistics).toEqual({ queues: 1, upcomingTracks: 0, activeQueues: 1 });
   expect(player.getQueue(queue.id)).toBe(queue);
-  expect(player.nodes).toBe(player.queues);
+  expect(player.nodes.player).toBe(player);
 
   await expect(player.play('voice', track)).rejects.toThrow('guildId');
 
@@ -181,4 +178,14 @@ it('orchestrates channel resolution, queue defaults and managed playback', async
   expect(session.playCalls).toBe(2);
   expect(await player.deleteQueue(queue.id)).toBe(true);
   expect(player.statistics.queues).toBe(0);
+});
+
+it('defaults to embedded execution without requiring beginners to configure native nodes', async () => {
+  const backend = createRemediaMock();
+  const create = vi.spyOn(RemediaClient, 'create').mockResolvedValue(backend.asClient());
+  const player = new DiscordPlayer({ send() {} });
+  await player.initialize('123');
+  expect(create.mock.lastCall?.[0].nodes).toEqual([{ id: 'local', type: 'embedded' }]);
+  await player.destroy();
+  expect(backend.client.close).toHaveBeenCalledOnce();
 });

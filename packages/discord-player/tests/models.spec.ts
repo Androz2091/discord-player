@@ -1,5 +1,4 @@
 import { expect, it, vi } from 'vitest';
-import { EventEmitter } from 'node:events';
 import {
   Track,
   Playlist,
@@ -7,11 +6,10 @@ import {
   BaseExtractor,
   QueryType,
   Util,
-  UnsupportedRemediaCapabilityError,
+  SourceUnavailableError,
   DiscordPlayerErrorCode,
 } from '../src/index.js';
 import { SafeEventEmitter } from '../src/utils/safe-event-emitter.js';
-import { DerivedEventEmitter } from '../src/utils/derived-event-emitter.js';
 
 it('keeps Track metadata, requesters, durations and display helpers consistent', async () => {
   const track = new Track({ title: 'Title', author: 'Author', duration: '1:02:03', url: 'https://example.test/audio' });
@@ -76,31 +74,15 @@ it('creates legacy and modern playlists with normalized entries and finite durat
   expect(Playlist.deserialize(playlist.toJSON()).tracks.every((track) => track.playlist)).toBe(true);
 });
 
-it('provides safe error events, derived emitter forwarding and stable capability error codes', () => {
+it('provides safe error events and stable source error codes', () => {
   const safe = new SafeEventEmitter<{ error: [Error] }>();
 
   expect(() => safe.emit('error', new Error('safe'))).not.toThrow();
 
-  const Derived = DerivedEventEmitter<EventEmitter>('target');
-  const derived = new Derived();
+  const error = new SourceUnavailableError('missingProvider');
 
-  expect(derived.emit('event', 'value')).toBe(false);
-
-  const target = new EventEmitter();
-
-  Object.assign(derived, { target });
-
-  const listener = vi.fn();
-
-  target.on('event', listener);
-
-  expect(derived.emit('event', 'value')).toBe(true);
-  expect(listener).toHaveBeenCalledWith('value');
-
-  const error = new UnsupportedRemediaCapabilityError('missingMethod');
-
-  expect(error.code).toBe(DiscordPlayerErrorCode.UnsupportedRemediaCapability);
-  expect(error.message).toContain('missingMethod');
+  expect(error.code).toBe(DiscordPlayerErrorCode.SourceUnavailable);
+  expect(error.message).toContain('missingProvider');
 });
 
 it('retains base legacy behavior and anonymous query and duration helpers', async () => {

@@ -9,7 +9,6 @@ it('rejects duplicate IDs and attributes setup, handler and teardown failures', 
   const cleanup = vi.fn();
   const failed = definePlugin({
     id: 'failed',
-    kind: 'source',
 
     setup(ctx) {
       ctx.onCleanup(cleanup);
@@ -25,7 +24,6 @@ it('rejects duplicate IDs and attributes setup, handler and teardown failures', 
 
   const source = definePlugin({
     id: 'source',
-    kind: 'source',
 
     setup(ctx) {
       ctx.on('track.stream', () => {
@@ -58,7 +56,6 @@ it('aborts and drains in-flight handlers before cleanup and propagates caller ca
   await host.register(
     definePlugin({
       id: 'slow',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('track.stream', async (_, { signal }) => {
@@ -109,7 +106,6 @@ it('cleans setup failures without leaking other constructor registrations', asyn
     plugins: [
       definePlugin({
         id: 'good',
-        kind: 'source',
 
         setup(ctx) {
           ctx.onCleanup(cleanup);
@@ -117,7 +113,6 @@ it('cleans setup failures without leaking other constructor registrations', asyn
       })(),
       definePlugin({
         id: 'bad',
-        kind: 'source',
 
         setup() {
           throw new Error('failed');
@@ -138,7 +133,6 @@ it('drains setup/removal races and executes cleanup exactly once in reverse orde
   const setup = host.register(
     definePlugin({
       id: 'pending',
-      kind: 'source',
 
       async setup(ctx) {
         ctx.onCleanup(() => {
@@ -174,7 +168,6 @@ it('drains setup/removal races and executes cleanup exactly once in reverse orde
   await host.register(
     definePlugin({
       id: 'pending',
-      kind: 'source',
 
       setup(ctx) {
         const remove = ctx.on('track.stream', () => 'https://example.test/removed');
@@ -197,7 +190,6 @@ it('removes all registrations even when one destructor fails', async () => {
   await p.plugins.register(
     definePlugin({
       id: 'failure',
-      kind: 'source',
 
       setup() {},
 
@@ -210,7 +202,6 @@ it('removes all registrations even when one destructor fails', async () => {
   await p.plugins.register(
     definePlugin({
       id: 'success',
-      kind: 'source',
 
       setup(ctx) {
         ctx.onCleanup(cleanup);

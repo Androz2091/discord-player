@@ -168,7 +168,7 @@ it('forwards client lifecycle events globally and projects existing guild owners
     expect(listener).toHaveBeenCalledExactlyOnceWith(events[name]);
   }
 
-  expect(player.queues.cache.size).toBe(1);
+  expect(player.nodes.cache.size).toBe(1);
   await player.destroy();
   expect(backend.client.eventNames()).toEqual([]);
 });

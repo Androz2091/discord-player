@@ -7,7 +7,6 @@ import {
   Playlist,
   SerializationError,
   serialize,
-  SourceUnavailableError,
   Track,
   type Serializable,
   type SerializedEntityUnion,
@@ -245,7 +244,7 @@ describe('versioned serialization', () => {
     expect(restoredPlaylist.serialize()).not.toHaveProperty('$encoder_version');
     expect(restoredPlaylist.serialize().data.tracks[0]!.data).not.toHaveProperty('extractor');
 
-    await expect(restoredTrack.getStreamableSource()).rejects.toBeInstanceOf(SourceUnavailableError);
+    expect('getStreamableSource' in restoredTrack).toBe(false);
   });
 
   it('rejects unsupported legacy entity types and requester records without identity', () => {

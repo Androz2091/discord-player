@@ -112,3 +112,30 @@ it('keeps lifetime signals aborted when resource cleanup fails', async () => {
   expect(player.signal.aborted).toBe(true);
   expect(queue.signal.aborted).toBe(true);
 });
+
+it('shares reentrant destruction and awaits signal-consumer teardown before closing the Player', async () => {
+  const { player, queue, session, backend } = await setup();
+  const cleanup = deferred<void>();
+  vi.spyOn(session, 'dispose').mockImplementation(() => cleanup.promise);
+  let consumer: Promise<void> | undefined;
+  player.signal.addEventListener('abort', () => {
+    consumer = queue.destroy();
+  });
+  const destruction = player.destroy();
+  expect(player.destroy()).toBe(destruction);
+  expect(queue.destroy()).toBe(consumer);
+  await settle();
+  expect(backend.client.close).not.toHaveBeenCalled();
+  cleanup.resolve();
+  await destruction;
+  expect(backend.client.close).toHaveBeenCalledOnce();
+  await expect(player.createQueue('after')).rejects.toMatchObject({ name: 'AbortError' });
+});
+
+it('removes failed queue resources from the manager and closes the backend while preserving the failure', async () => {
+  const { player, queue, session, backend } = await setup();
+  vi.spyOn(session, 'dispose').mockRejectedValue(new Error('disposal failed'));
+  await expect(player.destroy()).rejects.toThrow('disposal failed');
+  expect(player.nodes.has(queue.id)).toBe(false);
+  expect(backend.client.close).toHaveBeenCalledOnce();
+});

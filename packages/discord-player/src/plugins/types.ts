@@ -1,6 +1,6 @@
 export { definePlugin } from '@discord-player/plugin-host';
 export type {
-  SourceReference,
+  ProviderReference,
   SourceStream,
   DispatchPolicy,
   Operation,
@@ -10,7 +10,7 @@ export type {
   SourceRelatedRequest,
   SourceBridgeRequest,
   SourceStreamTransform,
-  SourceOperationMap,
+  OperationMap,
   OperationName,
   OperationInput,
   OperationOutput,
@@ -18,9 +18,8 @@ export type {
   OperationContext,
   OperationHandler,
   HandlerOptions,
-  SourcePluginContext,
-  SourcePluginDefinition,
-  RuntimePluginDefinition,
+  PluginContext,
+  PluginDefinition,
   PluginRegistration,
   PluginFactory,
 } from '@discord-player/plugin-host';

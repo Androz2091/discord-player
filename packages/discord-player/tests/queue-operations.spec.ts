@@ -6,15 +6,18 @@ import { settle } from './mocks/async.js';
 it('resolves guild queues and retains their original options and identities', async () => {
   const { player, queue } = await setup();
 
-  expect(player.queues.resolve(queue.id)).toBe(queue);
-  expect(player.queues.resolve({ id: queue.id })).toBe(queue);
-  expect(player.queues.resolve({ guildId: queue.id })).toBe(queue);
-  expect(player.queues.resolve('missing')).toBeNull();
-  expect(player.queues.has(queue.id)).toBe(true);
+  expect(player.nodes.resolveId(queue)).toBe(queue.id);
+  expect(player.nodes.get({ id: queue.id })).toBe(queue);
+  expect(player.nodes.has({ guildId: queue.id })).toBe(true);
+  expect(player.nodes.resolve(queue.id)).toBe(queue);
+  expect(player.nodes.resolve({ id: queue.id })).toBe(queue);
+  expect(player.nodes.resolve({ guildId: queue.id })).toBe(queue);
+  expect(player.nodes.resolve('missing')).toBeNull();
+  expect(player.nodes.has(queue.id)).toBe(true);
   expect(await player.createQueue(queue.id, { metadata: 'ignored' })).toBe(queue);
-  expect(await player.queues.delete('missing')).toBe(false);
-  expect(await player.queues.delete(queue.id)).toBe(true);
-  expect(player.queues.has(queue.id)).toBe(false);
+  expect(await player.nodes.delete('missing')).toBe(false);
+  expect(await player.nodes.delete(queue.id)).toBe(true);
+  expect(player.nodes.has(queue.id)).toBe(false);
 });
 
 it('supports track insertion, lookup, mutation and capacity limits without partial changes', async () => {

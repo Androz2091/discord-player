@@ -35,6 +35,7 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', 
   ] satisfies NodeSnapshot[];
   const client = Object.assign(new EventEmitter(), {
     nodes,
+    close: vi.fn(async () => {}),
     getAssignment: vi.fn(() => undefined),
     createDiscordSession: vi.fn((options: DiscordSessionOptions) => {
       if (activeSessions.has(options.guildId))

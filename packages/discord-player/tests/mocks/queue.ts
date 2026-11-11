@@ -49,7 +49,6 @@ export async function setup(
   await player.plugins.register(
     definePlugin({
       id: 'fixture',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('track.stream', ({ track }, { signal }) => (track as TestTrack).resolver(signal));
@@ -64,7 +63,7 @@ export async function setup(
 
   player.remedia = backend.asClient();
 
-  const queue = await player.queues.create('guild-one', {
+  const queue = await player.nodes.create('guild-one', {
     maxSize: options.maxSize,
     maxHistorySize: options.maxHistorySize,
     ...options.queueOptions,

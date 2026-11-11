@@ -68,10 +68,10 @@ it('runs published 7.2 SoundCloud handle, validate, related, URL streaming and r
 
   expect(await sc.validate(info.permalink_url, QueryType.SOUNDCLOUD_TRACK)).toBe(true);
 
-  const result = await remote(h, 'source.resolve', {
-    query: info.permalink_url,
-    pluginId: sc.identifier,
-    options: { searchEngine: QueryType.SOUNDCLOUD_TRACK },
+  const result = await remote(h, 'metadata.execute', {
+    providerId: sc.identifier,
+    operation: 'search.query.resolve',
+    input: { query: info.permalink_url, providerHint: QueryType.SOUNDCLOUD_TRACK },
   });
   const track = deserializeSourceResult(result).tracks[0]!;
 
@@ -82,7 +82,6 @@ it('runs published 7.2 SoundCloud handle, validate, related, URL streaming and r
     await h.plugins.resolveStream(
       (
         await h.runtime.search(info.permalink_url, {
-          pluginId: sc.identifier,
           searchEngine: QueryType.SOUNDCLOUD_TRACK,
         })
       ).tracks[0]!,
@@ -125,18 +124,15 @@ it('runs published Spotify and Apple Music createStream and bridge paths without
     { title: 'apple', artist: { name: 'artist' }, url: 'https://music.apple.com/song', duration: 1000, thumbnail: '' },
   ] as never);
 
-  expect(
-    (await h.runtime.search('apple', { pluginId: apple.identifier, searchEngine: QueryType.APPLE_MUSIC_SEARCH }))
-      .tracks[0],
-  ).toBeInstanceOf(Track);
+  expect((await h.runtime.search('apple', { searchEngine: QueryType.APPLE_MUSIC_SEARCH })).tracks[0]).toBeInstanceOf(
+    Track,
+  );
 
   const sc = (await h.extractors.register(SoundCloudExtractor as unknown as typeof BaseExtractor)) as any;
 
   vi.spyOn(sc, 'bridge').mockResolvedValue('https://cdn.example.com/bridge.mp3');
 
-  const tracks = (
-    await h.runtime.search('song', { pluginId: spotify.identifier, searchEngine: QueryType.SPOTIFY_SEARCH })
-  ).tracks;
+  const tracks = (await h.runtime.search('song', { searchEngine: QueryType.SPOTIFY_SEARCH })).tracks;
 
   expect(tracks[0]).toBeInstanceOf(Track);
   expect(await h.plugins.resolveStream(tracks[0]!)).toEqual({ url: 'https://cdn.example.com/bridge.mp3' });
@@ -193,7 +189,7 @@ it('runs published Attachment direct URL and encoded Readable branches', async (
     wav.writeUInt32LE(1600, 40);
     await writeFile(file, wav);
 
-    const resolved = await h.runtime.search(file, { pluginId: attachment.identifier, searchEngine: QueryType.FILE });
+    const resolved = await h.runtime.search(file, { searchEngine: QueryType.FILE });
     const local = resolved.tracks[0]!;
 
     expect(local.raw.engine).toBe(file);

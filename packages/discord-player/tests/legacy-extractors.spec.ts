@@ -11,7 +11,6 @@ it('adapts legacy lifecycle, raw data, protocols, priority, blocking and reconfi
   await p.plugins.register(
     definePlugin({
       id: 'modern',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('search.query.match', () => ({ score: 100 }));
@@ -52,7 +51,7 @@ it('rejects instances and modern definitions at the legacy registration boundary
   ).rejects.toThrow('constructor');
 
   await expect(
-    Reflect.apply(p.extractors.register, p.extractors, [definePlugin({ id: 'modern', kind: 'source', setup() {} })()]),
+    Reflect.apply(p.extractors.register, p.extractors, [definePlugin({ id: 'modern', setup() {} })()]),
   ).rejects.toThrow('constructor');
 });
 

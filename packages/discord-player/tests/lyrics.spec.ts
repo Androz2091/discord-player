@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DiscordPlayer, NoResultError } from '../src/index.js';
+import { LrcLib } from '@discord-player/plugin-host';
 import { mockFetch, jsonResponse } from './mocks/http.js';
 import { deferred } from './mocks/async.js';
 import { settle } from './mocks/async.js';
 
-const makeLyrics = () => new DiscordPlayer({ nodes: [], send() {} }).lyrics;
+const makeLyrics = () => new LrcLib({ version: 'test', debug() {} });
 
 afterEach(() => vi.useRealTimers());
 
@@ -117,7 +117,7 @@ describe('serialized lyrics requests', () => {
       .mockResolvedValueOnce(jsonResponse({}, 500))
       .mockResolvedValueOnce(jsonResponse({}, 404))
       .mockResolvedValueOnce(jsonResponse({ id: 4 }));
-    const failed = expect(lyrics.getById(1)).rejects.toBeInstanceOf(NoResultError);
+    const failed = expect(lyrics.getById(1)).rejects.toThrow('HTTP 500');
 
     await vi.advanceTimersByTimeAsync(250);
     await failed;

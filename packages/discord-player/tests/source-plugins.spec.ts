@@ -6,7 +6,7 @@ import {
   definePlugin,
   PluginError,
   deserialize,
-  type SourceOperationMap as Operations,
+  type OperationMap as Operations,
 } from '../src/index.js';
 
 it('owns independent lifecycle, options, subscriptions and cleanup on each Player', async () => {
@@ -14,7 +14,6 @@ it('owns independent lifecycle, options, subscriptions and cleanup on each Playe
   const destroy = vi.fn();
   const source = definePlugin<{ prefix: string }>({
     id: 'org.example.source',
-    kind: 'source',
 
     async setup(ctx) {
       let calls = 0;
@@ -57,7 +56,6 @@ it('rejects remote streams and buffers while accepting URLs and server files', a
   await host.register(
     definePlugin({
       id: 'raw',
-      kind: 'source',
 
       setup(ctx) {
         ctx.on('track.stream', () => source);

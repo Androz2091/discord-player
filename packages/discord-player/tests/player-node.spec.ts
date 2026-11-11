@@ -168,7 +168,7 @@ it('keeps raw controls separate from managed queue state and forwards playback e
   const { queue, player, session } = await setup();
   const node = queue.node;
 
-  await node.playRaw({ url: 'https://example.test/raw.mp3' });
+  await node.play({ url: 'https://example.test/raw.mp3' });
 
   expect(queue.currentTrack).toBeNull();
   expect(queue.history.size).toBe(0);
@@ -195,7 +195,7 @@ it('keeps raw controls separate from managed queue state and forwards playback e
 
   expect(node.streamTime).toBe(0);
 
-  for (const volume of [-1, 101, NaN, Infinity]) await expect(node.setVolume(volume)).rejects.toThrow(RangeError);
+  for (const volume of [-1, 201, NaN, Infinity]) await expect(node.setVolume(volume)).rejects.toThrow(RangeError);
 
   const events = ['playerPause', 'playerResume', 'playerSeek', 'voiceConnectionStateChange', 'error'] as const;
   const listeners = events.map((event) => {

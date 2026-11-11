@@ -6,7 +6,7 @@ import { GuildQueue, type GuildQueueOptions } from '../structures/guild-queue.js
 export type GuildQueueResolvable = string | { id: string } | { guildId: string };
 
 /** Cache and lifecycle manager for this Player's GuildQueue instances. */
-export class GuildQueueManager {
+export class GuildNodeManager {
   /** Cached queues indexed by guild ID. */
   public readonly cache = new Collection<string, GuildQueue>();
 
@@ -19,12 +19,20 @@ export class GuildQueueManager {
     public readonly player: DiscordPlayer,
   ) {}
 
+  /** Normalize a v7-compatible structural queue or guild reference.
+   * @param guild Guild ID, guild-like object or queue.
+   * @returns Guild identifier.
+   */
+  public resolveId(guild: GuildQueueResolvable): string {
+    return typeof guild === 'string' ? guild : 'guildId' in guild ? guild.guildId : guild.id;
+  }
+
   /**
    * Get a queue by guild ID, returning null when none exists.
    * @param guildId Guild ID used as the queue cache key.
    */
-  public get<Metadata = unknown>(guildId: string): GuildQueue<Metadata> | null {
-    return (this.cache.get(guildId) as GuildQueue<Metadata> | undefined) ?? null;
+  public get<Metadata = unknown>(guildId: GuildQueueResolvable): GuildQueue<Metadata> | null {
+    return (this.cache.get(this.resolveId(guildId)) as GuildQueue<Metadata> | undefined) ?? null;
   }
 
   /**
@@ -32,17 +40,15 @@ export class GuildQueueManager {
    * @param guild Guild ID or object containing an `id` or `guildId` property.
    */
   public resolve<Metadata = unknown>(guild: GuildQueueResolvable): GuildQueue<Metadata> | null {
-    const guildId = typeof guild === 'string' ? guild : 'guildId' in guild ? guild.guildId : guild.id;
-
-    return this.get<Metadata>(guildId);
+    return this.get<Metadata>(guild);
   }
 
   /**
    * Check whether a queue exists for a guild ID.
    * @param guildId Guild ID to check.
    */
-  public has(guildId: string): boolean {
-    return this.cache.has(guildId);
+  public has(guildId: GuildQueueResolvable): boolean {
+    return this.cache.has(this.resolveId(guildId));
   }
 
   /**
@@ -50,8 +56,8 @@ export class GuildQueueManager {
    * @param guildId Guild ID of the queue to remove.
    * @returns Whether a cached queue was found and destroyed.
    */
-  public async delete(guildId: string): Promise<boolean> {
-    const queue = this.cache.get(guildId);
+  public async delete(guildId: GuildQueueResolvable): Promise<boolean> {
+    const queue = this.cache.get(this.resolveId(guildId));
 
     if (!queue) return false;
 
@@ -67,22 +73,28 @@ export class GuildQueueManager {
    * @returns The existing or newly created queue.
    */
   public async create<Metadata = unknown>(
-    guildId: string,
+    guildId: GuildQueueResolvable,
     options: GuildQueueOptions<Metadata> = {},
   ): Promise<GuildQueue<Metadata>> {
+    this.player.signal.throwIfAborted();
+
     const existing = this.get<Metadata>(guildId);
 
     if (existing) return existing;
 
-    const queue = new GuildQueue(this, guildId, options);
+    const id = this.resolveId(guildId);
+    const queue = new GuildQueue(this, id, options);
 
-    this.cache.set(guildId, queue);
+    this.cache.set(id, queue);
 
     return queue;
   }
 
   /** Destroy every currently cached queue. */
   public async clear(): Promise<void> {
-    await Promise.all(Array.from(this.cache.values(), (queue) => queue.destroy()));
+    const results = await Promise.allSettled(Array.from(this.cache.values(), (queue) => queue.destroy()));
+    const errors = results.filter((result) => result.status === 'rejected').map((result) => result.reason);
+    if (errors.length === 1) throw errors[0];
+    if (errors.length) throw new AggregateError(errors, 'Guild queue cleanup failed');
   }
 }

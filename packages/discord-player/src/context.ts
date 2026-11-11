@@ -2,7 +2,7 @@ import { firstActivePlayer } from './active-players.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import type { DiscordPlayer } from './player.js';
 import type { GuildQueue } from './structures/guild-queue.js';
-import type { GuildQueueHistoryManager } from './managers/guild-queue-history.manager.js';
+import type { GuildQueueHistory } from './managers/guild-queue-history.manager.js';
 import type { PlayerTimestamp } from './structures/guild-queue-player-node.js';
 
 /** Callback executed inside an asynchronous context scope. */
@@ -161,7 +161,7 @@ export class PlayerContext extends Context<PlayerContextValue> {
       ...value,
       player: this.owner,
       guildId,
-      queue: value.queue ?? (guildId ? this.owner.queues.get(guildId) : null),
+      queue: value.queue ?? (guildId ? this.owner.nodes.get(guildId) : null),
     };
 
     return activePlayerContext.run(scoped, () => super.provide(scoped, receiver));
@@ -194,17 +194,17 @@ export function useQueue(
 ): GuildQueue | null {
   const context = activePlayerContext.getStore();
 
-  if (guildId) return (context?.player ?? firstActivePlayer())?.queues.get(guildId) ?? null;
+  if (guildId) return (context?.player ?? firstActivePlayer())?.nodes.get(guildId) ?? null;
 
   if (!context) return null;
 
   if (context.queue) return context.queue;
 
-  return context.guildId ? context.player.queues.get(context.guildId) : null;
+  return context.guildId ? context.player.nodes.get(context.guildId) : null;
 }
 
 /** Read the active queue's history manager. */
-export function useHistory(): GuildQueueHistoryManager | null {
+export function useHistory(): GuildQueueHistory | null {
   return useQueue()?.history ?? null;
 }
 

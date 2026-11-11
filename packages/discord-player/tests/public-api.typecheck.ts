@@ -24,7 +24,7 @@ export function wireV7CommandHandler(
     void [eventQueue.id, error.message, eventTrack.title, rawEvent?.error];
   });
 
-  void player.play(channel, track, { queueOptions: { metadata: { command: 'play' }, maxSize: 3 } });
+  void player.play(channel, track, { nodeOptions: { metadata: { command: 'play' }, maxSize: 3 } });
   void queue.history.back();
   void queue.node.setPaused(true);
 }

@@ -1,4 +1,5 @@
-import { RemoteSourceHosts, type RemoteSourceHostOptions } from './remote-source-hosts.js';
+import { prepareResource, type StreamHooks } from './hooks.js';
+import type { GuildQueue } from './structures/guild-queue.js';
 import { SourcePluginRuntime, SOURCE_PLUGIN_ID, serializeSourceTrack } from '@discord-player/plugin-host';
 import type { PluginRegistry } from './plugins/registry.js';
 import type { PluginRegistration } from './plugins/types.js';
@@ -15,7 +16,7 @@ import {
   type RemediaClientEvents,
   type RemediaClientOptions,
 } from '@remedia/client';
-import { GuildQueueManager } from './managers/guild-queue.manager.js';
+import { GuildNodeManager } from './managers/guild-queue.manager.js';
 import type { CrossfadeOptions, GuildQueueOptions } from './structures/guild-queue.js';
 import type { GuildQueueEventsMap } from './structures/common/guild-queue-events.js';
 import type { Track } from './structures/track.js';
@@ -30,27 +31,34 @@ import type {
 import { SafeEventEmitter } from './utils/safe-event-emitter.js';
 import { registerPlayer, unregisterPlayer } from './active-players.js';
 import { PlayerContext } from './context.js';
-import { LrcLib } from './lyrics.js';
+import { Lyrics } from './lyrics.js';
 
 const packageVersion = (createRequire(import.meta.url)('../package.json') as { version: string }).version;
 
 /** Options for a Discord Player instance and its Remedia client. */
-export type DiscordPlayerOptions = Omit<RemediaClientOptions, 'selectNode' | 'botUserId'> & {
-  /** Automatic queue crossfading; disabled by default. Uses PCM decoding and additional processing. */
-  crossfade?: CrossfadeOptions;
+export type DiscordPlayerOptions = Omit<RemediaClientOptions, 'selectNode' | 'botUserId' | 'nodes'> &
+  StreamHooks & {
+    /** Native nodes; omitted uses a single embedded node without additional configuration. */
+    nodes?: RemediaClientOptions['nodes'];
 
-  /** Standalone HTTP source deployments, searched in order after local sources decline. */
-  sourceHosts?: readonly RemoteSourceHostOptions[];
+    /** Automatic queue crossfading; disabled by default. Uses PCM decoding and additional processing. */
+    crossfade?: CrossfadeOptions;
 
-  /** Source registrations initialized with this Player. */
-  plugins?: readonly PluginRegistration<any>[];
+    /** Authoritative non-bot occupants; null means unavailable and disables emptiness policies.
+     * @param guildId Guild identifier.
+     * @param channelId Voice channel identifier.
+     */
+    resolveVoiceChannelUsers?: (guildId: string, channelId: string) => Promise<readonly string[] | null>;
 
-  /** Legacy metadata probe timeout; audio probing remains extractor-owned. */
-  probeTimeout?: number;
+    /** Source registrations initialized with this Player. */
+    plugins?: readonly PluginRegistration<any>[];
 
-  /** Disabled legacy/source IDs. */
-  blockExtractors?: readonly string[];
-};
+    /** Legacy metadata probe timeout; audio probing remains extractor-owned. */
+    probeTimeout?: number;
+
+    /** Disabled legacy/source IDs. */
+    blockExtractors?: readonly string[];
+  };
 
 /** Player-level event argument tuples. */
 export interface DiscordPlayerEvents extends RemediaClientEvents {
@@ -61,7 +69,7 @@ export interface DiscordPlayerEvents extends RemediaClientEvents {
   error: [error: Error];
 
   /** Voice state lifecycle event forwarded by an integration adapter. */
-  voiceStateUpdate: [guildId: string, event: unknown];
+  voiceStateUpdate: [guildId: string, event: Record<string, unknown>];
 }
 
 /** Familiar Player-level event names. */
@@ -108,11 +116,11 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   public readonly extractors: ExtractorExecutionContext;
 
   /** Source execution independent of queue and voice orchestration. */
-  public readonly sources: SourcePluginRuntime;
-
-  private readonly remoteSources: RemoteSourceHosts;
+  private readonly sources: SourcePluginRuntime;
 
   private initialPlugins: Promise<void>;
+
+  private destruction: Promise<void> | null = null;
 
   #clientId: string | null = null;
 
@@ -128,12 +136,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   private detachClientListeners: (() => void) | null = null;
 
   /** Guild queue manager. */
-  public readonly queues = new GuildQueueManager(this);
-
-  /** Compatibility alias for the v7 `player.nodes` GuildNodeManager. */
-  public get nodes(): GuildQueueManager {
-    return this.queues;
-  }
+  public readonly nodes = new GuildNodeManager(this);
 
   /** Guild queue lifecycle events; separate from Player-level events. */
   public readonly events = new SafeEventEmitter<GuildQueueEventsMap>();
@@ -144,8 +147,8 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** AsyncLocalStorage-backed per-Player command context. */
   public readonly context = new PlayerContext(this);
 
-  /** LRCLIB lyrics search and lookup client. */
-  public readonly lyrics = new LrcLib(this);
+  /** Optional lyrics lookup through registered capability providers. */
+  public readonly lyrics = new Lyrics(this);
 
   /** Create a Player configured with Remedia client options.
    * @param options Remedia node configurations and the Discord gateway send callback.
@@ -156,7 +159,6 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   ) {
     super();
 
-    this.remoteSources = new RemoteSourceHosts(options.sourceHosts ?? []);
     this.sources = new SourcePluginRuntime({ player: this });
     this.plugins = this.sources.plugins;
     this.extractors = this.sources.extractors;
@@ -170,6 +172,15 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     registerPlayer(this);
   }
 
+  /** Await constructor registrations and discover configured advanced HTTP hosts.
+   * @internal
+   */
+  public async ready(): Promise<void> {
+    this.signal.throwIfAborted();
+    await this.initialPlugins;
+    await this.plugins.ready();
+  }
+
   /** Identifier of this Player instance. */
   public readonly id = randomUUID();
 
@@ -180,7 +191,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
   /** Aggregated queue and runtime statistics. */
   public get statistics(): DiscordPlayerStatistics {
-    const queues = Array.from(this.queues.cache.values());
+    const queues = Array.from(this.nodes.cache.values());
 
     return {
       queues: queues.length,
@@ -225,8 +236,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     clientId: string,
   ): Promise<void> {
     try {
-      await this.initialPlugins;
-      await this.plugins.ready();
+      await this.ready();
     } catch (error) {
       try {
         await this.plugins.destroy();
@@ -240,8 +250,11 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     this.#clientId = clientId;
 
     const {
+      resolveVoiceChannelUsers: _resolver,
+      onBeforeCreateStream: _before,
+      onStreamExtracted: _extracted,
+      onAfterCreateStream: _after,
       crossfade: _crossfade,
-      sourceHosts: _sourceHosts,
       plugins: _plugins,
       blockExtractors: _blocked,
       probeTimeout: _probeTimeout,
@@ -251,10 +264,11 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     try {
       this.remedia = await RemediaClient.create({
         ...remediaOptions,
+        nodes: remediaOptions.nodes ?? [{ id: 'local', type: 'embedded' }],
         botUserId: clientId,
 
         selectNode: async (nodes, context) => {
-          const queue = this.queues.get(context.guildId);
+          const queue = this.nodes.get(context.guildId);
 
           if (!queue) {
             throw new Error(`No guild queue found for guild ID ${context.guildId}.`);
@@ -319,15 +333,15 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
     for (const name of ['sessionResumed', 'sessionLost'] as const) {
       on(name, (event) => {
-        for (const guildId of event.guildIds) this.queues.get(guildId)?.emit(name, event);
+        for (const guildId of event.guildIds) this.nodes.get(guildId)?.emit(name, event);
       });
     }
 
     for (const name of ['guildAssigned', 'guildReleased'] as const) {
-      on(name, (event) => this.queues.get(event.guildId)?.emit(name, event));
+      on(name, (event) => this.nodes.get(event.guildId)?.emit(name, event));
     }
 
-    on('guildMigrated', (event) => this.queues.get(event.guildId)?.emit('guildMigrated', event));
+    on('guildMigrated', (event) => this.nodes.get(event.guildId)?.emit('guildMigrated', event));
 
     this.detachClientListeners = () => {
       for (const cleanup of cleanups) cleanup();
@@ -361,6 +375,17 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     }
 
     this.remedia.receive(payload);
+
+    if (
+      payload.t === 'VOICE_STATE_UPDATE' &&
+      payload.d &&
+      typeof payload.d === 'object' &&
+      'guild_id' in payload.d &&
+      typeof payload.d.guild_id === 'string'
+    ) {
+      this.emit('voiceStateUpdate', payload.d.guild_id, payload);
+      this.nodes.get(payload.d.guild_id)?.voice.receive(payload);
+    }
   }
 
   /** Convert a supported in-memory media object to a SearchResult. Search strings require a source plugin.
@@ -376,20 +401,14 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   ): Promise<SearchResult> {
     options.signal?.throwIfAborted();
 
-    if (typeof query === 'string') await this.initialPlugins;
+    if (typeof query === 'string') await this.ready();
+    if (options.hostId && !this.plugins.hasHost(options.hostId))
+      throw new Error(`Source host ${options.hostId} is not configured`);
 
-    if (typeof query !== 'string') return this.sources.search(query, options);
-
-    if (!options.hostId) {
-      const local = await this.sources.search(query, options);
-
-      if (!local.isEmpty()) return local;
-    }
-
-    return (
-      (await this.remoteSources.search(query, options, this.options.blockExtractors ?? [])) ??
-      this.sources.search([], options)
-    );
+    return this.sources.search(query, {
+      ...options,
+      signal: options.signal ? AbortSignal.any([this.signal, options.signal]) : this.signal,
+    });
   }
 
   /** Select a source for the assigned audio node without opening remote media in the bot.
@@ -397,16 +416,27 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
    * @param track Queued canonical Track.
    * @param nodeId Assigned Remedia node ID.
    * @param signal Playback preparation lifetime.
+   * @param queue Optional queue supplying resource hooks and async context.
    * @returns Native operation descriptor for remote hosts, otherwise the local resolver result.
    */
-  public async resolvePlaybackSource(track: Track, nodeId: string | null, signal: AbortSignal): Promise<MediaSource> {
+  public async resolvePlaybackSource(
+    track: Track,
+    nodeId: string | null,
+    signal: AbortSignal,
+    queue?: GuildQueue,
+  ): Promise<MediaSource> {
     signal.throwIfAborted();
 
     const node = this.getRemedia().nodes.find((item) => item.id === nodeId);
+    if (queue)
+      return prepareResource(queue, track, signal, node?.type !== 'embedded', () =>
+        this.resolvePlaybackSource(track, nodeId, signal),
+      );
+
     const hostId = track.sourceReference?.hostId;
 
     if (hostId) {
-      this.remoteSources.assert(hostId);
+      if (!this.plugins.hasHost(hostId)) throw new Error(`Source host ${hostId} is not configured`);
 
       if (!track.sourceReference?.pluginId) throw new Error('Remote Track has no provider identity');
 
@@ -432,7 +462,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
     return this.plugins.resolveStream(track, {
       signal,
-      remote: node?.type === 'remote',
+      remote: node?.type !== 'embedded',
       blocked: this.options.blockExtractors,
     });
   }
@@ -464,21 +494,15 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       throw new TypeError('A guildId is required when channel does not expose a structural guild reference.');
     }
 
-    const queueDefaults = options.nodeOptions ?? options.queueOptions ?? {};
-    const queue = await this.queues.create<Metadata>(guildId, queueDefaults);
-    const searchResult = await this.search(resource, options.searchOptions);
+    const queueDefaults = options.nodeOptions ?? {};
+    const queue = await this.nodes.create<Metadata>(guildId, queueDefaults);
+    const searchResult = await this.search(resource, options);
 
     if (searchResult.isEmpty()) {
       return { queue, resource, searchResult, track: null, playerResult: null };
     }
 
-    const {
-      nodeOptions: _nodeOptions,
-      queueOptions: _queueOptions,
-      searchOptions: _searchOptions,
-      guildId: _guildId,
-      ...playOptions
-    } = options;
+    const { nodeOptions: _nodeOptions, guildId: _guildId, ...playOptions } = options;
     const result = await queue.play(searchResult, {
       ...playOptions,
       channelId,
@@ -495,7 +519,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     /** Guild ID to resolve. */
     guildId: string,
   ) {
-    return this.queues.get<Metadata>(guildId);
+    return this.nodes.get<Metadata>(guildId);
   }
 
   /** Get or create a guild queue.
@@ -509,7 +533,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     /** Queue defaults used only when the queue is first created. */
     options: GuildQueueOptions<Metadata> = {},
   ) {
-    return this.queues.create(guildId, options);
+    return this.nodes.create(guildId, options);
   }
 
   /** Destroy this Player's queue for a guild ID.
@@ -520,22 +544,41 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     /** Guild ID whose queue should be destroyed. */
     guildId: string,
   ): Promise<boolean> {
-    return this.queues.delete(guildId);
+    return this.nodes.delete(guildId);
   }
 
   /** Abort the Player lifetime signal, then destroy all managed queues and plugins. */
-  public async destroy(): Promise<void> {
-    this.#lifetimeController.abort();
+  public destroy(): Promise<void> {
+    if (this.destruction) return this.destruction;
+    this.destruction = Promise.resolve().then(async () => {
+      const errors: unknown[] = [];
+      try {
+        await queueCleanup;
+      } catch (error) {
+        errors.push(error);
+      }
+      try {
+        await this.remedia?.close();
+      } catch (error) {
+        errors.push(error);
+      }
+      try {
+        await this.plugins.destroy();
+      } catch (error) {
+        errors.push(error);
+      }
+      this.detachClientListeners?.();
+      this.detachClientListeners = null;
+      this.remedia = null;
+      this.#clientId = null;
+      if (errors.length === 1) throw errors[0];
+      if (errors.length) throw new AggregateError(errors, 'Player resource cleanup failed');
+    });
     unregisterPlayer(this);
-    this.detachClientListeners?.();
-    this.detachClientListeners = null;
-    this.remoteSources.destroy();
-
-    try {
-      await this.queues.clear();
-    } finally {
-      await this.plugins.destroy();
-    }
+    this.#lifetimeController.abort();
+    // Begin queue lifetime cancellation synchronously; teardown still shares each queue's promise.
+    const queueCleanup = this.nodes.clear();
+    return this.destruction;
   }
 
   /** Emit a Player-level debug message.

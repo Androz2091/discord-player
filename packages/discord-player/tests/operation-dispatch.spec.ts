@@ -6,7 +6,7 @@ import { Legacy } from './mocks/legacy.js';
 const player = () => new DiscordPlayer({ nodes: [], send() {} });
 
 declare module '../src/plugins/types.js' {
-  interface SourceOperationMap {
+  interface OperationMap {
     'fixture.null': { input: number; output: null | false; policy: 'first' };
   }
 }
@@ -26,7 +26,6 @@ it('supports every dispatch policy, stable priority, null/false and scoped remov
     await host.register(
       definePlugin({
         id,
-        kind: 'source',
 
         setup(ctx) {
           ctx.on('fixture.null', () => (id === 'b' ? false : null), { priority });
@@ -83,7 +82,6 @@ it('uses match confidence within a priority tier and preserves explicit targetin
     await p.plugins.register(
       definePlugin({
         id,
-        kind: 'source',
 
         setup(ctx) {
           ctx.on('search.query.match', () => ({ score }));
@@ -98,7 +96,7 @@ it('uses match confidence within a priority tier and preserves explicit targetin
   }
 
   expect((await p.search('query')).tracks[0]!.title).toBe('high:query');
-  expect((await p.search('query', { pluginId: 'low' })).tracks[0]!.title).toBe('low:query');
+  expect((await p.search('query', { searchEngine: 'low' })).tracks[0]!.title).toBe('low:query');
   expect((await p.search('unknown:query')).tracks[0]!.title).toBe('high:unknown:query');
 
   await p.extractors.register(Legacy, { prefix: 'legacy:' });
@@ -114,7 +112,7 @@ it('uses match confidence within a priority tier and preserves explicit targetin
   await p.extractors.register(HigherPriority, { prefix: 'other:' });
 
   expect((await p.search('raw://query')).tracks[0]!.title).toBe('legacy:query');
-  expect((await p.search('query', { searchEngine: 'ext:low' })).tracks[0]!.title).toBe('low:query');
+  await expect(p.search('query', { searchEngine: 'ext:low' })).rejects.toThrow('not registered');
 
   await p.destroy();
 });

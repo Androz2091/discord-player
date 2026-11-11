@@ -37,29 +37,17 @@ export type PlayerChannelResolvable = string | PlayerChannelLike | PlayerChannel
 export type { MediaResource, SearchOptions } from '@discord-player/plugin-host';
 import type { MediaResource, SearchOptions } from '@discord-player/plugin-host';
 
-/** Options for Player-level search. */
-export interface PlayerSearchOptions extends SearchOptions {
-  /** Optional guild context for future source plugin policies. */
-  guildId?: string;
-}
-
 /** Player-level playback orchestration options. */
-export interface PlayerPlayOptions<Metadata = unknown> extends GuildQueuePlayOptions<Metadata> {
+export interface PlayerPlayOptions<Metadata = unknown> extends GuildQueuePlayOptions<Metadata>, SearchOptions {
   /** Guild queue defaults used only when the queue is first created. */
   nodeOptions?: GuildQueueOptions<Metadata>;
-
-  /** Alias for `nodeOptions`. */
-  queueOptions?: GuildQueueOptions<Metadata>;
-
-  /** Search options passed to `Player.search()`. */
-  searchOptions?: PlayerSearchOptions;
 
   /** Explicit guild identifier when the channel argument is only a channel ID. */
   guildId?: string;
 }
 
 /** Compatibility name for the v7-style initializer options. */
-export type PlayerNodeInitializationOptions<Metadata = unknown> = PlayerPlayOptions<Metadata>;
+export type PlayerNodeInitializerOptions<Metadata = unknown> = PlayerPlayOptions<Metadata>;
 
 /** Result of Player-level orchestration. */
 export interface PlayerNodeInitializationResult<Metadata = unknown> extends GuildQueuePlayResult<Metadata> {

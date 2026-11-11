@@ -1,3 +1,4 @@
+import type { GatewayVoiceState } from '../../voice-state.js';
 import type { DiscordSessionEvents, RemediaClientEvents } from '@remedia/client';
 import type { GuildQueue } from '../guild-queue.js';
 import type { PlayerTriggeredReason, TrackSkipReason } from '../guild-queue.js';
@@ -64,7 +65,7 @@ export const GuildQueueEvents = {
   PlayerSkip: 'playerSkip',
   /** Emitted immediately before a managed Track is selected for playback. */
   PlayerTrigger: 'playerTrigger',
-  /** Emitted when the Remedia voice state changes. */
+  /** Emitted for normalized Discord Gateway member state changes. */
   VoiceStateUpdate: 'voiceStateUpdate',
   /** Emitted after the queue node's percentage volume changes. */
   VolumeChange: 'volumeChange',
@@ -77,30 +78,16 @@ export const GuildQueueEvents = {
   /** Emitted when managed playback stops without natural completion. */
   PlayerStop: 'playerStop',
   /** Legacy filter event name retained for compatibility. */
-  BiquadFiltersUpdate: 'biquadFiltersUpdate',
-  /** Legacy filter event name retained for compatibility. */
-  EqualizerUpdate: 'equalizerUpdate',
-  /** Legacy filter event name retained for compatibility. */
-  DSPUpdate: 'dspUpdate',
-  /** Legacy filter event name retained for compatibility. */
   AudioFiltersUpdate: 'audioFiltersUpdate',
   /** Legacy channel population event name retained for compatibility. */
   ChannelPopulate: 'channelPopulate',
-  /** Legacy sample-rate event name retained for compatibility. */
-  SampleRateUpdate: 'sampleRateUpdate',
-  /** Legacy filter sample-rate event name retained for compatibility. */
-  SampleRateFilterUpdate: 'sampleRateFilterUpdate',
-  /** Legacy reverb event name retained for compatibility. */
-  ReverbUpdate: 'reverbUpdate',
-  /** Legacy compressor event name retained for compatibility. */
-  CompressorUpdate: 'compressorUpdate',
   /** Emitted when a GuildQueue is created. */
   QueueCreate: 'queueCreate',
   /** Emitted when a GuildQueue is destroyed. */
   QueueDelete: 'queueDelete',
   /** Emitted before queue-managed playback starts a selected Track. */
   WillPlayTrack: 'willPlayTrack',
-  /** Emitted when AUTOPLAY repeat reaches the source-plugin scheduling boundary. */
+  /** Emitted for v7-compatible selection from related Track candidates. */
   WillAutoPlay: 'willAutoPlay',
 } as const;
 
@@ -191,7 +178,7 @@ export interface GuildQueueEventsMap {
   [GuildQueueEvents.ConnectionDestroyed]: QueueEventParams<[]>;
 
   /** A queue session disconnected. */
-  [GuildQueueEvents.Disconnect]: QueueEventParams<[]>;
+  [GuildQueueEvents.Disconnect]: QueueEventParams<[rawPacket?: Record<string, unknown>]>;
 
   /** Queue-scoped debug message. */
   [GuildQueueEvents.Debug]: QueueEventParams<[message: string]>;
@@ -233,8 +220,10 @@ export interface GuildQueueEventsMap {
   /** Track selection trigger with its application-level reason. */
   [GuildQueueEvents.PlayerTrigger]: QueueEventParams<[track: Track, reason: PlayerTriggeredReason]>;
 
-  /** Remedia voice-state update. */
-  [GuildQueueEvents.VoiceStateUpdate]: QueueEventParams<[event: DiscordSessionEvents['voiceStateChanged'][0]]>;
+  /** Gateway previous/current state and original packet; previous is null when unknown. */
+  [GuildQueueEvents.VoiceStateUpdate]: QueueEventParams<
+    [previous: GatewayVoiceState | null, current: GatewayVoiceState, rawEvent: Record<string, unknown>]
+  >;
 
   /** Previous and new volume percentages. */
   [GuildQueueEvents.VolumeChange]: QueueEventParams<
@@ -256,33 +245,12 @@ export interface GuildQueueEventsMap {
   >;
 
   /** Legacy filter update event retained for consumer type compatibility. */
-  [GuildQueueEvents.BiquadFiltersUpdate]: QueueEventParams<[oldFilters: unknown, newFilters: unknown]>;
-
-  /** Legacy filter update event retained for consumer type compatibility. */
-  [GuildQueueEvents.EqualizerUpdate]: QueueEventParams<[oldFilters: unknown, newFilters: unknown]>;
-
-  /** Legacy filter update event retained for consumer type compatibility. */
-  [GuildQueueEvents.DSPUpdate]: QueueEventParams<[oldFilters: unknown, newFilters: unknown]>;
-
-  /** Legacy filter update event retained for consumer type compatibility. */
   [GuildQueueEvents.AudioFiltersUpdate]: QueueEventParams<
     [oldFilters: string | null, newFilters: string | null, rawEvent?: DiscordSessionEvents['filterChanged'][0]]
   >;
 
   /** Legacy channel population event retained for compatibility. */
   [GuildQueueEvents.ChannelPopulate]: QueueEventParams<[]>;
-
-  /** Legacy sample-rate update event retained for compatibility. */
-  [GuildQueueEvents.SampleRateUpdate]: QueueEventParams<[oldRate: number | null, newRate: number]>;
-
-  /** Legacy filter sample-rate event retained for compatibility. */
-  [GuildQueueEvents.SampleRateFilterUpdate]: QueueEventParams<[oldFilter: unknown, newFilter: unknown]>;
-
-  /** Legacy reverb update event retained for compatibility. */
-  [GuildQueueEvents.ReverbUpdate]: QueueEventParams<[oldValue: unknown, newValue: unknown]>;
-
-  /** Legacy compressor update event retained for compatibility. */
-  [GuildQueueEvents.CompressorUpdate]: QueueEventParams<[oldValue: unknown, newValue: unknown]>;
 
   /** Queue was created; no raw Remedia event exists. */
   [GuildQueueEvents.QueueCreate]: QueueEventParams<[]>;
@@ -293,6 +261,6 @@ export interface GuildQueueEventsMap {
   /** A Track was selected and will be submitted to Remedia. */
   [GuildQueueEvents.WillPlayTrack]: QueueEventParams<[track: Track]>;
 
-  /** AUTOPLAY reached its deferred source-plugin scheduling boundary. */
-  [GuildQueueEvents.WillAutoPlay]: QueueEventParams<[track: Track]>;
+  /** Related candidates are ready. A registered listener must call done(trackOrNull); cancellation invalidates late choices. */
+  [GuildQueueEvents.WillAutoPlay]: QueueEventParams<[tracks: Track[], done: (track: Track | null) => void]>;
 }

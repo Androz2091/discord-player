@@ -25,16 +25,24 @@ export * from './plugins/registry.js';
 export * from './compat/extractors.js';
 export * from './compat/utils.js';
 
-/** Legacy history class name mapped to the managed v8 history facade. */
-export { GuildQueueHistoryManager as GuildQueueHistory } from './managers/guild-queue-history.manager.js';
-
 export * from './structures/guild-queue-player-audio-filters.js';
 export * from './structures/audio-filter-presets.js';
 
-export { SourcePluginRuntime } from '@discord-player/plugin-host';
-export type { LegacyPlayerContext, SourceRuntimeEvents, SourcePluginRuntimeOptions } from '@discord-player/plugin-host';
+export type { LegacyPlayerContext } from '@discord-player/plugin-host';
 
-export type { RemoteSourceHostOptions } from './remote-source-hosts.js';
+export type { RemotePluginHostOptions } from '@discord-player/plugin-host';
 
 /** Native payload contracts appended to forwarded lifecycle events. */
 export type { DiscordSessionEvents, RemediaClientEvents } from '@remedia/client';
+
+export type { GatewayVoiceState } from './voice-state.js';
+
+export { onBeforeCreateStream, onAfterCreateStream, onStreamExtracted } from './hooks.js';
+export type {
+  StreamHooks,
+  OnBeforeCreateStreamHandler,
+  OnAfterCreateStreamHandler,
+  OnStreamExtractedHandler,
+} from './hooks.js';
+
+export * from './structures/synced-lyrics.js';
