@@ -172,3 +172,39 @@ it('forwards client lifecycle events globally and projects existing guild owners
   await player.destroy();
   expect(backend.client.eventNames()).toEqual([]);
 });
+
+it('emits connected volume changes once and rejects stale pause state while retaining diagnostics', async () => {
+  const { player, queue, session } = await setup();
+  const volume = vi.fn();
+  const pause = vi.fn();
+  const native = vi.fn();
+
+  player.events.on('volumeChange', volume);
+  player.events.on('playerPause', pause);
+  player.events.on('sessionEvent', native);
+
+  await queue.node.setVolume(25);
+
+  expect(volume).toHaveBeenCalledOnce();
+  expect(volume.mock.lastCall?.slice(0, 3)).toEqual([queue, 100, 25]);
+  expect(volume.mock.lastCall?.[3].volume).toBe(0.25);
+
+  await queue.play(new TestTrack('current'));
+
+  const stale = {
+    sessionId: session.sessionId,
+    guildId: queue.id,
+    nodeId: session.nodeId,
+    generation: session.generation - 1,
+    previousState: 'playing',
+    state: 'paused',
+  } satisfies DiscordSessionEvents['playbackPaused'][0];
+
+  session.emit('playbackPaused', stale);
+
+  expect(pause).not.toHaveBeenCalled();
+  expect(native.mock.lastCall).toEqual([queue, 'playbackPaused', stale]);
+  expect(queue.currentTrack?.title).toBe('current');
+
+  await player.destroy();
+});
