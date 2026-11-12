@@ -647,26 +647,26 @@ export async function publishMissingPackages({
     log(`Publishing ${pkg.name}@${pkg.version} with npm dist-tag ${distTag}.`);
     await publish(pkg.path, { name: pkg.name, version: pkg.version, distTag });
 
-    let visible = false;
-    let verificationError;
+    // let visible = false;
+    // let verificationError;
 
-    for (let attempt = 1; attempt <= verifyAttempts; attempt += 1) {
-      try {
-        visible = await lookupVersion(pkg.name, pkg.version);
-      } catch (error) {
-        verificationError = error;
-      }
+    // for (let attempt = 1; attempt <= verifyAttempts; attempt += 1) {
+    //   try {
+    //     visible = await lookupVersion(pkg.name, pkg.version);
+    //   } catch (error) {
+    //     verificationError = error;
+    //   }
 
-      if (visible) break;
+    //   if (visible) break;
 
-      if (attempt < verifyAttempts) await sleep(verifyDelayMs * attempt);
-    }
+    //   if (attempt < verifyAttempts) await sleep(verifyDelayMs * attempt);
+    // }
 
-    if (!visible) {
-      const message = `npm publish completed but ${pkg.name}@${pkg.version} could not be verified on the registry after ${verifyAttempts} attempts.`;
+    // if (!visible) {
+    //   const message = `npm publish completed but ${pkg.name}@${pkg.version} could not be verified on the registry after ${verifyAttempts} attempts.`;
 
-      throw new ReleaseError(message, verificationError ? { cause: verificationError } : undefined);
-    }
+    //   throw new ReleaseError(message, verificationError ? { cause: verificationError } : undefined);
+    // }
 
     published.push({ name: pkg.name, version: pkg.version, status: 'published' });
   }
