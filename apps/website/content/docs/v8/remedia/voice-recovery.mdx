@@ -1,0 +1,79 @@
+---
+title: Voice recovery
+description: Understand voice join deadlines and diagnose guilds that fail to connect.
+---
+
+Every guild has its own Remedia voice connection. Joins run independently, so one guild connecting says nothing about the others.
+
+## Timeouts
+
+Use `@remedia/client` and `remedia-server` from the same release (`0.1.0-dev.7`).
+
+| Operation                      | Default                         |
+| ------------------------------ | ------------------------------- |
+| Ordinary remote request        | 15 seconds (`requestTimeoutMs`) |
+| Remote `voice.connect` request | At least 80 seconds             |
+| Server-side `voice.connect`    | At least 75 seconds             |
+| Whole initial join             | 100 seconds                     |
+
+These are separate deadlines. Raising `requestTimeoutMs` does not help a slow voice join. Set `connectTimeoutMs` on `queue.connect()` or `player.play()` instead. Channel moves use their own internal timeout.
+
+## Test several guilds
+
+When several guilds fail, connect them with `Promise.allSettled` so one rejection does not hide the others:
+
+```ts
+const destinations = [
+  { guildId: '111111111111111111', channelId: '222222222222222222' },
+  { guildId: '333333333333333333', channelId: '444444444444444444' },
+];
+
+const results = await Promise.allSettled(
+  destinations.map(async ({ guildId, channelId }) => {
+    const queue = await player.createQueue(guildId);
+
+    await queue.connect({ channelId, connectTimeoutMs: 120_000 });
+
+    return queue.node.session?.connectionState;
+  }),
+);
+
+for (const [index, result] of results.entries()) {
+  console.log(destinations[index]!.guildId, result);
+}
+```
+
+Replace the example IDs with real guild and channel IDs. This tests voice only, so you do not need a source plugin or a track.
+
+## Check the gateway
+
+- Pass every packet to `player.receive()`, including `READY`, `VOICE_STATE_UPDATE`, and `VOICE_SERVER_UPDATE`.
+- `send(guildId, payload)` must forward the payload to the shard that owns the guild. Make it throw when it cannot, because `guild?.shard.send(...)` quietly does nothing and the join waits until it times out.
+- Each bot account has its own voice identity, even in the same channel. Keep their Players, gateway packets, and Remedia sessions separate.
+
+## How recovery works
+
+Remedia retries eligible initial remote failures with a limited budget and fresh gateway credentials. Leaving explicitly or destroying the queue ends the session. Channel moves use a different path and can fail without an automatic rejoin.
+
+Voice close code `4022` means Discord ended the voice call. It is not a rate limit. A `4022` alone does not show whether Discord or your cleanup closed the call first.
+
+To find the cause, line up these events per guild:
+
+1. The OP 4 join and leave requests.
+2. Incoming gateway voice events.
+3. The `voice.connect` request.
+4. Socket closure.
+
+Log IDs and error categories only. Do not log Discord voice tokens, session secrets, or signed media URLs.
+
+## Check the server
+
+```bash
+remedia-server --list
+remedia-server --list --json
+remedia-server doctor --config ./remedia.config.json --env-file .env
+```
+
+These run on the server machine. `--list` reports local Remedia processes for the current user, not servers elsewhere on the network. `doctor` checks FFmpeg and the configuration. It does not check your bot's shard routing.
+
+<NextStep href="/docs/v8/troubleshooting" label="Troubleshooting" />

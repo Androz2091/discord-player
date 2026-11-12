@@ -1,8 +1,8 @@
 **Legal Notice Regarding Streaming Behavior**
 
-Please be advised that streaming content from sources such as YouTube may be in violation of the respective platform's Terms of Service (ToS). It is important to acknowledge that engaging in unauthorized streaming activities may lead to legal actions being taken against your project by the platform provider, in this case, YouTube.
+Streaming content from third-party media providers may violate their respective Terms of Service (ToS). Unauthorized streaming activities may lead to legal action by the provider.
 
-Discord Player, as a framework, **does not support YouTube** and provides users with comprehensive control over the streaming behavior of their bots. However, there may be community built extractors using YouTube as stream source not owned by discord-player. It is imperative to recognize that decisions related to allowing or disallowing specific types of streams are entirely at the discretion of the bot operator or developer using Discord Player.
+Discord Player does not include built-in integrations for restricted media providers. The framework gives bot operators and developers control over streaming behavior. Community-built extractors may support third-party sources independently of this project; decisions about allowing or disallowing those streams remain with the bot operator or developer.
 
 The authors of Discord Player and the project itself explicitly disclaim any responsibility for any consequences, legal or otherwise, arising from the use of the framework, including but not limited to casualties caused by streaming content in violation of third-party platform terms. Users are urged to comply with all applicable terms, conditions, and regulations when utilizing Discord Player for streaming purposes.
 

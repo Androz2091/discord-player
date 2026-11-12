@@ -1,0 +1,68 @@
+---
+title: Plugins
+description: Plugin definitions, the registry, and the built-in operations.
+---
+
+Define a plugin with `definePlugin<Options>(definition)` and register it with `player.plugins` or the `plugins` option.
+
+```ts
+import { definePlugin } from 'discord-player';
+
+const source = definePlugin({
+  id: 'example.source',
+
+  setup(ctx) {
+    ctx.on('track.stream', ({ track }) => ({ url: track.url }));
+  },
+});
+```
+
+## Definition
+
+| Field           | Type                                  | Description                                                                         |
+| --------------- | ------------------------------------- | ----------------------------------------------------------------------------------- |
+| `id`            | `string`                              | Provider ID                                                                         |
+| `setup?(ctx)`   | `void \| Promise<void>`               | Register handlers                                                                   |
+| `destroy?(ctx)` | `void \| Promise<void>`               | Optional teardown                                                                   |
+| `priority?`     | `number`                              | Default handler priority, or an override of a remote host's priorities              |
+| `remoteHost?`   | `{ hostId, url, token?, timeoutMs? }` | Use a [remote source host](/docs/v8/plugins/remote-hosts) instead of local handlers |
+
+A plugin that only provides lyrics needs no source operations.
+
+## Setup context
+
+| Member                                 | Description                                             |
+| -------------------------------------- | ------------------------------------------------------- |
+| `ctx.options`                          | Options for this registration                           |
+| `ctx.signal`                           | Aborted when the plugin is removed                      |
+| `ctx.on(operation, handler, options?)` | Registers a handler. Returns a function that removes it |
+| `ctx.onCleanup(fn)`                    | Registers cleanup that runs in reverse order            |
+
+Handler `options` are `{ priority?, protocols? }`.
+
+## Registry
+
+`player.plugins`:
+
+| Method                                | Description                                                           |
+| ------------------------------------- | --------------------------------------------------------------------- |
+| `register(registration)`              | Registers a plugin and waits for `setup()`                            |
+| `unregister(id, hostId?)`             | Removes a plugin and returns `true` if it existed                     |
+| `has(id, hostId?)`                    | Whether a plugin is registered                                        |
+| `hasHost(hostId)`                     | Whether a source host is registered                                   |
+| `registerHost(options)`               | Registers every provider a source host advertises                     |
+| `ready()`                             | Waits for pending registrations                                       |
+| `execute(operation, input, options?)` | Runs an operation                                                     |
+| `resolveStream(track, options?)`      | Returns the media source for a track                                  |
+| `defineOperation(name, policy)`       | Adds an operation. See [custom operations](/docs/v8/plugins/advanced) |
+| `destroy()`                           | Releases every registration                                           |
+
+## Operations
+
+`search.query.match`, `search.query.resolve`, `track.stream`, `track.related`, `track.bridge`, `stream.transform`, `lyrics.search`, and `track.stream.resolved`. Their dispatch policies are in [operations](/docs/v8/plugins/operations#built-in-operations).
+
+## v7 extractors
+
+`player.extractors.register(MyExtractor)` adapts a `BaseExtractor` class to this registry. There is no separate extractor pipeline. See [v7 extractors](/docs/v8/plugins/legacy-extractors).
+
+<NextStep href="/docs/v8/reference/models" label="Models" />

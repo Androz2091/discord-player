@@ -1,0 +1,4 @@
+{
+  "title": "API Reference",
+  "pages": ["index", "discord-player", "discord-voip", "equalizer", "extractor", "ffmpeg", "opus", "utils"]
+}

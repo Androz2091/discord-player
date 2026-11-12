@@ -1,52 +1,48 @@
-export { createErisCompat } from './compat/createErisCompat';
-export { createOceanicCompat } from './compat/createOceanicCompat';
-export { isErisProxy, isOceanicProxy } from './compat/common';
-export * from './utils/PlayerEventsEmitter';
-export * from './utils/AudioFilters';
-export * from './extractors/BaseExtractor';
-export * from './extractors/ExtractorExecutionContext';
-export * from './fabric';
-export * from './queue';
-export * from './lrclib/LrcLib';
-export * from './utils/SequentialBucket';
-export * from './stream/VoiceUtils';
-export * from './stream/StreamDispatcher';
-export * from './utils/Util';
-export * from './utils/TypeUtil';
-export * from './utils/AsyncQueue';
-export * from './utils/FFmpegStream';
-export * from './utils/QueryCache';
-export * from './utils/QueryResolver';
-export * from '@discord-player/ffmpeg';
-export * from './Player';
-export * from './hooks';
-export * from './utils/serde';
-export * from './utils/DependencyReportGenerator';
-export * from './stream/InterceptedStream';
-export * from './PlayerStreamInterceptor';
-export {
-  AudioFilters as PCMAudioFilters,
-  type BiquadFilters,
-  FilterType as BiquadFilterType,
-  type PCMFilters,
-  Q_BUTTERWORTH,
-  VolumeTransformer,
-  BASS_EQ_BANDS,
-  AF_NIGHTCORE_RATE,
-  AF_VAPORWAVE_RATE,
-  FiltersChain,
-} from '@discord-player/equalizer';
-export {
-  createAudioPlayer,
-  AudioPlayer,
-  getVoiceConnection,
-  getVoiceConnections,
-  joinVoiceChannel,
-  StreamType,
-  createAudioResource,
-  type JoinConfig,
-  type JoinVoiceChannelOptions,
-  type CreateAudioPlayerOptions,
-} from 'discord-voip';
+// root
+export * from './player.js';
+export * from './types.js';
+export * from './errors.js';
+export * from './context.js';
+export * from './lyrics.js';
 
-export { version } from './version';
+// managers
+export * from './managers/guild-queue.manager.js';
+export * from './managers/guild-queue-history.manager.js';
+
+// structures
+export * from './structures/common/guild-queue-events.js';
+export * from './structures/guild-queue.js';
+export * from './structures/guild-queue-player-node.js';
+export * from './structures/track.js';
+export * from './structures/playlist.js';
+export * from './structures/search-result.js';
+export * from './structures/common/queue.js';
+export * from './structures/common/stack.js';
+export * from './utils/serde.js';
+
+export * from './plugins/types.js';
+export * from './plugins/registry.js';
+export * from './compat/extractors.js';
+export * from './compat/utils.js';
+
+export * from './structures/guild-queue-player-audio-filters.js';
+export * from './structures/audio-filter-presets.js';
+
+export type { LegacyPlayerContext } from '@discord-player/plugin-host';
+
+export type { RemotePluginHostOptions } from '@discord-player/plugin-host';
+
+/** Native payload contracts appended to forwarded lifecycle events. */
+export type { DiscordSessionEvents, RemediaClientEvents } from '@remedia/client';
+
+export type { GatewayVoiceState } from './voice-state.js';
+
+export { onBeforeCreateStream, onAfterCreateStream, onStreamExtracted } from './hooks.js';
+export type {
+  StreamHooks,
+  OnBeforeCreateStreamHandler,
+  OnAfterCreateStreamHandler,
+  OnStreamExtractedHandler,
+} from './hooks.js';
+
+export * from './structures/synced-lyrics.js';

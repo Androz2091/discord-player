@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 120,
+  "tabWidth": 2,
+  "useTabs": false,
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "all",
+  "endOfLine": "lf",
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/target/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/.next/**",
+    "**/.source/**",
+    "**/generated/**",
+    "packages/remedia-node/native.js",
+    "packages/remedia-node/native.d.ts",
+    "**/*.generated.js",
+    "**/*.generated.jsx",
+    "**/*.generated.ts",
+    "**/*.generated.tsx",
+    "apps/website/content/docs/v7/**",
+    "Cargo.lock",
+    "pnpm-lock.yaml"
+  ]
+}

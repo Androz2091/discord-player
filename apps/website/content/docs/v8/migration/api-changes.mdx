@@ -1,0 +1,65 @@
+---
+title: API changes
+description: v7 APIs and their v8 equivalents.
+---
+
+## Mapping
+
+| v7                                      | v8                                        | Notes                                                                             |
+| --------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------- |
+| `new Player(client)`                    | `new Player({ nodes, send, plugins })`    | Discord Player no longer needs a client                                           |
+| Client wiring                           | `player.receive(rawPacket)`               | You forward raw gateway packets                                                   |
+| Ready on construction                   | `await player.initialize(botUserId)`      | Finish before any playback                                                        |
+| `player.nodes`                          | `player.nodes`                            | Still the queue manager                                                           |
+| Extractor dispatcher                    | `player.plugins`                          | Source operations are the main API                                                |
+| `player.extractors.register(Extractor)` | Same call                                 | A wrapper adapts the extractor to a plugin                                        |
+| `DefaultExtractors` bundle              | Register sources yourself                 | v8 has no built-in providers                                                      |
+| `player.play(channel, query)`           | `player.play(channel, resource)`          | The channel needs a guild and channel ID. String queries need a plugin            |
+| `queue.node.play(track)`                | `queue.play(track)`                       | `queue.node.play(track)` still works. A native source plays raw without the queue |
+| Filter and dispatcher classes           | `queue.node.filters`                      | Named presets and raw FFmpeg graphs                                               |
+| Raw PCM and Opus streams                | Remedia media sources                     | The engine owns codecs and voice                                                  |
+| Queue volume                            | `queue.node.setVolume(0..200)`            | A percentage. 100 is the default                                                  |
+| `track.toJSON()` for storage            | `serialize()` and `deserialize()`         | Versioned and validated                                                           |
+| Context hooks                           | `player.context.provide({ guildId }, fn)` | Per Player                                                                        |
+| `player.destroy()`                      | `await player.destroy()`                  | Wait for the native sessions to close                                             |
+
+## Channels
+
+`player.play()` accepts anything with an `id` and a guild, or explicit IDs:
+
+```ts
+await player.play({ guildId, channelId }, result);
+await player.play(voiceChannel, result); // discord.js channel
+await player.play(channelId, result, { guildId }); // Channel ID with an explicit guild
+```
+
+This keeps Discord Player independent from any one Discord library.
+
+## Queue controls are familiar
+
+```ts
+const queue = player.getQueue(guildId);
+
+if (!queue) return;
+
+await queue.node.pause();
+await queue.node.seek(25_000);
+await queue.skip();
+await queue.stop();
+```
+
+Calls that reach Remedia are asynchronous. Await them, and handle errors, before you reply.
+
+## Events
+
+`player.events` and its event names are the same. The arguments of events that come from Remedia gain an extra last argument with the original Remedia event.
+
+`playerStart`, `playerFinish`, `playerSkip`, and `playerError` are separate outcomes. The queue schedules the next track itself, so remove any code that calls `playNext()` from a finish listener.
+
+See the [event reference](/docs/v8/reference/events) and the [event mapping](/docs/v8/migration/compatibility#events).
+
+## Removed
+
+v8 does not bring back the stream dispatcher, audio resource internals, raw codec format overrides, or custom filter registration. Use [source plugins](/docs/v8/plugins) and [filters](/docs/v8/guides/filters) instead.
+
+<NextStep href="/docs/v8/migration/extractors" label="Migrate extractors" />

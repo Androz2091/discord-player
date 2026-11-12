@@ -1,0 +1,55 @@
+---
+title: Migration checklist
+description: Verify the upgrade on a test server before you move production bots to v8.
+---
+
+Work through this list on a small test server with a few known audio sources.
+
+## Runtime and voice
+
+- [ ] The bot starts on Node.js 22.18 or newer with ESM.
+- [ ] The embedded host loads FFmpeg 9 and `@remedia/node`, or the remote server loads FFmpeg 9 and starts.
+- [ ] `initialize(botUserId)` finishes after the bot is ready.
+- [ ] Every raw gateway packet reaches `player.receive()`.
+- [ ] The bot joins and leaves voice channels.
+- [ ] Moving channels keeps the queue and its settings.
+- [ ] Self-deaf and self-mute change while connected.
+- [ ] A reconnect or region change does not fire a false `playerFinish`.
+- [ ] Five guilds joining at once connect independently.
+- [ ] Your bot and the server use the same Remedia release.
+
+## Sources and plugins
+
+- [ ] A valid query matches the plugin you expect.
+- [ ] An unsupported query returns an empty result or a handled error.
+- [ ] Track metadata and audio resolve separately.
+- [ ] Direct URLs are reachable from the node that plays them.
+- [ ] Each kept legacy extractor still works.
+- [ ] Removing a plugin finishes without hanging.
+
+## Queue and controls
+
+- [ ] Two tracks play in order.
+- [ ] Pause, resume, and volume work.
+- [ ] Seek works where the source supports it, and fails cleanly where it does not.
+- [ ] Skip advances once and fires one `playerSkip`.
+- [ ] Stop keeps upcoming tracks and leaves history unchanged.
+- [ ] Repeat and shuffle behave as you intend.
+- [ ] A finished or failed track does not advance the queue twice.
+- [ ] Changing filters keeps the voice session.
+
+## Data and release
+
+- [ ] New tracks and playlists save and restore.
+- [ ] Sample v7 records convert, or land in quarantine.
+- [ ] Restored tracks resolve with your plugins.
+- [ ] Logs and metrics contain no tokens or signed URLs.
+- [ ] You can roll back your commands and your stored data.
+
+## Roll out
+
+Start with one test guild. Log queue events and compare the expected order with what plays. Move more guilds once the checks pass.
+
+For later work, use the [API reference](/docs/v8/reference), [source plugins](/docs/v8/plugins), and [error guide](/docs/v8/guides/errors).
+
+<NextStep href="/docs/v8/reference" label="Browse the API reference" />

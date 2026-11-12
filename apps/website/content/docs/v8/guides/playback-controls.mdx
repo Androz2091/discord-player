@@ -1,0 +1,78 @@
+---
+title: Playback controls
+description: Pause, resume, seek, change volume, skip, and read playback position.
+---
+
+Controls are asynchronous because they talk to Remedia. Await them before you reply to a user.
+
+```ts
+const queue = player.getQueue(guildId);
+
+if (!queue) return;
+
+await queue.node.pause();
+await queue.node.resume();
+await queue.node.seek(60_000); // Milliseconds
+await queue.node.setVolume(75); // 0 to 200 percent
+```
+
+## Skip, stop, and leave
+
+| Call                               | Effect                                                                     |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `await queue.skip()`               | End the current track and start the next. Returns the next track or `null` |
+| `await queue.skipTo(trackOrIndex)` | Skip ahead to an upcoming track                                            |
+| `await queue.jump(trackOrIndex)`   | Same as `skipTo()`                                                         |
+| `await queue.stop()`               | Stop playback and keep upcoming tracks                                     |
+| `await queue.destroy()`            | Stop, leave voice, and delete the queue                                    |
+
+Use these queue methods for commands. `queue.node.stopSession()` and `queue.node.play(source)` control the audio session directly and bypass the queue.
+
+## Read the position
+
+```ts
+const elapsed = queue.node.playbackTime; // milliseconds
+const duration = queue.node.totalDuration; // milliseconds
+const timestamp = queue.node.getTimestamp(); // { current, total, progress } or null
+const bar = queue.node.createProgressBar({ length: 20 });
+```
+
+`getTimestamp()` returns `null` when the track has no known duration, such as a live stream.
+
+`playbackTime` is the time Remedia has played, not the position inside the source file. It restarts at zero for each new track and after a seek, which sets it to the seek target. With a filter that changes speed, such as `nightcore`, it advances faster or slower than the file position. `progress` is capped at 100.
+
+## Seek
+
+```ts
+await queue.node.seek(90_000);
+```
+
+Whether a seek works depends on the source:
+
+- Files and URLs usually support seeking.
+- Plugin sources on a remote node can only seek forward. A backward seek is rejected.
+- A source with an unknown duration may reject a seek.
+
+Handle the rejection and tell the user:
+
+```ts
+try {
+  await queue.node.seek(positionMs);
+} catch (error) {
+  await interaction.reply('This track does not support seeking there.');
+}
+```
+
+## Volume
+
+`setVolume()` takes a percentage from 0 to 200. The default is 100. You can also set it when connecting:
+
+```ts
+await queue.connect({ channelId, volume: 70 });
+```
+
+## While crossfading
+
+During a crossfade, `currentTrack` is the incoming track. Skip, seek, and stop apply to it. See [crossfade](/docs/v8/guides/crossfade).
+
+<NextStep href="/docs/v8/guides/history" label="Navigate history" />

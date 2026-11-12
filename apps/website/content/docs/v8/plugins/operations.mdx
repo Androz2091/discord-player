@@ -1,0 +1,77 @@
+---
+title: Operations
+description: How handlers are chosen, ordered, cancelled, and when a handler declines.
+---
+
+A plugin registers handlers for named operations. Each operation has a dispatch policy that decides how results are combined.
+
+## Built-in operations
+
+| Operation               | Policy      | Result                                                        |
+| ----------------------- | ----------- | ------------------------------------------------------------- |
+| `search.query.match`    | `collect`   | Score from each plugin                                        |
+| `search.query.resolve`  | `first`     | Tracks and an optional playlist                               |
+| `track.stream`          | `first`     | A media source                                                |
+| `track.related`         | `first`     | Related tracks for autoplay                                   |
+| `track.bridge`          | `first`     | A fallback source when the track's own provider cannot stream |
+| `stream.transform`      | `pipe`      | A replacement encoded stream                                  |
+| `lyrics.search`         | `collect`   | Lyrics results                                                |
+| `track.stream.resolved` | `broadcast` | Notification only                                             |
+
+## Dispatch policies
+
+| Policy      | Behavior                                     |
+| ----------- | -------------------------------------------- |
+| `first`     | Use the first result that is not `undefined` |
+| `collect`   | Return all results as a list                 |
+| `pipe`      | Pass each result to the next handler         |
+| `broadcast` | Call every handler. No result                |
+
+## Priority and scores
+
+```ts
+ctx.on('search.query.match', ({ query }) => (query.startsWith('https://') ? { score: 90 } : null), {
+  priority: 10,
+});
+```
+
+Handlers with higher `priority` run first. For equal priority, a higher match `score` wins, then registration order. The Player resolves candidates in that order until one returns tracks.
+
+## Declining
+
+| Return      | Meaning                                                  |
+| ----------- | -------------------------------------------------------- |
+| `undefined` | This handler declines. The next one runs                 |
+| `null`      | A real result of "no match" for operations that allow it |
+| A throw     | A failure. The Player does not try another plugin        |
+
+## Target or block plugins
+
+```ts
+await player.search(query, { searchEngine: 'example.direct-audio' });
+await player.search(query, { searchEngine: 'ext:example.direct-audio' }); // Legacy extractor syntax
+```
+
+The `blockExtractors` option disables plugins by ID. It applies to matching, direct execution, stream resolution, and bridging.
+
+```ts
+import { Player } from 'discord-player';
+
+const player = new Player({ blockExtractors: ['example.direct-audio'], send });
+```
+
+## Cancellation and errors
+
+Every handler receives `{ signal }`, which aborts when the caller cancels or the plugin is removed. Check it during slow work:
+
+```ts
+ctx.on('track.stream', async ({ track }, { signal }) => {
+  signal.throwIfAborted();
+
+  return { url: track.url };
+});
+```
+
+A failing handler rejects with a `PluginError` that names the plugin and operation.
+
+<NextStep href="/docs/v8/plugins/advanced" label="Custom operations" />

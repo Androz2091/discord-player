@@ -1,0 +1,55 @@
+---
+title: Migrate saved data
+description: Convert stored v7 tracks and playlists to the v8 format.
+---
+
+v8 stores tracks and playlists as entities with a `type`, a `version`, and `data`, and keeps only portable information.
+
+## Write new data
+
+```ts
+import { decode, deserialize, encode, serialize } from 'discord-player';
+
+const stored = serialize(track);
+const text = encode(stored);
+
+// Later
+const restored = deserialize(decode(text));
+```
+
+Do not use `track.toJSON()` as your storage format. It is meant for display.
+
+## Read v7 data
+
+`deserialize()` reads supported v7 `$type` records, validates them, and builds v8 models. Invalid or incomplete records throw a `SerializationError`, so handle each record on its own:
+
+```ts
+import { deserialize } from 'discord-player';
+
+for (const legacyRecord of historicalRecords) {
+  try {
+    const model = deserialize(legacyRecord);
+
+    await saveNewRecord(model.serialize());
+  } catch (error) {
+    await quarantineRecord(legacyRecord, error);
+  }
+}
+```
+
+`historicalRecords`, `saveNewRecord`, and `quarantineRecord` belong to your storage layer. Do not overwrite your database before you validate the converted records.
+
+## What changes
+
+- v7 data may have no track ID, so v8 creates one.
+- Requester objects become requester ID strings.
+- Duration is stored in milliseconds. Formatted strings may be normalized.
+- Playlist links and live playback objects are not stored on each track.
+- Extractor state, `raw.engine`, closures, and credentials are dropped.
+- `sourceReference` should contain only public identifiers, never tokens or streams.
+
+## Roll out safely
+
+Read the old data, validate it, and write the new format alongside it. Compare how a sample of tracks resolve before you switch reads. Keep the original records until you no longer need to roll back.
+
+<NextStep href="/docs/v8/migration/compatibility" label="Compatibility details" />

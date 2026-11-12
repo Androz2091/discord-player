@@ -1,0 +1,65 @@
+---
+title: Errors and recovery
+description: Find where a failure happened and recover without losing the queue.
+---
+
+Failures happen in different layers: your source plugin, the voice connection, or Remedia. Handle each where it occurs.
+
+## Attach error listeners
+
+```ts
+player.on('error', (error) => console.error('Player:', error));
+
+player.events.on('error', (queue, error) => {
+  console.error('Queue', queue.guildId, error);
+});
+
+player.events.on('playerError', (queue, error, track) => {
+  console.error('Track failed:', track.url, error);
+});
+```
+
+Register them before the first `play()`. `player` and `player.events` ignore `error` events that have no listener, so nothing is thrown and nothing is logged until you attach one.
+
+## Diagnose a problem
+
+| Symptom                                  | Check                                                                       |
+| ---------------------------------------- | --------------------------------------------------------------------------- |
+| `player.search()` returns no tracks      | Is a plugin registered and does its `search.query.match` accept the query?  |
+| `No source plugin handled ...`           | Does the track have a source reference, or can another plugin bridge it?    |
+| Native library fails to load             | FFmpeg 9 shared libraries on the machine that runs the audio engine         |
+| Voice never connects                     | Bot permissions, `send` routing, and forwarding every packet to `receive()` |
+| Remote node rejects a stream             | Remote nodes cannot read a Node.js `Readable` from your bot                 |
+| A filter update rejects                  | Validate the raw FFmpeg graph                                               |
+| `playerError` right after a track starts | Is the URL reachable from the audio node, and is the format supported?      |
+
+## What happens to a failed track
+
+The track goes back to the front of the upcoming queue. It is not written to history. The queue does not start anything else, so the next step is yours.
+
+The track is put back after your `playerError` listeners return. To act on it, wait a tick:
+
+```ts
+player.events.on('playerError', (queue, error, track) => {
+  console.error(error);
+
+  queueMicrotask(async () => {
+    queue.removeTrack(track); // Drop the failed track
+    await queue.playNext(); // Start the next one, if any
+  });
+});
+```
+
+Call `queue.playNext()` without removing the track to retry it.
+
+## Plugin errors
+
+When a plugin handler throws, the Player rejects with a `PluginError` that names the plugin and operation. The Player does not try another plugin after a real error.
+
+A handler can decline an operation by returning `undefined`. Throwing means the handler failed.
+
+## Logging
+
+Keep tokens and signed URLs out of logs. Remedia diagnostics are described in the [Remedia overview](/docs/v8/remedia).
+
+<NextStep href="/docs/v8/plugins" label="Learn about source plugins" />

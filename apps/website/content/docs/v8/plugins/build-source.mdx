@@ -1,0 +1,98 @@
+---
+title: Build a source plugin
+description: Match queries, resolve track metadata, and return a playable source.
+---
+
+A source plugin handles three things: deciding whether it understands a query, describing the tracks, and returning the audio location. This example supports direct links to audio files.
+
+## Complete example
+
+```ts title="plugins/direct-audio.ts"
+import { definePlugin, Track } from 'discord-player';
+
+export const directAudio = definePlugin({
+  id: 'example.direct-audio',
+
+  setup(ctx) {
+    ctx.on('search.query.match', ({ query }) => {
+      const matches = /^https?:\/\/.+\.(mp3|ogg|wav)(\?.*)?$/i.test(query);
+
+      return matches ? { score: 100 } : null;
+    });
+
+    ctx.on('search.query.resolve', ({ query }) => ({
+      playlist: null,
+      tracks: [new Track({ title: 'Direct audio', url: query })],
+    }));
+
+    ctx.on('track.stream', ({ track }, { signal }) => {
+      signal.throwIfAborted();
+
+      return { url: track.url };
+    });
+  },
+});
+```
+
+Register it with the Player:
+
+```ts
+import { Player } from 'discord-player';
+
+const player = new Player({
+  plugins: [directAudio()],
+  send,
+});
+
+await player.initialize(botUserId);
+```
+
+`send` is your gateway callback. See [create the player](/docs/v8/getting-started/create-player).
+
+## The three handlers
+
+| Operation              | Purpose                                    | Return                                     |
+| ---------------------- | ------------------------------------------ | ------------------------------------------ |
+| `search.query.match`   | Decide whether this plugin handles a query | `{ score }`, or `null` for no match        |
+| `search.query.resolve` | Produce the tracks for the query           | `{ tracks, playlist }`                     |
+| `track.stream`         | Provide the audio for a track              | A [media source](/docs/v8/plugins/streams) |
+
+When a query arrives, the Player collects the scores from every plugin, picks the highest by priority and score, and asks that plugin to resolve it. The Player attaches a `sourceReference` to each track so it can find the same plugin again at play time.
+
+## Search and play
+
+```ts
+const result = await player.search('https://media.example.com/song.mp3');
+
+if (!result.isEmpty()) {
+  await player.play({ guildId, channelId }, result);
+}
+```
+
+## Plugin options
+
+Use `definePlugin<Options>()` when a plugin needs configuration:
+
+```ts
+import { definePlugin } from 'discord-player';
+
+type Options = { userAgent?: string };
+
+export const configurableSource = definePlugin<Options>({
+  id: 'example.configurable-source',
+
+  setup(ctx) {
+    console.log(ctx.options.userAgent);
+  },
+});
+
+const registration = configurableSource({ userAgent: 'example-bot/1.0' });
+```
+
+Each call to the factory creates an independent registration. Keep state in `ctx.options` and in `setup()` instead of module-level variables. Use `ctx.onCleanup()` to release resources.
+
+## Before production
+
+A match rule is not a security check. Before you accept URLs from users, enforce an allowed host list, check redirects, and block private network addresses.
+
+<NextStep href="/docs/v8/plugins/streams" label="Choose a media source" />

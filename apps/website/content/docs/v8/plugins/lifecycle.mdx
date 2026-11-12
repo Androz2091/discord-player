@@ -1,0 +1,66 @@
+---
+title: Registration and lifetime
+description: Register and remove plugins, handle asynchronous setup, and clean up correctly.
+---
+
+Each Player has its own plugin registry. A registration owns its handlers, its cleanup callbacks, and an abort signal.
+
+```ts
+import { definePlugin } from 'discord-player';
+
+const mySource = definePlugin({
+  id: 'example.network-source',
+
+  async setup(ctx) {
+    const resource = await acquireResource();
+
+    ctx.onCleanup(() => resource.close());
+
+    ctx.on('track.stream', async ({ track }, { signal }) => {
+      signal.throwIfAborted();
+
+      return resolveMedia(track, { signal, resource });
+    });
+  },
+});
+```
+
+`acquireResource` and `resolveMedia` are your functions.
+
+| Lifecycle point     | Use                                       |
+| ------------------- | ----------------------------------------- |
+| `setup(ctx)`        | Create resources and register handlers    |
+| `ctx.onCleanup(fn)` | Release a resource. Runs in reverse order |
+| `destroy(ctx)`      | Optional final teardown                   |
+| `ctx.signal`        | Aborted when the plugin is removed        |
+
+## Register and remove
+
+```ts
+await player.plugins.register(mySource());
+
+console.log(player.plugins.has('example.network-source'));
+
+await player.plugins.unregister('example.network-source');
+```
+
+Plugins passed in the `plugins` constructor option use the same registry. They finish setup before `player.initialize()` completes.
+
+Do not register the same ID twice.
+
+## What happens on removal
+
+1. New requests stop using the plugin.
+2. The registration's signal aborts.
+3. Running handlers finish.
+4. `destroy()` and the cleanup callbacks run.
+
+Do not wait for your own plugin's removal from inside one of its handlers. The registry waits for running handlers, so that would never finish.
+
+If `setup()` throws, the registry removes the handlers and runs cleanup. The ID can be registered again afterward.
+
+## Streams
+
+When a handler returns a `Readable`, the Player owns it from then on. It may destroy the stream when playback is cancelled, the plugin is removed, or the queue ends. Do not share one active stream between sessions.
+
+<NextStep href="/docs/v8/plugins/operations" label="Operations in depth" />

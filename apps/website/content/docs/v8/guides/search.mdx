@@ -1,0 +1,93 @@
+---
+title: Search routing
+description: Choose which plugin handles a query, and add custom query prefixes.
+---
+
+`player.search()` and `player.play()` send a string query to your source plugins. By default the Player picks the plugin with the best match. These options let you choose.
+
+## Pick a plugin
+
+```ts
+await player.search('some query', { searchEngine: 'example.source' });
+
+await player.play(channel, 'some query', {
+  searchEngine: 'example.source',
+  requestedBy: userId,
+  nodeOptions: { leaveOnEnd: true, leaveOnEndCooldown: 30_000 },
+});
+```
+
+`searchEngine` accepts:
+
+| Value                  | Effect                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| A registered plugin ID | Only that plugin handles the query                                             |
+| `ext:identifier`       | Only the legacy extractor with that identifier. Throws if it is not registered |
+| Any other string       | Passed to plugins as `providerHint`                                            |
+| Not set                | The Player chooses by priority and score                                       |
+
+A forced plugin does not fall back to another one. Blocking and cancellation still apply.
+
+`nodeOptions` holds the queue defaults for a new queue. It is the same name as in v7.
+
+## Custom prefixes
+
+A plugin can own a prefix such as `custom:` by declaring it on its handlers:
+
+```ts
+import { Track } from 'discord-player';
+
+ctx.on(
+  'search.query.resolve',
+  ({ query }) => ({
+    playlist: null,
+    tracks: [
+      new Track({
+        title: query,
+        sourceReference: { pluginId: 'example.source', data: { id: query } },
+      }),
+    ],
+  }),
+  { protocols: ['custom'] },
+);
+```
+
+`player.search('custom:resource-id')` calls this handler with `query` set to `resource-id` and `protocol` set to `custom`.
+
+- Only plugins that registered the prefix take part. They run by priority, then registration order.
+- URLs starting with `http://`, `https://`, or `file:`, drive paths, and unknown prefixes are left unchanged.
+- With a `searchEngine` set, the prefix is removed only if the chosen plugin owns it.
+- `BaseExtractor.protocols` uses the same mechanism.
+
+Turn prefix handling off with `resolveCustomProtocols: false` on `search()` or `play()`.
+
+## Register a plugin on a remote source host
+
+A [remote source host](/docs/v8/plugins/remote-hosts) is registered with a plugin that has a `remoteHost`:
+
+```ts
+import { definePlugin } from 'discord-player';
+
+const remoteSource = definePlugin({
+  id: 'example.source',
+  remoteHost: {
+    hostId: 'deployment-1',
+    url: 'https://sources.example.test',
+    token: process.env.SOURCE_TOKEN,
+  },
+});
+
+await player.plugins.register(remoteSource());
+```
+
+Registration checks what the host advertises. It does not install anything on the host. Remote providers join the same search as local ones.
+
+To search one host only, pass `hostId`:
+
+```ts
+await player.search('some query', { hostId: 'deployment-1' });
+```
+
+`player.plugins.unregister(id, hostId)` removes one deployment. Different hosts can run providers with the same ID, and each stays separate.
+
+<NextStep href="/docs/v8/guides/lyrics" label="Add lyrics" />

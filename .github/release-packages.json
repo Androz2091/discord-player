@@ -1,0 +1,3 @@
+{
+  "packages": ["@discord-player/plugin-host", "discord-player", "create-music-bot"]
+}

@@ -1,0 +1,78 @@
+---
+title: Troubleshooting
+description: Find the layer that failed and fix installation, source, voice, and playback problems.
+---
+
+Find the layer first. A missing source plugin and a native decoder failure are different problems.
+
+## Installation and native runtime
+
+**Symptom:** `ERR_DLOPEN_FAILED`, a missing `.node` addon, `avcodec` or FFmpeg library errors, or missing Windows DLLs.
+
+**Check:**
+
+- Node.js version and CPU architecture.
+- That optional platform packages were installed.
+- The five FFmpeg 9 shared libraries and their ABI versions (63, 63, 61, 12, 7).
+
+Run the [smoke test](/docs/v8/installation/ffmpeg#verify-your-installation). Embedded hosts need the libraries locally. A bot that only uses remote nodes does not.
+
+## No tracks found
+
+**Symptom:** `player.search(query)` returns no tracks, or a query never starts playback.
+
+**Check:** the registered `plugins`, that `search.query.match` accepts the query, the query prefix, `blockExtractors`, `searchEngine`, and `search.query.resolve`. A track URL alone does not register a source.
+
+## Playback fails after a track starts
+
+**Symptom:** the track resolves but `playerError` fires when it plays.
+
+**Check:** that `track.stream` is registered and returns something playable. For remote nodes, the audio server must be able to reach the URL or file, not only the bot. Check credentials, redirects, and codec support, and read the error attached to the event.
+
+## Voice never connects
+
+**Check:**
+
+- The bot's permissions in the channel.
+- The user ID passed to `initialize()`.
+- That `send` reaches the shard that owns the guild.
+- That every raw gateway packet, including `READY`, `VOICE_STATE_UPDATE`, and `VOICE_SERVER_UPDATE`, reaches `player.receive()`.
+
+## Several guilds fail to join at once
+
+**Symptom:** one guild joins while the others fail with `request_timeout` or Discord voice close code `4022`.
+
+**Check:** use the same Remedia release for client and server. Confirm that each guild's join request reaches its shard, and that voice packets reach `player.receive()`.
+
+Test with `Promise.allSettled`. See [voice recovery](/docs/v8/remedia/voice-recovery).
+
+## Playback stops, skips, or repeats unexpectedly
+
+**Check:**
+
+- Use `queue.play()` for managed tracks, not `queue.node.play(source)`.
+- Check the repeat mode.
+- Make sure no listener advances the queue from `playerFinish`.
+
+See the [playback lifecycle](/docs/v8/architecture/lifecycle).
+
+## A legacy extractor breaks
+
+**Check:** that you registered a `BaseExtractor` class, and that `stream()` returns encoded media and not an old voice pipe. If it relies on `raw.engine`, move it to a public URL or a portable `sourceReference`.
+
+## Related pages
+
+<Cards>
+  <Card
+    title="FFmpeg installation"
+    href="/docs/v8/installation/ffmpeg"
+    description="Libraries, platforms, and the smoke test."
+  />
+  <Card title="Operations" href="/docs/v8/plugins/operations" description="Matching, priority, and plugin errors." />
+  <Card title="Voice" href="/docs/v8/guides/voice" description="Gateway packets, identity, and moves." />
+  <Card
+    title="Migration checklist"
+    href="/docs/v8/migration/checklist"
+    description="Verify every lifecycle behavior."
+  />
+</Cards>

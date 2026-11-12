@@ -1,0 +1,4 @@
+{
+  "title": "Migrate from v7",
+  "pages": ["index", "api-changes", "extractors", "data", "compatibility", "checklist"]
+}

@@ -1,0 +1,45 @@
+---
+title: Player context
+description: Read the current Player, queue, or history inside a command without passing them around.
+---
+
+The context uses Node.js `AsyncLocalStorage`. It belongs to one Player, so several Players do not share an active queue.
+
+```ts
+import { useHistory, usePlayer, useQueue } from 'discord-player';
+
+await player.context.provide({ guildId }, async () => {
+  const activePlayer = usePlayer();
+  const queue = useQueue();
+  const history = useHistory();
+
+  console.log(activePlayer.id, queue?.currentTrack?.title, history?.size);
+});
+```
+
+The context stays available across `await` inside the callback.
+
+## Hooks
+
+| Hook                                | Returns                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `usePlayer()` and `useMainPlayer()` | The Player in the current context. Otherwise the first active Player. Throws if no Player exists |
+| `useQueue(guildId?)`                | The queue for the context's guild, or for `guildId`. `null` when none exists                     |
+| `useHistory()`                      | The current queue's history, or `null`                                                           |
+| `useMetadata()`                     | Metadata of the context, then of the queue                                                       |
+| `useVolume()`                       | The context volume, then the queue's volume                                                      |
+| `useTimeline()`                     | The context timeline, then the queue's `getTimestamp()`                                          |
+
+`useQueue()` without a guild and without a context returns `null`. It never guesses a guild.
+
+When a Player is destroyed, the fallback moves to the next active Player.
+
+## Outside a context
+
+Long-running workers and background jobs have no async context. Look up the queue explicitly:
+
+```ts
+const queue = player.getQueue(guildId);
+```
+
+<NextStep href="/docs/v8/guides/persistence" label="Save tracks" />

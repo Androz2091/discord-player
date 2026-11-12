@@ -1,0 +1,40 @@
+---
+title: Design decisions
+description: Why Discord Player separates queues, plugins, and the audio engine.
+---
+
+v8 draws explicit boundaries instead of exposing stream and voice objects to application code.
+
+## One engine, two modes
+
+Embedded and remote Remedia both use the same native engine, so decoding, filters, volume, and transport behave the same. Maintaining one engine avoids two sets of edge cases.
+
+Remote mode still differs in network latency, authentication, reconnects, which sources the server can open, and the process boundary. The same engine does not mean identical latency.
+
+## A separate queue layer
+
+Choosing the next track is application policy. The queue owns repeat, shuffle, history, skip, and event reconciliation. The engine owns playing a source and reporting how each generation ended. Because of this split, a native playback command cannot change your history by accident.
+
+It is also why `queue.play()` and `queue.node.play()` are different APIs.
+
+## Typed operations for sources
+
+A source rarely provides every capability. Typed operations separate matching a query, describing tracks, and opening media. That makes cancellation, handler choice, priority, and error attribution explicit.
+
+Legacy extractors run through the same host, so compatibility does not leave a second dispatcher behind.
+
+## A gateway boundary without a library
+
+Your bot already has a gateway connection. Discord Player asks for `send()` and `receive()` with raw payloads, so it works with any library that can provide them.
+
+## Non-goals
+
+- Built-in providers. Sources are registered explicitly.
+- A second media engine for remote nodes.
+- Gapless transfers between nodes.
+- Running a local JavaScript plugin on a remote server.
+- A replacement for the v7 stream dispatcher.
+
+The result is a smaller and more predictable API. For the details, see [source plugins](/docs/v8/plugins) and [queues](/docs/v8/guides/queues).
+
+<NextStep href="/docs/v8/migration" label="Migrating from v7" />

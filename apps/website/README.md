@@ -1,26 +1,61 @@
-# website
+# Discord Player documentation site
 
-This is a Next.js application generated with
-[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
+A Next.js and [Fumadocs](https://fumadocs.dev) app that is exported as a static site for GitHub Pages.
 
-Run development server:
-
-```bash
-npm run dev
-# or
-pnpm dev
-# or
-yarn dev
+```sh
+pnpm --filter @discord-player/website dev
+pnpm --filter @discord-player/website build
+pnpm --filter @discord-player/website start # serves the exported site from out/
 ```
 
-Open http://localhost:3000 with your browser to see the result.
+## Documentation versions
 
-## Learn More
+Each major version lives in its own folder under `content/docs/` and is served from `/docs/<version>/`.
 
-To learn more about Next.js and Fumadocs, take a look at the following
-resources:
+```
+content/docs/
+  v7/   → /docs/v7/…   (includes the API reference under v7/api)
+  v8/   → /docs/v8/…
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [Fumadocs](https://fumadocs.vercel.app) - learn about Fumadocs
+`src/lib/versions.ts` is the single place that controls versions:
+
+| Setting            | Controls                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| `docsVersions`     | Which versions exist, their order, display name, description, and badge                           |
+| `badge`            | The label next to a version name. Change `text` and `tone` to turn `Dev` into `Release Candidate` |
+| `defaultVersionId` | The "latest" version. `/docs`, `/api`, and old unversioned links redirect to it                   |
+| `apiReference`     | Where a version's API reference lives, so `/api` can find it                                      |
+
+To add a version, add an entry to `docsVersions` and create `content/docs/<id>/`. A folder in `content/docs/` that is not listed in `docsVersions` fails the build.
+
+### Redirects
+
+GitHub Pages cannot send HTTP redirects, so moved URLs are generated as small static pages that redirect in the browser (and keep the URL fragment):
+
+- `/docs` goes to the default version.
+- `/docs/<page>` goes to the default version's page, or to the first version that has it.
+- `/api/<page>` goes to the default version's API reference, or to the version that has the page.
+- `/showcase` goes to `/community`.
+
+### Search and switching
+
+Each version has its own search index at `/api/search/<version>`. The search dialog uses the version of the page being read, and the default version elsewhere.
+
+The version selector opens the same page in another version when it exists. Otherwise it opens the closest parent section, then the version root.
+
+## Content
+
+Pages are MDX. `meta.json` files define titles and order. `v7` content is a snapshot of the released v7 documentation and is excluded from the formatter, so keep edits there minimal.
+
+The Community page reads `src/data/community.ts`. Add a project by adding an entry to it.
+
+## Generated routes
+
+| Route                                                       | Purpose                            |
+| ----------------------------------------------------------- | ---------------------------------- |
+| `/llms.txt`, `/llms-full.txt`                               | Text export of the default version |
+| `/llms/<version>/llms.txt`, `/llms/<version>/llms-full.txt` | Text export of one version         |
+| `/llms.mdx/docs/<version>/<page>/content.md`                | Markdown of one page               |
+| `/og/docs/<version>/<page>/image.png`                       | Social preview image               |
+| `/sitemap.xml`                                              | Every page of every version        |

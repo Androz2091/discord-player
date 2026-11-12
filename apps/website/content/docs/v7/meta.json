@@ -1,0 +1,17 @@
+{
+  "title": "Discord Player v7",
+  "pages": [
+    "index",
+    "creating-a-music-bot",
+    "common-actions",
+    "extractors",
+    "filters",
+    "hooks",
+    "intercepting-streams",
+    "library-compatibility",
+    "faq",
+    "migrating",
+    "---Reference---",
+    "api"
+  ]
+}

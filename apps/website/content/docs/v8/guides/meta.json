@@ -1,0 +1,22 @@
+{
+  "title": "Guides",
+  "pages": [
+    "index",
+    "---Playback---",
+    "queues",
+    "playback-controls",
+    "history",
+    "filters",
+    "crossfade",
+    "---Events and voice---",
+    "events",
+    "voice",
+    "errors",
+    "---Advanced---",
+    "search",
+    "lyrics",
+    "hooks",
+    "context",
+    "persistence"
+  ]
+}

@@ -1,0 +1,53 @@
+---
+title: Media sources
+description: Return URLs, files, or streams from track.stream, and know what each kind of node can open.
+---
+
+`track.stream` returns the audio for a track. The Player passes it to Remedia as a media source.
+
+## Return shapes
+
+```ts
+// A URL
+ctx.on('track.stream', ({ track }) => ({ url: track.url }));
+
+// A file on the machine that runs the audio engine
+ctx.on('track.stream', ({ track }) => ({ file: track.url }));
+
+// An encoded Node.js Readable (embedded nodes only)
+ctx.on('track.stream', async ({ track }) => ({ stream: createEncodedReadable(track) }));
+```
+
+`createEncodedReadable` is your own function. These are alternatives, so a handler returns one of them. A plain HTTP(S) string, a file path string, a `Uint8Array`, or a `Readable` is also accepted.
+
+## What each node can open
+
+| Source               | Embedded node           | Remote node                                                    |
+| -------------------- | ----------------------- | -------------------------------------------------------------- |
+| HTTP(S) URL          | Yes                     | Yes, if the server can reach it and its media policy allows it |
+| File path            | Yes, on the bot machine | Only if the same file exists on the server                     |
+| `Readable` or buffer | Yes                     | No                                                             |
+
+A remote node runs on another machine and cannot read your bot's memory, files, or streams. For remote nodes, return a URL the server can open, or use a [remote source host](/docs/v8/plugins/remote-hosts).
+
+Do not assume a private local file is available on another server.
+
+## Encoded audio only
+
+A `Readable` carries encoded audio such as MP3, Ogg, or M4A. Remedia decodes it. A `Readable` is not a place to push raw PCM or Opus frames.
+
+To modify the encoded bytes before decoding, add a `stream.transform` handler. It runs only for local streams, must stop when the signal aborts, and should not keep unbounded chunks in memory.
+
+## Remote-safe URLs
+
+```ts
+ctx.on('track.stream', async ({ track }, { signal }) => {
+  signal.throwIfAborted();
+
+  return { url: await createAccessibleUrl(track, { signal }) };
+});
+```
+
+`createAccessibleUrl` is your function. It should check access rights and return a URL that expires.
+
+<NextStep href="/docs/v8/plugins/lifecycle" label="Plugin lifetime" />

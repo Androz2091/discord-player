@@ -1,83 +1,56 @@
 {
   "name": "discord-player",
-  "version": "7.2.0",
-  "description": "Complete framework to facilitate music commands using discord.js",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist/"
+  "version": "8.0.0-dev",
+  "description": "Complete framework to facilitate discord music commands using JavaScript and TypeScript",
+  "keywords": [
+    "api",
+    "bot",
+    "discord",
+    "discord-music",
+    "discord-music-player",
+    "discord.js",
+    "framework",
+    "lavalink",
+    "music",
+    "music-player",
+    "musicbot",
+    "player",
+    "queue",
+    "volume"
   ],
-  "module": "dist/index.mjs",
-  "scripts": {
-    "build": "tsup && node ./scripts/esm-shim.cjs",
-    "build:check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts --fix",
-    "test": "vitest",
-    "coverage": "vitest run --coverage"
+  "homepage": "https://discord-player.js.org",
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
   },
-  "funding": "https://github.com/Androz2091/discord-player?sponsor=1",
-  "contributors": [
-    "twlite"
-  ],
+  "license": "MIT",
+  "author": "Androz2091",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Androz2091/discord-player.git"
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "keywords": [
-    "music",
-    "player",
-    "bot",
-    "framework",
-    "discord",
-    "volume",
-    "queue",
-    "discord.js",
-    "musicbot",
-    "discord-music-player",
-    "discord-music",
-    "music-player",
-    "lavalink",
-    "api"
+  "files": [
+    "dist"
   ],
-  "author": "Androz2091",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Androz2091/discord-player/issues"
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
-  "homepage": "https://discord-player.js.org",
   "dependencies": {
-    "@discord-player/equalizer": "workspace:^",
-    "@discord-player/ffmpeg": "workspace:^",
-    "@discord-player/utils": "workspace:^",
-    "@web-scrobbler/metadata-filter": "^3.1.0",
-    "discord-voip": "workspace:^",
-    "libsodium-wrappers": "^0.7.13"
-  },
-  "peerDependencies": {
-    "@discord-player/extractor": "workspace:^",
-    "mediaplex": "^1"
+    "@discord-player/plugin-host": "workspace:*",
+    "@discordjs/collection": "^2.1.1",
+    "@remedia/client": "0.1.0-dev.7",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@discord-player/tsconfig": "workspace:^",
-    "@types/node": "^22.10.7",
-    "@types/ws": "^8.5.3",
-    "discord-api-types": "^0.38.40",
-    "discord.js": "^14.25.1",
-    "eris": "^0.17.2",
-    "oceanic.js": "^1.11.2",
-    "opusscript": "^0.0.8",
-    "tsup": "^8.3.5",
-    "typescript": "^5.2.2",
-    "vitest": "^0.34.6"
-  },
-  "typedoc": {
-    "entryPoint": "./src/index.ts",
-    "readmeFile": "./README.md",
-    "tsconfig": "./tsconfig.json",
-    "excludeExternals": true,
-    "excludePrivate": true
+    "@discord-player/extractor": "7.2.0",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

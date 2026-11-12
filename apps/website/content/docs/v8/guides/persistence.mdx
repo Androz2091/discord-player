@@ -1,0 +1,47 @@
+---
+title: Persistence
+description: Save and restore tracks and playlists in a portable, versioned format.
+---
+
+`Track` and `Playlist` can be saved as validated JSON-safe objects.
+
+```ts
+import { Track, decode, deserialize, encode, serialize } from 'discord-player';
+
+const track = new Track({
+  title: 'Example recording',
+  url: 'https://media.example.com/track.mp3',
+  durationMS: 180_000,
+});
+
+const entity = serialize(track); // { type: 'track', version: 1, data: ... }
+const text = encode(entity); // A string you can store
+const restored = deserialize(decode(text));
+```
+
+`serialize()` is for storage. `toJSON()` is only meant for display and logging.
+
+## What is saved
+
+| Saved                         | Not saved                          |
+| ----------------------------- | ---------------------------------- |
+| Title, author, URL, thumbnail | Live queue state                   |
+| Duration in milliseconds      | Active streams and native sessions |
+| Requester ID                  | Plugin instances                   |
+| Source and lyrics references  | Credentials and signed URLs        |
+
+A playlist saves its tracks in order.
+
+Register the same source plugin before you play restored tracks. A restored track does not know how to open a private URL by itself.
+
+## Validate input
+
+Treat stored or received data as untrusted. `deserialize()` validates it and throws a `SerializationError` for invalid data. The serializer rejects cycles, functions, getters, non-finite numbers, sparse arrays, and other values that are not JSON.
+
+The entity `version` belongs to the storage format. It is not the npm package version.
+
+## Import v7 data
+
+`deserialize()` also accepts supported v7 Track and Playlist records. See [migrating saved data](/docs/v8/migration/data).
+
+<NextStep href="/docs/v8/plugins" label="Source plugins" />

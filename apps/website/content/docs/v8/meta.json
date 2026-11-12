@@ -1,0 +1,22 @@
+{
+  "title": "Discord Player v8",
+  "pages": [
+    "index",
+    "---Start---",
+    "getting-started",
+    "installation",
+    "---Use---",
+    "guides",
+    "---Extend---",
+    "plugins",
+    "---Deploy---",
+    "remedia",
+    "---Upgrade---",
+    "migration",
+    "---Reference---",
+    "reference",
+    "troubleshooting",
+    "---Internals---",
+    "architecture"
+  ]
+}

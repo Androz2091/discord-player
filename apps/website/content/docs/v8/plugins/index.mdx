@@ -1,0 +1,56 @@
+---
+title: Source plugins
+description: Add music providers by teaching Discord Player how to find tracks and open audio.
+---
+
+A source plugin tells Discord Player how to recognize a query, find tracks, and return audio that Remedia can play. Discord Player has no built-in providers, so you register the plugins your bot needs.
+
+```ts
+import { Player } from 'discord-player';
+
+const player = new Player({
+  plugins: [mySourcePlugin()],
+  send,
+});
+```
+
+`mySourcePlugin` is your plugin. The [getting-started tutorial](/docs/v8/getting-started/source-plugin) builds a working one.
+
+## Choose a topic
+
+<Cards>
+  <Card
+    title="Build a source plugin"
+    href="/docs/v8/plugins/build-source"
+    description="Match queries, resolve tracks, and return audio."
+  />
+  <Card
+    title="Media sources"
+    href="/docs/v8/plugins/streams"
+    description="URLs, files, and streams, and what each node can open."
+  />
+  <Card
+    title="Registration and lifetime"
+    href="/docs/v8/plugins/lifecycle"
+    description="Register, unregister, and clean up."
+  />
+</Cards>
+
+## Advanced
+
+<Cards>
+  <Card title="Operations" href="/docs/v8/plugins/operations" description="How handlers are chosen and ordered." />
+  <Card title="Custom operations" href="/docs/v8/plugins/advanced" description="Add your own typed operations." />
+  <Card
+    title="v7 extractors"
+    href="/docs/v8/plugins/legacy-extractors"
+    description="Keep a BaseExtractor while you migrate."
+  />
+  <Card
+    title="Remote source hosts"
+    href="/docs/v8/plugins/remote-hosts"
+    description="Run plugins on a separate server and stream to a remote node."
+  />
+</Cards>
+
+<NextStep href="/docs/v8/plugins/build-source" label="Build a source plugin" />

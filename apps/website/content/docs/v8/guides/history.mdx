@@ -1,0 +1,53 @@
+---
+title: History
+description: Go back to previous tracks and understand what gets recorded.
+---
+
+The queue records finished tracks in `queue.history`.
+
+```ts
+const queue = player.getQueue(guildId);
+
+if (!queue) return;
+
+console.log(queue.history.size);
+console.log(queue.history.previousTrack?.title);
+
+await queue.history.previous(); // Play the previous track
+await queue.history.next(); // Play the next upcoming track
+queue.history.clear();
+```
+
+`previous()` and `next()` are asynchronous because they start a different track. Both reject with a `NoResultError` when there is nothing to go to, so catch the error in commands.
+
+By default, `previous()` puts the current track back at the front of the queue. Pass `false` to drop it:
+
+```ts
+await queue.history.previous(false);
+```
+
+## What is recorded
+
+| What happened                                    | History                                                           |
+| ------------------------------------------------ | ----------------------------------------------------------------- |
+| A track finished with repeat `OFF` or `AUTOPLAY` | The track is added                                                |
+| A track was skipped                              | The track is added                                                |
+| Repeat is `TRACK` or `QUEUE`                     | Replays are not added                                             |
+| A track failed to play                           | The track returns to the front of the queue. History is unchanged |
+| Playback was stopped                             | History is unchanged                                              |
+| `queue.clear()` or `queue.destroy()`             | History is cleared                                                |
+
+## Limit or disable history
+
+```ts
+const queue = await player.createQueue(guildId, {
+  maxHistorySize: 20, // Keep the last 20 tracks
+  disableHistory: true, // Or record nothing
+});
+```
+
+## Show the current track
+
+Use `queue.currentTrack` for the track that is playing. `queue.history.previousTrack` is the one before it.
+
+<NextStep href="/docs/v8/guides/filters" label="Apply audio filters" />

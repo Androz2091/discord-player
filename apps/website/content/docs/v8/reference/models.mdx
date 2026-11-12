@@ -1,0 +1,59 @@
+---
+title: Models
+description: Track, Playlist, SearchResult, and their storage format.
+---
+
+## Track
+
+A `Track` holds metadata and a `sourceReference`. It does not hold an open decoder.
+
+```ts
+import { Track } from 'discord-player';
+
+const track = new Track({
+  title: 'Example',
+  author: 'Artist',
+  url: 'https://media.example.com/track.mp3',
+  durationMS: 180_000,
+});
+```
+
+| Field                                                | Description                                        |
+| ---------------------------------------------------- | -------------------------------------------------- |
+| `id`                                                 | Unique ID. Generated when omitted                  |
+| `title`, `author`, `description`, `thumbnail`, `url` | Display metadata                                   |
+| `durationMS`, `duration`                             | Duration in milliseconds, and a formatted label    |
+| `requestedBy`                                        | Who requested the track. An ID string or an object |
+| `source`                                             | Provider-defined source name                       |
+| `live`                                               | `true` for live streams                            |
+| `playlist`                                           | The playlist the track came from, or `null`        |
+| `sourceReference`                                    | Portable identity of the source plugin and host    |
+| `lyricsReference`                                    | Portable identity of a preferred lyrics provider   |
+| `extractor`, `raw`, `queryType`                      | v7 compatibility fields. Not safe to store         |
+
+For legacy extractors, `new Track(player, data)` also works.
+
+## Playlist
+
+A `Playlist` is an ordered list of tracks with title, author, thumbnail, source, URL, and type. You can iterate it:
+
+```ts
+for (const track of playlist) console.log(track.title);
+```
+
+## SearchResult
+
+`player.search()` returns a `SearchResult` with `tracks`, an optional `playlist`, and helpers such as `first()` and `isEmpty()`. A string that no plugin matches gives an empty result. It does not throw.
+
+## Storage
+
+```ts
+import { decode, deserialize, encode, serialize } from 'discord-player';
+
+const text = encode(serialize(track));
+const restored = deserialize(decode(text));
+```
+
+`serialize()` validates that the data is JSON-safe and `deserialize()` validates unknown input. See [persistence](/docs/v8/guides/persistence) and [migrating saved data](/docs/v8/migration/data).
+
+<NextStep href="/docs/v8/reference/remedia" label="Remedia configuration" />

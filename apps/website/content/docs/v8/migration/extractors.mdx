@@ -1,0 +1,85 @@
+---
+title: Migrate extractors
+description: Keep a BaseExtractor through the adapter, then port it to a source plugin.
+---
+
+Migrate in two phases. First keep a compatible extractor working through the adapter. Then rewrite it as a plugin.
+
+## Phase 1: keep the extractor
+
+```ts
+import { BaseExtractor, Track } from 'discord-player';
+import type { ExtractorSearchContext } from 'discord-player';
+
+class MyLegacyExtractor extends BaseExtractor {
+  static identifier = 'my.source';
+
+  async validate(query: string) {
+    return query.startsWith('https://');
+  }
+
+  async handle(query: string, context: ExtractorSearchContext) {
+    return this.createResponse(null, [
+      new Track(this.context.player, {
+        title: 'Audio',
+        url: query,
+        requestedBy: context.requestedBy,
+        engine: query,
+      }),
+    ]);
+  }
+
+  async stream(track: Track) {
+    return track.raw.engine as string;
+  }
+}
+
+await player.extractors.register(MyLegacyExtractor, {});
+```
+
+`register()` takes the extractor class. See [v7 extractors](/docs/v8/plugins/legacy-extractors) for the method mapping and limits.
+
+## Phase 2: write a plugin
+
+```ts
+import { definePlugin, Track } from 'discord-player';
+
+export const mySource = definePlugin({
+  id: 'my.source',
+
+  setup(ctx) {
+    ctx.on('search.query.match', ({ query }) => (query.startsWith('https://') ? { score: 100 } : null));
+
+    ctx.on('search.query.resolve', ({ query }) => ({
+      playlist: null,
+      tracks: [new Track({ title: 'Audio', url: query })],
+    }));
+
+    ctx.on('track.stream', ({ track }) => ({ url: track.url }));
+  },
+});
+```
+
+Register `plugins: [mySource()]` in the Player options, or call `await player.plugins.register(mySource())` later. Remove the legacy extractor first. A modern plugin and a legacy extractor must not use the same ID at the same time.
+
+## Method mapping
+
+| v7 extractor                | v8 operation             |
+| --------------------------- | ------------------------ |
+| `validate`                  | `search.query.match`     |
+| `handle`                    | `search.query.resolve`   |
+| `stream`                    | `track.stream`           |
+| `getRelatedTracks`          | `track.related`          |
+| `bridge`                    | `track.bridge`           |
+| `handlePostStream`          | Local `stream.transform` |
+| `activate` and `deactivate` | `setup` and `destroy`    |
+
+## What does not carry over
+
+An extractor that needs raw voice packets, the old stream dispatcher, PCM or Opus format overrides, or a private session cannot run through the adapter. Move that part to Remedia features or redesign the source.
+
+Saved tracks must not depend on `raw.engine`. Restored tracks need a public `url` or a portable `sourceReference`.
+
+A remote node can only play URLs and files it can reach. A `Readable` from an extractor works with embedded nodes only.
+
+<NextStep href="/docs/v8/migration/data" label="Migrate saved data" />

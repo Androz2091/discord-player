@@ -1,0 +1,88 @@
+---
+title: Resource hooks
+description: Replace or inspect the audio source of a track before Remedia opens it.
+---
+
+Hooks run while a track is prepared for playback. Use them to swap the audio source, rewrite a URL, or process encoded audio in your own process.
+
+| Hook                   | Runs                                  | Can return                                  |
+| ---------------------- | ------------------------------------- | ------------------------------------------- |
+| `onBeforeCreateStream` | Before normal source resolution       | A replacement source, or `null` to continue |
+| `onStreamExtracted`    | After the plugin resolved a source    | The source to use                           |
+| `onAfterCreateStream`  | On encoded bytes, embedded nodes only | `{ stream }`, or `null` to keep the input   |
+
+## Register a hook
+
+Set a hook in one of three places. The most specific wins:
+
+1. The queue: `queue.onBeforeCreateStream = ...` or the queue option.
+2. The Player constructor options.
+3. Global registration with the exported function.
+
+```ts
+import { onBeforeCreateStream } from 'discord-player';
+
+const remove = onBeforeCreateStream(async (track, queryType, queue, signal) => {
+  signal.throwIfAborted();
+
+  return null; // Continue with normal resolution
+});
+
+queue.onBeforeCreateStream = async (track, queryType, queue, signal) => {
+  signal.throwIfAborted();
+
+  return { url: track.url };
+};
+```
+
+A global registration replaces the previous one. Call the returned function to remove it when the component that registered it shuts down.
+
+Hooks run inside the owning Player and queue [context](/docs/v8/guides/context).
+
+## Accepted sources
+
+A replacement can be:
+
+- A URL string or `{ url }`.
+- `{ file }`.
+- A native media descriptor.
+- A Node.js `Readable`, `Buffer`, or `Uint8Array` of encoded audio.
+
+| Source               | Embedded node | Remote node                    |
+| -------------------- | ------------- | ------------------------------ |
+| URL or file          | Yes           | Yes, if the server can open it |
+| `Readable` or buffer | Yes           | No                             |
+
+An unsupported source fails with an error. The Player does not move the guild to another node.
+
+## Cancellation
+
+The last argument is an `AbortSignal` for the preparation. Pass it to your own I/O. The queue also checks it after your hook returns and closes streams that arrive late.
+
+With crossfade, hooks run when the next track is staged. The prepared source is reused when it becomes audible.
+
+## onStreamExtracted
+
+```ts
+import { onStreamExtracted } from 'discord-player';
+
+onStreamExtracted(async (source, track, queue, signal) => {
+  return typeof source === 'string' ? `${source}?token=${await getToken(signal)}` : source;
+});
+```
+
+It receives the resolved source, which can be a URL or an operation descriptor. It does not see the audio bytes.
+
+## onAfterCreateStream
+
+```ts
+queue.onAfterCreateStream = async (stream, queue, track, signal) => {
+  return { stream: myTransform(stream, signal) };
+};
+```
+
+This hook needs the encoded bytes in your process, so it only works with an embedded node and a `Readable` source. When Remedia opens a URL or file itself, the bytes never reach your code and registering this hook for that source fails with an error. Return a `Readable` from `onBeforeCreateStream` if you need to process audio locally.
+
+v8 has no hook for decoded PCM audio.
+
+<NextStep href="/docs/v8/guides/context" label="Use Player context" />

@@ -1,0 +1,123 @@
+---
+title: Queues
+description: Create queues, add tracks, and control repeat, shuffle, and ordering.
+---
+
+A `GuildQueue` belongs to one guild and decides which track plays next. Remedia plays the audio. The queue keeps the current track, the upcoming tracks, and the history.
+
+## Create or get a queue
+
+```ts
+import { QueueRepeatMode } from 'discord-player';
+
+const queue = await player.createQueue(guildId, {
+  maxSize: 100,
+  maxHistorySize: 50,
+  repeatMode: QueueRepeatMode.OFF,
+  metadata: { textChannelId },
+});
+
+const existing = player.getQueue(guildId); // null when there is no queue
+```
+
+Options apply only when the queue is created. `player.play()` creates a queue for you, so you usually only call `getQueue()`.
+
+`maxSize` limits upcoming tracks. The current track does not count toward it.
+
+## Add and play tracks
+
+The usual route is `player.play()`, which searches, queues, and starts playback:
+
+```ts
+const { queue, track } = await player.play({ guildId, channelId }, query);
+```
+
+If you already have `Track` objects, use the queue directly:
+
+```ts
+await queue.play(track, { channelId }); // Queue it and start if idle
+queue.addTrack(track); // Upcoming only
+queue.addTracks(moreTracks);
+```
+
+`channelId` can be left out when the queue is already connected.
+
+<Callout type="info" title="Search results queue one track">
+  `player.play()` and `queue.play()` queue only the first track of a `SearchResult`. To queue every result, call
+  `queue.addTracks(searchResult.tracks)`.
+</Callout>
+
+## Read queue state
+
+| Property                  | Value                                             |
+| ------------------------- | ------------------------------------------------- |
+| `queue.currentTrack`      | The playing or paused track, otherwise `null`     |
+| `queue.tracks`            | Upcoming tracks. Call `toArray()` for an array    |
+| `queue.size`              | Number of upcoming tracks                         |
+| `queue.estimatedDuration` | Total duration of upcoming tracks in milliseconds |
+| `queue.isPlaying()`       | `true` while playing, including when paused       |
+| `queue.history`           | [Previous tracks](/docs/v8/guides/history)        |
+
+## Repeat modes
+
+```ts
+import { QueueRepeatMode } from 'discord-player';
+
+queue.repeatMode = QueueRepeatMode.TRACK;
+```
+
+| Mode       | Behavior                                                          |
+| ---------- | ----------------------------------------------------------------- |
+| `OFF`      | Play the upcoming tracks, then finish                             |
+| `TRACK`    | Repeat the current track until you change the mode or skip        |
+| `QUEUE`    | Move each finished track to the end of the queue                  |
+| `AUTOPLAY` | Ask the track's source for related tracks when the queue runs out |
+
+### Autoplay
+
+With `AUTOPLAY`, the queue calls the source's `track.related` operation after the last track finishes. If the source returns nothing, playback ends.
+
+To pick the related track yourself, listen for `willAutoPlay` and call `done` with the track, or `null` to stop:
+
+```ts
+player.events.on('willAutoPlay', (queue, tracks, done) => {
+  done(tracks[0] ?? null);
+});
+```
+
+Without a listener, the queue prefers a track that has not played yet. Skipping, stopping, or changing the queue cancels a pending selection.
+
+## Shuffle
+
+```ts
+queue.enableShuffle(); // Picks the next track at random each time
+queue.disableShuffle();
+queue.toggleShuffle();
+```
+
+Shuffle picks the next upcoming track at random. It does not reorder the queue and does not change history. Turning it off does not restore an earlier order.
+
+## Change the order
+
+All of these work on upcoming tracks only:
+
+| Method                                 | Effect                                                              |
+| -------------------------------------- | ------------------------------------------------------------------- |
+| `removeTrack(track)`                   | Remove a track                                                      |
+| `moveTrack(track, index)`              | Move a track                                                        |
+| `swapTracks(a, b)`                     | Swap two tracks                                                     |
+| `insertTrack(track, index)`            | Insert one track                                                    |
+| `prepend(tracks)` and `append(tracks)` | Add to the start or end                                             |
+| `clear()`                              | Remove upcoming tracks and history. The current track keeps playing |
+
+A track can be a `Track`, a track ID, or an index.
+
+## Delete a queue
+
+```ts
+await queue.destroy(); // or player.deleteQueue(guildId)
+```
+
+This stops playback, leaves voice, and clears the queue. A later `player.play()` creates a new queue.
+
+<NextStep href="/docs/v8/guides/playback-controls" label="Control playback" />

@@ -1,11 +1,7 @@
 node_modules
 dist
-yarn*.log
-.yarn/cache
-.yarn/*.gz
-dev/
 .DS_Store
-.turbo/
 .env
 .turbo
 .next
+.source

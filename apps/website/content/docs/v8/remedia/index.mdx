@@ -1,0 +1,47 @@
+---
+title: The Remedia runtime
+description: What Discord Player delegates to Remedia, and how embedded and remote nodes differ.
+---
+
+Remedia is the audio engine behind Discord Player. It decodes audio, applies filters and volume, encodes Opus, and sends audio over Discord voice. Discord Player decides which track plays and where its audio comes from.
+
+## Who owns what
+
+| Remedia                                              | Discord Player                                 |
+| ---------------------------------------------------- | ---------------------------------------------- |
+| FFmpeg demuxing, decoding, resampling, filters       | Tracks, queues, history, repeat, shuffle       |
+| Playback state, volume, pause, seek                  | Source plugins and search                      |
+| Opus encoding and encrypted Discord voice            | Events for your application                    |
+| Many independent sessions, in-process or on a server | Choosing the track and source for each session |
+
+## Embedded or remote
+
+<Cards>
+  <Card title="Embedded node" href="/docs/v8/remedia/embedded" description="The engine runs inside your bot process." />
+  <Card
+    title="Remote node"
+    href="/docs/v8/remedia/remote"
+    description="The engine runs in a separate server that the bot controls over WebSocket."
+  />
+  <Card
+    title="Node capacity and selection"
+    href="/docs/v8/remedia/operations"
+    description="Inspect nodes and choose where a guild plays."
+  />
+</Cards>
+
+Both modes run the same playback engine. A remote node is a separate process, so it adds network latency, authentication, and reconnects. It also cannot read your bot's local files or streams.
+
+## Access the client
+
+After `player.initialize()`, the Remedia client is `player.remedia`. Use `player.nodeSnapshots` for node status.
+
+`player.nodes` is the guild queue manager from v7. It is not the list of audio nodes.
+
+## What stays on the bot
+
+Source plugins run in your bot process. A remote Remedia server never runs your plugin's `setup()` or `track.stream` handler. It receives a resolved URL or file, or fetches audio from a [source host](/docs/v8/plugins/remote-hosts).
+
+For protocol, security, and server settings, see the [Remedia documentation](https://github.com/twlite/remedia/tree/main/apps/docs/content/docs).
+
+<NextStep href="/docs/v8/remedia/embedded" label="Embedded playback" />

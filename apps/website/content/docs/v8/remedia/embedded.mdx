@@ -1,0 +1,47 @@
+---
+title: Embedded playback
+description: Run the Remedia engine inside your Node.js process.
+---
+
+Embedded mode is the simplest setup. `@remedia/client` calls the native engine in `@remedia/node` directly, and no server or WebSocket is involved.
+
+```ts
+import { Player } from 'discord-player';
+
+const player = new Player({
+  nodes: [{ id: 'local', type: 'embedded', capacity: 8 }],
+  send,
+});
+
+await player.initialize(botUserId);
+```
+
+`capacity` is how many guild sessions the node accepts. The default is 64.
+
+## Set up
+
+1. Use Node.js 22.18 or newer with ESM.
+2. Install `discord-player` and `@remedia/node`.
+3. Install the [FFmpeg 9 shared libraries](/docs/v8/installation/ffmpeg) on the bot machine. The `ffmpeg` executable alone is not enough.
+4. Allow optional platform packages during installation, so the native binary for your platform is installed.
+5. Run the [smoke test](/docs/v8/installation/ffmpeg#verify-your-installation).
+
+## What embedded nodes allow
+
+Because the engine runs in your process, a source plugin can return a local encoded `Readable` or a buffer. A [remote node](/docs/v8/remedia/remote) cannot use those.
+
+## Plan capacity
+
+Each active guild has its own playback and voice session. Size `capacity` from measured CPU and memory use with your codecs, filters, and crossfade, not from how long queues are.
+
+Shut down cleanly so the native sessions are released:
+
+```ts
+await player.destroy();
+```
+
+## Crossfade
+
+Set `crossfade` on the Player or a queue. Embedded sessions receive the setting directly. See [crossfade](/docs/v8/guides/crossfade).
+
+<NextStep href="/docs/v8/remedia/remote" label="Remote playback" />

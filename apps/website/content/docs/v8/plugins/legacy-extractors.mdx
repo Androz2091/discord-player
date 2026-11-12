@@ -1,0 +1,73 @@
+---
+title: v7 extractors
+description: Keep a v7 BaseExtractor working while you move to source plugins.
+---
+
+`player.extractors` is still available so supported v7 `BaseExtractor` classes keep working. The adapter wraps each extractor as a source plugin, so extractors and plugins share one registry.
+
+New code should use [`definePlugin()`](/docs/v8/plugins/build-source).
+
+## Register an extractor
+
+```ts
+import { BaseExtractor, Track } from 'discord-player';
+import type { ExtractorSearchContext } from 'discord-player';
+
+class DirectMediaExtractor extends BaseExtractor {
+  static identifier = 'example.legacy-direct';
+
+  async validate(query: string) {
+    return /^https?:\/\//.test(query);
+  }
+
+  async handle(query: string, context: ExtractorSearchContext) {
+    return this.createResponse(null, [
+      new Track(this.context.player, {
+        title: 'Direct media',
+        url: query,
+        requestedBy: context.requestedBy,
+        engine: query,
+      }),
+    ]);
+  }
+
+  async stream(track: Track) {
+    return track.raw.engine as string;
+  }
+}
+
+await player.extractors.register(DirectMediaExtractor, {});
+```
+
+Pass the class, not an instance. `register()` returns the extractor instance the Player owns.
+
+## How methods map
+
+| v7 method            | v8 operation             |
+| -------------------- | ------------------------ |
+| `activate()`         | Plugin `setup()`         |
+| `deactivate()`       | Plugin `destroy()`       |
+| `validate()`         | `search.query.match`     |
+| `handle()`           | `search.query.resolve`   |
+| `stream()`           | `track.stream`           |
+| `getRelatedTracks()` | `track.related`          |
+| `bridge()`           | `track.bridge`           |
+| `handlePostStream()` | Local `stream.transform` |
+
+Priority and protocols carry over. Tracks created by an extractor receive a portable source reference.
+
+## Supported registry methods
+
+`register()`, `unregister()`, `unregisterAll()`, `get()`, `isRegistered()`, `loadMulti()`, and `reconfigure()`. `reconfigure()` replaces the owned instance, so fetch a fresh one with `get()`.
+
+## Limits
+
+The adapter reproduces the extractor API, not the v7 audio pipeline:
+
+- No stream dispatcher, raw audio resources, or PCM and Opus format overrides.
+- No access to extractor session internals.
+- A local `Readable` cannot reach a remote Remedia node.
+- Extractor state such as `raw.engine`, private clients, and callbacks is not portable and is not saved.
+- A restored track resolves through the extractors registered now.
+
+<NextStep href="/docs/v8/plugins/remote-hosts" label="Remote source hosts" />

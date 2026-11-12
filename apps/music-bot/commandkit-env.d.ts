@@ -1,1 +1,1 @@
-/// <reference path="node_modules/commandkit-types/index.d.ts" />
+/// <reference path="./.commandkit/types" />

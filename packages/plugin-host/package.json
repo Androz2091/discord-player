@@ -1,0 +1,62 @@
+{
+  "name": "@discord-player/plugin-host",
+  "version": "8.0.0-dev.0",
+  "description": "Standalone Discord Player source runtime and Remedia plugin protocol adapter",
+  "keywords": [
+    "api",
+    "bot",
+    "discord",
+    "discord-music",
+    "discord-music-player",
+    "discord.js",
+    "framework",
+    "lavalink",
+    "music",
+    "music-player",
+    "musicbot",
+    "player",
+    "queue",
+    "volume"
+  ],
+  "homepage": "https://discord-player.js.org",
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
+  },
+  "license": "MIT",
+  "author": "Androz2091",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androz2091/discord-player.git"
+  },
+  "files": [
+    "dist",
+    "docs/remedia-contract.md"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "test": "pnpm build && vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@discordjs/collection": "^2.1.1",
+    "@remedia/client": "0.1.0-dev.7",
+    "@remedia/plugin-host": "catalog:",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

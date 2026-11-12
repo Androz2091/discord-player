@@ -1,0 +1,98 @@
+---
+title: Lyrics
+description: Look up plain and synchronized lyrics through plugins, and follow them during playback.
+---
+
+Lyrics are optional. The Player never contacts a lyrics service unless you register a lyrics plugin.
+
+## Register a lyrics plugin
+
+A lyrics plugin uses the same registry as source plugins. It does not need to implement search or streaming.
+
+```ts
+import { definePlugin } from 'discord-player';
+
+const lyricsPlugin = definePlugin({
+  id: 'example.lyrics',
+
+  setup(ctx) {
+    ctx.on('lyrics.search', async ({ input }, { signal }) => {
+      signal.throwIfAborted();
+
+      const query = typeof input === 'string' ? input : `${input.author} ${input.title}`;
+
+      return [
+        {
+          plain: { available: true, text: `Lyrics for ${query}` },
+          synced: { available: false },
+        },
+      ];
+    });
+  },
+});
+
+await player.plugins.register(lyricsPlugin());
+```
+
+For the LRCLIB service, register `lrclibPlugin()` from `@discord-player/plugin-host`. It is never installed automatically.
+
+## Search for lyrics
+
+```ts
+const results = await player.lyrics.search(track, { signal: commandSignal });
+
+for (const result of results) {
+  if (result.plain.available) console.log(result.plain.text);
+  if (result.synced.available) queue.syncedLyrics.load(result);
+}
+```
+
+`search()` accepts a `Track` or a string. It returns an empty array when no plugin has lyrics. If a plugin fails, the call rejects. The result's `provider` field names the plugin that returned it.
+
+## Prefer a lyrics provider for a track
+
+```ts
+track.lyricsReference = { pluginId: 'example.lyrics', data: { id: 'abc' } };
+```
+
+The lookup tries that provider first, then the track's source plugin if it supports lyrics, then the others in order. The reference must be JSON-safe and contain no secrets. It is kept when you serialize the track.
+
+## Synchronized lyrics
+
+```ts
+queue.syncedLyrics.load('[00:01.250]First line\n[00:03.000]Second line');
+
+console.log(queue.syncedLyrics.at(1500)); // { timestamp: 1250, line: 'First line' }
+
+const unsubscribe = queue.syncedLyrics.subscribe((line, timestampMs) => {
+  console.log(timestampMs, line);
+});
+```
+
+`load()` accepts an LRC string, a list of `{ timestampMs, line }`, or a lyrics result. A line stays active until the next one starts.
+
+| Method                | Purpose                                                              |
+| --------------------- | -------------------------------------------------------------------- |
+| `load(lyrics)`        | Load lyrics for the current track                                    |
+| `at(positionMs)`      | The line active at a position                                        |
+| `subscribe(callback)` | Call back whenever the line changes. Returns an unsubscribe function |
+| `pause()`, `resume()` | Pause or resume callbacks                                            |
+| `isSubscribed()`      | Whether callbacks are active                                         |
+
+Callbacks follow the Remedia playback position, so they pause when playback pauses and move after a seek. Accuracy depends on how often Remedia reports its position, which is lower on remote nodes.
+
+## Load lyrics per track
+
+Lyrics are cleared whenever the track changes. Load the next track's lyrics in `playerStart`:
+
+```ts
+player.events.on('playerStart', async (queue, track) => {
+  const [result] = await player.lyrics.search(track);
+
+  if (result?.synced.available) queue.syncedLyrics.load(result);
+});
+```
+
+Loading never fetches lyrics, and nothing is fetched during playback unless you ask.
+
+<NextStep href="/docs/v8/guides/hooks" label="Use resource hooks" />

@@ -1,34 +1,36 @@
 {
   "name": "music-bot",
-  "description": "Discord Player test bot",
   "version": "0.1.0",
-  "type": "module",
   "private": true,
-  "main": "dist/index.js",
-  "scripts": {
-    "dev": "bunx cross-env NODE_OPTIONS=\"--trace-warnings\" commandkit dev",
-    "build": "commandkit build",
-    "start": "commandkit start"
+  "description": "Discord Player testing bot",
+  "homepage": "https://discord-player.js.org",
+  "bugs": {
+    "url": "https://github.com/Androz2091/discord-player/issues"
   },
+  "license": "MIT",
+  "author": "Androz2091",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Androz2091/discord-player.git"
   },
-  "author": "twilight <hello@twlite.dev>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Androz2091/discord-player/issues"
-  },
-  "homepage": "https://github.com/Androz2091/discord-player#readme",
-  "devDependencies": {
-    "@snazzah/davey": "^0.1.9",
-    "@types/node": "^25.3.3",
-    "typescript": "^5.7.2"
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "commandkit dev",
+    "build": "commandkit build",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run",
+    "start": "commandkit start"
   },
   "dependencies": {
-    "@discord-player/extractor": "workspace:^",
-    "commandkit": "^1.2.0-rc.15",
-    "discord-player": "workspace:^",
-    "discord.js": "^14.25.1"
+    "@remedia/node": "0.1.0-dev.7",
+    "commandkit": "^1.2.6",
+    "discord-player": "workspace:*",
+    "discord.js": "^14.28.1"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

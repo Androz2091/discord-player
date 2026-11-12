@@ -1,0 +1,73 @@
+---
+title: v7 compatibility
+description: Which v7 behavior carries over to v8, what changed, and what has no replacement.
+---
+
+This page compares v7 with v8 behavior. A matching method name does not mean identical behavior, so check the notes.
+
+## What carries over
+
+| Area                         | In v8                                                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| `Player` and `player.play()` | Same names. Search with `searchEngine`. Queue defaults go in `nodeOptions`                        |
+| `player.nodes`               | The guild queue manager. `create`, `get`, `resolve`, `delete`, `clear`                            |
+| Queue and history            | Add, remove, move, swap, copy, repeat, shuffle, bounded history, navigation                       |
+| `queue.node.play(track)`     | Plays through the queue. With no argument it starts the next track                                |
+| Queue helpers                | `queue.player`, `queue.deleted`, `queue.filters`, `queue.syncedLyricsProvider`                    |
+| Extractors                   | `BaseExtractor` through the adapter. Priority, protocols, `activate`, and `deactivate` carry over |
+| Lyrics                       | `player.lyrics.search()` with optional plugins. Plain and synced results                          |
+| Synced lyrics                | `load`, `at`, `subscribe`, and the v7 callbacks                                                   |
+| Stream hooks                 | Global, Player, and queue hooks. They keep v7 precedence                                          |
+| Context hooks                | `useMainPlayer`, `useQueue`, and the others. The first active Player is the fallback              |
+| Voice policies               | `leaveOnEmpty`, `leaveOnEnd`, `leaveOnStop`, cooldowns, and `pauseOnEmpty`                        |
+| Autoplay                     | Uses the source's `track.related` and the v7 `willAutoPlay` callback                              |
+| Track and Playlist           | Same constructors and helpers, with versioned storage                                             |
+| Lifetimes                    | `player.signal` and `queue.signal` abort as soon as destruction starts                            |
+
+## What changed
+
+| Area               | Difference                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| Audio and voice    | Remedia owns decoding, filters, voice transport, and session recovery                                   |
+| Filters and volume | Named presets or raw FFmpeg graphs. Volume is a percentage from 0 to 200. There are no DSP objects      |
+| Gateway events     | `voiceStateUpdate` gives normalized states instead of discord.js `VoiceState` objects                   |
+| Channel emptiness  | Needs a [resolver](/docs/v8/guides/voice#know-who-is-in-the-channel). Unknown is never treated as empty |
+| Synced lyrics      | A line stays active until the next one starts. The v7 two-second closest-line rule is gone              |
+| `willPlayTrack`    | Informational only. Use [resource hooks](/docs/v8/guides/hooks) to change the source                    |
+| `willAutoPlay`     | Same `tracks` and `done` contract                                                                       |
+| Metadata search    | Uses HTTP to a source host. Forwarding through Remedia is not implemented                               |
+| Stage channels     | Requesting to speak is up to your integration                                                           |
+
+## What has no replacement
+
+- The decoded stream interceptor, demux and codec plumbing, and mutable output bitrate.
+- DSP objects such as the equalizer, reverb, and compressor, and their events.
+- Decoded `StreamConfig` on `willPlayTrack`, and the `done` latch.
+- Hooks on URL or file bytes when Remedia opens the media. `onAfterCreateStream` works with encoded `Readable` sources on embedded nodes only. Descriptor hooks work for remote operation sources.
+- Raw v7 stream-type and decoded audio resource options. Raw native playback takes Remedia media sources.
+
+Detached `Track` and `Playlist` models keep their metadata, helpers, and storage. They do not hold a live audio resource or a queue. Use `player.play(channel, trackOrPlaylist)` and an explicit queue for seek and resource lifetime. Manager lookups return `null` when nothing exists.
+
+## Events
+
+| v7 event                                                          | v8                                                              |
+| ----------------------------------------------------------------- | --------------------------------------------------------------- |
+| `audioTrackAdd`, `audioTrackRemove`, `queueCreate`, `queueDelete` | Same. No Remedia event is attached                              |
+| `playerStart`                                                     | Fires when playback is audible. The Remedia event is last       |
+| `playerFinish`                                                    | Natural completion. Updates history and progression             |
+| `playerSkip`                                                      | `track, reason, description`, then the Remedia stop event       |
+| `playerError`                                                     | `error, track`, then the Remedia failure event                  |
+| `playerPause`, `playerResume`                                     | The Remedia event. Stale events are ignored                     |
+| `playerStop`                                                      | `track` or `null`, then the Remedia event                       |
+| `volumeChange`                                                    | Previous and new percentages, then the Remedia event            |
+| `audioFiltersUpdate`                                              | Previous and new filter graphs, then the Remedia event          |
+| `willPlayTrack`                                                   | Informational                                                   |
+| `emptyQueue`                                                      | The queue ran out of tracks. Unrelated to who is in the channel |
+| `connection`, `connectionDestroyed`                               | Voice session connected or disposed                             |
+| `emptyChannel`, `channelPopulate`, `disconnect`                   | Confirmed membership changes and policy-owned actions           |
+| `voiceStateUpdate`                                                | `previous`, `current`, and the raw packet                       |
+| Other DSP events                                                  | Removed. Use `audioFiltersUpdate`                               |
+
+New in v8: `willPrepareNextTrack`, `stageReady`, `stageFailed`, `stageInvalidated`, `transitionCancelled`, `sessionDisposed`, `voiceConnectionStateChange`, `sessionEvent`, and the guild assignment events. See the [event reference](/docs/v8/reference/events).
+
+<NextStep href="/docs/v8/migration/checklist" label="Run the checklist" />

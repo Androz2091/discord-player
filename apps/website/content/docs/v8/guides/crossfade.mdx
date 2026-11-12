@@ -1,0 +1,98 @@
+---
+title: Crossfade
+description: Blend the end of one track into the start of the next.
+---
+
+Crossfade overlaps the end of the playing track with the start of the next one. It is off by default.
+
+## Enable it
+
+Turn it on for every queue when you create the Player:
+
+```ts
+import { Player } from 'discord-player';
+
+const player = new Player({
+  crossfade: { enabled: true, durationMs: 5000 },
+  send,
+});
+```
+
+Or for one queue:
+
+```ts
+const queue = await player.createQueue(guildId, {
+  crossfade: { enabled: true, durationMs: 8000, prepareBeforeMs: 30_000 },
+});
+```
+
+A queue setting replaces the Player setting. Use `crossfade: false` to disable it for one queue.
+
+| Option            | Default        | Meaning                                                    |
+| ----------------- | -------------- | ---------------------------------------------------------- |
+| `enabled`         | none           | Must be `true` to opt in                                   |
+| `durationMs`      | `5000`         | Length of the overlap                                      |
+| `prepareBeforeMs` | `30000`        | How long before the fade starts the next track is prepared |
+| `curve`           | `'equalPower'` | The only supported curve                                   |
+
+The settings apply when a voice session is created. To change them for a guild, delete and recreate its queue.
+
+<Callout type="info" title="Crossfade costs CPU">
+  Crossfade decodes both tracks to PCM and mixes them. This uses more CPU than playing a single track.
+</Callout>
+
+## What you will observe
+
+Queue tracks as usual. The queue prepares the next track shortly before the fade, using the same source plugins as normal playback.
+
+During the overlap:
+
+- `playerStart` for the incoming track can fire before `playerFinish` for the outgoing track.
+- `queue.currentTrack` is the incoming track as soon as it is audible.
+- The incoming track stays in `queue.tracks` until it becomes audible.
+
+Staging a track for a fade does not fire `playerStart`.
+
+## How repeat modes behave
+
+| Repeat mode | Next track                                                         |
+| ----------- | ------------------------------------------------------------------ |
+| `OFF`       | The next upcoming track                                            |
+| `TRACK`     | A new copy of the current track                                    |
+| `QUEUE`     | The next upcoming track, and the finished track moves to the end   |
+| `AUTOPLAY`  | An already chosen upcoming track. Otherwise autoplay runs as usual |
+
+With shuffle on, the next track is chosen once when it is prepared, and that same track is used when the fade happens.
+
+## Controls during a fade
+
+| Action                                | Result                                               |
+| ------------------------------------- | ---------------------------------------------------- |
+| Skip, seek, stop, history navigation  | Cancels the prepared track                           |
+| Pause and resume                      | The prepared track is kept                           |
+| Removing or moving the prepared track | Cancels it and chooses again                         |
+| `queue.clear()`                       | Cancels preparation. The current track keeps playing |
+
+Use queue methods to change upcoming tracks. Changing `queue.tracks.store` directly resets preparation.
+
+If preparing the next track fails, you receive `playerError` and the queue continues normally.
+
+## Embedded and remote nodes
+
+An embedded node supports crossfade directly.
+
+A remote node must also have crossfade enabled and report it as available. In `remedia.config.json` on the server:
+
+```json
+{
+  "audio": {
+    "crossfade": { "enabled": true }
+  }
+}
+```
+
+If the selected node does not support crossfade, playback continues without it and the Player emits a `debug` message. Guilds are never moved to another node to enable crossfade.
+
+Crossfade needs tracks long enough for the configured overlap.
+
+<NextStep href="/docs/v8/guides/events" label="Handle events" />
