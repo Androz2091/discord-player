@@ -13,7 +13,16 @@ export const player = new DiscordPlayer({
     durationMs: Number(process.env.REMEDIA_CROSSFADE_DURATION_MS ?? 5000),
   },
   plugins: [rawHTTPExtractor()],
+  async resolveVoiceChannelUsers(guildId, channelId) {
+    const client = useClient<true>();
+    const guild = client.guilds.cache.get(guildId);
+    if (!guild) return null;
 
+    const channel = guild.channels.cache.get(channelId);
+    if (!channel?.isVoiceBased()) return null;
+
+    return Array.from(channel.members.filter((m) => !m.user.bot).keys());
+  },
   send(guildId, payload) {
     const client = useClient<true>();
     const guild = client.guilds.cache.get(guildId);
