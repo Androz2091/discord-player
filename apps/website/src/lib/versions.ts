@@ -44,6 +44,12 @@ export interface DocsVersionConfig {
    * Omit it when the version has no separate API reference.
    */
   apiReference?: string;
+
+  /**
+   * Path of this version's "getting started" page, relative to the version root and starting with a slash.
+   * The home page links to it. Omit it to link to the version root.
+   */
+  startPath?: string;
 }
 
 /**
@@ -55,6 +61,7 @@ export const docsVersions = [
     name: 'v7',
     description: 'Stable release',
     apiReference: 'api',
+    startPath: '/creating-a-music-bot/01_integrating',
   },
   {
     id: 'v8',
@@ -62,6 +69,7 @@ export const docsVersions = [
     description: 'Development preview',
     badge: { text: 'Dev', tone: 'warning' },
     apiReference: 'reference',
+    startPath: '/getting-started',
   },
 ] as const satisfies readonly DocsVersionConfig[];
 

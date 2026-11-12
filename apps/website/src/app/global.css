@@ -20,21 +20,3 @@ html > body[data-scroll-locked] {
   margin-right: 0 !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
-
-/* Animated flow lines in the home page diagram. */
-.flow-line {
-  stroke-dasharray: 5 7;
-  animation: flow 1.1s linear infinite;
-}
-
-@keyframes flow {
-  to {
-    stroke-dashoffset: -12;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .flow-line {
-    animation: none;
-  }
-}

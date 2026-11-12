@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpRight, Bot, Package, Search, Star, X } from 'lucide-react';
 import type { IExtractorShowcase, IMusicBotShowcase } from '@/data/community';
 import { cn } from '@/lib/cn';
+import { getProjectSource } from '@/lib/project-source';
 
 type Kind = 'all' | 'extractors' | 'bots';
 
@@ -44,39 +45,6 @@ function initialsFor(name: string) {
   return (letters || name).slice(0, 2).toUpperCase();
 }
 
-/** Where a project lives, derived from its URL. Fields are only set when the URL exposes them. */
-interface ProjectSource {
-  /** Hosting platform, such as `GitHub` or `npm`. */
-  platform: string;
-
-  /** Repository or package identifier shown on the card, such as `owner/repo` or `package-name`. */
-  identifier: string;
-
-  /** Repository owner. Only available for GitHub URLs. */
-  author?: string;
-}
-
-function parseSource(url: string): ProjectSource {
-  const { hostname, pathname } = new URL(url);
-  const segments = pathname.split('/').filter(Boolean).map(decodeURIComponent);
-
-  if (hostname === 'github.com' && segments.length >= 2) {
-    const [author, repo] = segments;
-    const cleanRepo = repo!.replace(/\.git$/, '').replace(/\.+$/, '');
-
-    return { platform: 'GitHub', identifier: `${author}/${cleanRepo}`, author };
-  }
-
-  if (hostname === 'npm.im' || hostname.endsWith('npmjs.com')) {
-    const parts = hostname === 'npm.im' ? segments : segments[0] === 'package' ? segments.slice(1) : segments;
-    const name = parts[0]?.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
-
-    if (name) return { platform: 'npm', identifier: name };
-  }
-
-  return { platform: hostname.replace(/^www\./, ''), identifier: hostname.replace(/^www\./, '') + pathname };
-}
-
 /** Groups bot versions by major version, for example `v7.2.0` becomes `v7`. */
 function majorOf(version: string) {
   return /^v\d+/.exec(version)?.[0] ?? version;
@@ -90,7 +58,7 @@ function matches(query: string, entry: Entry) {
 
 function ProjectCard({ entry }: { entry: Entry }) {
   const featured = entry.version === 'Promoted';
-  const source = parseSource(entry.url);
+  const source = getProjectSource(entry.url);
 
   return (
     <a
