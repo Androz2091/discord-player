@@ -2,14 +2,14 @@
   max-width: 500px;
   margin-top: 28px;
   padding: 20px;
-  border: 1px solid #ffffff1d;
+  border: 1px solid var(--color-fd-border);
   border-radius: 14px;
-  background: #ffffff04;
+  background: var(--color-fd-card);
 }
 
 .eyebrow {
   margin: 0 0 16px;
-  color: var(--muted);
+  color: var(--color-fd-muted-foreground);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -33,7 +33,7 @@
 
 .icon {
   flex-shrink: 0;
-  border: 1px solid #ffffff12;
+  border: 1px solid var(--color-fd-border);
   border-radius: 12px;
 }
 
@@ -44,7 +44,7 @@
 }
 
 .name a {
-  color: #f5f4f7;
+  color: var(--color-fd-foreground);
   text-decoration: none;
 }
 
@@ -54,7 +54,7 @@
 
 .description {
   margin: 5px 0 0;
-  color: var(--muted);
+  color: var(--color-fd-muted-foreground);
   font-size: 12px;
   line-height: 1.5;
 }
