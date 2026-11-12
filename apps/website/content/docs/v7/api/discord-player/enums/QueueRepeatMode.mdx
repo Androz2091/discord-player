@@ -1,0 +1,22 @@
+---
+title: 'QueueRepeatMode'
+description: 'The queue repeat mode. This can be one of:'
+---
+
+## QueueRepeatMode
+
+The queue repeat mode. This can be one of:
+
+- OFF
+- TRACK
+- QUEUE
+- AUTOPLAY
+
+| Property | Type | Value | Description                                                                |
+| -------- | ---- | ----- | -------------------------------------------------------------------------- |
+| AUTOPLAY | 3    | N/A   | When last track ends, play similar tracks in the future if queue is empty. |
+| OFF      | 0    | N/A   | Disable repeat mode.                                                       |
+| QUEUE    | 2    | N/A   | Repeat the entire queue.                                                   |
+| TRACK    | 1    | N/A   | Repeat the current track.                                                  |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/types/types.ts#L312)

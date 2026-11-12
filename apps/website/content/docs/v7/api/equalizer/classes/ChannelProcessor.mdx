@@ -1,0 +1,66 @@
+---
+title: 'ChannelProcessor'
+description: 'No description provided'
+---
+
+## ChannelProcessor
+
+```typescript
+new ChannelProcessor(bandMultipliers);
+```
+
+| Parameter       | Type           | Optional |
+| --------------- | -------------- | -------- |
+| bandMultipliers | Array\<number> | ❌       |
+
+## Properties
+
+### public bandMultipliers: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/ChannelProcessor.ts#L8)
+
+### public current: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/ChannelProcessor.ts#L9)
+
+### public history: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/ChannelProcessor.ts#L7)
+
+### public m1: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/ChannelProcessor.ts#L10)
+
+### public m2: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/ChannelProcessor.ts#L11)
+
+## Methods
+
+### public process(samples, extremum, bytes, readInt?, writeInt?): [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| samples   | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer)                 | ❌       |
+| extremum  | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+| bytes     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+| readInt   | ReadIntCallback                                                                                   | ✅       |
+| writeInt  | WriteIntCallback                                                                                  | ✅       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/ChannelProcessor.ts#L46)
+
+### public processInt(int): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| int       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/ChannelProcessor.ts#L21)
+
+### public reset(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/ChannelProcessor.ts#L81)
+
+### public step(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/equalizer/src/equalizer/ChannelProcessor.ts#L67)

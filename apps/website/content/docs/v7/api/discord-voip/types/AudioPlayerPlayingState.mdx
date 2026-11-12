@@ -1,0 +1,19 @@
+---
+title: 'AudioPlayerPlayingState'
+description: 'The state that an AudioPlayer is in when it is actively playing an AudioResource. When playback ends, it will enter the Idle state.'
+---
+
+## AudioPlayerPlayingState
+
+The state that an AudioPlayer is in when it is actively playing an AudioResource. When playback ends,
+it will enter the Idle state.
+
+| Property         | Type                                                                                              | Value | Description                                                                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| missedFrames     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | N/A   | The number of consecutive times that the audio resource has been unable to provide an Opus frame.                                                                |
+| onStreamError    | ( error: Error ) => void                                                                          | N/A   | N/A                                                                                                                                                              |
+| playbackDuration | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | N/A   | The playback duration in milliseconds of the current audio resource. This includes filler silence packets that have been played when the resource was buffering. |
+| resource         | AudioResource\<unknown>                                                                           | N/A   | The resource that is being played.                                                                                                                               |
+| status           | Playing                                                                                           | N/A   | N/A                                                                                                                                                              |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L104)

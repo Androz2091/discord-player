@@ -1,0 +1,21 @@
+---
+title: 'PlayerInitOptions'
+description: 'No description provided'
+---
+
+## PlayerInitOptions
+
+| Property                | Type                                                                                                | Value | Description                                                   |
+| ----------------------- | --------------------------------------------------------------------------------------------------- | ----- | ------------------------------------------------------------- |
+| blockExtractors         | Array\<string>                                                                                      | N/A   | List of extractors to disable querying metadata from          |
+| blockStreamFrom         | Array\<string>                                                                                      | N/A   | List of extractors to disable streaming from                  |
+| connectionTimeout       | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   | The voice connection timeout                                  |
+| ffmpegPath              | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)   | N/A   | Configure ffmpeg path                                         |
+| lagMonitor              | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   | Time in ms to re-monitor event loop lag                       |
+| lockVoiceStateHandler   | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   | Prevent voice state handler from being overridden             |
+| overrideFallbackContext | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   | Whether to override the fallback context. Defaults to `true`. |
+| probeTimeout            | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)   | N/A   | The probe timeout in milliseconds. Defaults to 5000.          |
+| queryCache              | null \| QueryCacheProvider\<any>                                                                    | N/A   | Query cache provider                                          |
+| skipFFmpeg              | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | N/A   | Skip ffmpeg process when possible                             |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/types/types.ts#L478)

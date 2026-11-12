@@ -1,0 +1,20 @@
+---
+title: 'AudioPlayerBufferingState'
+description: 'The state that an AudioPlayer is in when it is waiting for a resource to become readable. Once this'
+---
+
+## AudioPlayerBufferingState
+
+The state that an AudioPlayer is in when it is waiting for a resource to become readable. Once this
+happens, the AudioPlayer will enter the Playing state. If the resource ends/errors before this, then
+it will re-enter the Idle state.
+
+| Property           | Type                            | Value | Description                                      |
+| ------------------ | ------------------------------- | ----- | ------------------------------------------------ |
+| onFailureCallback  | ( ...args: unknown\[] ) => void | N/A   | N/A                                              |
+| onReadableCallback | ( ...args: unknown\[] ) => void | N/A   | N/A                                              |
+| onStreamError      | ( error: Error ) => void        | N/A   | N/A                                              |
+| resource           | AudioResource\<unknown>         | N/A   | The resource that the AudioPlayer is waiting for |
+| status             | Buffering                       | N/A   | N/A                                              |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L89)

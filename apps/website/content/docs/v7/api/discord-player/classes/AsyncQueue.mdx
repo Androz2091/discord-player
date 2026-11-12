@@ -1,0 +1,83 @@
+---
+title: 'AsyncQueue'
+description: 'No description provided'
+---
+
+## AsyncQueue
+
+```typescript
+new AsyncQueue();
+```
+
+## Properties
+
+### public entries: any
+
+The queued entries
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/AsyncQueue.ts#L16)
+
+### public exceptionHandler: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/AsyncQueue.ts#L18)
+
+### public size: any
+
+The total number of entries in this queue. Returns `0` if no entries are available.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/AsyncQueue.ts#L35)
+
+## Methods
+
+### public acquire(options?): AsyncQueueEntry
+
+Acquire an entry.
+
+```ts
+// lock the queue
+const entry = asyncQueue.acquire();
+// wait until previous task is completed
+await entry.getTask();
+// do something expensive
+await performSomethingExpensive();
+// make sure to release the lock once done
+asyncQueue.release();
+```
+
+| Parameter | Type                         | Optional |
+| --------- | ---------------------------- | -------- |
+| options   | AsyncQueueAcquisitionOptions | ✅       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/AsyncQueue.ts#L52)
+
+### public cancelAll(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Cancel all entries
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/AsyncQueue.ts#L80)
+
+### public clear(consume): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Clear entries queue
+
+| Parameter | Type                                                                                                | Optional | Description                                           |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------- |
+| consume   | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌       | Whether or not to consume all entries before clearing |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/AsyncQueue.ts#L24)
+
+### public release(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Release the current acquisition and move to next entry.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/AsyncQueue.ts#L70)
+
+### public removeEntry(entry): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Remove the given entry from the queue
+
+| Parameter | Type            | Optional | Description         |
+| --------- | --------------- | -------- | ------------------- |
+| entry     | AsyncQueueEntry | ❌       | The entry to remove |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/AsyncQueue.ts#L88)

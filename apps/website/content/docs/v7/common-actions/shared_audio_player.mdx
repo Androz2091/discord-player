@@ -1,0 +1,54 @@
+---
+title: Using Shared Audio Player
+description: Learn how to optimize resource usage by sharing same audio player across multiple queues
+---
+
+For music bots who basically broadcast same stream on all guilds, it is possible to share same audio player in order to reduce resource usage.
+Sharing audio player basically means using one single audio player for all queues.
+
+### Pros of using shared audio player
+
+- Less memory usage
+- Useful for radio streams or broadcasted streams
+- Saves bandwidth by using only one stream source
+
+### Cons of using shared audio player
+
+- Volume controls, audio filters are not independent
+  - It means that if one queue updates volume, the volume will change for all other queues who are using this audio player
+- If the source panics, all the subscribers are affected
+- If not done properly, destroying one queue can end stream for all other queues
+
+## Setting Up
+
+```js title="radio.js"
+const { createAudioPlayer } = require('discord-player');
+
+const sharedAudioPlayer = createAudioPlayer();
+
+// apply audio player while connecting. If the audio player was already playing, this connection will also start playing the audio in sync
+if (!queue.connection)
+  await queue.connect(channel, {
+    audioPlayer: sharedAudioPlayer,
+  });
+
+// only play if it is the initial play req
+// future subscribers will automatically receive audio without having to play a track
+if (thisIsInitialPlayRequest()) {
+  await queue.play(track, { queue: false });
+}
+
+// with player.play(), this is recommended for initial play only
+await player.play(channel, query, {
+  connectionOptions: {
+    audioPlayer: sharedAudioPlayer,
+  },
+});
+```
+
+With this setup, only one queue needs to initialize the player.
+
+<Callout>
+  Performing commands such as `pause()`, `play()`, `skip()` etc will affect all
+  subscribers since they all share same source.
+</Callout>

@@ -1,0 +1,17 @@
+---
+title: Using Discord.js with Discord Player
+description: Learn how to use Discord.js client with Discord Player
+---
+
+Discord Player by default supports Discord.js client. To use Discord Player with Discord.js, you just need to pass the Discord.js client instance to the `Player` constructor.
+
+```js title="index.js"
+const { Player } = require('discord-player');
+
+const client = new Discord.Client({
+  // Make sure you have 'GuildVoiceStates' intent enabled
+  intents: ['GuildVoiceStates' /* Other intents */],
+});
+
+const player = new Player(client);
+```

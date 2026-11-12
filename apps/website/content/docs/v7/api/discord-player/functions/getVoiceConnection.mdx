@@ -1,0 +1,13 @@
+---
+title: 'getVoiceConnection'
+description: 'Finds a voice connection with the given guild id and group. Defaults to the default group.'
+---
+
+### getVoiceConnection(guildId, group?): VoiceConnection | undefined
+
+Finds a voice connection with the given guild id and group. Defaults to the 'default' group.
+
+| Parameter | Type                                                                                              | Optional | Description                                             |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------- |
+| guildId   | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | The guild id of the voice connection                    |
+| group     | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ✅       | the group that the voice connection was registered with |

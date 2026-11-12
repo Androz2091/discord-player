@@ -1,0 +1,19 @@
+---
+title: 'AudioPlayerPausedState'
+description: 'The state that an AudioPlayer is in when it has either been explicitly paused by the user, or done automatically by the AudioPlayer itself if there are no available subscribers.'
+---
+
+## AudioPlayerPausedState
+
+The state that an AudioPlayer is in when it has either been explicitly paused by the user, or done
+automatically by the AudioPlayer itself if there are no available subscribers.
+
+| Property                | Type                                                                                              | Value | Description                                                                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| onStreamError           | ( error: Error ) => void                                                                          | N/A   | N/A                                                                                                                                                              |
+| playbackDuration        | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | N/A   | The playback duration in milliseconds of the current audio resource. This includes filler silence packets that have been played when the resource was buffering. |
+| resource                | AudioResource\<unknown>                                                                           | N/A   | The current resource of the audio player.                                                                                                                        |
+| silencePacketsRemaining | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | N/A   | How many silence packets still need to be played to avoid audio interpolation due to the stream suddenly pausing.                                                |
+| status                  | AutoPaused \| Paused                                                                              | N/A   | N/A                                                                                                                                                              |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L129)

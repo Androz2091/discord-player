@@ -1,0 +1,107 @@
+---
+title: 'AudioResource'
+description: 'Represents an audio resource that can be played by an audio player.'
+---
+
+## AudioResource
+
+Represents an audio resource that can be played by an audio player.
+
+```typescript
+new AudioResource(edges, streams, metadata, silencePaddingFrames);
+```
+
+| Parameter            | Type                                                                                              | Optional |
+| -------------------- | ------------------------------------------------------------------------------------------------- | -------- |
+| edges                | readonly Array\<Edge>                                                                             | ❌       |
+| streams              | readonly Array\<Readable>                                                                         | ❌       |
+| metadata             | Metadata                                                                                          | ❌       |
+| silencePaddingFrames | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+## Properties
+
+### public audioPlayer: any
+
+The audio player that the resource is subscribed to, if any.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L81)
+
+### public edges: any
+
+The pipeline used to convert the input stream into a playable format. For example, this may
+contain an FFmpeg component for arbitrary inputs, and it may contain a VolumeTransformer component
+for resources with inline volume transformation enabled.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L59)
+
+### public encoder: any
+
+If using an Opus encoder to create this audio resource, then this will be a `@discord-player/opus` opus.Encoder.
+You can use this to control settings such as bitrate, FEC, PLP.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L76)
+
+### public metadata: any
+
+Optional metadata that can be used to identify the resource.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L64)
+
+### public playStream: any
+
+An object-mode Readable stream that emits Opus packets. This is what is played by audio players.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L52)
+
+### public playbackDuration: any
+
+The playback duration of this audio resource, given in milliseconds.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L86)
+
+### public silencePaddingFrames: any
+
+The number of silence frames to append to the end of the resource's audio stream, to prevent interpolation glitches.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L96)
+
+### public silenceRemaining: any
+
+The number of remaining silence frames to play. If -1, the frames have not yet started playing.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L101)
+
+### public started: any
+
+Whether or not the stream for this resource has started (data has become readable)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L91)
+
+### public volume: any
+
+If the resource was created with inline volume transformation enabled, then this will be a
+`@discord-player/equalizer` VolumeTransformer. You can use this to alter the volume of the stream.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L70)
+
+### public ended: any
+
+Whether this resource has ended or not.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L143)
+
+### public readable: any
+
+Whether this resource is readable. If the underlying resource is no longer readable, this will still return true
+while there are silence padding frames left to play.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L129)
+
+## Methods
+
+### public read(): null | [Buffer](https://nodejs.org/dist/latest/docs/api/buffer.html#buffer_class_buffer)
+
+Attempts to read an Opus packet from the audio resource. If a packet is available, the playbackDuration
+is incremented.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioResource.ts#L157)

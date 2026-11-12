@@ -1,0 +1,113 @@
+---
+title: 'LrcLib'
+description: 'No description provided'
+---
+
+## LrcLib
+
+```typescript
+new LrcLib(player);
+```
+
+| Parameter | Type   | Optional | Description         |
+| --------- | ------ | -------- | ------------------- |
+| player    | Player | ❌       | The player instance |
+
+## Properties
+
+### public api: any
+
+The API URL
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L92)
+
+### public bucket: any
+
+The request bucket
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L100)
+
+### public player: any
+
+The player instance
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L106)
+
+### public timeout: any
+
+The request timeout. Default is 15 seconds.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L96)
+
+## Methods
+
+### public get(params): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<LrcSearchResult>
+
+Gets lyrics
+
+| Parameter | Type         | Optional | Description    |
+| --------- | ------------ | -------- | -------------- |
+| params    | LrcGetParams | ❌       | The get params |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L128)
+
+### public getById(id): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<LrcSearchResult>
+
+Gets lyrics by ID
+
+| Parameter | Type                                                                                                             | Optional | Description   |
+| --------- | ---------------------------------------------------------------------------------------------------------------- | -------- | ------------- |
+| id        | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)\`\$\{number}\` | ❌       | The lyrics ID |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L138)
+
+### public getCached(params): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<LrcSearchResult>
+
+Gets cached lyrics
+
+| Parameter | Type         | Optional | Description    |
+| --------- | ------------ | -------- | -------------- |
+| params    | LrcGetParams | ❌       | The get params |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L146)
+
+### public request(path, options?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<T>
+
+Requests the API
+
+| Parameter | Type                                                                                              | Optional | Description         |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ------------------- |
+| path      | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | The path            |
+| options   | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch)   | ✅       | The request options |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L175)
+
+### public search(params): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<LrcSearchResult>>
+
+Searches for lyrics
+
+| Parameter | Type            | Optional | Description       |
+| --------- | --------------- | -------- | ----------------- |
+| params    | LrcSearchParams | ❌       | The search params |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L156)
+
+### public setRequestTimeout(timeout): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Sets the request timeout
+
+| Parameter | Type                                                                                              | Optional | Description                 |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | --------------------------- |
+| timeout   | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       | The timeout in milliseconds |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L112)
+
+### public setRetryLimit(limit): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Sets the retry limit. Default is 5.
+
+| Parameter | Type                                                                                              | Optional | Description     |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | --------------- |
+| limit     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       | The retry limit |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/lrclib/LrcLib.ts#L120)

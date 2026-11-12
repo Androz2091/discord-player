@@ -1,0 +1,147 @@
+---
+title: 'Util'
+description: 'No description provided'
+---
+
+## Util
+
+## Methods
+
+### public static arrayCloneShuffle(src): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<T>
+
+| Parameter | Type                                                                                                | Optional |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- |
+| src       | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<T> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L224)
+
+### public static buildTimeCode(duration): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+Builds time code
+
+| Parameter | Type     | Optional | Description         |
+| --------- | -------- | -------- | ------------------- |
+| duration  | TimeData | ❌       | The duration object |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L85)
+
+### public static cleanTitle(title, source): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+Cleans the track title
+
+| Parameter | Type                                                                                              | Optional | Description |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ----------- |
+| title     | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | The title   |
+| source    | TrackSource                                                                                       | ❌       | The source  |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L132)
+
+### public static durationString(durObj): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+Creates duration string
+
+| Parameter | Type                                                                                                      | Optional                                                                                           | Description |
+| --------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------- | ------------------- |
+| durObj    | Record\<[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)> | ❌          | The duration object |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L57)
+
+### public static formatDuration(duration): [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+Formats duration
+
+| Parameter | Type                                                                                              | Optional | Description        |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ------------------ |
+| duration  | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       | The duration in ms |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L102)
+
+### public static getFetch(): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<any>
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L196)
+
+### public static getRuntime(): Runtime
+
+Gets the runtime information
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L38)
+
+### public static import(id): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<SafeImport>
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| id        | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L176)
+
+### public static isVoiceEmpty(channel): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Checks if the voice channel is empty
+
+| Parameter | Type         | Optional     | Description |
+| --------- | ------------ | ------------ | ----------- | ----------------- |
+| channel   | VoiceChannel | StageChannel | ❌          | The voice channel |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L122)
+
+### public static last(arr): T
+
+Picks last item of the given array
+
+| Parameter | Type                                                                                                | Optional | Description |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- | ----------- |
+| arr       | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<T> | ❌       | The array   |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L112)
+
+### public static noop(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L194)
+
+### public static parseMS(milliseconds): TimeData
+
+Parses milliseconds to consumable time object
+
+| Parameter    | Type                                                                                              | Optional | Description    |
+| ------------ | ------------------------------------------------------------------------------------------------- | -------- | -------------- |
+| milliseconds | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       | The time in ms |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L68)
+
+### public static randomChoice(src): T
+
+| Parameter | Type                                                                                                | Optional |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- |
+| src       | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<T> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L220)
+
+### public static require(id): SafeRequire
+
+Safer require
+
+| Parameter | Type                                                                                              | Optional | Description     |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | --------------- |
+| id        | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       | Node require id |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L168)
+
+### public static wait(time): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<undefined>
+
+Asynchronous timeout
+
+| Parameter | Type                                                                                              | Optional | Description            |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ---------------------- |
+| time      | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       | The time in ms to wait |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L190)
+
+### public static warn(message, code, detail?): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| message   | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       |
+| code      | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ❌       |
+| detail    | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) | ✅       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/Util.ts#L213)

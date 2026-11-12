@@ -1,0 +1,102 @@
+---
+title: Extractors API
+description: Learn how to create custom extractors for discord-player
+---
+
+Extractors are an extension to discord-player. It has the ability to alter search results and streams.
+
+# Official Extractors
+
+Discord Player supports the following sources using the following sources with the help of [@discord-player/extractor](https://npm.im/@discord-player/extractor):
+
+- Local file (You must set the search engine to `QueryType.FILE` in order to play local files, backed by `attachment extractor`)
+- Raw attachments (backed by `attachment extractor`)
+- Spotify (backed by `spotify extractor`)
+- Apple Music (backed by `appleMusic extractor`)
+- Vimeo (backed by `vimeo extractor`)
+- Reverbnation (backed by `reverbnation extractor`)
+- SoundCloud (backed by `soundcloud extractor`)
+
+If you need to extend this functionality and add support for more sources, you can build your own extractor with the help of extractors api.
+
+# Extractor Anatomy
+
+```ts title="MyExtractor.ts"
+// Base extractor
+import { BaseExtractor } from 'discord-player';
+
+// since it extends BaseExtractor, it is aware of Player who loaded this extractor and thus can access information such as queue, voice connections and more. Those data exist inside context property of BaseExtractor, which is an instance of ExtractorExecutionContext and can be accessed using `this.context`.
+class MyExtractor extends BaseExtractor {
+  // (required) you should give a unique id for you extractor here.
+  static identifier = 'unique-id-for-my-extractor' as const;
+
+  public createBridgeQuery = (track: Track) =>
+    `${track.title} by ${track.author} official audio`;
+
+  // this method is called when your extractor is loaded into discord-player's registry
+  async activate(): Promise<void> {
+    // do something here, such as initializing APIs or whatever
+
+    // you can access initialization options using
+    const initOptions = this.options;
+
+    // in order to access Player instance, use
+    const player = this.context.player;
+
+    // to register protocol, use
+    this.protocols = ['protocol_name'];
+  }
+
+  // discord-player calls this method when your extractor is removed from its registry
+  async deactivate(): Promise<void> {
+    // do something here, such as disconnecting from API or cleanup or whatever it is
+    // remove protocol for example
+    this.protocols = [];
+  }
+
+  // discord-player calls this method when it wants some metadata from you. When you return true, discord-player will use you for further processing. If you return false here, discord-player will query another extractor from its registry.
+  async validate(query, queryType): Promise<boolean> {
+    return validateQuery(query);
+  }
+
+  // discord-player calls this method when it wants a search result. It is called with the search query and a context parameter (options passed to player.search() method)
+  async handle(query, context): Promise<ExtractorInfo> {
+    // if query contained protocol, you can access that protocol via context.protocol
+    return this.createResponse(playlist | null, [tracks]);
+  }
+
+  // discord-player calls this method when it wants you to stream a track. You can either return raw url pointing at a stream or node.js readable stream object. Note: this method wont be called if onBeforeCreateStream was used. It is called with discord-player track object.
+  async stream(track): Promise<Readable | string> {
+    return stream;
+  }
+
+  // discord-player calls this method when it wants some tracks for autoplay mode.
+  async getRelatedTracks(track): Promise<ExtractorInfo> {
+    return this.createResponse(null, [tracks]);
+  }
+}
+```
+
+# Loading Extractor
+
+```js
+player.extractors.register(MyExtractor, initializationOptions /* optional */);
+```
+
+<Callout type="warn">
+  Do not instantiate the extractor class directly. Always use
+  `player.extractors.register` method to load your extractor. Discord Player
+  will instantiate the extractor for you.
+</Callout>
+
+# Search Engine Behavior
+
+Discord Player search engine can be set to values such as `QueryType.SOUNDCLOUD_SEARCH` to force that particular action. But since we are using custom extractor, we may not have appropriate value for our source. In order to force trigger our extractor, we can set the value of `searchEngine` to `ext:my-extractor-id`. Example:
+
+```js title="search.js"
+await player.search(query, {
+  searchEngine: `ext:${MyExtractor.identifier}`,
+});
+```
+
+This will force discord-player to execute the action using `MyExtractor` only.

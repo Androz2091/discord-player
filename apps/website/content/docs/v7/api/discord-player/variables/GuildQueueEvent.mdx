@@ -1,0 +1,73 @@
+---
+title: 'GuildQueueEvent'
+description: 'No description provided'
+---
+
+## GuildQueueEvent
+
+```ts
+const GuildQueueEvent = {
+  AudioFiltersUpdate: 'audioFiltersUpdate',
+  AudioTrackAdd: 'audioTrackAdd',
+  AudioTrackRemove: 'audioTrackRemove',
+  AudioTracksAdd: 'audioTracksAdd',
+  AudioTracksRemove: 'audioTracksRemove',
+  BiquadFiltersUpdate: 'biquadFiltersUpdate',
+  ChannelPopulate: 'channelPopulate',
+  Connection: 'connection',
+  ConnectionDestroyed: 'connectionDestroyed',
+  DSPUpdate: 'dspUpdate',
+  Debug: 'debug',
+  Disconnect: 'disconnect',
+  EmptyChannel: 'emptyChannel',
+  EmptyQueue: 'emptyQueue',
+  EqualizerUpdate: 'equalizerUpdate',
+  Error: 'error',
+  PlayerError: 'playerError',
+  PlayerFinish: 'playerFinish',
+  PlayerPause: 'playerPause',
+  PlayerResume: 'playerResume',
+  PlayerSkip: 'playerSkip',
+  PlayerStart: 'playerStart',
+  PlayerTrigger: 'playerTrigger',
+  QueueCreate: 'queueCreate',
+  QueueDelete: 'queueDelete',
+  VoiceStateUpdate: 'voiceStateUpdate',
+  VolumeChange: 'volumeChange',
+  WillAutoPlay: 'willAutoPlay',
+  WillPlayTrack: 'willPlayTrack',
+  audioFiltersUpdate: 'audioFiltersUpdate',
+  audioTrackAdd: 'audioTrackAdd',
+  audioTrackRemove: 'audioTrackRemove',
+  audioTracksAdd: 'audioTracksAdd',
+  audioTracksRemove: 'audioTracksRemove',
+  biquadFiltersUpdate: 'biquadFiltersUpdate',
+  channelPopulate: 'channelPopulate',
+  connection: 'connection',
+  connectionDestroyed: 'connectionDestroyed',
+  debug: 'debug',
+  disconnect: 'disconnect',
+  dspUpdate: 'dspUpdate',
+  emptyChannel: 'emptyChannel',
+  emptyQueue: 'emptyQueue',
+  equalizerUpdate: 'equalizerUpdate',
+  error: 'error',
+  playerError: 'playerError',
+  playerFinish: 'playerFinish',
+  playerPause: 'playerPause',
+  playerResume: 'playerResume',
+  playerSkip: 'playerSkip',
+  playerStart: 'playerStart',
+  playerTrigger: 'playerTrigger',
+  queueCreate: 'queueCreate',
+  queueDelete: 'queueDelete',
+  voiceStateUpdate: 'voiceStateUpdate',
+  volumeChange: 'volumeChange',
+  willAutoPlay: 'willAutoPlay',
+  willPlayTrack: 'willPlayTrack',
+};
+
+type GuildQueueEvent = (typeof GuildQueueEvent)[keyof typeof GuildQueueEvent];
+```
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueue.ts#L80)

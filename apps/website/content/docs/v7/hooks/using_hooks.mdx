@@ -1,0 +1,216 @@
+---
+title: Using hooks
+description: Learn how to use discord-player hooks like a pro to manipulate the queue and its components
+---
+
+Discord-Player provides a powerful hooks system that lets you interact with various aspects of the player, queues, and audio streams. These hooks can be used anywhere in your application after initializing the Player instance.
+
+# General Hooks Overview
+
+Discord-Player offers two distinct approaches to using hooks, giving you flexibility in how you structure your code:
+
+## Method 1: Context-Based Hook Usage
+
+This approach uses the `HooksContextProvider`, eliminating the need to pass node identifiers repeatedly:
+
+```js title="events/interactionCreate.js"
+const { useMainPlayer } = require('discord-player');
+
+// Set up the context provider in your interaction handler
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand()) return;
+
+  const player = useMainPlayer();
+  const command = client.commands.get(interaction.commandName);
+
+  // Create a context with the guild information
+  const context = { guild: interaction.guild };
+
+  // Execute the command within the provided context
+  await player.context.provide(context, () => command.execute(interaction));
+});
+```
+
+## Method 2: Direct Hook Usage with NodeResolvable
+
+This approach allows you to use hooks anywhere by providing a node identifier (typically a guild ID or guild object). This is the most straightforward method:
+
+```js title="commands/queue.js"
+const { useQueue } = require('discord-player');
+
+// Example command showing direct hook usage
+export async function execute(interaction) {
+  // Directly pass the guild ID to resolve the queue
+  const queue = useQueue(interaction.guild.id);
+
+  // Now you can work with the queue
+  if (!queue) {
+    return interaction.reply('No active queue in this server!');
+  }
+}
+```
+
+Then in your commands, you can use hooks without arguments:
+
+```js title="commands/nowplaying.js"
+const { useQueue } = require('discord-player');
+
+export async function execute(interaction) {
+  // The hook automatically uses the context to find the right queue
+  const queue = useQueue();
+
+  if (!queue?.isPlaying()) {
+    return interaction.reply('Nothing is currently playing!');
+  }
+}
+```
+
+# Available Hooks
+
+## useMainPlayer
+
+Provides access to the main player instance, which manages all guild queues and global player settings.
+
+```js title="index.js"
+const { useMainPlayer } = require('discord-player');
+
+// Get the player instance
+const player = useMainPlayer();
+```
+
+## usePlayer
+
+Retrieves the `GuildQueuePlayerNode` for a specific guild, giving you control over playback and track information.
+
+```js title="commands/nowplaying.js"
+const { usePlayer } = require('discord-player');
+
+// Get the player node for a guild
+const player = usePlayer(interaction.guild.id);
+
+// Create a visual progress bar
+const progressBar = player.createProgressBar();
+
+// Get detailed timestamp information
+const timestamp = player.getTimestamp();
+console.log(`Progress: ${timestamp.progress}%`);
+```
+
+## useQueue
+
+Access and manage the audio queue for a specific guild.
+
+```js title="commands/queue.js"
+const { useQueue } = require('discord-player');
+
+// Get the queue instance
+const queue = useQueue(interaction.guild.id);
+
+// Example: Display queue information
+if (queue) {
+  console.log(`Tracks in queue: ${queue.tracks.size}`);
+  console.log(`Current track: ${queue.currentTrack?.title}`);
+}
+```
+
+## useHistory
+
+Manage and access the playback history for a guild.
+
+```js title="commands/previous.js"
+const { useHistory } = require('discord-player');
+
+// Get the history instance
+const history = useHistory(interaction.guild.id);
+
+// Example: Show last played track
+const lastTrack = history.previousTrack;
+if (lastTrack) {
+  console.log(`Last played: ${lastTrack.title}`);
+}
+```
+
+## useMetadata
+
+Store and retrieve custom data associated with a guild's queue.
+
+```js title="commands/channel.js"
+const { useMetadata } = require('discord-player');
+
+// Get metadata handlers
+const [getMetadata, setMetadata] = useMetadata(interaction.guild.id);
+
+// Store channel information
+setMetadata({ channelId: interaction.channel.id });
+
+// Retrieve stored metadata
+const metadata = getMetadata();
+console.log(`Playing in channel: ${metadata.channelId}`);
+```
+
+## useTimeline
+
+Control and monitor the current track's playback state.
+
+```js title="commands/timeline.js"
+const { useTimeline } = require('discord-player');
+
+// Get timeline controls
+const timeline = useTimeline({ node: interaction.guildId });
+
+// Example: Comprehensive playback control
+console.log(`Volume: ${timeline.volume}%`);
+console.log(`Progress: ${timeline.timestamp.progress}%`);
+
+// Playback controls
+await timeline.setPosition(30000); // Seek to 30 seconds
+await timeline.setVolume(80); // Set volume to 80%
+timeline.paused ? timeline.resume() : timeline.pause();
+```
+
+# Stream Hooks
+
+Stream hooks provide powerful middleware capabilities for customizing audio stream handling:
+
+## onBeforeCreateStream
+
+Intercept and modify the audio stream before it's created:
+
+```js title="hooks/custom_stream.js"
+const { onBeforeCreateStream } = require('discord-player');
+const fs = require('fs');
+
+const queue = player.nodes.create(channel, {
+  // Custom stream handling
+  async onBeforeCreateStream(track, source, _queue) {
+    // Example: Use local files for specific tracks
+    if (track.title === 'my_favorite_song') {
+      return fs.createReadStream('./local_songs/favorite.mp3');
+    }
+
+    // Return undefined to use default streaming
+    return undefined;
+  },
+});
+```
+
+## onAfterCreateStream
+
+Process the PCM stream before it's used as an audio resource:
+
+```js title="hooks/audio_processing.js"
+const { onAfterCreateStream, StreamType } = require('discord-player');
+
+const queue = player.nodes.create(channel, {
+  // Post-process the audio stream
+  async onAfterCreateStream(pcmStream, queue) {
+    // Example: Apply custom audio processing
+    const processedStream = someAudioProcessor.process(pcmStream);
+
+    return {
+      stream: processedStream,
+      type: StreamType.Opus,
+    };
+  },
+});
+```

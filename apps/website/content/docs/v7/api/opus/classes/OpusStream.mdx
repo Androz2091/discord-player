@@ -1,0 +1,61 @@
+---
+title: 'OpusStream'
+description: 'Takes a stream of Opus data and outputs a stream of PCM data, or the inverse.'
+---
+
+## OpusStream extends [Transform](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_transform)
+
+Takes a stream of Opus data and outputs a stream of PCM data, or the inverse.
+**You shouldn't directly instantiate this class, see opus.Encoder and opus.Decoder instead!**
+
+## Properties
+
+### public \_options: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/OpusEncoder.ts#L189)
+
+### public \_required: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/OpusEncoder.ts#L190)
+
+### public encoder: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/OpusEncoder.ts#L188)
+
+### public type: any
+
+Returns the Opus module being used - `mediaplex`, `opusscript`, `node-opus`, or `@discordjs/opus`.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/OpusEncoder.ts#L240)
+
+## Methods
+
+### public setBitrate(bitrate): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Sets the bitrate of the stream.
+
+| Parameter | Type                                                                                              | Optional | Description                        |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- |
+| bitrate   | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       | the bitrate to use use, e.g. 48000 |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/OpusEncoder.ts#L249)
+
+### public setFEC(enabled): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Enables or disables forward error correction.
+
+| Parameter | Type                                                                                                | Optional | Description                   |
+| --------- | --------------------------------------------------------------------------------------------------- | -------- | ----------------------------- |
+| enabled   | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ❌       | whether or not to enable FEC. |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/OpusEncoder.ts#L261)
+
+### public setPLP(percentage?): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Sets the expected packet loss over network transmission.
+
+| Parameter  | Type                                                                                              | Optional | Description                                |
+| ---------- | ------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------ |
+| percentage | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ✅       | a percentage (represented between 0 and 1) |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/opus/src/OpusEncoder.ts#L269)

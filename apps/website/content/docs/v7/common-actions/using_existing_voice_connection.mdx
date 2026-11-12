@@ -1,0 +1,42 @@
+---
+title: Using Existing Voice Connection
+description: Learn how to reuse existing voice connection for playing audio
+---
+
+If you are manually handling voice connections, you may want to use it instead of creating another one again. In order to use your own connection, follow these steps:
+
+<Callout>
+  This feature is not currently supported with `player.play()`. If you depend
+  upon `player.play()` for queue creation, you need to manually create the
+  queue. You can then use `queue.play()` instead to achieve `player.play()`
+  functionality.
+</Callout>
+
+### joinVoiceChannel example
+
+```js title="play.js"
+import { joinVoiceChannel } from 'discord-voip'
+
+const connection = joinVoiceChannel(...);
+
+const queue = await player.nodes.create(guild, {...});
+
+queue.createDispatcher(connection);
+
+// now use the queue
+const { track } = await queue.play(query, { options });
+```
+
+### getVoiceConnection example
+
+```js title="play.js"
+import { getVoiceConnection } from 'discord-voip'
+
+const connection = getVoiceConnection(guildId);
+const queue = await player.nodes.create(guild, {...});
+
+queue.createDispatcher(connection);
+
+// now use the queue
+const { track } = await queue.play(query, { options });
+```

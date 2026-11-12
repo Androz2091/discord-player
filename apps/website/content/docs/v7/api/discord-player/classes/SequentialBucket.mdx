@@ -1,0 +1,50 @@
+---
+title: 'SequentialBucket'
+description: 'No description provided'
+---
+
+## SequentialBucket
+
+```typescript
+new SequentialBucket();
+```
+
+## Properties
+
+### public MAX_RETRIES: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/SequentialBucket.ts#L11)
+
+### public limit: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/SequentialBucket.ts#L7)
+
+### public queue: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/SequentialBucket.ts#L10)
+
+### public remaining: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/SequentialBucket.ts#L8)
+
+### public resetAfter: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/SequentialBucket.ts#L9)
+
+## Methods
+
+### public enqueue(req): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Response](https://developer.mozilla.org/en-US/docs/Web/API/Response)>
+
+Enqueues a request.
+
+| Parameter | Type          | Optional | Description                     |
+| --------- | ------------- | -------- | ------------------------------- |
+| req       | RequestEntity | ❌       | The request function to enqueue |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/SequentialBucket.ts#L24)
+
+### public isRateLimited(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Checks if the bucket is rate limited.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/SequentialBucket.ts#L16)

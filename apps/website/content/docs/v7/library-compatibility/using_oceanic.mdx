@@ -1,0 +1,26 @@
+---
+title: Using Oceanic instead of Discord.js
+description: Learn how to use Oceanic instead of Discord.js with Discord Player
+---
+
+<DevelopmentOnly />
+
+To use [oceanic](https://npm.im/oceanic.js), you just need to wrap your Oceanic client with `createOceanicCompat` function from discord-player. This function will return a new client proxy which mimics the Discord.js client.
+
+```js title="index.js"
+const { Player, createOceanicCompat } = require('discord-player');
+const { Client } = require('oceanic.js');
+
+const client = new Client({
+  auth: 'Bot ...',
+  gateway: {
+    intents: ['GUILD_VOICE_STATES' /* Other intents */],
+  },
+});
+
+const player = new Player(createOceanicCompat(client));
+```
+
+<Callout>
+  Because this is a proxy, the original client will not be mutated.
+</Callout>

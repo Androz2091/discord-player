@@ -1,0 +1,78 @@
+---
+title: 'GuildQueueAudioFilters'
+description: 'No description provided'
+---
+
+## GuildQueueAudioFilters
+
+```typescript
+new GuildQueueAudioFilters(queue);
+```
+
+| Parameter | Type              | Optional |
+| --------- | ----------------- | -------- |
+| queue     | GuildQueue\<Meta> | ❌       |
+
+## Properties
+
+### public \_lastFiltersCache: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L273)
+
+### public equalizerPresets: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L272)
+
+### public ffmpeg: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L271)
+
+### public graph: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L270)
+
+### public queue: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L280)
+
+### public biquad: any
+
+Digital biquad filters
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L317)
+
+### public equalizer: any
+
+15 Band Equalizer
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L310)
+
+### public filters: any
+
+DSP filters
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L324)
+
+### public resampler: any
+
+Audio resampler
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L331)
+
+### public volume: any
+
+Volume transformer
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L303)
+
+## Methods
+
+### public triggerReplay(seek): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
+
+Replay current track in transition mode
+
+| Parameter | Type                                                                                              | Optional | Description             |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ----------------------- |
+| seek      | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       | The duration to seek to |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildQueueAudioFilters.ts#L339)

@@ -1,0 +1,87 @@
+---
+title: 'GuildNodeManager'
+description: 'No description provided'
+---
+
+## GuildNodeManager
+
+```typescript
+new GuildNodeManager(player);
+```
+
+| Parameter | Type   | Optional |
+| --------- | ------ | -------- |
+| player    | Player | ❌       |
+
+## Properties
+
+### public cache: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildNodeManager.ts#L48)
+
+### public player: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildNodeManager.ts#L49)
+
+## Methods
+
+### public create(guild, options): GuildQueue\<T>
+
+Create guild queue if it does not exist
+
+| Parameter | Type                       | Optional | Description                                    |
+| --------- | -------------------------- | -------- | ---------------------------------------------- |
+| guild     | GuildResolvable            | ❌       | The guild which will be the owner of the queue |
+| options   | GuildNodeCreateOptions\<T> | ❌       | Queue initializer options                      |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildNodeManager.ts#L56)
+
+### public delete(node): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Delete queue
+
+| Parameter | Type           | Optional | Description      |
+| --------- | -------------- | -------- | ---------------- |
+| node      | NodeResolvable | ❌       | Queue resolvable |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildNodeManager.ts#L166)
+
+### public get(node): null | GuildQueue\<T>
+
+Get existing queue
+
+| Parameter | Type           | Optional | Description      |
+| --------- | -------------- | -------- | ---------------- |
+| node      | NodeResolvable | ❌       | Queue resolvable |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildNodeManager.ts#L146)
+
+### public has(node): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Check if a queue exists
+
+| Parameter | Type           | Optional | Description      |
+| --------- | -------------- | -------- | ---------------- |
+| node      | NodeResolvable | ❌       | Queue resolvable |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildNodeManager.ts#L157)
+
+### public resolve(node): undefined | GuildQueue\<T>
+
+Resolve queue
+
+| Parameter | Type           | Optional | Description      |
+| --------- | -------------- | -------- | ---------------- |
+| node      | NodeResolvable | ❌       | Queue resolvable |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildNodeManager.ts#L189)
+
+### public resolveId(node): null | [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)
+
+Resolve queue id
+
+| Parameter | Type           | Optional | Description      |
+| --------- | -------------- | -------- | ---------------- |
+| node      | NodeResolvable | ❌       | Queue resolvable |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/queue/GuildNodeManager.ts#L201)

@@ -1,0 +1,17 @@
+---
+title: 'NoSubscriberBehavior'
+description: 'Describes the behavior of the player when an audio packet is played but there are no available voice connections to play to.'
+---
+
+## NoSubscriberBehavior
+
+Describes the behavior of the player when an audio packet is played but there are no available
+voice connections to play to.
+
+| Property | Type    | Value | Description                                                           |
+| -------- | ------- | ----- | --------------------------------------------------------------------- |
+| Pause    | 'pause' | N/A   | Pauses playing the stream until a voice connection becomes available. |
+| Play     | 'play'  | N/A   | Continues to play through the resource regardless.                    |
+| Stop     | 'stop'  | N/A   | The player stops and enters the Idle state.                           |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/audio/AudioPlayer.ts#L22)

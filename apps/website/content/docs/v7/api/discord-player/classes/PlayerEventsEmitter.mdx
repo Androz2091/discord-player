@@ -1,0 +1,132 @@
+---
+title: 'PlayerEventsEmitter'
+description: 'No description provided'
+---
+
+## PlayerEventsEmitter extends EventEmitter\<L>
+
+```typescript
+new PlayerEventsEmitter(requiredEvents);
+```
+
+| Parameter      | Type            | Optional |
+| -------------- | --------------- | -------- |
+| requiredEvents | Array\<keyof L> | ❌       |
+
+## Properties
+
+### public requiredEvents: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L8)
+
+### public static defaultMaxListeners: any
+
+### public hasDebugger: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L70)
+
+## Methods
+
+### public addListener(name, listener): PlayerEventsEmitter\<L>
+
+| Parameter | Type  | Optional |
+| --------- | ----- | -------- |
+| name      | K     | ❌       |
+| listener  | L\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L28)
+
+### public emit(name, args): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+| Parameter | Type               | Optional |
+| --------- | ------------------ | -------- |
+| name      | K                  | ❌       |
+| args      | Parameters\<L\[K]> | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L54)
+
+### public eventNames(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<U>
+
+### public getMaxListeners(): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+### public listenerCount(type): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type    | Optional |
+| --------- | ------- | -------- |
+| type      | keyof L | ❌       |
+
+### public listeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<L\[U]>
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| type      | U    | ❌       |
+
+### public off(name, listener): PlayerEventsEmitter\<L>
+
+| Parameter | Type  | Optional |
+| --------- | ----- | -------- |
+| name      | K     | ❌       |
+| listener  | L\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L36)
+
+### public on(name, listener): PlayerEventsEmitter\<L>
+
+| Parameter | Type  | Optional |
+| --------- | ----- | -------- |
+| name      | K     | ❌       |
+| listener  | L\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L12)
+
+### public once(name, listener): PlayerEventsEmitter\<L>
+
+| Parameter | Type  | Optional |
+| --------- | ----- | -------- |
+| name      | K     | ❌       |
+| listener  | L\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L20)
+
+### public prependListener(event, listener): this
+
+| Parameter | Type  | Optional |
+| --------- | ----- | -------- |
+| event     | U     | ❌       |
+| listener  | L\[U] | ❌       |
+
+### public prependOnceListener(event, listener): this
+
+| Parameter | Type  | Optional |
+| --------- | ----- | -------- |
+| event     | U     | ❌       |
+| listener  | L\[U] | ❌       |
+
+### public rawListeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<L\[U]>
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| type      | U    | ❌       |
+
+### public removeAllListeners(name?): PlayerEventsEmitter\<L>
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| name      | K    | ✅       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L48)
+
+### public removeListener(name, listener): PlayerEventsEmitter\<L>
+
+| Parameter | Type  | Optional |
+| --------- | ----- | -------- |
+| name      | K     | ❌       |
+| listener  | L\[K] | ❌       |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/utils/PlayerEventsEmitter.ts#L42)
+
+### public setMaxListeners(n): this
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| n         | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |

@@ -1,0 +1,86 @@
+---
+title: Entity Serialization and Deserialization
+description: Learn how to serialize or deserialize discord-player entities
+---
+
+Serialization and Deserialization in discord-player is the process of converting a track or playlist object into a plain json object and vice versa.
+
+## Saving tracks or playlists in a database
+
+You may want to save tracks or playlists in a database to be able to retrieve them later. This also helps your users to save their favorite tracks or playlists, or create a custom playlist. Discord Player offers a built-in way to save and retrieve tracks or playlists in a database.
+
+<Callout>
+  Discord Player offers serialization and deserialization of `Track`s and
+  `Playlist`s only.
+</Callout>
+
+### Saving tracks
+
+To save a track, you will have to first convert Discord Player track object into a plain json object. Discord Player exports a function named
+`serialize` which takes a track object and returns a plain json object.
+
+```js title="save-track.js"
+import { serialize } from 'discord-player';
+
+const track = MyDiscordPlayerTrack;
+
+const serializedTrack = serialize(track);
+
+await database.save('my-track-name', serializedTrack);
+```
+
+You can also encode the track object into a base64 string using the `encode` function.
+
+```js title="save-track.js"
+import { encode } from 'discord-player';
+
+const track = MyDiscordPlayerTrack;
+
+const encodedTrackString = encode(serialize(track));
+
+await database.save('my-track-name', encodedTrackString);
+```
+
+### Retrieving tracks
+
+To retrieve a track, you will have to first convert the plain json object into a Discord Player track object. Discord Player exports a function named `deserialize` which takes a plain json object and returns a Discord Player track object.
+
+```js title="retrieve-track.js"
+import { deserialize } from 'discord-player';
+
+const serializedTrack = await database.get('my-track-name');
+
+const track = deserialize(serializedTrack);
+
+// now this track can be queued like a normal track
+```
+
+You can also decode the base64 string into a plain json object using the `decode` function.
+
+```js title="retrieve-track.js"
+import { decode } from 'discord-player';
+
+const encodedTrackString = await database.get('my-track-name');
+
+const serializedTrack = decode(encodedTrackString);
+
+const track = deserialize(serializedTrack);
+
+// now this track can be queued like a normal track
+```
+
+### Saving playlists
+
+You can use the same method as above to save or retrieve playlists.
+
+### Saving queue
+
+Discord Player does not offer queue serialization. But you can use the following method to serialize tracks under the queue.
+
+```js title="save-queue.js"
+import { serialize } from 'discord-player';
+
+const serializedTracks = queue.tracks.map((track) => serialize(track));
+
+await database.save('my-queue', serializedTracks);
+```

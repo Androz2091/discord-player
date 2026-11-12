@@ -1,0 +1,30 @@
+---
+title: Playing Raw Resource
+description: Learn how to play a custom audio resource using Discord Player
+---
+
+Discord Player natively allows you to play custom audio resource.
+
+```js title="play-raw.js"
+import { createAudioResource } from 'discord-voip';
+
+const resource = createAudioResource(...); // create audio resource
+
+await player.play(resource); // play that resource
+```
+
+<Callout type="warn">
+  If you do not plan on replaying the track, it is recommended to clear the
+  assigned resource from the track to avoid memory leaks.
+</Callout>
+
+The following example demonstrates how to clear the resource from the track. You may also utilize the events to clear the resource when the track ends. You can use `track.hasResource` to determine if the track has a resource assigned.
+
+```js title="play-raw.js"
+const { track } = await player.play(resource); // play that resource
+
+// clear the resource from the track
+if (track.hasResource) {
+  track.setResource(null);
+}
+```

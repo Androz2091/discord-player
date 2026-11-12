@@ -1,0 +1,18 @@
+---
+title: 'VoiceConnectionStatus'
+description: 'The various status codes a voice connection can hold at any one time.'
+---
+
+## VoiceConnectionStatus
+
+The various status codes a voice connection can hold at any one time.
+
+| Property     | Type           | Value | Description                                                                                                                    |
+| ------------ | -------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Connecting   | 'connecting'   | N/A   | The `VOICE_SERVER_UPDATE` and `VOICE_STATE_UPDATE` packets have been received, now attempting to establish a voice connection. |
+| Destroyed    | 'destroyed'    | N/A   | The voice connection has been destroyed and untracked, it cannot be reused.                                                    |
+| Disconnected | 'disconnected' | N/A   | The voice connection has either been severed or not established.                                                               |
+| Ready        | 'ready'        | N/A   | A voice connection has been established, and is ready to be used.                                                              |
+| Signalling   | 'signalling'   | N/A   | Sending a packet to the main Discord gateway to indicate we want to change our voice state.                                    |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-voip/src/VoiceConnection.ts#L27)

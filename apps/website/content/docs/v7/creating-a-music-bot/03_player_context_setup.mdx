@@ -1,0 +1,54 @@
+---
+title: Player Context Setup
+description: Learn how to setup Discord Player context in your command handler
+---
+
+Discord Player context allows your bot to manage queues and other player specific features more efficiently. **If you do not wish to use context, you may skip this guide.**
+
+## Design Planning
+
+Before we dive into the code, let's plan the design of our player context setup:
+
+1. **Command Handler**: We will modify the command handler to wrap `command.execute` in a player context provider.
+2. **Context Data**: We will provide the necessary context data (e.g., guild) to the player context provider.
+3. **Main Player Hook**: We will use the `useMainPlayer` hook to get the main player instance.
+
+## Setting up Player Context
+
+To set up the player context, you need to provide the context data to the player context provider. Here is an example of how you can set up the player context:
+
+```js title="command-handler.js"
+// Almost all command handlers have the following line of code
+await command.execute(interaction); // [!code highlight]
+```
+
+You will need to wrap `command.execute` in a player context provider like this:
+
+```js title="command-handler.js"
+import { useMainPlayer } from 'discord-player'; // [!code highlight]
+
+// inside your command handler
+const player = useMainPlayer(); // [!code highlight]
+
+// [!code highlight]
+const data = {
+  guild: interaction.guild, // [!code highlight]
+}; // [!code highlight]
+
+await player.context.provide(data, () => command.execute(interaction)); // [!code highlight]
+```
+
+<Callout type="warn">
+  Keep in mind, the command handler above is just an example. Your command
+  handler may look different. Make sure to adjust the code according to your
+  needs.
+</Callout>
+
+<Callout>
+  `useMainPlayer` is a hook that provides the main player instance. You must
+  call this hook after initializing the player.
+</Callout>
+
+In the example above, we are providing the guild data to the player context. This allows the player to manage the queue and other player specific features more efficiently.
+
+In the next section, we will learn how to create play command.

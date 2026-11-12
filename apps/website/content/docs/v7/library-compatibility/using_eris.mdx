@@ -1,0 +1,18 @@
+---
+title: Using Eris instead of Discord.js
+description: Learn how to use Eris instead of Discord.js with Discord Player
+---
+
+To use [Eris](https://npm.im/eris), you just need to wrap your eris client with `createErisCompat` function from discord-player. This function will return a new client proxy which mimics the Discord.js client.
+
+```js title="index.js"
+const { Player, createErisCompat } = require('discord-player');
+const Eris = require('eris');
+
+const client = new Eris('...');
+const player = new Player(createErisCompat(client));
+```
+
+<Callout>
+  Because this is a proxy, the original client will not be mutated.
+</Callout>

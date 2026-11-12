@@ -1,0 +1,15 @@
+---
+title: Adding custom audio filters
+description: Learn how to add custom audio filters in Discord Player
+---
+
+Audio filters in **Discord Player** are **[FFmpeg audio filters](http://ffmpeg.org/ffmpeg-all.html#Audio-Filters)**. You can add your own audio filter like this:
+
+```js title="custom_filter.js"
+const { AudioFilters } = require('discord-player');
+
+AudioFilters.define('3D', 'apulsator=hz=0.128');
+
+// later, it can be used like this
+queue.filters.ffmpeg.toggle('3D');
+```

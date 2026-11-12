@@ -1,0 +1,124 @@
+---
+title: Audio Filters
+description: Learn how to use audio filters in Discord Player
+---
+
+Discord Player supports various audio filters. There are 4 types of audio filters in discord-player.
+
+### FFmpeg
+
+The most common and powerful method is FFmpeg. It supports a lot of audio filters. To set ffmpeg filter, you can do:
+
+```js title="nightcore.js"
+await queue.filters.ffmpeg.toggle(['bassboost', 'nightcore']);
+```
+
+Note that there can be a delay between filters transition in this method.
+
+### Equalizer
+
+This equalizer is very similar to Lavalink's 15 Band Equalizer. To use this, you can do:
+
+```js title="bass.js"
+queue.filters.equalizer.setEQ([
+  { band: 0, gain: 0.25 },
+  { band: 1, gain: 0.25 },
+  { band: 2, gain: 0.25 },
+]);
+```
+
+There is no delay between filter transition when using equalizer.
+
+### Biquad
+
+This filter provides digital biquad filterer to the player. To use this, you can do:
+
+```js title="lowpass.js"
+import { BiquadFilterType } from 'discord-player';
+
+queue.filters.biquad.setFilter(BiquadFilterType.LowPass);
+// similarly, you can use other filters such as HighPass, BandPass, Notch, PeakEQ, LowShelf, HighShelf, etc.
+```
+
+There is no delay between filter transition when using biquad filters.
+
+### Resampler
+
+<DevelopmentOnly />
+
+This filter provides resampling to the player. This filter is identical to `await queue.filters.ffmpeg.toggle(..)` with `vaporwave` or `nightcore` filters. To use this, you can do:
+
+```js title="resampler.js"
+// resample current audio to 1.3 times the current sample rate
+queue.filters.resampler.setSampleRate(48000 * 1.3);
+
+// resample using predefined preset
+const enabled = queue.filters.resampler.toggleFilter('nightcore'); // or 'vaporwave'
+
+// currently applied sample rate
+console.log(queue.filters.resampler.sampleRate);
+```
+
+There is no delay between filter transition when using resampler.
+
+### Other Filters
+
+This is another type of audio filters provider. It currently supports `Tremolo` and `8D` filters only. To use this, you can do:
+
+```js title="8d.js"
+queue.filters.filters.setFilters(['8D']);
+```
+
+There is no delay between filters transition using this filter.
+
+### Seeker
+
+<DevelopmentOnly />
+
+Discord Player has a built-in filter called `seeker`. This filter is used to seek the audio forward. To use this, you have to explicitly enable it via `nodeOptions`:
+
+```js title="seeker.js"
+await player.play(channel, track, {
+  nodeOptions: {
+    disableSeeker: false,
+  },
+});
+```
+
+Invoking `queue.node.seek()` will use this filter to seek the audio forward. When seeking backwards, the player will fall back to the default behavior of seeking (using FFmpeg).
+
+### Reverb Filter
+
+<DevelopmentOnly />
+
+This filter provides reverb to the player. To use this, you can do:
+
+```js title="reverb.js"
+queue.filters.reverb.setReverb({
+  roomSize: 0.5,
+  damping: 0.5,
+  wetLevel: 0.5,
+  dryLevel: 0.5,
+});
+```
+
+There is no delay between filter transition when using reverb filter.
+
+### Compressor Filter
+
+<DevelopmentOnly />
+
+This filter provides compressor to the player. To use this, you can do:
+
+```js title="compressor.js"
+queue.filters.compressor.setCompressor({
+  threshold: -20,
+  ratio: 3,
+  attack: 0.1,
+  release: 0.1,
+  makeupGain: 0,
+  kneeWidth: 0,
+});
+```
+
+There is no delay between filter transition when using compressor filter.

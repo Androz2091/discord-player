@@ -1,0 +1,185 @@
+---
+title: Common Actions on Player/Queue
+description: Learn how to perform common actions on the player and queue
+---
+
+Here are few basic examples on how to implement various actions.
+
+This guide assumes that you already initialized the player in your `index.js` or corresponding file.
+
+Also this does not perform checks on the current status of the queue. Refer to one of the [example bots](/community) for more detailed info.
+
+## Getting the player instance from anywhere
+
+```js title="play.js"
+const { useMainPlayer } = require("discord-player");
+...
+const player = useMainPlayer();
+```
+
+## Playing a new track
+
+```js title="play.js"
+const { useMainPlayer } = require("discord-player");
+...
+const player = useMainPlayer();
+await player.play(interaction.member.voice.channel, query);
+```
+
+If you are not using `player.play()` and handling queue creation as well as other logic on your own, you may need to use `AsyncQueue` on your command, otherwise you may face [this issue](https://github.com/Androz2091/discord-player/issues/1717):
+
+```js title="play.js"
+const { useMainPlayer } = require("discord-player");
+...
+const player = useMainPlayer();
+
+const queue = player.nodes.create(...);
+const result = await player.search(...);
+
+// acquire task entry
+const entry = queue.tasksQueue.acquire();
+
+// wait for previous task to be released and our task to be resolved
+await entry.getTask();
+
+// add track(s) (this will add playlist or single track from the result)
+queue.addTrack(result);
+
+try {
+    // if player node was not previously playing, play a song
+    if (!queue.isPlaying()) await queue.node.play();
+} finally {
+    // release the task we acquired to let other tasks to be executed
+    // make sure you are releasing your entry, otherwise your bot won't
+    // accept new play requests
+    queue.tasksQueue.release();
+}
+```
+
+## Inserting a new track to a specific position in queue
+
+```js title="play-next.js"
+const { useQueue, useMainPlayer } = require("discord-player");
+...
+const player = useMainPlayer();
+const queue = useQueue(interaction.guild.id);
+const searchResult = await player.search(query, { requestedBy: interaction.user });
+queue.insertTrack(searchResult.tracks[0], position); //Remember queue index starts from 0, not 1
+```
+
+## Removing a track from the queue
+
+```js title="remove.js"
+const { useQueue } = require("discord-player");
+...
+const queue = useQueue(interaction.guild.id);
+queue.removeTrack(trackNumber); //Remember queue index starts from 0, not 1
+```
+
+## Getting the current queue
+
+```js title="queue.js"
+const { useQueue } = require("discord-player");
+...
+const queue = useQueue(interaction.guild.id);
+const tracks = queue.tracks.toArray(); //Converts the queue into a array of tracks
+const currentTrack = queue.currentTrack; //Gets the current track being played
+```
+
+## Pausing the queue
+
+_This example shows how you can toggle the pause state for a queue with a single command_
+
+```js title="pause.js"
+const { useQueue } = require("discord-player");
+...
+const queue = useQueue(interaction.guild.id);
+queue.node.setPaused(!queue.node.isPaused());//isPaused() returns true if that player is already paused
+```
+
+## Going back a track
+
+_If your queue is being looped then there won't be any tracks in history_
+
+```js title="previous.js"
+const { useHistory } = require("discord-player");
+...
+const history = useHistory(interaction.guild.id);
+await history.previous();
+```
+
+## Skipping a track
+
+```js title="skip.js"
+const { useQueue } = require("discord-player");
+...
+const queue = useQueue(interaction.guild.id);
+queue.node.skip()
+```
+
+## Shuffling the queue
+
+```js title="shuffle.js"
+const { useQueue } = require("discord-player");
+...
+const queue = useQueue(interaction.guild.id);
+queue.tracks.shuffle();
+```
+
+## Looping the queue
+
+_These are the various options for Loop Modes_
+
+| Mode     | Value | Description                                                   |
+| -------- | ----- | ------------------------------------------------------------- |
+| Off      | 0     | Default mode with no loop active                              |
+| Track    | 1     | Loops the current track                                       |
+| Queue    | 2     | Loops the current queue                                       |
+| Autoplay | 3     | Play related songs automatically based on your existing queue |
+
+```js title="loop.js"
+const { useQueue } = require("discord-player");
+...
+const queue = useQueue(interaction.guild.id);
+queue.setRepeatMode(mode); //Pass the value for the mode here
+```
+
+## Changing the volume of the player
+
+```js title="volume.js"
+const { useQueue } = require("discord-player");
+...
+const queue = useQueue(interaction.guild.id);
+queue.node.setVolume(volume); //Pass the value for the volume here
+```
+
+## Stopping the queue
+
+```js title="stop.js"
+const { useQueue } = require("discord-player");
+...
+const queue = useQueue(interaction.guild.id);
+queue.delete();
+```
+
+## Controlling the player behavior
+
+You can find the whole list of available nodeOptions from [GuildNodeCreateOptions](https://discord-player.js.org/api/discord-player/types/GuildNodeCreateOptions)
+
+```js title="play.js"
+const player = useMainPlayer();
+...
+await player.play(interaction.member.voice.channel, searchResultOrQuery, {
+	nodeOptions: {
+		metadata: interaction.channel,
+		bufferingTimeout: 15000, //How long the player should attempt buffering before giving up
+		leaveOnStop: true, //If player should leave the voice channel after user stops the player
+		leaveOnStopCooldown: 5000, //Cooldown in ms
+		leaveOnEnd: true, //If player should leave after the whole queue is over
+		leaveOnEndCooldown: 15000, //Cooldown in ms
+		leaveOnEmpty: true, //If the player should leave when the voice channel is empty
+		leaveOnEmptyCooldown: 300000, //Cooldown in ms
+		skipOnNoStream: true,
+	},
+});
+```

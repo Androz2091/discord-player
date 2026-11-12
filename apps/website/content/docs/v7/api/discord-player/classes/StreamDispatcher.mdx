@@ -1,0 +1,289 @@
+---
+title: 'StreamDispatcher'
+description: 'No description provided'
+---
+
+## StreamDispatcher extends EventEmitter\<VoiceEvents>
+
+## Properties
+
+### public audioPlayer: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L57)
+
+### public audioResource: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L59)
+
+### public channel: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L58)
+
+### public connectionTimeout: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L72)
+
+### public dsp: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L60)
+
+### public queue: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L71)
+
+### public voiceConnection: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L56)
+
+### public static defaultMaxListeners: any
+
+### public biquad: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L308)
+
+### public equalizer: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L312)
+
+### public filters: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L304)
+
+### public paused: any
+
+Check if the player has been paused manually
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L174)
+
+### public resampler: any
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L300)
+
+### public status: any
+
+The player status
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L320)
+
+### public streamTime: any
+
+The playback time
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L435)
+
+### public volume: any
+
+The current volume
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L426)
+
+## Methods
+
+### public addListener(event, listener): this
+
+| Parameter | Type            | Optional |
+| --------- | --------------- | -------- |
+| event     | U               | ❌       |
+| listener  | VoiceEvents\[U] | ❌       |
+
+### public createStream(src, ops?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<AudioResource\<Track\<unknown>>>
+
+Creates stream
+
+| Parameter | Type                                                                                         | Optional | Description       |
+| --------- | -------------------------------------------------------------------------------------------- | -------- | ----------------- |
+| src       | [Readable](https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable) | ❌       | The stream source |
+| ops       | CreateStreamOps                                                                              | ✅       | Options           |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L251)
+
+### public destroy(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Destroys this dispatcher
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L338)
+
+### public disconnect(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Disconnects from voice
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L328)
+
+### public emit(event, args): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+| Parameter | Type                         | Optional |
+| --------- | ---------------------------- | -------- |
+| event     | U                            | ❌       |
+| args      | Parameters\<VoiceEvents\[U]> | ❌       |
+
+### public end(): [void](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+
+Stops the player
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L353)
+
+### public eventNames(): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<U>
+
+### public getMaxListeners(): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+### public isBuffering(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Whether or not the player is currently buffering
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L192)
+
+### public isConnecting(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Whether or not the voice connection is connecting
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L241)
+
+### public isDestroyed(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Whether or not the voice connection has been destroyed
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L213)
+
+### public isDisconnected(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Whether or not the voice connection has been destroyed
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L220)
+
+### public isIdle(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Whether or not the player is currently idle
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L206)
+
+### public isPaused(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Whether or not the player is currently paused automatically or manually.
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L185)
+
+### public isPlaying(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Whether or not the player is currently playing
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L199)
+
+### public isReady(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Whether or not the voice connection is ready to play
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L227)
+
+### public isSignalling(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Whether or not the voice connection is signalling
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L234)
+
+### public listenerCount(type): [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+| Parameter | Type              | Optional |
+| --------- | ----------------- | -------- |
+| type      | keyof VoiceEvents | ❌       |
+
+### public listeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<VoiceEvents\[U]>
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| type      | U    | ❌       |
+
+### public off(event, listener): this
+
+| Parameter | Type            | Optional |
+| --------- | --------------- | -------- |
+| event     | U               | ❌       |
+| listener  | VoiceEvents\[U] | ❌       |
+
+### public on(event, listener): this
+
+| Parameter | Type            | Optional |
+| --------- | --------------- | -------- |
+| event     | U               | ❌       |
+| listener  | VoiceEvents\[U] | ❌       |
+
+### public once(event, listener): this
+
+| Parameter | Type            | Optional |
+| --------- | --------------- | -------- |
+| event     | U               | ❌       |
+| listener  | VoiceEvents\[U] | ❌       |
+
+### public pause(interpolateSilence?): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Pauses the stream playback
+
+| Parameter          | Type                                                                                                | Optional | Description                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| interpolateSilence | [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ✅       | If true, the player will play 5 packets of silence after pausing to prevent audio glitches. |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L367)
+
+### public playStream(resource?): [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<undefined | StreamDispatcher>
+
+Play stream
+
+| Parameter | Type                            | Optional | Description                |
+| --------- | ------------------------------- | -------- | -------------------------- |
+| resource  | AudioResource\<Track\<unknown>> | ✅       | The audio resource to play |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L387)
+
+### public prependListener(event, listener): this
+
+| Parameter | Type            | Optional |
+| --------- | --------------- | -------- |
+| event     | U               | ❌       |
+| listener  | VoiceEvents\[U] | ❌       |
+
+### public prependOnceListener(event, listener): this
+
+| Parameter | Type            | Optional |
+| --------- | --------------- | -------- |
+| event     | U               | ❌       |
+| listener  | VoiceEvents\[U] | ❌       |
+
+### public rawListeners(type): [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)\<VoiceEvents\[U]>
+
+| Parameter | Type | Optional |
+| --------- | ---- | -------- |
+| type      | U    | ❌       |
+
+### public removeAllListeners(event?): this
+
+| Parameter | Type              | Optional |
+| --------- | ----------------- | -------- |
+| event     | keyof VoiceEvents | ✅       |
+
+### public removeListener(event, listener): this
+
+| Parameter | Type            | Optional |
+| --------- | --------------- | -------- |
+| event     | U               | ❌       |
+| listener  | VoiceEvents\[U] | ❌       |
+
+### public resume(): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Resumes the stream playback
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L376)
+
+### public setMaxListeners(n): this
+
+| Parameter | Type                                                                                              | Optional |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- |
+| n         | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       |
+
+### public setVolume(value): [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+Sets playback volume
+
+| Parameter | Type                                                                                              | Optional | Description       |
+| --------- | ------------------------------------------------------------------------------------------------- | -------- | ----------------- |
+| value     | [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) | ❌       | The volume amount |
+
+- [Source](https://github.com/androz2091/discord-player/blob/ce04b3f4c6671029ce4d4aa9090e56ac7e7f5666/packages/discord-player/src/VoiceInterface/StreamDispatcher.ts#L417)

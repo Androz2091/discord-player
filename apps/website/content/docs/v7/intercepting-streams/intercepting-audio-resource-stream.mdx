@@ -1,0 +1,69 @@
+---
+title: Intercepting AudioResource Stream
+description: Learn how to intercept and consume the audio resource stream and store it in a file.
+---
+
+# Intercepting AudioResource Stream
+
+Discord Player supports intercepting and capturing the audio resource stream and consume it without affecting the playback. This feature is useful for saving the audio stream to a file or whatever you want to do with it.
+
+<Callout type="warn">
+  Keep in mind that the audio resource stream you are trying to capture might
+  not be legal to store or distribute. Make sure you have the right to store the
+  audio stream before proceeding. Stream depends on the extractor you are using.
+  Discord Player is not responsible for any misuse of this feature.
+</Callout>
+
+## 1. Enabling Stream Intercepting on a GuildQueue
+
+Each queues can define their interception behavior by setting the `enableStreamInterceptor` property to `true` (disabled by default). This property will enable the stream interceptor for the queue and `PlayerStreamInterceptor` will be able to capture this stream.
+
+```js
+await player.play(channel, query, {
+  nodeOptions: {
+    enableStreamInterceptor: true,
+  },
+});
+```
+
+## 2. Using PlayerStreamInterceptor
+
+`PlayerStreamInterceptor` allows you to capture intercepted audio resource stream and consume it. You can use this class to store the audio stream to a file or whatever you want to do with it. You can also define multiple consumers simultaneously.
+
+Interceptor will always execute **after** the `OnAfterCreateStream` hook.
+
+```js
+const interceptor = player.createStreamInterceptor({
+  async shouldIntercept(queue, track, format, stream) {
+    // Return true to intercept the stream, false to skip
+    // this is useful if you want to dynamically decide whether to intercept the stream or not based on the track or format or queue
+    return true;
+  },
+});
+
+// this will be called every time an audio resource stream is intercepted
+const unsubscribe = interceptor.onStream(
+  async (queue, track, format, stream) => {
+    const ext = format === StreamType.Opus ? '.opus' : '.pcm';
+    const out = fs.createWriteStream(`./${track.title}${ext}`);
+
+    stream.interceptors.add(out);
+  },
+);
+
+// Unsubscribe the interceptor
+unsubscribe();
+```
+
+<Callout type="warn">
+  You must not use `.pipe()` method on this stream. This affects the audio
+  player directly. Instead, use `.interceptors.add()` method to add a writable
+  stream. You can add as many interceptors as you want.
+</Callout>
+
+<Callout type="info">
+  Discord Player returns `opus` stream format when ffmpeg is not being used. If
+  ffmpeg is being used, the stream format will be `pcm`.
+</Callout>
+
+That's it! You have successfully intercepted the audio resource stream and stored it in a file. You can now use this feature to store the audio stream in a database, send it to a server, or whatever you want to do with it. Just make sure to not misuse this feature.
