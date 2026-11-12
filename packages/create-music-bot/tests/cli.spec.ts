@@ -148,8 +148,8 @@ describe('create-music-bot CLI', () => {
 
   it('refuses to run from a build that has no release version', async () => {
     const cwd = makeTempDir();
-    // The workspace build keeps the placeholder version 0.0.0 until a release synchronizes it.
-    const result = await runCli(join(packageRoot, 'dist', 'cli.js'), ['my-bot'], { cwd });
+    const unreleasedCli = createGeneratorFixture('0.0.0');
+    const result = await runCli(unreleasedCli, ['my-bot'], { cwd });
 
     expect(result.code).toBe(1);
     expect(result.stderr).toContain('not a release build');

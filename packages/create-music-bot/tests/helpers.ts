@@ -16,8 +16,8 @@ export function makeTempDir(prefix = 'create-music-bot-'): string {
 }
 
 /**
- * Copies the built generator into a temp directory under a release version.
- * The workspace copy has the placeholder version `0.0.0`, which the generator refuses to use.
+ * Copies the built generator into a temp directory with an explicit version,
+ * independently of whether release CI has synchronized the workspace version.
  *
  * @param version Version to give the copy.
  * @returns Path of the copy's CLI entry point.
