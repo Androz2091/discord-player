@@ -186,14 +186,10 @@ it('keeps raw controls separate from managed queue state and forwards playback e
 
   expect(node.streamTime).toBe(0);
 
-  session.position.mediaMs = null;
-  session.position.playedMs = 1234;
+  session.elapsedMs = 1234;
 
   expect(node.streamTime).toBe(1234);
-
-  session.position.playedMs = null;
-
-  expect(node.streamTime).toBe(0);
+  expect(node.playbackTime).toBe(1234);
 
   for (const volume of [-1, 201, NaN, Infinity]) await expect(node.setVolume(volume)).rejects.toThrow(RangeError);
 
@@ -225,7 +221,7 @@ it('formats timelines and progress bars for absent, zero, long and completed med
   expect(queue.node.createProgressBar()).toBeNull();
 
   await queue.play(new TestTrack('timeline'));
-  session.position.mediaMs = 3661000;
+  session.elapsedMs = 3661000;
   session.durationMs = 7322000;
 
   expect(queue.node.getTimestamp()).toEqual({
@@ -250,6 +246,76 @@ it('formats timelines and progress bars for absent, zero, long and completed med
   expect(queue.node.getTimestamp()?.progress).toBe(100);
 
   await player.destroy();
+});
+
+it('reads output elapsed time from the Remedia clock rather than stale position snapshots', async () => {
+  const { queue, player, session } = await setup();
+  const getPlaybackTime = vi.spyOn(session, 'getPlaybackTime');
+
+  await queue.play(new TestTrack('clock'));
+
+  session.position.mediaMs = 5_000;
+  session.position.playedMs = 5_000;
+  session.elapsedMs = 20_000;
+
+  expect(queue.node.playbackTime).toBe(20_000);
+  expect(queue.node.streamTime).toBe(20_000);
+  expect(queue.node.getTimestamp()?.current.value).toBe(20_000);
+  expect(getPlaybackTime).toHaveBeenCalled();
+
+  session.elapsedMs = 20_001;
+
+  expect(queue.node.playbackTime).toBe(20_001);
+
+  await player.destroy();
+});
+
+it('keeps output elapsed time separate from the source position under tempo changes', async () => {
+  const { queue, player, session } = await setup();
+
+  await queue.play(new TestTrack('tempo'));
+
+  session.durationMs = 60_000;
+  session.position.mediaMs = 90_000;
+  session.elapsedMs = 45_000;
+
+  expect(queue.node.playbackTime).toBe(45_000);
+  expect(queue.node.getTimestamp()).toMatchObject({ current: { value: 45_000 }, progress: 75 });
+
+  // Slowed output can run past the source duration; the clock is not capped, only the percentage is.
+  session.position.mediaMs = 30_000;
+  session.elapsedMs = 90_000;
+
+  expect(queue.node.playbackTime).toBe(90_000);
+  expect(queue.node.getTimestamp()).toMatchObject({ current: { value: 90_000 }, progress: 100 });
+
+  await player.destroy();
+});
+
+it('does not carry elapsed time across seeks, replacements, stops or a missing session', async () => {
+  const { queue, player, session } = await setup();
+
+  await queue.play([new TestTrack('first'), new TestTrack('second')]);
+
+  session.elapsedMs = 12_000;
+  await queue.node.seek(30_000);
+
+  expect(queue.node.playbackTime).toBe(30_000);
+
+  await queue.skip();
+
+  expect(queue.currentTrack?.title).toBe('second');
+  expect(queue.node.playbackTime).toBe(0);
+
+  session.elapsedMs = 8_000;
+  await queue.node.stop();
+  session.elapsedMs = 0;
+
+  expect(queue.node.playbackTime).toBe(0);
+
+  await player.destroy();
+
+  expect(queue.node.playbackTime).toBe(0);
 });
 
 it('forwards navigation aliases to queue ownership rather than operating on raw sessions', async () => {

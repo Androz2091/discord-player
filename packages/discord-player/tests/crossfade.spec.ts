@@ -125,6 +125,28 @@ describe('automatic crossfading', () => {
     expect(queue.stats.tracksFinished).toBe(3);
   });
 
+  it('starts playback time from zero for the promoted generation', async () => {
+    const { queue, session } = await setup({ queueOptions: enabled });
+
+    await queue.play([new TestTrack('a'), new TestTrack('b')]);
+
+    session.elapsedMs = 55_000;
+    session.requestPreparation();
+    await settle();
+
+    // Staging must not disturb the active generation's clock.
+    expect(queue.node.playbackTime).toBe(55_000);
+
+    const finish = session.promote();
+
+    expect(queue.node.playbackTime).toBe(0);
+
+    finish();
+    await settle();
+
+    expect(queue.node.playbackTime).toBe(0);
+  });
+
   it('assigns different identities to two occurrences of the same object', async () => {
     const { queue, session } = await setup({ queueOptions: enabled });
     const track = new TestTrack('same');

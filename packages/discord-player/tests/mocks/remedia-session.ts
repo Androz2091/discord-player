@@ -71,6 +71,9 @@ export class FakeSession
     playedMs: 0 as number | null,
   };
 
+  /** Output elapsed time reported by Remedia's playback clock; independent of the source position. */
+  public elapsedMs = 0;
+
   /** Current source duration. */
   public durationMs: number | null = 60_000;
 
@@ -178,6 +181,7 @@ export class FakeSession
     };
 
     this.generation++;
+    this.elapsedMs = 0;
     this.customMetadata = options.customMetadata;
     this.stage = null;
 
@@ -305,8 +309,14 @@ export class FakeSession
     this.state = 'playing';
   }
 
+  /** Return output elapsed time from Remedia's playback clock. */
+  public getPlaybackTime(): number {
+    return this.elapsedMs;
+  }
+
   /** Seek raw playback. */
   public async seek(positionMs: number): Promise<void> {
+    this.elapsedMs = positionMs;
     this.position = { ...this.position, mediaMs: positionMs, playedMs: positionMs };
   }
 
@@ -333,6 +343,7 @@ export class FakeSession
   }> {
     this.playCalls++;
     this.generation++;
+    this.elapsedMs = 0;
     this.state = 'playing';
     this.customMetadata = options?.customMetadata;
 

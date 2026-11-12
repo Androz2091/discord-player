@@ -89,7 +89,7 @@ console.log(session.nodeId);
 | `stopSession()`                          | Stop raw session audio                                           |
 | `pause()`, `resume()`, `setPaused(bool)` | Raw playback state                                               |
 | `seek(ms)`, `setVolume(percent)`         | Raw timing and gain controls                                     |
-| `playbackTime`, `totalDuration`          | Millisecond timeline                                             |
+| `playbackTime`, `totalDuration`          | Output elapsed time (Remedia clock) and source duration, in ms   |
 | `getTimestamp()`, `createProgressBar()`  | Display helpers                                                  |
 | `isIdle()`, `isPlaying()`, `isPaused()`  | Raw session status                                               |
 | `filters`                                | Named/raw FFmpeg filtergraph API                                 |

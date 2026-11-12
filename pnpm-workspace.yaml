@@ -3,7 +3,7 @@ packages:
   - 'apps/*'
 
 catalog:
-  '@remedia/plugin-host': 0.1.0-dev.6
+  '@remedia/plugin-host': 0.1.0-dev.7
   '@types/node': ^26.6.5
   '@types/react': ^19.3.0
   '@types/react-dom': ^19.3.0

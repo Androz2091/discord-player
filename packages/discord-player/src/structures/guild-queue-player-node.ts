@@ -636,11 +636,14 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     return this.session ? this.session.volume * 100 : this.#volume;
   }
 
-  /** Current media position in milliseconds, or zero when Remedia has no position. */
+  /**
+   * Output elapsed time in milliseconds, read on demand from Remedia's playback clock.
+   * @remarks This is time spent producing output for the current generation, not the source-media position.
+   * It starts at the seek target after `seek()` and can differ from the source position (and exceed
+   * {@link GuildQueuePlayerNode.totalDuration}) when a filter changes tempo. Returns zero when no session exists.
+   */
   public get playbackTime(): number {
-    const position = this.session?.position;
-
-    return position?.mediaMs ?? position?.playedMs ?? 0;
+    return this.session?.getPlaybackTime() ?? 0;
   }
 
   /** Total session duration in milliseconds, falling back to the current Track's duration. */
@@ -648,7 +651,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     return this.session?.durationMs ?? this.queue.currentTrack?.durationMS ?? 0;
   }
 
-  /** Compatibility alias for {@link GuildQueuePlayerNode.playbackTime}. */
+  /** Compatibility alias for {@link GuildQueuePlayerNode.playbackTime}; also output elapsed time. */
   public get streamTime(): number {
     return this.playbackTime;
   }
@@ -668,7 +671,11 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     return !!this.session && ['paused', 'pausing'].includes(this.session.state);
   }
 
-  /** Return the formatted timeline for the current queue Track, or `null` when no Track is selected. */
+  /**
+   * Return the formatted timeline for the current queue Track, or `null` when no Track is selected.
+   * @remarks `current` is output elapsed time and `total` is the source duration, so `progress` is clamped to 100
+   * and is approximate while a tempo-changing filter is active.
+   */
   public getTimestamp(): PlayerTimestamp | null {
     if (!this.queue.currentTrack) return null;
 
@@ -683,7 +690,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   /**
-   * Create a text progress bar from Remedia's current media position and duration.
+   * Create a text progress bar from output elapsed time and the source duration.
    * @param options Bar length, characters, separator, and timecode options.
    * @returns Formatted progress bar, or `null` when the queue has no current Track.
    */

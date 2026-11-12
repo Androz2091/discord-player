@@ -1,6 +1,6 @@
 # Remedia source-host integration
 
-Supported with published `@remedia/client@0.1.0-dev.6`, `@remedia/plugin-host@0.1.0-dev.6`,
+Supported with published `@remedia/client@0.1.0-dev.7`, `@remedia/plugin-host@0.1.0-dev.7`,
 and the matching Remedia server.
 
 The standalone adapter exposes `GET /.well-known/remedia` and
@@ -47,7 +47,7 @@ Discord voice playback, Rust playback, seeking, reconnects or recovery. Small
 MP4/M4A files with a trailing moov atom may happen to fit FFmpeg's internal buffers;
 large or interleaved files can require seeking and must not be advertised as safe.
 
-Remedia dev.6's generic operation path treats host grants as single-use encoded
+Remedia dev.7's generic operation path treats host grants as single-use encoded
 inputs, redeems each with one plain GET (no Range, reopen or reconnect), supports
 forward-only seeking, and owns native decoding. Replay re-executes the operation. A grant is not a
 seekable durable URL. Source providers must support reconstruction/reopening for
