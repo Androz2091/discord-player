@@ -17,6 +17,21 @@ Find the layer first. A missing source plugin and a native decoder failure are d
 
 Run the [smoke test](/docs/v8/installation/ffmpeg#verify-your-installation). Embedded hosts need the libraries locally. A bot that only uses remote nodes does not.
 
+## The generated bot will not start
+
+**Symptom:** `npm run dev` exits right away.
+
+**Check:** the message it prints.
+
+| Message                                        | Cause                                                                                         |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `DISCORD_TOKEN is not set`                     | `.env` is missing. Copy `.env.example` to `.env`                                              |
+| `ALLOWED_MEDIA_HOSTS must list bare hostnames` | An entry is a URL, has a port or a wildcard. List hostnames only                              |
+| `Could not log in to Discord`                  | The token is wrong or was reset                                                               |
+| `Could not start the audio engine`             | The FFmpeg 9 shared libraries are missing. See [Install FFmpeg](/docs/v8/installation/ffmpeg) |
+
+`/play` replies that playback is disabled until `ALLOWED_MEDIA_HOSTS` contains the host of the link. See [the generated project](/docs/v8/getting-started/create-music-bot).
+
 ## No tracks found
 
 **Symptom:** `player.search(query)` returns no tracks, or a query never starts playback.

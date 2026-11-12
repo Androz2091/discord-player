@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
+import { CopyCommand } from '@/components/copy-command';
 import { DiscordInvite } from '@/components/discord-invite';
 import { VersionBadge } from '@/components/version-badge';
 import { communityResources } from '@/data/community';
@@ -24,6 +25,9 @@ export const metadata = {
 };
 
 const remediaUrl = 'https://github.com/twlite/remedia';
+
+/** Creates a new project from the v8 starter template. */
+const generatorCommand = 'npm create music-bot@dev';
 
 /** The version the "What's new" section describes. Its name and badge still come from the version configuration. */
 const newestVersionId = 'v8' satisfies DocsVersionId;
@@ -86,7 +90,7 @@ const { track } = await player.play(voiceChannel, url, {
   nodeOptions: { metadata: interaction.channel },
 });
 `,
-    note: 'directMedia is the source plugin built in the tutorial.',
+    note: 'directMedia is the source plugin built in the manual setup tutorial.',
   },
 };
 
@@ -255,6 +259,20 @@ export default function HomePage() {
             Get started
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
+
+          <div className="mt-8 max-w-md">
+            <p className="mb-2 flex items-center gap-2 text-sm font-medium">
+              Start a {newest.name} project
+              {newest.badge ? <VersionBadge badge={newest.badge} /> : null}
+            </p>
+            <CopyCommand command={generatorCommand} label={`Create a ${newest.name} project`} />
+            <p className="mt-2 text-xs leading-5 text-fd-muted-foreground">
+              Generates a TypeScript or JavaScript bot with play, pause, skip, and queue commands.{' '}
+              <Link href={`${getVersionBaseUrl(newest.id)}${newest.startPath ?? ''}`} className={linkClass}>
+                Read the guide
+              </Link>
+            </p>
+          </div>
 
           <DiscordInvite />
         </div>

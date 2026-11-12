@@ -1,4 +1,13 @@
 {
   "title": "Getting started",
-  "pages": ["index", "create-player", "source-plugin", "play-track", "next-steps"]
+  "pages": [
+    "index",
+    "create-music-bot",
+    "---Manual setup---",
+    "manual-setup",
+    "create-player",
+    "source-plugin",
+    "play-track",
+    "next-steps"
+  ]
 }
