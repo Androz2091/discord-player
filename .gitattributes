@@ -2,3 +2,4 @@
 *.js linguist-detectable=false
 *.mjs linguist-detectable=false
 *.mdx linguist-detectable=false
+*.css linguist-detectable=false
