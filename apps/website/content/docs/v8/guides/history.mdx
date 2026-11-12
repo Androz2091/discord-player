@@ -1,9 +1,9 @@
 ---
-title: History, repeat, and shuffle
-description: Know when tracks enter history and how navigation interacts with managed playback.
+title: History
+description: Go back to previous tracks and understand what gets recorded.
 ---
 
-The queue owns a `GuildQueueHistory`. It records previous Tracks and provides navigation separate from upcoming Tracks.
+The queue records finished tracks in `queue.history`.
 
 ```ts
 const queue = player.getQueue(guildId);
@@ -13,28 +13,41 @@ if (!queue) return;
 console.log(queue.history.size);
 console.log(queue.history.previousTrack?.title);
 
-await queue.history.previous();
-await queue.history.next();
+await queue.history.previous(); // Play the previous track
+await queue.history.next(); // Play the next upcoming track
 queue.history.clear();
 ```
 
-## Which tracks are recorded?
+`previous()` and `next()` are asynchronous because they start a different track. Both reject with a `NoResultError` when there is nothing to go to, so catch the error in commands.
 
-| Terminal outcome                                   | History behavior                            |
-| -------------------------------------------------- | ------------------------------------------- |
-| Natural completion with repeat `OFF` or `AUTOPLAY` | Store the completed Track                   |
-| Explicit skip                                      | Store the skipped Track                     |
-| Repeat `TRACK` or `QUEUE`                          | Do not store each replay                    |
-| Playback failure                                   | Return the Track to the upcoming queue head |
-| Stop                                               | Leave history unchanged                     |
-| `queue.clear()` or destruction                     | Clear history                               |
+By default, `previous()` puts the current track back at the front of the queue. Pass `false` to drop it:
 
-`queue.history.previous()`, `back()`, and `next()` are asynchronous because navigation may replace the currently playing native generation.
+```ts
+await queue.history.previous(false);
+```
 
-## Shuffle is independent of history
+## What is recorded
 
-`queue.enableShuffle()` enables dynamic random selection of upcoming Tracks. It does not shuffle the already-played history. Disabling dynamic shuffle does not reverse a prior in-place random ordering.
+| What happened                                    | History                                                           |
+| ------------------------------------------------ | ----------------------------------------------------------------- |
+| A track finished with repeat `OFF` or `AUTOPLAY` | The track is added                                                |
+| A track was skipped                              | The track is added                                                |
+| Repeat is `TRACK` or `QUEUE`                     | Replays are not added                                             |
+| A track failed to play                           | The track returns to the front of the queue. History is unchanged |
+| Playback was stopped                             | History is unchanged                                              |
+| `queue.clear()` or `queue.destroy()`             | History is cleared                                                |
 
-For a command that displays the current song, use `queue.currentTrack`. `queue.history.previousTrack` describes earlier tracks, not the active one.
+## Limit or disable history
 
-<NextStep href="/docs/guides/persistence" label="Persist tracks safely" />
+```ts
+const queue = await player.createQueue(guildId, {
+  maxHistorySize: 20, // Keep the last 20 tracks
+  disableHistory: true, // Or record nothing
+});
+```
+
+## Show the current track
+
+Use `queue.currentTrack` for the track that is playing. `queue.history.previousTrack` is the one before it.
+
+<NextStep href="/docs/v8/guides/filters" label="Apply audio filters" />

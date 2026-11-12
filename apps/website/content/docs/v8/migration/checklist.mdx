@@ -1,56 +1,55 @@
 ---
-title: Migration verification checklist
-description: Test the new runtime and source host before switching production bots to v8.
+title: Migration checklist
+description: Verify the upgrade on a test server before you move production bots to v8.
 ---
 
-Use this as a release gate. The items below are designed to expose the most common differences in source identity, native playback, and queue lifecycle.
+Work through this list on a small test server with a few known audio sources.
 
 ## Runtime and voice
 
-- [ ] Bot starts on Node.js 22.18+ with ESM.
-- [ ] Embedded host loads FFmpeg 9 and matching Remedia native bindings; or remote server loads them successfully.
-- [ ] `initialize(botUserId)` completes after Gateway READY.
-- [ ] Raw `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE` are forwarded once.
-- [ ] Bot joins and leaves a voice channel correctly.
-- [ ] Moving channels retains queue metadata and existing playback policy.
-- [ ] Self-deaf and self-mute can be changed while connected.
-- [ ] Reconnect and voice-region changes do not generate a false `playerFinish`.
-- [ ] Five simultaneous guild joins connect independently without unexpected voice leaves.
-- [ ] Transient initial transport failures recover using fresh Gateway credentials.
-- [ ] The bot client and remote server include the voice-recovery fixes.
+- [ ] The bot starts on Node.js 22.18 or newer with ESM.
+- [ ] The embedded host loads FFmpeg 9 and `@remedia/node`, or the remote server loads FFmpeg 9 and starts.
+- [ ] `initialize(botUserId)` finishes after the bot is ready.
+- [ ] Every raw gateway packet reaches `player.receive()`.
+- [ ] The bot joins and leaves voice channels.
+- [ ] Moving channels keeps the queue and its settings.
+- [ ] Self-deaf and self-mute change while connected.
+- [ ] A reconnect or region change does not fire a false `playerFinish`.
+- [ ] Five guilds joining at once connect independently.
+- [ ] Your bot and the server use the same Remedia release.
 
 ## Sources and plugins
 
-- [ ] A valid query matches the intended plugin.
-- [ ] An unsupported query returns an empty result or a clearly handled error.
-- [ ] Track metadata and playable source are resolved independently.
-- [ ] Known direct URLs are accessible from the selected Remedia node.
-- [ ] Legacy extractor compatibility tests cover each retained integration.
-- [ ] Plugin teardown and cancellation complete without stuck promises.
+- [ ] A valid query matches the plugin you expect.
+- [ ] An unsupported query returns an empty result or a handled error.
+- [ ] Track metadata and audio resolve separately.
+- [ ] Direct URLs are reachable from the node that plays them.
+- [ ] Each kept legacy extractor still works.
+- [ ] Removing a plugin finishes without hanging.
 
 ## Queue and controls
 
-- [ ] At least two Tracks play in order.
-- [ ] Pause/resume and volume controls work.
-- [ ] Seek works on sources that support it, and unsupported requests fail cleanly.
-- [ ] Skip advances once, with one `playerSkip`.
-- [ ] Stop retains upcoming Tracks but does not insert history.
-- [ ] Repeat and shuffle follow the intended policy.
-- [ ] Natural completion and failure do not produce duplicate queue transitions.
-- [ ] Filter updates apply without unexpectedly replacing the voice session.
+- [ ] Two tracks play in order.
+- [ ] Pause, resume, and volume work.
+- [ ] Seek works where the source supports it, and fails cleanly where it does not.
+- [ ] Skip advances once and fires one `playerSkip`.
+- [ ] Stop keeps upcoming tracks and leaves history unchanged.
+- [ ] Repeat and shuffle behave as you intend.
+- [ ] A finished or failed track does not advance the queue twice.
+- [ ] Changing filters keeps the voice session.
 
 ## Data and release
 
-- [ ] New serialized Tracks and Playlists deserialize correctly.
-- [ ] Sample v7 records import or are safely quarantined.
-- [ ] Restored Tracks resolve with registered source plugins.
-- [ ] Metrics and logs omit tokens and sensitive signed URLs.
-- [ ] A rollback plan exists for bot commands and the stored entity format.
+- [ ] New tracks and playlists save and restore.
+- [ ] Sample v7 records convert, or land in quarantine.
+- [ ] Restored tracks resolve with your plugins.
+- [ ] Logs and metrics contain no tokens or signed URLs.
+- [ ] You can roll back your commands and your stored data.
 
-## Suggested rollout
+## Roll out
 
-Start with a small test guild and a short set of known audio sources. Log queue lifecycle events and compare the expected queue order against actual playback. Move additional guilds only after the above checks pass.
+Start with one test guild. Log queue events and compare the expected order with what plays. Move more guilds once the checks pass.
 
-For ongoing work, use the [API reference](/docs/reference), [source plugin guide](/docs/plugins), and [error guide](/docs/guides/errors). The [architecture page](/docs/architecture) explains why the underlying behavior changed.
+For later work, use the [API reference](/docs/v8/reference), [source plugins](/docs/v8/plugins), and [error guide](/docs/v8/guides/errors).
 
-<NextStep href="/docs/reference" label="Browse the v8 public API reference" />
+<NextStep href="/docs/v8/reference" label="Browse the API reference" />

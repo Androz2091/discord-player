@@ -1,9 +1,9 @@
 ---
-title: Plugin registration and lifetime
-description: Register sources, handle asynchronous setup and teardown, and cancel in-flight work correctly.
+title: Registration and lifetime
+description: Register and remove plugins, handle asynchronous setup, and clean up correctly.
 ---
 
-Each Player has its own plugin registry. Registration owns the handler subscriptions, cleanup callbacks, and cancellation signal.
+Each Player has its own plugin registry. A registration owns its handlers, its cleanup callbacks, and an abort signal.
 
 ```ts
 import { definePlugin } from 'discord-player';
@@ -22,36 +22,45 @@ const mySource = definePlugin({
       return resolveMedia(track, { signal, resource });
     });
   },
-
-  async destroy() {
-    // Optional. Setup resources also have onCleanup handlers.
-  },
 });
 ```
 
-Here `acquireResource` and `resolveMedia` are **your own implementation functions**. The public lifecycle methods are `setup`, `destroy`, and `onCleanup`.
+`acquireResource` and `resolveMedia` are your functions.
 
-## Register and unregister
+| Lifecycle point     | Use                                       |
+| ------------------- | ----------------------------------------- |
+| `setup(ctx)`        | Create resources and register handlers    |
+| `ctx.onCleanup(fn)` | Release a resource. Runs in reverse order |
+| `destroy(ctx)`      | Optional final teardown                   |
+| `ctx.signal`        | Aborted when the plugin is removed        |
+
+## Register and remove
 
 ```ts
 await player.plugins.register(mySource());
+
 console.log(player.plugins.has('example.network-source'));
 
 await player.plugins.unregister('example.network-source');
 ```
 
-Constructor registrations through `plugins: [mySource()]` use the same host and are initialized before the Player starts. Do not register the same ID twice.
+Plugins passed in the `plugins` constructor option use the same registry. They finish setup before `player.initialize()` completes.
 
-## Teardown guarantees
+Do not register the same ID twice.
 
-When a plugin is unregistered, new dispatches stop using its handlers immediately. The registration's AbortSignal is aborted, in-flight handlers are awaited, then `destroy()` and registered cleanups run in reverse cleanup order.
+## What happens on removal
 
-**Do not await your own registration's removal from inside one of its handlers.** The host waits for active handlers to settle, so self-removal would deadlock.
+1. New requests stop using the plugin.
+2. The registration's signal aborts.
+3. Running handlers finish.
+4. `destroy()` and the cleanup callbacks run.
 
-If setup fails, the host removes subscriptions and attempts resource cleanup. The ID can be reused once teardown completes.
+Do not wait for your own plugin's removal from inside one of its handlers. The registry waits for running handlers, so that would never finish.
 
-## Stream ownership
+If `setup()` throws, the registry removes the handlers and runs cleanup. The ID can be registered again afterward.
 
-A source handler returning a Node.js `Readable` hands playback lifetime to the host. It may destroy the stream on cancellation, plugin removal, or queue termination. Do not share one active Readable among multiple playback sessions.
+## Streams
 
-<NextStep href="/docs/plugins/streams" label="Choose a stream source" />
+When a handler returns a `Readable`, the Player owns it from then on. It may destroy the stream when playback is cancelled, the plugin is removed, or the queue ends. Do not share one active stream between sessions.
+
+<NextStep href="/docs/v8/plugins/operations" label="Operations in depth" />

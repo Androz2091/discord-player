@@ -10,7 +10,7 @@ By default the bot uses the in-process `@remedia/node` addon. Set `REMEDIA_MODE=
 
 The remote server and this bot should use matching Remedia builds. Embedded mode requires FFmpeg 9 shared libraries on the bot host; remote mode requires them only on the server. Local file matches from `MUSIC_DIRECTORY` refer to paths on the bot host, so they are generally not playable by a separate server unless that path is also accessible and allowed on the server. HTTP(S) sources must be allowed by the server's media URL policy.
 
-See [remote installation](../website/content/docs/remedia/remote.mdx) and [voice recovery](../website/content/docs/remedia/voice-recovery.mdx).
+See [remote installation](../website/content/docs/v8/remedia/remote.mdx) and [voice recovery](../website/content/docs/v8/remedia/voice-recovery.mdx).
 
 ## Commands
 

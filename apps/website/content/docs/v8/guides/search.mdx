@@ -1,53 +1,73 @@
 ---
-title: Search routing and protocols
-description: One selector and one dispatcher for local, legacy and hosted metadata.
+title: Search routing
+description: Choose which plugin handles a query, and add custom query prefixes.
 ---
 
-`searchEngine` is the public selector on both `player.search()` and `player.play()`:
+`player.search()` and `player.play()` send a string query to your source plugins. By default the Player picks the plugin with the best match. These options let you choose.
+
+## Pick a plugin
 
 ```ts
 await player.search('some query', { searchEngine: 'example.source' });
+
 await player.play(channel, 'some query', {
   searchEngine: 'example.source',
-  requestedBy: user,
+  requestedBy: userId,
   nodeOptions: { leaveOnEnd: true, leaveOnEndCooldown: 30_000 },
 });
 ```
 
-An exact registered plugin ID forces that provider. `ext:identifier` forces a
-registered legacy extractor; an absent legacy target throws. Other values become
-`providerHint` in the operation input. Omission selects sources automatically.
-Forced providers do not silently fall back. Blocking and cancellation still apply.
-`pluginId`, `source`, nested `searchOptions`, and `queueOptions` were unpublished
-v8 experiments and have been removed. `nodeOptions` retains the released v7 name.
+`searchEngine` accepts:
 
-## Custom protocols
+| Value                  | Effect                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| A registered plugin ID | Only that plugin handles the query                                             |
+| `ext:identifier`       | Only the legacy extractor with that identifier. Throws if it is not registered |
+| Any other string       | Passed to plugins as `providerHint`                                            |
+| Not set                | The Player chooses by priority and score                                       |
 
-Register ownership on the search match and/or resolution handler:
+A forced plugin does not fall back to another one. Blocking and cancellation still apply.
+
+`nodeOptions` holds the queue defaults for a new queue. It is the same name as in v7.
+
+## Custom prefixes
+
+A plugin can own a prefix such as `custom:` by declaring it on its handlers:
 
 ```ts
+import { Track } from 'discord-player';
+
 ctx.on(
   'search.query.resolve',
-  ({ query, protocol }) => ({
-    tracks: [new Track({ title: query, sourceReference: { pluginId: 'example.source', data: { id: query } } })],
+  ({ query }) => ({
     playlist: null,
+    tracks: [
+      new Track({
+        title: query,
+        sourceReference: { pluginId: 'example.source', data: { id: query } },
+      }),
+    ],
   }),
   { protocols: ['custom'] },
 );
 ```
 
-`player.search('custom:resource-id')` passes `resource-id` and protocol `custom`.
-Only registered protocol owners participate, ordered by priority and registration.
-`BaseExtractor.protocols` uses the same mechanism. An explicit selector takes
-precedence and strips the prefix only if that selected handler owns it.
+`player.search('custom:resource-id')` calls this handler with `query` set to `resource-id` and `protocol` set to `custom`.
 
-`resolveCustomProtocols: false` disables prefix handling on search and play. Unknown
-prefixes, HTTP(S)/file URLs and drive paths remain intact. Generic hints are not
-provider IDs. Modern, adapted legacy and HTTP handlers share this normalization.
+- Only plugins that registered the prefix take part. They run by priority, then registration order.
+- URLs starting with `http://`, `https://`, or `file:`, drive paths, and unknown prefixes are left unchanged.
+- With a `searchEngine` set, the prefix is removed only if the chosen plugin owns it.
+- `BaseExtractor.protocols` uses the same mechanism.
 
-## Remote registrations
+Turn prefix handling off with `resolveCustomProtocols: false` on `search()` or `play()`.
+
+## Register a plugin on a remote source host
+
+A [remote source host](/docs/v8/plugins/remote-hosts) is registered with a plugin that has a `remoteHost`:
 
 ```ts
+import { definePlugin } from 'discord-player';
+
 const remoteSource = definePlugin({
   id: 'example.source',
   remoteHost: {
@@ -60,17 +80,14 @@ const remoteSource = definePlugin({
 await player.plugins.register(remoteSource());
 ```
 
-No local setup or duplicate constructor host configuration is required. Registration
-validates the existing service's advertised capabilities; it does not install
-anything remotely. Its metadata handlers join the same dispatcher, with advertised
-priorities unless the descriptor overrides `priority`. Different deployments of
-the same provider remain distinct; `hostId` can explicitly restrict advanced search.
-`plugins.unregister(id, hostId)` removes a particular deployment.
+Registration checks what the host advertises. It does not install anything on the host. Remote providers join the same search as local ones.
 
-Advanced applications may use `player.plugins.registerHost(hostOptions)` to register
-all advertised providers through the same registry. The old `sourceHosts` constructor
-option was removed. Metadata currently uses authenticated direct HTTP, not Remedia
-RPC forwarding. The transport boundary is isolated in plugin-host; future Remedia
-forwarding can replace it without changing search or lyrics APIs.
-The standalone host must advertise the current metadata capabilities. Playback
-continues to use operation sources, deployment affinity and native node capabilities.
+To search one host only, pass `hostId`:
+
+```ts
+await player.search('some query', { hostId: 'deployment-1' });
+```
+
+`player.plugins.unregister(id, hostId)` removes one deployment. Different hosts can run providers with the same ID, and each stays separate.
+
+<NextStep href="/docs/v8/guides/lyrics" label="Add lyrics" />

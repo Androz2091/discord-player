@@ -1,15 +1,17 @@
 ---
 title: Architecture
-description: A detailed map of discord-player v8, Remedia, plugins, queues, and Discord voice delivery.
+description: How Discord Player, plugins, Remedia, and Discord voice fit together.
 ---
 
-v8 is built around **clear ownership**. Discord Player decides _which_ Track should play, plugins resolve _where_ its media lives, and Remedia handles _how_ bytes become audio. This separation lets the same queue API use an embedded engine or a remote audio server.
+This section is for contributors and for developers who want to understand what happens underneath. You do not need it to build a bot.
 
-## The system at a glance
+Discord Player decides which track plays, plugins decide where its audio lives, and Remedia turns that audio into sound on Discord. The split lets one queue API work with an embedded engine or a remote audio server.
+
+## Overview
 
 <ArchitectureDiagram />
 
-The detailed diagram below expands the overview into individual components. Both diagrams are embedded SVGs and work offline in the static docs. Expand **View Mermaid source** below the detailed diagram to copy it into your architecture tooling and modify it.
+## Components in detail
 
 ```mermaid
 flowchart TB
@@ -63,44 +65,46 @@ flowchart TB
   Events --> Queue
 ```
 
-## 1. The application boundary
+## The five boundaries
 
-The Discord library supplies commands, guild/channel IDs, and raw Gateway events. `send()` returns voice-state requests to the right shard; `receive()` takes every raw dispatch; Remedia uses the voice and session packets and ignores the rest. This is why v8 can work with different Discord libraries without shipping separate adapters.
+### 1. Application
 
-## 2. The managed queue boundary
+Your bot supplies commands, guild and channel IDs, and raw gateway packets. `send()` routes voice requests to the right shard. `receive()` takes every packet, and Remedia uses the voice-related ones. Because the contract is plain packets, one Player works with any Discord library.
 
-`Player` owns `GuildNodeManager`, and each `GuildQueue` owns upcoming Tracks, the currently active managed operation, history, repeat/shuffle policy, and serialized transitions. The queue selects the next Track and reconciles native lifecycle events, including out-of-order or duplicated notifications.
+### 2. Managed queue
 
-The queue does **not** decode files or send Discord UDP packets. `queue.node.play()` is intentionally raw Remedia playback and must not be mistaken for the managed scheduling API.
+`Player` owns a `GuildNodeManager`. Each `GuildQueue` owns upcoming tracks, the active playback operation, history, repeat and shuffle, and serialized transitions. It picks the next track and reconciles Remedia events, including duplicated or out-of-order ones.
 
-## 3. The plugin boundary
+The queue never decodes audio or sends UDP packets. `queue.node.play()` is raw Remedia playback. It is not queue scheduling.
 
-`PluginRegistry` dispatches named operations: `search.query.match`, `search.query.resolve`, `track.stream`, related-track lookup, bridging, and local encoded-stream transformation.
+### 3. Plugins
 
-The `BaseExtractor` compatibility adapter translates its supported methods into those same operations. There is no competing legacy dispatcher inside the framework. Stream resolution stays in the application process in the current v8 design; plugins are not automatically shipped to remote audio nodes.
+`PluginRegistry` dispatches named operations such as `search.query.match`, `search.query.resolve`, `track.stream`, `track.related`, `track.bridge`, and `stream.transform`.
 
-## 4. The Remedia client boundary
+The `BaseExtractor` adapter turns legacy methods into the same operations, so there is one dispatcher. Source resolution runs in your bot process. Plugins are not copied to remote audio nodes.
 
-`@remedia/client` maintains guild-to-node affinity, session creation, connected/disconnected state, and playback generations. The selected node is either embedded or remote. Both paths speak to the same Rust playback engine; remote mode adds an authenticated RPC connection and a separate process.
+### 4. Remedia client
 
-## 5. The native engine and voice boundary
+`@remedia/client` keeps guild-to-node affinity, creates sessions, and tracks connection state and playback generations. The selected node is embedded or remote. Both run the same Rust engine, and remote adds an authenticated connection and a separate process.
 
-`remedia-core` opens a source with FFmpeg, decodes/resamples audio, applies filters/volume, and tracks source position. `remedia-discord` handles codec output and Discord voice transport, including the security protocol and UDP delivery. Playback lifecycle events return to the client and then to the owning queue.
+### 5. Engine and voice
 
-## Read the rest in order
+`remedia-core` opens the source with FFmpeg, decodes and resamples it, applies filters and volume, and tracks the source position. `remedia-discord` encodes Opus and delivers it over Discord's encrypted voice transport. Playback events return through the client to the owning queue.
+
+## Read next
 
 <Cards>
   <Card
-    title="Track lifecycle"
-    href="/docs/architecture/lifecycle"
-    description="The sequence from a query to terminal playback and the next Track."
+    title="Playback lifecycle"
+    href="/docs/v8/architecture/lifecycle"
+    description="From a query to the next track."
   />
   <Card
     title="Design decisions"
-    href="/docs/architecture/design-decisions"
-    description="Why the boundaries exist, including trade-offs and known limits."
+    href="/docs/v8/architecture/design-decisions"
+    description="Why the boundaries exist, and the limits."
   />
-  <Card title="Plugins" href="/docs/plugins" description="How source integrations plug into the dispatch system." />
+  <Card title="Source plugins" href="/docs/v8/plugins" description="How plugins join the dispatch system." />
 </Cards>
 
-<NextStep href="/docs/architecture/lifecycle" label="Follow the playback lifecycle" />
+<NextStep href="/docs/v8/architecture/lifecycle" label="Playback lifecycle" />

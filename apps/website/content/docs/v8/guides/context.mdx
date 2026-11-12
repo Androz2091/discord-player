@@ -1,33 +1,45 @@
 ---
 title: Player context
-description: Access a Player, queue, or history inside asynchronous command work without global singletons.
+description: Read the current Player, queue, or history inside a command without passing them around.
 ---
 
-The v8 context uses Node.js `AsyncLocalStorage`. It is scoped to a particular Player instance, so multiple bots or Player instances do not share a global active queue.
+The context uses Node.js `AsyncLocalStorage`. It belongs to one Player, so several Players do not share an active queue.
 
 ```ts
-import { useQueue, useHistory, usePlayer } from 'discord-player';
+import { useHistory, usePlayer, useQueue } from 'discord-player';
 
 await player.context.provide({ guildId }, async () => {
   const activePlayer = usePlayer();
   const queue = useQueue();
   const history = useHistory();
 
-  console.log(activePlayer?.id, queue?.currentTrack?.title, history?.size);
+  console.log(activePlayer.id, queue?.currentTrack?.title, history?.size);
 });
 ```
 
-The scope survives `await` while the provided callback is active. `useMainPlayer()` and `usePlayer()` prefer the scoped Player, otherwise resolve the
-first active registered Player. Destroying that Player advances the fallback to the
-next registered instance. Both throw an actionable missing-context error when no
-Player remains.
+The context stays available across `await` inside the callback.
 
-`useQueue(guildId)` can resolve an explicit guild through that fallback. Without an
-explicit guild or a queue context, queue-dependent hooks return `null` or
-`undefined`; they never infer a guild from global registration.
+## Hooks
 
-Other hooks include `useMetadata()`, `useVolume()`, and `useTimeline()`. These read state from the current queue; they are not native audio callbacks.
+| Hook                                | Returns                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `usePlayer()` and `useMainPlayer()` | The Player in the current context. Otherwise the first active Player. Throws if no Player exists |
+| `useQueue(guildId?)`                | The queue for the context's guild, or for `guildId`. `null` when none exists                     |
+| `useHistory()`                      | The current queue's history, or `null`                                                           |
+| `useMetadata()`                     | Metadata of the context, then of the queue                                                       |
+| `useVolume()`                       | The context volume, then the queue's volume                                                      |
+| `useTimeline()`                     | The context timeline, then the queue's `getTimestamp()`                                          |
 
-Use explicit `player.getQueue(guildId)` for long-lived workers, background jobs, or places where an async context may not exist.
+`useQueue()` without a guild and without a context returns `null`. It never guesses a guild.
 
-<NextStep href="/docs/guides/errors" label="Handle errors and recovery" />
+When a Player is destroyed, the fallback moves to the next active Player.
+
+## Outside a context
+
+Long-running workers and background jobs have no async context. Look up the queue explicitly:
+
+```ts
+const queue = player.getQueue(guildId);
+```
+
+<NextStep href="/docs/v8/guides/persistence" label="Save tracks" />

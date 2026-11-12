@@ -3,39 +3,52 @@ title: 2. Add a source
 description: Play direct audio URLs with a small source plugin.
 ---
 
-Discord Player needs a source plugin to turn a query into playable media. For now, we'll support direct MP3, Ogg, and WAV URLs.
+A source plugin turns a query into tracks and tells the Player where to find the audio. This one accepts direct links to MP3, Ogg, and WAV files.
 
 Create `src/direct-media.ts`:
 
 ```ts title="src/direct-media.ts"
 import { definePlugin, Track } from 'discord-player';
 
+const audioUrl = /^https?:\/\/.+\.(mp3|ogg|wav)(\?.*)?$/i;
+
 export const directMedia = definePlugin({
   id: 'example.direct-media',
-  setup(ctx) {
-    ctx.on('search.query.match', ({ query }) =>
-      /^https?:\/\/.*\.(mp3|ogg|wav)(\?.*)?$/i.test(query) ? { score: 100 } : null,
-    );
 
+  setup(ctx) {
+    // Claim queries that look like audio links.
+    ctx.on('search.query.match', ({ query }) => (audioUrl.test(query) ? { score: 100 } : null));
+
+    // Describe the track for the queue.
     ctx.on('search.query.resolve', ({ query }) => ({
       playlist: null,
       tracks: [
         new Track({
-          title: new URL(query).pathname.split('/').pop() || 'Audio',
+          title: new URL(query).pathname.split('/').pop() || 'Audio file',
           url: query,
         }),
       ],
     }));
 
+    // Return the audio location when the track plays.
     ctx.on('track.stream', ({ track }) => ({ url: track.url }));
   },
 });
 ```
 
-The Player in step 1 already registers this plugin with `plugins: [directMedia()]`. Don't create a second Player.
+## How a query becomes audio
 
-This example accepts direct audio file URLs, not website pages or search terms. **Do not allow untrusted users to submit arbitrary URLs to this example in production.** Validate allowed hosts and redirects and block private-network destinations first.
+| Operation              | When it runs               | What it returns                                              |
+| ---------------------- | -------------------------- | ------------------------------------------------------------ |
+| `search.query.match`   | A string query is searched | A score, or `null` when the plugin does not handle the query |
+| `search.query.resolve` | The plugin won the match   | The tracks to queue                                          |
+| `track.stream`         | A track is about to play   | The URL or file for Remedia to open                          |
 
-Once you're ready to add more providers, see [source plugins](/docs/plugins) and [legacy extractor compatibility](/docs/plugins/legacy-extractors).
+<Callout type="warn" title="Validate URLs in production">
+  This plugin plays any matching link. Before you accept URLs from users, restrict allowed hosts, check redirects, and
+  block private network addresses.
+</Callout>
 
-<NextStep href="/docs/getting-started/play-track" label="3. Play a track" />
+To support real providers, see [source plugins](/docs/v8/plugins).
+
+<NextStep href="/docs/v8/getting-started/play-track" label="3. Play a track" />

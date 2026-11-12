@@ -12,7 +12,7 @@ Node.js 22.18+ and ESM are required. For embedded playback:
 pnpm add discord-player discord.js @remedia/node
 ```
 
-Install [FFmpeg 9 shared libraries](https://discord-player.js.org/docs/installation/ffmpeg) on the machine running audio. Remote-only bot processes do not need FFmpeg locally.
+Install [FFmpeg 9 shared libraries](https://discord-player.js.org/docs/v8/installation/ffmpeg) on the machine running audio. Remote-only bot processes do not need FFmpeg locally.
 
 ## Create a player
 
@@ -41,7 +41,7 @@ client.once(Events.ClientReady, (ready) => {
 });
 ```
 
-The `directMedia` plugin is defined in the [getting-started tutorial](https://discord-player.js.org/docs/getting-started/source-plugin). Source plugins supply playable audio. Discord Player does not automatically register a music provider.
+The `directMedia` plugin is defined in the [getting-started tutorial](https://discord-player.js.org/docs/v8/getting-started/source-plugin). Source plugins supply playable audio. Discord Player does not automatically register a music provider.
 
 Inside your play command, after initialization:
 
@@ -66,9 +66,9 @@ if (queue) {
 
 ## Documentation
 
-- [Getting started](https://discord-player.js.org/docs/getting-started)
-- [Queues and events](https://discord-player.js.org/docs/guides)
-- [Source plugins](https://discord-player.js.org/docs/plugins)
-- [Embedded and remote playback](https://discord-player.js.org/docs/remedia)
-- [Migrating from v7](https://discord-player.js.org/docs/migration)
-- [API reference](https://discord-player.js.org/docs/reference)
+- [Getting started](https://discord-player.js.org/docs/v8/getting-started)
+- [Queues and events](https://discord-player.js.org/docs/v8/guides)
+- [Source plugins](https://discord-player.js.org/docs/v8/plugins)
+- [Embedded and remote playback](https://discord-player.js.org/docs/v8/remedia)
+- [Migrating from v7](https://discord-player.js.org/docs/v8/migration)
+- [API reference](https://discord-player.js.org/docs/v8/reference)

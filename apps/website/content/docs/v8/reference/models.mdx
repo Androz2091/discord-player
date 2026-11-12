@@ -1,11 +1,11 @@
 ---
-title: Models and serialization
-description: Track, Playlist, SearchResult, and portable model persistence.
+title: Models
+description: Track, Playlist, SearchResult, and their storage format.
 ---
 
 ## Track
 
-`Track` stores metadata and a `sourceReference`, not an open native decoder.
+A `Track` holds metadata and a `sourceReference`. It does not hold an open decoder.
 
 ```ts
 import { Track } from 'discord-player';
@@ -18,33 +18,42 @@ const track = new Track({
 });
 ```
 
-Common fields include `id`, `title`, `author`, `url`, `description`, `thumbnail`, `durationMS`, `requestedBy`, `source`, `live`, `playlist`, and `sourceReference`. Compatibility fields include `extractor`, `raw`, and `queryType`, but these are not reliable portable storage.
+| Field                                                | Description                                        |
+| ---------------------------------------------------- | -------------------------------------------------- |
+| `id`                                                 | Unique ID. Generated when omitted                  |
+| `title`, `author`, `description`, `thumbnail`, `url` | Display metadata                                   |
+| `durationMS`, `duration`                             | Duration in milliseconds, and a formatted label    |
+| `requestedBy`                                        | Who requested the track. An ID string or an object |
+| `source`                                             | Provider-defined source name                       |
+| `live`                                               | `true` for live streams                            |
+| `playlist`                                           | The playlist the track came from, or `null`        |
+| `sourceReference`                                    | Portable identity of the source plugin and host    |
+| `lyricsReference`                                    | Portable identity of a preferred lyrics provider   |
+| `extractor`, `raw`, `queryType`                      | v7 compatibility fields. Not safe to store         |
+
+For legacy extractors, `new Track(player, data)` also works.
 
 ## Playlist
 
-`Playlist` contains ordered Tracks and metadata such as title, author, thumbnail, source, URL, and type. It implements `Iterable<Track>`.
+A `Playlist` is an ordered list of tracks with title, author, thumbnail, source, URL, and type. You can iterate it:
 
 ```ts
-for (const track of playlist) {
-  console.log(track.title);
-}
+for (const track of playlist) console.log(track.title);
 ```
 
 ## SearchResult
 
-`player.search()` returns a SearchResult containing `tracks`, an optional `playlist`, and helper accessors such as `first()` and `isEmpty()`. A string query that matches no plugin returns an empty SearchResult rather than an exception.
+`player.search()` returns a `SearchResult` with `tracks`, an optional `playlist`, and helpers such as `first()` and `isEmpty()`. A string that no plugin matches gives an empty result. It does not throw.
 
 ## Storage
 
 ```ts
-import { serialize, deserialize, encode, decode } from 'discord-player';
+import { decode, deserialize, encode, serialize } from 'discord-player';
 
-const encoded = encode(serialize(track));
-const restored = deserialize(decode(encoded));
+const text = encode(serialize(track));
+const restored = deserialize(decode(text));
 ```
 
-Do not treat `toJSON()` as the storage schema. The `Serializable` contract is versioned; `serialize()` validates JSON-safe data and `deserialize()` validates unknown input.
+`serialize()` validates that the data is JSON-safe and `deserialize()` validates unknown input. See [persistence](/docs/v8/guides/persistence) and [migrating saved data](/docs/v8/migration/data).
 
-See [persistence](/docs/guides/persistence) and [data migration](/docs/migration/data) for edge cases.
-
-<NextStep href="/docs/reference/events" label="Event reference" />
+<NextStep href="/docs/v8/reference/remedia" label="Remedia configuration" />

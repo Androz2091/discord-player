@@ -1,49 +1,68 @@
 ---
-title: Plugin operations
-description: Discover exactly how operations dispatch, what constitutes a decline, and how handler priority works.
+title: Operations
+description: How handlers are chosen, ordered, cancelled, and when a handler declines.
 ---
 
-Every handler registers by a typed name. The operation definition decides whether the host stops at the first result, collects results, runs a pipeline, or broadcasts notifications.
+A plugin registers handlers for named operations. Each operation has a dispatch policy that decides how results are combined.
 
 ## Built-in operations
 
-| Operation               | Dispatch policy | Result                                       |
-| ----------------------- | --------------- | -------------------------------------------- |
-| `search.query.match`    | `collect`       | Scored source candidates                     |
-| `search.query.resolve`  | `first`         | Tracks and optional Playlist                 |
-| `track.stream`          | `first`         | Media source, URL, or encoded Readable       |
-| `lyrics.search`         | `collect`       | Optional plain/synchronized lyrics           |
-| `track.related`         | `first`         | Related Tracks                               |
-| `track.bridge`          | `first`         | Explicit fallback stream                     |
-| `stream.transform`      | `pipe`          | Replacement encoded stream passed downstream |
-| `track.stream.resolved` | `broadcast`     | Informational notification                   |
+| Operation               | Policy      | Result                                                        |
+| ----------------------- | ----------- | ------------------------------------------------------------- |
+| `search.query.match`    | `collect`   | Score from each plugin                                        |
+| `search.query.resolve`  | `first`     | Tracks and an optional playlist                               |
+| `track.stream`          | `first`     | A media source                                                |
+| `track.related`         | `first`     | Related tracks for autoplay                                   |
+| `track.bridge`          | `first`     | A fallback source when the track's own provider cannot stream |
+| `stream.transform`      | `pipe`      | A replacement encoded stream                                  |
+| `lyrics.search`         | `collect`   | Lyrics results                                                |
+| `track.stream.resolved` | `broadcast` | Notification only                                             |
 
-These definitions are available from `OperationMap` in `discord-player`.
+## Dispatch policies
 
-## Matching and resolution
+| Policy      | Behavior                                     |
+| ----------- | -------------------------------------------- |
+| `first`     | Use the first result that is not `undefined` |
+| `collect`   | Return all results as a list                 |
+| `pipe`      | Pass each result to the next handler         |
+| `broadcast` | Call every handler. No result                |
+
+## Priority and scores
 
 ```ts
-ctx.on('search.query.match', ({ query }) => (query.startsWith('https://') ? { score: 90 } : null), { priority: 10 });
+ctx.on('search.query.match', ({ query }) => (query.startsWith('https://') ? { score: 90 } : null), {
+  priority: 10,
+});
 ```
 
-The host orders candidates by handler priority first, then match score. Equal rank preserves registration order. Candidates resolve in order until metadata is found. Explicit targeting remains confined to the selected provider. `null` means _no match_ for `search.query.match`.
+Handlers with higher `priority` run first. For equal priority, a higher match `score` wins, then registration order. The Player resolves candidates in that order until one returns tracks.
 
-`undefined` is the only general-purpose decline value in first-result operations. A handler returning `null` or `false` where the operation type allows it is considered a result, not an implicit request to continue.
+## Declining
 
-## Target and filter registrations
+| Return      | Meaning                                                  |
+| ----------- | -------------------------------------------------------- |
+| `undefined` | This handler declines. The next one runs                 |
+| `null`      | A real result of "no match" for operations that allow it |
+| A throw     | A failure. The Player does not try another plugin        |
+
+## Target or block plugins
 
 ```ts
 await player.search(query, { searchEngine: 'example.direct-audio' });
-
-// Legacy targeting syntax remains supported:
-await player.search(query, { searchEngine: 'ext:example.direct-audio' });
+await player.search(query, { searchEngine: 'ext:example.direct-audio' }); // Legacy extractor syntax
 ```
 
-The `blockExtractors` option applies to modern and compatibility source IDs. It affects matching, direct execution, stream resolution, and bridging.
+The `blockExtractors` option disables plugins by ID. It applies to matching, direct execution, stream resolution, and bridging.
+
+```ts
+import { Player } from 'discord-player';
+
+const player = new Player({ blockExtractors: ['example.direct-audio'], send });
+```
 
 ## Cancellation and errors
 
-Each handler receives `{ signal }`. It combines caller cancellation and registration removal. Always cooperate with cancellation for operations that perform I/O:
+Every handler receives `{ signal }`, which aborts when the caller cancels or the plugin is removed. Check it during slow work:
 
 ```ts
 ctx.on('track.stream', async ({ track }, { signal }) => {
@@ -53,6 +72,6 @@ ctx.on('track.stream', async ({ track }, { signal }) => {
 });
 ```
 
-An operation failure rejects with `PluginError` and includes the plugin and operation identity. The host does **not** silently fall through to another source after a genuine error.
+A failing handler rejects with a `PluginError` that names the plugin and operation.
 
-<NextStep href="/docs/plugins/lifecycle" label="Own plugin lifetime correctly" />
+<NextStep href="/docs/v8/plugins/advanced" label="Custom operations" />

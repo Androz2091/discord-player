@@ -3,11 +3,12 @@
   "pages": [
     "index",
     "build-source",
-    "operations",
-    "lifecycle",
     "streams",
-    "legacy-extractors",
+    "lifecycle",
+    "---Advanced---",
+    "operations",
     "advanced",
+    "legacy-extractors",
     "remote-hosts"
   ]
 }

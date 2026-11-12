@@ -1,57 +1,71 @@
 ---
 title: Remedia configuration
-description: Configure embedded/remote engine nodes, inspect status, and understand session boundaries.
+description: Node options for embedded and remote playback.
 ---
 
-The Player receives a Remedia node pool through `DiscordPlayerOptions.nodes`. This is separate from `player.nodes`, which remains an alias for the guild queue manager.
+Pass nodes to the Player with `nodes`. This is separate from `player.nodes`, the queue manager.
 
 ## Embedded node
 
 ```ts
-nodes: [{ type: 'embedded', id: 'local', capacity: 8 }];
+nodes: [{ id: 'local', type: 'embedded', capacity: 8 }];
 ```
 
-An embedded node uses `@remedia/node` directly inside the application and needs FFmpeg 9 shared libraries with ABI majors 63, 63, 61, 12, 7 on that host.
+| Field      | Description                                     |
+| ---------- | ----------------------------------------------- |
+| `id`       | Unique node name                                |
+| `type`     | `'embedded'`                                    |
+| `capacity` | Maximum simultaneous guild sessions. Default 64 |
+
+It uses `@remedia/node` in your process and needs the [FFmpeg 9 shared libraries](/docs/v8/installation/ffmpeg) on that machine.
 
 ## Remote node
 
 ```ts
 nodes: [
   {
-    type: 'remote',
     id: 'audio-1',
+    type: 'remote',
     url: 'remedias://audio.example.com',
     auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
   },
 ];
 ```
 
-A remote node runs the same Rust engine in `remedia-server`. The bot host does not need FFmpeg if it uses only remote nodes. Use TLS and server-side source access controls.
+| Field      | Description                                                                      |
+| ---------- | -------------------------------------------------------------------------------- |
+| `id`       | Unique node name                                                                 |
+| `type`     | `'remote'`                                                                       |
+| `url`      | `remedia://`, `remedias://`, `ws://`, or `wss://`. The path defaults to `/v1/ws` |
+| `auth`     | `{ username, password }` for HTTP Basic authentication. Do not log it            |
+| `capacity` | Overrides the server's reported player maximum for selection                     |
 
-## Player integration
+The bot machine does not need FFmpeg when it only uses remote nodes. Use TLS and server-side access limits. See [remote playback](/docs/v8/remedia/remote).
+
+## Client options
+
+These Player options go to the Remedia client:
+
+| Option               | Default | Description                         |
+| -------------------- | ------- | ----------------------------------- |
+| `requestTimeoutMs`   | 15000   | Timeout for ordinary requests       |
+| `maxPendingRequests` | 128     | Concurrent requests per remote node |
+
+Voice joins use a longer deadline. `connectTimeoutMs` on `queue.connect()` or `player.play()` sets the overall initial join deadline, and channel moves keep their own.
+
+## Inspect nodes
 
 ```ts
-const player = new Player({
-  nodes,
-
-  send: (guildId, packet) => sendToShard(guildId, packet),
-});
-
 await player.initialize(botUserId);
 
-const remedia = player.getRemedia();
-
 console.log(player.nodeSnapshots);
+console.log(player.getRemedia().nodes);
 ```
 
-The bot forwards raw Gateway dispatches with `player.receive(packet)`. The `send` callback must reach the correct owning shard, and must reject instead of silently ignoring a missing guild. `botUserId` scopes sessions and identifies the account for Discord voice; a single server can serve independent bot clients.
+## Placement
 
-## Placement and media limits
+A guild stays on the node it was assigned to. A queue's `selectNode` option influences the first placement. See [node capacity and selection](/docs/v8/remedia/operations).
 
-A guild assignment stays sticky to its selected healthy node. Queue-specific `selectNode` options can influence placement. Embedded mode can consume local binary Readables; remote mode accepts only server-accessible URLs or file paths from discord-player's source resolution.
+For session migration, event generations, and the protocol, see the [Remedia client reference](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/client/overview.mdx).
 
-Remedia gives `voice.connect` a dedicated 80-second client RPC timeout and an overall 100-second initial join deadline. Ordinary RPCs still default to 15 seconds. `connectTimeoutMs` on `queue.connect()` or `player.play()` overrides an initial join deadline; channel moves retain Remedia's internal deadline.
-
-For details on low-level session migration, event generations, reconnection, and protocol, refer to the [Remedia client reference](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/client/overview.mdx).
-
-<NextStep href="/docs/troubleshooting" label="Resolve common issues" />
+<NextStep href="/docs/v8/troubleshooting" label="Troubleshooting" />

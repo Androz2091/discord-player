@@ -1,41 +1,113 @@
 ---
 title: 3. Play a track
-description: Join a voice channel and start audio.
+description: Register a /play command and start the bot.
 ---
 
-In your bot's play command, call `player.play()` with the guild ID, voice channel ID, and a direct audio file:
+Create `src/commands.ts` with a `/play` command, and `src/index.ts` to register and dispatch commands.
 
-```ts
-const result = await player.play(
-  { guildId: interaction.guildId!, channelId: voiceChannel.id },
-  'https://your-media-host.example/song.mp3',
-);
+## The /play command
 
-if (result.track) {
-  console.log('Playing', result.track.title);
-} else {
-  console.log('No matching audio file');
+```ts title="src/commands.ts"
+import {
+  ApplicationCommandOptionType,
+  MessageFlags,
+  type ChatInputApplicationCommandData,
+  type ChatInputCommandInteraction,
+} from 'discord.js';
+import { player } from './player.ts';
+
+export interface Command {
+  data: ChatInputApplicationCommandData;
+  run(interaction: ChatInputCommandInteraction<'cached'>): Promise<unknown>;
 }
+
+const play: Command = {
+  data: {
+    name: 'play',
+    description: 'Play an audio file from a direct link',
+    options: [
+      {
+        name: 'url',
+        description: 'Link to an MP3, Ogg, or WAV file',
+        type: ApplicationCommandOptionType.String,
+        required: true,
+      },
+    ],
+  },
+
+  async run(interaction) {
+    const channel = interaction.member.voice.channel;
+
+    if (!channel) {
+      return interaction.reply({ content: 'Join a voice channel first.', flags: MessageFlags.Ephemeral });
+    }
+
+    // Searching and connecting can take longer than Discord's 3 second reply window.
+    await interaction.deferReply();
+
+    const { track } = await player.play(channel, interaction.options.getString('url', true), {
+      requestedBy: interaction.user.id,
+      nodeOptions: { leaveOnEnd: true, leaveOnEndCooldown: 30_000 },
+    });
+
+    return interaction.editReply(track ? `Queued **${track.title}**` : 'No playable audio found at that link.');
+  },
+};
+
+export const commands: Command[] = [play];
 ```
 
-Use an actual URL for an MP3, Ogg, or WAV file. The example address is a placeholder. `voiceChannel` should be the user's voice channel, resolved using your Discord library. The [Player setup](/docs/getting-started/create-player) must be initialized before playback.
+`player.play()` searches your source plugins, creates the guild's queue, joins the voice channel, and starts playback. `track` is `null` when no plugin matched the query.
 
-## Listen for events
+## Start the bot
 
-Register these once during bot startup:
+```ts title="src/index.ts"
+import { Events, MessageFlags } from 'discord.js';
+import { commands } from './commands.ts';
+import { client, player } from './player.ts';
 
-```ts
+client.once(Events.ClientReady, async (ready) => {
+  await ready.application.commands.set(commands.map((command) => command.data));
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand() || !interaction.inCachedGuild()) return;
+
+  const command = commands.find((entry) => entry.data.name === interaction.commandName);
+
+  if (!command) return;
+
+  try {
+    await command.run(interaction);
+  } catch (error) {
+    console.error(`/${interaction.commandName} failed:`, error);
+
+    const reply = { content: 'Something went wrong.', flags: MessageFlags.Ephemeral } as const;
+
+    if (interaction.deferred || interaction.replied) await interaction.followUp(reply);
+    else await interaction.reply(reply);
+  }
+});
+
 player.events.on('playerStart', (queue, track) => {
-  console.log('Playing', track.title, 'in guild', queue.guildId);
+  console.log(`Now playing ${track.title} in ${queue.guildId}`);
 });
 
 player.events.on('playerError', (queue, error, track) => {
-  console.error('Failed to play', track.title, error);
+  console.error(`Could not play ${track.title}:`, error);
 });
 
-player.on('error', console.error);
+await client.login(process.env.DISCORD_TOKEN);
 ```
 
-`player.play()` creates or reuses a guild queue and connects to the selected voice channel. It does not register a Discord slash command. Your Discord library handles command registration and locating the user's channel.
+## Run it
 
-<NextStep href="/docs/getting-started/next-steps" label="4. Control playback" />
+```bash
+node --env-file=.env src/index.ts
+```
+
+Invite the bot with the `bot` and `applications.commands` scopes and the Connect and Speak permissions. Join a voice channel and run `/play` with a link to an audio file.
+
+Global slash commands can take a few minutes to appear the first time.
+
+<NextStep href="/docs/v8/getting-started/next-steps" label="4. Control playback" />

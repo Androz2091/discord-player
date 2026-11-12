@@ -1,53 +1,53 @@
 ---
-title: Media sources and stream ownership
-description: Select URL, file, and encoded Readable sources that the chosen Remedia node can actually open.
+title: Media sources
+description: Return URLs, files, or streams from track.stream, and know what each kind of node can open.
 ---
 
-A `track.stream` handler must return a playable source, not only Track metadata. The host normalizes acceptable inputs to a Remedia `MediaSource`.
+`track.stream` returns the audio for a track. The Player passes it to Remedia as a media source.
 
-## Supported source shapes
+## Return shapes
 
 ```ts
+// A URL
 ctx.on('track.stream', ({ track }) => ({ url: track.url }));
 
-// Locally available file on the audio host:
+// A file on the machine that runs the audio engine
 ctx.on('track.stream', ({ track }) => ({ file: track.url }));
 
-// Embedded mode only, from a Node.js encoded Readable:
-ctx.on('track.stream', async ({ track }) => ({
-  stream: createEncodedReadable(track),
-}));
+// An encoded Node.js Readable (embedded nodes only)
+ctx.on('track.stream', async ({ track }) => ({ stream: createEncodedReadable(track) }));
 ```
 
-`createEncodedReadable` is your own producer. These snippets show alternative return shapes. Register one appropriate handler per source and keep its behavior explicit.
+`createEncodedReadable` is your own function. These are alternatives, so a handler returns one of them. A plain HTTP(S) string, a file path string, a `Uint8Array`, or a `Readable` is also accepted.
 
-The host also accepts HTTP(S) strings, file-path strings, and encoded Node Readables in appropriate contexts.
+## What each node can open
 
-| Source                     | Embedded node            | Remote node                                    |
-| -------------------------- | ------------------------ | ---------------------------------------------- |
-| HTTP(S) URL                | Supported                | Supported when the server can access it        |
-| File path                  | Supported on bot host    | Supported only when that file exists on server |
-| Encoded Node Readable      | Supported                | Not transferable to remote runtime             |
-| In-memory stream or buffer | Local binding capability | Not part of the remote source protocol         |
+| Source               | Embedded node           | Remote node                                                    |
+| -------------------- | ----------------------- | -------------------------------------------------------------- |
+| HTTP(S) URL          | Yes                     | Yes, if the server can reach it and its media policy allows it |
+| File path            | Yes, on the bot machine | Only if the same file exists on the server                     |
+| `Readable` or buffer | Yes                     | No                                                             |
 
-## Encoded streams, not PCM pipes
+A remote node runs on another machine and cannot read your bot's memory, files, or streams. For remote nodes, return a URL the server can open, or use a [remote source host](/docs/v8/plugins/remote-hosts).
 
-Readable inputs contain encoded media that FFmpeg can demux or decode. They are **not** an invitation to bypass Remedia's decoder with arbitrary PCM or Opus pipe objects from older applications.
+Do not assume a private local file is available on another server.
 
-A `stream.transform` operation can replace an encoded Readable locally. A transform must handle AbortSignal cancellation and should not retain unbounded chunks.
+## Encoded audio only
 
-## Remote source design
+A `Readable` carries encoded audio such as MP3, Ogg, or M4A. Remedia decodes it. A `Readable` is not a place to push raw PCM or Opus frames.
 
-The source plugin host currently runs on the bot side. A remote Remedia node cannot call your local JavaScript source plugin or consume its Node.js Readable directly. Resolve a server-accessible URL or file instead.
+To modify the encoded bytes before decoding, add a `stream.transform` handler. It runs only for local streams, must stop when the signal aborts, and should not keep unbounded chunks in memory.
+
+## Remote-safe URLs
 
 ```ts
 ctx.on('track.stream', async ({ track }, { signal }) => {
   signal.throwIfAborted();
 
-  return { url: await obtainRemoteAccessibleUrl(track) };
+  return { url: await createAccessibleUrl(track, { signal }) };
 });
 ```
 
-`obtainRemoteAccessibleUrl` is application code and must enforce access controls and token expiration. Do not assume private local files are available on another server.
+`createAccessibleUrl` is your function. It should check access rights and return a URL that expires.
 
-<NextStep href="/docs/plugins/legacy-extractors" label="Understand extractor emulation" />
+<NextStep href="/docs/v8/plugins/lifecycle" label="Plugin lifetime" />

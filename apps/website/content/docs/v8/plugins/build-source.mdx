@@ -1,9 +1,9 @@
 ---
 title: Build a source plugin
-description: Implement scored matching, metadata resolution, and a playable media source.
+description: Match queries, resolve track metadata, and return a playable source.
 ---
 
-A source plugin should resolve **both** metadata and playable media. This example handles direct HTTP audio files. It uses real v8 operation names and does not require an extractor subclass.
+A source plugin handles three things: deciding whether it understands a query, describing the tracks, and returning the audio location. This example supports direct links to audio files.
 
 ## Complete example
 
@@ -15,9 +15,9 @@ export const directAudio = definePlugin({
 
   setup(ctx) {
     ctx.on('search.query.match', ({ query }) => {
-      const valid = /^https?:\/\/.*\.(mp3|ogg|wav)(\?.*)?$/i.test(query);
+      const matches = /^https?:\/\/.+\.(mp3|ogg|wav)(\?.*)?$/i.test(query);
 
-      return valid ? { score: 100 } : null;
+      return matches ? { score: 100 } : null;
     });
 
     ctx.on('search.query.resolve', ({ query }) => ({
@@ -34,39 +34,48 @@ export const directAudio = definePlugin({
 });
 ```
 
-Register it when creating the Player:
+Register it with the Player:
 
 ```ts
-const player = new Player({
-  nodes: [{ id: 'local', type: 'embedded' }],
-  plugins: [directAudio()],
+import { Player } from 'discord-player';
 
-  send: (guildId, packet) => sendGateway(guildId, packet),
+const player = new Player({
+  plugins: [directAudio()],
+  send,
 });
 
 await player.initialize(botUserId);
 ```
 
-`sendGateway` is your application's Gateway sender. See the [working discord.js example](/docs/getting-started/create-player).
+`send` is your gateway callback. See [create the player](/docs/v8/getting-started/create-player).
+
+## The three handlers
+
+| Operation              | Purpose                                    | Return                                     |
+| ---------------------- | ------------------------------------------ | ------------------------------------------ |
+| `search.query.match`   | Decide whether this plugin handles a query | `{ score }`, or `null` for no match        |
+| `search.query.resolve` | Produce the tracks for the query           | `{ tracks, playlist }`                     |
+| `track.stream`         | Provide the audio for a track              | A [media source](/docs/v8/plugins/streams) |
+
+When a query arrives, the Player collects the scores from every plugin, picks the highest by priority and score, and asks that plugin to resolve it. The Player attaches a `sourceReference` to each track so it can find the same plugin again at play time.
 
 ## Search and play
 
 ```ts
 const result = await player.search('https://media.example.com/song.mp3');
-const track = result.tracks[0];
 
-if (track) {
+if (!result.isEmpty()) {
   await player.play({ guildId, channelId }, result);
 }
 ```
 
-Search selects one source plugin by priority and match score. The selected source produces Track metadata, and the host attaches a `sourceReference` for portable source identity. At playback time, the host resolves that Track through `track.stream`.
+## Plugin options
 
-## Typed plugin options
-
-For per-registration configuration, use `definePlugin<Options>()`:
+Use `definePlugin<Options>()` when a plugin needs configuration:
 
 ```ts
+import { definePlugin } from 'discord-player';
+
 type Options = { userAgent?: string };
 
 export const configurableSource = definePlugin<Options>({
@@ -77,14 +86,13 @@ export const configurableSource = definePlugin<Options>({
   },
 });
 
-// The factory supplies independent configuration to each Player.
 const registration = configurableSource({ userAgent: 'example-bot/1.0' });
 ```
 
-Avoid global mutable state inside a plugin factory. Use `ctx.options`, `ctx.onCleanup()`, and the registration-local AbortSignal.
+Each call to the factory creates an independent registration. Keep state in `ctx.options` and in `setup()` instead of module-level variables. Use `ctx.onCleanup()` to release resources.
 
-## Production validation
+## Before production
 
-The direct-URL example deliberately has a narrow match rule, but it is not a complete security layer. Validate redirects, private-network targets, media access, and allowed hosts before accepting arbitrary user-supplied URLs.
+A match rule is not a security check. Before you accept URLs from users, enforce an allowed host list, check redirects, and block private network addresses.
 
-<NextStep href="/docs/plugins/operations" label="Understand the operation host" />
+<NextStep href="/docs/v8/plugins/streams" label="Choose a media source" />

@@ -1,69 +1,78 @@
 ---
 title: Troubleshooting
-description: Diagnose installation, source selection, voice transport, and playback problems systematically.
+description: Find the layer that failed and fix installation, source, voice, and playback problems.
 ---
 
-Start by locating the layer that failed. A missing source plugin and a failed native decoder are different problems.
+Find the layer first. A missing source plugin and a native decoder failure are different problems.
 
 ## Installation and native runtime
 
-**Symptom:** `ERR_DLOPEN_FAILED`, missing `.node` addon, `avcodec`/FFmpeg shared library errors, or missing Windows DLLs.
+**Symptom:** `ERR_DLOPEN_FAILED`, a missing `.node` addon, `avcodec` or FFmpeg library errors, or missing Windows DLLs.
 
-**Check:** Node.js version, CPU architecture, platform optional dependencies, and the five required FFmpeg 9 shared library ABI majors (63, 63, 61, 12, 7). Run the [native loading checklist and smoke test](/docs/installation/ffmpeg#troubleshooting). Embedded hosts need the libraries locally; remote-only bot hosts do not.
+**Check:**
 
-## No matching tracks
+- Node.js version and CPU architecture.
+- That optional platform packages were installed.
+- The five FFmpeg 9 shared libraries and their ABI versions (63, 63, 61, 12, 7).
 
-**Symptom:** `player.search(query)` returns no Tracks or a string query never starts playback.
+Run the [smoke test](/docs/v8/installation/ffmpeg#verify-your-installation). Embedded hosts need the libraries locally. A bot that only uses remote nodes does not.
 
-**Check:** `plugins` registrations, the `search.query.match` handler, query protocol, `blockExtractors`, explicit `pluginId`, and `search.query.resolve`. A Track's URL alone does not automatically register a decoder source.
+## No tracks found
 
-## Source fails at playback
+**Symptom:** `player.search(query)` returns no tracks, or a query never starts playback.
 
-**Symptom:** Metadata resolves, but `playerError` fires when the Track is played.
+**Check:** the registered `plugins`, that `search.query.match` accepts the query, the query prefix, `blockExtractors`, `searchEngine`, and `search.query.resolve`. A track URL alone does not register a source.
 
-**Check:** `track.stream` is registered and returns an accessible media source. For remote nodes, the URL/file must be reachable from the audio server, not just the bot. Validate credentials/redirects and codec support. Inspect the associated native error.
+## Playback fails after a track starts
 
-## Voice never becomes connected
+**Symptom:** the track resolves but `playerError` fires when it plays.
 
-**Check:** Guild voice permissions, botUserId, the correct shard in `send`, and forwarding of `VOICE_STATE_UPDATE` and `VOICE_SERVER_UPDATE`. `player.receive()` must run on every raw Gateway dispatch, including `READY`, not just a high-level voice-state callback.
+**Check:** that `track.stream` is registered and returns something playable. For remote nodes, the audio server must be able to reach the URL or file, not only the bot. Check credentials, redirects, and codec support, and read the error attached to the event.
 
-## Concurrent voice joins fail
+## Voice never connects
 
-**Symptom:** one guild joins while others fail with `RemediaRpcError: request_timeout` or Discord voice WebSocket close `4022`.
+**Check:**
 
-**Check:** deploy matching Remedia client and server builds with voice recovery support. The fixed client has a dedicated `voice.connect` deadline and retries eligible initial failures with fresh Gateway credentials. Ordinary `requestTimeoutMs` does not govern voice negotiation. Verify that OP 4 is routed to each guild's shard and that raw voice Gateway events reach `player.receive()`.
+- The bot's permissions in the channel.
+- The user ID passed to `initialize()`.
+- That `send` reaches the shard that owns the guild.
+- That every raw gateway packet, including `READY`, `VOICE_STATE_UPDATE`, and `VOICE_SERVER_UPDATE`, reaches `player.receive()`.
 
-Use `Promise.allSettled` when testing independent guild joins. Correlate gateway joins/leaves with each RPC and voice socket close; `4022` alone does not prove which event caused termination. See [voice recovery and concurrent joins](/docs/remedia/voice-recovery).
+## Several guilds fail to join at once
+
+**Symptom:** one guild joins while the others fail with `request_timeout` or Discord voice close code `4022`.
+
+**Check:** use the same Remedia release for client and server. Confirm that each guild's join request reaches its shard, and that voice packets reach `player.receive()`.
+
+Test with `Promise.allSettled`. See [voice recovery](/docs/v8/remedia/voice-recovery).
 
 ## Playback stops, skips, or repeats unexpectedly
 
-**Check:** Use `queue.play()` for managed Tracks, not `queue.node.play()`. Verify repeat mode and that application event listeners are not manually advancing a queue on `playerFinish`. [Queue lifecycle](/docs/architecture/lifecycle) explains the ownership boundary.
+**Check:**
 
-## Legacy extractor breaks
+- Use `queue.play()` for managed tracks, not `queue.node.play(source)`.
+- Check the repeat mode.
+- Make sure no listener advances the queue from `playerFinish`.
 
-**Check:** Is the registered value a `BaseExtractor` subclass constructor? Does its `stream()` return an encoded media source instead of relying on retired voice pipe objects? If the source uses private `raw.engine`, migrate it to a public URL or a portable `sourceReference`.
+See the [playback lifecycle](/docs/v8/architecture/lifecycle).
 
-## Relevant next steps
+## A legacy extractor breaks
+
+**Check:** that you registered a `BaseExtractor` class, and that `stream()` returns encoded media and not an old voice pipe. If it relies on `raw.engine`, move it to a public URL or a portable `sourceReference`.
+
+## Related pages
 
 <Cards>
   <Card
     title="FFmpeg installation"
-    href="/docs/installation/ffmpeg"
-    description="Platform-specific libraries, native dependencies, and smoke tests."
+    href="/docs/v8/installation/ffmpeg"
+    description="Libraries, platforms, and the smoke test."
   />
-  <Card
-    title="Plugin debugging"
-    href="/docs/plugins/operations"
-    description="Understand matching, priorities, and typed operation errors."
-  />
-  <Card
-    title="Voice debugging"
-    href="/docs/guides/voice"
-    description="Verify raw Gateway packets, identity, and channel moves."
-  />
+  <Card title="Operations" href="/docs/v8/plugins/operations" description="Matching, priority, and plugin errors." />
+  <Card title="Voice" href="/docs/v8/guides/voice" description="Gateway packets, identity, and moves." />
   <Card
     title="Migration checklist"
-    href="/docs/migration/checklist"
-    description="Test all expected lifecycle behaviors before deployment."
+    href="/docs/v8/migration/checklist"
+    description="Verify every lifecycle behavior."
   />
 </Cards>

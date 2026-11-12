@@ -1,43 +1,14 @@
 ---
-title: Event reference
-description: Public Player and GuildQueue events, argument ordering, and terminal semantics.
+title: Events
+description: Every Player and queue event with its arguments, in the order your listener receives them.
 ---
 
-There are two event emitters:
+| Emitter              | Use for                                                    |
+| -------------------- | ---------------------------------------------------------- |
+| `player.events.on()` | Events of one guild queue. The first argument is the queue |
+| `player.on()`        | Player events, and Remedia node and session events         |
 
-- `player.on()` for Player-level `debug`, `error`, and voice-state diagnostics.
-- `player.events.on()` for queue-scoped lifecycle and playback events. The first argument is the owning queue.
-
-## Queue events
-
-| Name                         | Arguments after queue                     |
-| ---------------------------- | ----------------------------------------- |
-| `queueCreate`                | none                                      |
-| `queueDelete`                | none                                      |
-| `connection`                 | none                                      |
-| `connectionDestroyed`        | none                                      |
-| `disconnect`                 | `rawGatewayPacket?`                       |
-| `audioTrackAdd`              | `track`                                   |
-| `audioTracksAdd`             | `tracks`                                  |
-| `audioTrackRemove`           | `track`                                   |
-| `audioTracksRemove`          | `tracks`                                  |
-| `playerStart`                | `track, rawEvent?`                        |
-| `playerFinish`               | `track, rawEvent?`                        |
-| `playerSkip`                 | `track, reason, description, rawEvent?`   |
-| `playerStop`                 | `trackOrNull, rawEvent?`                  |
-| `playerError`                | `error, track, rawEvent?`                 |
-| `playerPause`                | `rawEvent`                                |
-| `playerResume`               | `rawEvent`                                |
-| `playerSeek`                 | `rawEvent`                                |
-| `voiceConnectionStateChange` | `previousState, state, rawEvent`          |
-| `volumeChange`               | `oldPercentage, newPercentage, rawEvent?` |
-| `emptyQueue`, `emptyChannel` | none                                      |
-| `willPlayTrack`              | `track`                                   |
-| `error`                      | `error`                                   |
-
-The exported `GuildQueueEvents` constant contains the canonical string identifiers. Some historic event names are retained for type compatibility, but that does not mean every old DSP pipeline is recreated.
-
-## Example
+The `GuildQueueEvents` constant lists the queue event names.
 
 ```ts
 player.events.on('playerSkip', (queue, track, reason, description) => {
@@ -45,83 +16,119 @@ player.events.on('playerSkip', (queue, track, reason, description) => {
 });
 ```
 
-Treat terminal events separately. A natural finish advances differently from a stop, skip, or failure, and should not be conflated in analytics or music-command responses.
+## Queue events
 
-<NextStep href="/docs/reference/remedia" label="Remedia configuration reference" />
+Arguments are listed after `queue`. A trailing `rawEvent` is the original Remedia event.
 
-## Native event forwarding
+### Queue and tracks
 
-All queue events backed by Remedia append the original typed event as the final
-argument. Application-owned operations have no fabricated native event. Playback
-compatibility events retain the queue-owned Track; raw playback without a managed
-Track is visible through native observation instead.
+| Event                                 | Arguments          |
+| ------------------------------------- | ------------------ |
+| `queueCreate`, `queueDelete`          | none               |
+| `audioTrackAdd`, `audioTrackRemove`   | `track`            |
+| `audioTracksAdd`, `audioTracksRemove` | `tracks`           |
+| `emptyQueue`                          | none               |
+| `willPlayTrack`                       | `track`            |
+| `willAutoPlay`                        | `tracks, done`     |
+| `playerTrigger`                       | `track, reason`    |
+| `debug`                               | `message`          |
+| `error`                               | `error, rawEvent?` |
+
+### Playback
+
+| Event                                       | Arguments                               |
+| ------------------------------------------- | --------------------------------------- |
+| `playerStart`                               | `track, rawEvent?`                      |
+| `playerFinish`                              | `track, rawEvent?`                      |
+| `playerSkip`                                | `track, reason, description, rawEvent?` |
+| `playerStop`                                | `track \| null, rawEvent?`              |
+| `playerError`                               | `error, track, rawEvent?`               |
+| `playerPause`, `playerResume`, `playerSeek` | `rawEvent`                              |
+| `volumeChange`                              | `oldVolume, newVolume, rawEvent?`       |
+| `audioFiltersUpdate`                        | `oldGraph, newGraph, rawEvent?`         |
+
+`willAutoPlay` needs a listener that calls `done(trackOrNull)`. Without a listener the queue picks a track itself. Skipping, stopping, queue changes, and destruction cancel a pending choice and ignore a late `done`.
+
+`willPlayTrack` is informational. To change the source, use a [resource hook](/docs/v8/guides/hooks).
+
+### Voice
+
+| Event                               | Arguments                              |
+| ----------------------------------- | -------------------------------------- |
+| `connection`, `connectionDestroyed` | none                                   |
+| `disconnect`                        | `rawPacket?`                           |
+| `emptyChannel`, `channelPopulate`   | none                                   |
+| `voiceStateUpdate`                  | `previous \| null, current, rawPacket` |
+| `voiceConnectionStateChange`        | `previousState, state, rawEvent`       |
+| `sessionDisposed`                   | `rawEvent`                             |
+
+`voiceStateUpdate` reports Discord member changes. A normalized state has `guildId`, `userId`, `channelId`, and the server mute and suppress flags when available. `previous` is `null` when unknown.
+
+`voiceConnectionStateChange` reports the audio connection. A failed connection emits `error` with the Remedia event as its second argument.
+
+`emptyChannel`, `channelPopulate`, and `disconnect` come from the queue's own voice tracking and do not depend on Remedia.
+
+### Crossfade and staging
+
+| Event                  | Arguments                         |
+| ---------------------- | --------------------------------- |
+| `willPrepareNextTrack` | `track, rawEvent`                 |
+| `stageReady`           | `track \| null, rawEvent`         |
+| `stageFailed`          | `track \| null, error, rawEvent?` |
+| `stageInvalidated`     | `track \| null, rawEvent`         |
+| `transitionCancelled`  | `track \| null, rawEvent`         |
+
+Preparation is informational and can repeat after a cancel or a retry. It starts before the source is resolved. Staging never fires `playerStart`. Promotion does. A staging failure does not mean the current track failed.
+
+A `null` track means the staged track could not be matched reliably.
+
+### Sessions and nodes
+
+| Event                                             | Arguments        |
+| ------------------------------------------------- | ---------------- |
+| `sessionEvent`                                    | `name, rawEvent` |
+| `sessionResumed`, `sessionLost`                   | `rawEvent`       |
+| `guildAssigned`, `guildReleased`, `guildMigrated` | `rawEvent`       |
+
+`sessionEvent` reports every Remedia session event, including stale ones, before the queue processes them. It never changes queue state.
+
+The guild events go only to queues that already exist.
+
+## Native event types
+
+The trailing `rawEvent` types come from `@remedia/client`:
+
+| Queue event                                                                        | Remedia type                                     |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `willPrepareNextTrack`                                                             | `DiscordSessionEvents['prepareRequested'][0]`    |
+| `stageReady`                                                                       | `DiscordSessionEvents['stageReady'][0]`          |
+| `stageFailed`                                                                      | `DiscordSessionEvents['stageFailed'][0]`         |
+| `stageInvalidated`                                                                 | `DiscordSessionEvents['stageInvalidated'][0]`    |
+| `transitionCancelled`                                                              | `DiscordSessionEvents['transitionCancelled'][0]` |
+| `sessionDisposed`                                                                  | `DiscordSessionEvents['sessionDisposed'][0]`     |
+| `audioFiltersUpdate`                                                               | `DiscordSessionEvents['filterChanged'][0]`       |
+| `voiceConnectionStateChange`                                                       | `DiscordSessionEvents['voiceStateChanged'][0]`   |
+| `error` from a voice failure                                                       | `DiscordSessionEvents['voiceFailed'][0]`         |
+| `sessionResumed`, `sessionLost`, `guildAssigned`, `guildReleased`, `guildMigrated` | The matching `RemediaClientEvents` payload       |
+
+Discord Player exports both `DiscordSessionEvents` and `RemediaClientEvents` as types.
+
+Application-owned changes, such as adding a track or `queueCreate`, have no Remedia event, so none is added.
+
+## Remedia events on the player
+
+`player.on()` receives every `RemediaClientEvents` event with its unchanged arguments:
+
+`nodeConnected`, `nodeDisconnected`, `sessionResumed`, `sessionLost`, `nodeEvent`, `eventsLost`, `guildAssigned`, `guildReleased`, `guildMigrated`, plus the Remedia playback and voice session events.
+
+It also emits `debug`, `error`, and `voiceStateUpdate(guildId, packet)`.
 
 ```ts
-player.events.on('volumeChange', (queue, oldVolume, newVolume, rawEvent) => {
-  console.log(queue.guildId, oldVolume, newVolume, rawEvent?.generation);
-});
-
-player.events.on('stageFailed', (queue, track, error, rawEvent) => {
-  console.log(queue.guildId, track?.title, error.message, rawEvent?.entryId);
-});
-
-player.events.on('sessionEvent', (queue, name, rawEvent) => {
-  // Includes notifications rejected by queue generation correlation.
-  console.log(queue.guildId, name, rawEvent.sessionId);
+player.on('nodeDisconnected', ({ node, error }) => {
+  console.warn(`Node ${node.id} disconnected`, error);
 });
 ```
 
-| Queue event                                       | Arguments after queue            | Native payload type                              |
-| ------------------------------------------------- | -------------------------------- | ------------------------------------------------ |
-| `willPrepareNextTrack`                            | `track, rawEvent`                | `DiscordSessionEvents['prepareRequested'][0]`    |
-| `stageReady`                                      | `trackOrNull, rawEvent`          | `DiscordSessionEvents['stageReady'][0]`          |
-| `stageFailed`                                     | `trackOrNull, error, rawEvent?`  | `DiscordSessionEvents['stageFailed'][0]`         |
-| `stageInvalidated`                                | `trackOrNull, rawEvent`          | `DiscordSessionEvents['stageInvalidated'][0]`    |
-| `transitionCancelled`                             | `trackOrNull, rawEvent`          | `DiscordSessionEvents['transitionCancelled'][0]` |
-| `sessionDisposed`                                 | `rawEvent`                       | `DiscordSessionEvents['sessionDisposed'][0]`     |
-| `audioFiltersUpdate`                              | `oldGraph, newGraph, rawEvent`   | `DiscordSessionEvents['filterChanged'][0]`       |
-| `voiceConnectionStateChange`                      | `previousState, state, rawEvent` | `DiscordSessionEvents['voiceStateChanged'][0]`   |
-| `error` from voice failure                        | `error, rawEvent`                | `DiscordSessionEvents['voiceFailed'][0]`         |
-| `sessionResumed`, `sessionLost`                   | `rawEvent`                       | Corresponding `RemediaClientEvents` payload      |
-| `guildAssigned`, `guildReleased`, `guildMigrated` | `rawEvent`                       | Corresponding `RemediaClientEvents` payload      |
+Player events describe the whole client. Queue events describe one guild's queue. They are separate scopes, so a Remedia playback event can appear on both.
 
-Preparation is observational and can occur again after cancellation or retry. It
-runs before source resolution. Staging never emits `playerStart`; native promotion
-starts the incoming Track. A stage failure does not imply the current Track failed.
-A null staging Track means its occurrence could not be correlated reliably.
-
-`sessionEvent(queue, name, rawEvent)` observes all 17 installed session notification
-kinds, including stale generations, before compatibility processing. It does not
-change queue state. After session disposal, owned subscriptions are removed;
-caller-owned session listeners are retained.
-
-All native `RemediaClientEvents` are also available on `player.on()` with their
-unchanged native argument tuples, including `nodeConnected`, `nodeDisconnected`,
-`sessionResumed`, `sessionLost`, `nodeEvent`, `eventsLost`, `guildAssigned`,
-`guildReleased`, and `guildMigrated`. Guild notifications project onto existing
-queues only. No queue is created to deliver a notification. Global native playback
-observations and queue compatibility events represent different scopes.
-
-Volume gain is converted to percentages (including native gains above 1). Generic
-filter changes expose raw previous/current graphs, and do not fabricate equalizer,
-reverb, compressor, or other legacy DSP events. Native notifications also update
-queue configuration defaults. Connected convenience methods rely on native volume
-notifications rather than emitting the same change twice.
-
-`voiceConnectionStateChange` describes Remedia transport recovery. Discord Gateway
-member updates use `voiceStateUpdate(queue, previousOrNull, current, rawPacket)`.
-Normalized state contains guildId, userId, channelId and the available serverMute
-and suppress flags. `emptyChannel`, `channelPopulate` and `disconnect` are emitted
-by the queue-owned Gateway policy tracker, independently of native observation.
-Legacy DSP-specific declarations without implementations have been removed; use
-`audioFiltersUpdate` and the complete raw filter event for native graph changes.
-
-`willAutoPlay(queue, tracks, done)` preserves v7 related-candidate selection. A
-registered listener must eventually call `done(trackOrNull)`; no listener uses the
-default selection. Stop, skip, queue changes and destruction cancel a pending
-selection and ignore its late callback. This is a selection callback contract,
-separate from observational crossfade preparation events.
-
-`willPlayTrack(queue, track)` is observational in v8. The old decoded StreamConfig
-and done latch are replaced by awaited source/resource hooks; no fake decoded
-pipeline object is supplied.
+<NextStep href="/docs/v8/reference/plugins" label="Plugins" />

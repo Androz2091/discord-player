@@ -1,42 +1,47 @@
 ---
 title: Embedded playback
-description: Run Remedia's Rust engine inside your Node.js process with direct native audio calls.
+description: Run the Remedia engine inside your Node.js process.
 ---
 
-Embedded mode is the simplest topology for one bot or a small deployment. `@remedia/client` uses `@remedia/node` through N-API. It does **not** start a local WebSocket server.
+Embedded mode is the simplest setup. `@remedia/client` calls the native engine in `@remedia/node` directly, and no server or WebSocket is involved.
 
 ```ts
-const player = new Player({
-  nodes: [{ type: 'embedded', id: 'local', capacity: 8 }],
+import { Player } from 'discord-player';
 
-  send: (guildId, packet) => sendGateway(guildId, packet),
+const player = new Player({
+  nodes: [{ id: 'local', type: 'embedded', capacity: 8 }],
+  send,
 });
 
 await player.initialize(botUserId);
 ```
 
-The engine performs native decoding and voice transport in the application process while JavaScript manages queues and plugins.
+`capacity` is how many guild sessions the node accepts. The default is 64.
 
-## Before starting
+## Set up
 
-1. Use Node.js 22.18+ with ESM.
-2. Install `discord-player` and the matching `@remedia/node` native addon. See [Remedia bindings](https://github.com/twlite/remedia/tree/main/packages/remedia-node).
-3. Install FFmpeg **9.0.2 shared libraries** with ABI majors **63, 63, 61, 12, 7** on the bot host. The executable alone is insufficient.
-4. Allow optional native platform dependencies during package installation.
-5. Test loading and decoding using the [FFmpeg smoke test](/docs/installation/ffmpeg#nodejs-smoke-test).
+1. Use Node.js 22.18 or newer with ESM.
+2. Install `discord-player` and `@remedia/node`.
+3. Install the [FFmpeg 9 shared libraries](/docs/v8/installation/ffmpeg) on the bot machine. The `ffmpeg` executable alone is not enough.
+4. Allow optional platform packages during installation, so the native binary for your platform is installed.
+5. Run the [smoke test](/docs/v8/installation/ffmpeg#verify-your-installation).
 
-The source plugin can return a local encoded `Readable` or buffer in this mode because the native decoder shares the same host.
+## What embedded nodes allow
 
-## Resource planning
+Because the engine runs in your process, a source plugin can return a local encoded `Readable` or a buffer. A [remote node](/docs/v8/remedia/remote) cannot use those.
 
-Each concurrent player has its own playback and voice state. Size node capacity according to actual CPU and memory usage for your codecs, filters, and song mix, not just the queue length. An embedded engine still needs error handling and orderly shutdown.
+## Plan capacity
+
+Each active guild has its own playback and voice session. Size `capacity` from measured CPU and memory use with your codecs, filters, and crossfade, not from how long queues are.
+
+Shut down cleanly so the native sessions are released:
 
 ```ts
-await player.destroy(); // Release queues and the Remedia client
+await player.destroy();
 ```
 
-<NextStep href="/docs/remedia/remote" label="Deploy remote Remedia when needed" />
+## Crossfade
 
-## Automatic crossfading
+Set `crossfade` on the Player or a queue. Embedded sessions receive the setting directly. See [crossfade](/docs/v8/guides/crossfade).
 
-Set `crossfade: { enabled: true }` on the Player or queue before connecting. Embedded sessions receive this policy directly. PCM decoding and overlapping mixing can cost more processing than Opus passthrough. See the [crossfade guide](/docs/guides/crossfade).
+<NextStep href="/docs/v8/remedia/remote" label="Remote playback" />

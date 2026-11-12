@@ -1,9 +1,9 @@
 ---
-title: Plugin API
-description: The public definition, registration, operations, and compatibility contracts.
+title: Plugins
+description: Plugin definitions, the registry, and the built-in operations.
 ---
 
-Capability plugins are defined with `definePlugin<Options>(definition)` and registered with `player.plugins`.
+Define a plugin with `definePlugin<Options>(definition)` and register it with `player.plugins` or the `plugins` option.
 
 ```ts
 import { definePlugin } from 'discord-player';
@@ -17,41 +17,52 @@ const source = definePlugin({
 });
 ```
 
-## Definitions
+## Definition
 
-| Field                                  | Type                    | Purpose                                   |
-| -------------------------------------- | ----------------------- | ----------------------------------------- |
-| `id`                                   | `string`                | Provider identifier, scoped by deployment |
-| `setup?(ctx)`                          | `void \| Promise<void>` | Register operation handlers               |
-| `destroy?(ctx)`                        | `void \| Promise<void>` | Optional teardown                         |
-| `ctx.options`                          | `Options`               | Registration-local configuration          |
-| `ctx.signal`                           | `AbortSignal`           | Aborted on removal                        |
-| `ctx.on(operation, handler, options?)` | `() => void`            | Register a typed handler                  |
-| `ctx.onCleanup(fn)`                    | `void`                  | Register owned cleanup                    |
+| Field           | Type                                  | Description                                                                         |
+| --------------- | ------------------------------------- | ----------------------------------------------------------------------------------- |
+| `id`            | `string`                              | Provider ID                                                                         |
+| `setup?(ctx)`   | `void \| Promise<void>`               | Register handlers                                                                   |
+| `destroy?(ctx)` | `void \| Promise<void>`               | Optional teardown                                                                   |
+| `priority?`     | `number`                              | Default handler priority, or an override of a remote host's priorities              |
+| `remoteHost?`   | `{ hostId, url, token?, timeoutMs? }` | Use a [remote source host](/docs/v8/plugins/remote-hosts) instead of local handlers |
 
-A `remoteHost` descriptor may supply `{ hostId, url, token?, timeoutMs? }` instead of
-local setup. `priority` supplies default local priority or overrides advertised
-remote priorities. Lyrics-only plugins need no source operations.
+A plugin that only provides lyrics needs no source operations.
+
+## Setup context
+
+| Member                                 | Description                                             |
+| -------------------------------------- | ------------------------------------------------------- |
+| `ctx.options`                          | Options for this registration                           |
+| `ctx.signal`                           | Aborted when the plugin is removed                      |
+| `ctx.on(operation, handler, options?)` | Registers a handler. Returns a function that removes it |
+| `ctx.onCleanup(fn)`                    | Registers cleanup that runs in reverse order            |
+
+Handler `options` are `{ priority?, protocols? }`.
 
 ## Registry
 
-| Method                                | Contract                                            |
-| ------------------------------------- | --------------------------------------------------- |
-| `register(registration)`              | Register and await plugin setup                     |
-| `unregister(id, hostId?)`             | Abort/await handlers and cleanup; returns `boolean` |
-| `has(id)`                             | Registration present?                               |
-| `ready()`                             | Wait for registrations                              |
-| `execute(operation, input, options?)` | Dispatch typed operation                            |
-| `resolveStream(track, options?)`      | Return normalized Remedia MediaSource               |
-| `defineOperation(name, policy)`       | Register a custom operation policy                  |
-| `destroy()`                           | Release all owned registrations                     |
+`player.plugins`:
+
+| Method                                | Description                                                           |
+| ------------------------------------- | --------------------------------------------------------------------- |
+| `register(registration)`              | Registers a plugin and waits for `setup()`                            |
+| `unregister(id, hostId?)`             | Removes a plugin and returns `true` if it existed                     |
+| `has(id, hostId?)`                    | Whether a plugin is registered                                        |
+| `hasHost(hostId)`                     | Whether a source host is registered                                   |
+| `registerHost(options)`               | Registers every provider a source host advertises                     |
+| `ready()`                             | Waits for pending registrations                                       |
+| `execute(operation, input, options?)` | Runs an operation                                                     |
+| `resolveStream(track, options?)`      | Returns the media source for a track                                  |
+| `defineOperation(name, policy)`       | Adds an operation. See [custom operations](/docs/v8/plugins/advanced) |
+| `destroy()`                           | Releases every registration                                           |
 
 ## Operations
 
-`search.query.match`, `search.query.resolve`, `track.stream`, `lyrics.search`, `track.related`, `track.bridge`, `stream.transform`, and `track.stream.resolved` are the built-in typed operations. See [dispatch behavior](/docs/plugins/operations) for their policies.
+`search.query.match`, `search.query.resolve`, `track.stream`, `track.related`, `track.bridge`, `stream.transform`, `lyrics.search`, and `track.stream.resolved`. Their dispatch policies are in [operations](/docs/v8/plugins/operations#built-in-operations).
 
-## Compatibility
+## v7 extractors
 
-`BaseExtractor` subclasses can be registered via `player.extractors.register(MyExtractor)`. A compatibility wrapper maps supported methods to this same host. There is **no** separate extractor execution pipeline.
+`player.extractors.register(MyExtractor)` adapts a `BaseExtractor` class to this registry. There is no separate extractor pipeline. See [v7 extractors](/docs/v8/plugins/legacy-extractors).
 
-<NextStep href="/docs/reference/models" label="Track and Playlist models" />
+<NextStep href="/docs/v8/reference/models" label="Models" />

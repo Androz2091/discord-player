@@ -1,19 +1,22 @@
 {
-  "title": "Core guides",
+  "title": "Guides",
   "pages": [
     "index",
+    "---Playback---",
     "queues",
     "playback-controls",
+    "history",
+    "filters",
     "crossfade",
+    "---Events and voice---",
     "events",
     "voice",
-    "filters",
-    "history",
-    "persistence",
+    "errors",
+    "---Advanced---",
     "search",
     "lyrics",
     "hooks",
     "context",
-    "errors"
+    "persistence"
   ]
 }

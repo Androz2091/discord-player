@@ -1,75 +1,95 @@
 ---
 title: Remote playback
-description: Connect discord-player to remedia-server without installing FFmpeg on the bot host.
+description: Run Remedia on another machine and connect your bot to it.
 ---
 
-A remote node runs the **same Remedia engine** in a separate Rust service. Your bot still owns Discord Gateway events and source plugins; the server owns audio decoding, playback state, and voice output.
+A remote node is the same engine running in `remedia-server`. Your bot still owns the Discord gateway connection and source plugins. The server decodes audio and sends it to Discord voice, so the bot machine does not need FFmpeg.
+
+## Connect the bot
 
 ```ts
+import { Player } from 'discord-player';
+
 const player = new Player({
   nodes: [
     {
       id: 'audio-1',
       type: 'remote',
       url: 'remedias://audio.example.com',
-      auth: {
-        username: 'bot',
-        password: process.env.REMEDIA_PASSWORD!,
-      },
+      auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
     },
   ],
-
-  send: (guildId, packet) => sendGateway(guildId, packet),
+  send,
 });
 
 await player.initialize(botUserId);
 ```
 
-`remedia://` maps to WebSocket, `remedias://` to secure WebSocket. A missing endpoint path defaults to `/v1/ws`. Standard `ws://` and `wss://` URLs are also supported.
+| URL scheme        | Connects with    |
+| ----------------- | ---------------- |
+| `remedia://`      | WebSocket        |
+| `remedias://`     | Secure WebSocket |
+| `ws://`, `wss://` | Also accepted    |
 
-## Deploy the server
+When the URL has no path, `/v1/ws` is used. The server listens on `127.0.0.1:8787` by default.
 
-Install the [matching Remedia server release](https://github.com/twlite/remedia/releases) on the audio host, not on the bot host. Use the official [server installation guide](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/installation.mdx). The standalone CLI supports:
+## Run the server
 
-```sh
+Install the [matching Remedia release](https://github.com/twlite/remedia/releases) on the audio machine, following the [server installation guide](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/installation.mdx).
+
+```bash
 remedia-server --generate-config-file
 remedia-server doctor --config ./remedia.config.json --env-file .env
 remedia-server serve --config ./remedia.config.json --env-file .env
-remedia-server --list
 ```
 
-The generated configuration denies playback URLs and file paths until you authorize sources. Set the referenced password in `.env`. The `--env-file` argument requires an existing file; `--optional-env-file` ignores a missing file. Neither loads values into the process-global environment.
+| Command                  | Purpose                                                                     |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `--generate-config-file` | Writes a starter `remedia.config.json` without overwriting an existing file |
+| `doctor`                 | Checks the FFmpeg 9 libraries and the configuration                         |
+| `serve`                  | Starts the server                                                           |
+| `--list`                 | Shows Remedia servers running on this machine for the current user          |
 
-The lightweight administrative CLI can run without FFmpeg. Native `serve` and `doctor` still require FFmpeg **9** shared libraries on the server. `--list` discovers running Remedia processes for the same local OS user and reports their health, resource counts, and listening ports; it is not a LAN scanner or process manager.
+The generated configuration denies all media URLs and files until you allow them. Put the password in `.env` and reference it from the configuration. `--env-file` requires the file to exist, and `--optional-env-file` does not.
 
-## Connection timing
+`serve` and `doctor` need the FFmpeg 9 libraries on the server. The `--list` command does not.
 
-Remedia uses a dedicated 80-second `voice.connect` client RPC timeout and allows 75 seconds on the server, independent of regular RPC timeout settings. The default overall join deadline is 100 seconds.
+For configuration and deployment details, see the Remedia [configuration reference](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/configuration.mdx) and [deployment guide](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/deployment.mdx).
+
+<Callout type="warn" title="Protect the server">
+  Put TLS in front of a server that is reachable over a network, restrict which media sources it may open, and never
+  expose it without authentication.
+</Callout>
+
+## What a remote node can play
+
+| Source                                                             | Works                                        |
+| ------------------------------------------------------------------ | -------------------------------------------- |
+| A URL the server can reach and its policy allows                   | Yes                                          |
+| A file path that exists on the server and is allowed               | Yes                                          |
+| A track from a [remote source host](/docs/v8/plugins/remote-hosts) | Yes. Audio flows from the host to the server |
+| A local `Readable`, a buffer, or a file only on the bot            | No                                           |
+
+Source plugins on the bot should return a URL the server can open. See [media sources](/docs/v8/plugins/streams).
+
+## Join timeouts
+
+A voice join has its own deadlines, separate from normal requests:
 
 ```ts
 await queue.connect({ channelId, connectTimeoutMs: 120_000 });
 ```
 
-Do not globally serialize guild joins to avoid timeouts. Each guild has an independent session. Read [voice recovery and concurrent joins](/docs/remedia/voice-recovery) before changing connection settings.
+Do not serialize guild joins to avoid timeouts. Each guild has an independent session. Read [voice recovery](/docs/v8/remedia/voice-recovery) before you change timeouts.
 
-## Server setup details
+## Reconnects and affinity
 
-Install compatible FFmpeg libraries **on the remote machine**. Start an authenticated `remedia-server` with its `remedia.config.json`; see the [server configuration reference](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/configuration.mdx) and [deployment guide](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/deployment.mdx).
+A guild stays on the node it was assigned to. When the connection drops, the client reconnects and tries to resume its sessions. A lost session is not a finished track, so watch the `sessionLost` and `sessionResumed` events and recover on purpose.
 
-For a public network, put TLS in front of the service, restrict source access, and protect credentials. Never expose your server with anonymous playback privileges.
+The Remedia client can move a session to another node, but the move may need to reconnect and reopen the audio. Do not expect gapless transfers or automatic load shedding from Discord Player.
 
-## What can be streamed remotely?
+## Crossfade
 
-For local source registrations, return a server-accessible URL or an allowed file path. For standalone execution, configure [remote source hosts](/docs/plugins/remote-hosts); their Tracks become generic Remedia operation sources and encoded media flows directly from the host to the audio node. A local Node.js `Readable`, private buffer, or local-only path cannot be transported through this source API. [Source plugins](/docs/plugins/streams) should resolve a URL the remote server can open.
+The server must have crossfade enabled and must report `capabilities.crossfade.available`. If it does not, the guild plays without crossfade and the Player emits a `debug` message. See [crossfade](/docs/v8/guides/crossfade#embedded-and-remote-nodes).
 
-## Recovery and affinity
-
-Remedia assigns sessions to healthy nodes and keeps a guild sticky to its node. Remote connections attempt reconnect and session resumption. A missing or expired session is not equivalent to a clean, completed Track; observe diagnostics and recover deliberately.
-
-Connected Remedia sessions have an explicit cross-node migration operation in the engine client, but a cutover may require reconnecting and reopening audio. Do not assume a gapless decoder transfer or automatic load shedding in discord-player.
-
-<NextStep href="/docs/remedia/operations" label="Understand capacity and failure behavior" />
-
-## Crossfade capability negotiation
-
-Use a Remedia build with server crossfading enabled. The selected node must advertise `capabilities.crossfade.available`; the guild must also opt in at session creation. Unsupported nodes fall back to ordinary playback with a debug message. Existing sticky assignments are retained. See the [crossfade guide](/docs/guides/crossfade).
+<NextStep href="/docs/v8/remedia/operations" label="Node capacity and selection" />

@@ -1,103 +1,107 @@
 ---
-title: GuildQueue and playback node
-description: Queue methods, result contracts, raw node operations, and state semantics.
+title: GuildQueue and node
+description: Queue options, methods, state, and the playback node.
 ---
 
-`GuildQueue` owns application-level playback scheduling. `GuildQueuePlayerNode` provides controls over the underlying Remedia session.
+`GuildQueue` schedules tracks. `queue.node` is a `GuildQueuePlayerNode` that controls the Remedia session.
 
-## Create, connect, play
+## Queue options
 
 ```ts
-const queue = await player.createQueue(guildId, {
-  maxSize: 100,
-  maxHistorySize: 50,
-  metadata: { textChannelId },
-});
-
-await queue.connect({ channelId, volume: 75, connectTimeoutMs: 120_000 });
-await queue.play(track);
+const queue = await player.createQueue(guildId, { maxSize: 100, metadata: { textChannelId } });
 ```
 
-## Queue methods
+| Option                                                              | Description                                                                |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `metadata`                                                          | Your data, stored on the queue                                             |
+| `maxSize`, `maxHistorySize`                                         | Limits for upcoming and past tracks. Zero or less means unlimited          |
+| `disableHistory`                                                    | Do not record history                                                      |
+| `repeatMode`                                                        | Initial [repeat mode](/docs/v8/guides/queues#repeat-modes)                 |
+| `volume`                                                            | Initial volume percentage, 0 to 200                                        |
+| `filterGraph`                                                       | Raw FFmpeg graph for new sessions                                          |
+| `selfDeaf`, `selfMute`                                              | Initial voice flags                                                        |
+| `crossfade`                                                         | [Crossfade](/docs/v8/guides/crossfade) for this queue. `false` disables it |
+| `selectNode`                                                        | Chooses the Remedia node for the first session                             |
+| `leaveOnEmpty`, `leaveOnEnd`, `leaveOnStop`                         | [Leave policies](/docs/v8/guides/voice#leave-and-pause-automatically)      |
+| `leaveOnEmptyCooldown`, `leaveOnEndCooldown`, `leaveOnStopCooldown` | Delay in milliseconds                                                      |
+| `pauseOnEmpty`                                                      | Pause when the channel is confirmed empty                                  |
+| `onBeforeCreateStream`, `onStreamExtracted`, `onAfterCreateStream`  | [Resource hooks](/docs/v8/guides/hooks)                                    |
 
-| Method                                                  | Purpose                                       |
-| ------------------------------------------------------- | --------------------------------------------- |
-| `addTrack(trackOrArrayOrPlaylist)`                      | Append future Tracks                          |
-| `addTracks(tracks)`                                     | Append multiple Tracks                        |
-| `prepend(...)`, `append(...)`, `insertTrack(...)`       | Reorder upcoming Tracks                       |
-| `removeTrack(...)`, `moveTrack(...)`, `swapTracks(...)` | Modify future ordering                        |
-| `play(resource, options?)`                              | Queue-managed playback                        |
-| `playNext()`                                            | Start next upcoming Track when idle           |
-| `skip(reason?)`, `skipTo(...)`, `jump(...)`             | Managed navigation                            |
-| `stop()`                                                | Stop managed playback, retain upcoming Tracks |
-| `connect(options)`                                      | Connect/move channel through Remedia          |
-| `setSelfDeaf(bool)`, `setSelfMute(bool)`                | Update voice flags                            |
-| `destroy()`, `delete()`                                 | Release queue resources                       |
-| `clear()`                                               | Clear upcoming Tracks and history             |
+Options apply when the queue is created.
 
-## Connection deadline
+## Methods
 
-`connectTimeoutMs` is optional and applies to a new voice join or an explicit reconnect. Remedia defaults to 100 seconds. It does not change the independent 80-second `voice.connect` RPC deadline or a channel move's internal timeout. `player.play(channel, resource, { connectTimeoutMs })` forwards the same option. See [voice recovery](/docs/remedia/voice-recovery).
+| Method                                                        | Description                                                        |
+| ------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `connect(options)`                                            | Join or move to `options.channelId`                                |
+| `play(resource, options?)`                                    | Queue a track, batch, playlist, or search result and start if idle |
+| `playNext()`                                                  | Start the next upcoming track when idle                            |
+| `skip(reason?, description?)`                                 | Skip the current track. Returns the next track or `null`           |
+| `skipTo(target)`, `jump(target)`                              | Skip to an upcoming track                                          |
+| `stop()`                                                      | Stop playback and keep upcoming tracks                             |
+| `destroy()`, `delete()`                                       | Stop, leave voice, and remove the queue                            |
+| `addTrack(trackOrPlaylist)`, `addTracks(tracks)`              | Add to the end                                                     |
+| `prepend()`, `append()`, `insertTrack()`                      | Add at a position                                                  |
+| `removeTrack()`, `moveTrack()`, `swapTracks()`, `copyTrack()` | Change upcoming tracks                                             |
+| `clear()`                                                     | Remove upcoming tracks and history                                 |
+| `setSelfDeaf(enabled)`, `setSelfMute(enabled)`                | Voice flags                                                        |
+| `enableShuffle()`, `disableShuffle()`, `toggleShuffle()`      | Shuffle                                                            |
+| `setRepeatMode(mode)`                                         | Set the repeat mode                                                |
+| `setMaxSize(n)`, `setMaxHistorySize(n)`                       | Change limits                                                      |
 
-## Queue state
+`connect()` options extend the Remedia session options and add `connectTimeoutMs`. The initial join deadline defaults to 100 seconds.
 
-| Property       | Value                                   |
-| -------------- | --------------------------------------- |
-| `guildId`      | Owning guild ID                         |
-| `currentTrack` | Active or paused Track or `null`        |
-| `tracks`       | Upcoming Track collection               |
-| `size`         | Upcoming Track count, excludes current  |
-| `history`      | Previous-track manager                  |
-| `node`         | GuildQueuePlayerNode                    |
-| `metadata`     | App-defined metadata                    |
-| `repeatMode`   | OFF, TRACK, QUEUE, AUTOPLAY             |
-| `isShuffling`  | Shuffle state                           |
-| `isPlaying()`  | Managed active status (includes paused) |
+## State
+
+| Property                            | Description                                                       |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| `guildId`                           | The guild ID                                                      |
+| `currentTrack`                      | The playing or paused track, or `null`                            |
+| `tracks`                            | Upcoming tracks                                                   |
+| `size`, `maxSize`, `maxHistorySize` | Counts and limits. `size` excludes the current track              |
+| `estimatedDuration`                 | Duration of upcoming tracks in milliseconds                       |
+| `history`                           | The history manager                                               |
+| `node`                              | The playback node                                                 |
+| `metadata`                          | Your data                                                         |
+| `repeatMode`, `isShuffling`         | Repeat and shuffle state                                          |
+| `isPlaying()`                       | `true` while playing, including when paused                       |
+| `filters`                           | Same as `node.filters`                                            |
+| `syncedLyrics`                      | [Synchronized lyrics](/docs/v8/guides/lyrics#synchronized-lyrics) |
+| `stats`                             | Counters for finished and failed tracks                           |
+| `signal`                            | `AbortSignal` that aborts as soon as `destroy()` starts           |
 
 ## Lifetime signal
 
-`queue.signal` is a read-only `AbortSignal` for this queue instance. It aborts
-synchronously when `queue.destroy()` or `queue.delete()` begins, including deletion
-through the Player or its queue manager. Player destruction also destroys its
-managed queues. The signal remains aborted even if asynchronous cleanup fails.
-Await the destruction promise to wait for cleanup to finish.
+`queue.signal` aborts when `queue.destroy()` or `queue.delete()` starts, including when the Player destroys the queue. It stays aborted if cleanup fails. Stopping, skipping, pausing, or replacing a session does not abort it. A new queue for the same guild gets a new signal.
 
-Stopping, skipping, pausing, or replacing a voice session does not end the queue's
-lifetime. Recreating a deleted guild queue gives the new instance a fresh signal.
+Pass it to cancellable APIs, or listen with `{ once: true }`. Before you work with a stored queue, call `queue.signal.throwIfAborted()`.
 
-Consumers can pass the signal to cancellable APIs or register an `abort` listener
-with `{ once: true }` for their own cleanup. Before starting work against a retained
-queue reference, check `queue.signal.aborted` or call `queue.signal.throwIfAborted()`.
-
-## Node/session API
+## Playback node
 
 ```ts
 await queue.node.pause();
-await queue.node.resume();
 await queue.node.seek(15_000);
 await queue.node.setVolume(80);
-await queue.node.filters.set(['8d', 'nightcore']);
-
-const session = queue.node.getSession();
-
-console.log(session.nodeId);
 ```
 
-| Node method/property                     | Meaning                                                          |
-| ---------------------------------------- | ---------------------------------------------------------------- |
-| `play(source, options?)`                 | Track input: managed scheduling; native descriptor: raw playback |
-| `stopSession()`                          | Stop raw session audio                                           |
-| `pause()`, `resume()`, `setPaused(bool)` | Raw playback state                                               |
-| `seek(ms)`, `setVolume(percent)`         | Raw timing and gain controls                                     |
-| `playbackTime`, `totalDuration`          | Output elapsed time (Remedia clock) and source duration, in ms   |
-| `getTimestamp()`, `createProgressBar()`  | Display helpers                                                  |
-| `isIdle()`, `isPlaying()`, `isPaused()`  | Raw session status                                               |
-| `filters`                                | Named/raw FFmpeg filtergraph API                                 |
+| Member                                     | Description                                                                 |
+| ------------------------------------------ | --------------------------------------------------------------------------- |
+| `pause()`, `resume()`, `setPaused(paused)` | Playback state                                                              |
+| `seek(ms)`                                 | Seek to a position                                                          |
+| `setVolume(percent)`                       | 0 to 200                                                                    |
+| `volume`                                   | Current volume percentage                                                   |
+| `playbackTime`, `streamTime`               | Elapsed playback time in milliseconds                                       |
+| `totalDuration`                            | Track duration in milliseconds                                              |
+| `getTimestamp()`                           | `{ current, total, progress }` or `null`                                    |
+| `createProgressBar(options?)`              | Text progress bar                                                           |
+| `isIdle()`, `isPlaying()`, `isPaused()`    | Session status                                                              |
+| `filters`                                  | [Audio filters](/docs/v8/guides/filters)                                    |
+| `getSession()`                             | The Remedia session. Throws without one. `getSession(false)` returns `null` |
+| `play(track, options?)`                    | Managed playback of a track. With no argument, starts the next track        |
+| `play(source)`                             | Raw playback of a Remedia media source. It does not use the queue           |
+| `stopSession()`                            | Stop the raw session audio                                                  |
+| `skip()`, `skipTo()`, `jump()`, `stop()`   | Delegates to the queue                                                      |
 
-The managed queue serializes conflicting transitions and correlates playback generations. Prefer its methods for user commands.
+Prefer the queue methods for commands. They keep history, repeat, and events consistent.
 
-<NextStep href="/docs/reference/plugins" label="Plugin API reference" />
-
-## Crossfade configuration
-
-`GuildQueueOptions.crossfade` overrides `DiscordPlayerOptions.crossfade`. The type is `false | { enabled: true; durationMs?: number; prepareBeforeMs?: number; curve?: "equalPower" }`. Defaults are disabled, 5000 ms overlap, and 30000 ms preparation lead before the fade. Configuration changes apply to newly created sessions. See the [crossfade guide](/docs/guides/crossfade).
+<NextStep href="/docs/v8/reference/events" label="Events" />

@@ -1,46 +1,57 @@
 ---
 title: Audio filters
-description: Apply named FFmpeg presets or raw filtergraphs through Remedia without manipulating stream pipes.
+description: Apply named presets or raw FFmpeg filtergraphs to a queue.
 ---
 
-`queue.node.filters` holds the current graph configuration. It supports v8's named compatibility presets plus direct FFmpeg filtergraphs.
+`queue.node.filters` changes the sound of the current session. It accepts named presets and raw FFmpeg filtergraphs.
 
 ```ts
 const filters = queue.node.filters;
 
-await filters.set(['8d', 'nightcore']);
-console.log(filters.enabled); // Canonical preset names
-console.log(filters.graph); // Generated filtergraph
-
-await filters.toggle('nightcore');
-await filters.remove('8d');
-await filters.setRaw('volume=0.8');
+await filters.set(['bassboost', 'nightcore']); // Replace all filters
+await filters.toggle('8d'); // Turn one preset on or off
+await filters.remove('nightcore');
 await filters.clear();
+
+console.log(filters.enabled); // ['bassboost', '8d']
+console.log(filters.graph); // The combined FFmpeg graph, or null
 ```
 
-## Named presets and raw graphs
+## Methods
 
-| Method                   | Description                               |
-| ------------------------ | ----------------------------------------- |
-| `set(nameOrNames)`       | Replace the graph with preset(s)          |
-| `get(name)`              | Check whether a named preset is enabled   |
-| `get()`                  | Read the complete filtergraph, if present |
-| `toggle(name, enabled?)` | Change a named preset                     |
-| `remove(nameOrNames)`    | Remove named presets                      |
-| `setRaw(graph)`          | Replace with an opaque FFmpeg filtergraph |
-| `clear()`                | Remove all filters                        |
+| Method                   | Description                                         |
+| ------------------------ | --------------------------------------------------- |
+| `set(nameOrNames)`       | Replace the active filters with one or more presets |
+| `toggle(name, enabled?)` | Turn a preset on or off. Returns the new state      |
+| `remove(nameOrNames)`    | Remove presets                                      |
+| `get(name)`              | `true` if the preset is enabled                     |
+| `get()`                  | The combined filtergraph, or `null`                 |
+| `setRaw(graph)`          | Replace everything with a raw FFmpeg filtergraph    |
+| `clear()`                | Remove all filters                                  |
 
-Preset names include `8d`, `bassboost`, `nightcore`, and others listed in the [public preset map](https://github.com/Androz2091/discord-player/blob/v8/packages/discord-player/src/structures/audio-filter-presets.ts).
+## Presets
 
-## Graph ownership
+The built-in presets include `8d`, `bassboost`, `bassboost_low`, `bassboost_high`, `nightcore`, `vaporwave`, `lofi`, `karaoke`, `mono`, `reverse`, `treble`, `chorus`, `flanger`, and `phaser`. The complete list is in the [preset source](https://github.com/Androz2091/discord-player/blob/v8/packages/discord-player/src/structures/audio-filter-presets.ts).
 
-When you call `setRaw()`, the graph is opaque. Toggle/remove operates on managed named presets and **does not** parse arbitrary filter strings. For example, a raw `volume=0.8` graph should be replaced explicitly when you want another custom configuration.
+## Raw filtergraphs
 
-Filters can be prepared before voice connection. Connected changes call the native session under a serialized operation lock, so an invalid FFmpeg graph rejects instead of silently replacing a working configuration.
+```ts
+await queue.node.filters.setRaw('aecho=0.8:0.9:1000:0.3');
+```
 
-<Callout type="warn" title="Filters change sound and sometimes timing">
-  Time-altering filters can affect the relationship between source duration and playback position. Always display the
-  Remedia-backed timeline, not an independently incremented timer.
+A raw graph is opaque. `toggle()` and `remove()` only work with presets, and they do not parse a raw graph. Call `setRaw()` again or `clear()` to change it.
+
+Filtergraphs are trusted input because FFmpeg filters can reach external resources. Do not pass user-provided text to `setRaw()`.
+
+## Before and after connecting
+
+You can set filters before the queue connects. They apply when the session starts.
+
+On a connected session, an invalid graph rejects and the previous filters stay active.
+
+<Callout type="warn" title="Filters can change timing">
+  Filters that change speed or pitch, such as `nightcore` and `vaporwave`, change how fast `playbackTime` advances. Use
+  `queue.node.getTimestamp()` for progress displays instead of your own timer.
 </Callout>
 
-<NextStep href="/docs/guides/history" label="Navigate playback history" />
+<NextStep href="/docs/v8/guides/crossfade" label="Crossfade between tracks" />

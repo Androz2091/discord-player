@@ -1,9 +1,9 @@
 ---
 title: Playback controls
-description: Pause, resume, seek, change volume, and distinguish managed commands from raw session controls.
+description: Pause, resume, seek, change volume, skip, and read playback position.
 ---
 
-Controls are asynchronous because they cross the Remedia session boundary. Always await them before sending a success response to a user.
+Controls are asynchronous because they talk to Remedia. Await them before you reply to a user.
 
 ```ts
 const queue = player.getQueue(guildId);
@@ -13,44 +13,66 @@ if (!queue) return;
 await queue.node.pause();
 await queue.node.resume();
 await queue.node.seek(60_000); // Milliseconds
-await queue.node.setVolume(75); // 0–200 percent
+await queue.node.setVolume(75); // 0 to 200 percent
 ```
 
-## Managed lifecycle controls
+## Skip, stop, and leave
 
-| Call                               | Effect                                          |
-| ---------------------------------- | ----------------------------------------------- |
-| `await queue.skip()`               | End the current managed Track and advance       |
-| `await queue.skipTo(trackOrIndex)` | Skip to an upcoming Track                       |
-| `await queue.jump(trackOrIndex)`   | Jump within the upcoming queue                  |
-| `await queue.stop()`               | Stop managed playback, preserve upcoming Tracks |
-| `await queue.destroy()`            | Dispose voice, history, and the queue           |
+| Call                               | Effect                                                                     |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `await queue.skip()`               | End the current track and start the next. Returns the next track or `null` |
+| `await queue.skipTo(trackOrIndex)` | Skip ahead to an upcoming track                                            |
+| `await queue.jump(trackOrIndex)`   | Same as `skipTo()`                                                         |
+| `await queue.stop()`               | Stop playback and keep upcoming tracks                                     |
+| `await queue.destroy()`            | Stop, leave voice, and delete the queue                                    |
 
-For a raw session, `queue.node.stopSession()` stops its audio without following the queue's managed lifecycle. Use `queue.stop()` for ordinary music commands.
+Use these queue methods for commands. `queue.node.stopSession()` and `queue.node.play(source)` control the audio session directly and bypass the queue.
 
-## Position and duration
+## Read the position
 
 ```ts
-const elapsed = queue.node.playbackTime;
-const duration = queue.node.totalDuration;
-const timestamp = queue.node.getTimestamp();
+const elapsed = queue.node.playbackTime; // milliseconds
+const duration = queue.node.totalDuration; // milliseconds
+const timestamp = queue.node.getTimestamp(); // { current, total, progress } or null
 const bar = queue.node.createProgressBar({ length: 20 });
 ```
 
-`playbackTime` and `totalDuration` are **milliseconds**. The timeline can be unknown for live or unbounded sources. `getTimestamp()` returns `null` if the current Track cannot produce a timeline.
+`getTimestamp()` returns `null` when the track has no known duration, such as a live stream.
 
-`playbackTime` (and its alias `streamTime`) is **output elapsed time** from Remedia's playback clock, read on demand from the current session. For remote nodes Remedia interpolates it between lifecycle events and snapshots, freezes it while paused or disconnected, and restarts it at zero for every new playback generation, including a crossfade promotion. After `seek()` it restarts at the seek target. It is not the source-media position: with a tempo-changing filter it advances at a different rate than the source and can exceed `totalDuration`, so `getTimestamp().progress` is clamped to 100 and is approximate while such a filter is active.
+`playbackTime` is the time Remedia has played, not the position inside the source file. It restarts at zero for each new track and after a seek, which sets it to the seek target. With a filter that changes speed, such as `nightcore`, it advances faster or slower than the file position. `progress` is capped at 100.
 
-## Seeking is source-dependent
+## Seek
 
-File, URL, and buffer seeking follow Remedia's decoder capabilities. One-shot streams may have more restricted seeking support and may require consuming intermediate audio. Do not assume every source can seek backward or that seeking to an unknown duration is valid. Remote plugin-host operation sources seek forward only: a backward seek is rejected by Remedia with `unsupported` and the source is not reopened.
+```ts
+await queue.node.seek(90_000);
+```
 
-## Volume differs at the boundary
+Whether a seek works depends on the source:
 
-discord-player uses a percentage (0–200). Remedia's low-level session uses linear gain, so discord-player converts `80` to `0.8` when configuring the native session.
+- Files and URLs usually support seeking.
+- Plugin sources on a remote node can only seek forward. A backward seek is rejected.
+- A source with an unknown duration may reject a seek.
 
-<NextStep href="/docs/guides/events" label="Handle lifecycle events" />
+Handle the rejection and tell the user:
 
-## Crossfades and controls
+```ts
+try {
+  await queue.node.seek(positionMs);
+} catch (error) {
+  await interaction.reply('This track does not support seeking there.');
+}
+```
 
-With automatic crossfading, `currentTrack` follows the incoming source as soon as it becomes audible. Skip, seek, stop and history navigation cancel upcoming preparation. Pause and resume retain it. See the [crossfade guide](/docs/guides/crossfade).
+## Volume
+
+`setVolume()` takes a percentage from 0 to 200. The default is 100. You can also set it when connecting:
+
+```ts
+await queue.connect({ channelId, volume: 70 });
+```
+
+## While crossfading
+
+During a crossfade, `currentTrack` is the incoming track. Skip, seek, and stop apply to it. See [crossfade](/docs/v8/guides/crossfade).
+
+<NextStep href="/docs/v8/guides/history" label="Navigate history" />

@@ -44,7 +44,7 @@ operation. The bot searches over HTTP and sends an operation descriptor for play
 and automatic crossfade staging. Encoded bytes flow directly from host to audio
 node. Local sources run locally. Embedded nodes cannot play hosted Tracks.
 
-See the [complete deployment example](https://discord-player.js.org/docs/plugins/remote-hosts).
+See the [complete deployment example](https://discord-player.js.org/docs/v8/plugins/remote-hosts).
 The direct HTTP examples below describe protocol consumers; a bot should use
 `player.search()` and queue playback, without fetching media grants itself.
 

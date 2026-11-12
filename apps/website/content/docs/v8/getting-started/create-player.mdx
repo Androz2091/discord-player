@@ -3,12 +3,12 @@ title: 1. Create the player
 description: Connect discord.js gateway events to Discord Player.
 ---
 
-Create `src/player.ts`:
+Create `src/player.ts`. It creates the Discord client and the Player, and connects them.
 
 ```ts title="src/player.ts"
 import { Client, Events, GatewayIntentBits } from 'discord.js';
 import { Player } from 'discord-player';
-import { directMedia } from './direct-media.js';
+import { directMedia } from './direct-media.ts';
 
 export const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
@@ -16,30 +16,42 @@ export const client = new Client({
 
 export const player = new Player({
   plugins: [directMedia()],
-  send(guildId, packet) {
+
+  send(guildId, payload) {
     const guild = client.guilds.cache.get(guildId);
-    if (!guild) throw new Error('Cannot find the guild shard');
-    return guild.shard.send(packet);
+
+    if (!guild) throw new Error(`Guild ${guildId} is not cached, so its shard is unknown.`);
+
+    return guild.shard.send(payload);
   },
 });
 
-client.on('raw', (packet) => player.receive(packet));
+client.on(Events.Raw, (packet) => player.receive(packet));
+
 client.once(Events.ClientReady, async (ready) => {
   await player.initialize(ready.user.id);
-  console.log('Discord Player ready');
+  console.log(`Ready as ${ready.user.tag}`);
 });
+
+player.on('error', (error) => console.error('Player error:', error));
 ```
 
-`send` sends voice connection requests through discord.js. `receive` forwards incoming gateway events to Discord Player. Both are required.
+## What each part does
 
-The `directMedia` import comes from [step 2](/docs/getting-started/source-plugin). Create that file before running your bot, and use one Player instance throughout the application.
+| Part                      | Purpose                                                                    |
+| ------------------------- | -------------------------------------------------------------------------- |
+| `GuildVoiceStates` intent | Lets the bot see voice state changes                                       |
+| `send`                    | Sends voice join and leave requests to the shard that owns the guild       |
+| `player.receive()`        | Receives every raw gateway packet. Do not filter packets before calling it |
+| `player.initialize()`     | Starts Remedia. Call it once, after the bot is ready                       |
+| `plugins`                 | Source plugins registered with this Player                                 |
 
-After registering your command handlers, connect the bot:
+The Player has no `nodes` option here, so it uses one embedded Remedia node.
 
-```ts
-await client.login(process.env.DISCORD_TOKEN);
-```
+`send` throws when it cannot find the guild. A silent `undefined` return would leave a voice join waiting until it times out.
 
-Keep the token in an environment variable, not in your source code.
+<Callout type="info" title="Use one Player">
+  Create a single Player for the whole application and share it between commands.
+</Callout>
 
-<NextStep href="/docs/getting-started/source-plugin" label="2. Add a source" />
+<NextStep href="/docs/v8/getting-started/source-plugin" label="2. Add a source" />

@@ -1,11 +1,13 @@
 ---
-title: Legacy extractor emulation
-description: Use supported v7 BaseExtractor subclasses through v8's single plugin host without a second dispatcher.
+title: v7 extractors
+description: Keep a v7 BaseExtractor working while you move to source plugins.
 ---
 
-v8 keeps `player.extractors` as a compatibility entry point. The adapter creates a source plugin for each registered `BaseExtractor` subclass. All work then runs through the same typed operation registry as modern plugins.
+`player.extractors` is still available so supported v7 `BaseExtractor` classes keep working. The adapter wraps each extractor as a source plugin, so extractors and plugins share one registry.
 
-## Register a legacy extractor
+New code should use [`definePlugin()`](/docs/v8/plugins/build-source).
+
+## Register an extractor
 
 ```ts
 import { BaseExtractor, Track } from 'discord-player';
@@ -37,11 +39,11 @@ class DirectMediaExtractor extends BaseExtractor {
 await player.extractors.register(DirectMediaExtractor, {});
 ```
 
-Register **the constructor**, not an instantiated extractor or a plugin factory. `register()` returns the owned compatibility instance; new plugins instead use `player.plugins.register(myPlugin())`.
+Pass the class, not an instance. `register()` returns the extractor instance the Player owns.
 
-## How the emulation layer works
+## How methods map
 
-| Legacy method        | v8 operation             |
+| v7 method            | v8 operation             |
 | -------------------- | ------------------------ |
 | `activate()`         | Plugin `setup()`         |
 | `deactivate()`       | Plugin `destroy()`       |
@@ -52,22 +54,20 @@ Register **the constructor**, not an instantiated extractor or a plugin factory.
 | `bridge()`           | `track.bridge`           |
 | `handlePostStream()` | Local `stream.transform` |
 
-The adapter preserves legacy priority and protocols where possible. It stamps Tracks with portable references so future resolution uses the same source identity.
+Priority and protocols carry over. Tracks created by an extractor receive a portable source reference.
 
-## Supported registration methods
+## Supported registry methods
 
-`register()`, `unregister()`, `unregisterAll()`, `get()`, `isRegistered()`, `loadMulti()`, and `reconfigure()` are supported. Reconfigure replaces the owned instance; fetch a fresh reference through `get()`.
+`register()`, `unregister()`, `unregisterAll()`, `get()`, `isRegistered()`, `loadMulti()`, and `reconfigure()`. `reconfigure()` replaces the owned instance, so fetch a fresh one with `get()`.
 
-## Compatibility boundaries
+## Limits
 
-The API is an **emulation layer**, not the old audio pipeline. In particular:
+The adapter reproduces the extractor API, not the v7 audio pipeline:
 
-- It does not restore the former stream dispatcher, raw audio resources, or custom PCM/Opus format overrides.
-- Runtime extractor session internals are not available.
-- A local encoded Readable still cannot travel to a remote Remedia node.
-- Extractor runtime objects, private engines, and callbacks are not portable serialized state.
-- A restored Track must be resolved with currently registered source information.
+- No stream dispatcher, raw audio resources, or PCM and Opus format overrides.
+- No access to extractor session internals.
+- A local `Readable` cannot reach a remote Remedia node.
+- Extractor state such as `raw.engine`, private clients, and callbacks is not portable and is not saved.
+- A restored track resolves through the extractors registered now.
 
-Existing source integrations can migrate incrementally. The preferred long-term API is a modern `definePlugin()` source.
-
-<NextStep href="/docs/plugins/advanced" label="Extend the operation system" />
+<NextStep href="/docs/v8/plugins/remote-hosts" label="Remote source hosts" />

@@ -1,40 +1,40 @@
 ---
-title: Why v8 is designed this way
-description: Understand the separation between command orchestration, source plugins, and a single native audio engine.
+title: Design decisions
+description: Why Discord Player separates queues, plugins, and the audio engine.
 ---
 
-v8 chooses explicit boundaries instead of exposing a web of stream and voice implementation objects to application code.
+v8 draws explicit boundaries instead of exposing stream and voice objects to application code.
 
-## One Rust engine, two deployment modes
+## One engine, two modes
 
-Embedded and remote Remedia both use native Rust audio processing. This keeps decoder, filter, volume, and transport behavior aligned. It also avoids maintaining two independent audio implementations with different edge cases.
+Embedded and remote Remedia both use the same native engine, so decoding, filters, volume, and transport behave the same. Maintaining one engine avoids two sets of edge cases.
 
-Remote mode still has real differences: network round trips, authenticated sessions, reconnection, source accessibility, and process boundaries. **Consistency of engine behavior does not imply zero migration gaps or identical latency.**
+Remote mode still differs in network latency, authentication, reconnects, which sources the server can open, and the process boundary. The same engine does not mean identical latency.
 
-## A dedicated managed queue layer
+## A separate queue layer
 
-Track selection is application policy, not codec behavior. The queue owns repeat, shuffle, history, skip, and event reconciliation. The audio engine owns source playback and terminal generation events. This prevents native playback commands from accidentally mutating application history.
+Choosing the next track is application policy. The queue owns repeat, shuffle, history, skip, and event reconciliation. The engine owns playing a source and reporting how each generation ended. Because of this split, a native playback command cannot change your history by accident.
 
-It is also why `queue.play()` and `queue.node.play()` are intentionally different APIs.
+It is also why `queue.play()` and `queue.node.play()` are different APIs.
 
-## Typed operations for source integration
+## Typed operations for sources
 
-A source needs multiple capabilities, but rarely all at once. Typed operations separate query matching from metadata resolution and media opening. This makes cancellation, handler selection, priority, and error attribution explicit.
+A source rarely provides every capability. Typed operations separate matching a query, describing tracks, and opening media. That makes cancellation, handler choice, priority, and error attribution explicit.
 
-Legacy extractors are adapted into the same operation host so compatibility work does not create a permanent parallel execution system.
+Legacy extractors run through the same host, so compatibility does not leave a second dispatcher behind.
 
-## Library-independent Gateway boundary
+## A gateway boundary without a library
 
-The application already has a Discord Gateway connection. Rather than importing a specific client library, v8 asks for `send()` and `receive()` with raw Gateway payloads and identifiers. The same Player works wherever that contract can be fulfilled.
+Your bot already has a gateway connection. Discord Player asks for `send()` and `receive()` with raw payloads, so it works with any library that can provide them.
 
-## Deliberate non-goals
+## Non-goals
 
-- No built-in registration of every possible media provider. Source implementations remain explicit.
-- No second media engine for remote nodes.
-- No promise of gapless cross-node transfer.
-- No automatic remote execution of a local JavaScript plugin.
-- No general replacement for the previous raw audio pipe/dispatcher internals.
+- Built-in providers. Sources are registered explicitly.
+- A second media engine for remote nodes.
+- Gapless transfers between nodes.
+- Running a local JavaScript plugin on a remote server.
+- A replacement for the v7 stream dispatcher.
 
-The result is a smaller, more predictable public framework API. For implementation and error boundaries, return to [the plugin guide](/docs/plugins) or [the managed queue guide](/docs/guides/queues).
+The result is a smaller and more predictable API. For the details, see [source plugins](/docs/v8/plugins) and [queues](/docs/v8/guides/queues).
 
-<NextStep href="/docs/migration" label="Learn the v7 migration boundaries" />
+<NextStep href="/docs/v8/migration" label="Migrating from v7" />

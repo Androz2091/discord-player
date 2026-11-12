@@ -1,24 +1,44 @@
 ---
 title: Guides
-description: Learn how to manage a music bot after its first track plays.
+description: Task-based guides for managing queues, playback, voice, and events after your first track plays.
 ---
 
-Start with the [getting-started tutorial](/docs/getting-started) if you haven't played a track yet.
+These guides assume you finished the [getting-started tutorial](/docs/v8/getting-started). Each one covers a single task.
+
+## Playback
 
 <Cards>
-  <Card title="Queues" href="/docs/guides/queues" description="Add tracks, repeat songs, and shuffle." />
+  <Card title="Queues" href="/docs/v8/guides/queues" description="Add tracks, repeat, shuffle, and reorder." />
   <Card
     title="Playback controls"
-    href="/docs/guides/playback-controls"
-    description="Pause, seek, skip, stop, and change volume."
+    href="/docs/v8/guides/playback-controls"
+    description="Pause, seek, skip, stop, and volume."
   />
-  <Card title="Events" href="/docs/guides/events" description="Handle starts, finishes, and errors." />
-  <Card title="Voice" href="/docs/guides/voice" description="Join channels, move, and recover connections." />
-  <Card title="Audio filters" href="/docs/guides/filters" description="Apply presets and custom filters." />
-  <Card title="History" href="/docs/guides/history" description="Return to earlier tracks." />
-  <Card title="Context" href="/docs/guides/context" description="Access a queue in your command handlers." />
-  <Card title="Persistence" href="/docs/guides/persistence" description="Save and restore tracks and playlists." />
-  <Card title="Errors" href="/docs/guides/errors" description="Diagnose playback failures." />
+  <Card title="History" href="/docs/v8/guides/history" description="Go back to earlier tracks." />
+  <Card title="Audio filters" href="/docs/v8/guides/filters" description="Presets and custom FFmpeg filters." />
+  <Card title="Crossfade" href="/docs/v8/guides/crossfade" description="Blend one track into the next." />
 </Cards>
 
-<NextStep href="/docs/guides/queues" label="Manage queues" />
+## Events and voice
+
+<Cards>
+  <Card title="Events" href="/docs/v8/guides/events" description="React to starts, finishes, and errors." />
+  <Card title="Voice connections" href="/docs/v8/guides/voice" description="Join, move, and leave channels." />
+  <Card title="Errors" href="/docs/v8/guides/errors" description="Diagnose playback failures." />
+</Cards>
+
+## Advanced
+
+<Cards>
+  <Card title="Search routing" href="/docs/v8/guides/search" description="Choose which plugin handles a query." />
+  <Card title="Lyrics" href="/docs/v8/guides/lyrics" description="Plain and synchronized lyrics." />
+  <Card title="Resource hooks" href="/docs/v8/guides/hooks" description="Intercept audio sources before playback." />
+  <Card
+    title="Player context"
+    href="/docs/v8/guides/context"
+    description="Access the queue without passing it around."
+  />
+  <Card title="Persistence" href="/docs/v8/guides/persistence" description="Save and restore tracks and playlists." />
+</Cards>
+
+<NextStep href="/docs/v8/guides/queues" label="Manage queues" />

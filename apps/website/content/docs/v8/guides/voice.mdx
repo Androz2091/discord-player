@@ -1,117 +1,150 @@
 ---
 title: Voice connections
-description: Understand the Gateway boundary, channel moves, self-deaf/mute controls, and session ownership.
+description: Connect the gateway, join and move between channels, and configure leave and pause behavior.
 ---
 
-discord-player does not open a Discord Gateway connection itself. Your bot library owns the connection; Remedia uses it to obtain Discord voice credentials.
+Your bot library owns the Discord gateway connection. Discord Player asks it to join channels and passes incoming voice packets to Remedia.
 
-## The send/receive contract
+## Connect the gateway
+
+Provide a `send` callback and forward every raw packet to `player.receive()`:
 
 ```ts
-const player = new Player({
-  nodes: [{ id: 'local', type: 'embedded' }],
+import { Player } from 'discord-player';
 
-  send(guildId, packet) {
-    return gateway.sendToGuildShard(guildId, packet);
+import { Events } from 'discord.js';
+
+const player = new Player({
+  send(guildId, payload) {
+    const guild = client.guilds.cache.get(guildId);
+
+    if (!guild) throw new Error(`Guild ${guildId} is not cached.`);
+
+    return guild.shard.send(payload);
   },
 });
 
-gateway.onDispatch((packet) => player.receive(packet));
-await player.initialize(botUserId);
+client.on(Events.Raw, (packet) => player.receive(packet));
+
+client.once(Events.ClientReady, (ready) => player.initialize(ready.user.id));
 ```
 
-`gateway.sendToGuildShard` and `gateway.onDispatch` are application integration points, **not** discord-player exports. For an executable discord.js example, see [create a player](/docs/getting-started/create-player).
+Rules to follow:
 
-Pass every raw dispatch to `player.receive()`. Remedia receives all packets, including `READY`, and ignores those it does not need; filtering them first can break Gateway-session ordering. Discord Player separately tracks `VOICE_STATE_UPDATE` for queue voice policies. `send` must reject when a guild cannot be routed to a shard; do not silently swallow missing guilds. Each bot account must use its own authenticated user identity, even if multiple bots share a guild or voice channel.
+- Pass every packet to `receive()`, including `READY`. Remedia uses them to order gateway events, so filtering can break voice.
+- Make `send` throw when it cannot route a guild. Returning `undefined` leaves the join waiting until it times out.
+- Give each bot account its own Player.
 
-## Connect or move channels
+`send` and `receive` connect your library to Discord Player. They are not exports of Discord Player. The [getting-started tutorial](/docs/v8/getting-started/create-player) shows the discord.js version.
+
+## Join and move channels
 
 ```ts
 const queue = await player.createQueue(guildId);
 
 await queue.connect({
-  channelId: firstVoiceChannelId,
+  channelId: firstChannelId,
   selfDeaf: true,
-  selfMute: false,
   volume: 70,
-  connectTimeoutMs: 120_000, // Optional initial-join timeout
+  connectTimeoutMs: 120_000, // Optional. Initial join deadline
 });
 
-await queue.connect({ channelId: nextVoiceChannelId });
+await queue.connect({ channelId: nextChannelId }); // Move
 ```
 
-The second call reuses the queue/session and requests a voice channel move. It does not intentionally clear history or create a new managed queue.
+Moving to another channel keeps the queue and its history. `player.play()` connects for you when you pass a channel.
 
-## Update voice flags
+## Self-deafen and self-mute
 
 ```ts
 await queue.setSelfDeaf(false);
 await queue.setSelfMute(true);
 ```
 
-These settings update both the connected session and the defaults for subsequent sessions. Queue volume is percentage-based; session-level linear volume is a Remedia detail.
+These change the connected session and become the defaults for later sessions.
 
-## Handle voice recovery
+## React to connection problems
 
 ```ts
 player.events.on('voiceConnectionStateChange', (queue, previousState, state, rawEvent) => {
-  if (state === 'reconnecting') {
-    console.log('Recovering voice', queue.guildId);
-  }
+  if (state === 'reconnecting') console.log('Recovering voice in', queue.guildId);
 });
 ```
 
-Remedia retries transient initial remote join failures with fresh Gateway credentials. The default initial join deadline is 100 seconds. Ordinary remote requests retain their separate 15-second timeout.
+Remedia retries initial remote join failures with fresh gateway credentials. The initial join deadline is 100 seconds, and `connectTimeoutMs` changes it.
 
-Avoid treating a brief voice reconnect as a completed Track. The queue and Remedia have separate state machines. A channel move is not the same thing as moving a decoder to another Remedia node.
+A short reconnect does not end the current track. Do not treat `reconnecting` as a finished track.
 
-## Authoritative channel occupancy
+See [voice recovery](/docs/v8/remedia/voice-recovery) for timeouts and for diagnosing guilds that fail to join.
 
-Bot joins, moves, disconnects, server mute and stage suppression are recognized
-from the bot identity supplied to `initialize()`, without a membership resolver.
-Raw Gateway packets still reach Remedia. Queue `voiceStateUpdate` listeners receive
-`(queue, previousOrNull, current, rawPacket)` with normalized IDs and available mute
-flags. Unknown previous state stays null; listeners never disable default handling.
-Remedia transport notifications remain separate `voiceConnectionStateChange` events.
-
-For empty-channel behavior, configure `resolveVoiceChannelUsers(guildId, channelId)`
-on the Player. Return non-bot member IDs, `[]` for confirmed empty, or null for an
-unavailable snapshot. Resolver failures emit queue `error` and leave occupancy
-unknown. The core does not infer a complete channel from partial Gateway history.
-
-Requests are coalesced after connection and relevant Gateway changes. Channel,
-session and revision checks reject stale responses. There is one occupancy Set per
-queue, and no mandatory Discord library dependency. An integration adapter may
-supply authoritative IDs from its channel cache when complete.
-
-## Queue leave and pause policies
+## Leave and pause automatically
 
 ```ts
 const queue = await player.createQueue(guildId, {
-  leaveOnEmpty: true,
-  leaveOnEmptyCooldown: 30_000,
-  pauseOnEmpty: true,
   leaveOnEnd: true,
   leaveOnEndCooldown: 60_000,
   leaveOnStop: true,
   leaveOnStopCooldown: 10_000,
+  leaveOnEmpty: true,
+  leaveOnEmptyCooldown: 30_000,
+  pauseOnEmpty: true,
 });
 ```
 
-Policies are opt-in. `leaveOnEmpty` and `pauseOnEmpty` act only on confirmed occupancy.
-`emptyChannel` and `channelPopulate` report confirmed transitions. An empty cooldown
-revalidates occupancy before deletion. Null snapshots never mean empty.
+All policies are off by default.
 
-`leaveOnEnd` follows natural exhaustion (including related-track autoplay declining);
-`leaveOnStop` follows managed stop. Neither needs an occupancy resolver. New playback,
-applicable enqueues, moves, replacement and destruction invalidate obsolete timers.
-Repeat and crossfade continuation do not count as exhaustion; skipping alone does
-not trigger the natural-end leave policy.
+| Option         | Triggers when                                                                          |
+| -------------- | -------------------------------------------------------------------------------------- |
+| `leaveOnEnd`   | The queue runs out of tracks. Repeat modes and crossfade continuation do not count     |
+| `leaveOnStop`  | Playback is stopped with `queue.stop()`                                                |
+| `leaveOnEmpty` | The channel is confirmed empty. Needs a [member resolver](#know-who-is-in-the-channel) |
+| `pauseOnEmpty` | The channel is confirmed empty. Resumes when someone joins                             |
 
-Only policy-owned pauses are automatically resumed. Calling `queue.node.pause()`
-explicitly retains the user pause after repopulation. Server mute/suppression also
-pause playback; release resumes only a policy-owned pause. Requesting stage speaking
-permission remains the integration's responsibility because Remedia exposes no
-corresponding request-to-speak API.
+Each `...Cooldown` option waits that many milliseconds first. The queue checks the condition again before it acts. Starting playback, moving channels, and destroying the queue cancel a pending timer.
 
-<NextStep href="/docs/remedia/voice-recovery" label="Diagnose concurrent voice joins" />
+A pause started by `pauseOnEmpty` is resumed automatically. A pause from `queue.node.pause()` stays paused.
+
+If the bot is server-muted or suppressed in a stage channel, playback pauses and resumes when that ends. Requesting to speak in a stage channel is up to your bot.
+
+## Know who is in the channel
+
+Emptiness policies need to know who is in the voice channel. Discord Player does not guess from gateway events, because it would miss members who were already there. Provide a resolver:
+
+```ts
+import { Player } from 'discord-player';
+
+const player = new Player({
+  async resolveVoiceChannelUsers(guildId, channelId) {
+    const channel = client.channels.cache.get(channelId);
+
+    if (!channel?.isVoiceBased()) return null;
+
+    return channel.members.filter((member) => !member.user.bot).map((member) => member.id);
+  },
+  send,
+});
+```
+
+Return:
+
+| Value                | Meaning                                            |
+| -------------------- | -------------------------------------------------- |
+| An array of user IDs | The channel's members, not counting bots           |
+| `[]`                 | The channel is confirmed empty                     |
+| `null`               | Membership is unknown. Nothing is treated as empty |
+
+An error in the resolver emits a queue `error` event and leaves membership unknown. Without a resolver, `leaveOnEmpty` and `pauseOnEmpty` never act.
+
+### Voice state events
+
+```ts
+player.events.on('voiceStateUpdate', (queue, previous, current, rawPacket) => {
+  console.log(current.userId, current.channelId);
+});
+```
+
+`previous` is `null` when the earlier state is unknown. These events describe Discord members. `voiceConnectionStateChange` describes the audio connection and is a separate event.
+
+`emptyChannel` and `channelPopulate` fire when a transition is confirmed.
+
+<NextStep href="/docs/v8/guides/errors" label="Handle errors" />

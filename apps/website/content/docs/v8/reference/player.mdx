@@ -1,18 +1,14 @@
 ---
 title: Player
-description: Constructor configuration, initialization, source discovery, queue management, and lifecycle.
+description: Constructor options, initialization, searching, playing, and lifecycle.
 ---
 
-`DiscordPlayer` is exported as both `DiscordPlayer` and the compatibility alias `Player`.
+`DiscordPlayer` is exported as `DiscordPlayer` and as `Player`.
 
 ```ts
 import { Player } from 'discord-player';
 
-const player = new Player({
-  nodes: [{ type: 'embedded', id: 'local' }],
-
-  send: (guildId, packet) => sendGateway(guildId, packet),
-});
+const player = new Player({ send });
 
 await player.initialize(botUserId);
 ```
@@ -21,47 +17,54 @@ await player.initialize(botUserId);
 
 `new Player(options: DiscordPlayerOptions)`
 
-| Option              | Type                                          | Meaning                                                                                   |
-| ------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `nodes?`            | `RemediaNodeConfig[]`                         | Advanced audio nodes; defaults to one embedded node                                       |
-| `send`              | `(guildId, payload) => void \| Promise<void>` | Forward voice-state requests to your Gateway library                                      |
-| `plugins?`          | `PluginRegistration[]`                        | Initial source registrations                                                              |
-| `blockExtractors?`  | `string[]`                                    | Disabled source identifiers                                                               |
-| `probeTimeout?`     | `number`                                      | Compatibility metadata-probing option                                                     |
-| `requestTimeoutMs?` | `number`                                      | Ordinary Remedia RPC timeout (15,000 ms default); voice setup has its own longer deadline |
+| Option                                                             | Type                                                | Description                                                                           |
+| ------------------------------------------------------------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `send`                                                             | `(guildId, payload) => void \| Promise<void>`       | Required. Sends voice requests through the shard that owns the guild                  |
+| `nodes`                                                            | `RemediaNodeConfig[]`                               | Audio nodes. Defaults to one embedded node named `local`                              |
+| `plugins`                                                          | `PluginRegistration[]`                              | Source plugins registered with the Player                                             |
+| `crossfade`                                                        | `CrossfadeOptions`                                  | Default [crossfade](/docs/v8/guides/crossfade) for new queues. Off by default         |
+| `resolveVoiceChannelUsers`                                         | `(guildId, channelId) => Promise<string[] \| null>` | Member IDs for [emptiness policies](/docs/v8/guides/voice#know-who-is-in-the-channel) |
+| `blockExtractors`                                                  | `string[]`                                          | Plugin and extractor IDs to disable                                                   |
+| `probeTimeout`                                                     | `number`                                            | Timeout for legacy extractor metadata probing                                         |
+| `requestTimeoutMs`                                                 | `number`                                            | Remedia request timeout. Default 15000                                                |
+| `maxPendingRequests`                                               | `number`                                            | Remedia concurrent requests per remote node. Default 128                              |
+| `onBeforeCreateStream`, `onStreamExtracted`, `onAfterCreateStream` | functions                                           | [Resource hooks](/docs/v8/guides/hooks)                                               |
 
-The options extend relevant `@remedia/client` configuration without exposing its `botUserId` or `selectNode` directly. Queue-level node selection uses `GuildQueueOptions.selectNode`.
+The Remedia client options `botUserId` and `selectNode` are not options of the Player. `initialize()` takes the user ID, and node selection is a queue option.
 
-## Main methods
+## Methods
 
-| Method                              | Returns                                   | Notes                                               |
-| ----------------------------------- | ----------------------------------------- | --------------------------------------------------- |
-| `initialize(botUserId)`             | `Promise<void>`                           | Initialize plugins and Remedia, call after READY    |
-| `receive(payload)`                  | `void`                                    | Forward every raw Gateway dispatch to Remedia       |
-| `search(query, options?)`           | `Promise<SearchResult>`                   | String queries require a matching plugin            |
-| `play(channel, resource, options?)` | `Promise<PlayerNodeInitializationResult>` | Create/retrieve queue and delegate managed playback |
-| `createQueue(guildId, options?)`    | `Promise<GuildQueue>`                     | Reuse or create guild queue                         |
-| `getQueue(guildId)`                 | `GuildQueue \| null`                      | Fetch existing queue                                |
-| `deleteQueue(guildId)`              | `Promise<boolean>`                        | Delete queue and release its session                |
-| `getRemedia()`                      | `RemediaClient`                           | Requires initialization                             |
-| `destroy()`                         | `Promise<void>`                           | Dispose queues and Remedia                          |
+| Method                              | Returns                                   | Description                                                                        |
+| ----------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------- |
+| `initialize(botUserId)`             | `Promise<void>`                           | Starts plugins and Remedia. Call it after the bot is ready                         |
+| `receive(payload)`                  | `void`                                    | Forwards a raw gateway packet. Ignored before `initialize()` and after `destroy()` |
+| `search(query, options?)`           | `Promise<SearchResult>`                   | Finds tracks. String queries need a plugin                                         |
+| `play(channel, resource, options?)` | `Promise<PlayerNodeInitializationResult>` | Creates or reuses the queue and plays                                              |
+| `createQueue(guildId, options?)`    | `Promise<GuildQueue>`                     | Gets or creates a queue                                                            |
+| `getQueue(guildId)`                 | `GuildQueue \| null`                      | Gets an existing queue                                                             |
+| `deleteQueue(guildId)`              | `Promise<boolean>`                        | Destroys a queue                                                                   |
+| `getRemedia()`                      | `RemediaClient`                           | The Remedia client. Throws before initialization                                   |
+| `getClientId()`                     | `string`                                  | The bot user ID. Throws before initialization                                      |
+| `debug(message)`                    | `void`                                    | Emits a `debug` event                                                              |
+| `destroy()`                         | `Promise<void>`                           | Destroys queues, plugins, and the Remedia client                                   |
 
-## Important properties
+## Properties
 
-`player.nodes` is the v7-compatible `GuildNodeManager`, which owns guild queues. `player.nodeSnapshots` exposes the separate native node pool and Remedia status. `player.plugins` is the shared capability registry, `player.extractors` the compatibility registration API, and `player.events` the guild event emitter.
+| Property        | Description                                                  |
+| --------------- | ------------------------------------------------------------ |
+| `nodes`         | The guild queue manager (`GuildNodeManager`)                 |
+| `nodeSnapshots` | Status of the Remedia nodes, or `null` before initialization |
+| `remedia`       | The Remedia client, or `null` before initialization          |
+| `plugins`       | The plugin registry                                          |
+| `extractors`    | The v7 extractor registration API                            |
+| `events`        | Guild queue events. See [events](/docs/v8/reference/events)  |
+| `context`       | [Player context](/docs/v8/guides/context)                    |
+| `lyrics`        | [Lyrics lookup](/docs/v8/guides/lyrics)                      |
+| `statistics`    | Counts of queues, upcoming tracks, and active queues         |
+| `signal`        | `AbortSignal` that aborts as soon as `destroy()` starts      |
+| `id`, `version` | Instance ID and package version                              |
 
-## Lifetime signal
-
-`player.signal` is a read-only `AbortSignal` for this Player's lifetime. It starts
-unaborted and aborts synchronously when `player.destroy()` begins, before awaited
-queue and plugin cleanup. Pass it to cancellable operations or subscribe to its
-`abort` event to release application-owned resources. It remains aborted if cleanup
-fails; awaiting `destroy()` is still required to wait for cleanup to finish.
-
-Destroying an individual queue does not abort `player.signal`. Destroying the
-Player also destroys its managed queues and aborts their lifetime signals.
-
-## Play result
+## play()
 
 ```ts
 const { queue, track, playerResult, searchResult } = await player.play({ guildId, channelId }, query, {
@@ -69,12 +72,28 @@ const { queue, track, playerResult, searchResult } = await player.play({ guildId
 });
 ```
 
-The optional `connectTimeoutMs` overrides the overall initial voice join timeout (100 seconds by default). It also works on `queue.connect()`. It does not override a voice-channel move's internal deadline.
+| Argument   | Accepts                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| `channel`  | A voice channel object, `{ guildId, channelId }`, or a channel ID with `options.guildId` |
+| `resource` | A string query, `Track`, `Track[]`, `Playlist`, or `SearchResult`                        |
+| `options`  | Search options, queue play options, `nodeOptions`, and `guildId`                         |
 
-`track` is `null` for an empty search. `playerResult` is the immediate Remedia play result when a Track started, otherwise `null`. The result also contains the original `resource`.
+| Result         | Description                                                         |
+| -------------- | ------------------------------------------------------------------- |
+| `queue`        | The queue that received the request                                 |
+| `track`        | The selected track, or `null` for an empty search                   |
+| `playerResult` | The immediate Remedia result when a track started, otherwise `null` |
+| `searchResult` | The tracks and playlist found                                       |
+| `resource`     | The value you passed in                                             |
 
-## Input types
+`connectTimeoutMs` sets the initial voice join deadline. The default is 100 seconds. It does not apply to channel moves.
 
-`resource` accepts a string query, Track, Track array, Playlist, or SearchResult. The channel can be a structural voice-channel object, explicit `{ guildId, channelId }`, or a channel ID string **with an explicit `guildId` option**.
+`nodeOptions` holds queue defaults and applies only when the queue is created.
 
-<NextStep href="/docs/reference/queue" label="GuildQueue API" />
+## Lifetime signal
+
+`player.signal` is an `AbortSignal` for the Player's lifetime. It aborts when `destroy()` starts, before cleanup finishes, and stays aborted if cleanup fails. Await `destroy()` to know when cleanup is done.
+
+Destroying one queue does not abort `player.signal`.
+
+<NextStep href="/docs/v8/reference/queue" label="GuildQueue" />

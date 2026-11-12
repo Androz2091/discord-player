@@ -1,13 +1,18 @@
 ---
 title: Events
-description: React to playback, queue changes, and errors.
+description: React to playback, queue changes, voice, and errors.
 ---
 
-Listen to `player.events` for events related to a guild queue. The first callback argument is always the queue.
+Discord Player has two event emitters.
+
+| Emitter         | Scope                              | First argument |
+| --------------- | ---------------------------------- | -------------- |
+| `player.events` | One guild queue                    | The queue      |
+| `player`        | The whole Player and Remedia nodes | None           |
 
 ```ts
 player.events.on('playerStart', (queue, track) => {
-  console.log('Playing', track.title);
+  console.log('Playing', track.title, 'in', queue.guildId);
 });
 
 player.events.on('playerFinish', (queue, track) => {
@@ -19,31 +24,50 @@ player.events.on('playerError', (queue, error, track) => {
 });
 ```
 
-## Common events
+Register listeners once, during startup.
 
-| Event                 | When it happens             |
-| --------------------- | --------------------------- |
-| `playerStart`         | A track starts              |
-| `playerFinish`        | A track finishes naturally  |
-| `playerSkip`          | A track is skipped          |
-| `playerStop`          | Playback stops              |
-| `playerError`         | A track fails               |
-| `audioTrackAdd`       | A track is added            |
-| `emptyQueue`          | No upcoming track remains   |
-| `connection`          | A voice session connects    |
-| `connectionDestroyed` | A voice session is disposed |
+## Common queue events
 
-The queue advances tracks automatically. Don't call `queue.playNext()` inside a `playerFinish` listener.
+| Event                               | When it fires                             |
+| ----------------------------------- | ----------------------------------------- |
+| `queueCreate`, `queueDelete`        | A queue is created or deleted             |
+| `connection`, `connectionDestroyed` | The voice session connects or is disposed |
+| `audioTrackAdd`, `audioTracksAdd`   | Tracks are added                          |
+| `playerStart`                       | A track starts playing                    |
+| `playerFinish`                      | A track ends on its own                   |
+| `playerSkip`                        | A track is skipped                        |
+| `playerStop`                        | Playback is stopped                       |
+| `playerError`                       | A track fails to play                     |
+| `emptyQueue`                        | No upcoming tracks remain                 |
+| `emptyChannel`                      | The voice channel has no listeners        |
 
-## Player-level errors
+Every event and its arguments are listed in the [event reference](/docs/v8/reference/events).
 
-The Player also emits errors and diagnostics not tied to a queue:
+## Do not advance the queue yourself
+
+The queue starts the next track automatically. Do not call `queue.playNext()` from a `playerFinish` listener.
+
+A natural finish, a skip, a stop, and a failure are different events. Handle each separately, for example to avoid sending "finished" messages for skipped tracks.
+
+## Player events
 
 ```ts
-player.on('error', console.error);
-player.on('debug', console.debug);
+player.on('error', (error) => console.error('Player error:', error));
+player.on('debug', (message) => console.debug(message));
 ```
 
-A skipped track is different from one that finished naturally. See the [event reference](/docs/reference/events) for argument order and other events.
+`player` also emits Remedia node events such as `nodeConnected` and `nodeDisconnected`. See [Remedia events](/docs/v8/reference/events#remedia-events-on-the-player).
 
-<NextStep href="/docs/guides/voice" label="Connect to voice" />
+## Remedia event data
+
+Events that come from Remedia receive the original Remedia event as their last argument. Events that Discord Player creates itself, such as `queueCreate`, do not.
+
+```ts
+player.events.on('volumeChange', (queue, oldVolume, newVolume, rawEvent) => {
+  console.log(queue.guildId, oldVolume, newVolume, rawEvent?.generation);
+});
+```
+
+Use the final argument when you need Remedia details. Use the earlier arguments for your own logic, because they use Discord Player's own `Track` and queue objects.
+
+<NextStep href="/docs/v8/guides/voice" label="Connect to voice" />

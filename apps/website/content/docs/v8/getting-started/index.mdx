@@ -1,41 +1,42 @@
 ---
 title: Getting started
-description: Build a music bot that plays a direct audio file.
+description: Build a Discord music bot that plays direct audio links, from an empty folder to a working /play command.
 ---
 
-This tutorial uses discord.js to connect to Discord and an embedded Remedia node to play audio. Discord Player itself is not tied to discord.js.
+This tutorial builds a small music bot with discord.js. It plays direct links to MP3, Ogg, and WAV files and adds pause, skip, and queue commands. Discord Player itself does not depend on discord.js.
 
 ## Before you start
 
-You need Node.js 22.18+ with ESM, a Discord bot token, permission to join and speak in a voice channel, and [FFmpeg 9 shared libraries](/docs/installation/ffmpeg).
+You need:
 
-Install the packages:
+- Node.js 22.18 or newer.
+- A Discord application with a bot token. Create one in the [Discord Developer Portal](https://discord.com/developers/applications).
+- A server where the bot can join and speak in a voice channel.
+- [FFmpeg 9 shared libraries](/docs/v8/installation/ffmpeg) on your machine.
+
+## Create the project
 
 ```bash
+mkdir music-bot && cd music-bot
+pnpm init
 pnpm add discord-player discord.js @remedia/node
 ```
 
-We'll use a small source plugin that recognizes direct MP3, Ogg, and WAV URLs. You don't need to implement a full music provider to follow along.
+Add `"type": "module"` to `package.json`. Node.js 22.18 and newer runs `.ts` files directly, so no build step is needed.
 
-<Cards>
-  <Card
-    title="1. Create the player"
-    href="/docs/getting-started/create-player"
-    description="Connect the Discord gateway to playback."
-  />
-  <Card
-    title="2. Add a source"
-    href="/docs/getting-started/source-plugin"
-    description="Play direct audio URLs with a small plugin."
-  />
-  <Card title="3. Play a track" href="/docs/getting-started/play-track" description="Join a channel and start audio." />
-  <Card
-    title="4. Control playback"
-    href="/docs/getting-started/next-steps"
-    description="Pause, skip, seek, and inspect the queue."
-  />
-</Cards>
+Create a `.env` file with your bot token:
 
-For more media providers, read [source plugins](/docs/plugins). Upgrading from v7? Use the [migration guide](/docs/migration).
+```bash title=".env"
+DISCORD_TOKEN=your-bot-token
+```
 
-<NextStep href="/docs/getting-started/create-player" label="1. Create the player" />
+## What you will build
+
+| Step                                                           | File                              | Purpose                                       |
+| -------------------------------------------------------------- | --------------------------------- | --------------------------------------------- |
+| [1. Create the player](/docs/v8/getting-started/create-player) | `src/player.ts`                   | Connect the Discord gateway to Discord Player |
+| [2. Add a source](/docs/v8/getting-started/source-plugin)      | `src/direct-media.ts`             | Turn a URL into a playable track              |
+| [3. Play a track](/docs/v8/getting-started/play-track)         | `src/index.ts`, `src/commands.ts` | Register `/play` and start the bot            |
+| [4. Control playback](/docs/v8/getting-started/next-steps)     | `src/commands.ts`                 | Add pause, resume, skip, stop, and queue      |
+
+<NextStep href="/docs/v8/getting-started/create-player" label="1. Create the player" />

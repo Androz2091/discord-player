@@ -1,9 +1,13 @@
 ---
-title: Extending the operation map
-description: Add typed operations and select explicit dispatch policies without inventing a separate plugin bus.
+title: Custom operations
+description: Add your own typed operations and choose how they dispatch.
 ---
 
-The public `OperationMap` is declaration-mergeable. New operations must be defined on the host before handlers register.
+You can add operations to the registry. This is rarely needed. Source plugins normally use the built-in operations.
+
+## Define an operation
+
+Declare the operation's types, then register its policy on the Player:
 
 ```ts
 import type { Operation } from 'discord-player';
@@ -17,21 +21,31 @@ declare module '@discord-player/plugin-host' {
 player.plugins.defineOperation('track.audit', 'first');
 ```
 
-After defining the policy, plugins may register `ctx.on('track.audit', handler)` and callers can execute `player.plugins.execute('track.audit', { sourceId })`.
+Plugins can then handle it, and you can run it:
 
-## Choose the correct policy
+```ts
+ctx.on('track.audit', ({ sourceId }) => ({ accepted: sourceId.length > 0 }));
 
-- `first` selects the first result other than `undefined`.
-- `collect` returns the ordered list of results.
-- `pipe` passes the previous result into the next handler.
-- `broadcast` invokes notification handlers without a result.
+const result = await player.plugins.execute('track.audit', { sourceId: 'abc' });
+```
 
-Prefer a named operation for one coherent purpose. Define request/response data with JSON-compatible, portable identities if you expect to persist data or share source metadata later.
+Define the operation before any plugin registers a handler for it.
 
-## Current host boundary
+## Choose a policy
 
-Local and advertised HTTP metadata handlers share this operation system. It does not automatically serialize a handler, launch a worker process, distribute a plugin to remote Remedia servers.
+| Policy      | Use when                              |
+| ----------- | ------------------------------------- |
+| `first`     | One handler should answer             |
+| `collect`   | You want an answer from every handler |
+| `pipe`      | Handlers transform a value in turn    |
+| `broadcast` | Handlers only need to be notified     |
 
-For a source that must work with remote audio nodes, return server-accessible media in the existing `track.stream` operation.
+## Keep data portable
 
-<NextStep href="/docs/remedia" label="Learn the audio runtime underneath" />
+Use JSON-compatible data for inputs and outputs if the result might be saved or sent to another process.
+
+## Limits
+
+Custom operations run inside the bot process. They are not sent to a remote Remedia server. A source that must work with a remote audio node should return a server-accessible URL from `track.stream`, or run on a [source host](/docs/v8/plugins/remote-hosts).
+
+<NextStep href="/docs/v8/plugins/legacy-extractors" label="v7 extractors" />

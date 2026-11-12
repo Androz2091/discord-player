@@ -1,12 +1,12 @@
 ---
-title: Serialization and persistence
-description: Store portable Track and Playlist data using the versioned v8 entity format.
+title: Persistence
+description: Save and restore tracks and playlists in a portable, versioned format.
 ---
 
-`Track` and `Playlist` implement `Serializable<T>`. `serialize()` returns a validated persistence representation; `toJSON()` is intended for display/logging.
+`Track` and `Playlist` can be saved as validated JSON-safe objects.
 
 ```ts
-import { Track, serialize, deserialize, encode, decode } from 'discord-player';
+import { Track, decode, deserialize, encode, serialize } from 'discord-player';
 
 const track = new Track({
   title: 'Example recording',
@@ -15,24 +15,33 @@ const track = new Track({
 });
 
 const entity = serialize(track); // { type: 'track', version: 1, data: ... }
-const encoded = encode(entity);
-const restored = deserialize(decode(encoded));
+const text = encode(entity); // A string you can store
+const restored = deserialize(decode(text));
 ```
 
-## What gets saved
+`serialize()` is for storage. `toJSON()` is only meant for display and logging.
 
-A Track saves portable identity, metadata, duration in **milliseconds**, and a source reference when provided by a plugin. A Playlist saves ordered serialized Tracks. Both omit the live queue, native player, streams, and plugin instances.
+## What is saved
 
-Restore the same or a compatible source plugin before attempting playback of persisted Tracks. A restored Track does not automatically know how to open a private URL or stream.
+| Saved                         | Not saved                          |
+| ----------------------------- | ---------------------------------- |
+| Title, author, URL, thumbnail | Live queue state                   |
+| Duration in milliseconds      | Active streams and native sessions |
+| Requester ID                  | Plugin instances                   |
+| Source and lyrics references  | Credentials and signed URLs        |
 
-## Validation rules
+A playlist saves its tracks in order.
 
-The serializer rejects cyclic objects, functions, getters, non-finite numbers, sparse arrays, and other non-JSON values. Treat decoded data as untrusted and call `deserialize()`, which validates the schema.
+Register the same source plugin before you play restored tracks. A restored track does not know how to open a private URL by itself.
 
-The entity `version` is a persistence schema version and does **not** match the npm package version.
+## Validate input
 
-## Upgrading stored v7 data
+Treat stored or received data as untrusted. `deserialize()` validates it and throws a `SerializationError` for invalid data. The serializer rejects cycles, functions, getters, non-finite numbers, sparse arrays, and other values that are not JSON.
 
-`deserialize()` accepts supported v7 `$type` Track/Playlist entities as an import boundary. V7 records may lack stable Track IDs; new ones are generated. Extractor runtime state is not restored. See [migrating persisted data](/docs/migration/data) before changing your storage format.
+The entity `version` belongs to the storage format. It is not the npm package version.
 
-<NextStep href="/docs/guides/context" label="Use request-scoped Player context" />
+## Import v7 data
+
+`deserialize()` also accepts supported v7 Track and Playlist records. See [migrating saved data](/docs/v8/migration/data).
+
+<NextStep href="/docs/v8/plugins" label="Source plugins" />

@@ -1,17 +1,17 @@
 ---
 title: Playback lifecycle
-description: Follow one managed Track from query matching through the Rust decoder and back to queue progression.
+description: Follow one track from a query, through the engine, to the next track.
 ---
 
-Consider a call to:
+Consider this call:
 
 ```ts
 await player.play({ guildId, channelId }, 'https://media.example.com/song.mp3');
 ```
 
-The call crosses several ownership boundaries. Each has a different failure and cancellation policy.
+It crosses several ownership boundaries, and each has its own failure and cancellation rules.
 
-## Request and execution path
+## Request path
 
 ```mermaid
 sequenceDiagram
@@ -27,39 +27,44 @@ sequenceDiagram
   P->>S: search.query.match
   S-->>P: scored candidates
   P->>S: search.query.resolve (winner)
-  S-->>P: Tracks + sourceReference
-  P->>Q: queue.play(SearchResult)
-  Q->>R: DiscordSession.connect()
+  S-->>P: tracks with sourceReference
+  P->>Q: queue.play(searchResult)
+  Q->>R: connect voice session
   R->>Bot: send(OP 4)
-  Bot->>R: receive(Gateway dispatches incl. VOICE_STATE/VOICE_SERVER)
+  Bot->>R: receive(gateway voice packets)
   R->>E: connect voice
-  Q->>S: track.stream(current Track)
-  S-->>Q: MediaSource (URL / file / Readable)
-  Q->>R: session.play(source, metadata)
-  R->>E: start generation
-  E->>D: Opus / voice packets
-  E-->>R: playbackStarted / Completed / Failed
-  R-->>Q: Correlated generation event
-  Q-->>Bot: playerStart / Finish / Error
-  Q->>Q: Update history and select next Track
+  Q->>S: track.stream(current track)
+  S-->>Q: media source
+  Q->>R: session.play(source)
+  R->>E: start playback generation
+  E->>D: Opus voice packets
+  E-->>R: started, completed, or failed
+  R-->>Q: event for that generation
+  Q-->>Bot: playerStart, playerFinish, or playerError
+  Q->>Q: update history, pick next track
 ```
 
-## Why generations matter
+## Generations
 
-A queue may receive an event before the original `play()` request has finished. It cannot rely on event arrival order alone. v8 associates each managed operation with a queue token, an operation ID, the exact Remedia session, and a playback generation. This prevents a stale terminal event from completing the wrong Track after a skip, replay, or reconnect.
+An event can reach the queue before the original `play()` call returns, so the queue cannot trust arrival order. Each managed operation carries a queue token, an operation ID, the exact session, and a Remedia playback generation. A stale event from a skipped, replayed, or reconnected track is therefore ignored.
 
-## When a Track ends
+## How a track ends
 
-Natural completion records history when appropriate and advances according to the repeat mode. A skip is a separate terminal transition. A stop leaves upcoming Tracks intact. A playback failure returns the Track to the head of the upcoming queue for deliberate retry.
+| Outcome     | What the queue does                                                  |
+| ----------- | -------------------------------------------------------------------- |
+| Natural end | Records history when repeat allows it and advances by repeat mode    |
+| Skip        | A separate transition that records history and starts the next track |
+| Stop        | Keeps upcoming tracks                                                |
+| Failure     | Puts the track back at the front of the queue for you to retry       |
 
-Application listeners such as `player.events.on('playerFinish')` are notifications. They do not need to issue `queue.playNext()` for normal progression.
+`playerFinish` and the other events are notifications. They do not need `queue.playNext()` for ordinary progression.
 
-## Why a local stream is special
+## Local streams
 
-A Node.js Readable can supply encoded bytes to an embedded native engine. A remote engine cannot consume that same in-process object. If your application uses remote nodes, a source plugin must resolve to an URL or path accessible from that remote machine.
+A Node.js `Readable` can feed an embedded engine because both live in one process. A remote engine cannot read it. With remote nodes, a plugin must return a URL or path the remote machine can open.
 
-<NextStep href="/docs/architecture/design-decisions" label="Understand the design trade-offs" />
+## Overlapping tracks with crossfade
 
-## Overlapping generations
+With crossfade, Remedia asks for the next track with `prepareRequested`. The queue reserves a separate upcoming entry and resolves its source through the normal plugin pipeline. The incoming `playbackStarted` commits the reservation and fires `playerStart`. The outgoing `playbackCompleted` records history and fires `playerFinish`, without restarting playback or clearing the incoming track. The queue tracks outgoing generations separately from the current one. See [crossfade](/docs/v8/guides/crossfade).
 
-Automatic crossfading reserves a distinct upcoming occurrence on `prepareRequested`. Its source uses the normal plugin pipeline. Native incoming `playbackStarted` commits the reservation and emits `playerStart`; outgoing `playbackCompleted` finalizes history and emits `playerFinish` without starting playback again or clearing the incoming Track. The queue retains outgoing generations independently of the current operation. See the [crossfade guide](/docs/guides/crossfade).
+<NextStep href="/docs/v8/architecture/design-decisions" label="Design decisions" />

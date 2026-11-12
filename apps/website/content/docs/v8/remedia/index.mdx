@@ -1,51 +1,47 @@
 ---
 title: The Remedia runtime
-description: Understand what Discord Player delegates to Rust and how one audio engine supports embedded and remote nodes.
+description: What Discord Player delegates to Remedia, and how embedded and remote nodes differ.
 ---
 
-discord-player is a music **framework**. Remedia is its audio **engine**. The distinction is deliberate: music commands and queue policies do not need to own audio decoding threads, codec buffers, or Discord voice transport.
+Remedia is the audio engine behind Discord Player. It decodes audio, applies filters and volume, encodes Opus, and sends audio over Discord voice. Discord Player decides which track plays and where its audio comes from.
 
-## What Remedia owns
+## Who owns what
 
-- FFmpeg-based demuxing, decoding, resampling, and filtergraphs.
-- Playback state, volume, pause, seek, and source position tracking.
-- Opus encoding and Discord voice transport, including encrypted voice sessions.
-- Independent player sessions running in the bot process or on a remote audio server.
+| Remedia                                              | Discord Player                                 |
+| ---------------------------------------------------- | ---------------------------------------------- |
+| FFmpeg demuxing, decoding, resampling, filters       | Tracks, queues, history, repeat, shuffle       |
+| Playback state, volume, pause, seek                  | Source plugins and search                      |
+| Opus encoding and encrypted Discord voice            | Events for your application                    |
+| Many independent sessions, in-process or on a server | Choosing the track and source for each session |
 
-discord-player supplies track selection, source resolution, guild queues, history, repeat/shuffle policies, and application-facing events.
-
-## Embedded and remote
+## Embedded or remote
 
 <Cards>
-  <Card
-    title="Embedded node"
-    href="/docs/remedia/embedded"
-    description="Native Rust engine in your Node.js bot. No loopback service required."
-  />
+  <Card title="Embedded node" href="/docs/v8/remedia/embedded" description="The engine runs inside your bot process." />
   <Card
     title="Remote node"
-    href="/docs/remedia/remote"
-    description="Authenticated WebSocket control of the same Rust engine on another host."
+    href="/docs/v8/remedia/remote"
+    description="The engine runs in a separate server that the bot controls over WebSocket."
   />
   <Card
-    title="How a command reaches audio"
-    href="/docs/architecture"
-    description="Detailed graph of plugin operations, queue ownership, and voice output."
+    title="Node capacity and selection"
+    href="/docs/v8/remedia/operations"
+    description="Inspect nodes and choose where a guild plays."
   />
 </Cards>
 
-Both deployment modes reuse Remedia's core playback implementation. They do not share one in-memory decoder across machines; a remote node runs its own instance of that engine.
+Both modes run the same playback engine. A remote node is a separate process, so it adds network latency, authentication, and reconnects. It also cannot read your bot's local files or streams.
 
-## Node selection and identity
+## Access the client
 
-After `player.initialize(botUserId)`, the underlying Remedia client is available as `player.remedia`. Use `player.nodeSnapshots` for node status. `player.nodes` remains the compatibility alias for the **guild queue manager**, not the pool of audio servers.
+After `player.initialize()`, the Remedia client is `player.remedia`. Use `player.nodeSnapshots` for node status.
 
-A queue may supply a `selectNode` policy. Its guild session becomes sticky to the selected node. One bot user ID identifies an application client; multiple different bots can share a server without sharing a guild session.
+`player.nodes` is the guild queue manager from v7. It is not the list of audio nodes.
 
-## Current boundary
+## What stays on the bot
 
-The source plugin host lives with discord-player. A remote audio server receives resolved media locations and playback controls; it does **not** execute a JavaScript plugin's `setup()` or `track.stream` handler remotely.
+Source plugins run in your bot process. A remote Remedia server never runs your plugin's `setup()` or `track.stream` handler. It receives a resolved URL or file, or fetches audio from a [source host](/docs/v8/plugins/remote-hosts).
 
-For engine-specific protocol, security, and runtime details, see the [Remedia documentation](https://github.com/twlite/remedia/tree/main/apps/docs/content/docs).
+For protocol, security, and server settings, see the [Remedia documentation](https://github.com/twlite/remedia/tree/main/apps/docs/content/docs).
 
-<NextStep href="/docs/remedia/embedded" label="Set up embedded playback" />
+<NextStep href="/docs/v8/remedia/embedded" label="Embedded playback" />

@@ -1,33 +1,91 @@
 ---
 title: 4. Control playback
-description: Pause, skip, seek, and inspect a queue.
+description: Add pause, resume, skip, stop, and queue commands.
 ---
 
-Get the queue for a guild:
+Add more commands to `src/commands.ts`. Each one looks up the guild's queue, because a queue exists only after something has been played.
 
-```ts
-const queue = player.getQueue(guildId);
-if (!queue) return;
+```ts title="src/commands.ts"
+import { player } from './player.ts';
 
-console.log(queue.currentTrack?.title);
-console.log(queue.size); // Tracks waiting to play
+/** Builds a command that needs an existing queue and replies with its result. */
+function queueCommand(
+  name: string,
+  description: string,
+  action: (queue: NonNullable<ReturnType<typeof player.getQueue>>) => Promise<string> | string,
+): Command {
+  return {
+    data: { name, description },
 
-await queue.node.pause();
-await queue.node.resume();
-await queue.node.seek(30_000); // Milliseconds
-await queue.node.setVolume(70); // Percent
-await queue.skip();
+    async run(interaction) {
+      const queue = player.getQueue(interaction.guildId);
+
+      if (!queue?.currentTrack) {
+        return interaction.reply({ content: 'Nothing is playing.', flags: MessageFlags.Ephemeral });
+      }
+
+      return interaction.reply(await action(queue));
+    },
+  };
+}
+
+const pause = queueCommand('pause', 'Pause playback', async (queue) => {
+  await queue.node.pause();
+
+  return 'Paused.';
+});
+
+const resume = queueCommand('resume', 'Resume playback', async (queue) => {
+  await queue.node.resume();
+
+  return 'Resumed.';
+});
+
+const skip = queueCommand('skip', 'Skip the current track', async (queue) => {
+  const next = await queue.skip();
+
+  return next ? `Skipped. Now playing **${next.title}**.` : 'Skipped. The queue is empty.';
+});
+
+const stop = queueCommand('stop', 'Stop playback and keep the queue', async (queue) => {
+  await queue.stop();
+
+  return 'Stopped.';
+});
+
+const nowPlaying = queueCommand('queue', 'Show what is playing', (queue) => {
+  const upcoming = queue.tracks
+    .toArray()
+    .slice(0, 10)
+    .map((track, index) => `${index + 1}. ${track.title}`);
+
+  return [`Now playing: **${queue.currentTrack?.title}**`, ...upcoming].join('\n');
+});
+
+export const commands: Command[] = [play, pause, resume, skip, stop, nowPlaying];
 ```
 
-`queue.stop()` stops the current track but keeps upcoming tracks. `queue.destroy()` removes the queue and closes its voice session.
+Replace the `commands` export from the previous step with the last line above. Restart the bot to register the new commands.
+
+## What the controls do
+
+| Call                                | Effect                                                                            |
+| ----------------------------------- | --------------------------------------------------------------------------------- |
+| `queue.node.pause()` and `resume()` | Pause or resume the current track                                                 |
+| `queue.skip()`                      | End the current track and start the next one. Returns the next track or `null`    |
+| `queue.stop()`                      | Stop playback. Upcoming tracks stay in the queue                                  |
+| `queue.tracks`                      | The upcoming tracks, not including the current one. Call `toArray()` for an array |
+| `queue.currentTrack`                | The playing or paused track, or `null`                                            |
+
+Each control is asynchronous. Await it before you reply, so the reply reflects what happened.
 
 ## Keep building
 
 <Cards>
-  <Card title="Queues" href="/docs/guides/queues" description="Add tracks, repeat, shuffle, and use history." />
-  <Card title="Events" href="/docs/guides/events" description="Respond to playback and voice events." />
-  <Card title="Filters" href="/docs/guides/filters" description="Change sound with presets or FFmpeg filters." />
-  <Card title="Plugins" href="/docs/plugins" description="Add more media sources." />
+  <Card title="Queues" href="/docs/v8/guides/queues" description="Add tracks, repeat, and shuffle." />
+  <Card title="Playback controls" href="/docs/v8/guides/playback-controls" description="Seek, volume, and progress." />
+  <Card title="Events" href="/docs/v8/guides/events" description="Announce tracks in a text channel." />
+  <Card title="Source plugins" href="/docs/v8/plugins" description="Add more music providers." />
 </Cards>
 
-<NextStep href="/docs/guides/queues" label="Manage queues" />
+<NextStep href="/docs/v8/guides/queues" label="Manage queues" />

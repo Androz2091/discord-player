@@ -3,45 +3,61 @@ title: Installation
 description: Install Discord Player and choose where audio runs.
 ---
 
-Discord Player v8 requires Node.js 22.18+ and ESM.
+Discord Player v8 requires Node.js 22.18 or newer and ESM.
 
 ```bash
 pnpm add discord-player
 ```
 
-You'll also need a Discord gateway library such as discord.js. Discord Player doesn't manage the bot's gateway connection.
+You also need a Discord gateway library such as discord.js. Discord Player does not open the gateway connection itself.
 
-## Embedded playback
+## Choose where audio runs
 
-Run audio inside your bot process:
+|                            | Embedded                               | Remote                                |
+| -------------------------- | -------------------------------------- | ------------------------------------- |
+| Audio engine               | Inside your bot process                | A separate `remedia-server`           |
+| Extra package on the bot   | `@remedia/node`                        | None                                  |
+| FFmpeg 9 libraries         | On the bot machine                     | On the server machine                 |
+| Local streams from plugins | Supported                              | Not supported                         |
+| Best for                   | First bots, single-machine deployments | Scaling, isolating audio from the bot |
+
+### Embedded playback
 
 ```bash
 pnpm add @remedia/node
 ```
 
 ```ts
-nodes: [{ id: 'local', type: 'embedded' }];
+import { Player } from 'discord-player';
+
+const player = new Player({
+  nodes: [{ id: 'local', type: 'embedded' }],
+  send,
+});
 ```
 
-Install [FFmpeg 9 shared libraries](/docs/installation/ffmpeg) on the bot machine. Having an `ffmpeg` command alone doesn't guarantee the required libraries are available.
+`nodes` can be omitted. A Player without `nodes` uses one embedded node named `local`.
 
-This is the simplest option for a first bot.
+Install the [FFmpeg 9 shared libraries](/docs/v8/installation/ffmpeg) on the bot machine. An `ffmpeg` executable alone is not enough.
 
-## Remote playback
-
-Run Remedia on another machine:
+### Remote playback
 
 ```ts
-nodes: [
-  {
-    id: 'media-1',
-    type: 'remote',
-    url: 'wss://audio.example.com/v1/ws',
-    auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
-  },
-];
+import { Player } from 'discord-player';
+
+const player = new Player({
+  nodes: [
+    {
+      id: 'audio-1',
+      type: 'remote',
+      url: 'wss://audio.example.com/v1/ws',
+      auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
+    },
+  ],
+  send,
+});
 ```
 
-The audio server needs FFmpeg; the bot machine doesn't. Follow the [remote deployment guide](/docs/remedia/remote) for server setup and authentication.
+`send` is the gateway callback from the [getting-started tutorial](/docs/v8/getting-started/create-player). The audio server needs FFmpeg and the bot does not. See [remote playback](/docs/v8/remedia/remote) for server setup.
 
-<NextStep href="/docs/getting-started" label="Build a music bot" />
+<NextStep href="/docs/v8/getting-started" label="Build a music bot" />

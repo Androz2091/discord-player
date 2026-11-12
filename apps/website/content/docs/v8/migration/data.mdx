@@ -1,56 +1,55 @@
 ---
-title: Migrating saved data
-description: Move from legacy Track and Playlist payloads to validated v8 persistence entities.
+title: Migrate saved data
+description: Convert stored v7 tracks and playlists to the v8 format.
 ---
 
-v8's persistence shape is separate from the npm version. Serialized entities have `type`, `version`, and `data`, and store only portable information.
+v8 stores tracks and playlists as entities with a `type`, a `version`, and `data`, and keeps only portable information.
 
-## New writes
+## Write new data
 
 ```ts
-import { serialize, deserialize, encode, decode } from 'discord-player';
+import { decode, deserialize, encode, serialize } from 'discord-player';
 
 const stored = serialize(track);
-const encoded = encode(stored);
+const text = encode(stored);
 
-// Later:
-const restored = deserialize(decode(encoded));
+// Later
+const restored = deserialize(decode(text));
 ```
 
-Avoid relying on `track.toJSON()` as a storage contract. It is a display representation, not the canonical persistence format.
+Do not use `track.toJSON()` as your storage format. It is meant for display.
 
-## Legacy reads
+## Read v7 data
 
-`deserialize()` supports a defined subset of v7 `$type` Track/Playlist records as a migration boundary. It validates the record before constructing a new v8 model. Incompatible or incomplete data fails with `SerializationError`, so wrap migration in a per-record error boundary.
+`deserialize()` reads supported v7 `$type` records, validates them, and builds v8 models. Invalid or incomplete records throw a `SerializationError`, so handle each record on its own:
 
 ```ts
-import { deserialize, serialize } from 'discord-player';
+import { deserialize } from 'discord-player';
 
 for (const legacyRecord of historicalRecords) {
   try {
     const model = deserialize(legacyRecord);
-    const v8Entity = serialize(model);
 
-    await saveNewRecord(v8Entity);
+    await saveNewRecord(model.serialize());
   } catch (error) {
     await quarantineRecord(legacyRecord, error);
   }
 }
 ```
 
-`historicalRecords`, `saveNewRecord`, and `quarantineRecord` are your storage integration. Do not overwrite the original database until the transformed records have been validated.
+`historicalRecords`, `saveNewRecord`, and `quarantineRecord` belong to your storage layer. Do not overwrite your database before you validate the converted records.
 
-## Differences that affect playback
+## What changes
 
-- V7 data may not have a Track ID, so v8 generates one during reconstruction.
-- Legacy requester objects become portable requester ID strings.
-- Duration persists in milliseconds; formatted display strings may be normalized.
-- Playlist links and live playback objects are not persisted on each Track.
-- Private legacy extractor state, `raw.engine` closures, or credentials do not survive.
-- `sourceReference` should hold only public/portable identifiers, not tokens or streams.
+- v7 data may have no track ID, so v8 creates one.
+- Requester objects become requester ID strings.
+- Duration is stored in milliseconds. Formatted strings may be normalized.
+- Playlist links and live playback objects are not stored on each track.
+- Extractor state, `raw.engine`, closures, and credentials are dropped.
+- `sourceReference` should contain only public identifiers, never tokens or streams.
 
-## Safe rollout
+## Roll out safely
 
-Read legacy data, validate, write a new format in parallel, and compare sample playback resolution before switching reads. Keep an archive of original entities until rollback is no longer required.
+Read the old data, validate it, and write the new format alongside it. Compare how a sample of tracks resolve before you switch reads. Keep the original records until you no longer need to roll back.
 
-<NextStep href="/docs/migration/checklist" label="Run the migration checklist" />
+<NextStep href="/docs/v8/migration/compatibility" label="Compatibility details" />

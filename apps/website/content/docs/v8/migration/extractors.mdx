@@ -1,11 +1,11 @@
 ---
-title: Migrating extractors to plugins
-description: Keep supported BaseExtractor subclasses via emulation, then port source logic to typed operations.
+title: Migrate extractors
+description: Keep a BaseExtractor through the adapter, then port it to a source plugin.
 ---
 
-You can migrate in two phases. First keep a compatible legacy extractor through the emulation layer, then implement a modern source plugin. Both paths share `PluginRegistry`.
+Migrate in two phases. First keep a compatible extractor working through the adapter. Then rewrite it as a plugin.
 
-## Phase 1: compatibility mode
+## Phase 1: keep the extractor
 
 ```ts
 import { BaseExtractor, Track } from 'discord-player';
@@ -30,18 +30,16 @@ class MyLegacyExtractor extends BaseExtractor {
   }
 
   async stream(track: Track) {
-    return track.raw.engine;
+    return track.raw.engine as string;
   }
 }
 
 await player.extractors.register(MyLegacyExtractor, {});
 ```
 
-See the full [legacy extractor reference](/docs/plugins/legacy-extractors) for the supported compatibility lifecycle and limitations.
+`register()` takes the extractor class. See [v7 extractors](/docs/v8/plugins/legacy-extractors) for the method mapping and limits.
 
-The compatibility adapter accepts a `BaseExtractor` **constructor**, not an instance or a modern plugin descriptor. Its `validate`, `handle`, `stream`, `bridge`, related lookup, and local encoded post-stream logic map onto the new operation host.
-
-## Phase 2: native source plugin
+## Phase 2: write a plugin
 
 ```ts
 import { definePlugin, Track } from 'discord-player';
@@ -62,26 +60,26 @@ export const mySource = definePlugin({
 });
 ```
 
-Register `plugins: [mySource()]` before Player initialization, or `await player.plugins.register(mySource())` later. Do not register both the modern and legacy plugin with the same ID at the same time.
+Register `plugins: [mySource()]` in the Player options, or call `await player.plugins.register(mySource())` later. Remove the legacy extractor first. A modern plugin and a legacy extractor must not use the same ID at the same time.
 
-## The emulation contract
+## Method mapping
 
-| Legacy hook             | Modern operation         |
-| ----------------------- | ------------------------ |
-| `validate`              | `search.query.match`     |
-| `handle`                | `search.query.resolve`   |
-| `stream`                | `track.stream`           |
-| `getRelatedTracks`      | `track.related`          |
-| `bridge`                | `track.bridge`           |
-| `handlePostStream`      | Local `stream.transform` |
-| `activate / deactivate` | `setup / destroy`        |
+| v7 extractor                | v8 operation             |
+| --------------------------- | ------------------------ |
+| `validate`                  | `search.query.match`     |
+| `handle`                    | `search.query.resolve`   |
+| `stream`                    | `track.stream`           |
+| `getRelatedTracks`          | `track.related`          |
+| `bridge`                    | `track.bridge`           |
+| `handlePostStream`          | Local `stream.transform` |
+| `activate` and `deactivate` | `setup` and `destroy`    |
 
-## Known incompatibilities
+## What does not carry over
 
-A legacy extractor requiring raw voice packets, old stream dispatcher objects, customized PCM/Opus format overrides, or a private execution session cannot rely on compatibility mode. Move that functionality to Remedia-backed APIs or redesign the source integration.
+An extractor that needs raw voice packets, the old stream dispatcher, PCM or Opus format overrides, or a private session cannot run through the adapter. Move that part to Remedia features or redesign the source.
 
-Persisted Track `raw.engine` fields are not portable. A restored Track needs a new source resolver using its public `url` or a portable `sourceReference`.
+Saved tracks must not depend on `raw.engine`. Restored tracks need a public `url` or a portable `sourceReference`.
 
-Remote audio nodes require URLs/files accessible to the server. A Node.js Readable resolved by a compatibility extractor is local-only.
+A remote node can only play URLs and files it can reach. A `Readable` from an extractor works with embedded nodes only.
 
-<NextStep href="/docs/migration/data" label="Migrate stored Track and Playlist data" />
+<NextStep href="/docs/v8/migration/data" label="Migrate saved data" />
