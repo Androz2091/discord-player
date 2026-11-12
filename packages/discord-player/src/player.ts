@@ -111,6 +111,9 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Current package version. */
   static readonly version = packageVersion;
 
+  /** Maximum Gateway dispatches retained while the playback backend starts. */
+  private static readonly GATEWAY_BUFFER_LIMIT = 1024;
+
   /** Shared execution host for modern and legacy sources. */
   public readonly plugins: PluginRegistry;
 
@@ -135,6 +138,13 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   private initializationClientId: string | null = null;
 
   private backendInitialized = false;
+
+  private backendFailed = false;
+
+  /** Ordered dispatches retained until the selected backend is ready to receive them. */
+  private gatewayBuffer: Record<string, unknown>[] = [];
+
+  private gatewayBufferOverflowed = false;
 
   private initialPlugins: Promise<void>;
 
@@ -299,6 +309,8 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     const backend = this.customBackend;
     if (!backend) return Promise.resolve();
     this.backendReady = false;
+    this.backendFailed = true;
+    this.clearGatewayBuffer();
     this.backendDisposal = (async () => {
       const errors: unknown[] = [];
       try {
@@ -355,6 +367,9 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
           ) ||
           typeof backend.capabilities.crossfade !== 'boolean' ||
           typeof backend.capabilities.filters !== 'boolean' ||
+          (backend.capabilities.pluginHosts !== undefined &&
+            (!Array.isArray(backend.capabilities.pluginHosts) ||
+              !backend.capabilities.pluginHosts.every((host) => typeof host === 'string' && host.length > 0))) ||
           !['initialize', 'receive', 'createSession', 'destroy'].every(
             (name) => typeof Reflect.get(backend, name) === 'function',
           )
@@ -368,6 +383,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
         if (this.backendDisposal) throw new Error('Playback provider was removed during initialization.');
         this.backendReady = true;
         this.backendInitialized = true;
+        this.replayGateway();
         try {
           this.plugins.executeSync('player.initialized', { playerId: this.id });
         } catch (error) {
@@ -375,6 +391,8 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
         }
         return;
       } catch (error) {
+        this.backendFailed = true;
+        this.clearGatewayBuffer();
         const errors: unknown[] = [error];
         try {
           await this.disposeCustomBackend();
@@ -416,6 +434,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       }
       this.remedia = client;
       this.backendInitialized = true;
+      this.clearGatewayBuffer();
       this.attachClientListeners(client);
       try {
         this.plugins.executeSync('player.initialized', { playerId: this.id });
@@ -424,6 +443,8 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       }
     } catch (error) {
       this.#clientId = null;
+      this.backendFailed = true;
+      this.clearGatewayBuffer();
 
       try {
         await this.plugins.destroy();
@@ -496,8 +517,9 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Forward every raw Discord Gateway dispatch to the active playback backend and track queue voice states.
    *
    * The active backend needs the complete dispatch stream, including `READY`, to track Gateway sessions and
-   * dispatch ordering; do not filter packets before calling this method. Discord Player separately consumes
-   * `VOICE_STATE_UPDATE` for queue voice policies. Packets are ignored before `initialize()` and after `destroy()`.
+   * dispatch ordering; do not filter packets before calling this method. Dispatches received before the selected
+   * backend is ready are retained in order so a custom provider still observes initial Gateway state. Discord
+   * Player separately consumes `VOICE_STATE_UPDATE` for queue voice policies. Packets are ignored after `destroy()`.
    * @param payload Raw Gateway dispatch packet from the Discord client's event adapter.
    */
   public receive(
@@ -505,8 +527,50 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     payload: Record<string, unknown>,
   ): void {
     if (this.playbackSignal.aborted || this.backendDisposal) return;
+
+    if (!this.backendInitialized) {
+      this.bufferGateway(payload);
+      return;
+    }
+
+    this.dispatchGateway(payload);
+  }
+
+  private bufferGateway(payload: Record<string, unknown>): void {
+    if (this.backendFailed) return;
+
+    if (this.gatewayBuffer.length >= DiscordPlayer.GATEWAY_BUFFER_LIMIT) {
+      if (!this.gatewayBufferOverflowed) {
+        this.gatewayBufferOverflowed = true;
+        this.emit(
+          'debug',
+          `Discord Player dropped Gateway dispatches beyond the ${DiscordPlayer.GATEWAY_BUFFER_LIMIT}-packet pre-initialization buffer.`,
+        );
+      }
+      return;
+    }
+
+    this.gatewayBuffer.push(payload);
+  }
+
+  private replayGateway(): void {
+    const buffered = this.gatewayBuffer;
+
+    this.gatewayBuffer = [];
+    this.gatewayBufferOverflowed = false;
+
+    for (const payload of buffered) this.dispatchGateway(payload);
+  }
+
+  private clearGatewayBuffer(): void {
+    this.gatewayBuffer = [];
+    this.gatewayBufferOverflowed = false;
+  }
+
+  private dispatchGateway(payload: Record<string, unknown>): void {
     const backend = this.customBackend ?? this.remedia;
     if (!backend) return;
+
     backend.receive(payload);
 
     if (
@@ -718,6 +782,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   public destroy(): Promise<void> {
     if (this.destruction) return this.destruction;
     this.plugins.assertNotDispatching();
+    this.clearGatewayBuffer();
     this.destruction = Promise.resolve().then(async () => {
       const errors: unknown[] = [];
       try {

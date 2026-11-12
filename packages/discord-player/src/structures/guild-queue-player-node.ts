@@ -1,4 +1,4 @@
-import type { PlaybackSession, PlaybackSessionOptions } from '../playback-backend.js';
+import type { PlaybackBackend, PlaybackSession, PlaybackSessionOptions } from '../playback-backend.js';
 import { intercept } from '../plugins/capabilities.js';
 import { GuildQueuePlayerAudioFilters } from './guild-queue-player-audio-filters.js';
 import type {
@@ -62,6 +62,39 @@ export interface PlayRawResult<Metadata = unknown> {
 
   /** Playback session that owns the playback generation. */
   session: PlaybackSession<Metadata>;
+}
+
+const PLAYBACK_STATES = [
+  'idle',
+  'starting',
+  'playing',
+  'pausing',
+  'resuming',
+  'paused',
+  'stopping',
+  'stopped',
+  'completed',
+  'failed',
+] as const;
+
+const CONNECTION_STATES = [
+  'connecting',
+  'negotiating_dave',
+  'connected',
+  'reconnecting',
+  'disconnecting',
+  'disconnected',
+  'failed',
+] as const;
+
+interface SessionConfiguration {
+  volume: number;
+
+  selfDeaf: boolean;
+
+  selfMute: boolean;
+
+  filterGraph: string | null;
 }
 
 function timecode(milliseconds: number): string {
@@ -153,9 +186,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       userId: this.player.getClientId(),
     });
 
-    this.#currentSession = session;
-    this.rememberSessionConfiguration(session);
-    this.attachSessionListeners(session);
+    await this.adoptSession(session);
 
     return session as PlaybackSession<M>;
   }
@@ -234,10 +265,8 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       userId: this.player.getClientId(),
     });
 
-    this.#currentSession = session;
-    this.attachSessionListeners(session);
-
     try {
+      await this.adoptSession(session);
       await session.connect({
         ...(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs }),
         ...(this.player.playbackBackend
@@ -247,7 +276,13 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       this.rememberSessionConfiguration(session);
       this.queue.voice.connected(session);
     } catch (error) {
-      await this.destroySessionUnlocked();
+      if (this.session === session) {
+        try {
+          await this.destroySessionUnlocked();
+        } catch (cleanup) {
+          throw new AggregateError([error, cleanup], 'Playback session connection failed', { cause: error });
+        }
+      }
 
       throw error;
     }
@@ -301,38 +336,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       this.player.playbackSignal.throwIfAborted();
       if (this.player.playbackBackend !== backend)
         throw new Error('Playback provider was removed during session creation.');
-      if (
-        !session ||
-        ![
-          'connect',
-          'move',
-          'dispose',
-          'play',
-          'stop',
-          'pause',
-          'resume',
-          'seek',
-          'setVolume',
-          'setSelfDeaf',
-          'setSelfMute',
-          'getPlaybackTime',
-          'on',
-          'off',
-        ].every((name) => typeof Reflect.get(session, name) === 'function')
-      )
-        throw new TypeError('Playback backend returned an invalid session implementation.');
-      if (!session.snapshot || !Number.isSafeInteger(session.snapshot.generation))
-        throw new TypeError('Playback backend returned an invalid session snapshot.');
-      if (session.guildId !== this.queue.guildId || !session.sessionId)
-        throw new Error('Playback backend returned an invalid session identity.');
-      if (!backend.capabilities.crossfade && session.snapshot.crossfade?.enabled)
-        throw new Error('Playback backend enabled undeclared crossfade.');
-      if (!backend.capabilities.filters && session.snapshot.filterGraph)
-        throw new Error('Playback backend enabled undeclared audio filters.');
-      if (backend.capabilities.filters && !session.filters)
-        throw new Error('Playback backend declared filters without session controls.');
-      if (backend.capabilities.crossfade && (!session.stageNext || !session.clearStage || !session.stagedSource))
-        throw new Error('Playback backend declared crossfade without session staging controls.');
+      this.assertBackendSession(session, backend);
       return session;
     } catch (error) {
       if (session && typeof session.dispose === 'function') {
@@ -344,6 +348,149 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       }
       throw error;
     }
+  }
+
+  private assertBackendSession(session: PlaybackSession, backend: PlaybackBackend): void {
+    if (!session || typeof session !== 'object')
+      throw new TypeError('Playback backend returned an invalid session implementation.');
+
+    if (
+      ![
+        'connect',
+        'move',
+        'dispose',
+        'play',
+        'stop',
+        'pause',
+        'resume',
+        'seek',
+        'setVolume',
+        'setSelfDeaf',
+        'setSelfMute',
+        'getPlaybackTime',
+        'on',
+        'off',
+      ].every((name) => typeof Reflect.get(session, name) === 'function')
+    )
+      throw new TypeError('Playback backend returned an invalid session implementation.');
+
+    if (!session.snapshot || !Number.isSafeInteger(session.snapshot.generation))
+      throw new TypeError('Playback backend returned an invalid session snapshot.');
+
+    if (typeof session.sessionId !== 'string' || !session.sessionId)
+      throw new TypeError('Playback backend returned an invalid session identity.');
+
+    if (session.guildId !== this.queue.guildId)
+      throw new Error('Playback backend returned an invalid session identity.');
+
+    if (typeof session.channelId !== 'string' || !session.channelId)
+      throw new TypeError('Playback backend returned an invalid session channel.');
+
+    if (session.nodeId !== null && typeof session.nodeId !== 'string')
+      throw new TypeError('Playback backend returned an invalid session node.');
+
+    if (!CONNECTION_STATES.includes(session.connectionState))
+      throw new TypeError('Playback backend returned an invalid connection state.');
+
+    if (!PLAYBACK_STATES.includes(session.state) || !PLAYBACK_STATES.includes(session.snapshot.state))
+      throw new TypeError('Playback backend returned an invalid playback state.');
+
+    if (
+      !session.position ||
+      typeof session.position !== 'object' ||
+      !('mediaMs' in session.position) ||
+      !(session.position.mediaMs === null || Number.isFinite(session.position.mediaMs))
+    )
+      throw new TypeError('Playback backend returned an invalid playback position.');
+
+    if (session.durationMs !== null && (!Number.isFinite(session.durationMs) || session.durationMs < 0))
+      throw new TypeError('Playback backend returned an invalid source duration.');
+
+    if (!Number.isFinite(session.volume) || session.volume < 0 || session.volume > 2)
+      throw new TypeError('Playback backend returned an invalid volume.');
+
+    if (typeof session.selfDeaf !== 'boolean' || typeof session.selfMute !== 'boolean')
+      throw new TypeError('Playback backend returned invalid voice flags.');
+
+    if (session.snapshot.filterGraph !== null && typeof session.snapshot.filterGraph !== 'string')
+      throw new TypeError('Playback backend returned an invalid filter graph.');
+
+    const crossfade = session.snapshot.crossfade;
+
+    if (
+      crossfade !== null &&
+      crossfade !== undefined &&
+      (crossfade.enabled !== true ||
+        !Number.isFinite(crossfade.durationMs) ||
+        crossfade.durationMs <= 0 ||
+        !Number.isFinite(crossfade.prepareBeforeMs) ||
+        crossfade.prepareBeforeMs < 0 ||
+        crossfade.curve !== 'equalPower')
+    )
+      throw new TypeError('Playback backend returned an invalid crossfade snapshot.');
+
+    if (session.filters) {
+      if (
+        (session.filters.graph !== null && typeof session.filters.graph !== 'string') ||
+        typeof session.filters.set !== 'function' ||
+        typeof session.filters.clear !== 'function'
+      )
+        throw new TypeError('Playback backend returned invalid filter controls.');
+    }
+
+    for (const name of ['stageNext', 'clearStage', 'stagedSource'] as const) {
+      const value = session[name];
+
+      if (value !== undefined && typeof value !== 'function')
+        throw new TypeError('Playback backend returned invalid staging controls.');
+    }
+
+    if (!backend.capabilities.crossfade && crossfade?.enabled)
+      throw new Error('Playback backend enabled undeclared crossfade.');
+
+    if (!backend.capabilities.filters && session.snapshot.filterGraph)
+      throw new Error('Playback backend enabled undeclared audio filters.');
+
+    if (backend.capabilities.filters && !session.filters)
+      throw new Error('Playback backend declared filters without session controls.');
+
+    if (
+      backend.capabilities.crossfade &&
+      (typeof session.stageNext !== 'function' ||
+        typeof session.clearStage !== 'function' ||
+        typeof session.stagedSource !== 'function')
+    )
+      throw new Error('Playback backend declared crossfade without session staging controls.');
+  }
+
+  private async adoptSession(session: PlaybackSession): Promise<void> {
+    const previousDetach = this.detachSessionListeners;
+    let detach: (() => void) | null = null;
+    let configuration: SessionConfiguration;
+
+    try {
+      configuration = this.readSessionConfiguration(session);
+      previousDetach?.();
+      detach = this.attachSessionListeners(session);
+    } catch (error) {
+      detach?.();
+      this.detachSessionListeners = null;
+      const errors: unknown[] = [error];
+
+      try {
+        await session.dispose();
+      } catch (cleanup) {
+        errors.push(cleanup);
+      }
+
+      if (errors.length > 1) throw new AggregateError(errors, 'Playback session attachment failed', { cause: error });
+
+      throw error;
+    }
+
+    this.#currentSession = session;
+    this.detachSessionListeners = detach;
+    this.applySessionConfiguration(configuration);
   }
 
   private async sessionPolicy(
@@ -444,9 +591,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       throw new Error(`Remedia node ${nodeId} cannot access required source hosts (${hosts.join(', ')})`);
   }
 
-  private attachSessionListeners(session: PlaybackSession): void {
-    this.detachSessionListeners?.();
-
+  private attachSessionListeners(session: PlaybackSession): () => void {
     const cleanups: (() => void)[] = [];
     type SessionListener = <Name extends keyof DiscordSessionEvents>(
       name: Name,
@@ -461,85 +606,102 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       cleanups.push(() => unsubscribe(name, handler));
     };
 
-    // Native observation remains available even when generation correlation rejects an event.
-    const observe = <Name extends keyof DiscordSessionEvents>(name: Name) => {
-      on(name, (...args) => {
-        // A mapped tuple keeps event names correlated with their exported native payloads.
-        this.queue.emit('sessionEvent', ...([name, args[0]] as NativeSessionObservation));
+    try {
+      // Native observation remains available even when generation correlation rejects an event.
+      const observe = <Name extends keyof DiscordSessionEvents>(name: Name) => {
+        on(name, (...args) => {
+          // A mapped tuple keeps event names correlated with their exported native payloads.
+          this.queue.emit('sessionEvent', ...([name, args[0]] as NativeSessionObservation));
+        });
+      };
+
+      for (const name of [
+        'playbackStarted',
+        'playbackCompleted',
+        'playbackStopped',
+        'playbackFailed',
+        'playbackPaused',
+        'playbackResumed',
+        'playbackSeeked',
+        'prepareRequested',
+        'stageReady',
+        'stageFailed',
+        'stageInvalidated',
+        'transitionCancelled',
+        'filterChanged',
+        'volumeChanged',
+        'voiceStateChanged',
+        'voiceFailed',
+        'sessionDisposed',
+      ] as const)
+        observe(name);
+
+      const active = () => session === this.session && !this.queue.destroyed;
+
+      on('prepareRequested', (event) => this.queue.handlePrepareRequested(session, event));
+
+      for (const name of ['stageReady', 'stageFailed', 'stageInvalidated', 'transitionCancelled'] as const) {
+        on(name, (event) => this.queue.handleStageEvent(session, name, event));
+      }
+
+      on('playbackStarted', (event) => this.queue.handlePlaybackStarted(session, event));
+      on('playbackCompleted', (event) => this.queue.handlePlaybackTerminal(session, 'natural', event));
+      on('playbackStopped', (event) => this.queue.handlePlaybackTerminal(session, 'stopped', event));
+      on('playbackFailed', (event) => this.queue.handlePlaybackTerminal(session, 'failed', event));
+      on('playbackPaused', (event) => {
+        if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerPause', event);
       });
-    };
+      on('playbackResumed', (event) => {
+        if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerResume', event);
+      });
+      on('playbackSeeked', (event) => {
+        if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerSeek', event);
+      });
+      on('volumeChanged', (event) => {
+        if (!active()) return;
 
-    for (const name of [
-      'playbackStarted',
-      'playbackCompleted',
-      'playbackStopped',
-      'playbackFailed',
-      'playbackPaused',
-      'playbackResumed',
-      'playbackSeeked',
-      'prepareRequested',
-      'stageReady',
-      'stageFailed',
-      'stageInvalidated',
-      'transitionCancelled',
-      'filterChanged',
-      'volumeChanged',
-      'voiceStateChanged',
-      'voiceFailed',
-      'sessionDisposed',
-    ] as const)
-      observe(name);
+        this.#volume = event.volume * 100;
+        this.queue.options.volume = this.#volume;
+        this.queue.emit('volumeChange', event.previousVolume * 100, this.#volume, event);
+      });
+      on('filterChanged', (event) => {
+        if (!active()) return;
 
-    const active = () => session === this.session && !this.queue.destroyed;
+        this.queue.options.filterGraph = event.graph;
+        this.queue.emit('audioFiltersUpdate', event.previousGraph, event.graph, event);
+      });
+      on('voiceStateChanged', (event) => {
+        if (!active()) return;
 
-    on('prepareRequested', (event) => this.queue.handlePrepareRequested(session, event));
+        this.queue.emit('voiceConnectionStateChange', event.previousState, event.state, event);
 
-    for (const name of ['stageReady', 'stageFailed', 'stageInvalidated', 'transitionCancelled'] as const) {
-      on(name, (event) => this.queue.handleStageEvent(session, name, event));
+        if (event.state === 'connected') this.queue.voice.connected(session);
+
+        if (event.state === 'connected')
+          void this.queue.reconcileCrossfade(session).catch((error) => this.player.emit('debug', String(error)));
+      });
+      on('voiceFailed', (event) => {
+        if (active()) this.queue.emit('error', event.error, event);
+      });
+      on('sessionDisposed', (event) => this.queue.emit('sessionDisposed', event));
+    } catch (error) {
+      const errors: unknown[] = [error];
+
+      for (const cleanup of cleanups) {
+        try {
+          cleanup();
+        } catch (cleanupError) {
+          errors.push(cleanupError);
+        }
+      }
+
+      if (errors.length > 1)
+        throw new AggregateError(errors, 'Playback session listener attachment failed', { cause: error });
+
+      throw error;
     }
 
-    on('playbackStarted', (event) => this.queue.handlePlaybackStarted(session, event));
-    on('playbackCompleted', (event) => this.queue.handlePlaybackTerminal(session, 'natural', event));
-    on('playbackStopped', (event) => this.queue.handlePlaybackTerminal(session, 'stopped', event));
-    on('playbackFailed', (event) => this.queue.handlePlaybackTerminal(session, 'failed', event));
-    on('playbackPaused', (event) => {
-      if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerPause', event);
-    });
-    on('playbackResumed', (event) => {
-      if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerResume', event);
-    });
-    on('playbackSeeked', (event) => {
-      if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerSeek', event);
-    });
-    on('volumeChanged', (event) => {
-      if (!active()) return;
-
-      this.#volume = event.volume * 100;
-      this.queue.options.volume = this.#volume;
-      this.queue.emit('volumeChange', event.previousVolume * 100, this.#volume, event);
-    });
-    on('filterChanged', (event) => {
-      if (!active()) return;
-
-      this.queue.options.filterGraph = event.graph;
-      this.queue.emit('audioFiltersUpdate', event.previousGraph, event.graph, event);
-    });
-    on('voiceStateChanged', (event) => {
-      if (!active()) return;
-
-      this.queue.emit('voiceConnectionStateChange', event.previousState, event.state, event);
-
-      if (event.state === 'connected') this.queue.voice.connected(session);
-
-      if (event.state === 'connected')
-        void this.queue.reconcileCrossfade(session).catch((error) => this.player.emit('debug', String(error)));
-    });
-    on('voiceFailed', (event) => {
-      if (active()) this.queue.emit('error', event.error, event);
-    });
-    on('sessionDisposed', (event) => this.queue.emit('sessionDisposed', event));
-
-    this.detachSessionListeners = () => {
+    return () => {
       for (const cleanup of cleanups) cleanup();
     };
   }
@@ -551,11 +713,24 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   private rememberSessionConfiguration(session: PlaybackSession): void {
-    this.#volume = session.volume * 100;
-    this.queue.options.volume = this.#volume;
-    this.queue.options.selfDeaf = session.selfDeaf;
-    this.queue.options.selfMute = session.selfMute;
-    this.queue.options.filterGraph = session.snapshot.filterGraph;
+    this.applySessionConfiguration(this.readSessionConfiguration(session));
+  }
+
+  private readSessionConfiguration(session: PlaybackSession): SessionConfiguration {
+    return {
+      volume: session.volume * 100,
+      selfDeaf: session.selfDeaf,
+      selfMute: session.selfMute,
+      filterGraph: session.snapshot.filterGraph,
+    };
+  }
+
+  private applySessionConfiguration(configuration: SessionConfiguration): void {
+    this.#volume = configuration.volume;
+    this.queue.options.volume = configuration.volume;
+    this.queue.options.selfDeaf = configuration.selfDeaf;
+    this.queue.options.selfMute = configuration.selfMute;
+    this.queue.options.filterGraph = configuration.filterGraph;
   }
 
   /** Play a Track through the managed queue, preserving v7 scheduling.
