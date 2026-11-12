@@ -999,13 +999,19 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /**
    * Return the formatted timeline for the current queue Track, or `null` when no Track is selected.
-   * @remarks `current` is output elapsed time and `total` is the source duration, so `progress` is clamped to 100
-   * and is approximate while a tempo-changing filter is active.
+   * @param ignoreFilters Whether to read the original source position instead of Remedia's filtered output clock.
+   * @remarks Remedia reports output elapsed time separately from the source position but does not expose the
+   * duration multiplier of tempo-changing filters. Both modes therefore use the source duration as the total,
+   * while `ignoreFilters` selects the source media position when one is available. `progress` is clamped to 100.
    */
-  public getTimestamp(): PlayerTimestamp | null {
+  public getTimestamp(
+    /** Whether to read the source timeline instead of Remedia's filtered output clock. */
+    ignoreFilters = false,
+  ): PlayerTimestamp | null {
     if (!this.queue.currentTrack) return null;
 
-    const current = this.playbackTime;
+    const sourcePosition = this.session?.position.mediaMs ?? null;
+    const current = ignoreFilters && sourcePosition !== null ? sourcePosition : this.playbackTime;
     const total = this.totalDuration;
 
     return {

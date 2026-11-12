@@ -42,6 +42,8 @@ export async function setup(
     maxHistorySize?: number;
 
     queueOptions?: Partial<GuildQueueOptions>;
+
+    guildId?: string;
   } = {},
 ) {
   const player = new DiscordPlayer({ nodes: [], send: vi.fn(), ...options.playerOptions });
@@ -63,7 +65,7 @@ export async function setup(
 
   player.remedia = backend.asClient();
 
-  const queue = await player.nodes.create('guild-one', {
+  const queue = await player.nodes.create(options.guildId ?? 'guild-one', {
     maxSize: options.maxSize,
     maxHistorySize: options.maxHistorySize,
     ...options.queueOptions,

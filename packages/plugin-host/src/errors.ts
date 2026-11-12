@@ -8,6 +8,8 @@ export const DiscordPlayerErrorCode = {
   SourceUnavailable: 'ERR_SOURCE_UNAVAILABLE',
   /** Data could not be serialized or reconstructed. */
   Serialization: 'ERR_SERIALIZATION',
+  /** A guild-scoped hook was invoked without a valid context or explicit guild. */
+  IllegalHookInvocation: 'ERR_ILLEGAL_HOOK_INVOCATION',
 } as const;
 
 /** Error code union for Discord Player errors. */
@@ -49,6 +51,26 @@ export class SourceUnavailableError extends DiscordPlayerError {
     track: string,
   ) {
     super(`No source plugin is available to resolve Track "${track}".`, DiscordPlayerErrorCode.SourceUnavailable);
+  }
+}
+
+/** Error thrown when a guild-scoped hook cannot resolve a Player or guild queue. */
+export class IllegalHookInvocationError extends DiscordPlayerError {
+  /**
+   * Create a hook invocation error.
+   * @param target Hook name or subsystem that was invoked illegally.
+   * @param message Additional explanation of the required invocation.
+   */
+  public constructor(
+    /** Hook name or subsystem that was invoked illegally. */
+    target: string,
+    /** Additional explanation of the required invocation. */
+    message?: string,
+  ) {
+    super(
+      `Illegal invocation of ${target} hook.${message ? ` ${message}` : ''}`,
+      DiscordPlayerErrorCode.IllegalHookInvocation,
+    );
   }
 }
 

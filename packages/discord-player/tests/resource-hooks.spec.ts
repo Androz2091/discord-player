@@ -43,20 +43,59 @@ it('applies queue, Player and global precedence in the correct Player async cont
   expect(global).toHaveBeenCalledOnce();
 });
 
-it('supports local encoded hooks and descriptor interception without reviving a decoder pipeline', async () => {
+it('uses arbitrary as the v7 query fallback and runs descriptor interception after provider resolution', async () => {
   const { queue, session } = await fixture();
   const stream = Readable.from(['encoded']);
-  cleanups.push(onBeforeCreateStream(async () => stream));
+  const queryTypes: unknown[] = [];
+  queue.onBeforeCreateStream = async (_track, queryType) => {
+    queryTypes.push(queryType);
+
+    return null;
+  };
   const extracted = vi.fn(async (input) => input);
   cleanups.push(onStreamExtracted(extracted));
-  const after = vi.fn(async (input: Readable) => ({ stream: input }));
+  const after = vi.fn(async (input: Readable) => ({ stream: input, type: 'legacy' }));
   cleanups.push(onAfterCreateStream(after));
   const play = vi.spyOn(session, 'play');
-  const track = new TestTrack('one');
+  const track = new TestTrack('one', async () => ({ stream }));
+
   await queue.play(track);
-  expect(extracted.mock.calls[0]?.slice(1, 3)).toEqual([track, queue]);
+
+  expect(queryTypes).toEqual(['arbitrary']);
+  expect(extracted).toHaveBeenCalledExactlyOnceWith({ stream }, track, queue, expect.any(AbortSignal));
   expect(after).toHaveBeenCalledExactlyOnceWith(stream, queue, track, expect.any(AbortSignal));
   expect(play.mock.lastCall?.[0]).toEqual({ stream });
+});
+
+it('keeps v7 onBeforeCreateStream precedence over descriptor interception', async () => {
+  const { queue, session } = await fixture();
+  const stream = Readable.from(['intercepted']);
+  queue.onBeforeCreateStream = async () => stream;
+  const extracted = vi.fn(async (input) => input);
+  cleanups.push(onStreamExtracted(extracted));
+  const play = vi.spyOn(session, 'play');
+
+  await queue.play(
+    new TestTrack('one', async () => {
+      throw new Error('provider should be bypassed');
+    }),
+  );
+
+  expect(extracted).not.toHaveBeenCalled();
+  expect(play.mock.lastCall?.[0]).toEqual({ stream });
+});
+
+it('keeps the resolved source when descriptor interception returns nullish', async () => {
+  const { queue, session } = await fixture();
+  const resolved = { stream: Readable.from(['resolved']) };
+  const extracted = vi.fn(async () => undefined);
+  cleanups.push(onStreamExtracted(extracted));
+  const play = vi.spyOn(session, 'play');
+
+  await queue.play(new TestTrack('nullish', async () => resolved));
+
+  expect(extracted).toHaveBeenCalledOnce();
+  expect(play.mock.lastCall?.[0]).toEqual(resolved);
 });
 
 it('rejects remote process-local bytes with an actionable error and preserves assignment', async () => {
