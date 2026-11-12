@@ -1,6 +1,6 @@
 # Remedia source-host integration
 
-Supported with published `@remedia/client@0.1.0-dev.7`, `@remedia/plugin-host@0.1.0-dev.7`,
+Supported with published `@remedia/client@0.1.0`, `@remedia/plugin-host@0.1.0`,
 and the matching Remedia server.
 
 The standalone adapter exposes `GET /.well-known/remedia` and
@@ -9,7 +9,9 @@ operations are `source.search`, `metadata.execute`, `source.related`, and `sourc
 Discovery names are display labels. Stable deployment `hostId` values belong in
 operator configuration and in each Track's portable source reference.
 
-Configure a client plugin with `definePlugin({ id, remoteHost: { hostId, url, token?, timeoutMs? } })`, then pass its factory registration in `Player({ plugins: [remotePlugin()], ... })`.
+Automatic discovery through `RemediaClient.plugins.list()` is the default. Allow `source.search` and `source.stream` on the server; Discord Player forwards searches with `plugins.execute()`, preserving portable provider state and stamping the executing `nodeId` on Track references. Related metadata uses `source.related`, and Track-based lyrics use `metadata.execute` when allowed. Node affinity survives serialization and queue history. Conflicting queue origins, sticky assignments and existing sessions fail without migration. Remedia owns discovery caching and forwarding authorization; unsupported servers and embedded nodes keep local plugins.
+
+For optional direct HTTP access, configure a client plugin with `definePlugin({ id, remoteHost: { hostId, url, token?, timeoutMs? } })`, then pass its factory registration in `Player({ plugins: [remotePlugin()], ... })`.
 The bot performs metadata operations, reconstructing canonical Tracks with
 `deserializeSourceResult()`. It sends remote playback and staged-next sources as:
 
@@ -35,7 +37,7 @@ reopens a grant: replaying a queue entry runs the operation again. Credentials a
 `Track.serialize()` omits it and preserves durable provider/deployment identity.
 Expired state is reconstructed on the standalone host when possible.
 
-See the [complete deployment example](https://discord-player.js.org/docs/plugins/remote-hosts).
+See the [complete deployment example](https://discord-player.js.org/docs/v8/plugins/remote-hosts).
 
 ## Media probing, Range and reopening
 
@@ -47,7 +49,7 @@ Discord voice playback, Rust playback, seeking, reconnects or recovery. Small
 MP4/M4A files with a trailing moov atom may happen to fit FFmpeg's internal buffers;
 large or interleaved files can require seeking and must not be advertised as safe.
 
-Remedia dev.7's generic operation path treats host grants as single-use encoded
+Remedia 0.1.0's generic operation path treats host grants as single-use encoded
 inputs, redeems each with one plain GET (no Range, reopen or reconnect), supports
 forward-only seeking, and owns native decoding. Replay re-executes the operation. A grant is not a
 seekable durable URL. Source providers must support reconstruction/reopening for

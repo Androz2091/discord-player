@@ -29,7 +29,14 @@ export interface LyricsResult {
 /** Validate provider-neutral records crossing a process boundary. @internal */
 export const lyricsResultSchema = z.strictObject({
   trackId: z.string().optional(),
-  provider: z.strictObject({ pluginId: z.string().min(1), hostId: z.string().optional(), data: z.json() }).optional(),
+  provider: z
+    .strictObject({
+      pluginId: z.string().min(1),
+      hostId: z.string().optional(),
+      nodeId: z.string().optional(),
+      data: z.json(),
+    })
+    .optional(),
   plain: z.discriminatedUnion('available', [
     z.strictObject({ available: z.literal(false) }),
     z.strictObject({ available: z.literal(true), text: z.string() }),
@@ -61,6 +68,7 @@ export function normalizeLyrics(result: LyricsResult): LyricsResult {
             pluginId: value.provider.pluginId,
             data: value.provider.data,
             ...(value.provider.hostId === undefined ? {} : { hostId: value.provider.hostId }),
+            ...(value.provider.nodeId === undefined ? {} : { nodeId: value.provider.nodeId }),
           },
         }
       : {}),
@@ -156,6 +164,10 @@ export async function searchLyrics(
       seen.add(key);
       results.push(normalized);
     }
+  }
+
+  if (!results.length) {
+    return (await plugins.searchRemoteLyrics(input, signal)).map(normalizeLyrics);
   }
 
   return results;

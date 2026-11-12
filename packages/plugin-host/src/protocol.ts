@@ -56,7 +56,11 @@ export function deserializeSourceResult(result: PortableSourceResult): SearchRes
  * @returns Portable metadata with an optional opaque state token. Persistence should use serialize().
  */
 export function serializeSourceTrack(track: Track): PortableSourceTrack {
-  return { ...track.serialize(), ...(track.sourceState ? { sourceState: track.sourceState } : {}) };
+  const serialized = track.serialize();
+  // Placement belongs to the consuming Player, never to source-host execution.
+  if (serialized.data.sourceReference) delete serialized.data.sourceReference.nodeId;
+  if (serialized.data.lyricsReference) delete serialized.data.lyricsReference.nodeId;
+  return { ...serialized, ...(track.sourceState ? { sourceState: track.sourceState } : {}) };
 }
 
 /** Portable search input, normalized before crossing the metadata boundary. */

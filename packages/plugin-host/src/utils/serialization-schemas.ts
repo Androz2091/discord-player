@@ -7,6 +7,7 @@ export const nonNegative = z.number().nonnegative();
 const sourceReferenceSchema = z.strictObject({
   pluginId: z.string(),
   hostId: z.string().min(1).max(128).optional(),
+  nodeId: z.string().min(1).optional(),
   data: z.json(),
 });
 

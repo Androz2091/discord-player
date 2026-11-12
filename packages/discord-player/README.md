@@ -11,7 +11,7 @@ Requires Node.js 22.18+ and ESM.
 ```bash
 pnpm add discord-player@dev
 # For playback inside your bot process:
-pnpm add @remedia/node@0.1.0-dev.7
+pnpm add @remedia/node
 ```
 
 Starting a new bot? `npm create music-bot@dev my-bot` generates a working project. v8 is a preview release, so use the `dev` tag: without it your package manager installs v7.

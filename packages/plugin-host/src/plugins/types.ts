@@ -14,6 +14,9 @@ export type ProviderReference = {
   /** Deployment identity, separate from the provider ID. Omit for ordinary embedded sources. */
   hostId?: string;
 
+  /** Remedia node owning this deployment; retained across serialization and history. */
+  nodeId?: string;
+
   /** Registered source plugin ID. */
   pluginId: string;
 

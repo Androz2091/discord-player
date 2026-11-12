@@ -612,7 +612,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     options.signal?.throwIfAborted();
 
     if (typeof query === 'string') await this.ready();
-    if (options.hostId && !this.plugins.hasHost(options.hostId))
+    if (options.hostId && !this.remedia && !this.plugins.hasHost(options.hostId))
       throw new Error(`Source host ${options.hostId} is not configured`);
 
     return this.sources.search(query, {
@@ -663,7 +663,11 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     const hostId = track.sourceReference?.hostId;
 
     if (hostId) {
-      if (!this.plugins.hasHost(hostId)) throw new Error(`Source host ${hostId} is not configured`);
+      if (!track.sourceReference?.nodeId && !this.plugins.hasHost(hostId))
+        throw new Error(`Source host ${hostId} is not configured`);
+
+      if (track.sourceReference?.nodeId && track.sourceReference.nodeId !== nodeId)
+        throw new Error('Remote Track must play on its originating Remedia node');
 
       if (!track.sourceReference?.pluginId) throw new Error('Remote Track has no provider identity');
 
