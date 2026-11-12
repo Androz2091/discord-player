@@ -576,6 +576,14 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       if (candidates.length) nodeId = await selector(candidates, { guildId: this.queue.guildId });
     }
 
+    if (
+      options.nodeId &&
+      client.getAssignment(this.queue.guildId)?.nodeId &&
+      options.nodeId !== client.getAssignment(this.queue.guildId)?.nodeId
+    )
+      throw new Error('Remote Track origin conflicts with sticky guild assignment');
+    if (!nodeId && hosts.length) nodeId = this.eligibleNodes(hosts)[0]?.id;
+    if (hosts.length && !nodeId) throw new Error('No healthy Remedia node can access required source hosts');
     if (nodeId) this.assertHosts(nodeId, hosts);
 
     const selected = nodeId && nodeId !== options.nodeId ? { ...options, nodeId } : options;

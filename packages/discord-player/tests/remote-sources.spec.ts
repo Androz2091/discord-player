@@ -1,3 +1,4 @@
+import type { RemediaClient } from '@remedia/client';
 import { createServer } from 'node:http';
 import { Readable } from 'node:stream';
 import { once } from 'node:events';
@@ -33,6 +34,10 @@ class RemoteExtractor extends BaseExtractor {
         raw: { engine: { private: true } },
       }),
     ]);
+  }
+
+  override async getRelatedTracks(track: Track) {
+    return this.handle(`related:${track.title}`);
   }
 
   override async stream(track: Track) {
@@ -361,7 +366,9 @@ it('carries all queued host requirements into session creation and fences custom
 
   const selections = selectNode.mock.calls.length;
 
-  await expect(queue.play([first, second], { channelId: 'voice' })).rejects.toThrow('cannot access source host b');
+  await expect(queue.play([first, second], { channelId: 'voice' })).rejects.toThrow(
+    'No healthy Remedia node can access required source hosts',
+  );
 
   // Like Remedia, a selector is never offered an empty candidate pool.
   expect(selectNode).toHaveBeenCalledTimes(selections);
@@ -493,4 +500,232 @@ it('rejects provider failures and mismatched deployment identity without retryin
   await expect(incorrect.search('music')).rejects.toThrow('identity does not match');
 
   expect(b.requests.some((request) => request.body?.input?.operation === 'search.query.resolve')).toBe(false);
+});
+
+async function forwarded() {
+  const host = await deployment('discovered');
+  const fixture = await setup({
+    nodeType: 'remote',
+    crossfadeAvailable: true,
+    queueOptions: { crossfade: { enabled: true } },
+  });
+  cleanup.push(() => fixture.player.destroy());
+  const node = fixture.backend.client.nodes[0]!;
+  node.capabilities.pluginOperations = { available: true, forwarding: true, hosts: [host.hostId] };
+  const list = vi.fn<RemediaClient['plugins']['list']>(async ({ signal } = {}) => {
+    signal?.throwIfAborted();
+    const response = await host.host.fetch(new Request(`${host.url}/.well-known/remedia`, { signal }));
+    const manifest = await response.json();
+    return [
+      {
+        nodeId: node.id,
+        hostId: host.hostId,
+        status: 'healthy',
+        operations: manifest.plugins.flatMap((plugin: { id: string; operations: string[] }) =>
+          plugin.operations.map((operation) => ({ pluginId: plugin.id, operation })),
+        ),
+      },
+    ];
+  });
+  const execute = vi.fn<RemediaClient['plugins']['execute']>(async (options) => {
+    options.signal?.throwIfAborted();
+    const response = await host.host.fetch(
+      new Request(`${host.url}/remedia/v1/execute`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        signal: options.signal,
+        body: JSON.stringify({ pluginId: options.pluginId, operation: options.operation, input: options.input }),
+      }),
+    );
+    if (!response.ok) throw new Error(`Forwarding failed: ${response.status}`);
+    return {
+      ...(await response.json()),
+      nodeId: options.nodeId!,
+      hostId: options.hostId,
+      pluginId: options.pluginId,
+      operation: options.operation,
+    };
+  });
+  Object.assign(fixture.backend.client, { plugins: { list, execute } });
+  return { ...fixture, host, list, execute };
+}
+
+it('automatically discovers sources through Remedia, preserves portable state and plays without host registration', async () => {
+  const { player: bot, session, execute } = await forwarded();
+  const result = await bot.search('automatic', { requestedBy: { id: 'requester' } });
+  const track = result.tracks[0]!;
+  expect(bot.plugins.hasHost('discovered')).toBe(false);
+  expect(track.sourceReference).toMatchObject({
+    nodeId: 'fake-node',
+    hostId: 'discovered',
+    pluginId: RemoteExtractor.identifier,
+  });
+  expect(track.sourceState).toBeTypeOf('string');
+  expect((deserialize(track.serialize()) as Track).sourceReference).toEqual(track.sourceReference);
+  expect(execute).toHaveBeenCalledWith(expect.objectContaining({ nodeId: 'fake-node', operation: 'source.search' }));
+  const play = vi.spyOn(session, 'play');
+  await bot.play({ guildId: 'guild-one', channelId: 'voice-one' }, result);
+  expect(play).toHaveBeenCalledWith(
+    expect.objectContaining({ hostId: 'discovered', operation: 'source.stream' }),
+    expect.anything(),
+  );
+  await expect(bot.resolvePlaybackSource(track, 'another-node', new AbortController().signal)).rejects.toThrow(
+    'originating',
+  );
+});
+
+it('prefers local results and forwards portable targeting, blocked providers and cancellation', async () => {
+  const { player: bot, execute } = await forwarded();
+  await bot.plugins.register(
+    definePlugin({
+      id: 'local',
+      setup(ctx) {
+        ctx.on('search.query.match', () => ({ score: 1 }));
+        ctx.on('search.query.resolve', () => ({ tracks: [new Track({ title: 'local' })], playlist: null }));
+      },
+    })(),
+  );
+  expect((await bot.search('local')).tracks[0]?.title).toBe('local');
+  expect(execute).not.toHaveBeenCalled();
+  const result = await bot.search('remote', {
+    searchEngine: RemoteExtractor.identifier,
+    blockExtractors: ['local'],
+    requestOptions: { headers: { authorization: 'private' } },
+  });
+  expect(result.tracks).toHaveLength(1);
+  expect(JSON.stringify(execute.mock.calls)).not.toContain('private');
+  expect((await bot.search('blocked', { blockExtractors: ['local', RemoteExtractor.identifier] })).isEmpty()).toBe(
+    true,
+  );
+  const controller = new AbortController();
+  controller.abort(new Error('cancelled'));
+  await expect(bot.search('cancelled', { signal: controller.signal })).rejects.toThrow('cancelled');
+});
+
+it('keeps failures distinct from empty results and refreshes discovery on subsequent requests', async () => {
+  const { player: bot, list, execute } = await forwarded();
+  execute.mockResolvedValueOnce({
+    handled: false,
+    nodeId: 'fake-node',
+    hostId: 'discovered',
+    pluginId: SOURCE_PLUGIN_ID,
+    operation: 'source.search',
+  });
+  expect((await bot.search('declined')).isEmpty()).toBe(true);
+  execute.mockRejectedValueOnce(new Error('host unavailable'));
+  await expect(bot.search('failure')).rejects.toThrow('host unavailable');
+  list.mockResolvedValueOnce([]);
+  expect((await bot.search('removed')).isEmpty()).toBe(true);
+  expect((await bot.search('reconnected')).tracks).toHaveLength(1);
+});
+
+it('rejects conflicting placements including duplicate host IDs and sticky guild assignments', async () => {
+  const { player: bot, queue, backend } = await forwarded();
+  const first = (await bot.search('first')).tracks[0]!;
+  const second = deserialize(first.serialize()) as Track;
+  second.sourceReference!.nodeId = 'other-deployment';
+  await expect(queue.play([first, second], { channelId: 'voice-one' })).rejects.toThrow('conflicting Remedia nodes');
+  await expect(queue.play(second, { channelId: 'voice-one' })).rejects.toThrow();
+  await queue.node.destroySession();
+  backend.client.getAssignment.mockReturnValue({
+    guildId: queue.guildId,
+    nodeId: 'other-deployment',
+    nodeType: 'remote',
+    status: 'assigned',
+  });
+  await expect(queue.play(first, { channelId: 'voice-one' })).rejects.toThrow('sticky guild assignment');
+});
+
+it('forwards related Tracks to their origin and preserves affinity during crossfade and history', async () => {
+  const { player: bot, queue, session, execute } = await forwarded();
+  const first = (await bot.search('first')).tracks[0]!;
+  const related = await bot.plugins.execute('track.related', { track: first });
+  const second = related!.tracks[0]!;
+  expect(second.title).toBe('related:first');
+  expect(second.sourceReference).toMatchObject({
+    nodeId: 'fake-node',
+    hostId: 'discovered',
+    pluginId: RemoteExtractor.identifier,
+  });
+  expect(execute).toHaveBeenCalledWith(expect.objectContaining({ nodeId: 'fake-node', operation: 'source.related' }));
+  const stage = vi.spyOn(session, 'stageNext');
+  await queue.play([first, second]);
+  session.requestPreparation();
+  await settle();
+  expect(stage).toHaveBeenCalledWith(
+    expect.objectContaining({ hostId: 'discovered', operation: 'source.stream' }),
+    expect.anything(),
+  );
+  session.promote()();
+  await settle();
+  expect(queue.currentTrack).toBe(second);
+  expect(queue.history.tracks.toArray()[0]?.sourceReference?.nodeId).toBe('fake-node');
+  await queue.stop();
+  expect(session.stage).toBeNull();
+});
+
+it('forwards authorized Track lyrics through metadata.execute without forwarding lifecycle hooks', async () => {
+  const { player: bot, host, execute } = await forwarded();
+  const track = (await bot.search('lyrics')).tracks[0]!;
+  await host.host.plugins.register(
+    definePlugin({
+      id: 'lyrics-provider',
+      setup(ctx) {
+        ctx.on('lyrics.search', () => [{ plain: { available: true, text: 'A lyric' }, synced: { available: false } }]);
+      },
+    })(),
+  );
+  track.lyricsReference = { ...track.sourceReference!, pluginId: 'lyrics-provider' };
+  const lyrics = await bot.lyrics.search(track);
+  expect(lyrics[0]?.plain).toEqual({ available: true, text: 'A lyric' });
+  expect(lyrics[0]?.provider).toMatchObject({ nodeId: 'fake-node', hostId: 'discovered', pluginId: 'lyrics-provider' });
+  expect(execute).toHaveBeenLastCalledWith(
+    expect.objectContaining({ operation: 'metadata.execute', nodeId: 'fake-node' }),
+  );
+  expect(bot.plugins.hasCapability('player.destroying')).toBe(false);
+});
+
+it('tries multiple deployments with duplicate host IDs and pins a new session to the successful node', async () => {
+  const { player: bot, queue, backend, list, execute } = await forwarded();
+  const original = (await list())[0]!;
+  list.mockResolvedValue([original, { ...original, nodeId: 'second-node' }]);
+  backend.client.nodes.push({ ...backend.client.nodes[0]!, id: 'second-node' });
+  execute.mockResolvedValueOnce({
+    handled: true,
+    result: { tracks: [], playlist: null },
+    nodeId: 'fake-node',
+    hostId: 'discovered',
+    pluginId: SOURCE_PLUGIN_ID,
+    operation: 'source.search',
+  });
+  const track = (await bot.search('second deployment')).tracks[0]!;
+  expect(track.sourceReference?.nodeId).toBe('second-node');
+  await queue.node.destroySession();
+  await queue.play(track, { channelId: 'voice-one' });
+  expect(backend.client.createDiscordSession).toHaveBeenLastCalledWith(
+    expect.objectContaining({ nodeId: 'second-node' }),
+  );
+});
+
+it('cancels in-flight forwarding and skips unsupported servers without polling', async () => {
+  const { player: bot, backend, list, execute } = await forwarded();
+  let entered!: () => void;
+  const started = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  execute.mockImplementationOnce(async ({ signal }) => {
+    entered();
+    await new Promise<void>((resolve) => signal!.addEventListener('abort', () => resolve(), { once: true }));
+    signal!.throwIfAborted();
+    throw new Error('Unreachable');
+  });
+  const controller = new AbortController();
+  const pending = bot.search('pending', { signal: controller.signal });
+  await started;
+  controller.abort(new Error('cancel forwarding'));
+  await expect(pending).rejects.toThrow('cancel forwarding');
+  list.mockClear();
+  backend.client.nodes[0]!.capabilities.pluginOperations.forwarding = false;
+  expect((await bot.search('unsupported')).isEmpty()).toBe(true);
+  expect(list).not.toHaveBeenCalled();
 });

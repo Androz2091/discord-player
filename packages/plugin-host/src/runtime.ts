@@ -1,3 +1,4 @@
+import { searchRemedia } from './remedia.js';
 import type { SourceQuery } from './plugins/types.js';
 import type { RemediaClient } from '@remedia/client';
 import { PluginRegistry } from './plugins/registry.js';
@@ -104,7 +105,16 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
     const engine = options.searchEngine;
     const legacy = engine?.startsWith('ext:') ? engine.slice(4) : undefined;
 
-    if (legacy !== undefined && !this.extractors.get(legacy))
+    if (
+      legacy !== undefined &&
+      !this.extractors.get(legacy) &&
+      !this.player
+        .getRemedia(false)
+        ?.nodes.some(
+          (node) =>
+            node.type === 'remote' && node.status === 'healthy' && node.capabilities?.pluginOperations?.forwarding,
+        )
+    )
       throw new Error(`Legacy extractor ${legacy} is not registered`);
 
     const target = legacy ?? (engine && this.plugins.has(engine) ? engine : undefined);
@@ -168,6 +178,26 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
         throw new TypeError('search.afterResults requires Track instances.');
       return new SearchResult(transformed);
     }
-    return SearchResult.empty();
+    const client = this.player.getRemedia(false);
+    if (!client) return SearchResult.empty();
+    const result = await searchRemedia(
+      client,
+      input.query === query ? query : input.protocol ? `${input.protocol}:${input.query}` : input.query,
+      {
+        ...options,
+        ...input.options,
+        searchEngine: input.providerHint ?? options.searchEngine,
+        blockExtractors: blocked,
+      },
+    );
+    if (result.isEmpty() || !this.plugins.hasCapability('search.afterResults')) return result;
+    const transformed = await this.plugins.execute('search.afterResults', result, { signal: options.signal });
+    if (
+      !transformed ||
+      !Array.isArray(transformed.tracks) ||
+      !transformed.tracks.every((track) => track instanceof Track)
+    )
+      throw new TypeError('search.afterResults requires Track instances.');
+    return new SearchResult(transformed);
   }
 }

@@ -1,3 +1,4 @@
+import { relatedRemedia, lyricsRemedia } from '../remedia.js';
 import { serialize, deserialize, type SerializedEntityUnion } from '../utils/serde.js';
 import { parseEntity } from '../utils/parse-serialized-entity.js';
 import type { Playlist } from '../structures/playlist.js';
@@ -664,6 +665,24 @@ export class PluginRegistry {
   ): Promise<OperationResult<K>> {
     const track = input && typeof input === 'object' && 'track' in input ? input.track : undefined;
 
+    if (operation === 'track.related' && track?.sourceReference?.nodeId) {
+      const signal = options.signal ? AbortSignal.any([this.lifetime.signal, options.signal]) : this.lifetime.signal;
+      signal.throwIfAborted();
+      await this.ready();
+      signal.throwIfAborted();
+      if (
+        (options.pluginId && options.pluginId !== track.sourceReference.pluginId) ||
+        (options.hostId !== undefined && options.hostId !== track.sourceReference.hostId)
+      )
+        throw new Error('Related-track targeting conflicts with remote Track origin');
+      const client = this.player.getRemedia(false);
+      if (!client) throw new Error('Remote Track requires its originating Remedia client');
+      return (await relatedRemedia(client, track, 'source.related', signal, [
+        ...this.blocked(),
+        ...(options.blocked ?? []),
+      ])) as OperationResult<K>;
+    }
+
     if (
       track?.sourceReference?.hostId &&
       track.sourceReference.hostId !== this.hostId &&
@@ -705,6 +724,20 @@ export class PluginRegistry {
     }
 
     return result;
+  }
+
+  /** Resolve lyrics on a Track's Remedia deployment after local providers return no results.
+   * @internal
+   * @param input Track or query; free-text remote lookup has no provider identity.
+   * @param signal Caller lifetime.
+   */
+  public async searchRemoteLyrics(input: OperationInput<'lyrics.search'>['input'], signal?: AbortSignal) {
+    signal = signal ? AbortSignal.any([this.lifetime.signal, signal]) : this.lifetime.signal;
+    signal.throwIfAborted();
+    const reference = typeof input === 'string' ? undefined : (input.lyricsReference ?? input.sourceReference);
+    if (reference && this.blocked().includes(reference.pluginId)) return [];
+    const client = this.player.getRemedia(false);
+    return client ? lyricsRemedia(client, input, signal) : [];
   }
 
   /** Inspect byte transformations using the same selection rules as execution.

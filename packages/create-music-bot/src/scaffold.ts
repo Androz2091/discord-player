@@ -17,7 +17,7 @@ export type PackageManager = (typeof PACKAGE_MANAGERS)[number];
  * The `@remedia/node` release that Discord Player's Remedia client is built and tested against.
  * `@remedia/client` declares this exact version as its peer dependency, so update it with `@remedia/client`.
  */
-export const REMEDIA_NODE_VERSION = '0.1.0-dev.7';
+export const REMEDIA_NODE_VERSION = '0.1.0';
 
 const DISCORD_JS_VERSION = '^14.28.1';
 const NODE_TYPES_VERSION = '^22.20.5';

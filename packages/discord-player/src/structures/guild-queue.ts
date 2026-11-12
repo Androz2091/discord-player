@@ -2033,6 +2033,16 @@ export class GuildQueue<Metadata = unknown> {
     const filterGraph =
       options.filterGraph !== undefined ? options.filterGraph : existing ? undefined : this.options.filterGraph;
 
+    const origins = new Set(
+      [...(this.currentTrack ? [this.currentTrack] : []), ...this.tracks.toArray(), ...incoming].flatMap((track) =>
+        track.sourceReference?.nodeId ? [track.sourceReference.nodeId] : [],
+      ),
+    );
+    if (origins.size > 1) throw new Error('Queued remote Tracks require conflicting Remedia nodes');
+    const origin = origins.values().next().value;
+    if (origin && options.nodeId && origin !== options.nodeId)
+      throw new Error('Selected Remedia node conflicts with remote Track origin');
+
     const session = await this.node.connect({
       channelId: options.channelId,
       pluginHosts: [
@@ -2042,7 +2052,7 @@ export class GuildQueue<Metadata = unknown> {
           ),
         ),
       ],
-      ...(options.nodeId ? { nodeId: options.nodeId } : {}),
+      ...((origin ?? options.nodeId) ? { nodeId: origin ?? options.nodeId } : {}),
       ...(options.connectTimeoutMs === undefined ? {} : { connectTimeoutMs: options.connectTimeoutMs }),
       ...(selfDeaf !== undefined ? { selfDeaf } : {}),
       ...(selfMute !== undefined ? { selfMute } : {}),

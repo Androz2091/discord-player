@@ -31,10 +31,10 @@ You also need a Discord gateway library such as discord.js. Discord Player does 
 ### Embedded playback
 
 ```bash
-pnpm add @remedia/node@0.1.0-dev.7
+pnpm add @remedia/node@0.1.0
 ```
 
-`@remedia/node` must be the exact version that your `discord-player` release depends on, and the `latest` tag is older. The generator and the [manual setup](/docs/v8/getting-started/manual-setup) use `0.1.0-dev.7`, which matches `discord-player@dev` at the time of writing. Your package manager reports a peer dependency warning when the versions differ.
+`@remedia/node` must be the exact version that your `discord-player` release depends on. The generator and the [manual setup](/docs/v8/getting-started/manual-setup) use `0.1.0`, which matches `discord-player@dev` at the time of writing. Your package manager reports a peer dependency warning when the versions differ.
 
 ```ts
 import { Player } from 'discord-player';

@@ -3,11 +3,11 @@ title: Remote source hosts
 description: Run source plugins on a separate server and stream their audio straight to a remote Remedia node.
 ---
 
-A source host runs plugins away from your bot and away from the audio node. The bot searches through the host, and the Remedia node pulls the audio directly from it.
+A source host runs plugins away from your bot and away from the audio node. The bot discovers and searches through Remedia forwarding, and the Remedia node pulls the audio directly from it.
 
 ```mermaid
 flowchart LR
-  Bot["Bot<br/>(Discord Player)"] -- "search (HTTP)" --> Host["Source host<br/>(plugins, credentials)"]
+  Bot["Bot<br/>(Discord Player)"] -- "search (WebSocket)" --> Node["Source host<br/>(plugins, credentials)"]
   Bot -- "play (WebSocket)" --> Node["Remedia server"]
   Node -- "fetch audio (HTTP)" --> Host
 ```
@@ -16,7 +16,7 @@ Use a source host when credentials must stay off the bot, or when the audio node
 
 ## Requirements
 
-- `@remedia/client`, `@remedia/plugin-host`, and the Remedia server must all be `0.1.0-dev.7`.
+- `@remedia/client`, `@remedia/plugin-host`, and the Remedia server must all be `0.1.0`.
 - The bot needs no native audio binding for remote playback.
 - Install `@discord-player/plugin-host` and `@remedia/plugin-host` on the host machine.
 
@@ -104,6 +104,9 @@ Add a `pluginHosts` entry to `remedia.config.json`:
       "allowInsecureHttp": true,
       "allowPrivateNetwork": true,
       "operations": [
+        { "pluginId": "discord-player.source", "operation": "source.search" },
+        { "pluginId": "discord-player.source", "operation": "source.related" },
+        { "pluginId": "discord-player.source", "operation": "metadata.execute" },
         {
           "pluginId": "discord-player.source",
           "operation": "source.stream",
@@ -117,7 +120,7 @@ Add a `pluginHosts` entry to `remedia.config.json`:
 
 | Field                                      | Meaning                                                                                                           |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `id`                                       | Must match the `hostId` of the source host and of the bot's `remoteHost`                                          |
+| `id`                                       | Must match the `hostId` of the source host                                                                        |
 | `endpoint`                                 | The host's origin: scheme, host, and port only                                                                    |
 | `allowInsecureHttp`, `allowPrivateNetwork` | Needed only because this example uses plain HTTP on loopback. Remove them for a public HTTPS endpoint             |
 | `replaySafe`                               | Allows Remedia to run the operation again for a fresh grant. Enable it only when opening the source twice is safe |
@@ -128,24 +131,15 @@ Add a `pluginHosts` entry to `remedia.config.json`:
 remedia-server serve --config ./remedia.config.json --env-file .env
 ```
 
-The server discovers the host and reports it in `pluginOperations.hosts`. For crossfade, also set `audio.crossfade.enabled` to `true` on the server.
+Unavailable hosts and stale manifests are excluded from discovery. Unsupported servers remain usable with local plugins or explicit HTTP registration. Transport and authorization errors propagate; only empty or unhandled results try the next host. The server discovers the host and reports it in `pluginOperations.hosts`. For crossfade, also set `audio.crossfade.enabled` to `true` on the server.
 
 ## 3. Configure the bot
 
 ```ts title="bot.ts"
-import { Player, definePlugin } from 'discord-player';
+import { Player } from 'discord-player';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
-
-const remoteSources = definePlugin({
-  id: 'example.source',
-  remoteHost: {
-    hostId: 'sources-1',
-    url: 'http://127.0.0.1:8080',
-    token: process.env.SOURCE_TOKEN,
-  },
-});
 
 const player = new Player({
   nodes: [
@@ -156,7 +150,6 @@ const player = new Player({
       auth: { username: 'bot', password: process.env.REMEDIA_PASSWORD! },
     },
   ],
-  plugins: [remoteSources()],
 
   send(guildId, payload) {
     const guild = client.guilds.cache.get(guildId);
@@ -172,7 +165,7 @@ client.on(Events.Raw, (packet) => player.receive(packet));
 client.once(Events.ClientReady, async (ready) => {
   await player.initialize(ready.user.id);
 
-  const result = await player.search('fixture', { hostId: 'sources-1', searchEngine: 'example.audio' });
+  const result = await player.search('fixture', { requestedBy: ready.user.id });
 
   await player.play({ guildId: process.env.GUILD_ID!, channelId: process.env.CHANNEL_ID! }, result);
 });
@@ -180,26 +173,47 @@ client.once(Events.ClientReady, async (ready) => {
 await client.login(process.env.DISCORD_TOKEN);
 ```
 
-`remoteHost.url` must be the same origin the server uses as `endpoint`. For separate machines, use an HTTPS URL that both the bot and the audio node can reach.
+The bot configures only Remedia nodes. Source endpoints, host IDs and source credentials stay on the server. The Remedia username and password must match a server user authorized for plugin forwarding.
 
-The username and password must match a user in the server's configuration.
+Allow `source.search` and `source.stream` for discovery and playback. Allow `source.related` for autoplay and `metadata.execute` for Track-based lyrics lookup when the source provider implements them. Local lifecycle hooks are never forwarded. Free-text lyrics discovery is not available because Remedia advertises host operations rather than individual provider IDs.
+
+## Optional direct HTTP registration
+
+Existing applications can register a host explicitly when the bot should contact it directly:
+
+```ts
+import { definePlugin } from 'discord-player';
+
+await player.plugins.register(
+  definePlugin({
+    id: 'example.audio',
+    remoteHost: {
+      hostId: 'sources-1',
+      url: 'https://sources.example.com',
+      token: process.env.SOURCE_TOKEN,
+    },
+  })(),
+);
+```
+
+This approach requires bot-side access and credentials. The audio node must also reach the host for playback. Automatic Remedia discovery requires no such registration.
 
 ## How routing works
 
-| Topic                | Behavior                                                                                                    |
-| -------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Search order         | Local plugins first, then hosts in the order you registered them. The first non-empty result wins           |
-| Scores               | Not compared across hosts. Each host uses its own matching and priorities                                   |
-| Restrict to one host | `search(query, { hostId })`                                                                                 |
-| Select a provider    | `searchEngine: 'provider-id'`                                                                               |
-| Errors               | Authentication, identity, and transport errors fail the search. An empty result moves on to the next host   |
-| Cancellation         | Cancelling a search, a timeout, or destroying the Player aborts the HTTP request                            |
-| Sent to the host     | Portable search hints and the requester ID only. Functions, Discord objects, and credentials are never sent |
-| Discovery            | The host is checked on every search, so a restarted host is picked up                                       |
+| Topic                | Behavior                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Search order         | Local plugins first, then explicit HTTP registrations, then eligible Remedia nodes and hosts in discovery order. The first non-empty result wins |
+| Scores               | Not compared across hosts. Each host uses its own matching and priorities                                                                        |
+| Restrict to one host | `search(query, { hostId })`                                                                                                                      |
+| Select a provider    | `searchEngine: 'provider-id'`                                                                                                                    |
+| Errors               | Authentication, identity, and transport errors fail the search. An empty result moves on to the next host                                        |
+| Cancellation         | Cancelling a search, a timeout, or destroying the Player cancels forwarded work through Remedia                                                  |
+| Sent to the host     | Portable search hints and the requester ID only. Functions, Discord objects, and credentials are never sent                                      |
+| Discovery            | On-demand Remedia discovery uses server-cached manifests; no background polling is added                                                         |
 
 ## Playback and affinity
 
-Tracks remember the host that created them (`sourceReference.hostId`) in queues and history. `serialize()` keeps the host ID and leaves out temporary state.
+Tracks remember the host and node that created them (`sourceReference.hostId` and `sourceReference.nodeId`) in queues and history. `serialize()` keeps both identities and leaves out temporary state.
 
 When a track plays, the Player checks that the assigned node lists that host. Then it sends Remedia an operation source instead of a URL:
 
@@ -209,8 +223,8 @@ When a track plays, the Player checks that the assigned node lists that host. Th
 
 Remedia runs it and receives the encoded audio straight from the host. The bot never opens that stream.
 
-- An embedded node, a node without the host, or a bot without the registration fails with an error.
-- Queuing a track from another host does not move the guild to a different node. Configure the node with every host the guild needs.
+- Playback pins new sessions to the originating node. Existing sessions and sticky guild assignments must agree; incompatible placement fails explicitly. Embedded nodes cannot play remotely discovered Tracks.
+- Tracks from different nodes cannot share one queue session, even when host IDs match. Tracks from several hosts on the same node are supported. Crossfade uses the same placement checks. No guild migration is performed.
 - Every play creates a new operation, so expired grants and track state are rebuilt. If a track's state expired, search again.
 - If the host is down, preparing or playing tracks from it fails. Retry after it recovers.
 - Node disconnects and recovery are handled by Remedia. Discord Player does not migrate guilds to another node or host.
@@ -220,9 +234,9 @@ Remedia runs it and receives the encoded audio straight from the host. The bot n
 
 | Symptom                             | Check                                                                                    |
 | ----------------------------------- | ---------------------------------------------------------------------------------------- |
-| `Source host ... is not configured` | The bot registered the host, and `hostId` matches everywhere                             |
+| `Source host ... is not configured` | For explicit HTTP registration, check the bot registration and host ID                   |
 | `cannot access source host`         | The audio node's `pluginHosts` includes this host and the node is a remote node          |
 | Search works, playback fails        | `endpoint` and `allowInsecureHttp` on the server, and that the server can reach the host |
-| `401` from the host                 | `SOURCE_TOKEN` is the same on the bot, host, and server                                  |
+| `401` from the host                 | `SOURCE_TOKEN` matches on the host and server (also the bot for direct HTTP)             |
 
 <NextStep href="/docs/v8/remedia/remote" label="Remote Remedia nodes" />

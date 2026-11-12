@@ -22,6 +22,10 @@ It is neither bundled nor automatically registered.
 Normal applications register plugins locally. A metadata-only client descriptor can
 register an existing standalone provider without repeating its host configuration:
 
+Discord Player automatically discovers source hosts configured on connected Remedia servers. Allow `discord-player.source/source.search` and `source.stream` on the server, then use `player.search(query)` and `player.play(channel, result)` unchanged. Related Tracks and Track-based lyrics use `source.related` and `metadata.execute` when authorized. Tracks retain their originating node for playback, crossfade and history; conflicting sessions or sticky assignments fail explicitly.
+
+The direct HTTP registration below is an optional explicit approach when the bot should contact the host itself.
+
 ```ts
 const remoteSource = definePlugin({
   id: 'example.source',
@@ -38,7 +42,7 @@ Advanced clients may register every advertised provider with
 option has been removed. Registration validates live provider capabilities and
 deployment identity; it does not install plugins on the service.
 
-This requires `@remedia/client@0.1.0-dev.7` and a matching remote server configured
+This requires `@remedia/client@0.1.0` and a matching remote server configured
 with the same `pluginHosts` ID and the `discord-player.source` / `source.stream`
 operation. The bot searches over HTTP and sends an operation descriptor for play
 and automatic crossfade staging. Encoded bytes flow directly from host to audio
@@ -281,10 +285,10 @@ compatibility surface does not emulate the whole Player API.
 
 ## Remedia server integration boundary
 
-Remedia dev.7 supports generic host discovery, authenticated operation execution,
+Remedia 0.1.0 supports generic host discovery, authenticated operation execution,
 native decoding of single-use grants, and cancellation. Configure the deployment
-in the server's `pluginHosts` list and in the bot plugin's `remoteHost` descriptor. Installing
-`@remedia/plugin-host@0.1.0-dev.7` alone does not register a host with an audio node.
+in the server's `pluginHosts` list. Discord Player automatically discovers authorized source operations through connected healthy remote nodes; bot-side `remoteHost` registration is optional. Installing
+`@remedia/plugin-host@0.1.0` alone does not register a host with an audio node.
 
 DiscordPlayer sends operation descriptors for playback and staged-next preparation;
 the audio node invokes `source.stream` and consumes encoded bytes directly. The
@@ -363,7 +367,7 @@ registration. Provider URL expiration remains intact. The consuming node must st
 independently enforce its DNS/redirect policy for direct URLs. Authentication or
 byte transformations requiring the host must use proxy delivery.
 
-Single-use media grants reject Range requests. Remedia dev.7 redeems each grant with one
+Single-use media grants reject Range requests. Remedia 0.1.0 redeems each grant with one
 plain GET and feeds a bounded sequential queue to the decoder, so it never issues Range
 requests, reopens or reconnects a grant. Seeking is forward-only. This does not add random
 access or turn grant URLs into durable source references.
@@ -387,10 +391,10 @@ lyrics or related metadata. `source.search` remains the high-level search endpoi
 without expiring source-state hints. `source.stream` and native operation-source
 playback retain their existing media policy, cancellation and grant behavior.
 
-Metadata currently travels over direct HTTP. Remedia dev.7 can forward generic plugin
-operations to server-configured hosts (`client.plugins.list` / `execute`), but Discord Player
-does not use that path yet. `remote.ts` isolates this boundary for a future supported
-transport without introducing a second search dispatcher.
+Metadata uses Remedia forwarding by default (`client.plugins.list` / `execute`).
+Discovery reads server-cached manifests on demand and skips unhealthy hosts and unsupported nodes.
+Search tries local providers first, then eligible deployments, stopping on transport or authorization errors.
+Explicit `remoteHost` registration retains direct HTTP transport. Neither path forwards local lifecycle capabilities.
 
 ## Modern capabilities
 
