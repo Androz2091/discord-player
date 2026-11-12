@@ -2,19 +2,21 @@
 
 Build Discord music bots with queues, playback controls, events, history, filters, and source plugins. [Remedia](https://github.com/twlite/remedia) handles audio processing and voice transport.
 
-> v8 is under development and has breaking changes from v7. See the [migration guide](https://discord-player.js.org/docs/migration).
+> v8 is under development and has breaking changes from v7. See the [migration guide](https://discord-player.js.org/docs/v8/migration).
 
 ## Install
 
 Requires Node.js 22.18+ and ESM.
 
 ```bash
-pnpm add discord-player
+pnpm add discord-player@dev
 # For playback inside your bot process:
-pnpm add @remedia/node
+pnpm add @remedia/node@0.1.0-dev.7
 ```
 
-Embedded playback needs [FFmpeg 9 shared libraries](https://discord-player.js.org/docs/installation/ffmpeg). For remote playback, the audio server needs them instead.
+Starting a new bot? `npm create music-bot@dev my-bot` generates a working project. v8 is a preview release, so use the `dev` tag: without it your package manager installs v7.
+
+Embedded playback needs [FFmpeg 9 shared libraries](https://discord-player.js.org/docs/v8/installation/ffmpeg). For remote playback, the audio server needs them instead.
 
 ## Set up the player
 
@@ -31,7 +33,7 @@ client.on('raw', (packet) => player.receive(packet));
 await player.initialize(client.user.id);
 ```
 
-`client`, `mySourcePlugin`, and `sendGatewayPacket` belong to your application. Follow the [complete discord.js walkthrough](https://discord-player.js.org/docs/getting-started) for a working example. Discord Player does not create your gateway connection or automatically add music sources.
+`client`, `mySourcePlugin`, and `sendGatewayPacket` belong to your application. Follow the [discord.js walkthrough](https://discord-player.js.org/docs/v8/getting-started/manual-setup) for a working example. Discord Player does not create your gateway connection or automatically add music sources.
 
 ## Play and control audio
 
@@ -64,8 +66,8 @@ player.events.on('playerError', (queue, error, track) => {
 
 ## Documentation
 
-- [Getting started](https://discord-player.js.org/docs/getting-started)
-- [Queues and playback](https://discord-player.js.org/docs/guides)
-- [Source plugins](https://discord-player.js.org/docs/plugins)
-- [API reference](https://discord-player.js.org/docs/reference)
-- [Migration from v7](https://discord-player.js.org/docs/migration)
+- [Getting started](https://discord-player.js.org/docs/v8/getting-started)
+- [Queues and playback](https://discord-player.js.org/docs/v8/guides)
+- [Source plugins](https://discord-player.js.org/docs/v8/plugins)
+- [API reference](https://discord-player.js.org/docs/v8/reference)
+- [Migration from v7](https://discord-player.js.org/docs/v8/migration)
