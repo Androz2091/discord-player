@@ -1,9 +1,10 @@
 import { Heart } from 'lucide-react';
 import type { BaseLayoutProps, LinkItemType } from 'fumadocs-ui/layouts/shared';
+import { BrandTitle } from '@/components/logo';
 import { SponsorMenu } from '@/components/sponsor-menu';
 import { VersionSelector } from '@/components/version-selector';
 import { getFundingLinks } from './funding';
-import { appName, communityRoute, discordInviteUrl, gitConfig } from './shared';
+import { communityRoute, discordInviteUrl, gitConfig } from './shared';
 import { getPageSlugs } from './source';
 import {
   defaultVersionId,
@@ -56,7 +57,7 @@ export function baseOptions(version?: DocsVersionId): BaseLayoutProps {
 
   return {
     nav: {
-      title: appName,
+      title: <BrandTitle compact={Boolean(version)} />,
       children: version ? <VersionSelector current={version} pageIndex={getPageIndex(version)} /> : undefined,
     },
     githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,

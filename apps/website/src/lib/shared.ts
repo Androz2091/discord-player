@@ -1,6 +1,5 @@
 import type { DocsVersionId } from './versions';
 
-export const appName = 'discord-player';
 export const discordInviteUrl = 'https://androz2091.fr/discord';
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://discord-player.js.org';
 export const docsRoute = '/docs';

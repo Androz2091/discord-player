@@ -1,7 +1,12 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { ImageResponse } from 'next/og';
 import type { DocsVersionConfig } from './versions';
 
 export const socialImageSize = { width: 1200, height: 630 };
+
+/** The logo as a data URL, read once from `public/` when the build starts. Run from `apps/website`. */
+const logoUrl = `data:image/png;base64,${readFileSync(resolve(process.cwd(), 'public/logo.png')).toString('base64')}`;
 
 export function createSocialImage({
   title,
@@ -44,17 +49,9 @@ export function createSocialImage({
         style={{ display: 'flex', position: 'absolute', inset: 18, border: '1px solid #ffffff19', borderRadius: 19 }}
       />
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <svg width="42" height="42" viewBox="0 0 48 48">
-          <path
-            d="M18 13v24a7 7 0 1 1-5-6.7V11l22-5v25a7 7 0 1 1-5-6.7V8"
-            fill="none"
-            stroke="#b58aff"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <span style={{ fontSize: 30, fontWeight: 700, letterSpacing: -1.2 }}>discord-player</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logoUrl} width={42} height={42} alt="" />
+        <span style={{ fontSize: 30, fontWeight: 700, letterSpacing: -1.2 }}>Discord Player</span>
         {home ? null : (
           <span style={{ color: '#bf9bf8', fontSize: 20 }}>
             {versionName}

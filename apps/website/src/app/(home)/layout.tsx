@@ -10,7 +10,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
 
   return (
     <div className={`${homePalette} bg-fd-background`}>
-      <HomeLayout {...options} nav={{ ...options.nav, title: 'Discord Player' }}>
+      <HomeLayout {...options} nav={options.nav}>
         {children}
       </HomeLayout>
     </div>
