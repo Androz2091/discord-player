@@ -199,6 +199,9 @@ export interface HandlerOptions {
   guildIds?: readonly string[];
 }
 
+/** Declaration-merged singleton services supplied only by modern plugins. */
+export interface ProviderMap {}
+
 /** Source setup context shared by embedded and standalone execution. */
 export interface PluginContext<Options> {
   /** Options belonging to this registration. */
@@ -217,6 +220,12 @@ export interface PluginContext<Options> {
    * @returns An idempotent subscription removal function.
    */
   on<K extends OperationName>(operation: K, handler: OperationHandler<K>, options?: HandlerOptions): () => void;
+
+  /** Supply one locally owned implementation of a declared singleton capability.
+   * @param capability Provider capability declared by the embedding Player.
+   * @param implementation Registration-owned implementation.
+   */
+  provide<K extends keyof ProviderMap>(capability: K, implementation: ProviderMap[K]): void;
 
   /** Register cleanup, run in reverse order after active handlers settle.
    * @param callback Resource cleanup.

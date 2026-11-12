@@ -1,9 +1,9 @@
+import type { PlaybackSession, PlaybackSessionOptions } from '../playback-backend.js';
 import { intercept } from '../plugins/capabilities.js';
 import { GuildQueuePlayerAudioFilters } from './guild-queue-player-audio-filters.js';
 import type {
   AudioStreamInfo,
   DiscordSessionEvents,
-  DiscordSession,
   DiscordSessionOptions,
   MediaSource,
   PlayOptions,
@@ -61,7 +61,7 @@ export interface PlayRawResult<Metadata = unknown> {
   audioStream: AudioStreamInfo;
 
   /** Remedia session that owns the playback generation. */
-  session: DiscordSession<Metadata>;
+  session: PlaybackSession<Metadata>;
 }
 
 function timecode(milliseconds: number): string {
@@ -78,7 +78,12 @@ function timecode(milliseconds: number): string {
 /** Raw Remedia player controls for one guild queue. It never schedules queue tracks. */
 export class GuildQueuePlayerNode<Metadata = unknown> {
   /** Current Remedia session, or `null` before connecting. */
-  public session: DiscordSession | null = null;
+  #currentSession: PlaybackSession | null = null;
+
+  /** Framework-owned current session; use createSession() to replace it safely. */
+  public get session(): PlaybackSession | null {
+    return this.#currentSession;
+  }
 
   /** Parent Player that owns Remedia and gateway orchestration. */
   public readonly player: DiscordPlayer;
@@ -104,20 +109,20 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   /** Get the connected session, throwing when one does not exist. */
-  public getSession<M = unknown>(): DiscordSession<M>;
+  public getSession<M = unknown>(): PlaybackSession<M>;
 
   /**
    * Optionally return `null` when no session exists.
    * @param throwOnMissingSession Pass `false` to return `null` instead of throwing.
    */
-  public getSession<M = unknown>(throwOnMissingSession: false): DiscordSession<M> | null;
+  public getSession<M = unknown>(throwOnMissingSession: false): PlaybackSession<M> | null;
 
-  public getSession<M = unknown>(throwOnMissingSession = true): DiscordSession<M> | null {
+  public getSession<M = unknown>(throwOnMissingSession = true): PlaybackSession<M> | null {
     if (!this.session && throwOnMissingSession) {
-      throw new Error('DiscordSession is not initialized. Call queue.connect() first.');
+      throw new Error('PlaybackSession is not initialized. Call queue.connect() first.');
     }
 
-    return this.session as DiscordSession<M> | null;
+    return this.session as PlaybackSession<M> | null;
   }
 
   /**
@@ -127,7 +132,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    */
   public async createSession<M = unknown>(
     options: GuildQueuePlayerNodeSessionCreateOptions,
-  ): Promise<DiscordSession<M>> {
+  ): Promise<PlaybackSession<M>> {
     const request = intercept(this.player.plugins, 'voice.beforeSession', {
       guildId: this.queue.guildId,
       channelId: options.channelId,
@@ -142,17 +147,17 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     const { connectTimeoutMs: _connectTimeoutMs, ...sessionOptions } = options;
     const negotiated = await this.sessionPolicy(sessionOptions);
-    const session = this.player.getRemedia().createDiscordSession({
+    const session = await this.createBackendSession({
       ...negotiated,
       guildId: this.queue.guildId,
       userId: this.player.getClientId(),
     });
 
-    this.session = session;
+    this.#currentSession = session;
     this.rememberSessionConfiguration(session);
     this.attachSessionListeners(session);
 
-    return session as DiscordSession<M>;
+    return session as PlaybackSession<M>;
   }
 
   /**
@@ -162,7 +167,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    * @returns The connected Remedia session.
    * @throws Error When an existing session is assigned to a different node than requested.
    */
-  public async connect<M = unknown>(options: GuildQueuePlayerNodeSessionCreateOptions): Promise<DiscordSession<M>> {
+  public async connect<M = unknown>(options: GuildQueuePlayerNodeSessionCreateOptions): Promise<PlaybackSession<M>> {
     const request = intercept(this.player.plugins, 'voice.beforeSession', {
       guildId: this.queue.guildId,
       channelId: options.channelId,
@@ -175,6 +180,12 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     this.assertQueueAlive();
 
     const existing = this.session;
+    if (
+      this.player.playbackBackend &&
+      options.filterGraph !== undefined &&
+      !this.player.playbackBackend.capabilities.filters
+    )
+      throw new Error('Playback backend does not support audio filters.');
 
     if (existing) {
       this.assertHosts(existing.nodeId, options.pluginHosts ?? []);
@@ -193,36 +204,46 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
       if (options.volume !== undefined && options.volume !== previousVolume) await existing.setVolume(options.volume);
 
-      if (options.filterGraph !== undefined && options.filterGraph !== existing.filters.graph) {
-        if (options.filterGraph === null) await existing.filters.clear();
-        else await existing.filters.set(options.filterGraph);
+      if (options.filterGraph !== undefined && options.filterGraph !== existing.filters?.graph) {
+        if (options.filterGraph === null) await this.requireFilters(existing).clear();
+        else await this.requireFilters(existing).set(options.filterGraph);
       }
 
       if (options.channelId !== existing.channelId) await existing.move(options.channelId);
 
       if (existing.connectionState !== 'connected') {
-        await existing.connect(options.connectTimeoutMs === undefined ? {} : { timeoutMs: options.connectTimeoutMs });
+        await existing.connect({
+          ...(options.connectTimeoutMs === undefined ? {} : { timeoutMs: options.connectTimeoutMs }),
+          ...(this.player.playbackBackend
+            ? { signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]) }
+            : {}),
+        });
       }
 
       this.rememberSessionConfiguration(existing);
       this.queue.voice.connected(existing);
 
-      return existing as DiscordSession<M>;
+      return existing as PlaybackSession<M>;
     }
 
     const { connectTimeoutMs, ...sessionOptions } = options;
     const negotiated = await this.sessionPolicy(sessionOptions);
-    const session = this.player.getRemedia().createDiscordSession({
+    const session = await this.createBackendSession({
       ...negotiated,
       guildId: this.queue.guildId,
       userId: this.player.getClientId(),
     });
 
-    this.session = session;
+    this.#currentSession = session;
     this.attachSessionListeners(session);
 
     try {
-      await session.connect(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs });
+      await session.connect({
+        ...(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs }),
+        ...(this.player.playbackBackend
+          ? { signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]) }
+          : {}),
+      });
       this.rememberSessionConfiguration(session);
       this.queue.voice.connected(session);
     } catch (error) {
@@ -231,7 +252,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       throw error;
     }
 
-    return session as DiscordSession<M>;
+    return session as PlaybackSession<M>;
   }
 
   /** Disconnect and clear the current Remedia session. */
@@ -249,7 +270,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     this.queue.invalidateSession(session);
     this.rememberSessionConfiguration(session);
-    this.session = null;
+    this.#currentSession = null;
     this.queue.voice.connected(null);
     await this.queue.cancelPreparation();
     // Keep native diagnostics attached through disposal, then release only our listeners.
@@ -262,9 +283,87 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     this.queue.emit('connectionDestroyed');
   }
 
+  private requireFilters(session: PlaybackSession) {
+    if (!session.filters || (this.player.playbackBackend && !this.player.playbackBackend.capabilities.filters))
+      throw new Error('Playback backend does not support audio filters.');
+    return session.filters;
+  }
+
+  private async createBackendSession(options: PlaybackSessionOptions): Promise<PlaybackSession> {
+    const backend = this.player.playbackBackend;
+    if (!backend) return this.player.getRemedia().createDiscordSession(options);
+    this.player.getBackend();
+    const session = await backend.createSession(
+      options,
+      AbortSignal.any([this.queue.signal, this.player.playbackSignal]),
+    );
+    try {
+      this.queue.signal.throwIfAborted();
+      this.player.playbackSignal.throwIfAborted();
+      if (this.player.playbackBackend !== backend)
+        throw new Error('Playback provider was removed during session creation.');
+      if (
+        !session ||
+        ![
+          'connect',
+          'move',
+          'dispose',
+          'play',
+          'stop',
+          'pause',
+          'resume',
+          'seek',
+          'setVolume',
+          'setSelfDeaf',
+          'setSelfMute',
+          'getPlaybackTime',
+          'on',
+          'off',
+        ].every((name) => typeof Reflect.get(session, name) === 'function')
+      )
+        throw new TypeError('Playback backend returned an invalid session implementation.');
+      if (!session.snapshot || !Number.isSafeInteger(session.snapshot.generation))
+        throw new TypeError('Playback backend returned an invalid session snapshot.');
+      if (session.guildId !== this.queue.guildId || !session.sessionId)
+        throw new Error('Playback backend returned an invalid session identity.');
+      if (!backend.capabilities.crossfade && session.snapshot.crossfade?.enabled)
+        throw new Error('Playback backend enabled undeclared crossfade.');
+      if (!backend.capabilities.filters && session.snapshot.filterGraph)
+        throw new Error('Playback backend enabled undeclared audio filters.');
+      if (backend.capabilities.filters && !session.filters)
+        throw new Error('Playback backend declared filters without session controls.');
+      if (backend.capabilities.crossfade && (!session.stageNext || !session.clearStage || !session.stagedSource))
+        throw new Error('Playback backend declared crossfade without session staging controls.');
+      return session;
+    } catch (error) {
+      if (session && typeof session.dispose === 'function') {
+        try {
+          await session.dispose();
+        } catch (cleanup) {
+          throw new AggregateError([error, cleanup], 'Invalid playback session cleanup failed', { cause: cleanup });
+        }
+      }
+      throw error;
+    }
+  }
+
   private async sessionPolicy(
     options: GuildQueuePlayerNodeSessionCreateOptions,
   ): Promise<GuildQueuePlayerNodeSessionCreateOptions> {
+    const backend = this.player.playbackBackend;
+    if (backend) {
+      if (options.nodeId || this.queue.options.selectNode)
+        throw new Error('Custom playback providers do not support Remedia node selection.');
+      this.assertHosts(null, options.pluginHosts ?? []);
+      if (options.filterGraph !== undefined && !backend.capabilities.filters)
+        throw new Error('Playback backend does not support audio filters.');
+      const requested = this.queue.options.crossfade ?? this.player.options.crossfade ?? options.crossfade;
+      if (requested && !backend.capabilities.crossfade) throw new Error('Playback backend does not support crossfade.');
+      return {
+        ...options,
+        crossfade: requested ? { durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower', ...requested } : false,
+      };
+    }
     const client = this.player.getRemedia();
     const hosts = options.pluginHosts ?? [];
     const requested = this.queue.options.crossfade ?? this.player.options.crossfade;
@@ -327,6 +426,15 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   private assertHosts(nodeId: string | null, hosts: readonly string[]): void {
     if (!hosts.length) return;
 
+    const backend = this.player.playbackBackend;
+    if (backend) {
+      if (
+        !backend.capabilities.sources.includes('operation') ||
+        !hosts.every((host) => backend.capabilities.pluginHosts?.includes(host))
+      )
+        throw new Error('Playback backend cannot access required source hosts.');
+      return;
+    }
     const node = this.player.getRemedia().nodes.find((item) => item.id === nodeId);
 
     if (
@@ -337,7 +445,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       throw new Error(`Remedia node ${nodeId} cannot access required source hosts (${hosts.join(', ')})`);
   }
 
-  private attachSessionListeners(session: DiscordSession): void {
+  private attachSessionListeners(session: PlaybackSession): void {
     this.detachSessionListeners?.();
 
     const cleanups: (() => void)[] = [];
@@ -439,10 +547,11 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   private assertQueueAlive(): void {
     this.player.plugins.assertNotDispatching();
+    if (this.player.playbackBackend) this.player.getBackend();
     if (this.queue.destroyed) throw new Error('Cannot use a player node after its guild queue has been destroyed.');
   }
 
-  private rememberSessionConfiguration(session: DiscordSession): void {
+  private rememberSessionConfiguration(session: PlaybackSession): void {
     this.#volume = session.volume * 100;
     this.queue.options.volume = this.#volume;
     this.queue.options.selfDeaf = session.selfDeaf;
@@ -485,6 +594,21 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     if (session !== this.session) throw new Error('Queue session changed before playback; retry on the current queue.');
     options?.signal?.throwIfAborted();
+    const backend = this.player.playbackBackend;
+    if (backend) {
+      const kind =
+        'url' in source
+          ? 'url'
+          : 'file' in source
+            ? 'file'
+            : 'buffer' in source
+              ? 'buffer'
+              : 'stream' in source
+                ? 'stream'
+                : 'operation';
+      if (!backend.capabilities.sources.includes(kind))
+        throw new Error(`Playback backend does not support ${kind} sources.`);
+    }
     const audioStream = await session.play(source, options);
 
     return { audioStream, session };

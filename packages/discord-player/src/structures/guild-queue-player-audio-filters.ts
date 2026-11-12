@@ -35,7 +35,9 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
 
   /** Current raw graph, including queued defaults before a session exists. */
   public get graph(): string | null {
-    return this.node.session ? this.node.session.filters.graph : (this.node.queue.options.filterGraph ?? null);
+    return this.node.session
+      ? (this.node.session.filters?.graph ?? null)
+      : (this.node.queue.options.filterGraph ?? null);
   }
 
   /** Enabled canonical preset names, in application order. Returns a detached array. */
@@ -159,6 +161,8 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
       throw new Error('Cannot change audio filters after the guild queue has been destroyed.');
     }
 
+    if (this.node.player.playbackBackend && !this.node.player.playbackBackend.capabilities.filters)
+      throw new Error('Playback backend does not support audio filters.');
     const next = change(this.synchronize());
     let graph = [next.raw, ...next.enabled.map((name) => AudioFilterPresets[name])].filter(Boolean).join(',') || null;
 

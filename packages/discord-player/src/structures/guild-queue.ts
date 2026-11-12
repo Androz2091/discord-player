@@ -1,9 +1,10 @@
+import type { PlaybackSession } from '../playback-backend.js';
 import { intercept, admissionTracks, type QueueEventObservation } from '../plugins/capabilities.js';
 import { SyncedLyricsProvider } from './synced-lyrics.js';
 import type { StreamHooks } from '../hooks.js';
 import { VoiceStateTracker } from '../voice-state.js';
 import { randomInt, randomUUID } from 'node:crypto';
-import type { DiscordSession, DiscordSessionEvents, NodeSelection, PlayOptions } from '@remedia/client';
+import type { DiscordSessionEvents, NodeSelection, PlayOptions } from '@remedia/client';
 import { AsyncQueue } from '../utils/async-queue.js';
 import type { GuildNodeManager } from '../managers/guild-queue.manager.js';
 import { GuildQueueHistory } from '../managers/guild-queue-history.manager.js';
@@ -201,7 +202,7 @@ interface ManagedOperation {
   track: Track;
 
   /** Exact session to which this operation was submitted. */
-  session: DiscordSession;
+  session: PlaybackSession;
 
   /** Remedia's generation when it becomes known from a lifecycle event. */
   generation: number | null;
@@ -327,7 +328,7 @@ export class GuildQueue<Metadata = unknown> {
 
   #reservation: Reservation | null = null;
 
-  #prepareRequest: { session: DiscordSession; event: DiscordSessionEvents['prepareRequested'][0] } | null = null;
+  #prepareRequest: { session: PlaybackSession; event: DiscordSessionEvents['prepareRequested'][0] } | null = null;
 
   #decisionRevision = 0;
 
@@ -813,7 +814,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param options Channel, node, and voice policy settings for the session.
    * @returns The queue's connected Remedia session.
    */
-  public async connect(options: GuildQueueConnectOptions): Promise<DiscordSession> {
+  public async connect(options: GuildQueueConnectOptions): Promise<PlaybackSession> {
     intercept(this.player.plugins, 'voice.beforeConnect', { guildId: this.guildId });
 
     using _lock = await this.tasks.acquire('queue.playback-transition');
@@ -1134,7 +1135,7 @@ export class GuildQueue<Metadata = unknown> {
    * @internal
    * @param session Exact session losing ownership.
    */
-  public invalidateSession(session: DiscordSession): void {
+  public invalidateSession(session: PlaybackSession): void {
     if (this.#operation?.session === session) this.#operation.controller.abort(new Error('Queue session replaced.'));
     for (const operation of this.#outgoing.values()) if (operation.session === session) operation.controller.abort();
   }
@@ -1144,11 +1145,11 @@ export class GuildQueue<Metadata = unknown> {
    * @param session Exact session that emitted the lifecycle event.
    * @param event Generation-aware Remedia playback-start event.
    */
-  public handlePlaybackStarted(session: DiscordSession, event: StartedEvent): void {
+  public handlePlaybackStarted(session: PlaybackSession, event: StartedEvent): void {
     this.applyPlaybackStarted(session, event, event);
   }
 
-  private applyPlaybackStarted(session: DiscordSession, event: StartedEvent, rawEvent?: StartedEvent): void {
+  private applyPlaybackStarted(session: PlaybackSession, event: StartedEvent, rawEvent?: StartedEvent): void {
     if (event.transition) this.promote(session, event);
     else if (session === this.node.session && !this.matchOperation(session, event)) {
       this.#prepareRequest = null;
@@ -1176,7 +1177,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param kind Application-level terminal classification.
    * @param event Generation-aware Remedia completion, stop, or failure event.
    */
-  public handlePlaybackTerminal(session: DiscordSession, kind: PlaybackTerminalKind, event: TerminalEvent): void {
+  public handlePlaybackTerminal(session: PlaybackSession, kind: PlaybackTerminalKind, event: TerminalEvent): void {
     if (this.#destroyed) return;
 
     if ('continuation' in event && event.continuation && this.#reservation) {
@@ -1237,13 +1238,13 @@ export class GuildQueue<Metadata = unknown> {
     // waiting on its lock, then fence completion with the normal serialized clear.
     if (reservation.operation.phase === 'starting')
       await reservation.operation.session
-        .clearStage()
+        .clearStage?.()
         .catch((error) => this.debugCrossfade(`clear failed: ${String(error)}`));
 
     using _lock = await this.tasks.acquire('queue.crossfade-stage');
 
     await reservation.operation.session
-      .clearStage()
+      .clearStage?.()
       .catch((error) => this.debugCrossfade(`clear failed: ${String(error)}`));
 
     reservation.operation.controller.abort();
@@ -1315,7 +1316,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param session Exact session requesting preparation.
    * @param event Generation and session identity supplied by Remedia.
    */
-  public handlePrepareRequested(session: DiscordSession, event: DiscordSessionEvents['prepareRequested'][0]): void {
+  public handlePrepareRequested(session: PlaybackSession, event: DiscordSessionEvents['prepareRequested'][0]): void {
     const outgoing = this.matchOperation(session, event);
 
     if (
@@ -1388,6 +1389,7 @@ export class GuildQueue<Metadata = unknown> {
 
     operation.phase = 'starting';
 
+    if (!operation.session.stageNext) throw new Error('Playback backend does not support crossfade.');
     await operation.session.stageNext(source, {
       expectedGeneration: reservation.outgoing.generation!,
       entryId: reservation.entryId,
@@ -1403,7 +1405,7 @@ export class GuildQueue<Metadata = unknown> {
     });
   }
 
-  private promote(session: DiscordSession, event: StartedEvent): void {
+  private promote(session: PlaybackSession, event: StartedEvent): void {
     const reservation = this.#reservation;
 
     if (
@@ -1455,7 +1457,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param event Generation-aware stage or cancellation identity.
    */
   public handleStageEvent(
-    session: DiscordSession,
+    session: PlaybackSession,
     name: 'stageReady' | 'stageFailed' | 'stageInvalidated' | 'transitionCancelled',
     event:
       | DiscordSessionEvents['stageReady'][0]
@@ -1532,11 +1534,12 @@ export class GuildQueue<Metadata = unknown> {
    * Recover a promotion missed during transport recovery from the native playback snapshot.
    * @param session Reconnected session whose native state should be inspected.
    */
-  public async reconcileCrossfade(session: DiscordSession): Promise<void> {
+  public async reconcileCrossfade(session: PlaybackSession): Promise<void> {
     const reservation = this.#reservation;
 
     if (!reservation || session !== this.node.session) return;
 
+    if (!session.stagedSource) return;
     const stage = await session.stagedSource();
 
     if (this.#reservation !== reservation) return;
@@ -1987,7 +1990,7 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   private matchOperation(
-    session: DiscordSession,
+    session: PlaybackSession,
     event: Pick<StartedEvent, 'sessionId' | 'customMetadata'>,
   ): ManagedOperation | null {
     const markerId = (event.customMetadata as Partial<GuildQueuePlaybackMetadata> | undefined)?.__discordPlayer
@@ -2007,7 +2010,7 @@ export class GuildQueue<Metadata = unknown> {
   private async connectLocked(
     options: GuildQueueConnectOptions,
     incoming: readonly Track[] = [],
-  ): Promise<DiscordSession> {
+  ): Promise<PlaybackSession> {
     if (
       options.volume !== undefined &&
       (!Number.isFinite(options.volume) || options.volume < 0 || options.volume > 200)

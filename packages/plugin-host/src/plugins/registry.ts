@@ -18,6 +18,7 @@ import type {
   PluginRegistration,
   ProviderReference,
   OperationMap,
+  ProviderMap,
 } from './types.js';
 import type { LegacyPlayerContext } from '../legacy-player.js';
 
@@ -26,6 +27,47 @@ export type { ExecuteOptions, StreamResolutionOptions } from './execution-option
 
 /** Context-owned capability registry. Removal aborts and drains calls before teardown. */
 export class PluginRegistry {
+  private providerNames = new Set<keyof ProviderMap>();
+
+  private sealedProviders = new Set<keyof ProviderMap>();
+
+  private providersIndex = new Map<
+    keyof ProviderMap,
+    { entry: Entry; value: unknown; dispose?: () => Promise<void> }
+  >();
+
+  /** Enable a local singleton capability before setup. Source hosts do not enable playback providers.
+   * @param name Provider capability name.
+   */
+  public defineProvider<K extends keyof ProviderMap>(name: K): void {
+    this.providerNames.add(name);
+  }
+
+  /** Read the selected provider registration lifetime.
+   * @param name Provider capability name.
+   * @returns Registration cancellation signal, absent for the default implementation.
+   */
+  public providerSignal<K extends keyof ProviderMap>(name: K): AbortSignal | undefined {
+    return this.providersIndex.get(name)?.entry.controller.signal;
+  }
+
+  /** Select and seal a provider before resource initialization. Later replacement registrations fail.
+   * @param name Provider capability name.
+   * @param dispose Release owned framework resources before plugin teardown.
+   * @returns The active implementation, or undefined for the framework default.
+   */
+  public selectProvider<K extends keyof ProviderMap>(
+    name: K,
+    dispose: () => Promise<void>,
+  ): ProviderMap[K] | undefined {
+    if (this.sealedProviders.has(name)) throw new Error(`Provider already selected: ${String(name)}`);
+    this.sealedProviders.add(name);
+    const provider = this.providersIndex.get(name);
+    if (!provider?.entry.active) return undefined;
+    provider.dispose = dispose;
+    return provider.value as ProviderMap[K];
+  }
+
   private advertisements = new WeakMap<object, RemoteProvider[]>();
 
   private entries = new Map<string, Entry>();
@@ -312,6 +354,15 @@ export class PluginRegistry {
       options: registration.options,
       signal: controller.signal,
 
+      provide: (name, value) => {
+        controller.signal.throwIfAborted();
+        if (!this.providerNames.has(name)) throw new Error(`Unsupported local provider: ${String(name)}`);
+        if (this.sealedProviders.has(name)) throw new Error(`Provider selection is sealed: ${String(name)}`);
+        if (this.providersIndex.has(name)) throw new Error(`Duplicate provider: ${String(name)}`);
+        if (!value) throw new TypeError(`Provider implementation is required: ${String(name)}`);
+        this.providersIndex.set(name, { entry, value });
+      },
+
       on: (operation, fn, options = {}) => {
         controller.signal.throwIfAborted();
 
@@ -404,6 +455,16 @@ export class PluginRegistry {
     entry.handlers.clear();
 
     const errors: unknown[] = [];
+
+    for (const [name, provider] of this.providersIndex) {
+      if (provider.entry !== entry) continue;
+      this.providersIndex.delete(name);
+      try {
+        await provider.dispose?.();
+      } catch (error) {
+        errors.push(new PluginError(entry.id, String(name), error));
+      }
+    }
 
     try {
       await entry.registration.definition.destroy?.(entry.context);

@@ -1,5 +1,5 @@
+import type { PlaybackSession } from './playback-backend.js';
 import { intercept } from './plugins/capabilities.js';
-import type { DiscordSession } from '@remedia/client';
 import type { GuildQueue } from './structures/guild-queue.js';
 
 /** Normalized Discord Gateway member state, independent of any Discord library. */
@@ -21,7 +21,7 @@ export class VoiceStateTracker {
   private states = new Map<string, GatewayVoiceState>();
   private occupants: Set<string> | null = null;
   private channel: string | null = null;
-  private session: DiscordSession | null = null;
+  private session: PlaybackSession | null = null;
   private revision = 0;
   private requested = false;
   private work: Promise<void> | null = null;
@@ -74,7 +74,7 @@ export class VoiceStateTracker {
   /** Invalidate channel/session-dependent work and reconcile a successful connection.
    * @param session Current native session, or null on replacement/disposal.
    */
-  connected(session: DiscordSession | null): void {
+  connected(session: PlaybackSession | null): void {
     if (this.session !== session || this.channel !== session?.channelId) {
       this.revision++;
       this.pauseRevision++;

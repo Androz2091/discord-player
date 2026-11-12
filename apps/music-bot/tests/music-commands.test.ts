@@ -193,7 +193,7 @@ test('queue creation/deletion announce outside the cache and connection repeats 
 
   const session = { sessionId: '00000000-0000-0000-0000-000000000001' as const, channelId: 'voice' };
 
-  queue.node.session = sessionFixture(session);
+  vi.spyOn(queue.node, 'session', 'get').mockReturnValue(sessionFixture(session));
   player.events.emit('connection', queue);
   player.events.emit('connection', queue);
 
