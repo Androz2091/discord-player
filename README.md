@@ -15,7 +15,7 @@ npm create music-bot@dev my-bot
 To add Discord Player to an existing project, install the `dev` tag (npm's `latest` is still v7). For embedded playback:
 
 ```bash
-pnpm add discord-player@dev discord.js @remedia/node@0.1.0
+pnpm add discord-player@dev discord.js @remedia/node
 ```
 
 Install [FFmpeg 9 shared libraries](https://discord-player.js.org/docs/v8/installation/ffmpeg) on the machine running audio. Remote-only bot processes do not need FFmpeg locally.
