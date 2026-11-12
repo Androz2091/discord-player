@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import type { DocsVersionConfig } from './versions';
 
 export const socialImageSize = { width: 1200, height: 630 };
 
@@ -7,6 +8,7 @@ export function createSocialImage({
   description,
   section = 'DOCUMENTATION',
   home = false,
+  version,
 }: {
   title: string;
 
@@ -15,7 +17,13 @@ export function createSocialImage({
   section?: string;
 
   home?: boolean;
+
+  /** Documentation version the page belongs to. Defaults to the v8 landing page branding. */
+  version?: DocsVersionConfig;
 }) {
+  const versionName = version?.name ?? '';
+  const sectionLabel = version ? `${version.name.toUpperCase()} DOCUMENTATION` : section;
+
   return new ImageResponse(
     <div
       style={{
@@ -47,7 +55,12 @@ export function createSocialImage({
           />
         </svg>
         <span style={{ fontSize: 30, fontWeight: 700, letterSpacing: -1.2 }}>discord-player</span>
-        <span style={{ color: '#bf9bf8', fontSize: 20 }}>v8</span>
+        {home ? null : (
+          <span style={{ color: '#bf9bf8', fontSize: 20 }}>
+            {versionName}
+            {version?.badge ? ` · ${version.badge.text}` : ''}
+          </span>
+        )}
       </div>
       <div
         style={{
@@ -61,7 +74,7 @@ export function createSocialImage({
         }}
       >
         <span style={{ width: 36, height: 2, background: '#b994f1' }} />
-        {section}
+        {sectionLabel}
       </div>
       <div
         style={{
@@ -94,7 +107,9 @@ export function createSocialImage({
         }}
       >
         <span>
-          {home ? 'Native audio  ·  Source plugins  ·  Library independent' : 'Documentation  ·  discord-player v8'}
+          {home
+            ? 'Queues  ·  Playback  ·  Filters  ·  Music sources'
+            : `Documentation  ·  discord-player ${versionName}`}
         </span>
         <span style={{ color: '#a298aa' }}>discord-player.js.org</span>
       </div>
@@ -105,9 +120,9 @@ export function createSocialImage({
 
 export function createHomeSocialImage() {
   return createSocialImage({
-    title: 'The next generation music framework for Discord.',
-    description: 'Native audio powered by Remedia. One engine for embedded and remote playback.',
-    section: 'DISCORD-PLAYER v8',
+    title: 'Build Discord music bots in TypeScript.',
+    description: 'Queues, playback, filters, and music sources, without the audio plumbing.',
+    section: 'DISCORD PLAYER',
     home: true,
   });
 }

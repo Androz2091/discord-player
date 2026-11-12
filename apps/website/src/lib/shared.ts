@@ -1,10 +1,10 @@
-import { createGetUrl } from 'fumadocs-core/source';
+import type { DocsVersionId } from './versions';
 
 export const appName = 'discord-player';
 export const discordInviteUrl = 'https://androz2091.fr/discord';
+export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://discord-player.js.org';
 export const docsRoute = '/docs';
-export const docsImageRoute = '/og/docs';
-export const docsContentRoute = '/llms.mdx/docs';
+export const communityRoute = '/community';
 
 export const gitConfig = {
   user: 'Androz2091',
@@ -12,18 +12,32 @@ export const gitConfig = {
   branch: 'v8',
 };
 
-const getContentUrl = createGetUrl(docsContentRoute);
+/** Generated per-page routes that exist for every documentation version. */
+const generatedRoutes = {
+  markdown: '/llms.mdx/docs',
+  image: '/og/docs',
+} as const;
 
-export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
-  const segments = [...page.slugs, 'content.md'];
-
-  return { segments, url: getContentUrl(segments, page.locale) };
+interface PageLocation {
+  version: DocsVersionId;
+  slugs: string[];
 }
 
-const getImageUrl = createGetUrl(docsImageRoute);
+/** Returns the Markdown export of a page, for example for `llms.txt` consumers and the copy button. */
+export function getPageMarkdownUrl({ version, slugs }: PageLocation) {
+  const segments = [version, ...slugs, 'content.md'];
 
-export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
-  const segments = [...page.slugs, 'image.png'];
+  return { segments, url: `${generatedRoutes.markdown}/${segments.join('/')}` };
+}
 
-  return { segments, url: getImageUrl(segments, page.locale) };
+/** Returns the social preview image of a page. */
+export function getPageImageUrl({ version, slugs }: PageLocation) {
+  const segments = [version, ...slugs, 'image.png'];
+
+  return { segments, url: `${generatedRoutes.image}/${segments.join('/')}` };
+}
+
+/** Returns the location of a page's source file in the repository. */
+export function getPageSourceUrl(version: DocsVersionId, path: string) {
+  return `https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/apps/website/content/docs/${version}/${path}`;
 }

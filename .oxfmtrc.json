@@ -22,6 +22,7 @@
     "**/*.generated.jsx",
     "**/*.generated.ts",
     "**/*.generated.tsx",
+    "apps/website/content/docs/v7/**",
     "Cargo.lock",
     "pnpm-lock.yaml"
   ]
