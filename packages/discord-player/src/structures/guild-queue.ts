@@ -810,9 +810,9 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   /**
-   * Connect to or move the queue's logical Remedia session.
+   * Connect to or move the queue's logical playback session.
    * @param options Channel, node, and voice policy settings for the session.
-   * @returns The queue's connected Remedia session.
+   * @returns The queue's connected playback session.
    */
   public async connect(options: GuildQueueConnectOptions): Promise<PlaybackSession> {
     intercept(this.player.plugins, 'voice.beforeConnect', { guildId: this.guildId });

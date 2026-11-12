@@ -194,7 +194,7 @@ export class PluginRegistry {
     return [...this.entries.values()].some((entry) => entry.registration.definition.remoteHost?.hostId === hostId);
   }
 
-  /** Advertise only actual local operation handlers.
+  /** Advertise only active local operation handlers and supplied provider capabilities.
    * @returns Serializable provider capability descriptions.
    */
   public describe() {
@@ -203,8 +203,12 @@ export class PluginRegistry {
       .map((entry) => {
         const handlers = [...entry.handlers];
         const operations = [...new Set(handlers.map((handler) => handler.operation))];
+        const provides = [...this.providersIndex]
+          .filter(([, provider]) => provider.entry === entry)
+          .map(([name]) => name);
         return {
           id: entry.id,
+          provides,
           operations,
           protocols: [
             ...new Set(

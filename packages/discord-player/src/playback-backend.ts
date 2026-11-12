@@ -1,12 +1,12 @@
 import type {
   AudioStreamInfo,
   DiscordConnectOptions,
+  DiscordGatewaySend,
   DiscordSession,
   DiscordSessionEvents,
   DiscordSessionOptions,
   MediaSource,
   PlayOptions,
-  RemediaClientOptions,
   StageNextOptions,
   StageSnapshot,
 } from '@remedia/client';
@@ -44,7 +44,7 @@ export interface PlaybackBackendContext {
   readonly signal: AbortSignal;
 
   /** Configured shard-aware Gateway sender. */
-  readonly send: RemediaClientOptions['send'];
+  readonly send: DiscordGatewaySend;
 }
 
 type EventSubscription<Metadata> = {

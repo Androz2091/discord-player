@@ -217,6 +217,9 @@ it('rejects duplicate, late and standalone providers without silently choosing o
   });
   await expect(player.plugins.register(duplicate())).rejects.toThrow(/Duplicate provider/);
   await player.initialize('bot-user');
+  expect(player.plugins.describe().find((provider) => provider.id === 'backend')?.provides).toEqual([
+    'playback.backend',
+  ]);
   await expect(player.plugins.register(duplicate())).rejects.toThrow(/sealed/);
   const runtime = new SourcePluginRuntime();
   await expect(runtime.plugins.register(duplicate())).rejects.toThrow(/Unsupported local provider/);
@@ -378,6 +381,27 @@ it('does not allocate either backend after destruction overtakes plugin readines
   await initialization;
   expect(backend.initialize).not.toHaveBeenCalled();
   expect(RemediaClient.create).not.toHaveBeenCalled();
+});
+
+it('exposes the default Remedia client through getBackend and seals selection without a provider', async () => {
+  const { createRemediaMock } = await import('./mocks/remedia.js');
+  const mock = createRemediaMock();
+  vi.mocked(RemediaClient.create).mockResolvedValue(mock.asClient());
+  const player = new DiscordPlayer({ send() {} });
+  players.push(player);
+  await player.initialize('bot-user');
+  expect(player.getBackend()).toBe(mock.asClient());
+  expect(player.getRemedia()).toBe(mock.asClient());
+  await expect(
+    player.plugins.register(
+      definePlugin({
+        id: 'late-backend',
+        setup(ctx) {
+          ctx.provide('playback.backend', {} as PlaybackBackend);
+        },
+      })(),
+    ),
+  ).rejects.toThrow(/sealed/);
 });
 
 it('disposes late default initialization while retaining the default Remedia path', async () => {

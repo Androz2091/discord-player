@@ -493,10 +493,10 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     return this.#clientId;
   }
 
-  /** Forward every raw Discord Gateway dispatch to Remedia and track voice states for the owning queue.
+  /** Forward every raw Discord Gateway dispatch to the active playback backend and track queue voice states.
    *
-   * Remedia needs the complete dispatch stream, including `READY`, to track Gateway sessions and dispatch
-   * ordering; do not filter packets before calling this method. Discord Player separately consumes
+   * The active backend needs the complete dispatch stream, including `READY`, to track Gateway sessions and
+   * dispatch ordering; do not filter packets before calling this method. Discord Player separately consumes
    * `VOICE_STATE_UPDATE` for queue voice policies. Packets are ignored before `initialize()` and after `destroy()`.
    * @param payload Raw Gateway dispatch packet from the Discord client's event adapter.
    */
@@ -601,7 +601,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
             !node.capabilities?.pluginOperations?.available ||
             !node.capabilities.pluginOperations.hosts.includes(hostId)
       )
-        throw new Error(`Remedia node ${nodeId} cannot access source host ${hostId}`);
+        throw new Error(`Playback backend cannot access source host ${hostId}`);
 
       const source: OperationMediaSource = {
         hostId,

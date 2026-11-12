@@ -143,10 +143,12 @@ cannot be implemented. Provider initialization must honor its lifetime signal.
 
 ### Ownership and registration lifecycle
 
-Give each Player its own backend instance. Only one backend can be provided per Player. Duplicate providers fail setup;
-selection is sealed after plugin readiness and before resources initialize, including when no custom
-provider exists. Repeated initialization for the same client ID shares the existing attempt; a different ID rejects. Failed
-initialization disposes the provider and does not fall back to Remedia.
+Give each Player its own backend instance. Only one backend can be provided per
+Player. Duplicate providers fail setup; selection is sealed after plugin
+readiness and before resources initialize, including when no custom provider
+exists. Repeated initialization for the same client ID shares the existing
+attempt; a different ID rejects. Failed initialization disposes the provider and
+does not fall back to Remedia.
 
 `queue.node.session` is a read-only `PlaybackSession` reference. Use
 `queue.node.createSession()` for replacement; Discord Player cancels the old

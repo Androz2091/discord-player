@@ -14,11 +14,11 @@ import { Track } from './track.js';
 import type { NativeSessionObservation } from './common/guild-queue-events.js';
 
 /**
- * Remedia session configuration supplied when a queue node creates or connects its raw session.
- * `volume` is Remedia's linear gain, from 0 through 2; queue APIs accept percentages instead.
+ * Playback session configuration supplied when a queue node creates or connects its raw session.
+ * `volume` uses linear gain, from 0 through 2; queue APIs accept percentages instead.
  */
 export interface GuildQueuePlayerNodeSessionCreateOptions extends Omit<DiscordSessionOptions, 'guildId' | 'userId'> {
-  /** Deadline for the initial Discord voice join, in milliseconds; defaults to Remedia's 100 seconds. */
+  /** Deadline for the initial Discord voice join, in milliseconds; defaults to the backend timeout. */
   connectTimeoutMs?: number;
 }
 
@@ -55,12 +55,12 @@ export interface PlayerTimestamp {
   progress: number;
 }
 
-/** Result returned by raw Remedia playback. */
+/** Result returned by raw playback. */
 export interface PlayRawResult<Metadata = unknown> {
-  /** Audio stream information reported by Remedia. */
+  /** Audio stream information reported by the active backend. */
   audioStream: AudioStreamInfo;
 
-  /** Remedia session that owns the playback generation. */
+  /** Playback session that owns the playback generation. */
   session: PlaybackSession<Metadata>;
 }
 
@@ -75,9 +75,9 @@ function timecode(milliseconds: number): string {
     : `${minutes}:${String(remainder).padStart(2, '0')}`;
 }
 
-/** Raw Remedia player controls for one guild queue. It never schedules queue tracks. */
+/** Raw playback controls for one guild queue. It never schedules queue tracks. */
 export class GuildQueuePlayerNode<Metadata = unknown> {
-  /** Current Remedia session, or `null` before connecting. */
+  /** Current playback session, or `null` before connecting. */
   #currentSession: PlaybackSession | null = null;
 
   /** Framework-owned current session; use createSession() to replace it safely. */
@@ -85,7 +85,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     return this.#currentSession;
   }
 
-  /** Parent Player that owns Remedia and gateway orchestration. */
+  /** Parent Player that owns the playback backend and gateway orchestration. */
   public readonly player: DiscordPlayer;
 
   /** Queue-owned named presets and raw filtergraph controls, available before connection. */
@@ -127,8 +127,8 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /**
    * Replace the current session with a newly created, not-yet-connected session.
-   * @param options Remedia channel, node, voice, gain, and filtergraph settings.
-   * @returns The created Remedia session.
+   * @param options Channel, node, voice, gain, and filtergraph settings.
+   * @returns The created playback session.
    */
   public async createSession<M = unknown>(
     options: GuildQueuePlayerNodeSessionCreateOptions,
@@ -162,9 +162,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /**
    * Connect the current session or create and connect one for the requested channel.
-   * Moving a connected session uses Remedia's `move()` method and retains this session identity.
-   * @param options Remedia channel, node, voice, gain, and filtergraph settings.
-   * @returns The connected Remedia session.
+   * Moving a connected session uses the backend's `move()` method and retains this session identity.
+   * @param options Channel, node, voice, gain, and filtergraph settings.
+   * @returns The connected playback session.
    * @throws Error When an existing session is assigned to a different node than requested.
    */
   public async connect<M = unknown>(options: GuildQueuePlayerNodeSessionCreateOptions): Promise<PlaybackSession<M>> {
@@ -255,7 +255,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     return session as PlaybackSession<M>;
   }
 
-  /** Disconnect and clear the current Remedia session. */
+  /** Disconnect and clear the current playback session. */
   public async destroySession(): Promise<void> {
     this.player.plugins.assertNotDispatching();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
@@ -293,10 +293,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     const backend = this.player.playbackBackend;
     if (!backend) return this.player.getRemedia().createDiscordSession(options);
     this.player.getBackend();
-    const session = await backend.createSession(
-      options,
-      AbortSignal.any([this.queue.signal, this.player.playbackSignal]),
-    );
+    const signal = AbortSignal.any([this.queue.signal, this.player.playbackSignal]);
+    signal.throwIfAborted();
+    const session = await backend.createSession(options, signal);
     try {
       this.queue.signal.throwIfAborted();
       this.player.playbackSignal.throwIfAborted();
@@ -616,7 +615,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /**
    * Set player volume using Discord Player's 0–200 percentage convention.
-   * @param volumePercentage Volume percentage; Remedia receives a linear gain from zero through two.
+   * @param volumePercentage Volume percentage; the backend receives a linear gain from zero through two.
    * @returns The applied percentage volume.
    */
   public async setVolume(volumePercentage: number): Promise<number> {
@@ -714,7 +713,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     await this.getSession().seek(Math.max(0, positionMs));
   }
 
-  /** Pause raw playback in the current Remedia session. */
+  /** Pause raw playback in the current playback session. */
   public async pause(): Promise<void> {
     intercept(this.player.plugins, 'playback.beforePause', { guildId: this.queue.guildId });
     this.queue.voice.manualPause();
@@ -723,7 +722,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     await this.getSession().pause();
   }
 
-  /** Resume raw playback in the current Remedia session. */
+  /** Resume raw playback in the current playback session. */
   public async resume(): Promise<void> {
     intercept(this.player.plugins, 'playback.beforeResume', { guildId: this.queue.guildId });
     this.queue.voice.manualPause();
@@ -771,7 +770,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   /**
-   * Stop the current Remedia generation without queue scheduling.
+   * Stop the current playback generation without queue scheduling.
    * @remarks Intended for queue lifecycle transitions; use `stop()` for queue-managed playback.
    */
   public async stopSession(): Promise<void> {
@@ -789,7 +788,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   /**
-   * Output elapsed time in milliseconds, read on demand from Remedia's playback clock.
+   * Output elapsed time in milliseconds, read on demand from the backend playback clock.
    * @remarks This is time spent producing output for the current generation, not the source-media position.
    * It starts at the seek target after `seek()` and can differ from the source position (and exceed
    * {@link GuildQueuePlayerNode.totalDuration}) when a filter changes tempo. Returns zero when no session exists.
