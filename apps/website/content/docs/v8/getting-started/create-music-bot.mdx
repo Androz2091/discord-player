@@ -1,0 +1,118 @@
+---
+title: The project generator
+description: Options of create-music-bot, the generated files, and how to change the bot.
+---
+
+`create-music-bot` writes a complete bot into a new folder. This page covers its options, what it generates, and where to make changes. To create your first bot, start with [Getting started](/docs/v8/getting-started).
+
+## Run it without prompts
+
+Pass the project folder and flags. With npm, put flags after `--`.
+
+```bash
+npm create music-bot@dev my-bot -- --template ts
+npm create music-bot@dev my-bot -- --template js --install
+```
+
+| Option                        | Description                                                                   |
+| ----------------------------- | ----------------------------------------------------------------------------- |
+| `[directory]`                 | Folder to create. Its last segment becomes the package name                   |
+| `-t, --template <ts\|js>`     | Language of the project. Defaults to `ts` when the generator is not prompting |
+| `--install`                   | Install dependencies after generating the project                             |
+| `--no-install`                | Skip installation. This is the default when not prompting                     |
+| `--overwrite`                 | Replace existing files without asking                                         |
+| `-y, --yes`                   | Never prompt. A folder argument is then required                              |
+| `-h, --help`, `-v, --version` | Print help or the generator version                                           |
+
+The generator does not prompt when it is not attached to a terminal, for example in CI. It exits with a non-zero code and an explanation when an argument is invalid. Running it with `.` as the folder generates into the current directory.
+
+It detects whether you started it with npm, pnpm, yarn, or bun, and uses that package manager to install and in the commands it prints.
+
+### Existing folders
+
+The generator writes into an existing folder only when no generated file would replace one of its files. Otherwise it asks before replacing anything, or exits unless you pass `--overwrite`. It replaces only files with a generated name, never deletes anything, and refuses to write into a path that is a file. Cancelling a prompt with `Ctrl+C` writes nothing.
+
+## Generated files
+
+```text
+my-bot/
+  src/
+    index.ts
+    bot.ts
+    commands.ts
+    events.ts
+    media-source.ts
+    config.ts
+  .env.example
+  .gitignore
+  package.json
+  README.md
+  tsconfig.json
+```
+
+JavaScript projects have the same files with a `.js` extension and no `tsconfig.json`.
+
+| File              | Responsibility                                                                                |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| `index.ts`        | Starts the bot and stops it on `SIGINT` or `SIGTERM`                                          |
+| `bot.ts`          | Creates the Discord client and the Player, forwards gateway packets, and handles interactions |
+| `commands.ts`     | The six slash commands and their voice-channel checks                                         |
+| `events.ts`       | Announces playback in the text channel and logs errors                                        |
+| `media-source.ts` | A [source plugin](/docs/v8/plugins) for direct links on allowed hosts                         |
+| `config.ts`       | Reads and validates `.env`                                                                    |
+
+The TypeScript project runs the `.ts` files directly on Node.js 22.18 or newer, so there is no build step. `npm run typecheck` runs `tsc --noEmit`.
+
+## Dependencies
+
+| Package          | Version                                                     |
+| ---------------- | ----------------------------------------------------------- |
+| `discord-player` | The generator's own version, as an exact version            |
+| `@remedia/node`  | The release that `discord-player`'s Remedia client requires |
+| `discord.js`     | A `^14` range                                               |
+
+The generator and Discord Player are released together with the same version. A generator at `8.0.0-dev.3` writes `"discord-player": "8.0.0-dev.3"`, so a prerelease generator never installs v7. `@remedia/node` is an exact version because the Remedia client requires that exact version as its peer dependency. Generated projects never use `latest` or workspace versions.
+
+## Environment variables
+
+| Variable              | Required | Description                                                                   |
+| --------------------- | -------- | ----------------------------------------------------------------------------- |
+| `DISCORD_TOKEN`       | Yes      | Bot token. The bot refuses to start without it                                |
+| `ALLOWED_MEDIA_HOSTS` | No       | Comma-separated hostnames `/play` may load audio from. Empty disables `/play` |
+
+`ALLOWED_MEDIA_HOSTS` takes bare hostnames such as `media.example.com`. URLs, ports, and wildcards are rejected at startup. Both variables are read from the process environment, and from `.env` through `--env-file-if-exists`.
+
+## Commands
+
+| Command   | Behavior                                                                                       |
+| --------- | ---------------------------------------------------------------------------------------------- |
+| `/play`   | Queue a direct link. Needs you in a voice channel and the bot able to view, connect, and speak |
+| `/pause`  | Pause the current track                                                                        |
+| `/resume` | Resume a paused track                                                                          |
+| `/skip`   | Skip to the next track                                                                         |
+| `/stop`   | Stop, clear the queue, and leave the voice channel                                             |
+| `/queue`  | Show the current track and the next ten                                                        |
+
+Pause, resume, skip, and stop only work for members in the bot's voice channel. `/queue` is open to everyone in the server. If the bot is already playing in another channel, `/play` tells the member where the bot is instead of moving it.
+
+## How it works
+
+The generated code uses only public Discord Player APIs, so each part maps to a section of these docs.
+
+- `bot.ts` creates one [Player](/docs/v8/getting-started/create-player) with the media source plugin and a `send` function. It forwards every raw gateway packet to `player.receive()`, and calls `player.initialize()` after the client is ready.
+- `media-source.ts` implements the three [plugin operations](/docs/v8/plugins/build-source). It reads the file's tags with `probe()` so the queue shows a real title and duration. It checks the host again when a track starts, so a stored track cannot point the engine at a host that has since been removed from the list.
+- `commands.ts` uses the queue and `queue.node` [playback controls](/docs/v8/guides/playback-controls). `/play` searches first and only then creates the queue, so a link that cannot be read leaves nothing behind.
+- `events.ts` listens to [queue events](/docs/v8/guides/events). When a track fails, it removes the track and starts the next one, as described in [errors and recovery](/docs/v8/guides/errors).
+- The Player uses one embedded Remedia node, so audio is decoded in the bot process.
+
+### Change the bot
+
+- **Add a command.** Add an entry to the array returned by `createCommands()` in `commands.ts`. The bot registers every entry at startup.
+- **Play from another provider.** Write a [source plugin](/docs/v8/plugins) and add it to `plugins` in `bot.ts`.
+- **Run audio on another machine.** Set `nodes` on the Player as shown in [remote playback](/docs/v8/remedia/remote). The generated plugin returns URLs, which a remote server can open if it can reach the host and its media policy allows it.
+
+## Security
+
+The host list is the only control on what `/play` can request. The plugin does not resolve hostnames, and Remedia follows HTTP redirects, so list only hosts that you trust and that do not redirect users' links elsewhere. Do not list hosts that resolve to private network addresses unless that is intended.
+
+<NextStep href="/docs/v8/guides" label="Learn more in the guides" />

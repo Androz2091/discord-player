@@ -20,6 +20,7 @@ import {
   resolveTriggeringActorId,
   syncPackageVersions,
   validateTarball,
+  verifyBuiltPackages,
   verifyPublishedVersions,
 } from './release.mjs';
 
@@ -907,4 +908,58 @@ test('allows only the source host contract documentation outside dist', () => {
   execFileSync('tar', ['-czf', tarball, 'package'], { cwd: root });
 
   assert.throws(() => validateTarball(tarball, { name, version: '8.0.0', expectedPackages: [] }), /unexpected file/);
+});
+
+test('a generator package is verified and packed by its bin entry and bundled templates', () => {
+  const root = createWorkspace(['create-music-bot']);
+  const packageDir = join(root, 'packages/create-music-bot');
+  const manifest = { bin: { 'create-music-bot': './dist/cli.js' } };
+
+  writeJson(join(packageDir, 'package.json'), {
+    ...packageManifest('create-music-bot', '0.0.0'),
+    main: undefined,
+    types: undefined,
+    ...manifest,
+  });
+
+  assert.throws(() => verifyBuiltPackages({ root }), /missing declared build entrypoint dist\/cli\.js/);
+
+  writeFileSync(join(packageDir, 'dist/cli.js'), '#!/usr/bin/env node\n');
+
+  assert.deepEqual(verifyBuiltPackages({ root })[0].entrypoints, ['dist/cli.js']);
+
+  const directory = tempDir();
+  const packed = join(directory, 'package');
+
+  mkdirSync(join(packed, 'dist/templates/ts/src'), { recursive: true });
+  mkdirSync(join(packed, 'dist/templates/js'), { recursive: true });
+  writeJson(join(packed, 'package.json'), {
+    ...packageManifest('create-music-bot', '8.0.0-dev.4'),
+    main: undefined,
+    types: undefined,
+    ...manifest,
+  });
+  writeFileSync(join(packed, 'dist/cli.js'), '#!/usr/bin/env node\n');
+  writeFileSync(join(packed, 'dist/templates/ts/_gitignore'), '.env\n');
+  writeFileSync(join(packed, 'dist/templates/ts/src/index.ts'), 'export {};\n');
+  writeFileSync(join(packed, 'dist/templates/js/.env.example'), 'DISCORD_TOKEN=\n');
+  writeFileSync(join(packed, 'README.md'), '# create-music-bot\n');
+
+  const tarball = join(directory, 'create-music-bot-8.0.0-dev.4.tgz');
+
+  execFileSync('tar', ['-czf', tarball, 'package'], { cwd: directory });
+
+  assert.equal(
+    validateTarball(tarball, { name: 'create-music-bot', version: '8.0.0-dev.4', root }).version,
+    '8.0.0-dev.4',
+  );
+
+  rmSync(join(packed, 'dist/cli.js'));
+  rmSync(tarball);
+  execFileSync('tar', ['-czf', tarball, 'package'], { cwd: directory });
+
+  assert.throws(
+    () => validateTarball(tarball, { name: 'create-music-bot', version: '8.0.0-dev.4', root }),
+    /missing declared entrypoint dist\/cli\.js/,
+  );
 });

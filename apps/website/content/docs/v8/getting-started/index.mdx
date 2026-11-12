@@ -1,9 +1,11 @@
 ---
 title: Getting started
-description: Build a Discord music bot that plays direct audio links, from an empty folder to a working /play command.
+description: Create a Discord music bot with one command, configure it, and play your first track.
 ---
 
-This tutorial builds a small music bot with discord.js. It plays direct links to MP3, Ogg, and WAV files and adds pause, skip, and queue commands. Discord Player itself does not depend on discord.js.
+`create-music-bot` generates a small bot built on discord.js, Discord Player, and the embedded Remedia audio engine. It has `/play`, `/pause`, `/resume`, `/skip`, `/stop`, and `/queue`, and it plays direct links to audio files.
+
+Adding Discord Player to a bot you already have? Follow [manual setup](/docs/v8/getting-started/manual-setup) instead.
 
 ## Before you start
 
@@ -12,31 +14,135 @@ You need:
 - Node.js 22.18 or newer.
 - A Discord application with a bot token. Create one in the [Discord Developer Portal](https://discord.com/developers/applications).
 - A server where the bot can join and speak in a voice channel.
-- [FFmpeg 9 shared libraries](/docs/v8/installation/ffmpeg) on your machine.
+- FFmpeg 9 shared libraries on the machine that runs the bot. See the next section.
 
-## Create the project
+## 1. Install FFmpeg 9
+
+Remedia decodes audio with FFmpeg's shared libraries. An `ffmpeg` executable is not enough, and most Linux distributions ship an older version. Remedia's installer sets up the right libraries in `~/.remedia/ffmpeg9`, and `@remedia/node` finds them without any configuration.
+
+<Tabs items={['Linux and macOS', 'Windows PowerShell']}>
+  <Tab value="Linux and macOS">
 
 ```bash
-mkdir music-bot && cd music-bot
-pnpm init
-pnpm add discord-player discord.js @remedia/node
+curl -fsSL https://remedia.twlite.dev/install.sh | sh -s -- --ffmpeg-only
 ```
 
-Add `"type": "module"` to `package.json`. Node.js 22.18 and newer runs `.ts` files directly, so no build step is needed.
+  </Tab>
+  <Tab value="Windows PowerShell">
 
-Create a `.env` file with your bot token:
+```powershell
+& ([scriptblock]::Create((irm https://remedia.twlite.dev/install.ps1))) -FFmpegOnly
+```
+
+  </Tab>
+</Tabs>
+
+[Install FFmpeg](/docs/v8/installation/ffmpeg) lists other methods and how to check the result.
+
+## 2. Create the project
+
+<Tabs items={['npm', 'pnpm', 'yarn', 'bun']}>
+  <Tab value="npm">
+
+```bash
+npm create music-bot@dev my-bot
+```
+
+  </Tab>
+  <Tab value="pnpm">
+
+```bash
+pnpm create music-bot@dev my-bot
+```
+
+  </Tab>
+  <Tab value="yarn">
+
+```bash
+yarn create music-bot@dev my-bot
+```
+
+  </Tab>
+  <Tab value="bun">
+
+```bash
+bun create music-bot@dev my-bot
+```
+
+  </Tab>
+</Tabs>
+
+Leave out `my-bot` to be asked for the name. `@dev` selects the v8 preview. Without it your package manager resolves the `latest` tag, which does not point to v8 yet.
+
+The generator asks three questions:
+
+| Question             | Choices                                                         |
+| -------------------- | --------------------------------------------------------------- |
+| Project name         | Also the folder name. Lowercase letters, numbers, `-`, `.`, `_` |
+| Language             | TypeScript or JavaScript. Both projects behave the same         |
+| Install dependencies | Runs your package manager in the new folder                     |
+
+To skip the questions, pass flags. For example, `npm create music-bot@dev my-bot -- --template js --install` creates a JavaScript project and installs it. See [the generator](/docs/v8/getting-started/create-music-bot) for every option.
+
+## 3. Add your token and a media host
+
+```bash
+cd my-bot
+cp .env.example .env
+```
+
+On Windows, use `copy .env.example .env`. Then edit `.env`:
 
 ```bash title=".env"
 DISCORD_TOKEN=your-bot-token
+ALLOWED_MEDIA_HOSTS=media.example.com
 ```
 
-## What you will build
+`ALLOWED_MEDIA_HOSTS` lists the hostnames `/play` may load audio from, separated by commas. It is empty by default and `/play` refuses every link until you set it. Use hosts you trust: Remedia follows redirects, so a listed host can send the bot elsewhere.
 
-| Step                                                           | File                              | Purpose                                       |
-| -------------------------------------------------------------- | --------------------------------- | --------------------------------------------- |
-| [1. Create the player](/docs/v8/getting-started/create-player) | `src/player.ts`                   | Connect the Discord gateway to Discord Player |
-| [2. Add a source](/docs/v8/getting-started/source-plugin)      | `src/direct-media.ts`             | Turn a URL into a playable track              |
-| [3. Play a track](/docs/v8/getting-started/play-track)         | `src/index.ts`, `src/commands.ts` | Register `/play` and start the bot            |
-| [4. Control playback](/docs/v8/getting-started/next-steps)     | `src/commands.ts`                 | Add pause, resume, skip, stop, and queue      |
+## 4. Invite the bot
 
-<NextStep href="/docs/v8/getting-started/create-player" label="1. Create the player" />
+In the Developer Portal, open **OAuth2** and create an invite URL with:
+
+- Scopes: `bot` and `applications.commands`.
+- Permissions: View Channels, Send Messages, Connect, and Speak.
+
+Open the URL and add the bot to your server. The bot does not need any privileged intent.
+
+## 5. Install and run
+
+If you did not let the generator install dependencies, run `npm install` first.
+
+```bash
+npm run dev
+```
+
+`dev` restarts the bot when you edit a file. Use `npm start` to run it once. The bot is running when it prints:
+
+```text
+Ready as My Bot#1234
+```
+
+The first start registers the slash commands. Global commands can take a few minutes to appear.
+
+## 6. Play a track
+
+Join a voice channel and run `/play` with a direct link to an audio file on an allowed host, for example `https://media.example.com/song.mp3`. The bot joins, announces the track in the channel where you ran the command, and plays it.
+
+Use `/queue` to see what is next and `/skip`, `/pause`, `/resume`, or `/stop` to control playback. Stop the bot with `Ctrl+C`. It leaves voice channels and closes the audio engine before exiting.
+
+## If something goes wrong
+
+| Message or symptom                      | Fix                                                                                                                                  |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `DISCORD_TOKEN is not set`              | Create `.env` from `.env.example` and set the token                                                                                  |
+| `Could not log in to Discord`           | The token is wrong or was reset. Copy a new one from the Developer Portal                                                            |
+| `Could not start the audio engine`      | FFmpeg 9 shared libraries are missing. Follow step 1 and [verify the install](/docs/v8/installation/ffmpeg#verify-your-installation) |
+| `/play` says playback is disabled       | Set `ALLOWED_MEDIA_HOSTS` in `.env` and restart                                                                                      |
+| `"host" is not in ALLOWED_MEDIA_HOSTS`  | Add the exact hostname to the list                                                                                                   |
+| `I could not read audio from that link` | The link must point straight at an audio file that Remedia can open, not at a web page                                               |
+| Slash commands do not appear            | Wait a few minutes after the first start, and check the invite included `applications.commands`                                      |
+
+More causes are in [Troubleshooting](/docs/v8/troubleshooting).
+
+<NextStep href="/docs/v8/getting-started/create-music-bot" label="Explore the generated project" />

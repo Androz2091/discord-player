@@ -6,10 +6,16 @@ Discord Player is a music framework for Discord bots. Manage queues, tracks, pla
 
 ## Install
 
-Node.js 22.18+ and ESM are required. For embedded playback:
+Node.js 22.18+ and ESM are required. To start a new bot, generate a project:
 
 ```bash
-pnpm add discord-player discord.js @remedia/node
+npm create music-bot@dev my-bot
+```
+
+To add Discord Player to an existing project, install the `dev` tag (npm's `latest` is still v7). For embedded playback:
+
+```bash
+pnpm add discord-player@dev discord.js @remedia/node@0.1.0-dev.7
 ```
 
 Install [FFmpeg 9 shared libraries](https://discord-player.js.org/docs/v8/installation/ffmpeg) on the machine running audio. Remote-only bot processes do not need FFmpeg locally.
@@ -41,7 +47,7 @@ client.once(Events.ClientReady, (ready) => {
 });
 ```
 
-The `directMedia` plugin is defined in the [getting-started tutorial](https://discord-player.js.org/docs/v8/getting-started/source-plugin). Source plugins supply playable audio. Discord Player does not automatically register a music provider.
+The `directMedia` plugin is defined in the [manual setup tutorial](https://discord-player.js.org/docs/v8/getting-started/source-plugin). Source plugins supply playable audio. Discord Player does not automatically register a music provider.
 
 Inside your play command, after initialization:
 

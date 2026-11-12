@@ -1,0 +1,49 @@
+---
+title: Manual setup
+description: Add Discord Player to an existing discord.js bot, step by step.
+---
+
+This tutorial adds Discord Player to a discord.js bot you already have, or builds a small one from scratch. It plays direct links to MP3, Ogg, and WAV files and adds pause, skip, and queue commands. Discord Player itself does not depend on discord.js.
+
+Starting a new bot? [Generate one](/docs/v8/getting-started) instead. The generator does everything on this page and also restricts which hosts `/play` can load.
+
+## Before you start
+
+You need:
+
+- Node.js 22.18 or newer.
+- A Discord application with a bot token. Create one in the [Discord Developer Portal](https://discord.com/developers/applications).
+- A server where the bot can join and speak in a voice channel.
+- [FFmpeg 9 shared libraries](/docs/v8/installation/ffmpeg) on your machine.
+
+## Install the packages
+
+```bash
+mkdir music-bot && cd music-bot
+pnpm init
+pnpm add discord-player@dev discord.js @remedia/node@0.1.0-dev.7
+```
+
+Add `"type": "module"` to `package.json`. Node.js 22.18 and newer runs `.ts` files directly, so no build step is needed.
+
+<Callout type="warn" title="Use the dev tag while v8 is a preview">
+  `pnpm add discord-player` installs v7, because npm's `latest` tag still points to it. `@remedia/node` must be the
+  exact version that `discord-player` depends on. The generator always chooses a matching pair.
+</Callout>
+
+Create a `.env` file with your bot token:
+
+```bash title=".env"
+DISCORD_TOKEN=your-bot-token
+```
+
+## What you will build
+
+| Step                                                           | File                              | Purpose                                       |
+| -------------------------------------------------------------- | --------------------------------- | --------------------------------------------- |
+| [1. Create the player](/docs/v8/getting-started/create-player) | `src/player.ts`                   | Connect the Discord gateway to Discord Player |
+| [2. Add a source](/docs/v8/getting-started/source-plugin)      | `src/direct-media.ts`             | Turn a URL into a playable track              |
+| [3. Play a track](/docs/v8/getting-started/play-track)         | `src/index.ts`, `src/commands.ts` | Register `/play` and start the bot            |
+| [4. Control playback](/docs/v8/getting-started/next-steps)     | `src/commands.ts`                 | Add pause, resume, skip, stop, and queue      |
+
+<NextStep href="/docs/v8/getting-started/create-player" label="1. Create the player" />

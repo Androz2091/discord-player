@@ -18,22 +18,32 @@
     "type": "git",
     "url": "git+https://github.com/Androz2091/discord-player.git"
   },
+  "bin": {
+    "create-music-bot": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "README.md"
   ],
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "build": "tsc && node scripts/copy-templates.mjs",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit && tsc -p templates/ts/tsconfig.json",
+    "test": "pnpm build && vitest run"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@clack/prompts": "^1.9.0"
+  },
   "devDependencies": {
+    "@remedia/client": "0.1.0-dev.7",
+    "@remedia/node": "0.1.0-dev.7",
     "@types/node": "catalog:",
+    "discord-player": "workspace:*",
+    "discord.js": "^14.28.1",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=22.18.0"
   }
 }
