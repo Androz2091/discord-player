@@ -1,58 +1,75 @@
-name: Deploy Website
+name: Deploy Documentation
 
 on:
-  workflow_dispatch:
   push:
     branches: [master]
     paths:
       - 'apps/website/**'
+      - 'packages/**'
+      - 'scripts/docs/**'
       - '.github/workflows/deploy-website.yml'
+      - '.github/scripts/verify-docs-export.mjs'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.base.json'
+  workflow_dispatch:
 
-# Allow the workflow to publish to GitHub Pages.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# Only one concurrent deployment; in-progress runs are allowed to finish.
 concurrency:
-  group: pages
+  group: github-pages
   cancel-in-progress: false
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: read
     steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: pnpm/action-setup@v6.1.0
         with:
           version: 12.16.1
-
       - uses: actions/setup-node@v7.1.0
         with:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build website (static export)
-        run: pnpm --filter=@discord-player/website build
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Read GitHub Pages configuration
+        id: pages
+        uses: actions/configure-pages@v5
+      - run: pnpm install --frozen-lockfile
+      - name: Export documentation
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: pnpm --filter @discord-player/website build
+      - name: Verify exported links and resources
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: node .github/scripts/verify-docs-export.mjs
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v4
         with:
           path: apps/website/out
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

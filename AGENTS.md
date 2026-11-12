@@ -17,7 +17,7 @@ Avoid provider-specific assumptions in core packages, tests, documentation, and 
 
 ## Scope and repository boundaries
 
-- Work on the `v8` branch unless explicitly instructed otherwise.
+- Base topic branches on `master` unless explicitly instructed otherwise. Work on the requested branch.
 - Do not modify the Remedia repository unless explicitly requested.
 - Do not open pull requests, merge branches, publish packages, or change release versions unless explicitly requested.
 - Do not implement APIs that require unreleased or nonexistent Remedia functionality.

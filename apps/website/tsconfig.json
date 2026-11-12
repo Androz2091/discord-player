@@ -15,13 +15,15 @@
     "jsx": "react-jsx",
     "incremental": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@docs-scripts/*": ["../../scripts/docs/*"]
     },
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "allowImportingTsExtensions": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
   "exclude": ["node_modules"]

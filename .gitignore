@@ -5,3 +5,5 @@ dist
 .turbo
 .next
 .source
+apps/website/.generated/
+apps/website/out/

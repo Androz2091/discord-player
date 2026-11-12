@@ -54,6 +54,8 @@
     "**/.next/**",
     "**/.source/**",
     "**/generated/**",
+    "**/.generated/**",
+    "apps/website/out/**",
     "**/*.generated.js",
     "**/*.generated.jsx",
     "**/*.generated.ts",

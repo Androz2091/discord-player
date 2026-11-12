@@ -68,7 +68,7 @@ export const docsVersions = [
     name: 'v8',
     description: 'Development preview',
     badge: { text: 'Dev', tone: 'warning' },
-    apiReference: 'reference',
+    apiReference: 'api',
     startPath: '/getting-started',
   },
 ] as const satisfies readonly DocsVersionConfig[];

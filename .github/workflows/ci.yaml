@@ -81,6 +81,9 @@ jobs:
       - name: Run workspace and release tooling tests
         run: pnpm test
 
+      - name: Build and verify documentation
+        run: pnpm --filter @discord-player/website build
+
       - name: Verify publishable package entrypoints
         run: node .github/scripts/release.mjs verify-build
 
