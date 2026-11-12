@@ -1,4 +1,5 @@
-import type { DiscordSession } from '@remedia/client';
+import type { PlaybackSession } from './playback-backend.js';
+import { intercept } from './plugins/capabilities.js';
 import type { GuildQueue } from './structures/guild-queue.js';
 
 /** Normalized Discord Gateway member state, independent of any Discord library. */
@@ -20,7 +21,7 @@ export class VoiceStateTracker {
   private states = new Map<string, GatewayVoiceState>();
   private occupants: Set<string> | null = null;
   private channel: string | null = null;
-  private session: DiscordSession | null = null;
+  private session: PlaybackSession | null = null;
   private revision = 0;
   private requested = false;
   private work: Promise<void> | null = null;
@@ -73,7 +74,7 @@ export class VoiceStateTracker {
   /** Invalidate channel/session-dependent work and reconcile a successful connection.
    * @param session Current native session, or null on replacement/disposal.
    */
-  connected(session: DiscordSession | null): void {
+  connected(session: PlaybackSession | null): void {
     if (this.session !== session || this.channel !== session?.channelId) {
       this.revision++;
       this.pauseRevision++;
@@ -222,6 +223,7 @@ export class VoiceStateTracker {
         if (shouldPause && session.state === 'playing') {
           this.pauseOwned = true;
           this.pauseCause = this.blocked ? 'mute' : 'empty';
+          intercept(this.queue.player.plugins, 'voice.beforeAutoPause', { guildId: this.queue.guildId });
           await session.pause();
         } else if (
           !shouldPause &&
@@ -299,6 +301,7 @@ export class VoiceStateTracker {
               return;
             if (reason !== 'empty' && this.queue.isPlaying()) return;
             if (reason === 'end' && this.queue.size) return;
+            intercept(this.queue.player.plugins, 'voice.beforeLeave', { guildId: this.queue.guildId, reason });
             await this.queue.destroy();
           })(),
         );

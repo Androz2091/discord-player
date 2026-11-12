@@ -446,3 +446,36 @@ it('rechecks transforms registered while an eager URL is resolving and defers th
     await new Promise<void>((resolve) => upstream.close(() => resolve()));
   }
 });
+
+it('routes modern transformations from a separate registration through encoded proxy delivery', async () => {
+  const h = host({ directUrlProviders: ['source'] });
+  const transformed = vi.fn(({ track, stream }: SourceStreamTransform) => ({ track, stream }));
+  await h.plugins.register(
+    definePlugin({
+      id: 'modern-transform',
+      setup(ctx) {
+        ctx.on('media.transform', transformed);
+      },
+    })(),
+  );
+  const { track, open } = await provider(h, () => Readable.from(['encoded']));
+  const grant = await result(h, 'source.stream', { track });
+  expect(open).not.toHaveBeenCalled();
+  expect(await (await h.fetch(new Request(grant.url))).text()).toBe('encoded');
+  expect(transformed).toHaveBeenCalledOnce();
+});
+
+it('authorizes transformed descriptors before returning a direct URL', async () => {
+  const h = host({ directUrlProviders: ['source'] });
+  await h.plugins.register(
+    definePlugin({
+      id: 'descriptor',
+      setup(ctx) {
+        ctx.on('media.descriptor', (input) => ({ ...input, source: { url: 'http://127.0.0.1/private' } }));
+      },
+    })(),
+  );
+  const { track } = await provider(h, () => ({ url: 'https://example.com/audio' }));
+  const response = await call(h, 'source.stream', { track });
+  expect(response.status).toBe(502);
+});

@@ -1,8 +1,10 @@
+import type { PlaybackSession } from '../playback-backend.js';
+import { intercept, admissionTracks, type QueueEventObservation } from '../plugins/capabilities.js';
 import { SyncedLyricsProvider } from './synced-lyrics.js';
 import type { StreamHooks } from '../hooks.js';
 import { VoiceStateTracker } from '../voice-state.js';
 import { randomInt, randomUUID } from 'node:crypto';
-import type { DiscordSession, DiscordSessionEvents, NodeSelection, PlayOptions } from '@remedia/client';
+import type { DiscordSessionEvents, NodeSelection, PlayOptions } from '@remedia/client';
 import { AsyncQueue } from '../utils/async-queue.js';
 import type { GuildNodeManager } from '../managers/guild-queue.manager.js';
 import { GuildQueueHistory } from '../managers/guild-queue-history.manager.js';
@@ -200,7 +202,7 @@ interface ManagedOperation {
   track: Track;
 
   /** Exact session to which this operation was submitted. */
-  session: DiscordSession;
+  session: PlaybackSession;
 
   /** Remedia's generation when it becomes known from a lifecycle event. */
   generation: number | null;
@@ -225,6 +227,8 @@ interface ManagedOperation {
 }
 
 interface Reservation {
+  customSelection: boolean;
+
   operation: ManagedOperation;
 
   outgoing: ManagedOperation;
@@ -324,7 +328,7 @@ export class GuildQueue<Metadata = unknown> {
 
   #reservation: Reservation | null = null;
 
-  #prepareRequest: { session: DiscordSession; event: DiscordSessionEvents['prepareRequested'][0] } | null = null;
+  #prepareRequest: { session: PlaybackSession; event: DiscordSessionEvents['prepareRequested'][0] } | null = null;
 
   #decisionRevision = 0;
 
@@ -392,6 +396,7 @@ export class GuildQueue<Metadata = unknown> {
     this.#repeatMode = options.repeatMode ?? QueueRepeatMode.OFF;
     this.tracks = new Queue<Track>();
     this.tasks = new AsyncQueue();
+    this.tracks.onBeforeMutation = () => this.player.plugins.assertNotDispatching();
     this.tracks.onMutation = () => this.queueChanged();
     this.node = new GuildQueuePlayerNode(this);
     this.history = new GuildQueueHistory(this);
@@ -423,7 +428,18 @@ export class GuildQueue<Metadata = unknown> {
       emit(event: string | symbol, ...args: unknown[]): boolean;
     };
 
-    return emitter.emit(event as string, this, ...args);
+    const emitted = emitter.emit(event as string, this, ...args);
+    if (this.player.plugins.hasCapability('queue.event'))
+      try {
+        this.player.plugins.executeSync('queue.event', {
+          guildId: this.guildId,
+          event,
+          args: Object.freeze([...args]),
+        } as unknown as QueueEventObservation);
+      } catch (error) {
+        this.player.emit('error', asError(error));
+      }
+    return emitted;
   }
 
   /** Convenient alias for `guildId`. */
@@ -441,6 +457,9 @@ export class GuildQueue<Metadata = unknown> {
    * @param value New application metadata.
    */
   public set metadata(value: Metadata) {
+    const decision = intercept(this.player.plugins, 'queue.beforeMetadata', { guildId: this.guildId, metadata: value });
+    if (decision.metadata !== value)
+      throw new TypeError('Metadata interception supports veto only; set typed metadata in application code.');
     this.options.metadata = value;
   }
 
@@ -520,7 +539,17 @@ export class GuildQueue<Metadata = unknown> {
   public addTrack(track: Track | Track[] | Playlist): void {
     this.assertAlive();
 
-    const incoming = track instanceof Playlist ? track.tracks : Array.isArray(track) ? track : [track];
+    let incoming = track instanceof Playlist ? track.tracks : Array.isArray(track) ? track : [track];
+
+    if (this.player.plugins.hasCapability('queue.beforeAdd')) {
+      const decision = intercept(this.player.plugins, 'queue.beforeAdd', {
+        guildId: this.guildId,
+        tracks: Object.freeze([...incoming]),
+        index: null,
+      });
+      incoming = admissionTracks(decision);
+      if (decision.index !== null) throw new TypeError('Append admission cannot change insertion position.');
+    }
 
     this.assertCapacity(incoming.length);
     this.tracks.merge(incoming);
@@ -553,6 +582,8 @@ export class GuildQueue<Metadata = unknown> {
    * @returns The removed Track, or `undefined` when no match exists.
    */
   public removeTrack(track: TrackResolvable, emitEvent = true): Track | undefined {
+    intercept(this.player.plugins, 'queue.beforeRemove', { guildId: this.guildId });
+
     this.assertAlive();
 
     const items = this.tracks.toArray();
@@ -611,6 +642,8 @@ export class GuildQueue<Metadata = unknown> {
    * @param index Destination index after removal.
    */
   public moveTrack(track: TrackResolvable, index = 0): void {
+    intercept(this.player.plugins, 'queue.beforeMove', { guildId: this.guildId });
+
     this.assertAlive();
 
     const items = this.tracks.toArray();
@@ -644,6 +677,8 @@ export class GuildQueue<Metadata = unknown> {
    * @param destination Second Track reference, identifier, title, URL, or index.
    */
   public swapTracks(source: TrackResolvable, destination: TrackResolvable): void {
+    intercept(this.player.plugins, 'queue.beforeSwap', { guildId: this.guildId });
+
     this.assertAlive();
 
     const items = this.tracks.toArray();
@@ -657,6 +692,8 @@ export class GuildQueue<Metadata = unknown> {
 
   /** Clear upcoming Tracks and previous-track history; the current playback continues. */
   public clear(): void {
+    intercept(this.player.plugins, 'queue.beforeClear', { guildId: this.guildId });
+
     this.tracks.clear();
     this.history.clear();
   }
@@ -696,6 +733,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param size New capacity; `Infinity` or a non-positive finite value means unlimited.
    */
   public setMaxSize(size: number): void {
+    intercept(this.player.plugins, 'queue.beforeConfigure', { guildId: this.guildId });
     if (!Number.isFinite(size) && size !== Infinity)
       throw new TypeError('maxSize must be a finite number or Infinity.');
 
@@ -707,6 +745,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param size New history limit; `Infinity` or a non-positive finite value means unlimited.
    */
   public setMaxHistorySize(size: number): void {
+    intercept(this.player.plugins, 'queue.beforeConfigure', { guildId: this.guildId });
     if (!Number.isFinite(size) && size !== Infinity)
       throw new TypeError('maxHistorySize must be a finite number or Infinity.');
 
@@ -719,6 +758,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param mode Repeat behavior to apply after natural playback completion.
    */
   public setRepeatMode(mode: QueueRepeatMode): void {
+    mode = intercept(this.player.plugins, 'queue.beforeRepeat', { guildId: this.guildId, mode }).mode;
     if (!Object.values(QueueRepeatMode).includes(mode)) throw new RangeError(`Unknown repeat mode: ${mode}`);
 
     this.#repeatMode = mode;
@@ -731,6 +771,7 @@ export class GuildQueue<Metadata = unknown> {
    * @returns `true` after enabling or applying a shuffle.
    */
   public enableShuffle(dynamic = true): boolean {
+    intercept(this.player.plugins, 'queue.beforeShuffle', { guildId: this.guildId });
     this.policyChanged();
 
     if (dynamic) this.#shuffle = true;
@@ -741,6 +782,7 @@ export class GuildQueue<Metadata = unknown> {
 
   /** Disable dynamic random selection. An earlier in-place shuffle is not reversible. */
   public disableShuffle(): boolean {
+    intercept(this.player.plugins, 'queue.beforeShuffle', { guildId: this.guildId });
     this.policyChanged();
     this.#shuffle = false;
 
@@ -776,11 +818,13 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   /**
-   * Connect to or move the queue's logical Remedia session.
+   * Connect to or move the queue's logical playback session.
    * @param options Channel, node, and voice policy settings for the session.
-   * @returns The queue's connected Remedia session.
+   * @returns The queue's connected playback session.
    */
-  public async connect(options: GuildQueueConnectOptions): Promise<DiscordSession> {
+  public async connect(options: GuildQueueConnectOptions): Promise<PlaybackSession> {
+    intercept(this.player.plugins, 'voice.beforeConnect', { guildId: this.guildId });
+
     using _lock = await this.tasks.acquire('queue.playback-transition');
 
     this.assertAlive();
@@ -798,6 +842,23 @@ export class GuildQueue<Metadata = unknown> {
     resource: Track | Track[] | Playlist | SearchResult,
     options: GuildQueuePlayOptions<PlaybackMetadata> = {},
   ): Promise<GuildQueuePlayResult<PlaybackMetadata>> {
+    this.player.plugins.assertNotDispatching();
+    if (this.player.plugins.hasCapability('playback.beforeStart')) {
+      const requested =
+        resource instanceof Track
+          ? [resource]
+          : resource instanceof Playlist
+            ? resource.tracks
+            : resource instanceof SearchResult
+              ? resource.first(1)
+              : resource;
+      const decision = intercept(this.player.plugins, 'playback.beforeStart', {
+        guildId: this.guildId,
+        tracks: Object.freeze([...requested]),
+      });
+      resource = admissionTracks({ ...decision, index: null });
+    }
+
     let selected: Track | null = null;
     let work: Promise<PlayRawResult<GuildQueuePlaybackMetadata<PlaybackMetadata>> | null> | null = null;
 
@@ -862,6 +923,8 @@ export class GuildQueue<Metadata = unknown> {
     reason: TrackSkipReason = TrackSkipReason.Manual,
     description = 'Skipped by user',
   ): Promise<Track | null> {
+    intercept(this.player.plugins, 'playback.beforeSkip', { guildId: this.guildId });
+
     this.#autoplayController?.abort();
     return this.terminateCurrent('skip', reason, description);
   }
@@ -872,6 +935,8 @@ export class GuildQueue<Metadata = unknown> {
    * @returns The selected Track, or `null` when no match exists.
    */
   public async skipTo(target: TrackResolvable): Promise<Track | null> {
+    intercept(this.player.plugins, 'playback.beforeSkip', { guildId: this.guildId });
+
     let targetTrack: Track | null = null;
     let work: Promise<PlayRawResult | null> | null = null;
 
@@ -960,6 +1025,8 @@ export class GuildQueue<Metadata = unknown> {
 
   /** Stop managed playback while retaining upcoming tracks. */
   public async stop(): Promise<void> {
+    intercept(this.player.plugins, 'playback.beforeStop', { guildId: this.guildId });
+
     this.#autoplayController?.abort();
     using _lock = await this.tasks.acquire('queue.playback-transition');
 
@@ -987,6 +1054,7 @@ export class GuildQueue<Metadata = unknown> {
   public destroy(): Promise<void> {
     if (this.#destruction) return this.#destruction;
 
+    this.player.plugins.assertNotDispatching();
     this.#destroyed = true;
     this.#destruction = Promise.resolve().then(async () => {
       await preparation;
@@ -1000,6 +1068,7 @@ export class GuildQueue<Metadata = unknown> {
       } finally {
         this.manager.cache.delete(this.guildId);
         this.emit(GuildQueueEvents.QueueDelete);
+        this.player.plugins.executeSync('queue.destroyed', { guildId: this.guildId });
       }
     });
     this.#lifetimeController.abort();
@@ -1037,6 +1106,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param preserveCurrent Whether to put the current Track at the upcoming queue head.
    */
   public async playHistoryTrack(track: Track, preserveCurrent = true): Promise<void> {
+    intercept(this.player.plugins, 'playback.beforeHistory', { guildId: this.guildId });
     let work: Promise<PlayRawResult | null> | null = null;
 
     {
@@ -1073,7 +1143,7 @@ export class GuildQueue<Metadata = unknown> {
    * @internal
    * @param session Exact session losing ownership.
    */
-  public invalidateSession(session: DiscordSession): void {
+  public invalidateSession(session: PlaybackSession): void {
     if (this.#operation?.session === session) this.#operation.controller.abort(new Error('Queue session replaced.'));
     for (const operation of this.#outgoing.values()) if (operation.session === session) operation.controller.abort();
   }
@@ -1083,11 +1153,11 @@ export class GuildQueue<Metadata = unknown> {
    * @param session Exact session that emitted the lifecycle event.
    * @param event Generation-aware Remedia playback-start event.
    */
-  public handlePlaybackStarted(session: DiscordSession, event: StartedEvent): void {
+  public handlePlaybackStarted(session: PlaybackSession, event: StartedEvent): void {
     this.applyPlaybackStarted(session, event, event);
   }
 
-  private applyPlaybackStarted(session: DiscordSession, event: StartedEvent, rawEvent?: StartedEvent): void {
+  private applyPlaybackStarted(session: PlaybackSession, event: StartedEvent, rawEvent?: StartedEvent): void {
     if (event.transition) this.promote(session, event);
     else if (session === this.node.session && !this.matchOperation(session, event)) {
       this.#prepareRequest = null;
@@ -1115,7 +1185,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param kind Application-level terminal classification.
    * @param event Generation-aware Remedia completion, stop, or failure event.
    */
-  public handlePlaybackTerminal(session: DiscordSession, kind: PlaybackTerminalKind, event: TerminalEvent): void {
+  public handlePlaybackTerminal(session: PlaybackSession, kind: PlaybackTerminalKind, event: TerminalEvent): void {
     if (this.#destroyed) return;
 
     if ('continuation' in event && event.continuation && this.#reservation) {
@@ -1176,13 +1246,13 @@ export class GuildQueue<Metadata = unknown> {
     // waiting on its lock, then fence completion with the normal serialized clear.
     if (reservation.operation.phase === 'starting')
       await reservation.operation.session
-        .clearStage()
+        .clearStage?.()
         .catch((error) => this.debugCrossfade(`clear failed: ${String(error)}`));
 
     using _lock = await this.tasks.acquire('queue.crossfade-stage');
 
     await reservation.operation.session
-      .clearStage()
+      .clearStage?.()
       .catch((error) => this.debugCrossfade(`clear failed: ${String(error)}`));
 
     reservation.operation.controller.abort();
@@ -1201,6 +1271,13 @@ export class GuildQueue<Metadata = unknown> {
   private queueChanged(): void {
     this.#autoplayController?.abort();
     this.#decisionRevision++;
+    if (!this.#destroyed && this.player.plugins.hasCapability('queue.changed')) {
+      try {
+        this.player.plugins.executeSync('queue.changed', { guildId: this.guildId, size: this.size });
+      } catch (error) {
+        this.player.emit('error', asError(error));
+      }
+    }
 
     if (!this.#committing && this.#prepareRequest && (!this.#reservation || !this.reservationValid(this.#reservation)))
       this.reprepareAfterMutation();
@@ -1235,7 +1312,9 @@ export class GuildQueue<Metadata = unknown> {
     return (
       index >= 0 &&
       this.tracks.at(index) === reservation.operation.track &&
-      (this.#shuffle || index === 0) &&
+      (reservation.customSelection
+        ? reservation.queueRevision === this.#decisionRevision && this.player.plugins.hasCapability('queue.selectNext')
+        : this.#shuffle || index === 0) &&
       this.#repeatMode !== QueueRepeatMode.TRACK
     );
   }
@@ -1245,7 +1324,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param session Exact session requesting preparation.
    * @param event Generation and session identity supplied by Remedia.
    */
-  public handlePrepareRequested(session: DiscordSession, event: DiscordSessionEvents['prepareRequested'][0]): void {
+  public handlePrepareRequested(session: PlaybackSession, event: DiscordSessionEvents['prepareRequested'][0]): void {
     const outgoing = this.matchOperation(session, event);
 
     if (
@@ -1263,7 +1342,7 @@ export class GuildQueue<Metadata = unknown> {
 
     const repeat =
       this.#repeatMode === QueueRepeatMode.TRACK || (this.#repeatMode === QueueRepeatMode.QUEUE && !this.size);
-    const index = this.#shuffle && this.size ? randomInt(this.size) : 0;
+    const index = repeat ? 0 : this.selectionIndex(true, this.#shuffle && this.size ? randomInt(this.size) : 0);
     const track = repeat ? outgoing.track : this.tracks.at(index);
 
     if (!track) return;
@@ -1279,6 +1358,7 @@ export class GuildQueue<Metadata = unknown> {
       startEmitted: false,
     };
     const reservation: Reservation = {
+      customSelection: this.player.plugins.hasCapability('queue.selectNext'),
       operation,
       outgoing,
       repeat,
@@ -1317,6 +1397,7 @@ export class GuildQueue<Metadata = unknown> {
 
     operation.phase = 'starting';
 
+    if (!operation.session.stageNext) throw new Error('Playback backend does not support crossfade.');
     await operation.session.stageNext(source, {
       expectedGeneration: reservation.outgoing.generation!,
       entryId: reservation.entryId,
@@ -1332,7 +1413,7 @@ export class GuildQueue<Metadata = unknown> {
     });
   }
 
-  private promote(session: DiscordSession, event: StartedEvent): void {
+  private promote(session: PlaybackSession, event: StartedEvent): void {
     const reservation = this.#reservation;
 
     if (
@@ -1384,7 +1465,7 @@ export class GuildQueue<Metadata = unknown> {
    * @param event Generation-aware stage or cancellation identity.
    */
   public handleStageEvent(
-    session: DiscordSession,
+    session: PlaybackSession,
     name: 'stageReady' | 'stageFailed' | 'stageInvalidated' | 'transitionCancelled',
     event:
       | DiscordSessionEvents['stageReady'][0]
@@ -1461,11 +1542,12 @@ export class GuildQueue<Metadata = unknown> {
    * Recover a promotion missed during transport recovery from the native playback snapshot.
    * @param session Reconnected session whose native state should be inspected.
    */
-  public async reconcileCrossfade(session: DiscordSession): Promise<void> {
+  public async reconcileCrossfade(session: PlaybackSession): Promise<void> {
     const reservation = this.#reservation;
 
     if (!reservation || session !== this.node.session) return;
 
+    if (!session.stagedSource) return;
     const stage = await session.stagedSource();
 
     if (this.#reservation !== reservation) return;
@@ -1545,6 +1627,20 @@ export class GuildQueue<Metadata = unknown> {
 
   private chooseAutoplayTrack(tracks: Track[], signal: AbortSignal): Promise<Track | null> {
     signal.throwIfAborted();
+    if (tracks.length && this.player.plugins.hasCapability('queue.selectRelated')) {
+      const candidates = Object.freeze(
+        tracks.map((track, i) => Object.freeze({ entryId: String(i), id: track.id, title: track.title })),
+      );
+      const selected = intercept(this.player.plugins, 'queue.selectRelated', {
+        guildId: this.guildId,
+        candidates,
+        index: 0,
+        crossfade: false,
+      });
+      if (!Number.isInteger(selected.index) || selected.index < 0 || selected.index >= tracks.length)
+        throw new RangeError('queue.selectRelated must select an existing index.');
+      return Promise.resolve(tracks[selected.index]!);
+    }
     return new Promise((resolve, reject) => {
       let settled = false;
       const abort = () => {
@@ -1902,7 +1998,7 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   private matchOperation(
-    session: DiscordSession,
+    session: PlaybackSession,
     event: Pick<StartedEvent, 'sessionId' | 'customMetadata'>,
   ): ManagedOperation | null {
     const markerId = (event.customMetadata as Partial<GuildQueuePlaybackMetadata> | undefined)?.__discordPlayer
@@ -1922,7 +2018,7 @@ export class GuildQueue<Metadata = unknown> {
   private async connectLocked(
     options: GuildQueueConnectOptions,
     incoming: readonly Track[] = [],
-  ): Promise<DiscordSession> {
+  ): Promise<PlaybackSession> {
     if (
       options.volume !== undefined &&
       (!Number.isFinite(options.volume) || options.volume < 0 || options.volume > 200)
@@ -1936,14 +2032,6 @@ export class GuildQueue<Metadata = unknown> {
     const selfMute = options.selfMute ?? (existing ? undefined : this.options.selfMute);
     const filterGraph =
       options.filterGraph !== undefined ? options.filterGraph : existing ? undefined : this.options.filterGraph;
-
-    if (options.volume !== undefined) this.options.volume = options.volume;
-
-    if (options.selfDeaf !== undefined) this.options.selfDeaf = options.selfDeaf;
-
-    if (options.selfMute !== undefined) this.options.selfMute = options.selfMute;
-
-    if (options.filterGraph !== undefined) this.options.filterGraph = options.filterGraph;
 
     const session = await this.node.connect({
       channelId: options.channelId,
@@ -1980,16 +2068,46 @@ export class GuildQueue<Metadata = unknown> {
     }
   }
 
+  private selectionIndex(crossfade: boolean, index: number): number {
+    if (!this.size || !this.player.plugins.hasCapability('queue.selectNext')) return index;
+    const candidates = Object.freeze(
+      this.tracks
+        .toArray()
+        .map((track, i) => Object.freeze({ entryId: this.tracks.entryId(i)!, id: track.id, title: track.title })),
+    );
+    const selected = intercept(this.player.plugins, 'queue.selectNext', {
+      guildId: this.guildId,
+      candidates,
+      index,
+      crossfade,
+    });
+    if (!Number.isInteger(selected.index) || selected.index < 0 || selected.index >= this.size)
+      throw new RangeError('queue.selectNext must select an existing occurrence index.');
+    return selected.index;
+  }
+
   private takeNextTrack(): Track | undefined {
+    const policy = this.selectionIndex(false, this.#shuffle && this.size ? randomInt(this.size) : 0);
+    if (policy !== 0) return this.tracks.removeAt(policy);
     if (!this.#shuffle) return this.tracks.dequeue();
 
     if (!this.tracks.size) return undefined;
 
-    return this.tracks.removeAt(randomInt(this.tracks.size));
+    return this.tracks.removeAt(policy);
   }
 
   private insertTracks(incoming: Track[], index: number): void {
     this.assertAlive();
+    if (this.player.plugins.hasCapability('queue.beforeAdd')) {
+      const decision = intercept(this.player.plugins, 'queue.beforeAdd', {
+        guildId: this.guildId,
+        tracks: Object.freeze([...incoming]),
+        index,
+      });
+      incoming = admissionTracks(decision);
+      if (decision.index === null) throw new TypeError('Insertion requires an index.');
+      index = decision.index;
+    }
     this.assertIndex(index, this.size);
     this.assertCapacity(incoming.length);
     this.tracks.insert(incoming, index);
@@ -2026,6 +2144,7 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   private assertAlive(): void {
+    this.player.plugins.assertNotDispatching();
     if (this.#destroyed) throw new Error(`Guild queue ${this.guildId} has been destroyed.`);
   }
 }

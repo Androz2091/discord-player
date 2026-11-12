@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "next build && node scripts/verify-social-images.mjs",
+    "verify:og": "node scripts/verify-social-images.mjs",
     "dev": "next dev",
     "start": "serve out",
     "typecheck": "next typegen && tsc --noEmit"

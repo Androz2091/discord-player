@@ -1,6 +1,7 @@
+import type { PlaybackSession } from '../../src/playback-backend.js';
 import { EventEmitter } from 'node:events';
 import { vi } from 'vitest';
-import type { DiscordSession, DiscordSessionOptions, RemediaClient, NodeSnapshot } from '@remedia/client';
+import type { DiscordSessionOptions, RemediaClient, NodeSnapshot } from '@remedia/client';
 import { FakeSession } from './remedia-session.js';
 
 export { FakeSession } from './remedia-session.js';
@@ -63,6 +64,6 @@ export function createRemediaMock(nodeType: 'embedded' | 'remote' = 'embedded', 
 
     asClient: () => client as unknown as RemediaClient,
 
-    asSession: (session: DiscordSession) => session as unknown as FakeSession,
+    asSession: (session: PlaybackSession) => session as unknown as FakeSession,
   };
 }

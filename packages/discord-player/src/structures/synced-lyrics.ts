@@ -270,7 +270,7 @@ export class SyncedLyricsProvider {
     // Native snapshots have no progress notification. Recheck the native clock at the
     // next transition, bounded to one second (250ms with an opaque filtergraph).
     let rate = 1;
-    const graph = session.filters.graph ?? '';
+    const graph = session.filters?.graph ?? '';
     for (const match of graph.matchAll(/atempo=(\d+(?:\.\d+)?)/g)) rate *= Number(match[1]);
     for (const match of graph.matchAll(/asetrate=\d+\*(\d+(?:\.\d+)?)/g)) rate *= Number(match[1]);
     this.timer = setTimeout(

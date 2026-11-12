@@ -1,3 +1,4 @@
+import type { SourceQuery } from './plugins/types.js';
 import type { RemediaClient } from '@remedia/client';
 import { PluginRegistry } from './plugins/registry.js';
 import { ExtractorExecutionContext } from './compat/extractor-execution-context.js';
@@ -114,7 +115,7 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
     const protocol =
       prefix && this.plugins.supportsProtocol(prefix[1]!, { pluginId: target, blocked }) ? prefix[1] : undefined;
     const providerHint = target ? undefined : engine;
-    const input = {
+    let input: SourceQuery = {
       query: protocol ? prefix![2]! : query,
       protocol,
       providerHint,
@@ -125,6 +126,12 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
         blockExtractors: options.blockExtractors,
       },
     };
+    if (this.plugins.hasCapability('search.beforeQuery')) {
+      const transformed = await this.plugins.execute('search.beforeQuery', input, { signal: options.signal });
+      if (!transformed || typeof transformed.query !== 'string')
+        throw new TypeError('search.beforeQuery requires a string query.');
+      input = { ...input, ...transformed };
+    }
     const execution = { signal: options.signal, blocked, pluginId: target, hostId: options.hostId };
     const matches = target
       ? [{ pluginId: target, score: 0, hostId: options.hostId }]
@@ -150,7 +157,16 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
         };
         if (options.requestedBy !== undefined) track.requestedBy = options.requestedBy;
       }
-      return new SearchResult(result);
+      const transformed = this.plugins.hasCapability('search.afterResults')
+        ? await this.plugins.execute('search.afterResults', result, { signal: options.signal })
+        : result;
+      if (
+        !transformed ||
+        !Array.isArray(transformed.tracks) ||
+        !transformed.tracks.every((track) => track instanceof Track)
+      )
+        throw new TypeError('search.afterResults requires Track instances.');
+      return new SearchResult(transformed);
     }
     return SearchResult.empty();
   }

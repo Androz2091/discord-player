@@ -1,8 +1,9 @@
+import type { PlaybackBackend, PlaybackSession, PlaybackSessionOptions } from '../playback-backend.js';
+import { intercept } from '../plugins/capabilities.js';
 import { GuildQueuePlayerAudioFilters } from './guild-queue-player-audio-filters.js';
 import type {
   AudioStreamInfo,
   DiscordSessionEvents,
-  DiscordSession,
   DiscordSessionOptions,
   MediaSource,
   PlayOptions,
@@ -13,11 +14,11 @@ import { Track } from './track.js';
 import type { NativeSessionObservation } from './common/guild-queue-events.js';
 
 /**
- * Remedia session configuration supplied when a queue node creates or connects its raw session.
- * `volume` is Remedia's linear gain, from 0 through 2; queue APIs accept percentages instead.
+ * Playback session configuration supplied when a queue node creates or connects its raw session.
+ * `volume` uses linear gain, from 0 through 2; queue APIs accept percentages instead.
  */
 export interface GuildQueuePlayerNodeSessionCreateOptions extends Omit<DiscordSessionOptions, 'guildId' | 'userId'> {
-  /** Deadline for the initial Discord voice join, in milliseconds; defaults to Remedia's 100 seconds. */
+  /** Deadline for the initial Discord voice join, in milliseconds; defaults to the backend timeout. */
   connectTimeoutMs?: number;
 }
 
@@ -54,13 +55,46 @@ export interface PlayerTimestamp {
   progress: number;
 }
 
-/** Result returned by raw Remedia playback. */
+/** Result returned by raw playback. */
 export interface PlayRawResult<Metadata = unknown> {
-  /** Audio stream information reported by Remedia. */
+  /** Audio stream information reported by the active backend. */
   audioStream: AudioStreamInfo;
 
-  /** Remedia session that owns the playback generation. */
-  session: DiscordSession<Metadata>;
+  /** Playback session that owns the playback generation. */
+  session: PlaybackSession<Metadata>;
+}
+
+const PLAYBACK_STATES = [
+  'idle',
+  'starting',
+  'playing',
+  'pausing',
+  'resuming',
+  'paused',
+  'stopping',
+  'stopped',
+  'completed',
+  'failed',
+] as const;
+
+const CONNECTION_STATES = [
+  'connecting',
+  'negotiating_dave',
+  'connected',
+  'reconnecting',
+  'disconnecting',
+  'disconnected',
+  'failed',
+] as const;
+
+interface SessionConfiguration {
+  volume: number;
+
+  selfDeaf: boolean;
+
+  selfMute: boolean;
+
+  filterGraph: string | null;
 }
 
 function timecode(milliseconds: number): string {
@@ -74,18 +108,25 @@ function timecode(milliseconds: number): string {
     : `${minutes}:${String(remainder).padStart(2, '0')}`;
 }
 
-/** Raw Remedia player controls for one guild queue. It never schedules queue tracks. */
+/** Raw playback controls for one guild queue. It never schedules queue tracks. */
 export class GuildQueuePlayerNode<Metadata = unknown> {
-  /** Current Remedia session, or `null` before connecting. */
-  public session: DiscordSession | null = null;
+  /** Current playback session, or `null` before connecting. */
+  #currentSession: PlaybackSession | null = null;
 
-  /** Parent Player that owns Remedia and gateway orchestration. */
+  /** Framework-owned current session; use createSession() to replace it safely. */
+  public get session(): PlaybackSession | null {
+    return this.#currentSession;
+  }
+
+  /** Parent Player that owns the playback backend and gateway orchestration. */
   public readonly player: DiscordPlayer;
 
   /** Queue-owned named presets and raw filtergraph controls, available before connection. */
   public readonly filters: GuildQueuePlayerAudioFilters<Metadata>;
 
   #volume = 100;
+
+  private readonly sessionDisposals = new WeakMap<PlaybackSession, Promise<void>>();
 
   private detachSessionListeners: (() => void) | null = null;
 
@@ -103,30 +144,37 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   /** Get the connected session, throwing when one does not exist. */
-  public getSession<M = unknown>(): DiscordSession<M>;
+  public getSession<M = unknown>(): PlaybackSession<M>;
 
   /**
    * Optionally return `null` when no session exists.
    * @param throwOnMissingSession Pass `false` to return `null` instead of throwing.
    */
-  public getSession<M = unknown>(throwOnMissingSession: false): DiscordSession<M> | null;
+  public getSession<M = unknown>(throwOnMissingSession: false): PlaybackSession<M> | null;
 
-  public getSession<M = unknown>(throwOnMissingSession = true): DiscordSession<M> | null {
+  public getSession<M = unknown>(throwOnMissingSession = true): PlaybackSession<M> | null {
     if (!this.session && throwOnMissingSession) {
-      throw new Error('DiscordSession is not initialized. Call queue.connect() first.');
+      throw new Error('PlaybackSession is not initialized. Call queue.connect() first.');
     }
 
-    return this.session as DiscordSession<M> | null;
+    return this.session as PlaybackSession<M> | null;
   }
 
   /**
    * Replace the current session with a newly created, not-yet-connected session.
-   * @param options Remedia channel, node, voice, gain, and filtergraph settings.
-   * @returns The created Remedia session.
+   * @param options Channel, node, voice, gain, and filtergraph settings.
+   * @returns The created playback session.
    */
   public async createSession<M = unknown>(
     options: GuildQueuePlayerNodeSessionCreateOptions,
-  ): Promise<DiscordSession<M>> {
+  ): Promise<PlaybackSession<M>> {
+    const request = intercept(this.player.plugins, 'voice.beforeSession', {
+      guildId: this.queue.guildId,
+      channelId: options.channelId,
+    });
+    if (typeof request.channelId !== 'string' || !request.channelId)
+      throw new TypeError('Voice channel ID must be nonempty.');
+    options = { ...options, channelId: request.channelId };
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     this.assertQueueAlive();
@@ -134,32 +182,43 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     const { connectTimeoutMs: _connectTimeoutMs, ...sessionOptions } = options;
     const negotiated = await this.sessionPolicy(sessionOptions);
-    const session = this.player.getRemedia().createDiscordSession({
+    const session = await this.createBackendSession({
       ...negotiated,
       guildId: this.queue.guildId,
       userId: this.player.getClientId(),
     });
 
-    this.session = session;
-    this.rememberSessionConfiguration(session);
-    this.attachSessionListeners(session);
+    await this.adoptSession(session);
 
-    return session as DiscordSession<M>;
+    return session as PlaybackSession<M>;
   }
 
   /**
    * Connect the current session or create and connect one for the requested channel.
-   * Moving a connected session uses Remedia's `move()` method and retains this session identity.
-   * @param options Remedia channel, node, voice, gain, and filtergraph settings.
-   * @returns The connected Remedia session.
+   * Moving a connected session uses the backend's `move()` method and retains this session identity.
+   * @param options Channel, node, voice, gain, and filtergraph settings.
+   * @returns The connected playback session.
    * @throws Error When an existing session is assigned to a different node than requested.
    */
-  public async connect<M = unknown>(options: GuildQueuePlayerNodeSessionCreateOptions): Promise<DiscordSession<M>> {
+  public async connect<M = unknown>(options: GuildQueuePlayerNodeSessionCreateOptions): Promise<PlaybackSession<M>> {
+    const request = intercept(this.player.plugins, 'voice.beforeSession', {
+      guildId: this.queue.guildId,
+      channelId: options.channelId,
+    });
+    if (typeof request.channelId !== 'string' || !request.channelId)
+      throw new TypeError('Voice channel ID must be nonempty.');
+    options = { ...options, channelId: request.channelId };
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     this.assertQueueAlive();
 
     const existing = this.session;
+    if (
+      this.player.playbackBackend &&
+      options.filterGraph !== undefined &&
+      !this.player.playbackBackend.capabilities.filters
+    )
+      throw new Error('Playback backend does not support audio filters.');
 
     if (existing) {
       this.assertHosts(existing.nodeId, options.pluginHosts ?? []);
@@ -168,62 +227,111 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
         throw new Error('Changing a Remedia node while preserving this session is not supported.');
       }
 
-      if (options.selfDeaf !== undefined && options.selfDeaf !== existing.selfDeaf)
-        await existing.setSelfDeaf(options.selfDeaf);
+      try {
+        if (options.selfDeaf !== undefined && options.selfDeaf !== existing.selfDeaf)
+          await existing.setSelfDeaf(options.selfDeaf);
 
-      if (options.selfMute !== undefined && options.selfMute !== existing.selfMute)
-        await existing.setSelfMute(options.selfMute);
+        if (options.selfMute !== undefined && options.selfMute !== existing.selfMute)
+          await existing.setSelfMute(options.selfMute);
 
-      const previousVolume = existing.volume;
+        const previousVolume = existing.volume;
 
-      if (options.volume !== undefined && options.volume !== previousVolume) await existing.setVolume(options.volume);
+        if (options.volume !== undefined && options.volume !== previousVolume) await existing.setVolume(options.volume);
 
-      if (options.filterGraph !== undefined && options.filterGraph !== existing.filters.graph) {
-        if (options.filterGraph === null) await existing.filters.clear();
-        else await existing.filters.set(options.filterGraph);
+        if (options.filterGraph !== undefined && options.filterGraph !== existing.filters?.graph) {
+          if (options.filterGraph === null) await this.requireFilters(existing).clear();
+          else await this.requireFilters(existing).set(options.filterGraph);
+        }
+
+        if (options.channelId !== existing.channelId) await existing.move(options.channelId);
+
+        if (existing.connectionState !== 'connected') {
+          await existing.connect({
+            ...(options.connectTimeoutMs === undefined ? {} : { timeoutMs: options.connectTimeoutMs }),
+            ...(this.player.playbackBackend
+              ? { signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]) }
+              : { signal: this.queue.signal }),
+          });
+        }
+
+        this.assertQueueAlive();
+        this.rememberSessionConfiguration(existing);
+        this.queue.voice.connected(existing);
+      } catch (error) {
+        // A rejected move/control can still change the transport. Retain its actual configuration.
+        try {
+          if (this.session === existing) {
+            this.rememberSessionConfiguration(existing);
+            if (!this.queue.signal.aborted && !this.player.playbackSignal.aborted) this.queue.voice.connected(existing);
+          }
+        } catch (cleanup) {
+          throw new AggregateError([error, cleanup], 'Playback session reconciliation failed', { cause: cleanup });
+        }
+        throw error;
       }
 
-      if (options.channelId !== existing.channelId) await existing.move(options.channelId);
-
-      if (existing.connectionState !== 'connected') {
-        await existing.connect(options.connectTimeoutMs === undefined ? {} : { timeoutMs: options.connectTimeoutMs });
-      }
-
-      this.rememberSessionConfiguration(existing);
-      this.queue.voice.connected(existing);
-
-      return existing as DiscordSession<M>;
+      return existing as PlaybackSession<M>;
     }
 
     const { connectTimeoutMs, ...sessionOptions } = options;
     const negotiated = await this.sessionPolicy(sessionOptions);
-    const session = this.player.getRemedia().createDiscordSession({
+    const session = await this.createBackendSession({
       ...negotiated,
       guildId: this.queue.guildId,
       userId: this.player.getClientId(),
     });
 
-    this.session = session;
-    this.attachSessionListeners(session);
+    const previousVolume = this.#volume;
+    const previousOptions = {
+      volume: this.queue.options.volume,
+      selfDeaf: this.queue.options.selfDeaf,
+      selfMute: this.queue.options.selfMute,
+      filterGraph: this.queue.options.filterGraph,
+    };
 
     try {
-      await session.connect(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs });
+      await this.adoptSession(session);
+      await session.connect({
+        ...(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs }),
+        ...(this.player.playbackBackend
+          ? { signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]) }
+          : { signal: this.queue.signal }),
+      });
+      this.assertQueueAlive();
       this.rememberSessionConfiguration(session);
       this.queue.voice.connected(session);
     } catch (error) {
-      await this.destroySessionUnlocked();
-
+      try {
+        if (this.session === session) await this.destroySessionUnlocked();
+      } catch (cleanup) {
+        throw new AggregateError([error, cleanup], 'Playback session connection failed', { cause: cleanup });
+      } finally {
+        if (!this.session) {
+          this.#volume = previousVolume;
+          Object.assign(this.queue.options, previousOptions);
+        }
+      }
       throw error;
     }
 
-    return session as DiscordSession<M>;
+    return session as PlaybackSession<M>;
   }
 
-  /** Disconnect and clear the current Remedia session. */
+  /** Disconnect and clear the current playback session. */
   public async destroySession(): Promise<void> {
+    this.player.plugins.assertNotDispatching();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     await this.destroySessionUnlocked();
+  }
+
+  private disposeSession(session: PlaybackSession): Promise<void> {
+    let disposal = this.sessionDisposals.get(session);
+    if (!disposal) {
+      disposal = Promise.resolve().then(() => session.dispose());
+      this.sessionDisposals.set(session, disposal);
+    }
+    return disposal;
   }
 
   private async destroySessionUnlocked(): Promise<void> {
@@ -231,24 +339,229 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     if (!session) return;
 
+    const errors: unknown[] = [];
     this.queue.invalidateSession(session);
-    this.rememberSessionConfiguration(session);
-    this.session = null;
-    this.queue.voice.connected(null);
-    await this.queue.cancelPreparation();
-    // Keep native diagnostics attached through disposal, then release only our listeners.
     try {
-      await session.dispose();
-    } finally {
-      this.detachSessionListeners?.();
-      this.detachSessionListeners = null;
+      this.rememberSessionConfiguration(session);
+    } catch (error) {
+      errors.push(error);
     }
+    this.#currentSession = null;
+    this.queue.voice.connected(null);
+    try {
+      await this.queue.cancelPreparation();
+    } catch (error) {
+      errors.push(error);
+    }
+    // Keep diagnostics attached through disposal, but attempt every cleanup even after failure.
+    try {
+      await this.disposeSession(session);
+    } catch (error) {
+      errors.push(error);
+    }
+    try {
+      this.detachSessionListeners?.();
+    } catch (error) {
+      errors.push(error);
+    }
+    this.detachSessionListeners = null;
+    if (errors.length === 1) throw errors[0];
+    if (errors.length) throw new AggregateError(errors, 'Playback session disposal failed', { cause: errors[0] });
     this.queue.emit('connectionDestroyed');
+  }
+
+  private requireFilters(session: PlaybackSession) {
+    if (!session.filters || (this.player.playbackBackend && !this.player.playbackBackend.capabilities.filters))
+      throw new Error('Playback backend does not support audio filters.');
+    return session.filters;
+  }
+
+  private async createBackendSession(options: PlaybackSessionOptions): Promise<PlaybackSession> {
+    const backend = this.player.playbackBackend;
+    if (!backend) return this.player.getRemedia().createDiscordSession(options);
+    this.player.getBackend();
+    const signal = AbortSignal.any([this.queue.signal, this.player.playbackSignal]);
+    signal.throwIfAborted();
+    const session = await backend.createSession(options, signal);
+    try {
+      this.queue.signal.throwIfAborted();
+      this.player.playbackSignal.throwIfAborted();
+      if (this.player.playbackBackend !== backend)
+        throw new Error('Playback provider was removed during session creation.');
+      this.assertBackendSession(session, backend);
+      return session;
+    } catch (error) {
+      if (session && typeof session.dispose === 'function') {
+        try {
+          await this.disposeSession(session);
+        } catch (cleanup) {
+          throw new AggregateError([error, cleanup], 'Invalid playback session cleanup failed', { cause: cleanup });
+        }
+      }
+      throw error;
+    }
+  }
+
+  private assertBackendSession(session: PlaybackSession, backend: PlaybackBackend): void {
+    if (!session || typeof session !== 'object')
+      throw new TypeError('Playback backend returned an invalid session implementation.');
+
+    if (
+      ![
+        'connect',
+        'move',
+        'dispose',
+        'play',
+        'stop',
+        'pause',
+        'resume',
+        'seek',
+        'setVolume',
+        'setSelfDeaf',
+        'setSelfMute',
+        'getPlaybackTime',
+        'on',
+        'off',
+      ].every((name) => typeof Reflect.get(session, name) === 'function')
+    )
+      throw new TypeError('Playback backend returned an invalid session implementation.');
+
+    if (!session.snapshot || !Number.isSafeInteger(session.snapshot.generation))
+      throw new TypeError('Playback backend returned an invalid session snapshot.');
+
+    if (typeof session.sessionId !== 'string' || !session.sessionId)
+      throw new TypeError('Playback backend returned an invalid session identity.');
+
+    if (session.guildId !== this.queue.guildId)
+      throw new Error('Playback backend returned an invalid session identity.');
+
+    if (typeof session.channelId !== 'string' || !session.channelId)
+      throw new TypeError('Playback backend returned an invalid session channel.');
+
+    if (session.nodeId !== null && typeof session.nodeId !== 'string')
+      throw new TypeError('Playback backend returned an invalid session node.');
+
+    if (!CONNECTION_STATES.includes(session.connectionState))
+      throw new TypeError('Playback backend returned an invalid connection state.');
+
+    if (!PLAYBACK_STATES.includes(session.state) || !PLAYBACK_STATES.includes(session.snapshot.state))
+      throw new TypeError('Playback backend returned an invalid playback state.');
+
+    if (
+      !session.position ||
+      typeof session.position !== 'object' ||
+      !('mediaMs' in session.position) ||
+      !(session.position.mediaMs === null || Number.isFinite(session.position.mediaMs))
+    )
+      throw new TypeError('Playback backend returned an invalid playback position.');
+
+    if (session.durationMs !== null && (!Number.isFinite(session.durationMs) || session.durationMs < 0))
+      throw new TypeError('Playback backend returned an invalid source duration.');
+
+    if (!Number.isFinite(session.volume) || session.volume < 0 || session.volume > 2)
+      throw new TypeError('Playback backend returned an invalid volume.');
+
+    if (typeof session.selfDeaf !== 'boolean' || typeof session.selfMute !== 'boolean')
+      throw new TypeError('Playback backend returned invalid voice flags.');
+
+    if (session.snapshot.filterGraph !== null && typeof session.snapshot.filterGraph !== 'string')
+      throw new TypeError('Playback backend returned an invalid filter graph.');
+
+    const crossfade = session.snapshot.crossfade;
+
+    if (
+      crossfade !== null &&
+      crossfade !== undefined &&
+      (crossfade.enabled !== true ||
+        !Number.isFinite(crossfade.durationMs) ||
+        crossfade.durationMs <= 0 ||
+        !Number.isFinite(crossfade.prepareBeforeMs) ||
+        crossfade.prepareBeforeMs < 0 ||
+        crossfade.curve !== 'equalPower')
+    )
+      throw new TypeError('Playback backend returned an invalid crossfade snapshot.');
+
+    if (session.filters) {
+      if (
+        (session.filters.graph !== null && typeof session.filters.graph !== 'string') ||
+        typeof session.filters.set !== 'function' ||
+        typeof session.filters.clear !== 'function'
+      )
+        throw new TypeError('Playback backend returned invalid filter controls.');
+    }
+
+    for (const name of ['stageNext', 'clearStage', 'stagedSource'] as const) {
+      const value = session[name];
+
+      if (value !== undefined && typeof value !== 'function')
+        throw new TypeError('Playback backend returned invalid staging controls.');
+    }
+
+    if (!backend.capabilities.crossfade && crossfade?.enabled)
+      throw new Error('Playback backend enabled undeclared crossfade.');
+
+    if (!backend.capabilities.filters && session.snapshot.filterGraph)
+      throw new Error('Playback backend enabled undeclared audio filters.');
+
+    if (backend.capabilities.filters && !session.filters)
+      throw new Error('Playback backend declared filters without session controls.');
+
+    if (
+      backend.capabilities.crossfade &&
+      (typeof session.stageNext !== 'function' ||
+        typeof session.clearStage !== 'function' ||
+        typeof session.stagedSource !== 'function')
+    )
+      throw new Error('Playback backend declared crossfade without session staging controls.');
+  }
+
+  private async adoptSession(session: PlaybackSession): Promise<void> {
+    const previousDetach = this.detachSessionListeners;
+    let detach: (() => void) | null = null;
+    let configuration: SessionConfiguration;
+
+    try {
+      configuration = this.readSessionConfiguration(session);
+      previousDetach?.();
+      detach = this.attachSessionListeners(session);
+    } catch (error) {
+      detach?.();
+      this.detachSessionListeners = null;
+      const errors: unknown[] = [error];
+
+      try {
+        await this.disposeSession(session);
+      } catch (cleanup) {
+        errors.push(cleanup);
+      }
+
+      if (errors.length > 1) throw new AggregateError(errors, 'Playback session attachment failed', { cause: error });
+
+      throw error;
+    }
+
+    this.#currentSession = session;
+    this.detachSessionListeners = detach;
+    this.applySessionConfiguration(configuration);
   }
 
   private async sessionPolicy(
     options: GuildQueuePlayerNodeSessionCreateOptions,
   ): Promise<GuildQueuePlayerNodeSessionCreateOptions> {
+    const backend = this.player.playbackBackend;
+    if (backend) {
+      if (options.nodeId || this.queue.options.selectNode)
+        throw new Error('Custom playback providers do not support Remedia node selection.');
+      this.assertHosts(null, options.pluginHosts ?? []);
+      if (options.filterGraph !== undefined && !backend.capabilities.filters)
+        throw new Error('Playback backend does not support audio filters.');
+      const requested = this.queue.options.crossfade ?? this.player.options.crossfade ?? options.crossfade;
+      if (requested && !backend.capabilities.crossfade) throw new Error('Playback backend does not support crossfade.');
+      return {
+        ...options,
+        crossfade: requested ? { durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower', ...requested } : false,
+      };
+    }
     const client = this.player.getRemedia();
     const hosts = options.pluginHosts ?? [];
     const requested = this.queue.options.crossfade ?? this.player.options.crossfade;
@@ -311,6 +624,15 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   private assertHosts(nodeId: string | null, hosts: readonly string[]): void {
     if (!hosts.length) return;
 
+    const backend = this.player.playbackBackend;
+    if (backend) {
+      if (
+        !backend.capabilities.sources.includes('operation') ||
+        !hosts.every((host) => backend.capabilities.pluginHosts?.includes(host))
+      )
+        throw new Error('Playback backend cannot access required source hosts.');
+      return;
+    }
     const node = this.player.getRemedia().nodes.find((item) => item.id === nodeId);
 
     if (
@@ -321,9 +643,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       throw new Error(`Remedia node ${nodeId} cannot access required source hosts (${hosts.join(', ')})`);
   }
 
-  private attachSessionListeners(session: DiscordSession): void {
-    this.detachSessionListeners?.();
-
+  private attachSessionListeners(session: PlaybackSession): () => void {
     const cleanups: (() => void)[] = [];
     type SessionListener = <Name extends keyof DiscordSessionEvents>(
       name: Name,
@@ -338,99 +658,153 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       cleanups.push(() => unsubscribe(name, handler));
     };
 
-    // Native observation remains available even when generation correlation rejects an event.
-    const observe = <Name extends keyof DiscordSessionEvents>(name: Name) => {
-      on(name, (...args) => {
-        // A mapped tuple keeps event names correlated with their exported native payloads.
-        this.queue.emit('sessionEvent', ...([name, args[0]] as NativeSessionObservation));
+    try {
+      // Native observation remains available even when generation correlation rejects an event.
+      const observe = <Name extends keyof DiscordSessionEvents>(name: Name) => {
+        on(name, (...args) => {
+          // A mapped tuple keeps event names correlated with their exported native payloads.
+          this.queue.emit('sessionEvent', ...([name, args[0]] as NativeSessionObservation));
+        });
+      };
+
+      for (const name of [
+        'playbackStarted',
+        'playbackCompleted',
+        'playbackStopped',
+        'playbackFailed',
+        'playbackPaused',
+        'playbackResumed',
+        'playbackSeeked',
+        'prepareRequested',
+        'stageReady',
+        'stageFailed',
+        'stageInvalidated',
+        'transitionCancelled',
+        'filterChanged',
+        'volumeChanged',
+        'voiceStateChanged',
+        'voiceFailed',
+        'sessionDisposed',
+      ] as const)
+        observe(name);
+
+      const active = () => session === this.session && !this.queue.destroyed;
+
+      on('prepareRequested', (event) => this.queue.handlePrepareRequested(session, event));
+
+      for (const name of ['stageReady', 'stageFailed', 'stageInvalidated', 'transitionCancelled'] as const) {
+        on(name, (event) => this.queue.handleStageEvent(session, name, event));
+      }
+
+      on('playbackStarted', (event) => this.queue.handlePlaybackStarted(session, event));
+      on('playbackCompleted', (event) => this.queue.handlePlaybackTerminal(session, 'natural', event));
+      on('playbackStopped', (event) => this.queue.handlePlaybackTerminal(session, 'stopped', event));
+      on('playbackFailed', (event) => this.queue.handlePlaybackTerminal(session, 'failed', event));
+      on('playbackPaused', (event) => {
+        if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerPause', event);
       });
-    };
+      on('playbackResumed', (event) => {
+        if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerResume', event);
+      });
+      on('playbackSeeked', (event) => {
+        if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerSeek', event);
+      });
+      on('volumeChanged', (event) => {
+        if (!active()) return;
 
-    for (const name of [
-      'playbackStarted',
-      'playbackCompleted',
-      'playbackStopped',
-      'playbackFailed',
-      'playbackPaused',
-      'playbackResumed',
-      'playbackSeeked',
-      'prepareRequested',
-      'stageReady',
-      'stageFailed',
-      'stageInvalidated',
-      'transitionCancelled',
-      'filterChanged',
-      'volumeChanged',
-      'voiceStateChanged',
-      'voiceFailed',
-      'sessionDisposed',
-    ] as const)
-      observe(name);
+        this.#volume = event.volume * 100;
+        this.queue.options.volume = this.#volume;
+        this.queue.emit('volumeChange', event.previousVolume * 100, this.#volume, event);
+      });
+      on('filterChanged', (event) => {
+        if (!active()) return;
 
-    const active = () => session === this.session && !this.queue.destroyed;
+        this.queue.options.filterGraph = event.graph;
+        this.queue.emit('audioFiltersUpdate', event.previousGraph, event.graph, event);
+      });
+      on('voiceStateChanged', (event) => {
+        if (!active()) return;
 
-    on('prepareRequested', (event) => this.queue.handlePrepareRequested(session, event));
+        this.queue.emit('voiceConnectionStateChange', event.previousState, event.state, event);
 
-    for (const name of ['stageReady', 'stageFailed', 'stageInvalidated', 'transitionCancelled'] as const) {
-      on(name, (event) => this.queue.handleStageEvent(session, name, event));
+        if (event.state === 'connected') this.queue.voice.connected(session);
+
+        if (event.state === 'connected')
+          void this.queue.reconcileCrossfade(session).catch((error) => this.player.emit('debug', String(error)));
+      });
+      on('voiceFailed', (event) => {
+        if (active()) this.queue.emit('error', event.error, event);
+      });
+      on('sessionDisposed', (event) => this.queue.emit('sessionDisposed', event));
+
+      const lifetime = this.player.playbackBackend
+        ? AbortSignal.any([this.queue.signal, this.player.playbackSignal])
+        : this.queue.signal;
+      const disposeOnAbort = () => {
+        // Teardown must unblock pending backend calls before waiting for the node lock.
+        // Its result is retained and awaited by destroySessionUnlocked(), including failures.
+        void this.disposeSession(session).catch(() => undefined);
+      };
+      lifetime.addEventListener('abort', disposeOnAbort, { once: true });
+      cleanups.push(() => lifetime.removeEventListener('abort', disposeOnAbort));
+      lifetime.throwIfAborted();
+    } catch (error) {
+      const errors: unknown[] = [error];
+
+      for (const cleanup of cleanups) {
+        try {
+          cleanup();
+        } catch (cleanupError) {
+          errors.push(cleanupError);
+        }
+      }
+
+      if (errors.length > 1)
+        throw new AggregateError(errors, 'Playback session listener attachment failed', { cause: error });
+
+      throw error;
     }
 
-    on('playbackStarted', (event) => this.queue.handlePlaybackStarted(session, event));
-    on('playbackCompleted', (event) => this.queue.handlePlaybackTerminal(session, 'natural', event));
-    on('playbackStopped', (event) => this.queue.handlePlaybackTerminal(session, 'stopped', event));
-    on('playbackFailed', (event) => this.queue.handlePlaybackTerminal(session, 'failed', event));
-    on('playbackPaused', (event) => {
-      if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerPause', event);
-    });
-    on('playbackResumed', (event) => {
-      if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerResume', event);
-    });
-    on('playbackSeeked', (event) => {
-      if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerSeek', event);
-    });
-    on('volumeChanged', (event) => {
-      if (!active()) return;
-
-      this.#volume = event.volume * 100;
-      this.queue.options.volume = this.#volume;
-      this.queue.emit('volumeChange', event.previousVolume * 100, this.#volume, event);
-    });
-    on('filterChanged', (event) => {
-      if (!active()) return;
-
-      this.queue.options.filterGraph = event.graph;
-      this.queue.emit('audioFiltersUpdate', event.previousGraph, event.graph, event);
-    });
-    on('voiceStateChanged', (event) => {
-      if (!active()) return;
-
-      this.queue.emit('voiceConnectionStateChange', event.previousState, event.state, event);
-
-      if (event.state === 'connected') this.queue.voice.connected(session);
-
-      if (event.state === 'connected')
-        void this.queue.reconcileCrossfade(session).catch((error) => this.player.emit('debug', String(error)));
-    });
-    on('voiceFailed', (event) => {
-      if (active()) this.queue.emit('error', event.error, event);
-    });
-    on('sessionDisposed', (event) => this.queue.emit('sessionDisposed', event));
-
-    this.detachSessionListeners = () => {
-      for (const cleanup of cleanups) cleanup();
+    return () => {
+      const errors: unknown[] = [];
+      for (const cleanup of cleanups.splice(0)) {
+        try {
+          cleanup();
+        } catch (error) {
+          errors.push(error);
+        }
+      }
+      if (errors.length === 1) throw errors[0];
+      if (errors.length)
+        throw new AggregateError(errors, 'Playback session listener cleanup failed', { cause: errors[0] });
     };
   }
 
   private assertQueueAlive(): void {
+    this.player.plugins.assertNotDispatching();
+    if (this.player.playbackBackend) this.player.getBackend();
     if (this.queue.destroyed) throw new Error('Cannot use a player node after its guild queue has been destroyed.');
   }
 
-  private rememberSessionConfiguration(session: DiscordSession): void {
-    this.#volume = session.volume * 100;
-    this.queue.options.volume = this.#volume;
-    this.queue.options.selfDeaf = session.selfDeaf;
-    this.queue.options.selfMute = session.selfMute;
-    this.queue.options.filterGraph = session.snapshot.filterGraph;
+  private rememberSessionConfiguration(session: PlaybackSession): void {
+    this.applySessionConfiguration(this.readSessionConfiguration(session));
+  }
+
+  private readSessionConfiguration(session: PlaybackSession): SessionConfiguration {
+    return {
+      volume: session.volume * 100,
+      selfDeaf: session.selfDeaf,
+      selfMute: session.selfMute,
+      filterGraph: session.snapshot.filterGraph,
+    };
+  }
+
+  private applySessionConfiguration(configuration: SessionConfiguration): void {
+    this.#volume = configuration.volume;
+    this.queue.options.volume = configuration.volume;
+    this.queue.options.selfDeaf = configuration.selfDeaf;
+    this.queue.options.selfMute = configuration.selfMute;
+    this.queue.options.filterGraph = configuration.filterGraph;
   }
 
   /** Play a Track through the managed queue, preserving v7 scheduling.
@@ -468,6 +842,21 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     if (session !== this.session) throw new Error('Queue session changed before playback; retry on the current queue.');
     options?.signal?.throwIfAborted();
+    const backend = this.player.playbackBackend;
+    if (backend) {
+      const kind =
+        'url' in source
+          ? 'url'
+          : 'file' in source
+            ? 'file'
+            : 'buffer' in source
+              ? 'buffer'
+              : 'stream' in source
+                ? 'stream'
+                : 'operation';
+      if (!backend.capabilities.sources.includes(kind))
+        throw new Error(`Playback backend does not support ${kind} sources.`);
+    }
     const audioStream = await session.play(source, options);
 
     return { audioStream, session };
@@ -475,10 +864,14 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /**
    * Set player volume using Discord Player's 0–200 percentage convention.
-   * @param volumePercentage Volume percentage; Remedia receives a linear gain from zero through two.
+   * @param volumePercentage Volume percentage; the backend receives a linear gain from zero through two.
    * @returns The applied percentage volume.
    */
   public async setVolume(volumePercentage: number): Promise<number> {
+    volumePercentage = intercept(this.player.plugins, 'audio.beforeVolume', {
+      guildId: this.queue.guildId,
+      volume: volumePercentage,
+    }).volume;
     if (!Number.isFinite(volumePercentage) || volumePercentage < 0 || volumePercentage > 200) {
       throw new RangeError('Volume must be a finite percentage between 0 and 200.');
     }
@@ -558,22 +951,29 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    * @param positionMs Requested position in milliseconds; negative values are clamped to zero.
    */
   public async seek(positionMs: number): Promise<void> {
+    positionMs = intercept(this.player.plugins, 'playback.beforeSeek', {
+      guildId: this.queue.guildId,
+      positionMs,
+    }).positionMs;
+    if (!Number.isFinite(positionMs)) throw new RangeError('Seek position must be finite.');
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     await this.queue.cancelPreparation();
     await this.getSession().seek(Math.max(0, positionMs));
   }
 
-  /** Pause raw playback in the current Remedia session. */
+  /** Pause raw playback in the current playback session. */
   public async pause(): Promise<void> {
+    intercept(this.player.plugins, 'playback.beforePause', { guildId: this.queue.guildId });
     this.queue.voice.manualPause();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     await this.getSession().pause();
   }
 
-  /** Resume raw playback in the current Remedia session. */
+  /** Resume raw playback in the current playback session. */
   public async resume(): Promise<void> {
+    intercept(this.player.plugins, 'playback.beforeResume', { guildId: this.queue.guildId });
     this.queue.voice.manualPause();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
@@ -619,7 +1019,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   /**
-   * Stop the current Remedia generation without queue scheduling.
+   * Stop the current playback generation without queue scheduling.
    * @remarks Intended for queue lifecycle transitions; use `stop()` for queue-managed playback.
    */
   public async stopSession(): Promise<void> {
@@ -637,7 +1037,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   /**
-   * Output elapsed time in milliseconds, read on demand from Remedia's playback clock.
+   * Output elapsed time in milliseconds, read on demand from the backend playback clock.
    * @remarks This is time spent producing output for the current generation, not the source-media position.
    * It starts at the seek target after `seek()` and can differ from the source position (and exceed
    * {@link GuildQueuePlayerNode.totalDuration}) when a filter changes tempo. Returns zero when no session exists.

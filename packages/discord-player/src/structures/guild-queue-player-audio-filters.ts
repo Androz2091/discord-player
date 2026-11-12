@@ -1,3 +1,4 @@
+import { intercept } from '../plugins/capabilities.js';
 import { AudioFilterPresets, type AudioFilterName, type AudioFilterPresetName } from './audio-filter-presets.js';
 import type { GuildQueuePlayerNode } from './guild-queue-player-node.js';
 
@@ -34,7 +35,9 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
 
   /** Current raw graph, including queued defaults before a session exists. */
   public get graph(): string | null {
-    return this.node.session ? this.node.session.filters.graph : (this.node.queue.options.filterGraph ?? null);
+    return this.node.session
+      ? (this.node.session.filters?.graph ?? null)
+      : (this.node.queue.options.filterGraph ?? null);
   }
 
   /** Enabled canonical preset names, in application order. Returns a detached array. */
@@ -151,14 +154,24 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
   }
 
   private async update(change: (state: FilterState) => FilterState): Promise<FilterState> {
+    this.node.player.plugins.assertNotDispatching();
     using _lock = await this.node.queue.tasks.acquire('queue.node.operation');
 
     if (this.node.queue.destroyed) {
       throw new Error('Cannot change audio filters after the guild queue has been destroyed.');
     }
 
+    if (this.node.player.playbackBackend && !this.node.player.playbackBackend.capabilities.filters)
+      throw new Error('Playback backend does not support audio filters.');
     const next = change(this.synchronize());
-    const graph = [next.raw, ...next.enabled.map((name) => AudioFilterPresets[name])].filter(Boolean).join(',') || null;
+    let graph = [next.raw, ...next.enabled.map((name) => AudioFilterPresets[name])].filter(Boolean).join(',') || null;
+
+    graph = intercept(this.node.player.plugins, 'audio.beforeFilters', {
+      guildId: this.node.queue.guildId,
+      graph,
+    }).graph;
+    if (graph !== null && (typeof graph !== 'string' || !graph.trim()))
+      throw new TypeError('Filter graph must be nonempty or null.');
 
     if (graph !== this.graph) {
       const controls = this.node.session?.filters;
@@ -173,7 +186,10 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
     }
 
     this.node.queue.options.filterGraph = graph;
-    this.state = next;
+    this.state =
+      graph === ([next.raw, ...next.enabled.map((name) => AudioFilterPresets[name])].filter(Boolean).join(',') || null)
+        ? next
+        : { raw: graph, enabled: [] };
     this.appliedGraph = graph;
 
     return next;

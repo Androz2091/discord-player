@@ -391,3 +391,22 @@ Metadata currently travels over direct HTTP. Remedia dev.7 can forward generic p
 operations to server-configured hosts (`client.plugins.list` / `execute`), but Discord Player
 does not use that path yet. `remote.ts` isolates this boundary for a future supported
 transport without introducing a second search dispatcher.
+
+## Modern capabilities
+
+`ctx.on()` supports shared `search.beforeQuery`, `search.afterResults`,
+`media.beforeResolve`, `media.descriptor`, and encoded `media.transform` operations.
+Transform handlers run sequentially in priority order. Pass the invocation's
+`signal` to asynchronous work; registration removal aborts and drains it before
+cleanup. `plugins.describe()` includes actual owned subscriptions and priorities.
+
+Byte transformations use proxy delivery when direct URLs would bypass processing.
+Descriptor interception runs before host media authorization. A standalone runtime
+has no live queue or Gateway context; local Player/queue/playback/voice capability
+registrations fail setup. Legacy extractors retain their existing post-stream
+adapter and do not acquire modern lifecycle capabilities.
+
+Use `await plugins.serialize(entity)` and `await plugins.restore(payload)` for
+validated `serialization.afterSerialize` / `serialization.beforeRestore`
+transformations. The existing synchronous model and global serialization APIs
+retain their behavior.

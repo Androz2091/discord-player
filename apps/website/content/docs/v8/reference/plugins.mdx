@@ -65,4 +65,119 @@ Handler `options` are `{ priority?, protocols? }`.
 
 `player.extractors.register(MyExtractor)` adapts a `BaseExtractor` class to this registry. There is no separate extractor pipeline. See [v7 extractors](/docs/v8/plugins/legacy-extractors).
 
+## Custom playback providers
+
+This advanced, local-only capability keeps Remedia as the default. Register a
+provider before `player.initialize()` to replace playback implementation while
+Discord Player retains Tracks, queues, source plugins, scheduling and history.
+It is unavailable to standalone source hosts and legacy extractors.
+
+```ts
+import { definePlugin, type PlaybackBackend } from 'discord-player';
+
+export const customPlayback = definePlugin<{ backend: PlaybackBackend }>({
+  id: 'custom-playback',
+  setup(ctx) {
+    ctx.provide('playback.backend', ctx.options.backend);
+  },
+});
+
+// backend is your application's implementation of PlaybackBackend.
+await player.plugins.register(customPlayback({ backend }));
+await player.initialize(botUserId);
+```
+
+### Provider contract
+
+| Member                                   | Responsibility                                                             |
+| ---------------------------------------- | -------------------------------------------------------------------------- |
+| `id`, `capabilities`                     | Diagnostic identity and explicit supported features                        |
+| `initialize({ clientId, signal, send })` | Initialize resources and use the configured shard-aware Gateway sender     |
+| `receive(packet)`                        | Consume every incoming Gateway dispatch, including READY and voice updates |
+| `createSession(options, signal)`         | Return a new `PlaybackSession`; do not attach it to the queue yourself     |
+| `destroy()`                              | Idempotently release provider resources, including partial initialization  |
+
+`capabilities.sources` lists accepted `url`, `file`, `buffer`, `stream` and
+`operation` descriptors. Process-local bytes remain local. Hosted operation
+sources additionally require the deployment in `capabilities.pluginHosts`;
+the backend must implement their delivery and cancellation. Source plugins and
+existing stream/descriptor hooks still prepare media before `session.play()`.
+
+Declare `crossfade` and `filters` explicitly. A provider without them receives
+no synthesized implementation: requesting them rejects. `filters: true` means
+the session supports raw filtergraphs and the built-in presets. Node selection
+is owned by the default Remedia implementation; custom providers reject
+Remedia node selection settings.
+
+Custom provider startup retains up to 1,024 Gateway packets and replays them in
+arrival order before reporting readiness. Overflow aborts initialization and
+cleans up the provider; create a new Player with a synchronized Gateway stream.
+Packets arriving during replay follow older buffered packets. Consumer failures
+and cancellation also fail startup. Default Remedia execution continues to
+ignore packets received before initialization.
+
+### Session contract
+
+`PlaybackSession` is the structural contract used by queue orchestration, not a
+concrete native class. It includes:
+
+- Read-only session/guild/channel/node identity, playback and connection state,
+  linear volume, self-deaf/mute flags, duration, position and reconciliation snapshot.
+- Typed `on`/`off` subscriptions using `PlaybackBackendEvents`, and
+  `getPlaybackTime()` in milliseconds.
+- `connect`, `move`, `dispose`, `play`, `stop`, `pause`, `resume`, `seek`,
+  `setVolume`, `setSelfDeaf` and `setSelfMute`.
+- Optional `filters` controls and `stageNext`, `clearStage`, `stagedSource`
+  methods when the corresponding capabilities are declared.
+
+The exported `PlaybackSessionOptions` and `PlaybackSource` use the existing
+shared settings and encoded descriptor schemas. Events use the existing typed
+lifecycle tuples so application event ordering stays consistent. Emit actual
+observed values; do not fabricate decoding information or unsupported events.
+
+Every new playback needs a monotonically increasing generation. Preserve
+`PlayOptions.customMetadata` unchanged on its lifecycle events: the queue uses
+that metadata, session identity and generation to reject stale notifications.
+Emit `playbackStarted` only after playback starts, and one appropriate terminal
+event (`playbackCompleted`, `playbackStopped` or `playbackFailed`) per generation.
+Staging must not emit a start; promotion must carry the real crossfade identity.
+Keep snapshot generation/state/source synchronized with emitted events.
+
+`connect()` must honor its signal and deadline; `play()` must honor its signal.
+The creation signal combines queue and provider lifetime. Dispose pending work
+and owned streams on cancellation, and reject controls or media formats that
+cannot be implemented. Provider initialization must honor its lifetime signal.
+
+### Ownership and registration lifecycle
+
+Give each Player its own backend instance. Only one backend can be provided per
+Player. Duplicate providers fail setup; selection is sealed after plugin
+readiness and before resources initialize, including when no custom provider
+exists. Repeated initialization for the same client ID shares the existing
+attempt; a different ID rejects. Failed initialization disposes the provider and
+does not fall back to Remedia.
+
+Failed connection attempts retain the previous queue defaults when the new
+session is disposed. Failed moves or partial control updates reconcile queue
+configuration with the actual retained session, rather than reporting requested
+settings that were never applied. Queue/provider cancellation starts disposal
+before waiting on pending session operations; implementations must cancel those
+operations during disposal.
+
+`queue.node.session` is a read-only `PlaybackSession` reference. Use
+`queue.node.createSession()` for replacement; Discord Player cancels the old
+queue operation, disposes its session, detaches its listeners and owns the new
+reference. Default sessions remain the original Remedia objects at runtime.
+
+Unregistering the selected provider cancels its lifetime, drains pending
+initialization, destroys its queues and disposes the backend before plugin
+teardown. It does not select another backend. Player destruction follows the
+same resource ownership rules. Call `destroy()` on the Player before creating a
+new instance with a different provider.
+
+`player.getBackend()` returns the active custom provider or default Remedia
+client. With a custom provider, `getRemedia()` throws and `getRemedia(false)`
+returns `null`. No native Remedia runtime is initialized for that provider.
+`player.plugins.describe()` includes the registration's `provides` capability.
+
 <NextStep href="/docs/v8/reference/models" label="Models" />

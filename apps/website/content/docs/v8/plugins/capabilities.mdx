@@ -1,0 +1,135 @@
+---
+title: Lifecycle capabilities
+description: Intercept application decisions and transform source operations through ctx.on.
+---
+
+Modern `definePlugin()` plugins register capabilities with `ctx.on()`. The same
+indexed registry handles source operations and Player lifecycle capabilities.
+Only subscribers to an operation are selected. `player.plugins.describe()` lists
+registrations and capabilities; `hasCapability(name)` checks active subscribers.
+
+## Semantics
+
+| Behavior  | Return value                                                     | Composition                                                       |
+| --------- | ---------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Observe   | `undefined`                                                      | All eligible observers run                                        |
+| Transform | Updated input                                                    | Async `pipe` operations run sequentially                          |
+| Intercept | `{ action: 'cancel', reason }` or `{ action: 'replace', value }` | Local decisions compose sequentially; cancellation stops dispatch |
+| Policy    | Replacement input with a selected index                          | Select an existing occurrence; framework commits it               |
+
+Returning `undefined` leaves the decision unchanged. Higher priorities run first;
+equal priorities preserve subscription order. Options and setup closures belong
+to each registration. Handler options accept `priority` and local `guildIds`.
+Source execution also supports provider, deployment, protocol and block filters.
+
+Local lifecycle callbacks must be synchronous. TypeScript excludes Promise
+returns and runtime registration rejects async functions. This preserves existing
+synchronous queue methods and avoids awaiting arbitrary plugin code under locks.
+Use asynchronous source/media operations for external work. Reentrant application
+mutation from a local callback throws; return a decision instead.
+
+## Queue admission
+
+```ts
+import { definePlugin } from 'discord-player';
+
+export const admission = definePlugin({
+  id: 'admission',
+  setup(ctx) {
+    ctx.on(
+      'queue.beforeAdd',
+      (input) => {
+        if (input.tracks.some((track) => track.durationMS > 30 * 60_000)) {
+          return { action: 'cancel', reason: 'Tracks must be under 30 minutes.' };
+        }
+      },
+      { priority: 10 },
+    );
+  },
+});
+```
+
+Admission covers add, insert, append, prepend and copy. Transformed Track batches
+are validated before capacity and insertion checks. Move and swap preserve the
+original occurrence identities.
+
+## Scheduling and playback
+
+```ts
+ctx.on('queue.selectNext', (input) => ({
+  action: 'replace',
+  value: { ...input, index: input.candidates.length - 1 },
+}));
+
+ctx.on('playback.beforeStart', ({ guildId }) => {
+  if (maintenanceGuilds.has(guildId)) {
+    return { action: 'cancel', reason: 'Playback is temporarily paused.' };
+  }
+});
+```
+
+`queue.selectNext` receives detached occurrence descriptions and `crossfade`.
+Return a valid index, not a newly created Track. `queue.selectRelated` controls
+autoplay candidate selection. Crossfade staging remains separate from playback
+start; terminal and promotion identity checks remain framework-owned.
+
+## Encoded streams
+
+```ts
+import { Transform } from 'node:stream';
+
+ctx.on('media.transform', ({ track, stream }) => ({
+  track,
+  stream: stream.pipe(
+    new Transform({
+      transform(chunk, encoding, callback) {
+        callback(null, chunk); // Process encoded bytes with your own compatible transform.
+      },
+    }),
+  ),
+}));
+```
+
+Keep the same Track and return a binary Readable. The registry owns replacement
+cleanup and combines caller cancellation with registration removal. Standalone
+hosts use their existing proxy path when byte interception prevents direct URL
+delivery. Local plugins cannot access bytes flowing from a remote host directly
+to Remedia: use `media.descriptor` at that boundary. Descriptor context has
+`guildId: null` when execution has no queue context.
+
+## Capability reference
+
+| Domain         | Capabilities                                                                                                                                                           |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Player         | `player.ready`, `player.beforeInitialize`, `player.initialized`, `player.destroying`                                                                                   |
+| Queues         | `queue.beforeCreate`, `queue.created`, `queue.destroyed`, `queue.beforeConfigure`, `queue.beforeMetadata`, `queue.beforeRepeat`, `queue.beforeShuffle`                 |
+| Mutations      | `queue.beforeAdd`, `queue.beforeRemove`, `queue.beforeMove`, `queue.beforeSwap`, `queue.beforeClear`, `queue.changed`                                                  |
+| Selection      | `queue.selectNext`, `queue.selectRelated`                                                                                                                              |
+| Playback       | `playback.beforeStart`, `playback.beforeSkip`, `playback.beforeStop`, `playback.beforePause`, `playback.beforeResume`, `playback.beforeSeek`, `playback.beforeHistory` |
+| Voice          | `voice.beforeConnect`, `voice.beforeSession`, `voice.beforeLeave`, `voice.beforeAutoPause`                                                                             |
+| Audio          | `audio.beforeVolume`, `audio.beforeFilters`                                                                                                                            |
+| Observation    | `queue.event` observes existing event names, including crossfade, session and error events                                                                             |
+| Shared sources | `search.beforeQuery`, `search.afterResults`, existing `search.query.*`, `track.stream`, `track.related`, `track.bridge`                                                |
+| Shared media   | `media.beforeResolve`, `media.descriptor`, `media.transform`, existing `track.stream.resolved`                                                                         |
+| Persistence    | `serialization.afterSerialize`, `serialization.beforeRestore` via `await player.plugins.serialize(entity)` / `restore(payload)`                                        |
+
+Source, media and persistence capabilities work in standalone source runtimes.
+Player, queue, playback, voice and audio capabilities are local-only; unsupported
+standalone registrations fail setup. No local lifecycle RPC is created.
+
+## Cancellation and errors
+
+Source/media handlers receive `signal` as their second argument. Propagate it to
+network requests and dispose resources through `ctx.onCleanup()`. Removing a
+registration aborts active calls, drains handlers and then runs cleanup in reverse
+order. The unsubscribe returned by `ctx.on()` prevents future selection.
+
+Explicit vetoes throw `CapabilityCancelledError`; handler failures identify the
+plugin and operation through `PluginError`. Observation errors are reported on
+the Player error channel when state has already committed. Mandatory shutdown
+and session cleanup cannot be vetoed.
+
+Direct configuration property writes, raw Remedia operations and synchronous
+model serialization retain their existing behavior. Use controlled Player/queue
+methods and registry persistence methods for capability interception. Legacy
+extractors retain `handlePostStream` but do not receive these new callbacks.

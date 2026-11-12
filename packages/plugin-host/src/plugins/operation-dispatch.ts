@@ -19,21 +19,24 @@ export function selectHandlers(
   options: ExecuteOptions,
   state: DispatchState,
 ) {
-  return state.handlers
-    .filter(
-      (handler) =>
-        handler.operation === operation &&
-        handler.entry.active &&
-        (!options.pluginId || handler.entry.id === options.pluginId) &&
-        (options.hostId === undefined ||
-          (handler.entry.registration.definition.remoteHost?.hostId ?? null) === options.hostId) &&
-        !options.blocked?.includes(handler.entry.id) &&
-        !state.blocked().includes(handler.entry.id) &&
-        (!(input as { protocol?: string }).protocol ||
-          !handler.protocols?.length ||
-          handler.protocols?.includes((input as { protocol: string }).protocol)),
-    )
-    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0) || a.order - b.order);
+  return (state.handlers.get(operation) ?? []).filter(
+    (handler) =>
+      handler.entry.active &&
+      (!handler.guildIds ||
+        (typeof input === 'object' &&
+          input !== null &&
+          'guildId' in input &&
+          typeof input.guildId === 'string' &&
+          handler.guildIds.includes(input.guildId))) &&
+      (!options.pluginId || handler.entry.id === options.pluginId) &&
+      (options.hostId === undefined ||
+        (handler.entry.registration.definition.remoteHost?.hostId ?? null) === options.hostId) &&
+      !options.blocked?.includes(handler.entry.id) &&
+      !state.blocked().includes(handler.entry.id) &&
+      (!(input as { protocol?: string }).protocol ||
+        !handler.protocols?.length ||
+        handler.protocols?.includes((input as { protocol: string }).protocol)),
+  );
 }
 
 /** Dispatch a typed operation against initialized host state.
@@ -96,10 +99,17 @@ export async function dispatchOperation<K extends OperationName>(
         signal.throwIfAborted();
       }
     } catch (error) {
+      if (
+        (operation === 'stream.transform' || operation === 'media.transform') &&
+        value &&
+        typeof value === 'object' &&
+        'stream' in value &&
+        value.stream instanceof Readable
+      )
+        value.stream.destroy();
       if (signal.aborted) {
         throw signal.reason;
       }
-
       throw new PluginError(handler.entry.id, operation, error);
     } finally {
       handler.entry.pending.delete(pending);
@@ -143,6 +153,28 @@ export async function dispatchOperation<K extends OperationName>(
     }
 
     if (policy === 'pipe') {
+      if (operation === 'stream.transform' || operation === 'media.transform') {
+        const previous = value as { track: Track; stream: Readable };
+        const next = result as { track: Track; stream: Readable };
+        if (!next || next.track !== previous.track || !(next.stream instanceof Readable)) {
+          previous.stream.destroy();
+          if (next?.stream instanceof Readable) next.stream.destroy();
+          throw new PluginError(
+            handler.entry.id,
+            operation,
+            new TypeError('Encoded transforms must preserve Track identity and return a Readable.'),
+          );
+        }
+        const dispose = () => {
+          previous.stream.destroy();
+          next.stream.destroy();
+        };
+        signal.addEventListener('abort', dispose, { once: true });
+        next.stream.once('close', () => {
+          signal.removeEventListener('abort', dispose);
+          if (previous.stream !== next.stream) previous.stream.destroy();
+        });
+      }
       value = result;
     }
 

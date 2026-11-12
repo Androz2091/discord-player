@@ -1,3 +1,5 @@
+import type { PlaybackBackend } from './playback-backend.js';
+import { installLocalCapabilities, intercept } from './plugins/capabilities.js';
 import { prepareResource, type StreamHooks } from './hooks.js';
 import type { GuildQueue } from './structures/guild-queue.js';
 import { SourcePluginRuntime, SOURCE_PLUGIN_ID, serializeSourceTrack } from '@discord-player/plugin-host';
@@ -109,6 +111,9 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Current package version. */
   static readonly version = packageVersion;
 
+  /** Maximum Gateway dispatches retained while the playback backend starts. */
+  private static readonly GATEWAY_BUFFER_LIMIT = 1024;
+
   /** Shared execution host for modern and legacy sources. */
   public readonly plugins: PluginRegistry;
 
@@ -117,6 +122,31 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
   /** Source execution independent of queue and voice orchestration. */
   private readonly sources: SourcePluginRuntime;
+
+  private customBackend: PlaybackBackend | null = null;
+
+  private backendInitialization: Promise<void> | null = null;
+
+  private backendReady = false;
+
+  private backendLifetime: AbortSignal | null = null;
+
+  private backendDisposal: Promise<void> | null = null;
+
+  private initialization: Promise<void> | null = null;
+
+  private initializationClientId: string | null = null;
+
+  private backendInitialized = false;
+
+  private backendFailed = false;
+
+  /** Ordered dispatches retained until the selected backend is ready to receive them. */
+  private gatewayBuffer: Record<string, unknown>[] = [];
+
+  private gatewayBufferError: Error | null = null;
+
+  private readonly gatewayStartup = new AbortController();
 
   private initialPlugins: Promise<void>;
 
@@ -161,10 +191,18 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
     this.sources = new SourcePluginRuntime({ player: this });
     this.plugins = this.sources.plugins;
+    installLocalCapabilities(this.plugins);
+    this.plugins.defineProvider('playback.backend');
     this.extractors = this.sources.extractors;
 
     this.initialPlugins = Promise.all((options.plugins ?? []).map((plugin) => this.plugins.register(plugin))).then(
-      () => undefined,
+      () => {
+        try {
+          this.plugins.executeSync('player.ready', { playerId: this.id });
+        } catch (error) {
+          this.emit('error', error instanceof Error ? error : new Error(String(error)));
+        }
+      },
     );
 
     // Retain the rejection for initialize/search while preventing an unobserved constructor promise.
@@ -221,6 +259,10 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
    * @returns The initialized Remedia client, or null when optional lookup is requested before initialization.
    */
   public getRemedia(throwOnMissing = true): RemediaClient | null {
+    if (this.customBackend) {
+      if (throwOnMissing) throw new Error('A custom playback backend is active. Use player.getBackend().');
+      return null;
+    }
     if (!this.remedia && throwOnMissing) {
       throw new Error('RemediaClient is not initialized. Call player.initialize(clientId) first.');
     }
@@ -231,13 +273,76 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Initialize Remedia and associate this Player with the bot user ID.
    * @param clientId Discord bot user snowflake used for remote node identity.
    */
-  public async initialize(
+  public initialize(clientId: string): Promise<void> {
+    this.plugins.assertNotDispatching();
+    this.signal.throwIfAborted();
+    if (this.backendDisposal && this.backendInitialized)
+      return Promise.reject(new Error('Playback backend has been disposed. Create a new Player.'));
+    if (this.initialization && this.initializationClientId !== clientId)
+      return Promise.reject(new Error('Player initialization already started for a different clientId.'));
+    this.initializationClientId = clientId;
+    return (this.initialization ??= this.initializeBackend(clientId));
+  }
+
+  /** Access the initialized custom provider or the default Remedia client.
+   * @returns Active playback implementation. Throws before initialization or after disposal.
+   */
+  public getBackend(): PlaybackBackend | RemediaClient {
+    const backend = this.customBackend ?? this.remedia;
+    if (!backend || (this.customBackend && !this.backendReady) || this.playbackSignal.aborted || this.backendDisposal)
+      throw new Error('Playback backend is not active.');
+    return backend;
+  }
+
+  /** Active advanced provider, or null for default Remedia execution.
+   * @internal
+   */
+  public get playbackBackend(): PlaybackBackend | null {
+    return this.customBackend;
+  }
+
+  /** Playback provider lifetime, combined with Player cancellation. @internal */
+  public get playbackSignal(): AbortSignal {
+    return this.backendLifetime ?? this.signal;
+  }
+
+  private disposeCustomBackend(): Promise<void> {
+    if (this.backendDisposal) return this.backendDisposal;
+    const backend = this.customBackend;
+    if (!backend) return Promise.resolve();
+    this.backendReady = false;
+    this.backendFailed = true;
+    this.clearGatewayBuffer();
+    this.backendDisposal = (async () => {
+      const errors: unknown[] = [];
+      try {
+        await this.nodes.clear();
+      } catch (error) {
+        errors.push(error);
+      }
+      await this.backendInitialization?.catch(() => undefined);
+      try {
+        await backend.destroy();
+      } catch (error) {
+        errors.push(error);
+      }
+      this.customBackend = null;
+      this.#clientId = null;
+      if (errors.length) throw new AggregateError(errors, 'Playback backend cleanup failed');
+    })();
+    return this.backendDisposal;
+  }
+
+  private async initializeBackend(
     /** Discord bot user snowflake used for remote node identity. */
     clientId: string,
   ): Promise<void> {
     try {
       await this.ready();
+      this.signal.throwIfAborted();
     } catch (error) {
+      this.backendFailed = true;
+      this.clearGatewayBuffer();
       try {
         await this.plugins.destroy();
       } catch (cleanup) {
@@ -247,7 +352,73 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       throw error;
     }
 
+    const initialization = intercept(this.plugins, 'player.beforeInitialize', { playerId: this.id, clientId });
+    if (initialization.playerId !== this.id || typeof initialization.clientId !== 'string' || !initialization.clientId)
+      throw new TypeError('Invalid Player initialization identity.');
+    clientId = initialization.clientId;
     this.#clientId = clientId;
+    const backend = this.plugins.selectProvider('playback.backend', () => this.disposeCustomBackend());
+    if (backend) {
+      this.customBackend = backend;
+      const registrationSignal = this.plugins.providerSignal('playback.backend');
+      this.backendLifetime = AbortSignal.any([
+        this.signal,
+        this.gatewayStartup.signal,
+        ...(registrationSignal ? [registrationSignal] : []),
+      ]);
+      try {
+        if (
+          !backend.id ||
+          !Array.isArray(backend.capabilities?.sources) ||
+          !backend.capabilities.sources.every((kind) =>
+            ['url', 'file', 'buffer', 'stream', 'operation'].includes(kind),
+          ) ||
+          typeof backend.capabilities.crossfade !== 'boolean' ||
+          typeof backend.capabilities.filters !== 'boolean' ||
+          (backend.capabilities.pluginHosts !== undefined &&
+            (!Array.isArray(backend.capabilities.pluginHosts) ||
+              !backend.capabilities.pluginHosts.every((host) => typeof host === 'string' && host.length > 0))) ||
+          !['initialize', 'receive', 'createSession', 'destroy'].every(
+            (name) => typeof Reflect.get(backend, name) === 'function',
+          )
+        )
+          throw new TypeError('Invalid playback backend implementation.');
+        this.playbackSignal.throwIfAborted();
+        this.backendInitialization = Promise.resolve().then(() => {
+          this.playbackSignal.throwIfAborted();
+          return backend.initialize({ clientId, signal: this.playbackSignal, send: this.options.send });
+        });
+        await this.backendInitialization;
+        this.playbackSignal.throwIfAborted();
+        if (this.backendDisposal) throw new Error('Playback provider was removed during initialization.');
+        this.replayGateway();
+        this.backendReady = true;
+        this.backendInitialized = true;
+        try {
+          this.plugins.executeSync('player.initialized', { playerId: this.id });
+        } catch (error) {
+          this.emit('error', error instanceof Error ? error : new Error(String(error)));
+        }
+        return;
+      } catch (error) {
+        this.backendFailed = true;
+        this.clearGatewayBuffer();
+        const errors: unknown[] = [error];
+        try {
+          await this.disposeCustomBackend();
+        } catch (cleanup) {
+          errors.push(cleanup);
+        }
+        try {
+          await this.plugins.destroy();
+        } catch (cleanup) {
+          errors.push(cleanup);
+        }
+        if (errors.length > 1)
+          throw new AggregateError(errors, 'Playback backend initialization and cleanup failed', { cause: error });
+        throw error;
+      }
+    }
 
     const {
       resolveVoiceChannelUsers: _resolver,
@@ -262,14 +433,28 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     } = this.options;
 
     try {
-      this.remedia = await RemediaClient.create({
+      const client = await RemediaClient.create({
         ...remediaOptions,
         nodes: remediaOptions.nodes ?? [{ id: 'local', type: 'embedded' }],
         botUserId: clientId,
       });
-      this.attachClientListeners(this.remedia);
+      if (this.signal.aborted) {
+        await client.close();
+        this.signal.throwIfAborted();
+      }
+      this.remedia = client;
+      this.backendInitialized = true;
+      this.clearGatewayBuffer();
+      this.attachClientListeners(client);
+      try {
+        this.plugins.executeSync('player.initialized', { playerId: this.id });
+      } catch (error) {
+        this.emit('error', error instanceof Error ? error : new Error(String(error)));
+      }
     } catch (error) {
       this.#clientId = null;
+      this.backendFailed = true;
+      this.clearGatewayBuffer();
 
       try {
         await this.plugins.destroy();
@@ -339,20 +524,67 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     return this.#clientId;
   }
 
-  /** Forward every raw Discord Gateway dispatch to Remedia and track voice states for the owning queue.
+  /** Forward every raw Discord Gateway dispatch to the active playback backend and track queue voice states.
    *
-   * Remedia needs the complete dispatch stream, including `READY`, to track Gateway sessions and dispatch
-   * ordering; do not filter packets before calling this method. Discord Player separately consumes
-   * `VOICE_STATE_UPDATE` for queue voice policies. Packets are ignored before `initialize()` and after `destroy()`.
+   * The active backend needs the complete dispatch stream, including `READY`, to track Gateway sessions and
+   * dispatch ordering; do not filter packets before calling this method. Dispatches received before the selected
+   * backend is ready are retained in order so a custom provider still observes initial Gateway state. Discord
+   * Player separately consumes `VOICE_STATE_UPDATE` for queue voice policies. Packets are ignored after `destroy()`.
    * @param payload Raw Gateway dispatch packet from the Discord client's event adapter.
    */
   public receive(
     /** Raw Gateway dispatch packet from the Discord client's event adapter. */
     payload: Record<string, unknown>,
   ): void {
-    if (!this.remedia) return;
+    if (this.playbackSignal.aborted || this.backendDisposal) return;
 
-    this.remedia.receive(payload);
+    if (!this.backendInitialized && !this.remedia) {
+      this.bufferGateway(payload);
+      return;
+    }
+
+    this.dispatchGateway(payload);
+  }
+
+  private bufferGateway(payload: Record<string, unknown>): void {
+    if (this.backendFailed) return;
+
+    if (this.gatewayBufferError) return;
+
+    if (this.gatewayBuffer.length >= DiscordPlayer.GATEWAY_BUFFER_LIMIT) {
+      this.gatewayBufferError = new Error(
+        `Custom playback backend Gateway startup exceeded ${DiscordPlayer.GATEWAY_BUFFER_LIMIT} buffered packets; initial Gateway history is incomplete. Create a new Player with a synchronized Gateway connection.`,
+      );
+      this.gatewayStartup.abort(this.gatewayBufferError);
+      this.gatewayBuffer = [];
+      return;
+    }
+
+    this.gatewayBuffer.push(payload);
+  }
+
+  private replayGateway(): void {
+    // Keep the same array until replay completes: reentrant dispatches append after older packets.
+    const buffered = this.gatewayBuffer;
+    for (const payload of buffered) {
+      this.playbackSignal.throwIfAborted();
+      this.dispatchGateway(payload);
+      this.playbackSignal.throwIfAborted();
+    }
+    this.clearGatewayBuffer();
+  }
+
+  private clearGatewayBuffer(): void {
+    this.gatewayBuffer = [];
+    this.gatewayBufferError = null;
+  }
+
+  private dispatchGateway(payload: Record<string, unknown>): void {
+    const backend = this.customBackend ?? this.remedia;
+    if (!backend) return;
+
+    backend.receive(payload);
+    if (this.playbackSignal.aborted || this.backendDisposal) return;
 
     if (
       payload.t === 'VOICE_STATE_UPDATE' &&
@@ -405,12 +637,29 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   ): Promise<MediaSource> {
     signal.throwIfAborted();
 
-    const node = this.getRemedia().nodes.find((item) => item.id === nodeId);
+    const node = this.getRemedia(false)?.nodes.find((item) => item.id === nodeId);
     if (queue)
-      return prepareResource(queue, track, signal, node?.type !== 'embedded', () =>
-        this.resolvePlaybackSource(track, nodeId, signal),
+      return prepareResource(
+        queue,
+        track,
+        signal,
+        this.customBackend
+          ? !this.customBackend.capabilities.sources.some((kind) => kind === 'stream' || kind === 'buffer')
+          : node?.type !== 'embedded',
+        () => this.resolveSourceDescriptor(track, nodeId, signal, queue.guildId),
       );
 
+    return this.resolveSourceDescriptor(track, nodeId, signal, null);
+  }
+
+  private async resolveSourceDescriptor(
+    track: Track,
+    nodeId: string | null,
+    signal: AbortSignal,
+    guildId: string | null,
+  ): Promise<MediaSource> {
+    signal.throwIfAborted();
+    const node = this.getRemedia(false)?.nodes.find((item) => item.id === nodeId);
     const hostId = track.sourceReference?.hostId;
 
     if (hostId) {
@@ -422,11 +671,14 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
         throw new Error('Track provider is blocked');
 
       if (
-        node?.type !== 'remote' ||
-        !node.capabilities?.pluginOperations?.available ||
-        !node.capabilities.pluginOperations.hosts.includes(hostId)
+        this.customBackend
+          ? !this.customBackend.capabilities.sources.includes('operation') ||
+            !this.customBackend.capabilities.pluginHosts?.includes(hostId)
+          : node?.type !== 'remote' ||
+            !node.capabilities?.pluginOperations?.available ||
+            !node.capabilities.pluginOperations.hosts.includes(hostId)
       )
-        throw new Error(`Remedia node ${nodeId} cannot access source host ${hostId}`);
+        throw new Error(`Playback backend cannot access source host ${hostId}`);
 
       const source: OperationMediaSource = {
         hostId,
@@ -435,12 +687,26 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
         input: { track: serializeSourceTrack(track) },
       };
 
-      return source;
+      if (!this.plugins.hasCapability('media.descriptor')) return source;
+      const descriptor = await this.plugins.execute('media.descriptor', { source, guildId }, { signal });
+      if (
+        !descriptor ||
+        !descriptor.source ||
+        !('hostId' in descriptor.source) ||
+        descriptor.source.hostId !== hostId ||
+        descriptor.source.pluginId !== source.pluginId ||
+        descriptor.source.operation !== source.operation
+      )
+        throw new TypeError('Remote descriptor interception must preserve source host identity.');
+      return descriptor.source;
     }
 
     return this.plugins.resolveStream(track, {
+      guildId,
       signal,
-      remote: node?.type !== 'embedded',
+      remote: this.customBackend
+        ? !this.customBackend.capabilities.sources.some((kind) => kind === 'stream' || kind === 'buffer')
+        : node?.type !== 'embedded',
       blocked: this.options.blockExtractors,
     });
   }
@@ -528,15 +794,23 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Abort the Player lifetime signal, then destroy all managed queues and plugins. */
   public destroy(): Promise<void> {
     if (this.destruction) return this.destruction;
+    this.plugins.assertNotDispatching();
+    this.clearGatewayBuffer();
     this.destruction = Promise.resolve().then(async () => {
       const errors: unknown[] = [];
+      try {
+        this.plugins.executeSync('player.destroying', { playerId: this.id });
+      } catch (error) {
+        errors.push(error);
+      }
       try {
         await queueCleanup;
       } catch (error) {
         errors.push(error);
       }
       try {
-        await this.remedia?.close();
+        if (this.customBackend || this.backendDisposal) await this.disposeCustomBackend();
+        else await this.remedia?.close();
       } catch (error) {
         errors.push(error);
       }

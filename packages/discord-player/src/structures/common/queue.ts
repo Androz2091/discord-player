@@ -18,6 +18,9 @@ export class Queue<T> implements Iterable<T> {
   /** Optional observer called after collection mutations, including compatibility store writes. */
   public onMutation?: () => void;
 
+  /** Internal ownership guard, called before changing this collection. */
+  public onBeforeMutation?: () => void;
+
   /**
    * Read the stable identity of a queued occurrence.
    * @param index Zero-based occurrence index.
@@ -46,6 +49,7 @@ export class Queue<T> implements Iterable<T> {
   public get store(): T[] {
     return (this.storeView ??= new Proxy(this.items, {
       set: (target, key, value) => {
+        this.onBeforeMutation?.();
         Reflect.set(target, key, value);
 
         if (target === this.items) {
@@ -57,6 +61,7 @@ export class Queue<T> implements Iterable<T> {
       },
 
       deleteProperty: (target, key) => {
+        this.onBeforeMutation?.();
         Reflect.deleteProperty(target, key);
 
         if (target === this.items) {
@@ -75,6 +80,7 @@ export class Queue<T> implements Iterable<T> {
    * @returns `true` when accepted, or `false` when the queue is full.
    */
   public enqueue(item: T): boolean {
+    this.onBeforeMutation?.();
     if (this.isFull()) return false;
 
     this.items.push(item);
@@ -86,6 +92,7 @@ export class Queue<T> implements Iterable<T> {
 
   /** Remove and return the oldest value. */
   public dequeue(): T | undefined {
+    this.onBeforeMutation?.();
     this.identities.shift();
 
     const item = this.items.shift();
@@ -106,6 +113,7 @@ export class Queue<T> implements Iterable<T> {
    * @returns Number of values accepted under the capacity limit.
    */
   public merge(other: Queue<T> | readonly T[]): number {
+    this.onBeforeMutation?.();
     const values = other instanceof Queue ? other.toArray() : Array.from(other);
     const accepted = Number.isFinite(this.limit) ? values.slice(0, Math.max(0, this.limit - this.size)) : values;
 
@@ -150,6 +158,7 @@ export class Queue<T> implements Iterable<T> {
 
   /** Remove every value. */
   public clear(): void {
+    this.onBeforeMutation?.();
     this.items = [];
     this.storeView = undefined;
     this.identities = [];
@@ -178,6 +187,7 @@ export class Queue<T> implements Iterable<T> {
    * @returns Number of values inserted.
    */
   public insert(values: T | readonly T[], index = 0): number {
+    this.onBeforeMutation?.();
     if (!Number.isInteger(index) || index < 0 || index > this.size) {
       throw new RangeError(`Queue index must be an integer between 0 and ${this.size}.`);
     }
@@ -198,6 +208,7 @@ export class Queue<T> implements Iterable<T> {
    * @returns `true` when a value was removed.
    */
   public remove(item: T): boolean {
+    this.onBeforeMutation?.();
     const index = this.items.indexOf(item);
 
     if (index < 0) return false;
@@ -215,6 +226,7 @@ export class Queue<T> implements Iterable<T> {
    * @returns Removed value, or `undefined` when the index is invalid.
    */
   public removeAt(index: number): T | undefined {
+    this.onBeforeMutation?.();
     if (!Number.isInteger(index) || index < 0 || index >= this.size) return undefined;
 
     const item = this.items.splice(index, 1)[0];
@@ -232,6 +244,7 @@ export class Queue<T> implements Iterable<T> {
    * @returns `true` when both indexes were valid.
    */
   public move(from: number, to: number): boolean {
+    this.onBeforeMutation?.();
     if (
       !Number.isInteger(from) ||
       !Number.isInteger(to) ||
@@ -262,6 +275,7 @@ export class Queue<T> implements Iterable<T> {
    * @returns `true` when both indexes were valid.
    */
   public swap(left: number, right: number): boolean {
+    this.onBeforeMutation?.();
     if (
       !Number.isInteger(left) ||
       !Number.isInteger(right) ||
@@ -282,6 +296,7 @@ export class Queue<T> implements Iterable<T> {
 
   /** Randomize item order in place using Fisher-Yates shuffling. */
   public shuffle(): void {
+    this.onBeforeMutation?.();
     for (let index = this.items.length - 1; index > 0; index--) {
       const target = randomInt(index + 1);
 
