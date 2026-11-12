@@ -15,6 +15,7 @@ import type {
   PlaybackBackend,
   PlaybackBackendCapabilities,
   PlaybackBackendContext,
+  PlaybackBackendEvents,
   PlaybackSession,
 } from '../../src/index.js';
 
@@ -147,10 +148,13 @@ export class IndependentSession implements PlaybackSession {
 
   private readonly disposeError: Error | undefined;
 
+  private readonly crossfade: DiscordSessionOptions['crossfade'];
+
   private readonly connectError: Error | undefined;
 
   /** Create a session from framework options without native resource allocation. */
   public constructor(options: DiscordSessionOptions, config: IndependentSessionConfig = {}) {
+    this.crossfade = options.crossfade;
     this.sessionId = config.sessionId ?? randomUUID();
     this.guildId = options.guildId;
     this.channelId = options.channelId;
@@ -173,7 +177,9 @@ export class IndependentSession implements PlaybackSession {
       state: this.state,
       source: this.state === 'idle' ? null : streamInfo,
       filterGraph: this.filters?.graph ?? null,
-      crossfade: null,
+      crossfade: this.crossfade
+        ? { durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower', ...this.crossfade }
+        : null,
       staged: this.staged,
     };
   }
@@ -197,7 +203,7 @@ export class IndependentSession implements PlaybackSession {
     return this.emitter.listenerCount(name);
   }
 
-  private emit(name: string, ...args: unknown[]): boolean {
+  private emit<Name extends keyof PlaybackBackendEvents>(name: Name, ...args: PlaybackBackendEvents[Name]): boolean {
     return this.emitter.emit(name, ...args);
   }
 
@@ -370,6 +376,7 @@ export class IndependentSession implements PlaybackSession {
       info: streamInfo,
       error: null,
     };
+    this.emit('stageReady', { ...this.identity(), ...this.staged });
     return this.staged;
   }
 
@@ -381,6 +388,37 @@ export class IndependentSession implements PlaybackSession {
   /** Inspect staged media. */
   public async stagedSource(): Promise<StageSnapshot | null> {
     return this.staged;
+  }
+
+  /** Request the real framework staging path for the current generation. */
+  public requestPreparation(): void {
+    this.emit('prepareRequested', { ...this.identity(), remainingMs: 35000, transitionInMs: 30000 });
+  }
+
+  /** Promote a staged occurrence, optionally leaving start delivery to snapshot recovery. */
+  public promote(notify = true): () => void {
+    const options = this.stageOptions.at(-1);
+    if (!options || !this.staged) throw new Error('No independent stage is available');
+    const outgoing = {
+      ...this.identity(),
+      state: 'completed' as const,
+      position: this.position,
+      continuation: { type: 'promoted' as const, generation: this.generation + 1, entryId: options.entryId },
+    };
+    this.generation++;
+    this.customMetadata = options.customMetadata;
+    this.staged = null;
+    this.state = 'playing';
+    if (notify)
+      this.emit('playbackStarted', {
+        ...this.identity(),
+        state: 'playing',
+        info: streamInfo,
+        transition: { type: 'crossfade', outgoingGeneration: outgoing.generation, entryId: options.entryId },
+      });
+    return () => {
+      this.emit('playbackCompleted', outgoing);
+    };
   }
 
   /** Emit natural completion without native end-of-stream detection. */

@@ -144,7 +144,9 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Ordered dispatches retained until the selected backend is ready to receive them. */
   private gatewayBuffer: Record<string, unknown>[] = [];
 
-  private gatewayBufferOverflowed = false;
+  private gatewayBufferError: Error | null = null;
+
+  private readonly gatewayStartup = new AbortController();
 
   private initialPlugins: Promise<void>;
 
@@ -339,6 +341,8 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       await this.ready();
       this.signal.throwIfAborted();
     } catch (error) {
+      this.backendFailed = true;
+      this.clearGatewayBuffer();
       try {
         await this.plugins.destroy();
       } catch (cleanup) {
@@ -357,7 +361,11 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     if (backend) {
       this.customBackend = backend;
       const registrationSignal = this.plugins.providerSignal('playback.backend');
-      this.backendLifetime = registrationSignal ? AbortSignal.any([this.signal, registrationSignal]) : this.signal;
+      this.backendLifetime = AbortSignal.any([
+        this.signal,
+        this.gatewayStartup.signal,
+        ...(registrationSignal ? [registrationSignal] : []),
+      ]);
       try {
         if (
           !backend.id ||
@@ -375,15 +383,17 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
           )
         )
           throw new TypeError('Invalid playback backend implementation.');
-        this.backendInitialization = Promise.resolve().then(() =>
-          backend.initialize({ clientId, signal: this.playbackSignal, send: this.options.send }),
-        );
+        this.playbackSignal.throwIfAborted();
+        this.backendInitialization = Promise.resolve().then(() => {
+          this.playbackSignal.throwIfAborted();
+          return backend.initialize({ clientId, signal: this.playbackSignal, send: this.options.send });
+        });
         await this.backendInitialization;
         this.playbackSignal.throwIfAborted();
         if (this.backendDisposal) throw new Error('Playback provider was removed during initialization.');
+        this.replayGateway();
         this.backendReady = true;
         this.backendInitialized = true;
-        this.replayGateway();
         try {
           this.plugins.executeSync('player.initialized', { playerId: this.id });
         } catch (error) {
@@ -528,7 +538,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   ): void {
     if (this.playbackSignal.aborted || this.backendDisposal) return;
 
-    if (!this.backendInitialized) {
+    if (!this.backendInitialized && !this.remedia) {
       this.bufferGateway(payload);
       return;
     }
@@ -539,14 +549,14 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   private bufferGateway(payload: Record<string, unknown>): void {
     if (this.backendFailed) return;
 
+    if (this.gatewayBufferError) return;
+
     if (this.gatewayBuffer.length >= DiscordPlayer.GATEWAY_BUFFER_LIMIT) {
-      if (!this.gatewayBufferOverflowed) {
-        this.gatewayBufferOverflowed = true;
-        this.emit(
-          'debug',
-          `Discord Player dropped Gateway dispatches beyond the ${DiscordPlayer.GATEWAY_BUFFER_LIMIT}-packet pre-initialization buffer.`,
-        );
-      }
+      this.gatewayBufferError = new Error(
+        `Custom playback backend Gateway startup exceeded ${DiscordPlayer.GATEWAY_BUFFER_LIMIT} buffered packets; initial Gateway history is incomplete. Create a new Player with a synchronized Gateway connection.`,
+      );
+      this.gatewayStartup.abort(this.gatewayBufferError);
+      this.gatewayBuffer = [];
       return;
     }
 
@@ -554,17 +564,19 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   }
 
   private replayGateway(): void {
+    // Keep the same array until replay completes: reentrant dispatches append after older packets.
     const buffered = this.gatewayBuffer;
-
-    this.gatewayBuffer = [];
-    this.gatewayBufferOverflowed = false;
-
-    for (const payload of buffered) this.dispatchGateway(payload);
+    for (const payload of buffered) {
+      this.playbackSignal.throwIfAborted();
+      this.dispatchGateway(payload);
+      this.playbackSignal.throwIfAborted();
+    }
+    this.clearGatewayBuffer();
   }
 
   private clearGatewayBuffer(): void {
     this.gatewayBuffer = [];
-    this.gatewayBufferOverflowed = false;
+    this.gatewayBufferError = null;
   }
 
   private dispatchGateway(payload: Record<string, unknown>): void {
@@ -572,6 +584,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     if (!backend) return;
 
     backend.receive(payload);
+    if (this.playbackSignal.aborted || this.backendDisposal) return;
 
     if (
       payload.t === 'VOICE_STATE_UPDATE' &&

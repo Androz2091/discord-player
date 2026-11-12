@@ -109,6 +109,13 @@ the session supports raw filtergraphs and the built-in presets. Node selection
 is owned by the default Remedia implementation; custom providers reject
 Remedia node selection settings.
 
+Custom provider startup retains up to 1,024 Gateway packets and replays them in
+arrival order before reporting readiness. Overflow aborts initialization and
+cleans up the provider; create a new Player with a synchronized Gateway stream.
+Packets arriving during replay follow older buffered packets. Consumer failures
+and cancellation also fail startup. Default Remedia execution continues to
+ignore packets received before initialization.
+
 ### Session contract
 
 `PlaybackSession` is the structural contract used by queue orchestration, not a
@@ -149,6 +156,13 @@ readiness and before resources initialize, including when no custom provider
 exists. Repeated initialization for the same client ID shares the existing
 attempt; a different ID rejects. Failed initialization disposes the provider and
 does not fall back to Remedia.
+
+Failed connection attempts retain the previous queue defaults when the new
+session is disposed. Failed moves or partial control updates reconcile queue
+configuration with the actual retained session, rather than reporting requested
+settings that were never applied. Queue/provider cancellation starts disposal
+before waiting on pending session operations; implementations must cancel those
+operations during disposal.
 
 `queue.node.session` is a read-only `PlaybackSession` reference. Use
 `queue.node.createSession()` for replacement; Discord Player cancels the old

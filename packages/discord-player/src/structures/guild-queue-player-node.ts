@@ -126,6 +126,8 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   #volume = 100;
 
+  private readonly sessionDisposals = new WeakMap<PlaybackSession, Promise<void>>();
+
   private detachSessionListeners: (() => void) | null = null;
 
   /**
@@ -225,34 +227,48 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
         throw new Error('Changing a Remedia node while preserving this session is not supported.');
       }
 
-      if (options.selfDeaf !== undefined && options.selfDeaf !== existing.selfDeaf)
-        await existing.setSelfDeaf(options.selfDeaf);
+      try {
+        if (options.selfDeaf !== undefined && options.selfDeaf !== existing.selfDeaf)
+          await existing.setSelfDeaf(options.selfDeaf);
 
-      if (options.selfMute !== undefined && options.selfMute !== existing.selfMute)
-        await existing.setSelfMute(options.selfMute);
+        if (options.selfMute !== undefined && options.selfMute !== existing.selfMute)
+          await existing.setSelfMute(options.selfMute);
 
-      const previousVolume = existing.volume;
+        const previousVolume = existing.volume;
 
-      if (options.volume !== undefined && options.volume !== previousVolume) await existing.setVolume(options.volume);
+        if (options.volume !== undefined && options.volume !== previousVolume) await existing.setVolume(options.volume);
 
-      if (options.filterGraph !== undefined && options.filterGraph !== existing.filters?.graph) {
-        if (options.filterGraph === null) await this.requireFilters(existing).clear();
-        else await this.requireFilters(existing).set(options.filterGraph);
+        if (options.filterGraph !== undefined && options.filterGraph !== existing.filters?.graph) {
+          if (options.filterGraph === null) await this.requireFilters(existing).clear();
+          else await this.requireFilters(existing).set(options.filterGraph);
+        }
+
+        if (options.channelId !== existing.channelId) await existing.move(options.channelId);
+
+        if (existing.connectionState !== 'connected') {
+          await existing.connect({
+            ...(options.connectTimeoutMs === undefined ? {} : { timeoutMs: options.connectTimeoutMs }),
+            ...(this.player.playbackBackend
+              ? { signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]) }
+              : { signal: this.queue.signal }),
+          });
+        }
+
+        this.assertQueueAlive();
+        this.rememberSessionConfiguration(existing);
+        this.queue.voice.connected(existing);
+      } catch (error) {
+        // A rejected move/control can still change the transport. Retain its actual configuration.
+        try {
+          if (this.session === existing) {
+            this.rememberSessionConfiguration(existing);
+            if (!this.queue.signal.aborted && !this.player.playbackSignal.aborted) this.queue.voice.connected(existing);
+          }
+        } catch (cleanup) {
+          throw new AggregateError([error, cleanup], 'Playback session reconciliation failed', { cause: cleanup });
+        }
+        throw error;
       }
-
-      if (options.channelId !== existing.channelId) await existing.move(options.channelId);
-
-      if (existing.connectionState !== 'connected') {
-        await existing.connect({
-          ...(options.connectTimeoutMs === undefined ? {} : { timeoutMs: options.connectTimeoutMs }),
-          ...(this.player.playbackBackend
-            ? { signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]) }
-            : {}),
-        });
-      }
-
-      this.rememberSessionConfiguration(existing);
-      this.queue.voice.connected(existing);
 
       return existing as PlaybackSession<M>;
     }
@@ -265,25 +281,36 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       userId: this.player.getClientId(),
     });
 
+    const previousVolume = this.#volume;
+    const previousOptions = {
+      volume: this.queue.options.volume,
+      selfDeaf: this.queue.options.selfDeaf,
+      selfMute: this.queue.options.selfMute,
+      filterGraph: this.queue.options.filterGraph,
+    };
+
     try {
       await this.adoptSession(session);
       await session.connect({
         ...(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs }),
         ...(this.player.playbackBackend
           ? { signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]) }
-          : {}),
+          : { signal: this.queue.signal }),
       });
+      this.assertQueueAlive();
       this.rememberSessionConfiguration(session);
       this.queue.voice.connected(session);
     } catch (error) {
-      if (this.session === session) {
-        try {
-          await this.destroySessionUnlocked();
-        } catch (cleanup) {
-          throw new AggregateError([error, cleanup], 'Playback session connection failed', { cause: error });
+      try {
+        if (this.session === session) await this.destroySessionUnlocked();
+      } catch (cleanup) {
+        throw new AggregateError([error, cleanup], 'Playback session connection failed', { cause: cleanup });
+      } finally {
+        if (!this.session) {
+          this.#volume = previousVolume;
+          Object.assign(this.queue.options, previousOptions);
         }
       }
-
       throw error;
     }
 
@@ -298,23 +325,48 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     await this.destroySessionUnlocked();
   }
 
+  private disposeSession(session: PlaybackSession): Promise<void> {
+    let disposal = this.sessionDisposals.get(session);
+    if (!disposal) {
+      disposal = Promise.resolve().then(() => session.dispose());
+      this.sessionDisposals.set(session, disposal);
+    }
+    return disposal;
+  }
+
   private async destroySessionUnlocked(): Promise<void> {
     const session = this.session;
 
     if (!session) return;
 
+    const errors: unknown[] = [];
     this.queue.invalidateSession(session);
-    this.rememberSessionConfiguration(session);
+    try {
+      this.rememberSessionConfiguration(session);
+    } catch (error) {
+      errors.push(error);
+    }
     this.#currentSession = null;
     this.queue.voice.connected(null);
-    await this.queue.cancelPreparation();
-    // Keep native diagnostics attached through disposal, then release only our listeners.
     try {
-      await session.dispose();
-    } finally {
-      this.detachSessionListeners?.();
-      this.detachSessionListeners = null;
+      await this.queue.cancelPreparation();
+    } catch (error) {
+      errors.push(error);
     }
+    // Keep diagnostics attached through disposal, but attempt every cleanup even after failure.
+    try {
+      await this.disposeSession(session);
+    } catch (error) {
+      errors.push(error);
+    }
+    try {
+      this.detachSessionListeners?.();
+    } catch (error) {
+      errors.push(error);
+    }
+    this.detachSessionListeners = null;
+    if (errors.length === 1) throw errors[0];
+    if (errors.length) throw new AggregateError(errors, 'Playback session disposal failed', { cause: errors[0] });
     this.queue.emit('connectionDestroyed');
   }
 
@@ -341,7 +393,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     } catch (error) {
       if (session && typeof session.dispose === 'function') {
         try {
-          await session.dispose();
+          await this.disposeSession(session);
         } catch (cleanup) {
           throw new AggregateError([error, cleanup], 'Invalid playback session cleanup failed', { cause: cleanup });
         }
@@ -478,7 +530,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       const errors: unknown[] = [error];
 
       try {
-        await session.dispose();
+        await this.disposeSession(session);
       } catch (cleanup) {
         errors.push(cleanup);
       }
@@ -684,6 +736,18 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
         if (active()) this.queue.emit('error', event.error, event);
       });
       on('sessionDisposed', (event) => this.queue.emit('sessionDisposed', event));
+
+      const lifetime = this.player.playbackBackend
+        ? AbortSignal.any([this.queue.signal, this.player.playbackSignal])
+        : this.queue.signal;
+      const disposeOnAbort = () => {
+        // Teardown must unblock pending backend calls before waiting for the node lock.
+        // Its result is retained and awaited by destroySessionUnlocked(), including failures.
+        void this.disposeSession(session).catch(() => undefined);
+      };
+      lifetime.addEventListener('abort', disposeOnAbort, { once: true });
+      cleanups.push(() => lifetime.removeEventListener('abort', disposeOnAbort));
+      lifetime.throwIfAborted();
     } catch (error) {
       const errors: unknown[] = [error];
 
@@ -702,7 +766,17 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     }
 
     return () => {
-      for (const cleanup of cleanups) cleanup();
+      const errors: unknown[] = [];
+      for (const cleanup of cleanups.splice(0)) {
+        try {
+          cleanup();
+        } catch (error) {
+          errors.push(error);
+        }
+      }
+      if (errors.length === 1) throw errors[0];
+      if (errors.length)
+        throw new AggregateError(errors, 'Playback session listener cleanup failed', { cause: errors[0] });
     };
   }
 

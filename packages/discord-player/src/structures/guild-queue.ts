@@ -2033,14 +2033,6 @@ export class GuildQueue<Metadata = unknown> {
     const filterGraph =
       options.filterGraph !== undefined ? options.filterGraph : existing ? undefined : this.options.filterGraph;
 
-    if (options.volume !== undefined) this.options.volume = options.volume;
-
-    if (options.selfDeaf !== undefined) this.options.selfDeaf = options.selfDeaf;
-
-    if (options.selfMute !== undefined) this.options.selfMute = options.selfMute;
-
-    if (options.filterGraph !== undefined) this.options.filterGraph = options.filterGraph;
-
     const session = await this.node.connect({
       channelId: options.channelId,
       pluginHosts: [

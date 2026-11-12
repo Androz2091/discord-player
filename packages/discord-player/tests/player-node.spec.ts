@@ -66,14 +66,14 @@ it('forwards a per-join timeout to Remedia without putting it in session configu
   const session = backend.sessions.at(-1)!;
 
   expect(backend.client.createDiscordSession.mock.lastCall?.[0]).not.toHaveProperty('connectTimeoutMs');
-  expect(session.connectOptions.at(-1)).toEqual({ timeoutMs: 120_000 });
+  expect(session.connectOptions.at(-1)).toEqual({ timeoutMs: 120_000, signal: queue.signal });
 
   const connect = vi.spyOn(session, 'connect');
 
   session.connectionState = 'disconnected';
   await queue.connect({ channelId: 'new', connectTimeoutMs: 110_000 });
 
-  expect(connect).toHaveBeenCalledWith({ timeoutMs: 110_000 });
+  expect(connect).toHaveBeenCalledWith({ timeoutMs: 110_000, signal: queue.signal });
 
   await player.destroy();
 });
@@ -102,7 +102,9 @@ it('connects five guild queues independently without a shared voice deadline', a
 
   for (const session of sessions) {
     expect(session.connectionState).toBe('connected');
-    expect(session.connectOptions).toEqual([{ timeoutMs: 120_000 }]);
+    expect(session.connectOptions).toEqual([
+      { timeoutMs: 120_000, signal: queues.find((queue) => queue.guildId === session.guildId)?.signal },
+    ]);
   }
 
   await player.destroy();
