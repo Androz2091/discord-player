@@ -1,85 +1,157 @@
-import type { ReactNode } from 'react';
-import { cn } from '@/lib/cn';
-
-function Tier({
-  title,
-  detail,
-  children,
-  className,
-}: {
-  title: string;
-  detail: string;
-  children?: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn('rounded-lg border bg-fd-background p-3.5', className)}>
-      <p className="text-sm font-medium">{title}</p>
-      <p className="mt-0.5 text-xs leading-5 text-fd-muted-foreground">{detail}</p>
-      {children ? <div className="mt-3 flex flex-wrap gap-1.5">{children}</div> : null}
-    </div>
-  );
-}
-
-function Chip({ children, mono = false }: { children: ReactNode; mono?: boolean }) {
-  return (
-    <span className={cn('rounded border bg-fd-card px-2 py-0.5 text-xs', mono && 'font-mono text-[0.6875rem]')}>
-      {children}
-    </span>
-  );
-}
-
-/** A vertical connector with a label, used between tiers. */
-function Link({ label }: { label: string }) {
-  return (
-    <div className="flex h-9 items-center gap-2 ps-6 text-[0.6875rem] text-fd-muted-foreground">
-      <span aria-hidden="true" className="h-full w-px bg-fd-border" />
-      {label}
-    </div>
-  );
-}
+const nodeNames = ['audio-1', 'audio-2', 'audio-n'];
+const hostNames = ['plugins', 'extractors'];
 
 /**
- * Sketch of a distributed v8 deployment: the bot controls Remedia nodes over WebSocket, searches source hosts over
- * HTTP, and the nodes fetch media from those hosts and send audio to Discord.
+ * Diagram of a distributed v8 deployment. The bot controls Remedia nodes over WebSocket and searches source hosts
+ * over HTTP. The nodes pull media straight from the hosts and send audio to Discord. Flow lines animate unless the
+ * visitor prefers reduced motion.
  */
 export function Topology() {
   return (
-    <figure className="rounded-xl border bg-fd-card p-4 shadow-sm md:p-5">
-      <figcaption className="sr-only">
-        A bot running Discord Player controls several Remedia audio nodes over WebSocket and searches source hosts over
-        HTTP. The audio nodes fetch media from the source hosts and send audio to Discord voice.
-      </figcaption>
+    <svg
+      viewBox="0 0 520 500"
+      role="img"
+      aria-label="A bot running Discord Player controls several Remedia audio nodes over WebSocket and searches source hosts over HTTP. The audio nodes pull media from the source hosts and send audio to Discord voice."
+      className="h-auto w-full"
+    >
+      <defs>
+        <marker
+          id="topology-arrow"
+          viewBox="0 0 10 10"
+          refX="8"
+          refY="5"
+          markerWidth="7"
+          markerHeight="7"
+          orient="auto"
+        >
+          <path d="M0 1 L9 5 L0 9 z" className="fill-teal-500" />
+        </marker>
+      </defs>
 
-      <Tier title="Your bot" detail="Discord Player: commands, queues, and events" />
+      {/* Bot */}
+      <rect x="140" y="6" width="240" height="78" rx="14" className="fill-fd-foreground" />
+      <text x="260" y="40" textAnchor="middle" className="fill-fd-background text-[19px] font-semibold">
+        Your bot
+      </text>
+      <text x="260" y="62" textAnchor="middle" className="fill-fd-background/70 text-[16px]">
+        Discord Player
+      </text>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Link label="control · WebSocket" />
-        <Link label="search · HTTP" />
-      </div>
+      {/* Control and search */}
+      <path d="M205 84 V128 H120 V176" fill="none" strokeWidth="2" className="flow-line stroke-fd-primary" />
+      <path d="M315 84 V128 H400 V176" fill="none" strokeWidth="2" className="flow-line stroke-teal-500" />
+      <text x="162" y="120" textAnchor="middle" className="fill-fd-muted-foreground text-[15px]">
+        control
+      </text>
+      <text x="360" y="120" textAnchor="middle" className="fill-fd-muted-foreground text-[15px]">
+        search
+      </text>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Tier title="Remedia nodes" detail="Rust: decode, filter, Opus, voice">
-          <Chip mono>audio-1</Chip>
-          <Chip mono>audio-2</Chip>
-          <Chip mono>audio-n</Chip>
-        </Tier>
-        <Tier title="Source hosts" detail="Plugins and extractors, with their credentials">
-          <Chip>plugins</Chip>
-          <Chip>extractors</Chip>
-        </Tier>
-      </div>
+      {/* Remedia nodes */}
+      <rect
+        x="10"
+        y="176"
+        width="220"
+        height="206"
+        rx="14"
+        strokeWidth="1.5"
+        className="fill-fd-primary/10 stroke-fd-primary"
+      />
+      <text x="28" y="206" className="fill-fd-foreground text-[18px] font-semibold">
+        Remedia nodes
+      </text>
+      <rect x="174" y="190" width="44" height="22" rx="11" className="fill-fd-primary" />
+      <text x="196" y="205.5" textAnchor="middle" className="fill-white text-[13px] font-semibold">
+        Rust
+      </text>
+      {nodeNames.map((name, index) => (
+        <g key={name}>
+          <rect
+            x="26"
+            y={224 + index * 50}
+            width="188"
+            height="40"
+            rx="9"
+            className="fill-fd-background stroke-fd-border"
+          />
+          <circle cx="44" cy={244 + index * 50} r="4.5" className="fill-emerald-500" />
+          <text x="58" y={249 + index * 50} className="fill-fd-foreground font-mono text-[16px]">
+            {name}
+          </text>
+        </g>
+      ))}
 
-      <p className="mt-3 flex items-center gap-2 text-[0.6875rem] text-fd-muted-foreground">
-        <span aria-hidden="true">←</span> Nodes fetch media directly from the source hosts. The bot never opens the
-        stream.
-      </p>
+      {/* Source hosts */}
+      <rect
+        x="290"
+        y="176"
+        width="220"
+        height="206"
+        rx="14"
+        strokeWidth="1.5"
+        className="fill-teal-500/10 stroke-teal-500"
+      />
+      <text x="308" y="206" className="fill-fd-foreground text-[18px] font-semibold">
+        Source hosts
+      </text>
+      {hostNames.map((name, index) => (
+        <g key={name}>
+          <rect
+            x="306"
+            y={224 + index * 50}
+            width="188"
+            height="40"
+            rx="9"
+            className="fill-fd-background stroke-fd-border"
+          />
+          <text x="322" y={249 + index * 50} className="fill-fd-foreground font-mono text-[16px]">
+            {name}
+          </text>
+        </g>
+      ))}
+      <text x="306" y="352" className="fill-fd-muted-foreground text-[15px]">
+        Credentials stay here
+      </text>
 
-      <div className="mt-1">
-        <Link label="voice · UDP" />
-      </div>
+      {/* Media */}
+      <path
+        d="M290 300 H236"
+        fill="none"
+        strokeWidth="2"
+        markerEnd="url(#topology-arrow)"
+        className="flow-line stroke-teal-500"
+      />
+      <text x="263" y="290" textAnchor="middle" className="fill-fd-muted-foreground text-[15px]">
+        media
+      </text>
 
-      <Tier title="Discord voice" detail="Encrypted Opus, one connection per guild" />
-    </figure>
+      {/* Voice */}
+      <path d="M120 382 V430" fill="none" strokeWidth="2" className="flow-line stroke-fd-primary" />
+      <text x="134" y="412" className="fill-fd-muted-foreground text-[15px]">
+        voice
+      </text>
+      <rect
+        x="10"
+        y="430"
+        width="220"
+        height="64"
+        rx="14"
+        strokeWidth="1.5"
+        className="fill-fd-background stroke-fd-border"
+      />
+      <text x="120" y="459" textAnchor="middle" className="fill-fd-foreground text-[18px] font-semibold">
+        Discord voice
+      </text>
+      <text x="120" y="479" textAnchor="middle" className="fill-fd-muted-foreground text-[15px]">
+        Encrypted Opus
+      </text>
+
+      <text x="306" y="462" className="fill-fd-muted-foreground text-[15px]">
+        Nodes pull media directly.
+      </text>
+      <text x="306" y="482" className="fill-fd-muted-foreground text-[15px]">
+        The bot never opens it.
+      </text>
+    </svg>
   );
 }
