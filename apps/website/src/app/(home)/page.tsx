@@ -3,113 +3,87 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components
 import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { DiscordInvite } from '@/components/discord-invite';
+import { Topology } from '@/components/topology';
 import { VersionBadge } from '@/components/version-badge';
 import { communityResources } from '@/data/community';
 import { communityRoute, discordInviteUrl, gitConfig } from '@/lib/shared';
 import {
   defaultVersionId,
-  getDefaultDocsVersion,
+  getDocsVersion,
   getDocsVersions,
   getVersionBaseUrl,
   type DocsVersionId,
 } from '@/lib/versions';
 
 export const metadata = {
-  title: { absolute: 'Discord Player | Music bots for Discord' },
+  title: { absolute: 'Discord Player | Music bots on a Rust audio engine' },
   description:
-    'Discord Player manages queues, playback controls, and events for Discord music bots, with extensible music sources and TypeScript types.',
+    'Discord Player manages queues, playback controls, and events for Discord music bots. v8 runs audio in Remedia, a Rust engine you can embed in your bot or scale out across machines.',
 };
 
-/** A working example for each documentation version. Adding a version in `versions.ts` requires adding one here. */
-const examples: Record<DocsVersionId, { lang: string; file: string; code: string }> = {
-  v7: {
-    lang: 'ts',
-    file: 'index.ts',
-    code: `// index.ts
-import { Client, GatewayIntentBits } from 'discord.js';
-import { Player } from 'discord-player';
-import { DefaultExtractors } from '@discord-player/extractor';
+/** The hero presents this version. It is the one the page encourages visitors to try. */
+const featuredVersionId = 'v8' satisfies DocsVersionId;
 
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildVoiceStates,
+/** Setups shown in the "one API" section. */
+const setups = [
+  {
+    id: 'embedded',
+    label: 'Embedded',
+    code: `import { Player } from 'discord-player';
+
+const player = new Player({
+  // Remedia runs inside your bot process.
+  nodes: [{ id: 'local', type: 'embedded' }],
+  plugins: [mySources()],
+  send, // Your gateway callback
+});`,
+  },
+  {
+    id: 'distributed',
+    label: 'Distributed',
+    code: `import { Player, definePlugin } from 'discord-player';
+
+const auth = { username: 'bot', password: process.env.REMEDIA_PASSWORD! };
+
+// Search through a source host that runs your plugins and extractors.
+const sources = definePlugin({
+  id: 'example.sources',
+  remoteHost: {
+    hostId: 'sources-1',
+    url: 'https://sources.example.com',
+    token: process.env.SOURCE_TOKEN,
+  },
+});
+
+const player = new Player({
+  // Audio is decoded and sent to Discord by separate Remedia servers.
+  nodes: [
+    { id: 'audio-1', type: 'remote', url: 'remedias://audio-1.example.com', auth },
+    { id: 'audio-2', type: 'remote', url: 'remedias://audio-2.example.com', auth },
   ],
-});
-
-const player = new Player(client);
-
-await player.extractors.loadMulti(DefaultExtractors);
-
-// Inside your /play command
-const { track } = await player.play(channel, query, {
-  nodeOptions: { metadata: interaction },
-});
-`,
+  plugins: [sources()],
+  send, // Your gateway callback
+});`,
   },
-  v8: {
-    lang: 'ts',
-    file: 'player.ts',
-    code: `// src/player.ts
-import { Client, Events, GatewayIntentBits } from 'discord.js';
-import { Player } from 'discord-player';
-import { directMedia } from './direct-media.ts';
+] as const;
 
-export const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildVoiceStates,
+const reasons = [
+  [
+    'A native audio engine',
+    'Decoding, filters, volume, Opus encoding, and encrypted voice transport run in Remedia, which is written in Rust. Your JavaScript handles queues and commands.',
   ],
-});
-
-export const player = new Player({
-  plugins: [directMedia()],
-
-  send(guildId, payload) {
-    const guild = client.guilds.cache.get(guildId);
-
-    if (!guild) throw new Error(\`Guild \${guildId} is not cached.\`);
-
-    return guild.shard.send(payload);
-  },
-});
-
-client.on(Events.Raw, (packet) => player.receive(packet));
-client.once(Events.ClientReady, (ready) => player.initialize(ready.user.id));
-
-// Inside your /play command
-const { track } = await player.play(voiceChannel, url, { requestedBy: interaction.user.id });
-`,
-  },
-};
-
-/** What each version is, written for the version table. */
-const versionNotes: Record<DocsVersionId, { points: string[]; start: { label: string; path: string } }> = {
-  v7: {
-    points: [
-      'Audio through discord-voip and FFmpeg.',
-      'Ready-made extractors in @discord-player/extractor.',
-      'Documented API reference for every package.',
-    ],
-    start: { label: 'Build a music bot', path: '/creating-a-music-bot/01_integrating' },
-  },
-  v8: {
-    points: [
-      'Audio decoded and sent to Discord by Remedia, inside your bot or on a separate server.',
-      'Source plugins replace the extractor bundle. Your v7 extractors keep working.',
-      'Your Discord library stays in charge of the gateway connection.',
-    ],
-    start: { label: 'Getting started', path: '/getting-started' },
-  },
-};
-
-const capabilities = [
-  ['Queues', 'Add, reorder, repeat, and shuffle tracks. History lets listeners go back.'],
-  ['Playback', 'Pause, seek, volume, and a progress timeline you can render in an embed.'],
-  ['Audio filters', 'Bass boost, nightcore, 8D, and dozens more presets, or your own FFmpeg filters.'],
-  ['Music sources', 'Search and stream from any provider through extractors or source plugins.'],
-  ['Events', 'Typed events for starts, finishes, skips, errors, and voice changes.'],
-  ['Lyrics', 'Plain and synchronized lyrics that follow playback.'],
+  [
+    'Scale by adding nodes',
+    'Run remedia-server on more machines. Each guild is placed on the node with the most spare capacity and stays there. On a remote node, decoding happens in another process, away from your bot.',
+  ],
+  [
+    'Services all the way down',
+    'Source plugins and extractors can run as their own service. The audio node pulls media straight from them, so provider code and credentials stay off your bot.',
+  ],
+  [
+    'The API you already know',
+    'Players, queues, history, repeat, shuffle, filters, crossfade, and events keep their v7 names. Supported v7 extractors keep working through an adapter.',
+  ],
 ] as const;
 
 const buttonBase =
@@ -130,71 +104,115 @@ function Section({ title, description, children }: { title: string; description?
 }
 
 export default function HomePage() {
-  const defaultVersion = getDefaultDocsVersion();
+  const featured = getDocsVersion(featuredVersionId);
   const versions = getDocsVersions();
-  const nextVersion = versions.find((version) => version.id !== defaultVersionId);
+  const stable = featuredVersionId === defaultVersionId ? null : getDocsVersion(defaultVersionId);
   const { extractors, bots } = communityResources;
-  const featured = [...bots.slice(0, 1), ...extractors.slice(0, 4)];
+  const community = [...bots.slice(0, 1), ...extractors.slice(0, 4)];
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 md:px-6">
-      <section className="grid items-center gap-12 pb-16 pt-14 md:pb-24 md:pt-24 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
+      <section className="grid items-center gap-12 pb-16 pt-14 md:pb-24 md:pt-24 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-16">
         <div>
           <h1 className="text-balance text-4xl font-semibold leading-[1.08] tracking-[-0.03em] md:text-5xl">
-            Build Discord music bots in TypeScript.
+            Build music bots on a Rust audio engine.
           </h1>
-          <p className="mt-5 max-w-md text-pretty text-lg leading-8 text-fd-muted-foreground">
-            Queues, playback, filters, and music sources, without the audio plumbing.
+          <p className="mt-5 max-w-xl text-pretty text-lg leading-8 text-fd-muted-foreground">
+            Discord Player {featured.name} hands decoding and voice to Remedia. Run it inside your bot, or scale it out
+            across machines together with your source plugins.
           </p>
 
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
-              href={getVersionBaseUrl(defaultVersionId)}
+              href={`${getVersionBaseUrl(featured.id)}/getting-started`}
               className={`${buttonBase} bg-fd-foreground text-fd-background hover:opacity-90`}
             >
-              Read the docs
-              <ArrowRight className="size-4" aria-hidden="true" />
+              Get started with {featured.name}
+              {featured.badge ? <VersionBadge badge={featured.badge} /> : null}
             </Link>
-            {nextVersion ? (
+            {stable ? (
               <Link
-                href={`${getVersionBaseUrl(nextVersion.id)}${versionNotes[nextVersion.id].start.path}`}
+                href={getVersionBaseUrl(stable.id)}
                 className={`${buttonBase} border bg-fd-background hover:bg-fd-accent`}
               >
-                Try {nextVersion.name}
-                {nextVersion.badge ? <VersionBadge badge={nextVersion.badge} /> : null}
+                {stable.name} docs
+                <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             ) : null}
           </div>
 
-          <DiscordInvite />
+          <dl className="mt-10 max-w-xl divide-y border-y text-sm">
+            {[
+              ['Rust engine', 'Decode, filter, and encode audio natively.'],
+              ['Scales out', 'Add audio nodes without changing your commands.'],
+              ['Distributed', 'Sources run as services too, with their own credentials.'],
+            ].map(([term, text]) => (
+              <div key={term} className="grid grid-cols-[7.5rem_1fr] gap-4 py-3">
+                <dt className="font-medium">{term}</dt>
+                <dd className="text-fd-muted-foreground">{text}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
-        <div className="min-w-0 overflow-hidden rounded-xl border bg-fd-card shadow-sm">
-          <Tabs defaultValue={defaultVersionId} className="!my-0 !rounded-none !border-0 !bg-transparent">
-            <TabsList className="px-2">
-              {versions.map((version) => (
-                <TabsTrigger key={version.id} value={version.id} className="gap-2">
-                  {version.name}
-                  {version.badge ? <VersionBadge badge={version.badge} /> : null}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            {versions.map((version) => (
-              <TabsContent key={version.id} value={version.id}>
-                <ServerCodeBlock
-                  lang={examples[version.id].lang}
-                  code={examples[version.id].code}
-                  codeblock={{ className: '!my-0 !rounded-none !border-0 !bg-transparent text-[0.8125rem]' }}
-                />
-              </TabsContent>
-            ))}
-          </Tabs>
+        <div className="min-w-0">
+          <Topology />
+          <DiscordInvite />
         </div>
       </section>
 
-      <Section title="What it handles" description="The parts of a music bot you would otherwise write yourself.">
+      <Section
+        title="One API, from one process to many machines"
+        description="Start embedded. Move audio and sources to other machines when you need to."
+      >
+        <div className="min-w-0">
+          <div className="overflow-hidden rounded-xl border bg-fd-card">
+            <Tabs defaultValue={setups[0].id} className="!my-0 !rounded-none !border-0 !bg-transparent">
+              <TabsList className="px-2">
+                {setups.map((setup) => (
+                  <TabsTrigger key={setup.id} value={setup.id}>
+                    {setup.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              {setups.map((setup) => (
+                <TabsContent key={setup.id} value={setup.id}>
+                  <ServerCodeBlock
+                    lang="ts"
+                    code={setup.code}
+                    codeblock={{ className: '!my-0 !rounded-none !border-0 !bg-transparent text-[0.8125rem]' }}
+                  />
+                </TabsContent>
+              ))}
+            </Tabs>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-fd-muted-foreground">
+            Queues, history, and events work the same either way. Plugins that return a local stream need an embedded
+            node. See{' '}
+            <Link
+              href={`${getVersionBaseUrl(featured.id)}/remedia/remote`}
+              className="font-medium text-fd-foreground underline underline-offset-4"
+            >
+              remote playback
+            </Link>{' '}
+            and{' '}
+            <Link
+              href={`${getVersionBaseUrl(featured.id)}/plugins/remote-hosts`}
+              className="font-medium text-fd-foreground underline underline-offset-4"
+            >
+              remote source hosts
+            </Link>
+            .
+          </p>
+        </div>
+      </Section>
+
+      <Section
+        title={`What ${featured.name} changes`}
+        description="The engine and the deployment model. Not your commands."
+      >
         <dl className="grid gap-x-12 gap-y-8 sm:grid-cols-2">
-          {capabilities.map(([name, text]) => (
+          {reasons.map(([name, text]) => (
             <div key={name}>
               <dt className="font-medium">{name}</dt>
               <dd className="mt-1.5 text-sm leading-6 text-fd-muted-foreground">{text}</dd>
@@ -206,11 +224,11 @@ export default function HomePage() {
       <Section title="Documentation" description="Choose the version you are building with.">
         <div className="divide-y rounded-xl border">
           {versions.map((version) => {
-            const note = versionNotes[version.id];
-            const apiPath = version.apiReference ? `/${version.apiReference}` : null;
+            const isFeatured = version.id === featured.id;
+            const start = isFeatured ? { label: 'Getting started', path: '/getting-started' } : null;
 
             return (
-              <div key={version.id} className="grid gap-5 p-6 md:grid-cols-[10rem_1fr]">
+              <div key={version.id} className="grid gap-4 p-6 md:grid-cols-[10rem_1fr]">
                 <div>
                   <p className="flex items-center gap-2 text-lg font-semibold">
                     {version.name}
@@ -221,40 +239,42 @@ export default function HomePage() {
                     {version.id === defaultVersionId ? ' · default' : ''}
                   </p>
                 </div>
-                <div>
-                  <ul className="list-disc space-y-1.5 ps-5 text-sm leading-6 text-fd-muted-foreground marker:text-fd-border">
-                    {note.points.map((point) => (
-                      <li key={point}>{point}</li>
-                    ))}
-                  </ul>
-                  <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium">
+                  <Link
+                    href={getVersionBaseUrl(version.id)}
+                    className="inline-flex items-center gap-1 hover:text-fd-primary"
+                  >
+                    Documentation <ArrowRight className="size-3.5" aria-hidden="true" />
+                  </Link>
+                  {start ? (
                     <Link
-                      href={getVersionBaseUrl(version.id)}
+                      href={`${getVersionBaseUrl(version.id)}${start.path}`}
                       className="inline-flex items-center gap-1 hover:text-fd-primary"
                     >
-                      Documentation <ArrowRight className="size-3.5" aria-hidden="true" />
+                      {start.label} <ArrowRight className="size-3.5" aria-hidden="true" />
                     </Link>
+                  ) : null}
+                  {isFeatured ? (
                     <Link
-                      href={`${getVersionBaseUrl(version.id)}${note.start.path}`}
+                      href={`${getVersionBaseUrl(version.id)}/migration`}
                       className="inline-flex items-center gap-1 hover:text-fd-primary"
                     >
-                      {note.start.label} <ArrowRight className="size-3.5" aria-hidden="true" />
+                      Migration guide <ArrowRight className="size-3.5" aria-hidden="true" />
                     </Link>
-                    {apiPath ? (
-                      <Link
-                        href={`${getVersionBaseUrl(version.id)}${apiPath}`}
-                        className="inline-flex items-center gap-1 hover:text-fd-primary"
-                      >
-                        API reference <ArrowRight className="size-3.5" aria-hidden="true" />
-                      </Link>
-                    ) : null}
-                  </div>
+                  ) : null}
+                  {version.apiReference ? (
+                    <Link
+                      href={`${getVersionBaseUrl(version.id)}/${version.apiReference}`}
+                      className="inline-flex items-center gap-1 hover:text-fd-primary"
+                    >
+                      API reference <ArrowRight className="size-3.5" aria-hidden="true" />
+                    </Link>
+                  ) : null}
                 </div>
               </div>
             );
           })}
         </div>
-        <p className="sr-only">The default version is {defaultVersion.name}.</p>
       </Section>
 
       <Section
@@ -263,7 +283,7 @@ export default function HomePage() {
       >
         <div>
           <ul className="divide-y rounded-xl border">
-            {featured.map((project) => (
+            {community.map((project) => (
               <li key={project.url}>
                 <a
                   href={project.url}
