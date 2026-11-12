@@ -18,19 +18,31 @@ export type OnBeforeCreateStreamHandler = (
   signal: AbortSignal,
 ) => SourceStream | null | Promise<SourceStream | null>;
 
+/** Result accepted from a local encoded-stream hook.
+ * @remarks Remedia owns decoding, so only `stream` is consumed. `type` is accepted for v7 source
+ * compatibility and is otherwise ignored.
+ */
+export interface PostProcessedResult {
+  /** Replacement encoded Node.js Readable. */
+  stream: Readable;
+
+  /** Legacy v7 stream type hint; ignored by Remedia. */
+  type?: string | number;
+}
+
 /** Descriptor interception after provider resolution.
  * @param source Resolved encoded resource or native descriptor.
  * @param track Canonical Track.
  * @param queue Owning queue.
  * @param signal Preparation cancellation.
- * @returns Resource to submit to Remedia.
+ * @returns Resource to submit to Remedia, or nullish to keep the resolved source.
  */
 export type OnStreamExtractedHandler = (
   source: SourceStream,
   track: Track,
   queue: GuildQueue,
   signal: AbortSignal,
-) => SourceStream | Promise<SourceStream>;
+) => SourceStream | null | undefined | Promise<SourceStream | null | undefined>;
 
 /** Local encoded-byte hook; unavailable when Remedia owns the bytes.
  * @param stream Encoded Node.js Readable, before Remedia decoding.
@@ -44,7 +56,7 @@ export type OnAfterCreateStreamHandler = (
   queue: GuildQueue,
   track: Track,
   signal: AbortSignal,
-) => { stream: Readable } | null | Promise<{ stream: Readable } | null>;
+) => PostProcessedResult | null | Promise<PostProcessedResult | null>;
 
 /** Optional resource interception callbacks; queue overrides Player overrides global. */
 export interface StreamHooks {
@@ -123,15 +135,28 @@ export async function prepareResource(
     };
     try {
       signal.throwIfAborted();
-      source = (await hooks.onBeforeCreateStream?.(track, track.queryType ?? 'auto', queue, signal)) ?? undefined;
+      // v7 used `arbitrary` when a Track had no query hint.
+      source = (await hooks.onBeforeCreateStream?.(track, track.queryType ?? 'arbitrary', queue, signal)) ?? undefined;
       remember(source);
       signal.throwIfAborted();
-      source ??= await resolve();
-      remember(source);
-      signal.throwIfAborted();
-      if (hooks.onStreamExtracted) source = await hooks.onStreamExtracted(source, track, queue, signal);
-      remember(source);
-      signal.throwIfAborted();
+
+      if (!source) {
+        source = await resolve();
+        remember(source);
+        signal.throwIfAborted();
+
+        if (hooks.onStreamExtracted) {
+          const extracted = await hooks.onStreamExtracted(source, track, queue, signal);
+
+          if (extracted != null) {
+            source = extracted;
+            remember(source);
+          }
+        }
+
+        signal.throwIfAborted();
+      }
+
       let normalized: MediaSource =
         typeof source === 'string'
           ? /^https?:\/\//i.test(source)
@@ -157,7 +182,11 @@ export async function prepareResource(
             'onAfterCreateStream requires an encoded Readable on an embedded node. Use onStreamExtracted for source descriptors.',
           );
         const replacement = await hooks.onAfterCreateStream(normalized.stream, queue, track, signal);
-        if (replacement) normalized = replacement;
+
+        if (replacement) {
+          remember(replacement.stream);
+          normalized = { stream: replacement.stream };
+        }
       }
       source = normalized;
       remember(source);

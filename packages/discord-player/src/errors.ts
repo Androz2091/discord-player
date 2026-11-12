@@ -2,6 +2,7 @@ import { DiscordPlayerError, DiscordPlayerErrorCode } from '@discord-player/plug
 export {
   DiscordPlayerError,
   DiscordPlayerErrorCode,
+  IllegalHookInvocationError,
   SourceUnavailableError,
   SerializationError,
 } from '@discord-player/plugin-host';

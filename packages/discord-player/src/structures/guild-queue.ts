@@ -444,6 +444,14 @@ export class GuildQueue<Metadata = unknown> {
     this.options.metadata = value;
   }
 
+  /**
+   * Replace the arbitrary queue metadata, preserving the v7 method form.
+   * @param metadata New application metadata.
+   */
+  public setMetadata(metadata: Metadata): void {
+    this.metadata = metadata;
+  }
+
   /** Whether this queue has been destroyed and removed from its manager. */
   public get destroyed(): boolean {
     return this.#destroyed;

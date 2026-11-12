@@ -6,14 +6,15 @@ description: Read the current Player, queue, or history inside a command without
 The context uses Node.js `AsyncLocalStorage`. It belongs to one Player, so several Players do not share an active queue.
 
 ```ts
-import { useHistory, usePlayer, useQueue } from 'discord-player';
+import { useHistory, useMainPlayer, usePlayer, useQueue } from 'discord-player';
 
 await player.context.provide({ guildId }, async () => {
-  const activePlayer = usePlayer();
+  const mainPlayer = useMainPlayer();
+  const node = usePlayer();
   const queue = useQueue();
   const history = useHistory();
 
-  console.log(activePlayer.id, queue?.currentTrack?.title, history?.size);
+  console.log(mainPlayer.options, node?.isPaused(), queue?.currentTrack?.title, history?.size);
 });
 ```
 
@@ -21,25 +22,65 @@ The context stays available across `await` inside the callback.
 
 ## Hooks
 
-| Hook                                | Returns                                                                                          |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `usePlayer()` and `useMainPlayer()` | The Player in the current context. Otherwise the first active Player. Throws if no Player exists |
-| `useQueue(guildId?)`                | The queue for the context's guild, or for `guildId`. `null` when none exists                     |
-| `useHistory()`                      | The current queue's history, or `null`                                                           |
-| `useMetadata()`                     | Metadata of the context, then of the queue                                                       |
-| `useVolume()`                       | The context volume, then the queue's volume                                                      |
-| `useTimeline()`                     | The context timeline, then the queue's `getTimestamp()`                                          |
+| Hook                 | Returns                                                                                                              |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `useMainPlayer()`    | The root `DiscordPlayer` in the current context, otherwise the first active Player. Throws if no Player exists       |
+| `usePlayer(node?)`   | The queue's `GuildQueuePlayerNode`, or `null`                                                                        |
+| `useQueue(node?)`    | The guild queue, or `null`                                                                                           |
+| `useHistory(node?)`  | The queue's `GuildQueueHistory`, or `null`                                                                           |
+| `useMetadata(node?)` | A `[get, set]` tuple backed by the queue's real metadata. The setter accepts a value or a functional update          |
+| `useVolume(node?)`   | A `[get, set]` tuple using percentage volume. The setter is asynchronous: `await set(50)` or `await set(v => v + 5)` |
+| `useTimeline(opts?)` | A `GuildQueueTimeline` controller, or `null`                                                                         |
 
-`useQueue()` without a guild and without a context returns `null`. It never guesses a guild.
+Every `node` argument accepts a guild ID, a guild-like object (`{ id }` or `{ guildId }`), or a `GuildQueue` instance. Without it, the hook uses the guild or queue supplied to `provide()`.
 
-When a Player is destroyed, the fallback moves to the next active Player.
+```ts
+await player.context.provide({ guildId }, async () => {
+  const [getMetadata, setMetadata] = useMetadata<{ locale: string }>();
+  const [getVolume, setVolume] = useVolume();
+
+  setMetadata((previous) => ({ ...previous, locale: 'en' }));
+  await setVolume((previous) => previous + 10);
+});
+```
+
+## Timeline
+
+`useTimeline()` returns a live view of the queue. Reading a property reflects current playback; controlling it awaits Remedia.
+
+```ts
+const timeline = useTimeline();
+
+if (timeline) {
+  console.log(timeline.track?.title, timeline.timestamp?.current.label, timeline.volume, timeline.paused);
+
+  await timeline.pause();
+  await timeline.resume();
+  await timeline.setVolume(80);
+  await timeline.setPosition(30_000);
+}
+```
+
+Control methods return `Promise<boolean>`. `pause()`, `resume()`, and `setPosition()` return `false` when the queue has no active session or Track. `setVolume()` resolves after Remedia applies the percentage.
+
+Pass `{ ignoreFilters: true }` to read the source media position instead of Remedia's filtered output clock. Remedia does not expose the duration multiplier of tempo-changing filters, so `timestamp.total` always reflects the source duration. Pass `{ node }` to target another queue.
+
+```ts
+const sourceTimeline = useTimeline({ node: guildId, ignoreFilters: true });
+```
 
 ## Outside a context
 
-Long-running workers and background jobs have no async context. Look up the queue explicitly:
+Background jobs have no async context. Pass the guild or queue explicitly:
 
 ```ts
-const queue = player.getQueue(guildId);
+const queue = useQueue(guildId);
+const node = usePlayer({ guildId });
+const history = useHistory(queueInstance);
 ```
+
+Calling a guild-scoped hook without a context, guild, or node throws `IllegalHookInvocationError` with code `ERR_ILLEGAL_HOOK_INVOCATION`. It never guesses a guild.
+
+When a Player is destroyed, the fallback moves to the next active Player.
 
 <NextStep href="/docs/v8/guides/persistence" label="Save tracks" />
