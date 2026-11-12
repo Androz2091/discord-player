@@ -1,5 +1,8 @@
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import { Heart } from 'lucide-react';
+import type { BaseLayoutProps, LinkItemType } from 'fumadocs-ui/layouts/shared';
+import { SponsorMenu } from '@/components/sponsor-menu';
 import { VersionSelector } from '@/components/version-selector';
+import { getFundingLinks } from './funding';
 import { appName, communityRoute, discordInviteUrl, gitConfig } from './shared';
 import { getPageSlugs } from './source';
 import {
@@ -22,11 +25,35 @@ function getPageIndex(current: DocsVersionId): VersionPageIndex {
 }
 
 /**
+ * Sponsor entry for the navigation. It links directly when there is one funding page and opens a menu otherwise.
+ * The heart icon is only shown in the documentation sidebar.
+ */
+function getSponsorLink(showIcon: boolean): LinkItemType | null {
+  const funding = getFundingLinks();
+  const [only] = funding;
+
+  if (!only) return null;
+
+  if (funding.length === 1) {
+    return {
+      text: 'Sponsor',
+      url: only.url,
+      external: true,
+      icon: showIcon ? <Heart className="size-4" aria-hidden="true" /> : undefined,
+    };
+  }
+
+  return { type: 'custom', children: <SponsorMenu links={funding} icon={showIcon} /> };
+}
+
+/**
  * Options shared by every layout. The version selector is only added for documentation pages.
  *
  * @param version Documentation version being displayed. Omit it outside the documentation.
  */
 export function baseOptions(version?: DocsVersionId): BaseLayoutProps {
+  const sponsor = getSponsorLink(Boolean(version));
+
   return {
     nav: {
       title: appName,
@@ -47,6 +74,7 @@ export function baseOptions(version?: DocsVersionId): BaseLayoutProps {
         url: discordInviteUrl,
         external: true,
       },
+      ...(sponsor ? [sponsor] : []),
     ],
   };
 }

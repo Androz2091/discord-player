@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components
 import { DiscordInvite } from '@/components/discord-invite';
 import { VersionBadge } from '@/components/version-badge';
 import { communityResources } from '@/data/community';
+import { getFundingLinks } from '@/lib/funding';
 import { getProjectSource } from '@/lib/project-source';
 import { communityRoute, discordInviteUrl, gitConfig } from '@/lib/shared';
 import {
@@ -404,6 +405,11 @@ export default function HomePage() {
           <a href={discordInviteUrl} target="_blank" rel="noreferrer" className="hover:text-fd-foreground">
             Discord
           </a>
+          {getFundingLinks().map((link) => (
+            <a key={link.url} href={link.url} target="_blank" rel="noreferrer" className="hover:text-fd-foreground">
+              {link.label}
+            </a>
+          ))}
           <a
             href={`https://github.com/${gitConfig.user}/${gitConfig.repo}`}
             target="_blank"
