@@ -1,3 +1,4 @@
+import { intercept } from '../plugins/capabilities.js';
 import { Collection } from '@discordjs/collection';
 import type { DiscordPlayer } from '../player.js';
 import { GuildQueue, type GuildQueueOptions } from '../structures/guild-queue.js';
@@ -76,6 +77,8 @@ export class GuildNodeManager {
     guildId: GuildQueueResolvable,
     options: GuildQueueOptions<Metadata> = {},
   ): Promise<GuildQueue<Metadata>> {
+    this.player.plugins.assertNotDispatching();
+    await this.player.ready();
     this.player.signal.throwIfAborted();
 
     const existing = this.get<Metadata>(guildId);
@@ -83,9 +86,28 @@ export class GuildNodeManager {
     if (existing) return existing;
 
     const id = this.resolveId(guildId);
+    if (this.player.plugins.hasCapability('queue.beforeCreate')) {
+      const decision = intercept(this.player.plugins, 'queue.beforeCreate', {
+        guildId: id,
+        configuration: Object.freeze({
+          volume: options.volume,
+          maxSize: options.maxSize,
+          maxHistorySize: options.maxHistorySize,
+          repeatMode: options.repeatMode,
+        }),
+      });
+      if (!decision.configuration || typeof decision.configuration !== 'object')
+        throw new TypeError('Queue creation requires configuration defaults.');
+      options = { ...options, ...decision.configuration };
+    }
     const queue = new GuildQueue(this, id, options);
 
     this.cache.set(id, queue);
+    try {
+      this.player.plugins.executeSync('queue.created', { guildId: id });
+    } catch (error) {
+      this.player.emit('error', error instanceof Error ? error : new Error(String(error)));
+    }
 
     return queue;
   }

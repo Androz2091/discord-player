@@ -27,6 +27,9 @@ export type Entry = {
   /** Owned cleanup callbacks in registration order. */
   cleanups: Array<() => void | Promise<void>>;
 
+  /** Subscriptions owned by this registration, including dynamic additions. */
+  handlers: Set<Handler>;
+
   /** Handler promises that teardown must drain. */
   pending: Set<Promise<unknown>>;
 
@@ -78,7 +81,7 @@ export type OperationRunner = <K extends OperationName>(
 /** Host state read by operation dispatch. */
 export interface DispatchState {
   /** Subscriptions visible to the current dispatch. */
-  handlers: Handler[];
+  handlers: ReadonlyMap<OperationName, readonly Handler[]>;
 
   /** Operation dispatch policies. */
   definitions: Map<OperationName, DispatchPolicy>;

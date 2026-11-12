@@ -1,3 +1,4 @@
+import { intercept } from '../plugins/capabilities.js';
 import { AudioFilterPresets, type AudioFilterName, type AudioFilterPresetName } from './audio-filter-presets.js';
 import type { GuildQueuePlayerNode } from './guild-queue-player-node.js';
 
@@ -151,6 +152,7 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
   }
 
   private async update(change: (state: FilterState) => FilterState): Promise<FilterState> {
+    this.node.player.plugins.assertNotDispatching();
     using _lock = await this.node.queue.tasks.acquire('queue.node.operation');
 
     if (this.node.queue.destroyed) {
@@ -158,7 +160,14 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
     }
 
     const next = change(this.synchronize());
-    const graph = [next.raw, ...next.enabled.map((name) => AudioFilterPresets[name])].filter(Boolean).join(',') || null;
+    let graph = [next.raw, ...next.enabled.map((name) => AudioFilterPresets[name])].filter(Boolean).join(',') || null;
+
+    graph = intercept(this.node.player.plugins, 'audio.beforeFilters', {
+      guildId: this.node.queue.guildId,
+      graph,
+    }).graph;
+    if (graph !== null && (typeof graph !== 'string' || !graph.trim()))
+      throw new TypeError('Filter graph must be nonempty or null.');
 
     if (graph !== this.graph) {
       const controls = this.node.session?.filters;
@@ -173,7 +182,10 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
     }
 
     this.node.queue.options.filterGraph = graph;
-    this.state = next;
+    this.state =
+      graph === ([next.raw, ...next.enabled.map((name) => AudioFilterPresets[name])].filter(Boolean).join(',') || null)
+        ? next
+        : { raw: graph, enabled: [] };
     this.appliedGraph = graph;
 
     return next;

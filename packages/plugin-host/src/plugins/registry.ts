@@ -1,3 +1,7 @@
+import { serialize, deserialize, type SerializedEntityUnion } from '../utils/serde.js';
+import { parseEntity } from '../utils/parse-serialized-entity.js';
+import type { Playlist } from '../structures/playlist.js';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { registerRemote, discoverRemote, type RemotePluginHostOptions, type RemoteProvider } from '../remote.js';
 import type { MediaSource } from '@remedia/client';
 import type { Track } from '../structures/track.js';
@@ -26,7 +30,15 @@ export class PluginRegistry {
 
   private entries = new Map<string, Entry>();
 
-  private handlers: Handler[] = [];
+  private handlers = new Map<OperationName, Handler[]>();
+
+  private synchronous = new Set<OperationName>();
+
+  private dispatching = false;
+
+  private calls = new AsyncLocalStorage<ReadonlySet<OperationName>>();
+
+  private initializing = new Set<Promise<void>>();
 
   private order = 0;
 
@@ -50,6 +62,13 @@ export class PluginRegistry {
   ) {}
 
   private definitions = new Map<OperationName, DispatchPolicy>([
+    ['serialization.beforeRestore', 'pipe'],
+    ['serialization.afterSerialize', 'pipe'],
+    ['media.beforeResolve', 'pipe'],
+    ['search.beforeQuery', 'pipe'],
+    ['search.afterResults', 'pipe'],
+    ['media.descriptor', 'pipe'],
+    ['media.transform', 'pipe'],
     ['lyrics.search', 'collect'],
     ['search.query.match', 'collect'],
     ['search.query.resolve', 'first'],
@@ -63,13 +82,22 @@ export class PluginRegistry {
   /** Define a declaration-merged operation before registering handlers.
    * @param name Operation name.
    * @param policy Dispatch policy matching its contract.
+   * @param synchronous Whether callbacks must complete before returning; required for interception.
    */
-  public defineOperation<K extends OperationName>(name: K, policy: OperationMap[K]['policy']): void {
+  public defineOperation<K extends OperationName>(
+    name: K,
+    policy: OperationMap[K]['policy'],
+    synchronous = false,
+  ): void {
+    if ((policy as DispatchPolicy) === 'intercept' && !synchronous)
+      throw new TypeError('Interception requires synchronous dispatch.');
+    if (synchronous && policy === 'collect') throw new TypeError('Synchronous collection dispatch is unsupported.');
     if (this.definitions.has(name)) {
       throw new Error(`Operation already defined: ${name}`);
     }
 
     this.definitions.set(name, policy);
+    if (synchronous) this.synchronous.add(name);
   }
 
   /** Whether an ID is reserved or active.
@@ -130,31 +158,37 @@ export class PluginRegistry {
   public describe() {
     return [...this.entries.values()]
       .filter((entry) => entry.active)
-      .map((entry) => ({
-        id: entry.id,
-        operations: [
-          ...new Set(this.handlers.filter((handler) => handler.entry === entry).map((handler) => handler.operation)),
-        ],
-        protocols: [
-          ...new Set(
-            this.handlers
-              .filter((handler) => handler.entry === entry && handler.operation.startsWith('search.query.'))
-              .flatMap((handler) => handler.protocols ?? []),
-          ),
-        ],
-        priorities: Object.fromEntries(
-          [
-            ...new Set(this.handlers.filter((handler) => handler.entry === entry).map((handler) => handler.operation)),
-          ].map((operation) => [
-            operation,
-            Math.max(
-              ...this.handlers
-                .filter((handler) => handler.entry === entry && handler.operation === operation)
-                .map((handler) => handler.priority ?? 0),
+      .map((entry) => {
+        const handlers = [...entry.handlers];
+        const operations = [...new Set(handlers.map((handler) => handler.operation))];
+        return {
+          id: entry.id,
+          operations,
+          protocols: [
+            ...new Set(
+              handlers
+                .filter((handler) => handler.operation.startsWith('search.query.'))
+                .flatMap((handler) => handler.protocols ?? []),
             ),
-          ]),
-        ),
-      }));
+          ],
+          priorities: Object.fromEntries(
+            operations.map((operation) => [
+              operation,
+              Math.max(
+                ...handlers
+                  .filter((handler) => handler.operation === operation)
+                  .map((handler) => handler.priority ?? 0),
+              ),
+            ]),
+          ),
+          subscriptions: handlers.map((handler) => ({
+            operation: handler.operation,
+            priority: handler.priority ?? 0,
+            guildIds: handler.guildIds,
+            order: handler.order,
+          })),
+        };
+      });
   }
 
   /** Register all advertised providers from an existing HTTP deployment.
@@ -193,17 +227,19 @@ export class PluginRegistry {
    * @param options Source targeting and block list.
    */
   public supportsProtocol(protocol: string, options: ExecuteOptions = {}): boolean {
-    return this.handlers.some(
-      (handler) =>
-        (handler.operation === 'search.query.match' || handler.operation === 'search.query.resolve') &&
-        handler.entry.active &&
-        (!options.pluginId || handler.entry.id === options.pluginId) &&
-        (options.hostId === undefined ||
-          (handler.entry.registration.definition.remoteHost?.hostId ?? null) === options.hostId) &&
-        !this.blocked().includes(handler.entry.id) &&
-        !options.blocked?.includes(handler.entry.id) &&
-        handler.protocols?.includes(protocol),
-    );
+    return (['search.query.match', 'search.query.resolve'] as const)
+      .flatMap((name) => this.handlers.get(name) ?? [])
+      .some(
+        (handler) =>
+          (handler.operation === 'search.query.match' || handler.operation === 'search.query.resolve') &&
+          handler.entry.active &&
+          (!options.pluginId || handler.entry.id === options.pluginId) &&
+          (options.hostId === undefined ||
+            (handler.entry.registration.definition.remoteHost?.hostId ?? null) === options.hostId) &&
+          !this.blocked().includes(handler.entry.id) &&
+          !options.blocked?.includes(handler.entry.id) &&
+          handler.protocols?.includes(protocol),
+      );
   }
 
   /** Ordered owners of a custom query protocol.
@@ -264,6 +300,7 @@ export class PluginRegistry {
       registration,
       controller,
       cleanups: [],
+      handlers: new Set(),
       pending: new Set(),
       active: false,
       ready: Promise.resolve(),
@@ -282,6 +319,12 @@ export class PluginRegistry {
           throw new Error(`Undefined operation: ${operation}`);
         }
 
+        if (this.synchronous.has(operation) && fn.constructor.name === 'AsyncFunction')
+          throw new TypeError(`Capability ${operation} requires a synchronous callback.`);
+
+        if (!Number.isFinite(options.priority ?? definition.priority ?? 0))
+          throw new TypeError('Handler priority must be finite.');
+
         const handler: Handler = {
           entry,
           operation,
@@ -289,13 +332,22 @@ export class PluginRegistry {
           priority: definition.priority,
           ...options,
           ...(definition.remoteHost && definition.priority !== undefined ? { priority: definition.priority } : {}),
+          ...(options.guildIds ? { guildIds: Object.freeze([...options.guildIds]) } : {}),
           order: this.order++,
         };
 
-        this.handlers.push(handler);
+        entry.handlers.add(handler);
+        const list = this.handlers.get(operation) ?? [];
+        this.handlers.set(
+          operation,
+          [...list, handler].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0) || a.order - b.order),
+        );
 
         return () => {
-          this.handlers = this.handlers.filter((item) => item !== handler);
+          entry.handlers.delete(handler);
+          const remaining = this.handlers.get(operation)?.filter((item) => item !== handler) ?? [];
+          if (remaining.length) this.handlers.set(operation, remaining);
+          else this.handlers.delete(operation);
         };
       },
 
@@ -335,11 +387,21 @@ export class PluginRegistry {
       }
     });
 
-    await entry.ready;
+    this.initializing.add(entry.ready);
+    try {
+      await entry.ready;
+    } finally {
+      this.initializing.delete(entry.ready);
+    }
   }
 
   private async cleanup(entry: Entry): Promise<void> {
-    this.handlers = this.handlers.filter((handler) => handler.entry !== entry);
+    for (const operation of new Set([...entry.handlers].map((handler) => handler.operation))) {
+      const remaining = this.handlers.get(operation)?.filter((handler) => handler.entry !== entry) ?? [];
+      if (remaining.length) this.handlers.set(operation, remaining);
+      else this.handlers.delete(operation);
+    }
+    entry.handlers.clear();
 
     const errors: unknown[] = [];
 
@@ -404,7 +466,7 @@ export class PluginRegistry {
 
   /** Initialize pending registrations before dispatch. */
   public async ready(): Promise<void> {
-    await Promise.all([...this.entries.values()].map((entry) => entry.ready));
+    if (this.initializing.size) await Promise.all(this.initializing);
   }
 
   /** Destroy all registrations, attempting every cleanup even when one fails. */
@@ -420,6 +482,92 @@ export class PluginRegistry {
     }
   }
 
+  /** Whether an operation has active subscribers. Does not scan unrelated registrations.
+   * @param operation Capability name.
+   * @returns Whether at least one active handler exists.
+   */
+  public hasCapability(operation: OperationName): boolean {
+    return this.handlers.get(operation)?.some((handler) => handler.entry.active) ?? false;
+  }
+
+  /** Reject reentrant application operations from synchronous capability handlers. */
+  public assertNotDispatching(): void {
+    if (this.dispatching)
+      throw new Error('Reentrant application operations inside a capability handler are unsupported.');
+  }
+
+  /** Dispatch a synchronous local capability without scheduling promises.
+   * @param operation Capability defined with synchronous execution.
+   * @param input Validated operation payload.
+   * @param options Scope and cancellation constraints.
+   * @returns The selected result, or transformed input for pipe operations.
+   */
+  public executeSync<K extends OperationName>(
+    operation: K,
+    input: OperationInput<K>,
+    options: ExecuteOptions = {},
+  ): OperationResult<K> {
+    options.signal?.throwIfAborted();
+    if (!this.synchronous.has(operation)) throw new Error(`Operation is not synchronous: ${operation}`);
+    const policy = this.definitions.get(operation);
+    const list = this.handlers.get(operation);
+    if (!list?.length) return (policy === 'pipe' ? input : undefined) as OperationResult<K>;
+    this.assertNotDispatching();
+    this.dispatching = true;
+    let value: unknown = input;
+    const errors: PluginError[] = [];
+    try {
+      for (const handler of selectHandlers(operation, input, options, {
+        handlers: this.handlers,
+        definitions: this.definitions,
+        blocked: this.blocked,
+        resultOwners: this.resultOwners,
+      })) {
+        const signal = options.signal
+          ? AbortSignal.any([options.signal, handler.entry.controller.signal])
+          : handler.entry.controller.signal;
+        signal.throwIfAborted();
+        try {
+          const result = handler.fn(policy === 'pipe' || policy === 'intercept' ? value : input, { signal });
+          if (result && typeof result === 'object' && 'then' in result) {
+            const pending = Promise.resolve(result);
+            handler.entry.pending.add(pending);
+            void pending.then(
+              () => handler.entry.pending.delete(pending),
+              () => handler.entry.pending.delete(pending),
+            );
+            throw new TypeError('Synchronous capability handlers must not return promises.');
+          }
+          signal.throwIfAborted();
+          if (result !== undefined && policy === 'intercept') {
+            if (!result || typeof result !== 'object' || !('action' in result))
+              throw new TypeError('Expected an explicit capability decision.');
+            if (result.action === 'cancel') {
+              if (!('reason' in result) || typeof result.reason !== 'string')
+                throw new TypeError('Cancellation requires a reason.');
+              return result as unknown as OperationResult<K>;
+            }
+            if (result.action !== 'replace' || !('value' in result)) throw new TypeError('Expected cancel or replace.');
+            value = result.value;
+          }
+          if (result !== undefined && policy === 'first') return result as unknown as OperationResult<K>;
+          if (result !== undefined && policy === 'pipe') value = result;
+        } catch (cause) {
+          const error = new PluginError(handler.entry.id, operation, cause);
+          if (policy !== 'broadcast') throw error;
+          errors.push(error);
+        }
+      }
+      if (errors.length === 1) throw errors[0];
+      if (errors.length) throw new AggregateError(errors, `Observers failed during ${operation}`);
+      return (
+        policy === 'pipe' ? value : policy === 'intercept' ? { action: 'replace', value } : undefined
+      ) as OperationResult<K>;
+    } finally {
+      this.dispatching = false;
+    }
+  }
+
   /** Execute using the operation's declared policy. Genuine failures reject immediately.
    * @param operation Typed operation name.
    * @param input Operation payload.
@@ -431,7 +579,16 @@ export class PluginRegistry {
     input: OperationInput<K>,
     options: ExecuteOptions = {},
   ): Promise<OperationResult<K>> {
-    return this.run(operation, input, options);
+    if (this.synchronous.has(operation)) return this.executeSync(operation, input, options);
+    const guarded =
+      operation.startsWith('media.') ||
+      operation.startsWith('serialization.') ||
+      operation === 'search.beforeQuery' ||
+      operation === 'search.afterResults';
+    if (!guarded) return this.run(operation, input, options);
+    const active = this.calls.getStore();
+    if (active?.has(operation)) throw new Error(`Recursive capability dispatch: ${operation}`);
+    return this.calls.run(new Set([...(active ?? []), operation]), () => this.run(operation, input, options));
   }
 
   private async run<K extends OperationName>(
@@ -445,7 +602,7 @@ export class PluginRegistry {
     if (
       track?.sourceReference?.hostId &&
       track.sourceReference.hostId !== this.hostId &&
-      !this.handlers.some(
+      !(this.handlers.get(operation) ?? []).some(
         (handler) =>
           handler.operation === operation &&
           handler.entry.active &&
@@ -492,6 +649,7 @@ export class PluginRegistry {
    * @returns Whether a byte transformation would be invoked.
    */
   hasStreamTransforms(pluginId?: string, options: StreamResolutionOptions = {}): boolean {
+    if (this.hasCapability('media.transform')) return true;
     return (
       selectHandlers(
         'stream.transform',
@@ -509,16 +667,55 @@ export class PluginRegistry {
     );
   }
 
+  /** Serialize using modern application-metadata transformations. Plain model serialization remains synchronous.
+   * @param entity Track or playlist to persist.
+   * @param options Cancellation and provider scope.
+   * @returns A validated JSON persistence payload, without playback grants or live streams.
+   */
+  public async serialize(entity: Track | Playlist, options: ExecuteOptions = {}): Promise<SerializedEntityUnion> {
+    const input = serialize<SerializedEntityUnion>(entity);
+    const result = this.hasCapability('serialization.afterSerialize')
+      ? await this.execute('serialization.afterSerialize', input, options)
+      : input;
+    return parseEntity(result);
+  }
+
+  /** Restore through modern metadata transformations and the existing schema validator.
+   * @param payload Untrusted persistence payload.
+   * @param options Cancellation and provider scope.
+   * @returns A restored entity without ephemeral playback state.
+   */
+  public async restore(payload: unknown, options: ExecuteOptions = {}): Promise<Track | Playlist> {
+    const input = parseEntity(payload);
+    const result = this.hasCapability('serialization.beforeRestore')
+      ? await this.execute('serialization.beforeRestore', input, options)
+      : input;
+    return deserialize(parseEntity(result));
+  }
+
   /** Resolve and normalize a track for the already selected Remedia node.
    * @param track Data model with a portable provider reference.
    * @param options Target node mode and cancellation.
    */
   public async resolveStream(track: Track, options: StreamResolutionOptions = {}): Promise<MediaSource> {
+    if (this.hasCapability('media.beforeResolve')) {
+      const originalPluginId = track.sourceReference?.pluginId;
+      const originalHostId = track.sourceReference?.hostId;
+      const prepared = await this.execute('media.beforeResolve', { track }, { signal: options.signal });
+      if (
+        !prepared ||
+        prepared.track.sourceReference?.pluginId !== originalPluginId ||
+        prepared.track.sourceReference?.hostId !== originalHostId
+      )
+        throw new TypeError('media.beforeResolve must preserve provider and deployment identity.');
+      track = prepared.track;
+    }
     return resolveTrackStream(
       track,
       options,
       (operation, input, execution, handled) => this.run(operation, input, execution, handled),
       (owner) => this.hasStreamTransforms(owner, options),
+      (operation) => this.hasCapability(operation),
     );
   }
 }

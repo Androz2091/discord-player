@@ -15,6 +15,7 @@ export class DeferredSourceRequired extends Error {}
  * @param options Selected node mode and playback lifetime.
  * @param run Shared operation runner.
  * @param hasTransforms Inspect applicable transformations for the resolved owner.
+ * @param hasCapability Inspect shared modern media subscriptions.
  * @returns Normalized playable media source.
  */
 export async function resolveTrackStream(
@@ -22,6 +23,7 @@ export async function resolveTrackStream(
   options: StreamResolutionOptions,
   run: OperationRunner,
   hasTransforms: (owner?: string) => boolean,
+  hasCapability: (operation: 'media.descriptor' | 'media.transform') => boolean = () => true,
 ): Promise<MediaSource> {
   const pluginId = track.sourceReference?.pluginId;
   let owner = pluginId;
@@ -52,6 +54,34 @@ export async function resolveTrackStream(
         : result instanceof Uint8Array
           ? { buffer: result }
           : result;
+
+  // Intercept before transport authorization/materialization so changed URLs pass the same access policy.
+  try {
+    if (hasCapability('media.descriptor')) {
+      const descriptor = await run(
+        'media.descriptor',
+        { source, guildId: options.guildId ?? null },
+        { ...options, pluginId: undefined },
+      );
+      if (!descriptor || !descriptor.source || typeof descriptor.source !== 'object')
+        throw new TypeError('media.descriptor requires a media source.');
+      const next = descriptor.source;
+      if (
+        !('url' in next && typeof next.url === 'string') &&
+        !('file' in next && typeof next.file === 'string') &&
+        !('stream' in next && next.stream instanceof Readable) &&
+        !('buffer' in next && next.buffer instanceof Uint8Array) &&
+        !('hostId' in next && typeof next.hostId === 'string')
+      )
+        throw new TypeError('media.descriptor returned an invalid media source.');
+      if ('stream' in source && (!('stream' in next) || next.stream !== source.stream))
+        throw new TypeError('Use media.transform to replace encoded streams.');
+      source = next;
+    }
+  } catch (error) {
+    if ('stream' in source) source.stream.destroy();
+    throw error;
+  }
 
   if (options.directUrlOnly) {
     if (!('url' in source)) {
@@ -110,10 +140,25 @@ export async function resolveTrackStream(
         { ...options, pluginId: owner },
       );
 
+      if (transformed && !(transformed.stream instanceof Readable))
+        throw new TypeError('Stream transformation must return a Readable.');
+
       if (transformed) {
         source = { ...source, stream: transformed.stream };
         streams.add(transformed.stream);
       }
+    }
+
+    if ('stream' in source) {
+      const transformed = await run(
+        'media.transform',
+        { track, stream: source.stream },
+        { ...options, pluginId: undefined },
+      );
+      if (!transformed || !(transformed.stream instanceof Readable))
+        throw new TypeError('media.transform requires an encoded Readable.');
+      streams.add(transformed.stream);
+      source = { ...source, stream: transformed.stream };
     }
 
     await run('track.stream.resolved', { track }, { ...options, pluginId: owner });

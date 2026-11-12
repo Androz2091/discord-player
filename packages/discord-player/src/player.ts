@@ -1,3 +1,4 @@
+import { installLocalCapabilities, intercept } from './plugins/capabilities.js';
 import { prepareResource, type StreamHooks } from './hooks.js';
 import type { GuildQueue } from './structures/guild-queue.js';
 import { SourcePluginRuntime, SOURCE_PLUGIN_ID, serializeSourceTrack } from '@discord-player/plugin-host';
@@ -161,10 +162,17 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
     this.sources = new SourcePluginRuntime({ player: this });
     this.plugins = this.sources.plugins;
+    installLocalCapabilities(this.plugins);
     this.extractors = this.sources.extractors;
 
     this.initialPlugins = Promise.all((options.plugins ?? []).map((plugin) => this.plugins.register(plugin))).then(
-      () => undefined,
+      () => {
+        try {
+          this.plugins.executeSync('player.ready', { playerId: this.id });
+        } catch (error) {
+          this.emit('error', error instanceof Error ? error : new Error(String(error)));
+        }
+      },
     );
 
     // Retain the rejection for initialize/search while preventing an unobserved constructor promise.
@@ -247,6 +255,10 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       throw error;
     }
 
+    const initialization = intercept(this.plugins, 'player.beforeInitialize', { playerId: this.id, clientId });
+    if (initialization.playerId !== this.id || typeof initialization.clientId !== 'string' || !initialization.clientId)
+      throw new TypeError('Invalid Player initialization identity.');
+    clientId = initialization.clientId;
     this.#clientId = clientId;
 
     const {
@@ -268,6 +280,11 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
         botUserId: clientId,
       });
       this.attachClientListeners(this.remedia);
+      try {
+        this.plugins.executeSync('player.initialized', { playerId: this.id });
+      } catch (error) {
+        this.emit('error', error instanceof Error ? error : new Error(String(error)));
+      }
     } catch (error) {
       this.#clientId = null;
 
@@ -408,9 +425,20 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
     const node = this.getRemedia().nodes.find((item) => item.id === nodeId);
     if (queue)
       return prepareResource(queue, track, signal, node?.type !== 'embedded', () =>
-        this.resolvePlaybackSource(track, nodeId, signal),
+        this.resolveSourceDescriptor(track, nodeId, signal, queue.guildId),
       );
 
+    return this.resolveSourceDescriptor(track, nodeId, signal, null);
+  }
+
+  private async resolveSourceDescriptor(
+    track: Track,
+    nodeId: string | null,
+    signal: AbortSignal,
+    guildId: string | null,
+  ): Promise<MediaSource> {
+    signal.throwIfAborted();
+    const node = this.getRemedia().nodes.find((item) => item.id === nodeId);
     const hostId = track.sourceReference?.hostId;
 
     if (hostId) {
@@ -435,10 +463,22 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
         input: { track: serializeSourceTrack(track) },
       };
 
-      return source;
+      if (!this.plugins.hasCapability('media.descriptor')) return source;
+      const descriptor = await this.plugins.execute('media.descriptor', { source, guildId }, { signal });
+      if (
+        !descriptor ||
+        !descriptor.source ||
+        !('hostId' in descriptor.source) ||
+        descriptor.source.hostId !== hostId ||
+        descriptor.source.pluginId !== source.pluginId ||
+        descriptor.source.operation !== source.operation
+      )
+        throw new TypeError('Remote descriptor interception must preserve source host identity.');
+      return descriptor.source;
     }
 
     return this.plugins.resolveStream(track, {
+      guildId,
       signal,
       remote: node?.type !== 'embedded',
       blocked: this.options.blockExtractors,
@@ -528,8 +568,14 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Abort the Player lifetime signal, then destroy all managed queues and plugins. */
   public destroy(): Promise<void> {
     if (this.destruction) return this.destruction;
+    this.plugins.assertNotDispatching();
     this.destruction = Promise.resolve().then(async () => {
       const errors: unknown[] = [];
+      try {
+        this.plugins.executeSync('player.destroying', { playerId: this.id });
+      } catch (error) {
+        errors.push(error);
+      }
       try {
         await queueCleanup;
       } catch (error) {

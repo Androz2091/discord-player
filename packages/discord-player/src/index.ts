@@ -46,3 +46,5 @@ export type {
 } from './hooks.js';
 
 export * from './structures/synced-lyrics.js';
+
+export * from './plugins/capabilities.js';

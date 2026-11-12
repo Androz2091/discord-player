@@ -1,3 +1,4 @@
+import type { SerializedEntityUnion } from '../utils/serde.js';
 import type { RemotePluginHostOptions } from '../remote.js';
 import type { LyricsRequest, LyricsResult } from '../lyrics.js';
 import type { Readable } from 'node:stream';
@@ -31,7 +32,7 @@ export type SourceStream =
   | Readable;
 
 /** Operation dispatch behavior. */
-export type DispatchPolicy = 'first' | 'collect' | 'pipe' | 'broadcast';
+export type DispatchPolicy = 'first' | 'collect' | 'pipe' | 'broadcast' | 'intercept';
 
 /** Declaration merged operation contract. */
 export interface Operation<Input, Output, Policy extends DispatchPolicy> {
@@ -98,6 +99,31 @@ export interface SourceStreamTransform extends SourceTrackRequest {
 
 /** Extensible source operation contracts. Augmented operations also need host definitions. */
 export interface OperationMap {
+  /** Transform a validated persistence payload before restoring an entity. */
+  'serialization.beforeRestore': Operation<SerializedEntityUnion, SerializedEntityUnion, 'pipe'>;
+
+  /** Transform serialized application metadata; the result is validated again. */
+  'serialization.afterSerialize': Operation<SerializedEntityUnion, SerializedEntityUnion, 'pipe'>;
+
+  /** Transform source preparation while preserving portable provider identity. */
+  'media.beforeResolve': Operation<SourceTrackRequest, SourceTrackRequest, 'pipe'>;
+
+  /** Transform a portable search query before provider selection. */
+  'search.beforeQuery': Operation<SourceQuery, SourceQuery, 'pipe'>;
+
+  /** Transform metadata returned by search orchestration. */
+  'search.afterResults': Operation<SearchResultData, SearchResultData, 'pipe'>;
+
+  /** Transform encoded bytes across modern plugins, independent of source ownership. */
+  'media.transform': Operation<SourceStreamTransform, SourceStreamTransform, 'pipe'>;
+
+  /** Transform a resolved descriptor. Standalone execution has no guild context. */
+  'media.descriptor': Operation<
+    { readonly source: MediaSource; readonly guildId: string | null },
+    { readonly source: MediaSource; readonly guildId: string | null },
+    'pipe'
+  >;
+
   /** Optional lyrics lookup, independent of all source operations. */
   'lyrics.search': Operation<LyricsRequest, LyricsResult[] | null, 'collect'>;
 
@@ -122,6 +148,9 @@ export interface OperationMap {
   /** Notification after a source is resolved. */
   'track.stream.resolved': Operation<SourceTrackRequest, void, 'broadcast'>;
 }
+
+/** Declaration merged names restricted to synchronous callbacks. */
+export interface SynchronousOperationMap {}
 
 /** Names available to source plugins. */
 export type OperationName = keyof OperationMap;
@@ -153,7 +182,10 @@ export interface OperationContext {
 export type OperationHandler<K extends OperationName> = (
   input: OperationInput<K>,
   context: OperationContext,
-) => OperationOutput<K> | undefined | Promise<OperationOutput<K> | undefined>;
+) =>
+  | OperationOutput<K>
+  | undefined
+  | (K extends keyof SynchronousOperationMap ? never : Promise<OperationOutput<K> | undefined>);
 
 /** Handler ordering metadata. */
 export interface HandlerOptions {
@@ -162,6 +194,9 @@ export interface HandlerOptions {
 
   /** Protocols accepted by this handler; absent means unrestricted. */
   protocols?: readonly string[];
+
+  /** Local guild constraints; unavailable guild context never matches. */
+  guildIds?: readonly string[];
 }
 
 /** Source setup context shared by embedded and standalone execution. */

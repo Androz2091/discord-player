@@ -1,3 +1,4 @@
+import { intercept } from '../plugins/capabilities.js';
 import { GuildQueuePlayerAudioFilters } from './guild-queue-player-audio-filters.js';
 import type {
   AudioStreamInfo,
@@ -127,6 +128,13 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   public async createSession<M = unknown>(
     options: GuildQueuePlayerNodeSessionCreateOptions,
   ): Promise<DiscordSession<M>> {
+    const request = intercept(this.player.plugins, 'voice.beforeSession', {
+      guildId: this.queue.guildId,
+      channelId: options.channelId,
+    });
+    if (typeof request.channelId !== 'string' || !request.channelId)
+      throw new TypeError('Voice channel ID must be nonempty.');
+    options = { ...options, channelId: request.channelId };
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     this.assertQueueAlive();
@@ -155,6 +163,13 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    * @throws Error When an existing session is assigned to a different node than requested.
    */
   public async connect<M = unknown>(options: GuildQueuePlayerNodeSessionCreateOptions): Promise<DiscordSession<M>> {
+    const request = intercept(this.player.plugins, 'voice.beforeSession', {
+      guildId: this.queue.guildId,
+      channelId: options.channelId,
+    });
+    if (typeof request.channelId !== 'string' || !request.channelId)
+      throw new TypeError('Voice channel ID must be nonempty.');
+    options = { ...options, channelId: request.channelId };
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     this.assertQueueAlive();
@@ -221,6 +236,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /** Disconnect and clear the current Remedia session. */
   public async destroySession(): Promise<void> {
+    this.player.plugins.assertNotDispatching();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     await this.destroySessionUnlocked();
@@ -422,6 +438,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   private assertQueueAlive(): void {
+    this.player.plugins.assertNotDispatching();
     if (this.queue.destroyed) throw new Error('Cannot use a player node after its guild queue has been destroyed.');
   }
 
@@ -479,6 +496,10 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    * @returns The applied percentage volume.
    */
   public async setVolume(volumePercentage: number): Promise<number> {
+    volumePercentage = intercept(this.player.plugins, 'audio.beforeVolume', {
+      guildId: this.queue.guildId,
+      volume: volumePercentage,
+    }).volume;
     if (!Number.isFinite(volumePercentage) || volumePercentage < 0 || volumePercentage > 200) {
       throw new RangeError('Volume must be a finite percentage between 0 and 200.');
     }
@@ -558,6 +579,11 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    * @param positionMs Requested position in milliseconds; negative values are clamped to zero.
    */
   public async seek(positionMs: number): Promise<void> {
+    positionMs = intercept(this.player.plugins, 'playback.beforeSeek', {
+      guildId: this.queue.guildId,
+      positionMs,
+    }).positionMs;
+    if (!Number.isFinite(positionMs)) throw new RangeError('Seek position must be finite.');
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
     await this.queue.cancelPreparation();
@@ -566,6 +592,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /** Pause raw playback in the current Remedia session. */
   public async pause(): Promise<void> {
+    intercept(this.player.plugins, 'playback.beforePause', { guildId: this.queue.guildId });
     this.queue.voice.manualPause();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
@@ -574,6 +601,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /** Resume raw playback in the current Remedia session. */
   public async resume(): Promise<void> {
+    intercept(this.player.plugins, 'playback.beforeResume', { guildId: this.queue.guildId });
     this.queue.voice.manualPause();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 

@@ -1,3 +1,4 @@
+import { intercept } from './plugins/capabilities.js';
 import type { DiscordSession } from '@remedia/client';
 import type { GuildQueue } from './structures/guild-queue.js';
 
@@ -222,6 +223,7 @@ export class VoiceStateTracker {
         if (shouldPause && session.state === 'playing') {
           this.pauseOwned = true;
           this.pauseCause = this.blocked ? 'mute' : 'empty';
+          intercept(this.queue.player.plugins, 'voice.beforeAutoPause', { guildId: this.queue.guildId });
           await session.pause();
         } else if (
           !shouldPause &&
@@ -299,6 +301,7 @@ export class VoiceStateTracker {
               return;
             if (reason !== 'empty' && this.queue.isPlaying()) return;
             if (reason === 'end' && this.queue.size) return;
+            intercept(this.queue.player.plugins, 'voice.beforeLeave', { guildId: this.queue.guildId, reason });
             await this.queue.destroy();
           })(),
         );

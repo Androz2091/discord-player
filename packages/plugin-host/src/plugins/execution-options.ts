@@ -17,6 +17,9 @@ export interface ExecuteOptions {
 
 /** Playback resolution configuration selected after the Remedia session is connected. */
 export interface StreamResolutionOptions {
+  /** Portable queue scope when resolution belongs to a live Player, otherwise null. */
+  guildId?: string | null;
+
   /** Restrict eager transport resolution to a declared URL-only source; defer bridging and byte transforms.
    * @internal
    */
