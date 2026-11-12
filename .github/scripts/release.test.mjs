@@ -21,7 +21,6 @@ import {
   syncPackageVersions,
   validateTarball,
   verifyBuiltPackages,
-  verifyPublishedVersions,
 } from './release.mjs';
 
 const tempDirs = [];
@@ -690,16 +689,6 @@ test('publication errors, registry errors, missing tarballs, and latest-tag down
       distTag: 'latest',
     }),
     /Missing npm tarball/,
-  );
-
-  await assert.rejects(
-    verifyPublishedVersions({
-      packages: ['discord-player', 'create-music-bot'],
-      version: '8.0.0',
-
-      lookupVersion: async (name) => name === 'discord-player',
-    }),
-    /create-music-bot@8.0.0 is not published/,
   );
 });
 

@@ -700,18 +700,6 @@ export async function publishRelease({ root = projectRoot, directory, version, .
   return { version, ...summary };
 }
 
-/**
- * Confirm release package versions are present on npm before creating a GitHub release.
- * @param {{packages: string[], version: string, lookupVersion?: Function}} options Registry check injection.
- * @returns {Promise<void>} Resolves when every required exact version is visible.
- */
-export async function verifyPublishedVersions({ packages, version, lookupVersion = lookupNpmVersion }) {
-  for (const name of packages) {
-    if (!(await lookupVersion(name, version)))
-      throw new ReleaseError(`Required npm package ${name}@${version} is not published.`);
-  }
-}
-
 function collectEntrypoints(manifest) {
   const targets = new Set();
 

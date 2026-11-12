@@ -27,6 +27,8 @@ function githubFixture({ tagSha = null, release = null } = {}) {
     const method = request.method ?? 'GET';
     const body = request.body ? JSON.parse(request.body) : undefined;
 
+    assert.equal(parsed.origin, 'https://api.github.com', 'GitHub release creation must not query npm.');
+
     state.calls.push({ method, path, body });
 
     if (method === 'GET' && path.startsWith('/git/ref/tags/')) {
@@ -88,8 +90,6 @@ function run(fixture, options = {}) {
     packages,
     token: 'github-test-token',
     fetchImpl: fixture.fetchImpl,
-
-    lookupVersion: async () => true,
 
     sleep: async () => {},
 
@@ -157,7 +157,7 @@ test('reuses an existing release for a correct tag and version without duplicate
   );
 });
 
-test('finalizes a matching existing draft after all npm packages are verified', async () => {
+test('finalizes a matching existing draft after the npm publish job succeeds', async () => {
   const fixture = githubFixture({
     tagSha: commitSha,
     release: {
@@ -192,19 +192,23 @@ test('fails if an existing immutable tag points to another commit', async () => 
   );
 });
 
-test('does not create a tag or release until every npm package is confirmed published', async () => {
+test('creates a release while npm package visibility is delayed without querying the registry', async (t) => {
   const fixture = githubFixture();
+  const registryRequests = [];
 
-  await assert.rejects(
-    run(fixture, {
-      lookupVersion: async (name) => name === 'discord-player',
-    }),
-    /create-music-bot@8\.0\.0 is not published/,
-  );
+  t.mock.method(globalThis, 'fetch', async (url) => {
+    registryRequests.push(url);
 
-  assert.deepEqual(fixture.state.calls, []);
-  assert.equal(fixture.state.tagSha, null);
-  assert.equal(fixture.state.release, null);
+    return apiResponse(404, { error: 'Package is pending npm verification' });
+  });
+
+  const result = await run(fixture);
+
+  assert.equal(result.created, true);
+  assert.equal(fixture.state.tagSha, commitSha);
+  assert.equal(fixture.state.release.draft, false);
+  assert.match(fixture.state.release.body, /create-music-bot@8\.0\.0/);
+  assert.deepEqual(registryRequests, []);
 });
 
 test('rerunning after npm publication completes the release without creating duplicates', async () => {

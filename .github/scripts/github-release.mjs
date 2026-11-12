@@ -1,7 +1,7 @@
 import { appendFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { discoverReleasePackages, parseSemver, verifyPublishedVersions } from './release.mjs';
+import { discoverReleasePackages, parseSemver } from './release.mjs';
 
 const API_ROOT = 'https://api.github.com';
 const expectedOwner = 'Androz2091';
@@ -15,8 +15,8 @@ export class GitHubReleaseError extends Error {
 }
 
 /**
- * Create or reuse a GitHub release after verifying the release package versions on npm.
- * @param {{owner: string, repository: string, version: string, commitSha: string, packages: string[], token: string, fetchImpl?: typeof fetch, lookupVersion?: Function, sleep?: Function, log?: Function}} options Release identity and injectable APIs.
+ * Create or reuse a GitHub release after the npm publish job succeeds.
+ * @param {{owner: string, repository: string, version: string, commitSha: string, packages: string[], token: string, fetchImpl?: typeof fetch, sleep?: Function, log?: Function}} options Release identity and injectable APIs.
  * @returns {Promise<{tag: string, name: string, prerelease: boolean, url: string | null, created: boolean}>} Verified GitHub release.
  */
 export async function createOrReuseGithubRelease({
@@ -27,7 +27,6 @@ export async function createOrReuseGithubRelease({
   packages,
   token,
   fetchImpl = fetch,
-  lookupVersion,
   sleep = delay,
   log = console.log,
 }) {
@@ -59,8 +58,6 @@ export async function createOrReuseGithubRelease({
 
   if (typeof token !== 'string' || token.length === 0)
     throw new GitHubReleaseError('GITHUB_TOKEN is unavailable for GitHub release creation.');
-
-  await verifyPublishedVersions({ packages, version, ...(lookupVersion ? { lookupVersion } : {}) });
 
   const tag = `v${version}`;
   const releaseName = `Discord Player ${tag}`;
