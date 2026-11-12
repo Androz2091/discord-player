@@ -45,7 +45,7 @@ await player.play(channel, query, { nodeId: 'audio-1' });
 
 ## Crossfade placement
 
-Crossfade is requested only when the chosen node supports it. Without `selectNode` or a pinned node, it is requested only if every eligible node supports it. Otherwise the queue plays without crossfade and emits a `debug` message. In a mixed pool, pin a node or provide `selectNode`.
+Crossfade is requested only when the chosen node supports it. Without `selectNode` or a pinned node, it is requested only if every eligible node supports it. Otherwise the queue plays without crossfade and emits a `debug` message. In a mixed pool, pin a node or provide `selectNode`. An explicitly requested curve must be listed by every eligible node; otherwise session creation rejects. Omit the curve to use each node's configured default.
 
 ## Embedded or remote
 

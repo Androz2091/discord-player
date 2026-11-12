@@ -477,7 +477,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
         crossfade.durationMs <= 0 ||
         !Number.isFinite(crossfade.prepareBeforeMs) ||
         crossfade.prepareBeforeMs < 0 ||
-        crossfade.curve !== 'equalPower')
+        (crossfade.curve !== 'equalPower' && crossfade.curve !== 'adaptive'))
     )
       throw new TypeError('Playback backend returned an invalid crossfade snapshot.');
 
@@ -564,7 +564,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     }
     const client = this.player.getRemedia();
     const hosts = options.pluginHosts ?? [];
-    const requested = this.queue.options.crossfade ?? this.player.options.crossfade;
+    const requested = this.queue.options.crossfade ?? this.player.options.crossfade ?? options.crossfade;
     const selector = this.queue.options.selectNode;
     let nodeId = options.nodeId ?? client.getAssignment(this.queue.guildId)?.nodeId;
 
@@ -588,11 +588,22 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     const selected = nodeId && nodeId !== options.nodeId ? { ...options, nodeId } : options;
 
-    if (!requested) return selected;
+    if (!requested) return requested === false ? { ...selected, crossfade: false } : selected;
 
     // Remedia rejects crossfade on nodes without support. Request it only when every node
     // that can host this session supports it, otherwise play without crossfade.
     const hostable = nodeId ? client.nodes.filter((node) => node.id === nodeId) : this.eligibleNodes(hosts);
+
+    if (requested.curve !== undefined) {
+      const curve = requested.curve;
+      const unsupported = hostable.find((node) => !node.capabilities?.crossfade.curves.includes(curve));
+
+      if (unsupported)
+        throw new Error(
+          `Remedia node ${unsupported.id} does not support the ${curve} crossfade curve. Choose a supported curve or a capable node.`,
+        );
+    }
+
     const available =
       hostable.length > 0 &&
       hostable.every((node) => node.type === 'embedded' || node.capabilities?.crossfade.available === true);
@@ -607,7 +618,8 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     return {
       ...selected,
-      crossfade: available ? { durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower', ...requested } : false,
+      // Leave omitted settings to Remedia so each node can apply its configured defaults.
+      crossfade: available ? requested : false,
     };
   }
 

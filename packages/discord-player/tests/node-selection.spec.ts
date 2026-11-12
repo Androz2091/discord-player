@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { NodeSnapshot } from '@remedia/client';
+import type { CrossfadeCurve, NodeSnapshot } from '@remedia/client';
 import { setup } from './mocks/queue.js';
 import type { MockNode } from './mocks/remedia.js';
 
@@ -174,5 +174,112 @@ describe('Remedia node placement', () => {
 
     expect(selectNode).not.toHaveBeenCalled();
     expect(fixture.backend.client.createDiscordSession.mock.calls[0]![0]).not.toHaveProperty('nodeId');
+  });
+});
+
+describe('crossfade curve negotiation', () => {
+  it.each(['embedded', 'remote'] as const)(
+    'forwards Player curves and queue overrides to %s sessions',
+    async (nodeType) => {
+      for (const curve of ['equalPower', 'adaptive'] as const) {
+        const fixture = await setup({
+          nodeType,
+          crossfadeAvailable: true,
+          playerOptions: { crossfade: { enabled: true, curve } },
+        });
+
+        expect(fixture.session.crossfade).toEqual({ enabled: true, curve });
+
+        const override: CrossfadeCurve = curve === 'adaptive' ? 'equalPower' : 'adaptive';
+        const queue = await pending(fixture, { crossfade: { enabled: true, curve: override } });
+
+        await queue.connect({ channelId: 'voice-two' });
+
+        expect(fixture.backend.client.createDiscordSession.mock.lastCall?.[0].crossfade).toEqual({
+          enabled: true,
+          curve: override,
+        });
+        await fixture.player.destroy();
+      }
+    },
+  );
+
+  it('leaves node defaults intact, including adaptive and different duration policies in an automatic pool', async () => {
+    const fixture = await setup({ nodeType: 'remote', crossfadeAvailable: true });
+    const node = fixture.backend.client.nodes[0]!;
+
+    Object.assign(node.capabilities.crossfade, { curve: 'adaptive', durationMs: 8000, prepareBeforeMs: 40000 });
+    addNode(fixture, 'equal-power-default', {
+      capabilities: { ...node.capabilities, crossfade: { ...node.capabilities.crossfade, curve: 'equalPower' } },
+    });
+
+    const queue = await pending(fixture, { crossfade: { enabled: true } });
+
+    await queue.connect({ channelId: 'voice-two' });
+
+    expect(fixture.backend.client.createDiscordSession.mock.lastCall?.[0].crossfade).toEqual({ enabled: true });
+    expect(fixture.backend.client.createDiscordSession.mock.lastCall?.[0]).not.toHaveProperty('nodeId');
+  });
+
+  it('allows equalPower on an older server and rejects adaptive before creating a session', async () => {
+    const fixture = await setup({ nodeType: 'remote', crossfadeAvailable: true });
+
+    fixture.backend.client.nodes[0]!.capabilities.crossfade.curves = ['equalPower'];
+
+    const compatible = await pending(fixture, { crossfade: { enabled: true, curve: 'equalPower' } });
+
+    await compatible.connect({ channelId: 'voice-two' });
+
+    expect(fixture.backend.client.createDiscordSession.mock.lastCall?.[0].crossfade).toEqual({
+      enabled: true,
+      curve: 'equalPower',
+    });
+    await compatible.destroy();
+
+    const incompatible = await pending(fixture, { crossfade: { enabled: true, curve: 'adaptive' } });
+
+    await expect(incompatible.connect({ channelId: 'voice-two' })).rejects.toThrow(
+      'does not support the adaptive crossfade curve',
+    );
+    expect(fixture.backend.client.createDiscordSession).not.toHaveBeenCalled();
+    expect(incompatible.node.session).toBeNull();
+    expect(fixture.session.connectionState).toBe('connected');
+  });
+
+  it('rejects adaptive in a mixed automatic pool without switching nodes or changing curves', async () => {
+    const fixture = await setup({ nodeType: 'remote', crossfadeAvailable: true });
+    const old = addNode(fixture, 'old-server');
+
+    old.capabilities.crossfade.curves = ['equalPower'];
+
+    const queue = await pending(fixture, { crossfade: { enabled: true, curve: 'adaptive' } });
+
+    await expect(queue.connect({ channelId: 'voice-two' })).rejects.toThrow('old-server');
+    expect(fixture.backend.client.createDiscordSession).not.toHaveBeenCalled();
+
+    queue.options.selectNode = () => 'fake-node';
+    await queue.connect({ channelId: 'voice-two' });
+
+    expect(fixture.backend.client.createDiscordSession.mock.lastCall?.[0]).toMatchObject({
+      nodeId: 'fake-node',
+      crossfade: { curve: 'adaptive' },
+    });
+  });
+
+  it('negotiates raw session options and lets a queue disable them', async () => {
+    const fixture = await setup();
+    const queue = await pending(fixture);
+
+    await queue.node.createSession({ channelId: 'voice-two', crossfade: { enabled: true, curve: 'adaptive' } });
+
+    expect(fixture.backend.client.createDiscordSession.mock.lastCall?.[0].crossfade).toEqual({
+      enabled: true,
+      curve: 'adaptive',
+    });
+    await queue.node.destroySession();
+    queue.options.crossfade = false;
+    await queue.node.createSession({ channelId: 'voice-two', crossfade: { enabled: true, curve: 'adaptive' } });
+
+    expect(fixture.backend.client.createDiscordSession.mock.lastCall?.[0].crossfade).toBe(false);
   });
 });

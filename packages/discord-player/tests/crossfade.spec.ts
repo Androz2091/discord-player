@@ -4,22 +4,22 @@ import { QueueRepeatMode } from '../src/index.js';
 import { setup, TestTrack } from './mocks/queue.js';
 import { deferred, settle } from './mocks/async.js';
 
-const enabled = { crossfade: { enabled: true as const } };
+describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %s', (curve) => {
+  const enabled = { crossfade: { enabled: true as const, curve } };
 
-async function prepare() {
-  const fixture = await setup({ queueOptions: enabled });
-  const a = new TestTrack('a');
-  const b = new TestTrack('b');
-  const c = new TestTrack('c');
+  async function prepare() {
+    const fixture = await setup({ queueOptions: enabled });
+    const a = new TestTrack('a');
+    const b = new TestTrack('b');
+    const c = new TestTrack('c');
 
-  await fixture.queue.play([a, b, c]);
-  fixture.session.requestPreparation();
-  await settle();
+    await fixture.queue.play([a, b, c]);
+    fixture.session.requestPreparation();
+    await settle();
 
-  return { ...fixture, a, b, c };
-}
+    return { ...fixture, a, b, c };
+  }
 
-describe('automatic crossfading', () => {
   it('is disabled by default and retains ordinary progression', async () => {
     const { queue, session } = await setup();
 
@@ -36,10 +36,16 @@ describe('automatic crossfading', () => {
     expect(session.playCalls).toBe(2);
   });
 
-  it('opts embedded sessions in with native defaults', async () => {
-    const { session } = await setup({ queueOptions: enabled });
+  it('leaves omitted settings to the embedded node defaults', async () => {
+    const { session } = await setup({ queueOptions: { crossfade: { enabled: true } } });
 
-    expect(session.crossfade).toEqual({ enabled: true, durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower' });
+    expect(session.crossfade).toEqual({ enabled: true });
+    expect(session.snapshot.crossfade).toEqual({
+      enabled: true,
+      durationMs: 5000,
+      prepareBeforeMs: 30000,
+      curve: 'equalPower',
+    });
   });
 
   it('uses global settings and allows a queue to disable them', async () => {
@@ -49,7 +55,7 @@ describe('automatic crossfading', () => {
 
     const override = await setup({ playerOptions: enabled, queueOptions: { crossfade: false } });
 
-    expect(override.session.crossfade).toBeUndefined();
+    expect(override.session.crossfade).toBe(false);
   });
 
   it('falls back on unsupported remote nodes', async () => {
@@ -75,7 +81,7 @@ describe('automatic crossfading', () => {
     expect(session.crossfade).toMatchObject({ enabled: true });
   });
 
-  it('resolves once on request, keeps the reservation queued, and promotes A-B-C with one play', async () => {
+  it('promotes A-B-C with one play and ordered events', async () => {
     const { queue, session, player, a, b, c } = await prepare();
     const resolve = vi.spyOn(player.plugins, 'resolveStream');
     const order: string[] = [];

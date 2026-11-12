@@ -5,6 +5,12 @@ description: What Discord Player delegates to Remedia, and how embedded and remo
 
 Remedia is the audio engine behind Discord Player. It decodes audio, applies filters and volume, encodes Opus, and sends audio over Discord voice. Discord Player decides which track plays and where its audio comes from.
 
+## Target Remedia version
+
+This branch targets **Remedia 0.2.0**, which is not published yet. The contract was checked against `twlite/remedia` commit `40b35d93f119156de9a1fe8feee332c2d6604b07`. Use matching client, embedded node, plugin-host and server builds from that source revision while testing.
+
+The dependency manifests request `0.2.0`. Registry installation and CI installation remain blocked until those packages are published. The lockfile still describes the last published dependencies; after publication, run `pnpm install --no-frozen-lockfile` and commit the regenerated lockfile. Local source-based validation is separate from validation against published artifacts.
+
 ## Who owns what
 
 | Remedia                                              | Discord Player                                 |
