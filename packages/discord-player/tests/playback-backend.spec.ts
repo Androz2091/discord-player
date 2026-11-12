@@ -475,3 +475,15 @@ it('continues provider cleanup when session disposal fails', async () => {
   expect(queue.node.session).toBeNull();
   expect(session.listenerCount('playbackCompleted')).toBe(0);
 });
+
+it.each(['equalPower', 'adaptive'] as const)('accepts a custom backend snapshot with the %s curve', async (curve) => {
+  const { player, sessions } = fixture({ capabilities: { sources: ['url'], crossfade: true, filters: false } });
+
+  await player.initialize('bot-user');
+
+  const queue = await player.nodes.create('guild', { crossfade: { enabled: true, curve } });
+
+  await queue.connect({ channelId: 'voice' });
+
+  expect(sessions[0]?.snapshot.crossfade?.curve).toBe(curve);
+});

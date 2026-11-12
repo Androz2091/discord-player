@@ -1,4 +1,4 @@
-import type { RemediaClient } from '@remedia/client';
+import type { CrossfadeCurve, RemediaClient } from '@remedia/client';
 import { createServer } from 'node:http';
 import { Readable } from 'node:stream';
 import { once } from 'node:events';
@@ -502,12 +502,12 @@ it('rejects provider failures and mismatched deployment identity without retryin
   expect(b.requests.some((request) => request.body?.input?.operation === 'search.query.resolve')).toBe(false);
 });
 
-async function forwarded() {
+async function forwarded(curve: CrossfadeCurve = 'equalPower') {
   const host = await deployment('discovered');
   const fixture = await setup({
     nodeType: 'remote',
     crossfadeAvailable: true,
-    queueOptions: { crossfade: { enabled: true } },
+    queueOptions: { crossfade: { enabled: true, curve } },
   });
   cleanup.push(() => fixture.player.destroy());
   const node = fixture.backend.client.nodes[0]!;
@@ -636,33 +636,37 @@ it('rejects conflicting placements including duplicate host IDs and sticky guild
   await expect(queue.play(first, { channelId: 'voice-one' })).rejects.toThrow('sticky guild assignment');
 });
 
-it('forwards related Tracks to their origin and preserves affinity during crossfade and history', async () => {
-  const { player: bot, queue, session, execute } = await forwarded();
-  const first = (await bot.search('first')).tracks[0]!;
-  const related = await bot.plugins.execute('track.related', { track: first });
-  const second = related!.tracks[0]!;
-  expect(second.title).toBe('related:first');
-  expect(second.sourceReference).toMatchObject({
-    nodeId: 'fake-node',
-    hostId: 'discovered',
-    pluginId: RemoteExtractor.identifier,
-  });
-  expect(execute).toHaveBeenCalledWith(expect.objectContaining({ nodeId: 'fake-node', operation: 'source.related' }));
-  const stage = vi.spyOn(session, 'stageNext');
-  await queue.play([first, second]);
-  session.requestPreparation();
-  await settle();
-  expect(stage).toHaveBeenCalledWith(
-    expect.objectContaining({ hostId: 'discovered', operation: 'source.stream' }),
-    expect.anything(),
-  );
-  session.promote()();
-  await settle();
-  expect(queue.currentTrack).toBe(second);
-  expect(queue.history.tracks.toArray()[0]?.sourceReference?.nodeId).toBe('fake-node');
-  await queue.stop();
-  expect(session.stage).toBeNull();
-});
+it.each(['equalPower', 'adaptive'] as const)(
+  'preserves discovered source affinity through %s crossfade and history',
+  async (curve) => {
+    const { player: bot, queue, session, execute } = await forwarded(curve);
+    expect(session.crossfade).toEqual({ enabled: true, curve });
+    const first = (await bot.search('first')).tracks[0]!;
+    const related = await bot.plugins.execute('track.related', { track: first });
+    const second = related!.tracks[0]!;
+    expect(second.title).toBe('related:first');
+    expect(second.sourceReference).toMatchObject({
+      nodeId: 'fake-node',
+      hostId: 'discovered',
+      pluginId: RemoteExtractor.identifier,
+    });
+    expect(execute).toHaveBeenCalledWith(expect.objectContaining({ nodeId: 'fake-node', operation: 'source.related' }));
+    const stage = vi.spyOn(session, 'stageNext');
+    await queue.play([first, second]);
+    session.requestPreparation();
+    await settle();
+    expect(stage).toHaveBeenCalledWith(
+      expect.objectContaining({ hostId: 'discovered', operation: 'source.stream' }),
+      expect.anything(),
+    );
+    session.promote()();
+    await settle();
+    expect(queue.currentTrack).toBe(second);
+    expect(queue.history.tracks.toArray()[0]?.sourceReference?.nodeId).toBe('fake-node');
+    await queue.stop();
+    expect(session.stage).toBeNull();
+  },
+);
 
 it('forwards authorized Track lyrics through metadata.execute without forwarding lifecycle hooks', async () => {
   const { player: bot, host, execute } = await forwarded();
@@ -728,4 +732,22 @@ it('cancels in-flight forwarding and skips unsupported servers without polling',
   backend.client.nodes[0]!.capabilities.pluginOperations.forwarding = false;
   expect((await bot.search('unsupported')).isEmpty()).toBe(true);
   expect(list).not.toHaveBeenCalled();
+});
+
+it('rejects an unsupported adaptive curve on a discovered source node without moving its playback', async () => {
+  const { player: bot, queue, session, backend } = await forwarded('adaptive');
+  const track = (await bot.search('affinity')).tracks[0]!;
+
+  await queue.node.destroySession();
+  backend.client.nodes[0]!.capabilities.crossfade.curves = ['equalPower'];
+  backend.client.createDiscordSession.mockClear();
+
+  await expect(queue.play(track, { channelId: 'voice-one' })).rejects.toThrow(
+    'does not support the adaptive crossfade curve',
+  );
+
+  expect(backend.client.createDiscordSession).not.toHaveBeenCalled();
+  expect(queue.node.session).toBeNull();
+  expect(session.connectionState).toBe('disconnected');
+  expect(track.sourceReference?.nodeId).toBe('fake-node');
 });

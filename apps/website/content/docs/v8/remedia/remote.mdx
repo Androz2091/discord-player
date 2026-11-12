@@ -90,6 +90,6 @@ The Remedia client can move a session to another node, but the move may need to 
 
 ## Crossfade
 
-The server must have crossfade enabled and must report `capabilities.crossfade.available`. If it does not, the guild plays without crossfade and the Player emits a `debug` message. See [crossfade](/docs/v8/guides/crossfade#embedded-and-remote-nodes).
+The server must have crossfade enabled and must report `capabilities.crossfade.available`. If it does not, the guild plays without crossfade and the Player emits a `debug` message. An explicit `adaptive` request also requires `capabilities.crossfade.curves` to include it, and rejects if unsupported. See [crossfade](/docs/v8/guides/crossfade#embedded-and-remote-nodes).
 
 <NextStep href="/docs/v8/remedia/operations" label="Node capacity and selection" />

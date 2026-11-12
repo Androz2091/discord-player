@@ -4,7 +4,7 @@ import { SyncedLyricsProvider } from './synced-lyrics.js';
 import type { StreamHooks } from '../hooks.js';
 import { VoiceStateTracker } from '../voice-state.js';
 import { randomInt, randomUUID } from 'node:crypto';
-import type { DiscordSessionEvents, NodeSelection, PlayOptions } from '@remedia/client';
+import type { CrossfadeCurve, DiscordSessionEvents, NodeSelection, PlayOptions } from '@remedia/client';
 import { AsyncQueue } from '../utils/async-queue.js';
 import type { GuildNodeManager } from '../managers/guild-queue.manager.js';
 import { GuildQueueHistory } from '../managers/guild-queue-history.manager.js';
@@ -61,14 +61,17 @@ export type CrossfadeOptions =
       /** Explicitly opt in to native crossfading. */
       enabled: true;
 
-      /** Overlap duration in milliseconds; defaults to 5000. */
+      /** Overlap duration in milliseconds; defaults to the node policy (normally 5000). */
       durationMs?: number;
 
-      /** Preparation lead before the fade begins; defaults to 30000 milliseconds. */
+      /** Preparation lead before the fade begins; defaults to the node policy (normally 30000 milliseconds). */
       prepareBeforeMs?: number;
 
-      /** Native mixing curve; only equal power is supported. */
-      curve?: 'equalPower';
+      /**
+       * Native mixing curve: `equalPower` or loudness-aware `adaptive`.
+       * Omitted values use the node default. An explicit unsupported curve rejects session creation.
+       */
+      curve?: CrossfadeCurve;
     };
 
 /** Initialization defaults and policies for one guild queue. */

@@ -13,7 +13,7 @@ Turn it on for every queue when you create the Player:
 import { Player } from 'discord-player';
 
 const player = new Player({
-  crossfade: { enabled: true, durationMs: 5000 },
+  crossfade: { enabled: true, durationMs: 5000, curve: 'adaptive' },
   send,
 });
 ```
@@ -28,12 +28,16 @@ const queue = await player.createQueue(guildId, {
 
 A queue setting replaces the Player setting. Use `crossfade: false` to disable it for one queue.
 
-| Option            | Default        | Meaning                                                    |
-| ----------------- | -------------- | ---------------------------------------------------------- |
-| `enabled`         | none           | Must be `true` to opt in                                   |
-| `durationMs`      | `5000`         | Length of the overlap                                      |
-| `prepareBeforeMs` | `30000`        | How long before the fade starts the next track is prepared |
-| `curve`           | `'equalPower'` | The only supported curve                                   |
+| Option            | Default                               | Meaning                                                    |
+| ----------------- | ------------------------------------- | ---------------------------------------------------------- |
+| `enabled`         | none                                  | Must be `true` to opt in                                   |
+| `durationMs`      | Node policy (normally `5000`)         | Length of the overlap                                      |
+| `prepareBeforeMs` | Node policy (normally `30000`)        | How long before the fade starts the next track is prepared |
+| `curve`           | Node policy (normally `'equalPower'`) | `'equalPower'` or `'adaptive'`                             |
+
+`equalPower` uses fixed equal-power gains. `adaptive` starts with those gains and applies bounded, smoothed attenuation based on the loudness difference between tracks, up to 6 dB; it never boosts. Remedia owns the mixing for both curves.
+
+Omitting `curve`, `durationMs`, or `prepareBeforeMs` leaves that setting to the selected node's defaults. A queue setting replaces the whole Player setting rather than merging with it.
 
 The settings apply when a voice session is created. To change them for a guild, delete and recreate its queue.
 
@@ -92,6 +96,10 @@ A remote node must also have crossfade enabled and report it as available. In `r
 ```
 
 If the selected node does not support crossfade, playback continues without it and the Player emits a `debug` message. Guilds are never moved to another node to enable crossfade.
+
+An explicit curve must appear in `node.capabilities.crossfade.curves`. Requesting an unsupported curve rejects session creation; Discord Player does not replace `adaptive` with `equalPower`. Older servers advertise only `equalPower` through the client's capability normalization. If automatic placement could choose an incompatible node, pin a capable node or use `selectNode` to choose one explicitly.
+
+Remedia-discovered Tracks stay on their originating node, including during crossfade preparation. That node must support the requested curve and the source's plugin host; another node's adaptive capability cannot override this affinity.
 
 Crossfade needs tracks long enough for the configured overlap.
 
