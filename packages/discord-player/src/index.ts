@@ -43,6 +43,7 @@ export type {
   OnBeforeCreateStreamHandler,
   OnAfterCreateStreamHandler,
   OnStreamExtractedHandler,
+  PostProcessedResult,
 } from './hooks.js';
 
 export * from './structures/synced-lyrics.js';

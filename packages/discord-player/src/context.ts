@@ -3,7 +3,10 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import type { DiscordPlayer } from './player.js';
 import type { GuildQueue } from './structures/guild-queue.js';
 import type { GuildQueueHistory } from './managers/guild-queue-history.manager.js';
-import type { PlayerTimestamp } from './structures/guild-queue-player-node.js';
+import type { NodeResolvable } from './managers/guild-queue.manager.js';
+import type { GuildQueuePlayerNode, PlayerTimestamp } from './structures/guild-queue-player-node.js';
+import type { Track } from './structures/track.js';
+import { IllegalHookInvocationError } from './errors.js';
 
 /** Callback executed inside an asynchronous context scope. */
 export type ContextReceiver<Result> = () => Result;
@@ -89,44 +92,26 @@ export interface PlayerContextValue {
   /** Player instance that established this scope. */
   player: DiscordPlayer;
 
-  /** Optional guild ID used to resolve the scoped queue. */
+  /** Guild ID used to resolve the scoped queue. */
   guildId?: string;
 
   /** Optional structural guild object. */
   guild?: { id: string } | null;
 
-  /** Optional pre-resolved queue. */
+  /** Optional queue supplied to the context. */
   queue?: GuildQueue | null;
-
-  /** Application metadata attached to the command context. */
-  metadata?: unknown;
-
-  /** Contextual volume override. */
-  volume?: number;
-
-  /** Contextual player timeline override. */
-  timeline?: PlayerTimestamp | null;
 }
 
 /** Input accepted by `PlayerContext.provide()`. */
 export interface PlayerContextInput {
-  /** Optional guild ID used to resolve the scoped queue. */
+  /** Guild ID used to resolve the scoped queue. */
   guildId?: string;
 
   /** Optional structural guild object. */
   guild?: { id: string } | null;
 
-  /** Optional pre-resolved queue. */
+  /** Optional queue supplied to the context. */
   queue?: GuildQueue | null;
-
-  /** Application metadata attached to the command context. */
-  metadata?: unknown;
-
-  /** Contextual volume override. */
-  volume?: number;
-
-  /** Contextual player timeline override. */
-  timeline?: PlayerTimestamp | null;
 }
 
 const activePlayerContext = new AsyncLocalStorage<PlayerContextValue>();
@@ -146,91 +131,290 @@ export class PlayerContext extends Context<PlayerContextValue> {
 
   /**
    * Provide v7-style command context while preserving isolation between Player instances.
-   * @param value Guild, queue, metadata, or other application context values.
+   * @param value Guild or queue values used by hook resolution.
    * @param receiver Callback run in the async context.
    * @returns The callback's return value.
    */
   public override provide<Result>(
-    /** Guild, queue, metadata, or other application context values. */
+    /** Guild or queue values used by hook resolution. */
     value: PlayerContextInput,
     /** Callback run in the async context. */
     receiver: ContextReceiver<Result>,
   ): Result {
-    const guildId = value.guildId ?? value.guild?.id;
-    const scoped: PlayerContextValue = {
-      ...value,
-      player: this.owner,
-      guildId,
-      queue: value.queue ?? (guildId ? this.owner.nodes.get(guildId) : null),
-    };
+    const guildId = value.guildId ?? value.guild?.id ?? value.queue?.guildId;
+    const scoped: PlayerContextValue = { ...value, player: this.owner, guildId };
 
     return activePlayerContext.run(scoped, () => super.provide(scoped, receiver));
   }
 }
 
-/** Read the scoped Player, otherwise the first active registered Player.
- * @throws Error When no Player exists in either context.
- */
-export function useMainPlayer(): DiscordPlayer {
-  const player = activePlayerContext.getStore()?.player ?? firstActivePlayer();
+interface HookContext {
+  /** Player owning the current or fallback scope. */
+  player: DiscordPlayer;
 
-  if (!player) throw new Error('Player context is not available. Create a DiscordPlayer first.');
+  /** Active Player context, if any. */
+  context: PlayerContextValue | undefined;
 
-  return player;
-}
-
-/** Read the Player associated with the current async scope. */
-export function usePlayer(): DiscordPlayer {
-  return useMainPlayer();
+  /** Whether the Player was resolved from the global fallback registry. */
+  isFallback: boolean;
 }
 
 /**
- * Resolve a queue in the active Player scope, optionally by explicit guild ID.
- * @param guildId Guild ID to resolve; defaults to the active context's guild.
+ * Resolve the Player and context used by a hook.
+ * @throws {IllegalHookInvocationError} When no Player exists in either context.
  */
-export function useQueue(
-  /** Guild ID to resolve; defaults to the active context's guild. */
-  guildId?: string,
-): GuildQueue | null {
+function useHooksContext(): HookContext {
   const context = activePlayerContext.getStore();
+  const player = context?.player ?? firstActivePlayer();
 
-  if (guildId) return (context?.player ?? firstActivePlayer())?.nodes.get(guildId) ?? null;
+  if (!player) {
+    throw new IllegalHookInvocationError(
+      'discord-player',
+      'Player context is not available. Create a DiscordPlayer before using this hook.',
+    );
+  }
 
-  if (!context) return null;
-
-  if (context.queue) return context.queue;
-
-  return context.guildId ? context.player.nodes.get(context.guildId) : null;
+  return { player, context, isFallback: context === undefined };
 }
 
-/** Read the active queue's history manager. */
-export function useHistory(): GuildQueueHistory | null {
-  return useQueue()?.history ?? null;
+/**
+ * Read the guild ID supplied by an active context.
+ * @param context Active Player context, if any.
+ */
+function contextGuildId(context: PlayerContextValue | undefined): string | undefined {
+  return context?.guildId ?? context?.guild?.id ?? context?.queue?.guildId;
 }
 
-/** Read command metadata first, then the active queue metadata. */
-export function useMetadata<Value = unknown>(): Value | undefined {
-  const context = activePlayerContext.getStore();
+/**
+ * Resolve the queue targeted by a guild-scoped hook.
+ * @param hookName Public hook name used in invocation errors.
+ * @param node Explicit queue resolvable supplied by the caller.
+ * @param resolution Whether queue instances bypass the owning Player cache.
+ */
+function resolveHookQueue<Metadata>(
+  hookName: string,
+  node: NodeResolvable | undefined,
+  resolution: 'get' | 'resolve',
+): { player: DiscordPlayer; queue: GuildQueue<Metadata> | null } {
+  const { player, context, isFallback } = useHooksContext();
 
-  if (!context) return undefined;
+  if (node !== undefined) {
+    const queue = resolution === 'resolve' ? player.nodes.resolve<Metadata>(node) : player.nodes.get<Metadata>(node);
 
-  return (context.metadata ?? context.queue?.metadata) as Value | undefined;
+    return { player, queue };
+  }
+
+  if (context?.queue) return { player, queue: context.queue as GuildQueue<Metadata> };
+
+  const guildId = contextGuildId(context);
+
+  if (!guildId) {
+    throw new IllegalHookInvocationError(
+      hookName,
+      isFallback
+        ? `${hookName} must be called with an explicit guild argument when not inside a player context.`
+        : `${hookName} requires a guild or queue in the active player context, or an explicit guild argument.`,
+    );
+  }
+
+  const queue =
+    resolution === 'resolve' ? player.nodes.resolve<Metadata>(guildId) : player.nodes.get<Metadata>(guildId);
+
+  return { player, queue };
 }
 
-/** Read contextual volume or the active queue node's percentage volume. */
-export function useVolume(): number | null {
-  const context = activePlayerContext.getStore();
-
-  if (!context) return null;
-
-  return context.volume ?? context.queue?.node.volume ?? null;
+/**
+ * Read the scoped Player, otherwise the first active registered Player.
+ * @throws {IllegalHookInvocationError} When no Player exists in either context.
+ */
+export function useMainPlayer(): DiscordPlayer {
+  return useHooksContext().player;
 }
 
-/** Read contextual timeline or the active queue node's current timeline. */
-export function useTimeline(): PlayerTimestamp | null {
-  const context = activePlayerContext.getStore();
+/**
+ * Read the raw playback node for a guild queue.
+ * @param node Guild queue resolvable; defaults to the guild in the active context.
+ */
+export function usePlayer<Metadata = unknown>(): GuildQueuePlayerNode<Metadata> | null;
+export function usePlayer<Metadata = unknown>(node: NodeResolvable): GuildQueuePlayerNode<Metadata> | null;
+export function usePlayer<Metadata = unknown>(node?: NodeResolvable): GuildQueuePlayerNode<Metadata> | null {
+  const { queue } = resolveHookQueue<Metadata>('usePlayer', node, 'get');
 
-  if (!context) return null;
+  return queue?.node ?? null;
+}
 
-  return context.timeline ?? context.queue?.node.getTimestamp() ?? null;
+/**
+ * Read a guild queue.
+ * @param node Guild queue resolvable; defaults to the guild in the active context.
+ */
+export function useQueue<Metadata = unknown>(): GuildQueue<Metadata> | null;
+export function useQueue<Metadata = unknown>(node: NodeResolvable): GuildQueue<Metadata> | null;
+export function useQueue<Metadata = unknown>(node?: NodeResolvable): GuildQueue<Metadata> | null {
+  const { queue } = resolveHookQueue<Metadata>('useQueue', node, 'resolve');
+
+  return queue;
+}
+
+/**
+ * Read a guild queue history manager.
+ * @param node Guild queue resolvable; defaults to the guild in the active context.
+ */
+export function useHistory<Metadata = unknown>(): GuildQueueHistory<Metadata> | null;
+export function useHistory<Metadata = unknown>(node: NodeResolvable): GuildQueueHistory<Metadata> | null;
+export function useHistory<Metadata = unknown>(node?: NodeResolvable): GuildQueueHistory<Metadata> | null {
+  const { queue } = resolveHookQueue<Metadata>('useHistory', node, 'get');
+
+  return queue?.history ?? null;
+}
+
+/** Functional metadata update. */
+export type SetterFN<T, P> = (previous: P) => T;
+
+/** Read and write queue metadata. */
+export type MetadataDispatch<T> = readonly [() => T, (metadata: T | SetterFN<T, T>) => void];
+
+/**
+ * Read and write guild queue metadata.
+ * @param node Guild queue resolvable; defaults to the guild in the active context.
+ */
+export function useMetadata<T = unknown>(): MetadataDispatch<T>;
+export function useMetadata<T = unknown>(node: NodeResolvable): MetadataDispatch<T>;
+export function useMetadata<T = unknown>(node?: NodeResolvable): MetadataDispatch<T> {
+  const { queue } = resolveHookQueue<T>('useMetadata', node, 'get');
+
+  const getter = () => queue?.metadata as T;
+  const setter = (metadata: T | SetterFN<T, T>) => {
+    if (!queue) return;
+
+    if (typeof metadata === 'function') {
+      queue.setMetadata((metadata as SetterFN<T, T>)(queue.metadata));
+
+      return;
+    }
+
+    queue.setMetadata(metadata);
+  };
+
+  return [getter, setter] as const;
+}
+
+/** Functional volume update. */
+export type VolumeSetterFN = (previous: number) => number;
+
+/** Read and write queue volume, awaited because Remedia applies gain asynchronously. */
+export type VolumeDispatch = readonly [() => number, (volume: number | VolumeSetterFN) => Promise<boolean | undefined>];
+
+/**
+ * Read and write guild queue volume.
+ * @param node Guild queue resolvable; defaults to the guild in the active context.
+ */
+export function useVolume(): VolumeDispatch;
+export function useVolume(node: NodeResolvable): VolumeDispatch;
+export function useVolume(node?: NodeResolvable): VolumeDispatch {
+  const { queue } = resolveHookQueue('useVolume', node, 'get');
+
+  const getter = () => queue?.node.volume as number;
+  const setter = async (volume: number | VolumeSetterFN) => {
+    if (!queue) return undefined;
+
+    const next = typeof volume === 'function' ? volume(queue.node.volume) : volume;
+
+    await queue.node.setVolume(next);
+
+    return true;
+  };
+
+  return [getter, setter] as const;
+}
+
+/** Options controlling the queue timeline exposed by {@link useTimeline}. */
+export interface TimelineDispatcherOptions {
+  /** Whether to read the source media position instead of Remedia's filtered output clock. */
+  ignoreFilters: boolean;
+
+  /** Queue to control; defaults to the guild in the active context. */
+  node: NodeResolvable;
+}
+
+/** Live controller for a guild queue's current playback. */
+export interface GuildQueueTimeline {
+  /** Current and total playback time, or null when no Track is selected. */
+  readonly timestamp: PlayerTimestamp | null;
+
+  /** Volume percentage, from zero through two hundred. */
+  readonly volume: number;
+
+  /** Whether playback is paused. */
+  readonly paused: boolean;
+
+  /** Current queue Track, including a paused Track. */
+  readonly track: Track | null;
+
+  /** Pause the current Remedia session. */
+  pause(): Promise<boolean>;
+
+  /** Resume the current Remedia session. */
+  resume(): Promise<boolean>;
+
+  /** Set volume using Discord Player's percentage convention. */
+  setVolume(vol: number): Promise<boolean>;
+
+  /** Seek the current Remedia session to a media position in milliseconds. */
+  setPosition(time: number): Promise<boolean>;
+}
+
+/**
+ * Read and control the current guild queue playback.
+ * @param options Optional queue target and filter-aware timeline selection.
+ * @remarks Control methods are asynchronous because Remedia owns the session.
+ */
+export function useTimeline(): GuildQueueTimeline | null;
+export function useTimeline(options: Partial<TimelineDispatcherOptions>): GuildQueueTimeline | null;
+export function useTimeline(options?: Partial<TimelineDispatcherOptions>): GuildQueueTimeline | null {
+  const { queue } = resolveHookQueue('useTimeline', options?.node, 'get');
+
+  if (!queue) return null;
+
+  const timeline = Object.preventExtensions({
+    get timestamp() {
+      return queue.node.getTimestamp(options?.ignoreFilters);
+    },
+    get volume() {
+      return queue.node.volume;
+    },
+    get paused() {
+      return queue.node.isPaused();
+    },
+    get track() {
+      return queue.currentTrack;
+    },
+    async pause() {
+      if (!queue.node.getSession(false)) return false;
+
+      await queue.node.pause();
+
+      return true;
+    },
+    async resume() {
+      if (!queue.node.getSession(false)) return false;
+
+      await queue.node.resume();
+
+      return true;
+    },
+    async setVolume(vol: number) {
+      await queue.node.setVolume(vol);
+
+      return true;
+    },
+    async setPosition(time: number) {
+      if (!queue.node.getSession(false) || !queue.currentTrack) return false;
+
+      await queue.node.seek(time);
+
+      return true;
+    },
+  } satisfies GuildQueueTimeline);
+
+  return timeline;
 }

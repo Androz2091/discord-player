@@ -5,6 +5,9 @@ import { GuildQueue, type GuildQueueOptions } from '../structures/guild-queue.js
 /** Guild ID or a structural guild-like object. */
 export type GuildQueueResolvable = string | { id: string } | { guildId: string };
 
+/** A guild queue instance or any value that can resolve to one. */
+export type NodeResolvable = GuildQueue | GuildQueueResolvable;
+
 /** Cache and lifecycle manager for this Player's GuildQueue instances. */
 export class GuildNodeManager {
   /** Cached queues indexed by guild ID. */
@@ -23,7 +26,7 @@ export class GuildNodeManager {
    * @param guild Guild ID, guild-like object or queue.
    * @returns Guild identifier.
    */
-  public resolveId(guild: GuildQueueResolvable): string {
+  public resolveId(guild: NodeResolvable): string {
     return typeof guild === 'string' ? guild : 'guildId' in guild ? guild.guildId : guild.id;
   }
 
@@ -31,15 +34,18 @@ export class GuildNodeManager {
    * Get a queue by guild ID, returning null when none exists.
    * @param guildId Guild ID used as the queue cache key.
    */
-  public get<Metadata = unknown>(guildId: GuildQueueResolvable): GuildQueue<Metadata> | null {
+  public get<Metadata = unknown>(guildId: NodeResolvable): GuildQueue<Metadata> | null {
     return (this.cache.get(this.resolveId(guildId)) as GuildQueue<Metadata> | undefined) ?? null;
   }
 
   /**
-   * Resolve a queue from a string guild ID or structural guild object.
+   * Resolve a queue from a guild ID, guild-like object, or queue instance.
    * @param guild Guild ID or object containing an `id` or `guildId` property.
+   * @returns The supplied queue instance directly, otherwise the cached queue for the guild.
    */
-  public resolve<Metadata = unknown>(guild: GuildQueueResolvable): GuildQueue<Metadata> | null {
+  public resolve<Metadata = unknown>(guild: NodeResolvable): GuildQueue<Metadata> | null {
+    if (guild instanceof GuildQueue) return guild as GuildQueue<Metadata>;
+
     return this.get<Metadata>(guild);
   }
 
@@ -47,7 +53,7 @@ export class GuildNodeManager {
    * Check whether a queue exists for a guild ID.
    * @param guildId Guild ID to check.
    */
-  public has(guildId: GuildQueueResolvable): boolean {
+  public has(guildId: NodeResolvable): boolean {
     return this.cache.has(this.resolveId(guildId));
   }
 
@@ -56,7 +62,7 @@ export class GuildNodeManager {
    * @param guildId Guild ID of the queue to remove.
    * @returns Whether a cached queue was found and destroyed.
    */
-  public async delete(guildId: GuildQueueResolvable): Promise<boolean> {
+  public async delete(guildId: NodeResolvable): Promise<boolean> {
     const queue = this.cache.get(this.resolveId(guildId));
 
     if (!queue) return false;

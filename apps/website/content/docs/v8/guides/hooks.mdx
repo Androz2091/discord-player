@@ -5,11 +5,19 @@ description: Replace or inspect the audio source of a track before Remedia opens
 
 Hooks run while a track is prepared for playback. Use them to swap the audio source, rewrite a URL, or process encoded audio in your own process.
 
-| Hook                   | Runs                                  | Can return                                  |
-| ---------------------- | ------------------------------------- | ------------------------------------------- |
-| `onBeforeCreateStream` | Before normal source resolution       | A replacement source, or `null` to continue |
-| `onStreamExtracted`    | After the plugin resolved a source    | The source to use                           |
-| `onAfterCreateStream`  | On encoded bytes, embedded nodes only | `{ stream }`, or `null` to keep the input   |
+| Hook                   | Runs                                  | Can return                                       |
+| ---------------------- | ------------------------------------- | ------------------------------------------------ |
+| `onBeforeCreateStream` | Before normal source resolution       | A replacement source, or `null` to continue      |
+| `onStreamExtracted`    | After the plugin resolved a source    | The source to use, or a nullish value to keep it |
+| `onAfterCreateStream`  | On encoded bytes, embedded nodes only | `{ stream }`, or `null` to keep the input        |
+
+The v7 argument order is preserved. v8 appends an `AbortSignal` as the last argument:
+
+```ts
+onBeforeCreateStream((track, queryType, queue, signal) => ...);
+onStreamExtracted((source, track, queue, signal) => ...);
+onAfterCreateStream((stream, queue, track, signal) => ...);
+```
 
 ## Register a hook
 
@@ -36,6 +44,8 @@ queue.onBeforeCreateStream = async (track, queryType, queue, signal) => {
 ```
 
 A global registration replaces the previous one. Call the returned function to remove it when the component that registered it shuts down.
+
+`queryType` uses the Track's stored query type, or `'arbitrary'` when the Track has none, matching v7.
 
 Hooks run inside the owning Player and queue [context](/docs/v8/guides/context).
 
@@ -73,6 +83,8 @@ onStreamExtracted(async (source, track, queue, signal) => {
 
 It receives the resolved source, which can be a URL or an operation descriptor. It does not see the audio bytes.
 
+As in v7, it only runs after normal provider resolution. If `onBeforeCreateStream` returned a replacement source, provider resolution and `onStreamExtracted` are skipped. Returning `null` or `undefined` keeps the resolved source.
+
 ## onAfterCreateStream
 
 ```ts
@@ -80,6 +92,8 @@ queue.onAfterCreateStream = async (stream, queue, track, signal) => {
   return { stream: myTransform(stream, signal) };
 };
 ```
+
+The result may include a legacy `type` field, which is accepted for v7 source compatibility but ignored because Remedia owns decoding. Return `{ stream }` or `null`.
 
 This hook needs the encoded bytes in your process, so it only works with an embedded node and a `Readable` source. When Remedia opens a URL or file itself, the bytes never reach your code and registering this hook for that source fails with an error. Return a `Readable` from `onBeforeCreateStream` if you need to process audio locally.
 
