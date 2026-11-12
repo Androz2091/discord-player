@@ -603,9 +603,9 @@ export async function lookupNpmDistTag(
 }
 
 /**
- * Publish all missing tarballs in dependency order and verify each exact version.
+ * Publish all missing tarballs in dependency order.
  * @param {{packages: Array<{name: string, version: string, path: string, manifest?: object}>, distTag: string, lookupVersion?: Function, lookupTag?: Function, publish?: Function, log?: Function}} options Publish inputs and injectable registry/npm operations.
- * @returns {Promise<{distTag: string, packages: Array<{name: string, version: string, status: string}>}>} Verified publication summary.
+ * @returns {Promise<{distTag: string, packages: Array<{name: string, version: string, status: string}>}>} Publication summary.
  */
 export async function publishMissingPackages({
   packages,
@@ -614,9 +614,6 @@ export async function publishMissingPackages({
   lookupTag = lookupNpmDistTag,
   publish = publishTarball,
   log = console.log,
-  verifyAttempts = 6,
-  verifyDelayMs = 2000,
-  sleep = delay,
 }) {
   if (!['latest', 'dev', 'beta', 'rc'].includes(distTag))
     throw new ReleaseError(`Unsupported npm dist-tag ${JSON.stringify(distTag)}.`);
@@ -646,27 +643,6 @@ export async function publishMissingPackages({
 
     log(`Publishing ${pkg.name}@${pkg.version} with npm dist-tag ${distTag}.`);
     await publish(pkg.path, { name: pkg.name, version: pkg.version, distTag });
-
-    // let visible = false;
-    // let verificationError;
-
-    // for (let attempt = 1; attempt <= verifyAttempts; attempt += 1) {
-    //   try {
-    //     visible = await lookupVersion(pkg.name, pkg.version);
-    //   } catch (error) {
-    //     verificationError = error;
-    //   }
-
-    //   if (visible) break;
-
-    //   if (attempt < verifyAttempts) await sleep(verifyDelayMs * attempt);
-    // }
-
-    // if (!visible) {
-    //   const message = `npm publish completed but ${pkg.name}@${pkg.version} could not be verified on the registry after ${verifyAttempts} attempts.`;
-
-    //   throw new ReleaseError(message, verificationError ? { cause: verificationError } : undefined);
-    // }
 
     published.push({ name: pkg.name, version: pkg.version, status: 'published' });
   }

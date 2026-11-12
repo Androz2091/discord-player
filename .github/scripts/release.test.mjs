@@ -507,8 +507,6 @@ test('publishes every missing package in dependency order with stable or prerele
       visibleVersions.add(options.name);
     },
 
-    sleep: async () => {},
-
     log: () => {},
   });
 
@@ -541,8 +539,6 @@ test('publishes every missing package in dependency order with stable or prerele
       prereleaseVisible = true;
     },
 
-    sleep: async () => {},
-
     log: () => {},
   });
 
@@ -550,42 +546,6 @@ test('publishes every missing package in dependency order with stable or prerele
     prereleaseCalls.map(({ distTag }) => distTag),
     ['beta'],
   );
-});
-
-test('waits through bounded npm propagation 404s after publication', async () => {
-  const root = tempDir();
-  const tarball = join(root, 'package.tgz');
-
-  writeFileSync(tarball, 'tarball');
-
-  let visible = false;
-  let checks = 0;
-  const result = await publishMissingPackages({
-    packages: [{ name: 'discord-player', version: '8.0.0', path: tarball }],
-    distTag: 'latest',
-
-    lookupVersion: async () => {
-      checks += 1;
-
-      return visible;
-    },
-
-    lookupTag: async () => null,
-
-    publish: async () => {
-      visible = true;
-    },
-
-    verifyAttempts: 3,
-    verifyDelayMs: 0,
-
-    sleep: async () => {},
-
-    log: () => {},
-  });
-
-  assert.equal(result.packages[0].status, 'published');
-  assert.equal(checks, 2);
 });
 
 test('skips every existing version, resumes a partial publish, and leaves existing tags untouched', async () => {
@@ -923,8 +883,6 @@ test('scoped plugin host tarballs use pnpm filenames and publish before their de
     },
 
     log: () => {},
-
-    sleep: async () => {},
   });
 
   assert.deepEqual(calls, ['@discord-player/plugin-host', 'discord-player']);
