@@ -1,0 +1,41 @@
+---
+title: Generated API reference
+description: How the TypeScript API reference is generated and verified.
+---
+
+The [generated API reference](/docs/v8/api) documents the public exports of [`discord-player`](/docs/v8/api/typescript/discord-player) and [`@discord-player/plugin-host`](/docs/v8/api/typescript/plugin-host). It is rebuilt from source on every documentation build.
+
+## Reading a page
+
+Classes, interfaces, types, enums, functions, variables and modules have their own pages. Members have stable anchors. Signatures are highlighted and documented type names link to their declarations, including references across packages. Inherited members link to their origin.
+
+Overloads appear in separate tabs, each with its signature, parameters, return value and examples. Every tab is present in the exported HTML. Direct links to an overload open its tab.
+
+Documentation preserves Markdown, code fences, `@example`, `@remarks`, `@deprecated`, `@throws` and `@see`. Source links point to the commit used to build the documentation. Search indexes symbols and members; `/llms.mdx/docs/v8/api/…/content.md` exports each page as Markdown.
+
+## Writing documentation
+
+Write TSDoc on exported declarations. Describe every parameter with `@param`, return values with `@returns`, and expected errors with `@throws`. Link declarations with `{@link Name}` and include realistic `@example` blocks.
+
+Only public entry points are documented. Private members and declarations marked `@internal`, `@hidden` or `@ignore` are omitted. Types used in signatures that are not exported remain readable and unlinked, and appear in generator warnings. Guides explaining behavior still need manual updates.
+
+## Generating locally
+
+```sh
+pnpm docs:api
+pnpm docs:typecheck
+pnpm docs:test
+pnpm --filter @discord-player/website dev
+pnpm --filter @discord-player/website build
+```
+
+Output lives in the ignored `apps/website/.generated/api` directory. The app generates it before development, type checking and builds. TypeDoc 0.28.20 uses TypeScript 5.9 independently of the website compiler. Its version and JSON schema are checked explicitly; update `scripts/docs/config.ts` and the normalizer together when upgrading.
+
+## How it works
+
+1. `scripts/docs/typedoc.ts` converts the configured public entry points to TypeDoc JSON.
+2. `normalize-typedoc.ts` builds the shared symbol model.
+3. `symbols.ts` allocates URLs using package, file and qualified declaration identity. `links.ts` resolves references by identity.
+4. `pages.ts` generates navigation, tables of contents and search content. `validate.ts` rejects duplicate URLs, anchors and missing link targets.
+5. The website merges generated virtual pages with authored guides and renders them through `src/components/api`. Only the current package's symbols expand in the sidebar.
+6. Builds check exported links, social images, search coverage, Markdown exports and server-rendered signatures. CI runs the generator tests and builds the website before deployment.

@@ -20,3 +20,233 @@ html > body[data-scroll-locked] {
   margin-right: 0 !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
+
+/* Long API paths should wrap in prose while fenced examples keep horizontal scrolling. */
+.prose :not(pre, td, th) > code {
+  overflow-wrap: anywhere;
+}
+
+/*
+ * Overload tabs for generated API pages. Every panel is present in the server-rendered HTML; the
+ * radio inputs switch panels without JavaScript (and with native arrow-key support). Rules are
+ * written per index because CSS cannot select a sibling by counter.
+ */
+.ov-tabs > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ov-tabs .ov-panel {
+  display: none;
+}
+
+.ov-tabs .ov-list > label {
+  border-bottom: 1px solid transparent;
+  color: var(--color-fd-muted-foreground);
+  cursor: pointer;
+}
+
+.ov-tabs .ov-list > label:hover {
+  color: var(--color-fd-accent-foreground);
+}
+
+.ov-tabs > input:nth-of-type(1):checked ~ .ov-panels > .ov-panel:nth-child(1) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(2):checked ~ .ov-panels > .ov-panel:nth-child(2) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(3):checked ~ .ov-panels > .ov-panel:nth-child(3) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(4):checked ~ .ov-panels > .ov-panel:nth-child(4) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(5):checked ~ .ov-panels > .ov-panel:nth-child(5) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(6):checked ~ .ov-panels > .ov-panel:nth-child(6) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(7):checked ~ .ov-panels > .ov-panel:nth-child(7) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(8):checked ~ .ov-panels > .ov-panel:nth-child(8) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(9):checked ~ .ov-panels > .ov-panel:nth-child(9) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(10):checked ~ .ov-panels > .ov-panel:nth-child(10) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(11):checked ~ .ov-panels > .ov-panel:nth-child(11) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(12):checked ~ .ov-panels > .ov-panel:nth-child(12) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(13):checked ~ .ov-panels > .ov-panel:nth-child(13) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(14):checked ~ .ov-panels > .ov-panel:nth-child(14) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(15):checked ~ .ov-panels > .ov-panel:nth-child(15) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(16):checked ~ .ov-panels > .ov-panel:nth-child(16) {
+  display: block;
+}
+.ov-tabs > input:nth-of-type(1):checked ~ .ov-list > label:nth-child(1) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(2):checked ~ .ov-list > label:nth-child(2) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(3):checked ~ .ov-list > label:nth-child(3) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(4):checked ~ .ov-list > label:nth-child(4) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(5):checked ~ .ov-list > label:nth-child(5) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(6):checked ~ .ov-list > label:nth-child(6) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(7):checked ~ .ov-list > label:nth-child(7) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(8):checked ~ .ov-list > label:nth-child(8) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(9):checked ~ .ov-list > label:nth-child(9) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(10):checked ~ .ov-list > label:nth-child(10) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(11):checked ~ .ov-list > label:nth-child(11) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(12):checked ~ .ov-list > label:nth-child(12) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(13):checked ~ .ov-list > label:nth-child(13) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(14):checked ~ .ov-list > label:nth-child(14) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(15):checked ~ .ov-list > label:nth-child(15) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(16):checked ~ .ov-list > label:nth-child(16) {
+  border-bottom-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+}
+.ov-tabs > input:nth-of-type(1):focus-visible ~ .ov-list > label:nth-child(1) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(2):focus-visible ~ .ov-list > label:nth-child(2) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(3):focus-visible ~ .ov-list > label:nth-child(3) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(4):focus-visible ~ .ov-list > label:nth-child(4) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(5):focus-visible ~ .ov-list > label:nth-child(5) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(6):focus-visible ~ .ov-list > label:nth-child(6) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(7):focus-visible ~ .ov-list > label:nth-child(7) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(8):focus-visible ~ .ov-list > label:nth-child(8) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(9):focus-visible ~ .ov-list > label:nth-child(9) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(10):focus-visible ~ .ov-list > label:nth-child(10) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(11):focus-visible ~ .ov-list > label:nth-child(11) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(12):focus-visible ~ .ov-list > label:nth-child(12) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(13):focus-visible ~ .ov-list > label:nth-child(13) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(14):focus-visible ~ .ov-list > label:nth-child(14) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(15):focus-visible ~ .ov-list > label:nth-child(15) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+.ov-tabs > input:nth-of-type(16):focus-visible ~ .ov-list > label:nth-child(16) {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+
+/*
+ * Highlighted API signatures reuse Shiki's dual-theme CSS variables. Tokens that link to another
+ * symbol are anchors rather than spans, so the Fumadocs `.shiki span` color rule is repeated for them
+ * and for inline fragments that live outside a code block figure.
+ */
+.shiki a.api-link,
+.api-inline span,
+.api-inline a.api-link {
+  color: var(--shiki-light);
+}
+
+.dark .shiki a.api-link,
+.dark .api-inline span,
+.dark .api-inline a.api-link {
+  color: var(--shiki-dark);
+}
+
+.api-inline {
+  font-size: 0.8125rem;
+}

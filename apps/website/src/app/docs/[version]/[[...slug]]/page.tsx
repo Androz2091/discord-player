@@ -1,3 +1,5 @@
+import { ApiPageBody } from '@/components/api/api-page';
+import { getManifestPage, isApiPath, loadApiPage } from '@/lib/api/store';
 import {
   DocsBody,
   DocsDescription,
@@ -37,6 +39,8 @@ export default async function Page(props: Props) {
   if (!page) notFound();
 
   const MDX = page.data.body;
+  const manifestPage = version === 'v8' && isApiPath(page.path) ? getManifestPage(page.url) : undefined;
+  const apiFile = manifestPage ? loadApiPage(manifestPage) : undefined;
   const markdownUrl = getPageMarkdownUrl({ version, slugs: page.slugs }).url;
   const { badge } = getDocsVersion(version);
 
@@ -46,7 +50,10 @@ export default async function Page(props: Props) {
       <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
       <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">
         <MarkdownCopyButton markdownUrl={markdownUrl} />
-        <ViewOptionsPopover markdownUrl={markdownUrl} githubUrl={getPageSourceUrl(version, page.path)} />
+        <ViewOptionsPopover
+          markdownUrl={markdownUrl}
+          githubUrl={apiFile?.type === 'symbol' ? apiFile.page.sourceUrl : getPageSourceUrl(version, page.path)}
+        />
         {badge ? (
           <span className="ms-auto inline-flex items-center gap-1.5 text-xs text-fd-muted-foreground">
             You are reading the {getDocsVersion(version).name} docs
@@ -55,7 +62,11 @@ export default async function Page(props: Props) {
         ) : null}
       </div>
       <DocsBody>
-        <MDX components={getMDXComponents({ a: createRelativeLink(getSource(version), page) })} />
+        {apiFile ? (
+          <ApiPageBody file={apiFile} />
+        ) : (
+          <MDX components={getMDXComponents({ a: createRelativeLink(getSource(version), page) })} />
+        )}
       </DocsBody>
     </DocsPage>
   );

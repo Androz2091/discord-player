@@ -16,6 +16,8 @@
     "**/.next/**",
     "**/.source/**",
     "**/generated/**",
+    "**/.generated/**",
+    "apps/website/out/**",
     "packages/remedia-node/native.js",
     "packages/remedia-node/native.d.ts",
     "**/*.generated.js",

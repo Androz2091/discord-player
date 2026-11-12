@@ -19,15 +19,22 @@
     "lint:fix": "oxlint . --fix --deny-warnings",
     "format": "oxfmt .",
     "format:check": "oxfmt . --check",
-    "typecheck": "pnpm --recursive --if-present run typecheck",
+    "typecheck": "pnpm --recursive --if-present run typecheck && pnpm docs:typecheck",
     "build": "pnpm --recursive --if-present --filter '!./apps/website' --filter '!./apps/music-bot' run build",
-    "test": "pnpm --recursive --if-present run test && node --test .github/scripts/*.test.mjs",
-    "check": "pnpm lint && pnpm typecheck && pnpm format:check"
+    "test": "pnpm --recursive --if-present run test && node --test .github/scripts/*.test.mjs && pnpm docs:test",
+    "check": "pnpm lint && pnpm typecheck && pnpm format:check",
+    "docs:api": "node scripts/docs/generate.ts",
+    "docs:typecheck": "tsc -p scripts/docs/tsconfig.json",
+    "docs:test": "node --test scripts/docs/tests/*.test.ts",
+    "docs:verify-export": "node scripts/docs/verify-export.ts"
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/node": "catalog:",
     "oxfmt": "catalog:",
-    "oxlint": "catalog:"
+    "oxlint": "catalog:",
+    "typedoc": "0.28.20",
+    "typescript": "~5.9.3"
   },
   "engines": {
     "node": ">=22.18.0"

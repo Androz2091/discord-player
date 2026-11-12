@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "next build && node scripts/verify-social-images.mjs",
+    "build": "pnpm --workspace-root run docs:api && next build && node scripts/verify-social-images.mjs && node scripts/check-links.mjs && pnpm --workspace-root run docs:verify-export",
     "verify:og": "node scripts/verify-social-images.mjs",
-    "dev": "next dev",
+    "dev": "pnpm --workspace-root run docs:api && next dev",
     "start": "serve out",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "pnpm --workspace-root run docs:api && next typegen && tsc --noEmit",
+    "check:links": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "beautiful-mermaid": "^1.1.3",

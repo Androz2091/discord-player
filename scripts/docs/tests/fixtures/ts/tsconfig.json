@@ -1,0 +1,12 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "types": ["node"],
+    "paths": { "@fx/base": ["./base/src/index.ts"] }
+  },
+  "include": ["base/src/**/*.ts", "app/src/**/*.ts"]
+}

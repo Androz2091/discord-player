@@ -1,3 +1,6 @@
+import { createApiFiles } from './api/files';
+import { apiPageToMarkdown } from './api/markdown';
+import { getManifestPage, isApiPath, loadApiPage } from './api/store';
 import { llms, loader } from 'fumadocs-core/source';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
@@ -45,7 +48,7 @@ function createVersionSource(id: DocsVersionId) {
 
   return loader({
     baseUrl: getVersionBaseUrl(id),
-    source: { ...allSource, files },
+    source: { ...allSource, files: [...files, ...(id === 'v8' ? (createApiFiles() as unknown as typeof files) : [])] },
     plugins: [],
   });
 }
@@ -75,7 +78,7 @@ export function getLlms(id: DocsVersionId) {
   return llms(sources[id], {
     renderPage: async (page) => `# ${page.data.title} (${page.url})
 
-${await page.data.getText('processed')}`,
+${id === 'v8' && isApiPath(page.path) ? apiPageToMarkdown(loadApiPage(requireManifestPage(page.url))) : await page.data.getText('processed')}`,
   });
 }
 
@@ -92,4 +95,13 @@ export function getPageSlugs(id: DocsVersionId): string[] {
  */
 export function getPage(id: DocsVersionId, slugs: string[] | undefined) {
   return sources[id].getPage(slugs);
+}
+
+/** Resolve the manifest for a generated page, failing on inconsistent navigation data. */
+function requireManifestPage(url: string) {
+  const page = getManifestPage(url);
+
+  if (!page) throw new Error(`Generated API page missing from manifest: ${url}`);
+
+  return page;
 }
