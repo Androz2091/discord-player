@@ -2,10 +2,11 @@ import { searchRemedia } from './remedia.js';
 import type { SourceQuery } from './plugins/types.js';
 import type { RemediaClient } from '@remedia/client';
 import { PluginRegistry } from './plugins/registry.js';
+import { PluginError } from './plugins/plugin-error.js';
 import { ExtractorExecutionContext } from './compat/extractor-execution-context.js';
 import { Track } from './structures/track.js';
 import { Playlist } from './structures/playlist.js';
-import { SearchResult } from './structures/search-result.js';
+import { SearchResult, type SearchResultData } from './structures/search-result.js';
 import { SafeEventEmitter } from './utils/safe-event-emitter.js';
 import type { LegacyPlayerContext, SourceRuntimeEvents } from './legacy-player.js';
 import type { MediaResource, SearchOptions } from './types.js';
@@ -148,13 +149,37 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
       : protocol
         ? this.plugins.protocolMatches(protocol, execution)
         : await this.plugins.execute('search.query.match', input, execution);
+    const failures: PluginError[] = [];
+
     for (const match of matches) {
       if (!match?.pluginId || match.score < 0) continue;
-      const result = await this.plugins.execute('search.query.resolve', input, {
-        ...execution,
-        pluginId: match.pluginId,
-        hostId: match.hostId ?? (target ? options.hostId : null),
-      });
+
+      let result: SearchResultData | undefined;
+
+      try {
+        result = await this.plugins.execute('search.query.resolve', input, {
+          ...execution,
+          pluginId: match.pluginId,
+          hostId: match.hostId ?? (target ? options.hostId : null),
+        });
+      } catch (error) {
+        options.signal?.throwIfAborted();
+
+        if (
+          !target &&
+          !match.hostId &&
+          error instanceof PluginError &&
+          error.operation === 'search.query.resolve' &&
+          error.pluginId === match.pluginId
+        ) {
+          failures.push(error);
+
+          continue;
+        }
+
+        throw error;
+      }
+
       if (!result?.tracks.length) {
         if (target) break;
         continue;
@@ -178,6 +203,17 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
         throw new TypeError('search.afterResults requires Track instances.');
       return new SearchResult(transformed);
     }
+
+    if (failures.length === 1) throw failures[0];
+
+    if (failures.length > 1) {
+      const details = failures.map((error) => error.message).join('; ');
+
+      throw new AggregateError(failures, `All matching source providers failed during search: ${details}`, {
+        cause: failures[0],
+      });
+    }
+
     const client = this.player.getRemedia(false);
     if (!client) return SearchResult.empty();
     const result = await searchRemedia(

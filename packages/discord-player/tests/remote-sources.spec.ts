@@ -7,6 +7,7 @@ import { createSourcePluginHost, SOURCE_PLUGIN_ID, serializeSourceTrack } from '
 import { BaseExtractor, DiscordPlayer, Track, definePlugin, deserialize } from '../src/index.js';
 import { setup } from './mocks/queue.js';
 import { settle } from './mocks/async.js';
+import { MatchingExtractor, PermissiveExtractor, matchingUrl } from './mocks/search-fallback.js';
 
 const nativeFetch = globalThis.fetch;
 const cleanup: (() => Promise<unknown>)[] = [];
@@ -47,7 +48,9 @@ class RemoteExtractor extends BaseExtractor {
   }
 }
 
-async function deployment(hostId = 'sources-1', token?: string) {
+type ConfigureHost = (host: ReturnType<typeof createSourcePluginHost>) => Promise<void>;
+
+async function deployment(hostId = 'sources-1', token?: string, configure?: ConfigureHost) {
   let host: ReturnType<typeof createSourcePluginHost>;
   const requests: { path: string; body: any }[] = [];
   const server = createServer(async (req, res) => {
@@ -93,7 +96,13 @@ async function deployment(hostId = 'sources-1', token?: string) {
     onError: () => {},
   });
 
-  await host.extractors.register(RemoteExtractor);
+  const configureHost =
+    configure ??
+    (async (sourceHost) => {
+      await sourceHost.extractors.register(RemoteExtractor);
+    });
+
+  await configureHost(host);
 
   cleanup.push(async () => {
     server.closeAllConnections();
@@ -113,7 +122,7 @@ async function deployment(hostId = 'sources-1', token?: string) {
 
       host = createSourcePluginHost({ name: 'Sources', hostId, publicUrl: url, token });
 
-      await host.extractors.register(RemoteExtractor);
+      await configureHost(host);
     },
   };
 }
@@ -502,8 +511,8 @@ it('rejects provider failures and mismatched deployment identity without retryin
   expect(b.requests.some((request) => request.body?.input?.operation === 'search.query.resolve')).toBe(false);
 });
 
-async function forwarded(curve: CrossfadeCurve = 'equalPower') {
-  const host = await deployment('discovered');
+async function forwarded(curve: CrossfadeCurve = 'equalPower', configure?: ConfigureHost) {
+  const host = await deployment('discovered', undefined, configure);
   const fixture = await setup({
     nodeType: 'remote',
     crossfadeAvailable: true,
@@ -550,6 +559,20 @@ async function forwarded(curve: CrossfadeCurve = 'equalPower') {
   return { ...fixture, host, list, execute };
 }
 
+async function configureFallbackHost(host: ReturnType<typeof createSourcePluginHost>) {
+  await host.extractors.register(PermissiveExtractor);
+  await host.extractors.register(MatchingExtractor);
+  await host.plugins.register(
+    definePlugin({
+      id: 'fixture.transport',
+
+      setup(ctx) {
+        ctx.on('track.stream', () => ({ url: 'https://fixture.test/audio' }));
+      },
+    })(),
+  );
+}
+
 it('automatically discovers sources through Remedia, preserves portable state and plays without host registration', async () => {
   const { player: bot, session, execute } = await forwarded();
   const result = await bot.search('automatic', { requestedBy: { id: 'requester' } });
@@ -572,6 +595,25 @@ it('automatically discovers sources through Remedia, preserves portable state an
   await expect(bot.resolvePlaybackSource(track, 'another-node', new AbortController().signal)).rejects.toThrow(
     'originating',
   );
+});
+
+it('falls through matching extractors inside Remedia-forwarded source.search', async () => {
+  const { player: bot, host, execute } = await forwarded('equalPower', configureFallbackHost);
+  const permissive = host.host.extractors.get(PermissiveExtractor.identifier)!;
+  const matching = host.host.extractors.get(MatchingExtractor.identifier)!;
+  const resolvePermissive = vi.spyOn(permissive, 'handle');
+  const resolveMatching = vi.spyOn(matching, 'handle');
+  const result = await bot.search(matchingUrl);
+
+  expect(result.tracks[0]).toMatchObject({ title: 'Matching provider result', url: matchingUrl });
+  expect(result.tracks[0]?.sourceReference).toMatchObject({
+    nodeId: 'fake-node',
+    hostId: 'discovered',
+    pluginId: MatchingExtractor.identifier,
+  });
+  expect(resolvePermissive).toHaveBeenCalledOnce();
+  expect(resolveMatching).toHaveBeenCalledOnce();
+  expect(execute).toHaveBeenCalledWith(expect.objectContaining({ nodeId: 'fake-node', operation: 'source.search' }));
 });
 
 it('prefers local results and forwards portable targeting, blocked providers and cancellation', async () => {
@@ -617,6 +659,18 @@ it('keeps failures distinct from empty results and refreshes discovery on subseq
   list.mockResolvedValueOnce([]);
   expect((await bot.search('removed')).isEmpty()).toBe(true);
   expect((await bot.search('reconnected')).tracks).toHaveLength(1);
+});
+
+it('does not retry a Remedia source-search forwarding failure on another deployment', async () => {
+  const { player: bot, backend, list, execute } = await forwarded();
+  const advertised = (await list())[0]!;
+
+  list.mockResolvedValue([advertised, { ...advertised, nodeId: 'second-node' }]);
+  backend.client.nodes.push({ ...backend.client.nodes[0]!, id: 'second-node' });
+  execute.mockRejectedValueOnce(new Error('forwarding transport failed'));
+
+  await expect(bot.search('transport failure')).rejects.toThrow('forwarding transport failed');
+  expect(execute).toHaveBeenCalledOnce();
 });
 
 it('rejects conflicting placements including duplicate host IDs and sticky guild assignments', async () => {
