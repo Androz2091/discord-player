@@ -42,8 +42,7 @@ Advanced clients may register every advertised provider with
 option has been removed. Registration validates live provider capabilities and
 deployment identity; it does not install plugins on the service.
 
-This requires `@remedia/client@0.1.0` and a matching remote server configured
-with the same `pluginHosts` ID and the `discord-player.source` / `source.stream`
+Configure the remote server with the same `pluginHosts` ID and the `discord-player.source` / `source.stream`
 operation. The bot searches over HTTP and sends an operation descriptor for play
 and automatic crossfade staging. Encoded bytes flow directly from host to audio
 node. Local sources run locally. Embedded nodes cannot play hosted Tracks.
@@ -285,10 +284,10 @@ compatibility surface does not emulate the whole Player API.
 
 ## Remedia server integration boundary
 
-Remedia 0.1.0 supports generic host discovery, authenticated operation execution,
+Remedia supports generic host discovery, authenticated operation execution,
 native decoding of single-use grants, and cancellation. Configure the deployment
 in the server's `pluginHosts` list. Discord Player automatically discovers authorized source operations through connected healthy remote nodes; bot-side `remoteHost` registration is optional. Installing
-`@remedia/plugin-host@0.1.0` alone does not register a host with an audio node.
+`@remedia/plugin-host` alone does not register a host with an audio node.
 
 DiscordPlayer sends operation descriptors for playback and staged-next preparation;
 the audio node invokes `source.stream` and consumes encoded bytes directly. The
@@ -367,7 +366,7 @@ registration. Provider URL expiration remains intact. The consuming node must st
 independently enforce its DNS/redirect policy for direct URLs. Authentication or
 byte transformations requiring the host must use proxy delivery.
 
-Single-use media grants reject Range requests. Remedia 0.1.0 redeems each grant with one
+Single-use media grants reject Range requests. Remedia redeems each grant with one
 plain GET and feeds a bounded sequential queue to the decoder, so it never issues Range
 requests, reopens or reconnects a grant. Seeking is forward-only. This does not add random
 access or turn grant URLs into durable source references.

@@ -65,13 +65,13 @@ The TypeScript project runs the `.ts` files directly on Node.js 22.18 or newer, 
 
 ## Dependencies
 
-| Package          | Version                                                     |
-| ---------------- | ----------------------------------------------------------- |
-| `discord-player` | The generator's own version, as an exact version            |
-| `@remedia/node`  | The release that `discord-player`'s Remedia client requires |
-| `discord.js`     | A `^14` range                                               |
+| Package          | Purpose                                                |
+| ---------------- | ------------------------------------------------------ |
+| `discord-player` | Tracks, queues, search, and playback orchestration.    |
+| `@remedia/node`  | Embedded audio processing and Discord voice transport. |
+| `discord.js`     | Discord Gateway connection and interactions.           |
 
-The generator and Discord Player are released together with the same version. A generator at `8.0.0-dev.3` writes `"discord-player": "8.0.0-dev.3"`, so a prerelease generator never installs v7. `@remedia/node` is an exact version because the Remedia client requires that exact version as its peer dependency. Generated projects never use `latest` or workspace versions.
+The generator and Discord Player are released together with the same version. A generator at `8.0.0-dev.3` writes `"discord-player": "8.0.0-dev.3"`, so a prerelease generator never installs v7. Generated projects never use `latest` or workspace versions.
 
 ## Environment variables
 

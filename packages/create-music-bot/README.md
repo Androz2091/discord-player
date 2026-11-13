@@ -60,7 +60,7 @@ The JavaScript project has the same files with a `.js` extension. Both are ESM a
 
 ## Versions
 
-The generator and Discord Player share one release version. A generator at `8.0.0-dev.3` creates a project that depends on exactly `discord-player@8.0.0-dev.3`, so a prerelease generator never installs the v7 `latest` release. `@remedia/node` is pinned to the version that Discord Player's Remedia client declares as its peer.
+The generator and Discord Player share one release version. A generator at `8.0.0-dev.3` creates a project that depends on exactly `discord-player@8.0.0-dev.3`, so a prerelease generator never installs the v7 `latest` release.
 
 ## Documentation
 

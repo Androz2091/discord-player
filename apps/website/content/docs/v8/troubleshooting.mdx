@@ -57,7 +57,7 @@ Run the [smoke test](/docs/v8/installation/ffmpeg#verify-your-installation). Emb
 
 **Symptom:** one guild joins while the others fail with `request_timeout` or Discord voice close code `4022`.
 
-**Check:** use the same Remedia release for client and server. Confirm that each guild's join request reaches its shard, and that voice packets reach `player.receive()`.
+**Check:** confirm that each guild's join request reaches its shard, and that voice packets reach `player.receive()`.
 
 Test with `Promise.allSettled`. See [voice recovery](/docs/v8/remedia/voice-recovery).
 

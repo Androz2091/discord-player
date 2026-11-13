@@ -13,11 +13,8 @@ export const PACKAGE_MANAGERS = ['npm', 'pnpm', 'yarn', 'bun'] as const;
 /** A supported package manager. */
 export type PackageManager = (typeof PACKAGE_MANAGERS)[number];
 
-/**
- * The `@remedia/node` release that Discord Player's Remedia client is built and tested against.
- * `@remedia/client` declares this exact version as its peer dependency, so update it with `@remedia/client`.
- */
-export const REMEDIA_NODE_VERSION = '0.2.0';
+/** Embedded audio runtime installed in generated projects. */
+export const REMEDIA_NODE_VERSION = '0.2.1';
 
 const DISCORD_JS_VERSION = '^14.28.1';
 const NODE_TYPES_VERSION = '^22.20.5';
