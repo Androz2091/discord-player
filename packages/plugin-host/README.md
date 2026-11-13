@@ -299,7 +299,7 @@ continues to execute local registrations and rejects remote-host Tracks.
 ## Validation
 
 `pnpm build`, `pnpm typecheck`, `pnpm test`, `pnpm lint`, and `pnpm format:check`
-cover the workspace. Tests include the published optional extractor collection (SDK calls stubbed),
+cover the workspace. Tests use local mock extractors and include
 real HTTP disconnect/shutdown, and real FFmpeg decoding of generated MP3, Ogg/Opus
 and faststart M4A. FFmpeg must be installed; CI installs it explicitly. No personal
 media files or third-party service access are needed. CI builds the host before discord-player,

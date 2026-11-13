@@ -6,7 +6,7 @@ import { it, expect } from 'vitest';
 import { DiscordPlayer, QueryType } from '../src/index.js';
 import { RawStreamExtractor } from './fixtures/raw-stream-extractor.js';
 
-it('runs the official v7 raw URL and local encoded-file implementation through the source host offline', async () => {
+it('runs a mock raw URL and local encoded-file extractor through the source host offline', async () => {
   const player = new DiscordPlayer({ nodes: [], send() {} });
 
   await player.extractors.register(RawStreamExtractor);
@@ -34,11 +34,13 @@ it('runs the official v7 raw URL and local encoded-file implementation through t
 
     expect('stream' in source && source.stream).toBeInstanceOf(Readable);
 
-    if ('stream' in source) {
-      for await (const _chunk of source.stream) {
-        /* Drain the fixture-owned file. */
-      }
-    }
+    if (!('stream' in source)) throw new Error('Expected encoded fixture stream');
+
+    const chunks: Buffer[] = [];
+
+    for await (const chunk of source.stream) chunks.push(Buffer.from(chunk));
+
+    expect(Buffer.concat(chunks).toString()).toBe('offline encoded fixture');
 
     await expect(player.plugins.resolveStream(local, { remote: true })).rejects.toThrow('server-accessible');
   } finally {
