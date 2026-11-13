@@ -1,0 +1,176 @@
+---
+title: Playback backends
+description: Provide your own audio and voice implementation while keeping Discord Player's queues and source plugins.
+---
+
+A playback backend handles audio playback and Discord voice connections. Remedia is the default backend, so most bots do not need to provide one.
+
+If you already have an audio and voice implementation that you want to use, a plugin can register it through `ctx.provide('playback.backend', backend)`. Discord Player continues to manage Tracks, queues, search, scheduling, and history. Your backend takes responsibility for playing the resolved media and maintaining voice sessions.
+
+## Register a backend
+
+Use a modern `definePlugin()` plugin and register it **before calling `player.initialize()`**:
+
+```ts
+import { Player, definePlugin, type PlaybackBackend } from 'discord-player';
+
+const customPlayback = definePlugin<{ backend: PlaybackBackend }>({
+  id: 'example.playback',
+
+  setup(ctx) {
+    ctx.provide('playback.backend', ctx.options.backend);
+  },
+});
+
+// backend is your implementation of PlaybackBackend.
+// send forwards outgoing Gateway payloads through the correct Discord shard.
+const player = new Player({
+  send,
+  plugins: [customPlayback({ backend })],
+});
+
+await player.initialize(botUserId);
+```
+
+`backend`, `send`, and `botUserId` come from your application. This example registers an existing implementation; the plugin API does not create an audio engine for you. Continue registering your source plugins as usual so the Player can find Tracks and resolve playable media.
+
+Give each Player its own backend instance. Only one plugin can provide `playback.backend` for a Player. Standalone source hosts and legacy `BaseExtractor` classes cannot provide it.
+
+Repeated calls to `initialize()` with the same bot user ID share the initialization attempt. Calling it with a different ID rejects.
+
+Once initialization selects a backend, that choice is fixed for the Player's lifetime. This also applies when it selects the default Remedia backend. To change backends, destroy the Player and create a new one.
+
+## Implement the backend
+
+Your object must satisfy the exported `PlaybackBackend` interface:
+
+| Member                           | What your implementation does                                                           |
+| -------------------------------- | --------------------------------------------------------------------------------------- |
+| `id`                             | Supplies a stable name for diagnostics.                                                 |
+| `capabilities`                   | Declares the media sources and optional features it supports.                           |
+| `initialize(context)`            | Prepares resources using the bot identity, Gateway sender, and lifetime signal.         |
+| `receive(packet)`                | Processes incoming Discord Gateway dispatches.                                          |
+| `createSession(options, signal)` | Creates a new `PlaybackSession` for the requested guild and channel.                    |
+| `destroy()`                      | Cancels pending work and releases all remaining resources. Safe to call more than once. |
+
+With a custom backend selected, Discord Player does not initialize a native Remedia runtime. The backend still uses the shared media, session, and event types exported by Discord Player.
+
+### Declare supported features
+
+For example, a backend that accepts HTTP URLs and local encoded streams, with no filters or crossfade, would declare:
+
+```ts
+import type { PlaybackBackendCapabilities } from 'discord-player';
+
+const capabilities = {
+  sources: ['url', 'stream'],
+  crossfade: false,
+  filters: false,
+} satisfies PlaybackBackendCapabilities;
+```
+
+List only the features your backend implements:
+
+| Capability    | Meaning                                                                                             |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `sources`     | Accepted descriptor kinds: `url`, `file`, `buffer`, `stream`, or `operation`.                       |
+| `crossfade`   | Supports staging, promotion, cancellation, and reconciliation of the next source.                   |
+| `filters`     | Supports raw filtergraphs and Discord Player's built-in named presets.                              |
+| `pluginHosts` | IDs of standalone source deployments the backend can access. Required for hosted operation sources. |
+
+Declaring a capability does not implement it. Requests for unsupported sources, filters, or crossfade reject rather than silently succeeding. Custom backends also reject Remedia-specific session node selection through `nodeId` or the queue's `selectNode` option.
+
+### Receive and send Gateway packets
+
+Forward every incoming raw Discord Gateway dispatch to `player.receive(packet)`, including `READY` and voice updates. The Player forwards that stream to your backend and separately handles its own voice-state policies.
+
+Use the `send(guildId, payload)` callback supplied to `initialize()` for outgoing Gateway messages. It is the application's shard-aware sender.
+
+During custom backend startup, the Player buffers up to 1,024 dispatches and replays them in arrival order before initialization completes. If that limit is exceeded, initialization fails and cleans up the backend. Create a new Player with a synchronized Gateway connection; the incomplete packet history cannot be recovered by retrying initialization.
+
+## Implement a session
+
+Each call to `createSession(options, signal)` returns a new object satisfying `PlaybackSession`. Use the supplied guild and channel settings, and give the session a unique `sessionId` that you never reuse after disposal. If your backend has no node concept, use `nodeId: null`.
+
+The Player connects the session, attaches its listeners, and stores the queue's session reference. Your backend should return the session without attaching it to the queue itself.
+
+### State and controls
+
+A session exposes its current connection state, playback state, position, duration, volume, voice flags, and `snapshot`. Keep those values accurate as operations complete. Use `null` for an unknown duration or unavailable media position.
+
+Implement these groups of controls:
+
+| Purpose          | Methods                                                          |
+| ---------------- | ---------------------------------------------------------------- |
+| Voice connection | `connect`, `move`, `setSelfDeaf`, `setSelfMute`                  |
+| Playback         | `play`, `stop`, `pause`, `resume`, `seek`, `setVolume`           |
+| Timing           | `getPlaybackTime`, returning elapsed output time in milliseconds |
+| Events           | Typed `on` and `off` subscriptions using `PlaybackBackendEvents` |
+| Cleanup          | Idempotent `dispose`                                             |
+
+Volume is linear gain from `0` to `2`. `seek()` takes a media position in milliseconds and must reject when the source does not support seeking. `play()` returns actual `AudioStreamInfo`; do not invent decoding results to satisfy the interface.
+
+If a move or control fails partway through, leave the state properties reflecting what actually happened. The Player uses the retained session state to reconcile queue settings.
+
+Keep connection state separate from playback state. A connected voice session can be idle or paused, and a Gateway voice-state update is not itself a playback event.
+
+### Media sources
+
+Source plugins and the existing stream and descriptor hooks still prepare media before `session.play()` runs. The session receives a `PlaybackSource`, which uses the shared encoded media descriptor format.
+
+Files, buffers, and Readables must be accessible where playback actually runs. A declaration that accepts `stream` does not make a bot-local Readable available on a remote server.
+
+For hosted operation sources, declare both `operation` in `sources` and the required deployment IDs in `pluginHosts`. Your backend must implement source delivery and cancellation for those deployments; listing an ID does not establish a connection.
+
+## Emit playback events
+
+Queue progression depends on the session's real lifecycle notifications. Implement the typed event tuples in `PlaybackBackendEvents`, and keep the snapshot consistent with what you emit.
+
+For each playback:
+
+1. Assign an increasing generation number to identify each new playback attempt.
+2. Preserve `play()`'s `customMetadata` unchanged on that generation's events.
+3. Emit `playbackStarted` when playback actually starts.
+4. Emit the appropriate terminal event once: `playbackCompleted`, `playbackStopped`, or `playbackFailed`.
+
+The queue uses session identity, generation, and metadata to recognize the active Track and reject stale notifications. Report pause, resume, seek, and transport changes with their actual values so application listeners receive meaningful events.
+
+### Crossfade
+
+If you declare `crossfade: true`, implement `stageNext`, `clearStage`, and `stagedSource` as well as the corresponding snapshot and event behavior.
+
+Preparing the next source must not emit `playbackStarted`. On promotion, preserve the real occurrence and crossfade identities, including the generation and queue/source revisions. Cancellation must release staged resources, and reconciliation must report whether a stage is still valid.
+
+### Filters
+
+If you declare `filters: true`, each session must expose `filters.graph`, `filters.set(graph)`, and `filters.clear()`. Support both raw filtergraphs and the built-in named presets. Keep `snapshot.filterGraph` in sync with the graph that is actually applied.
+
+## Handle cancellation and cleanup
+
+There are three signals to honor:
+
+| Signal                                     | What it covers                                                                      |
+| ------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `initialize(context).signal`               | The Player and backend plugin's lifetime.                                           |
+| `createSession(options, signal)`           | The queue and backend lifetime.                                                     |
+| Signals passed to `connect()` and `play()` | The individual operation; a play signal can also stop its generation after startup. |
+
+`connect()` must also honor its timeout. Cancellation should stop pending work and release owned streams, timers, listeners, and voice resources.
+
+The Player can call `dispose()` while a session operation is still pending. Disposal must cancel that operation so cleanup can finish. Similarly, backend `destroy()` must handle resources left by partially completed initialization.
+
+`queue.node.session` is read-only. When you need to replace it, use `queue.node.createSession()`. Discord Player cancels the previous queue operation, disposes the old session, detaches its listeners, and owns the replacement.
+
+### Removing the backend plugin
+
+Unregistering the selected plugin aborts its lifetime, destroys its queues, waits for pending initialization, and disposes the backend before plugin teardown. It does not switch to another backend. Failed initialization also cleans up and rejects without falling back to Remedia.
+
+Use `await player.destroy()` when shutting down. Create a new Player if you need to start again with a different backend.
+
+## Inspect the active backend
+
+After initialization, `player.getBackend()` returns your backend, or the Remedia client when using the default. It throws before initialization and after disposal.
+
+With a custom backend active, `player.getRemedia()` throws; `player.getRemedia(false)` returns `null`. `player.plugins.describe()` includes the registration's `provides` capability for diagnostics.
+
+See the [plugin API reference](/docs/v8/reference/plugins#custom-playback-providers) for the registration summary, and [lifecycle capabilities](/docs/v8/plugins/capabilities) for hooks around queue and playback decisions.

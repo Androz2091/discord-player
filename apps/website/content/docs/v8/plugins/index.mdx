@@ -1,6 +1,6 @@
 ---
-title: Source plugins
-description: Add music providers by teaching Discord Player how to find tracks and open audio.
+title: Plugins
+description: Add music providers, customize queue behavior, or supply a playback backend.
 ---
 
 A source plugin tells Discord Player how to recognize a query, find tracks, and return audio that Remedia can play. Discord Player has no built-in providers, so you register the plugins your bot needs.
@@ -39,6 +39,11 @@ const player = new Player({
 ## Advanced
 
 <Cards>
+  <Card
+    title="Playback backends"
+    href="/docs/v8/plugins/playback-backends"
+    description="Use your own audio and voice implementation with Discord Player's queues."
+  />
   <Card title="Operations" href="/docs/v8/plugins/operations" description="How handlers are chosen and ordered." />
   <Card title="Custom operations" href="/docs/v8/plugins/advanced" description="Add your own typed operations." />
   <Card
