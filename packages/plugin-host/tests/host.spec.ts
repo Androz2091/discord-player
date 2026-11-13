@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import { afterEach, expect, it, vi } from 'vitest';
 import {
+  BaseExtractor,
   createSourcePluginHost,
   SOURCE_PLUGIN_ID,
   Track,
@@ -29,6 +30,45 @@ afterEach(async () => {
 });
 
 const request = (operation: string, input: unknown) => ({ pluginId: SOURCE_PLUGIN_ID, operation, input });
+
+const matchingUrl = 'https://media.example.test/creator/item';
+
+class PermissiveFixtureExtractor extends BaseExtractor {
+  static override identifier = 'fixture.permissive-provider';
+
+  override priority = 20;
+
+  override async validate() {
+    return true;
+  }
+
+  override async handle(query: string) {
+    if (query.includes('media.example.test')) throw new Error('Unsupported source URL.');
+
+    return this.createResponse();
+  }
+}
+
+class MatchingFixtureExtractor extends BaseExtractor {
+  static override identifier = 'fixture.matching-provider';
+
+  override priority = 10;
+
+  override async validate(query: string) {
+    return query.includes('media.example.test');
+  }
+
+  override async handle(query: string) {
+    if (query.endsWith('/exhausted')) throw new Error('Matching provider resolution failed.');
+
+    return this.createResponse(null, [
+      new Track(this.context.player, {
+        title: 'Matching provider result',
+        url: query,
+      }),
+    ]);
+  }
+}
 
 async function http(h: ReturnType<typeof host>, operation: string, input: unknown) {
   const response = await h.fetch(
@@ -91,6 +131,62 @@ it('serializes metadata, restores private engine state, and transports encoded R
 
   expect(response.status).toBe(200);
   expect(await response.text()).toBe('encoded fixture');
+});
+
+it('falls through failed source candidates and returns an HTTP error response when all fail', async () => {
+  const report = vi.fn();
+  const h = host({ onError: report });
+
+  await h.extractors.register(PermissiveFixtureExtractor);
+  await h.extractors.register(MatchingFixtureExtractor);
+
+  const direct = await h.runtime.search(matchingUrl);
+
+  expect(direct.tracks[0]).toMatchObject({ title: 'Matching provider result', url: matchingUrl });
+
+  const handled = await h.handle(request('source.search', { query: matchingUrl }));
+
+  expect(handled.handled).toBe(true);
+  if (!handled.handled) throw new Error('Source search was not handled');
+  expect((handled.result as { tracks: Track[] }).tracks[0]?.title).toBe('Matching provider result');
+
+  const failed = await h.fetch(
+    new Request('http://localhost:3000/remedia/v1/execute', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(request('source.search', { query: 'https://media.example.test/creator/exhausted' })),
+    }),
+  );
+
+  expect(failed.status).toBe(502);
+  expect(await failed.text()).not.toContain('Unsupported source URL');
+  expect(report).toHaveBeenCalledOnce();
+
+  expect((await http(h, 'source.search', { query: matchingUrl })).result.tracks).toHaveLength(1);
+});
+
+it('keeps directly targeted metadata.execute strict', async () => {
+  const h = host();
+
+  await h.extractors.register(PermissiveFixtureExtractor);
+  await h.extractors.register(MatchingFixtureExtractor);
+
+  const response = await h.fetch(
+    new Request('http://localhost:3000/remedia/v1/execute', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(
+        request('metadata.execute', {
+          providerId: PermissiveFixtureExtractor.identifier,
+          operation: 'search.query.resolve',
+          input: { query: matchingUrl },
+        }),
+      ),
+    }),
+  );
+
+  expect(response.status).toBe(502);
+  expect(await response.text()).not.toContain('Unsupported source URL');
 });
 
 it('reconstructs expired and restart state using the owning provider URL', async () => {
