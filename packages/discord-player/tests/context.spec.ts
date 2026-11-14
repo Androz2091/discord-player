@@ -194,7 +194,7 @@ it('exposes the v7 timeline controller with async controls and filter selection'
     expect(timeline.track).toBe(track);
     expect(timeline.volume).toBe(100);
     expect(timeline.paused).toBe(false);
-    expect(timeline.timestamp?.current.value).toBe(2500);
+    expect(timeline.timestamp?.current.value).toBe(1000);
     expect(timeline.timestamp?.total.value).toBe(60_000);
 
     const sourceTimeline = useTimeline({ ignoreFilters: true });

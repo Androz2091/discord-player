@@ -63,7 +63,7 @@ if (timeline) {
 
 Control methods return `Promise<boolean>`. `pause()`, `resume()`, and `setPosition()` return `false` when the queue has no active session or Track. `setVolume()` resolves after Remedia applies the percentage.
 
-Pass `{ ignoreFilters: true }` to read the source media position instead of Remedia's filtered output clock. Remedia does not expose the duration multiplier of tempo-changing filters, so `timestamp.total` always reflects the source duration. Pass `{ node }` to target another queue.
+By default, the timeline prefers Remedia’s live source-media clock, including tempo changes. The v7-compatible `{ ignoreFilters: true }` option reads the latest source position snapshot instead when available. Both modes use the source duration as `timestamp.total`. Pass `{ node }` to target another queue.
 
 ```ts
 const sourceTimeline = useTimeline({ node: guildId, ignoreFilters: true });

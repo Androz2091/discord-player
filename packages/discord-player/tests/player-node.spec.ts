@@ -189,6 +189,7 @@ it('keeps raw controls separate from managed queue state and forwards playback e
   expect(node.streamTime).toBe(0);
 
   session.elapsedMs = 1234;
+  session.position.mediaMs = 1234;
 
   expect(node.streamTime).toBe(1234);
   expect(node.playbackTime).toBe(1234);
@@ -224,6 +225,7 @@ it('formats timelines and progress bars for absent, zero, long and completed med
 
   await queue.play(new TestTrack('timeline'));
   session.elapsedMs = 3661000;
+  session.position.mediaMs = 3661000;
   session.durationMs = 7322000;
 
   expect(queue.node.getTimestamp()).toEqual({
@@ -250,13 +252,13 @@ it('formats timelines and progress bars for absent, zero, long and completed med
   await player.destroy();
 });
 
-it('reads output elapsed time from the Remedia clock rather than stale position snapshots', async () => {
+it('falls back to the output clock when media timing is unavailable', async () => {
   const { queue, player, session } = await setup();
   const getPlaybackTime = vi.spyOn(session, 'getPlaybackTime');
 
   await queue.play(new TestTrack('clock'));
 
-  session.position.mediaMs = 5_000;
+  session.position.mediaMs = null;
   session.position.playedMs = 5_000;
   session.elapsedMs = 20_000;
 
@@ -272,48 +274,60 @@ it('reads output elapsed time from the Remedia clock rather than stale position 
   await player.destroy();
 });
 
-it('keeps output elapsed time separate from the source position under tempo changes', async () => {
-  const { queue, player, session } = await setup();
-
-  await queue.play(new TestTrack('tempo'));
-
-  session.durationMs = 60_000;
-  session.position.mediaMs = 90_000;
-  session.elapsedMs = 45_000;
-
-  expect(queue.node.playbackTime).toBe(45_000);
-  expect(queue.node.getTimestamp()).toMatchObject({ current: { value: 45_000 }, progress: 75 });
-
-  // Slowed output can run past the source duration; the clock is not capped, only the percentage is.
-  session.position.mediaMs = 30_000;
-  session.elapsedMs = 90_000;
-
-  expect(queue.node.playbackTime).toBe(90_000);
-  expect(queue.node.getTimestamp()).toMatchObject({ current: { value: 90_000 }, progress: 100 });
-
-  await player.destroy();
-});
-
 it.each(['embedded', 'remote'] as const)(
-  'keeps the %s output clock independent of optional media-time estimation',
+  'uses the %s media clock for sped-up and slowed-down playback',
   async (nodeType) => {
     const { queue, player, session } = await setup({ nodeType });
 
-    await queue.play(new TestTrack('estimated-media-time'));
+    await queue.play(new TestTrack('tempo'));
 
-    Object.assign(session, {
-      getMediaTime: () => 90_000,
-      getPlaybackRate: () => 2,
-    });
+    const getMediaTime = vi.spyOn(session, 'getMediaTime').mockReturnValue(45_000);
 
-    session.position.mediaMs = 85_000;
-    session.elapsedMs = 45_000;
+    session.position.mediaMs = 40_000;
+    session.elapsedMs = 30_000;
 
     expect(queue.node.playbackTime).toBe(45_000);
     expect(queue.node.streamTime).toBe(45_000);
-    expect(queue.node.getTimestamp()?.current.value).toBe(45_000);
-    expect(queue.node.getTimestamp(true)?.current.value).toBe(85_000);
-    expect(queue.node.playbackRate).toBe(2);
+    expect(queue.node.getTimestamp()).toMatchObject({ current: { value: 45_000 }, progress: 75 });
+    expect(queue.node.getTimestamp(true)?.current.value).toBe(40_000);
+
+    // Slower playback consumes less source media than elapsed output time.
+    getMediaTime.mockReturnValue(30_000);
+    session.position.mediaMs = 25_000;
+    session.elapsedMs = 60_000;
+
+    expect(queue.node.playbackTime).toBe(30_000);
+    expect(queue.node.getTimestamp()).toMatchObject({ current: { value: 30_000 }, progress: 50 });
+
+    await player.destroy();
+  },
+);
+
+it.each(['embedded', 'remote'] as const)(
+  'preserves zero media time and the %s snapshot/output fallback order',
+  async (nodeType) => {
+    const { queue, player, session } = await setup({ nodeType });
+
+    await queue.play(new TestTrack('clock-precedence'));
+
+    const getMediaTime = vi.spyOn(session, 'getMediaTime').mockReturnValue(0);
+
+    session.position.mediaMs = 20_000;
+    session.elapsedMs = 45_000;
+
+    expect(queue.node.playbackTime).toBe(0);
+
+    getMediaTime.mockReturnValue(null);
+
+    expect(queue.node.playbackTime).toBe(20_000);
+
+    session.position.mediaMs = null;
+
+    expect(queue.node.playbackTime).toBe(45_000);
+
+    getMediaTime.mockReturnValue(-100);
+
+    expect(queue.node.playbackTime).toBe(0);
 
     await player.destroy();
   },

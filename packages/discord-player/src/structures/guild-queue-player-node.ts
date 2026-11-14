@@ -1078,13 +1078,17 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   /**
-   * Output elapsed time in milliseconds, read on demand from the backend playback clock.
-   * @remarks This is time spent producing output for the current generation, not the source-media position.
-   * It starts at the seek target after `seek()` and can differ from the source position (and exceed
-   * {@link GuildQueuePlayerNode.totalDuration}) when a filter changes tempo. Returns zero when no session exists.
+   * Current media position in milliseconds, read on demand from the backend playback clock.
+   * @remarks Prefers the live source-media estimate so tempo-changing filters remain aligned with the
+   * source duration. Falls back to the source snapshot, then output elapsed time when media timing is
+   * unavailable. Returns zero when no session exists and clamps negative positions to zero.
    */
   public get playbackTime(): number {
-    return Math.max(0, this.session?.getPlaybackTime() ?? 0);
+    const session = this.session;
+
+    if (!session) return 0;
+
+    return Math.max(0, session.getMediaTime?.() ?? session.position.mediaMs ?? session.getPlaybackTime());
   }
 
   /** Constant rate of source progress per output second, or null for opaque graphs. */
@@ -1097,7 +1101,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     return this.session?.durationMs ?? this.queue.currentTrack?.durationMS ?? 0;
   }
 
-  /** Compatibility alias for {@link GuildQueuePlayerNode.playbackTime}; also output elapsed time. */
+  /** Compatibility alias for {@link GuildQueuePlayerNode.playbackTime}; uses the same media-clock precedence. */
   public get streamTime(): number {
     return this.playbackTime;
   }
@@ -1119,13 +1123,12 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /**
    * Return the formatted timeline for the current queue Track, or `null` when no Track is selected.
-   * @param ignoreFilters Whether to read the original source position instead of Remedia's filtered output clock.
-   * @remarks Remedia reports output elapsed time separately from the source position but does not expose the
-   * duration multiplier of tempo-changing filters. Both modes therefore use the source duration as the total,
-   * while `ignoreFilters` selects the source media position when one is available. `progress` is clamped to 100.
+   * @param ignoreFilters Whether to prefer the last reported source snapshot over the live playback position.
+   * @remarks Both modes use the source duration as the total. The default uses the live media clock when
+   * available; the v7 `ignoreFilters` option selects the last source snapshot instead. `progress` is clamped to 100.
    */
   public getTimestamp(
-    /** Whether to read the source timeline instead of Remedia's filtered output clock. */
+    /** Whether to prefer the last source snapshot over the live playback position. */
     ignoreFilters = false,
   ): PlayerTimestamp | null {
     if (!this.queue.currentTrack) return null;
@@ -1142,7 +1145,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   }
 
   /**
-   * Create a text progress bar from output elapsed time and the source duration.
+   * Create a text progress bar from the playback position and source duration.
    * @param options Bar length, characters, separator, and timecode options.
    * @returns Formatted progress bar, or `null` when the queue has no current Track.
    */

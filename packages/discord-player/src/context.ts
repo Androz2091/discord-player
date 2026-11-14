@@ -329,7 +329,7 @@ export function useVolume(node?: NodeResolvable): VolumeDispatch {
 
 /** Options controlling the queue timeline exposed by {@link useTimeline}. */
 export interface TimelineDispatcherOptions {
-  /** Whether to read the source media position instead of Remedia's filtered output clock. */
+  /** Whether to prefer the last source snapshot over the live playback position. */
   ignoreFilters: boolean;
 
   /** Queue to control; defaults to the guild in the active context. */

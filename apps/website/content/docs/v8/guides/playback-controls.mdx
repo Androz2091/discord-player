@@ -37,9 +37,9 @@ const timestamp = queue.node.getTimestamp(); // { current, total, progress } or 
 const bar = queue.node.createProgressBar({ length: 20 });
 ```
 
-`getTimestamp()` returns `null` when the track has no known duration, such as a live stream.
+`getTimestamp()` returns `null` when no track is selected. An unknown duration produces zero progress.
 
-`playbackTime` is the time Remedia has played, not the position inside the source file. It restarts at zero for each new track and after a seek, which sets it to the seek target. With a filter that changes speed, such as `nightcore`, it advances faster or slower than the file position. `progress` is capped at 100.
+`playbackTime` prefers Remedia’s live source-media clock, keeping progress aligned with the source duration under filters such as `nightcore` and `vaporwave`. If that clock is unavailable, it uses the latest source position snapshot, then output elapsed time. It starts at zero for each new track and moves to the source seek target after a seek. `streamTime` uses the same clock, and `progress` is capped at 100.
 
 ## Seek
 

@@ -182,6 +182,7 @@ export class FakeSession
 
     this.generation++;
     this.elapsedMs = 0;
+    this.position = { ...this.position, mediaMs: 0, submittedMs: 0, playedMs: 0 };
     this.customMetadata = options.customMetadata;
     this.stage = null;
 
@@ -309,6 +310,11 @@ export class FakeSession
     this.state = 'playing';
   }
 
+  /** Return the deterministic source-media estimate for the current generation. */
+  public getMediaTime(): number | null {
+    return this.position.mediaMs;
+  }
+
   /** Return output elapsed time from Remedia's playback clock. */
   public getPlaybackTime(): number {
     return this.elapsedMs;
@@ -344,6 +350,7 @@ export class FakeSession
     this.playCalls++;
     this.generation++;
     this.elapsedMs = 0;
+    this.position = { ...this.position, mediaMs: 0, submittedMs: 0, playedMs: 0 };
     this.state = 'playing';
     this.customMetadata = options?.customMetadata;
 

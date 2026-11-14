@@ -136,7 +136,8 @@ describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %
 
     await queue.play([new TestTrack('a'), new TestTrack('b')]);
 
-    session.elapsedMs = 55_000;
+    session.elapsedMs = 40_000;
+    session.position.mediaMs = 55_000;
     session.requestPreparation();
     await settle();
 
