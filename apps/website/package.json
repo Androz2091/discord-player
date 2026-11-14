@@ -8,7 +8,8 @@
     "dev": "pnpm --workspace-root run docs:api && next dev",
     "start": "serve out",
     "typecheck": "pnpm --workspace-root run docs:api && next typegen && tsc --noEmit",
-    "check:links": "node scripts/check-links.mjs"
+    "check:links": "node scripts/check-links.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "beautiful-mermaid": "^1.1.3",
@@ -27,10 +28,12 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "jsdom": "29.0.1",
     "oxlint": "catalog:",
     "postcss": "^8.5.31",
     "serve": "^14.2.6",
     "tailwindcss": "^4.3.3",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

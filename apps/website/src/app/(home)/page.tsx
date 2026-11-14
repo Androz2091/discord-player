@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components
 import { CopyCommand } from '@/components/copy-command';
 import { DiscordInvite } from '@/components/discord-invite';
 import { VersionBadge } from '@/components/version-badge';
-import { communityResources } from '@/data/community';
+import { communityResources, type IExtractorShowcase, type IMusicBotShowcase } from '@/data/community';
 import { getFundingLinks } from '@/lib/funding';
 import { getProjectSource } from '@/lib/project-source';
 import { communityRoute, discordInviteUrl, gitConfig } from '@/lib/shared';
@@ -198,37 +198,39 @@ function CodePanel({ code }: { code: string }) {
   return <ServerCodeBlock lang="ts" code={code} codeblock={{ className: '!my-0 min-w-0 text-[0.8125rem]' }} />;
 }
 
-function ProjectList({
-  title,
-  projects,
-}: {
-  title: string;
-  projects: { name: string; description: string; url: string }[];
-}) {
+function ProjectList({ title, projects }: { title: string; projects: (IExtractorShowcase | IMusicBotShowcase)[] }) {
   return (
     <div>
       <h3 className="text-sm font-semibold">{title}</h3>
       <ul className="mt-3 divide-y border-y">
-        {projects.map((project) => (
-          <li key={project.url}>
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noreferrer"
-              className="group block py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring"
-            >
-              <span className="flex items-baseline justify-between gap-4">
-                <span className="font-medium group-hover:underline group-hover:underline-offset-4">{project.name}</span>
-                <span className="hidden shrink-0 font-mono text-xs text-fd-muted-foreground sm:block">
-                  {getProjectSource(project.url).identifier.split('/')[0]}
+        {projects.map((project) => {
+          const url = project.repositoryUrl ?? ('websiteUrl' in project ? project.websiteUrl : undefined);
+
+          if (!url) throw new Error(`Community project "${project.name}" needs a repository or website URL.`);
+
+          return (
+            <li key={url}>
+              <a
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="group block py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring"
+              >
+                <span className="flex items-baseline justify-between gap-4">
+                  <span className="font-medium group-hover:underline group-hover:underline-offset-4">
+                    {project.name}
+                  </span>
+                  <span className="hidden shrink-0 font-mono text-xs text-fd-muted-foreground sm:block">
+                    {getProjectSource(url).identifier.split('/')[0]}
+                  </span>
                 </span>
-              </span>
-              <span className="mt-0.5 line-clamp-2 block text-sm leading-6 text-fd-muted-foreground">
-                {project.description}
-              </span>
-            </a>
-          </li>
-        ))}
+                <span className="mt-0.5 line-clamp-2 block text-sm leading-6 text-fd-muted-foreground">
+                  {project.description}
+                </span>
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
