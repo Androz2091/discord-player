@@ -1084,10 +1084,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    * {@link GuildQueuePlayerNode.totalDuration}) when a filter changes tempo. Returns zero when no session exists.
    */
   public get playbackTime(): number {
-    const session = this.session;
-    if (!session) return 0;
-
-    return Math.max(0, session.getMediaTime?.() ?? session.position.mediaMs ?? session.getPlaybackTime());
+    return Math.max(0, this.session?.getPlaybackTime() ?? 0);
   }
 
   /** Constant rate of source progress per output second, or null for opaque graphs. */

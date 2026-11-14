@@ -294,6 +294,31 @@ it('keeps output elapsed time separate from the source position under tempo chan
   await player.destroy();
 });
 
+it.each(['embedded', 'remote'] as const)(
+  'keeps the %s output clock independent of optional media-time estimation',
+  async (nodeType) => {
+    const { queue, player, session } = await setup({ nodeType });
+
+    await queue.play(new TestTrack('estimated-media-time'));
+
+    Object.assign(session, {
+      getMediaTime: () => 90_000,
+      getPlaybackRate: () => 2,
+    });
+
+    session.position.mediaMs = 85_000;
+    session.elapsedMs = 45_000;
+
+    expect(queue.node.playbackTime).toBe(45_000);
+    expect(queue.node.streamTime).toBe(45_000);
+    expect(queue.node.getTimestamp()?.current.value).toBe(45_000);
+    expect(queue.node.getTimestamp(true)?.current.value).toBe(85_000);
+    expect(queue.node.playbackRate).toBe(2);
+
+    await player.destroy();
+  },
+);
+
 it('does not carry elapsed time across seeks, replacements, stops or a missing session', async () => {
   const { queue, player, session } = await setup();
 
