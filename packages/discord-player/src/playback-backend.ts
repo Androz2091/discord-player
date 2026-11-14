@@ -185,6 +185,12 @@ export interface PlaybackSession<Metadata = unknown> {
 
   /** Optional stage reconciliation. */
   stagedSource?(): Promise<StageSnapshot | null>;
+
+  /** Optional playback rate control; null when the backend does not support it. */
+  getPlaybackRate?(): number | null;
+
+  /** Optional media timeline control; null when the backend does not support it. */
+  getMediaTime?(): number | null;
 }
 
 /** Advanced local provider. The framework retains ownership of queues and session references. */

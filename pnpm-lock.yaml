@@ -165,8 +165,8 @@ settings:
 catalogs:
   default:
     '@remedia/plugin-host':
-      specifier: 0.2.1
-      version: 0.2.1
+      specifier: 0.2.2
+      version: 0.2.2
     '@types/node':
       specifier: ^26.6.5
       version: 26.6.6
@@ -215,8 +215,8 @@ importers:
   apps/music-bot:
     dependencies:
       '@remedia/node':
-        specifier: 0.2.1
-        version: 0.2.1
+        specifier: 0.2.2
+        version: 0.2.2
       commandkit:
         specifier: ^1.2.6
         version: 1.2.6(esbuild@0.28.2)(supports-color@7.2.0)(typescript@7.0.2)
@@ -305,11 +305,11 @@ importers:
         version: 1.9.0
     devDependencies:
       '@remedia/client':
-        specifier: 0.2.1
-        version: 0.2.1(@remedia/node@0.2.1)
+        specifier: 0.2.2
+        version: 0.2.2(@remedia/node@0.2.2)
       '@remedia/node':
-        specifier: 0.2.1
-        version: 0.2.1
+        specifier: 0.2.2
+        version: 0.2.2
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.6
@@ -335,8 +335,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       '@remedia/client':
-        specifier: 0.2.1
-        version: 0.2.1(@remedia/node@0.2.1)
+        specifier: 0.2.2
+        version: 0.2.2(@remedia/node@0.2.2)
       zod:
         specifier: ^4.6.7
         version: 4.6.7
@@ -360,11 +360,11 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       '@remedia/client':
-        specifier: 0.2.1
-        version: 0.2.1(@remedia/node@0.2.1)
+        specifier: 0.2.2
+        version: 0.2.2(@remedia/node@0.2.2)
       '@remedia/plugin-host':
         specifier: 'catalog:'
-        version: 0.2.1
+        version: 0.2.2
       zod:
         specifier: ^4.6.7
         version: 4.6.7
@@ -1294,103 +1294,103 @@ packages:
   '@quansync/fs@1.1.0':
     resolution: {integrity: sha512-qAPG/t3HqML1TlN7sY/pTbEjzFVAKsMjNNMGheyDosro+kT4iw2KCUoHcVdmliwWjorm4elZbgNQyU2eD97eDg==}
 
-  '@remedia/client@0.2.1':
-    resolution: {integrity: sha512-FctOdl6JXrzEi7KWO7bNkgXxcbUstb8C1b00PQq8ciYwKM1y3lxYEUADknX+Wcmrg/QAXsStmnVA7kSzUB+j5w==}
+  '@remedia/client@0.2.2':
+    resolution: {integrity: sha512-UtNcR8EuN639uZ26fkaTa61qwBn+yU3aKnK/JVfXBgKXbcltNySDIDlind5ApnbLS8vDd8GX7d1iqt28G5sevA==}
     engines: {node: '>=22.18.0'}
     peerDependencies:
-      '@remedia/node': 0.2.1
+      '@remedia/node': 0.2.2
     peerDependenciesMeta:
       '@remedia/node':
         optional: true
 
-  '@remedia/node-android-arm-eabi@0.2.1':
-    resolution: {integrity: sha512-529fGoG4iiyNuLOfcqCDjELkC48z7RRewrrRGrJOUVBM4ZF0wkNZcp56ywVNmn+D9xbIGMuACkAAoiQuX2ORMw==}
+  '@remedia/node-android-arm-eabi@0.2.2':
+    resolution: {integrity: sha512-CaQs8XvHCG+w4/8OhbUA71tuD6NBU6sQ0YkgEniVWcIEfTBLbVJzZlXKxohzgzJwfKH3umBHo26du8q5xm8SGg==}
     engines: {node: '>=22.18.0'}
     cpu: [arm]
     os: [android]
 
-  '@remedia/node-android-arm64@0.2.1':
-    resolution: {integrity: sha512-2mmh1m8zvrJfBPuTRofYscQRLqFVPLLSdLeSLZBspYi4wKJD1RttnaR44OKObKNsPAb0rtb92e9NKAoq+OTYtg==}
+  '@remedia/node-android-arm64@0.2.2':
+    resolution: {integrity: sha512-DoJYos+w45sRoFVLFRHkWhHYolqc+StWxTriDryyTOQVmVeWaRSUaQxSVlzNIjHPbswp/11Z9+KzhYUCNA/3og==}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [android]
 
-  '@remedia/node-darwin-arm64@0.2.1':
-    resolution: {integrity: sha512-zNZ4276cXUNE+YFqJS4cSWu9bzLT++Dn44J5ap+LRgRaBK6lKnANGnYfDWyQmIxgb6pVMffzErkghHN0ya00Gw==}
+  '@remedia/node-darwin-arm64@0.2.2':
+    resolution: {integrity: sha512-rGU8xSvc75SVTy+4xhwt0Us6Vps81hpS+h5CtLz8SsqxZeos0Lru/6XDXZ9/YhsvGg16r6bc5VeyOXfWPdKEoA==}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@remedia/node-darwin-x64@0.2.1':
-    resolution: {integrity: sha512-PEuhkyabCquWNapGFmszrKbuiX1cmI5x4nVddO7Bdu80NDKQbX8/LZ5ue4Q0kcuybkbCKj3l2OCyfY6fIxtH2Q==}
+  '@remedia/node-darwin-x64@0.2.2':
+    resolution: {integrity: sha512-4pu+T3zn8yhvMdkEGpLlf5sFQyY/DZorlA9tptOxyYi+Yri5VM4ydCXCeFaUnQjl0NheCJkDB4ObuPcpBCxtcQ==}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@remedia/node-freebsd-x64@0.2.1':
-    resolution: {integrity: sha512-3e2NFJvrY/NcjyFv+heNHHPUQGosT0VFOKVXPNGAV/AIY9S/A3SIKfLcse+OB1pCNvXgaxNHRKIVfLKx85rTZg==}
+  '@remedia/node-freebsd-x64@0.2.2':
+    resolution: {integrity: sha512-WYEGP7T5gsPOMEAKAWgpf8atcMTHYUb4sGSf3drjlfKnhnndlEAjAxoUj7HmfE9A6LWhjZ0H/cYYKL58GGg9iw==}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [freebsd]
 
-  '@remedia/node-linux-arm-gnueabihf@0.2.1':
-    resolution: {integrity: sha512-zM+KxZ9Ngyhs37DedoFiUpJqwLaXNVLYycLYOHOU1SkJuYBJ5sWz/1L8uWyeK26MqTS+jl0wxlZ1/2dad5TWdQ==}
+  '@remedia/node-linux-arm-gnueabihf@0.2.2':
+    resolution: {integrity: sha512-BUErbewjKdG0YyvSj3QmWVxRaAOTGNfszhBo2EYAkiNPKAbkfcLNbopJCUbrHCvjymaBHmG+onLdITDUWMBsgg==}
     engines: {node: '>=22.18.0'}
     cpu: [arm]
     os: [linux]
 
-  '@remedia/node-linux-arm64-gnu@0.2.1':
-    resolution: {integrity: sha512-r1mKdLWPv6Mz3jetJA8BedJK1eJJBtoy5fzwwxMF0+UVKpZZtnzSLvkqDGeQWDVBXXP/unIhl0GKbcCfp67dmQ==}
+  '@remedia/node-linux-arm64-gnu@0.2.2':
+    resolution: {integrity: sha512-5Dg/QkLr63Q1mqlRx7kmV/ZIPNTn8WP029XLD48E6XwqcQp2d9f6z9/ZbDTnpDfia04IvlQefsx35fikb4Ua8Q==}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@remedia/node-linux-arm64-musl@0.2.1':
-    resolution: {integrity: sha512-NhFzbcjm+QcvAOtQH64tZ63MO05zL0ClLJlE0HLrNSV76IJBhCb3tuDQH0ga+5SwZ4lU4KL/K75Hs02uYvfATA==}
+  '@remedia/node-linux-arm64-musl@0.2.2':
+    resolution: {integrity: sha512-NhThTBePL4zzspxetU3se0pDnbAHygWU2hs6E2hFWx55hY4a3TrFa5nD4SCShapp6JwVGWvrDLKlt6ANFnuP0Q==}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@remedia/node-linux-x64-gnu@0.2.1':
-    resolution: {integrity: sha512-zZRlc6J9xeTPypYiDVwGHcnOwd0q8sHAxzaia4g0d3/OTMOsFMGQvJRBgAOynEzqKENyFAAjmRE9QJXWX1s9Qw==}
+  '@remedia/node-linux-x64-gnu@0.2.2':
+    resolution: {integrity: sha512-7y7stUZV92zYTmUtnDF0ZZD95fSkjBNENQ6oHMNCM1aFMyM4UOxWtlcVkyI+UqABd1z2Uk2M37becptxYST4OQ==}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@remedia/node-linux-x64-musl@0.2.1':
-    resolution: {integrity: sha512-gOz5QXVDiNGcs2xGL/MnKeabn3vnaG/ZQ/9ts8vti5t1RflPMYyjcJKeZ9c+nbjxT0gA7HYJolp9ZGWfISWduw==}
+  '@remedia/node-linux-x64-musl@0.2.2':
+    resolution: {integrity: sha512-LkiHjxsb9YUDLkwwvuvWAo6JHUExj97SPAcXpZCc2md9lD4LhxkPF3bsQgXEyr4aygG4q/QP78AWCYq/hRXJNg==}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@remedia/node-win32-arm64-msvc@0.2.1':
-    resolution: {integrity: sha512-G4JOvrwxC/mh9wCgtH/8SiwiQf5ytza3KiQ7MPwxHgiWdr84NkOMdU2zm0fysTUxlc6oNUmmvtaBXt0g/VQf9Q==}
+  '@remedia/node-win32-arm64-msvc@0.2.2':
+    resolution: {integrity: sha512-tyHu4JviVSSGXHuv9ULAKoAISY8f+ZXd29GKxsX7yvUfAL1sre/eeynWosC6hcHrrPBMZKE6rQWmBkPprPPW5g==}
     engines: {node: '>=22.18.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@remedia/node-win32-ia32-msvc@0.2.1':
-    resolution: {integrity: sha512-3vRdtTl6u2Y1mTKCm9FAlPeGrtlPxN4HNmH/2s9lH4o27HCjrfJXyn+GLq4S34Pe2ohfvQTfh2gNyWL/iH5DIg==}
+  '@remedia/node-win32-ia32-msvc@0.2.2':
+    resolution: {integrity: sha512-2irpVI1RXdWL/yPIk4G0D4MSJ445QTqsUEPjaZybtYsbte45xbPq3zApvWT9qrkC6r0Zt63QXgNF2EJRPj2Z8g==}
     engines: {node: '>=22.18.0'}
     cpu: [ia32]
     os: [win32]
 
-  '@remedia/node-win32-x64-msvc@0.2.1':
-    resolution: {integrity: sha512-x/Vpv/b4qpXNkOUDEfPoIHRzSeCs9tTB0mZnPidCW/Ix8JJkWmOEJ9RcGh12M5xZigBrg6TkE7WovjxoSsT/qg==}
+  '@remedia/node-win32-x64-msvc@0.2.2':
+    resolution: {integrity: sha512-z0DC/iAkmkL6MX8Xuqc32cR5ZNT11mwoEgjNzkofKb2qhDq1qqIMNldYj2Tb9OZKRbJvvtqKnrkasel4OMUUcg==}
     engines: {node: '>=22.18.0'}
     cpu: [x64]
     os: [win32]
 
-  '@remedia/node@0.2.1':
-    resolution: {integrity: sha512-wrBCZ2cPOEkb4K2k3wlwcvoxdsadqd107bH8YHJ6SJbrxQn2VD2QltqrIABjlZ1suW7mxjx/LLJtHMNModSmMQ==}
+  '@remedia/node@0.2.2':
+    resolution: {integrity: sha512-TxiaKPAe9w/CAHv34jSSUX0I46QP0xDvMgjuNpvvUt4npy1uGsvcx6KY9jCkLp5Zqj1qa4Rklown398qoMYl7Q==}
     engines: {node: '>=22.18.0'}
 
-  '@remedia/plugin-host@0.2.1':
-    resolution: {integrity: sha512-fEDDtNwkBHBIOm1Jlg9LE1vw9fsI5Z1P1PPFcfwg7tCmDWyeyd8Z0fmgXidIWPq9iubx1yqm+tnVezse7a+h5Q==}
+  '@remedia/plugin-host@0.2.2':
+    resolution: {integrity: sha512-ElvMCbxAyiG3JPjKk2POnB+yZV/itxAc94q6tRi3afq1KFmO23Nfjus8+hHVZC/FqP5yQigEtA5FX5j5G2Abmg==}
     engines: {node: '>=22.18.0'}
 
   '@rolldown/binding-android-arm-eabi@1.2.16':
@@ -4592,71 +4592,71 @@ snapshots:
     dependencies:
       quansync: 1.0.0
 
-  '@remedia/client@0.2.1(@remedia/node@0.2.1)':
+  '@remedia/client@0.2.2(@remedia/node@0.2.2)':
     dependencies:
       ws: 8.22.1
     optionalDependencies:
-      '@remedia/node': 0.2.1
+      '@remedia/node': 0.2.2
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@remedia/node-android-arm-eabi@0.2.1':
+  '@remedia/node-android-arm-eabi@0.2.2':
     optional: true
 
-  '@remedia/node-android-arm64@0.2.1':
+  '@remedia/node-android-arm64@0.2.2':
     optional: true
 
-  '@remedia/node-darwin-arm64@0.2.1':
+  '@remedia/node-darwin-arm64@0.2.2':
     optional: true
 
-  '@remedia/node-darwin-x64@0.2.1':
+  '@remedia/node-darwin-x64@0.2.2':
     optional: true
 
-  '@remedia/node-freebsd-x64@0.2.1':
+  '@remedia/node-freebsd-x64@0.2.2':
     optional: true
 
-  '@remedia/node-linux-arm-gnueabihf@0.2.1':
+  '@remedia/node-linux-arm-gnueabihf@0.2.2':
     optional: true
 
-  '@remedia/node-linux-arm64-gnu@0.2.1':
+  '@remedia/node-linux-arm64-gnu@0.2.2':
     optional: true
 
-  '@remedia/node-linux-arm64-musl@0.2.1':
+  '@remedia/node-linux-arm64-musl@0.2.2':
     optional: true
 
-  '@remedia/node-linux-x64-gnu@0.2.1':
+  '@remedia/node-linux-x64-gnu@0.2.2':
     optional: true
 
-  '@remedia/node-linux-x64-musl@0.2.1':
+  '@remedia/node-linux-x64-musl@0.2.2':
     optional: true
 
-  '@remedia/node-win32-arm64-msvc@0.2.1':
+  '@remedia/node-win32-arm64-msvc@0.2.2':
     optional: true
 
-  '@remedia/node-win32-ia32-msvc@0.2.1':
+  '@remedia/node-win32-ia32-msvc@0.2.2':
     optional: true
 
-  '@remedia/node-win32-x64-msvc@0.2.1':
+  '@remedia/node-win32-x64-msvc@0.2.2':
     optional: true
 
-  '@remedia/node@0.2.1':
+  '@remedia/node@0.2.2':
     optionalDependencies:
-      '@remedia/node-android-arm-eabi': 0.2.1
-      '@remedia/node-android-arm64': 0.2.1
-      '@remedia/node-darwin-arm64': 0.2.1
-      '@remedia/node-darwin-x64': 0.2.1
-      '@remedia/node-freebsd-x64': 0.2.1
-      '@remedia/node-linux-arm-gnueabihf': 0.2.1
-      '@remedia/node-linux-arm64-gnu': 0.2.1
-      '@remedia/node-linux-arm64-musl': 0.2.1
-      '@remedia/node-linux-x64-gnu': 0.2.1
-      '@remedia/node-linux-x64-musl': 0.2.1
-      '@remedia/node-win32-arm64-msvc': 0.2.1
-      '@remedia/node-win32-ia32-msvc': 0.2.1
-      '@remedia/node-win32-x64-msvc': 0.2.1
+      '@remedia/node-android-arm-eabi': 0.2.2
+      '@remedia/node-android-arm64': 0.2.2
+      '@remedia/node-darwin-arm64': 0.2.2
+      '@remedia/node-darwin-x64': 0.2.2
+      '@remedia/node-freebsd-x64': 0.2.2
+      '@remedia/node-linux-arm-gnueabihf': 0.2.2
+      '@remedia/node-linux-arm64-gnu': 0.2.2
+      '@remedia/node-linux-arm64-musl': 0.2.2
+      '@remedia/node-linux-x64-gnu': 0.2.2
+      '@remedia/node-linux-x64-musl': 0.2.2
+      '@remedia/node-win32-arm64-msvc': 0.2.2
+      '@remedia/node-win32-ia32-msvc': 0.2.2
+      '@remedia/node-win32-x64-msvc': 0.2.2
 
-  '@remedia/plugin-host@0.2.1': {}
+  '@remedia/plugin-host@0.2.2': {}
 
   '@rolldown/binding-android-arm-eabi@1.2.16':
     optional: true

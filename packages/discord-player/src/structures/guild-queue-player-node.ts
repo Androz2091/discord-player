@@ -249,7 +249,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
           await existing.connect({
             ...(options.connectTimeoutMs === undefined ? {} : { timeoutMs: options.connectTimeoutMs }),
             ...(this.player.playbackBackend
-              ? { signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]) }
+              ? {
+                  signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]),
+                }
               : { signal: this.queue.signal }),
           });
         }
@@ -294,7 +296,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       await session.connect({
         ...(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs }),
         ...(this.player.playbackBackend
-          ? { signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]) }
+          ? {
+              signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]),
+            }
           : { signal: this.queue.signal }),
       });
       this.assertQueueAlive();
@@ -366,7 +370,10 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     }
     this.detachSessionListeners = null;
     if (errors.length === 1) throw errors[0];
-    if (errors.length) throw new AggregateError(errors, 'Playback session disposal failed', { cause: errors[0] });
+    if (errors.length)
+      throw new AggregateError(errors, 'Playback session disposal failed', {
+        cause: errors[0],
+      });
     this.queue.emit('connectionDestroyed');
   }
 
@@ -535,7 +542,10 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
         errors.push(cleanup);
       }
 
-      if (errors.length > 1) throw new AggregateError(errors, 'Playback session attachment failed', { cause: error });
+      if (errors.length > 1)
+        throw new AggregateError(errors, 'Playback session attachment failed', {
+          cause: error,
+        });
 
       throw error;
     }
@@ -559,7 +569,14 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       if (requested && !backend.capabilities.crossfade) throw new Error('Playback backend does not support crossfade.');
       return {
         ...options,
-        crossfade: requested ? { durationMs: 5000, prepareBeforeMs: 30000, curve: 'equalPower', ...requested } : false,
+        crossfade: requested
+          ? {
+              durationMs: 5000,
+              prepareBeforeMs: 30000,
+              curve: 'equalPower',
+              ...requested,
+            }
+          : false,
       };
     }
     const client = this.player.getRemedia();
@@ -984,7 +1001,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /** Pause raw playback in the current playback session. */
   public async pause(): Promise<void> {
-    intercept(this.player.plugins, 'playback.beforePause', { guildId: this.queue.guildId });
+    intercept(this.player.plugins, 'playback.beforePause', {
+      guildId: this.queue.guildId,
+    });
     this.queue.voice.manualPause();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
@@ -993,7 +1012,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   /** Resume raw playback in the current playback session. */
   public async resume(): Promise<void> {
-    intercept(this.player.plugins, 'playback.beforeResume', { guildId: this.queue.guildId });
+    intercept(this.player.plugins, 'playback.beforeResume', {
+      guildId: this.queue.guildId,
+    });
     this.queue.voice.manualPause();
     using _lock = await this.queue.tasks.acquire('queue.node.operation');
 
@@ -1063,7 +1084,15 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    * {@link GuildQueuePlayerNode.totalDuration}) when a filter changes tempo. Returns zero when no session exists.
    */
   public get playbackTime(): number {
-    return this.session?.getPlaybackTime() ?? 0;
+    const session = this.session;
+    if (!session) return 0;
+
+    return Math.max(0, session.getMediaTime?.() ?? session.position.mediaMs ?? session.getPlaybackTime());
+  }
+
+  /** Constant rate of source progress per output second, or null for opaque graphs. */
+  public get playbackRate(): number | null {
+    return this.session?.getPlaybackRate?.() ?? 1;
   }
 
   /** Total session duration in milliseconds, falling back to the current Track's duration. */

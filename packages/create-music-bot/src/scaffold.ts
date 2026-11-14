@@ -14,7 +14,7 @@ export const PACKAGE_MANAGERS = ['npm', 'pnpm', 'yarn', 'bun'] as const;
 export type PackageManager = (typeof PACKAGE_MANAGERS)[number];
 
 /** Embedded audio runtime installed in generated projects. */
-export const REMEDIA_NODE_VERSION = '0.2.1';
+export const REMEDIA_NODE_VERSION = '0.2.2';
 
 const DISCORD_JS_VERSION = '^14.28.1';
 const NODE_TYPES_VERSION = '^22.20.5';
