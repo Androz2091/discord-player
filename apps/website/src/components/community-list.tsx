@@ -337,6 +337,7 @@ export function CommunityList({ resources, contributionUrl }: { resources: IShow
         {entries.map((category) => (
           <TabsTrigger
             key={category.id}
+            id={category.id}
             value={category.id}
             className="min-h-12 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring"
           >

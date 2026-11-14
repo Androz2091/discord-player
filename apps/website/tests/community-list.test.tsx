@@ -99,6 +99,9 @@ describe('Community directory', () => {
   it('defaults to extractors and exposes counts and linked tab panels', async () => {
     await render();
     expect(tab('Extractors').getAttribute('aria-selected')).toBe('true');
+    expect(tab('Extractors').id).toBe('extractors');
+    expect(tab('Music bots').id).toBe('bots');
+    expect(tab('Plugins').id).toBe('plugins');
     expect(tab('Plugins').textContent).toContain('(0)');
     expect(panel().getAttribute('aria-labelledby')).toBe(tab('Extractors').id);
     expect(panel().textContent).toContain('Audio source');

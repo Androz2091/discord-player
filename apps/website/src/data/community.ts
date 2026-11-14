@@ -291,7 +291,7 @@ export const communityResources: IShowcase = {
     },
     {
       name: 'discord-player-deezer',
-      description: 'An official extractor for discord-player to add support for deezer source.',
+      description: 'An unofficial extractor for discord-player to add support for deezer source.',
       repositoryUrl: 'https://github.com/retrouser955/discord-player-deezer',
       npmUrl: 'https://npm.im/discord-player-deezer',
     },
