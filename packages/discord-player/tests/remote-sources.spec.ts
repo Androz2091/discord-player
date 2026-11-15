@@ -4,7 +4,7 @@ import { Readable } from 'node:stream';
 import { once } from 'node:events';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createSourcePluginHost, SOURCE_PLUGIN_ID, serializeSourceTrack } from '@discord-player/plugin-host';
-import { BaseExtractor, DiscordPlayer, Track, definePlugin, deserialize } from '../src/index.js';
+import { BaseExtractor, DiscordPlayer, QueueRepeatMode, Track, definePlugin, deserialize } from '../src/index.js';
 import { setup } from './mocks/queue.js';
 import { settle } from './mocks/async.js';
 import { MatchingExtractor, PermissiveExtractor, matchingUrl } from './mocks/search-fallback.js';
@@ -804,4 +804,76 @@ it('rejects an unsupported adaptive curve on a discovered source node without mo
   expect(queue.node.session).toBeNull();
   expect(session.connectionState).toBe('disconnected');
   expect(track.sourceReference?.nodeId).toBe('fake-node');
+});
+
+it.each([false, true])('forwards natural-completion AutoPlay to its source host (crossfade %s)', async (crossfade) => {
+  const {
+    player: bot,
+    queue,
+    session,
+    execute,
+  } = await forwarded('equalPower', async (host) => {
+    const extractor = await host.extractors.register(RemoteExtractor);
+
+    vi.spyOn(extractor, 'getRelatedTracks').mockImplementation(async () => {
+      const result = await extractor.handle('related:first');
+      result.tracks[0]!.url = 'https://fixture.test/related';
+      return result;
+    });
+  });
+  const first = (await bot.search('first')).tracks[0]!;
+
+  queue.setRepeatMode(QueueRepeatMode.AUTOPLAY);
+  session.crossfade = crossfade ? { enabled: true } : false;
+  await queue.play(first);
+
+  if (crossfade) {
+    const staged = new Promise<void>((resolve) => bot.events.once('stageReady', () => resolve()));
+
+    session.requestPreparation();
+    await staged;
+
+    expect(session.stage).not.toBeNull();
+    expect(queue.currentTrack).toBe(first);
+  }
+
+  const started = new Promise<void>((resolve, reject) => {
+    bot.events.on('error', (_, error) => reject(error));
+    bot.events.on('playerError', (_, error) => reject(error));
+    bot.events.on('emptyQueue', () => reject(new Error('AutoPlay exhausted')));
+    bot.events.on('playerStart', (_, track) => {
+      if (track.title === 'related:first') resolve();
+    });
+  });
+
+  if (crossfade) session.promote()();
+  else {
+    session.state = 'completed';
+    session.emit('playbackCompleted', {
+      sessionId: session.sessionId,
+      guildId: queue.id,
+      nodeId: session.nodeId,
+      generation: session.generation,
+      state: 'completed',
+      position: session.position,
+    });
+  }
+  await started;
+
+  expect(queue.currentTrack?.title).toBe('related:first');
+  expect(queue.currentTrack?.sourceReference).toMatchObject({
+    nodeId: 'fake-node',
+    hostId: 'discovered',
+    pluginId: RemoteExtractor.identifier,
+  });
+  expect(execute.mock.calls.filter(([request]) => request.operation === 'source.related')).toHaveLength(1);
+  expect(execute).toHaveBeenCalledWith(
+    expect.objectContaining({
+      nodeId: 'fake-node',
+      hostId: 'discovered',
+      pluginId: SOURCE_PLUGIN_ID,
+      operation: 'source.related',
+    }),
+  );
+  expect(session.playCalls).toBe(crossfade ? 1 : 2);
 });
