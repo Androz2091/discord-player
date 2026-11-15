@@ -102,6 +102,15 @@ describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %
     expect(queue.stats.tracksStarted).toBe(2);
     expect(queue.stats.tracksFinished).toBe(0);
 
+    // Outgoing completion may omit application metadata as well.
+    session.emit('playbackCompleted', {
+      sessionId: session.sessionId,
+      guildId: queue.id,
+      nodeId: session.nodeId,
+      generation: session.generation - 1,
+      state: 'completed',
+      position: session.position,
+    });
     finishA();
     finishA();
     await settle();

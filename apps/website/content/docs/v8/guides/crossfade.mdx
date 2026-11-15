@@ -59,12 +59,14 @@ Staging a track for a fade does not fire `playerStart`.
 
 ## How repeat modes behave
 
-| Repeat mode | Next track                                                         |
-| ----------- | ------------------------------------------------------------------ |
-| `OFF`       | The next upcoming track                                            |
-| `TRACK`     | A new copy of the current track                                    |
-| `QUEUE`     | The next upcoming track, and the finished track moves to the end   |
-| `AUTOPLAY`  | An already chosen upcoming track. Otherwise autoplay runs as usual |
+| Repeat mode | Next track                                                       |
+| ----------- | ---------------------------------------------------------------- |
+| `OFF`       | The next upcoming track                                          |
+| `TRACK`     | A new copy of the current track                                  |
+| `QUEUE`     | The next upcoming track, and the finished track moves to the end |
+| `AUTOPLAY`  | The next upcoming track, or an early related-track lookup        |
+
+When `AUTOPLAY` has no upcoming track, Remedia's preparation request starts related-track discovery on the current track's source plugin host. The selected track is queued and prepared through the same crossfade path as other upcoming tracks. If discovery finishes after natural completion, the same request supplies the next track for ordinary playback. Skip, seek, stop, queue changes, and queue deletion cancel pending discovery.
 
 With shuffle on, the next track is chosen once when it is prepared, and that same track is used when the fade happens.
 

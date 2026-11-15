@@ -20,6 +20,7 @@ Avoid provider-specific assumptions in core packages, tests, documentation, and 
 - Base topic branches on `master` unless explicitly instructed otherwise. Work on the requested branch.
 - Do not modify the Remedia repository unless explicitly requested.
 - Do not open pull requests, merge branches, publish packages, or change release versions unless explicitly requested.
+- Use Conventional Commits style for commit messages and pull request titles: `type(scope): description`, such as `fix(queue): initiate AutoPlay discovery during crossfade`. The scope is optional.
 - Do not implement APIs that require unreleased or nonexistent Remedia functionality.
 - Read the actual source code and installed dependency types before designing changes.
 - Keep changes focused on the requested behavior. Avoid unrelated refactoring unless it is necessary to remove duplication or support the implementation.

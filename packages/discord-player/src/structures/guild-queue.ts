@@ -321,7 +321,12 @@ export class GuildQueue<Metadata = unknown> {
   /** Queue-scoped local encoded-byte interception. */
   public onAfterCreateStream: StreamHooks['onAfterCreateStream'];
 
-  #autoplayController: AbortController | null = null;
+  #autoplayRequest: {
+    operation: ManagedOperation;
+    revision: number;
+    controller: AbortController;
+    result: Promise<Track | null>;
+  } | null = null;
 
   #currentTrack: Track | null = null;
 
@@ -959,7 +964,7 @@ export class GuildQueue<Metadata = unknown> {
       guildId: this.guildId,
     });
 
-    this.#autoplayController?.abort();
+    this.cancelAutoplay();
     return this.terminateCurrent('skip', reason, description);
   }
 
@@ -1065,7 +1070,7 @@ export class GuildQueue<Metadata = unknown> {
       guildId: this.guildId,
     });
 
-    this.#autoplayController?.abort();
+    this.cancelAutoplay();
     using _lock = await this.tasks.acquire('queue.playback-transition');
 
     if (this.#destroyed) return;
@@ -1280,10 +1285,20 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   /**
-   * Cancel an upcoming reservation without removing its queue occurrence.
+   * Cancel pending AutoPlay discovery and an upcoming reservation without removing its queue occurrence.
    * @returns Resolves after native staged media is released.
    */
   public async cancelPreparation(): Promise<void> {
+    this.cancelAutoplay();
+    await this.clearPreparation();
+  }
+
+  private cancelAutoplay(): void {
+    this.#autoplayRequest?.controller.abort();
+    this.#autoplayRequest = null;
+  }
+
+  private async clearPreparation(): Promise<void> {
     const reservation = this.#reservation;
 
     if (!reservation) return;
@@ -1314,13 +1329,13 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   private policyChanged(): void {
-    this.#autoplayController?.abort();
+    this.cancelAutoplay();
     this.#decisionRevision++;
     this.reprepareAfterMutation();
   }
 
   private queueChanged(): void {
-    this.#autoplayController?.abort();
+    this.cancelAutoplay();
     this.#decisionRevision++;
     if (!this.#destroyed && this.player.plugins.hasCapability('queue.changed')) {
       try {
@@ -1374,7 +1389,7 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   /**
-   * Resolve one upcoming occurrence only when Remedia requests preparation.
+   * Resolve an upcoming occurrence or discover an AutoPlay successor when Remedia requests preparation.
    * @param session Exact session requesting preparation.
    * @param event Generation and session identity supplied by Remedia.
    */
@@ -1385,6 +1400,7 @@ export class GuildQueue<Metadata = unknown> {
       !outgoing ||
       outgoing !== this.#operation ||
       outgoing.terminal ||
+      outgoing.pendingTerminal ||
       outgoing.generation !== event.generation ||
       !session.snapshot.crossfade?.enabled
     )
@@ -1399,7 +1415,11 @@ export class GuildQueue<Metadata = unknown> {
     const index = repeat ? 0 : this.selectionIndex(true, this.#shuffle && this.size ? randomInt(this.size) : 0);
     const track = repeat ? outgoing.track : this.tracks.at(index);
 
-    if (!track) return;
+    if (!track) {
+      if (this.#repeatMode === QueueRepeatMode.AUTOPLAY) void this.autoplay(outgoing, this.#decisionRevision, true);
+
+      return;
+    }
 
     const operation: ManagedOperation = {
       id: randomUUID(),
@@ -1648,69 +1668,125 @@ export class GuildQueue<Metadata = unknown> {
     }
   }
 
-  private async autoplay(track: Track, revision: number): Promise<PlayRawResult | null> {
-    const controller = new AbortController();
-    this.#autoplayController = controller;
-    const signal = AbortSignal.any([
-      controller.signal,
-      this.signal,
-      AbortSignal.timeout(this.options.autoplayTimeoutMs ?? 30000),
-    ]);
+  private async discoverAutoplayTrack(track: Track, signal: AbortSignal, crossfade: boolean): Promise<Track | null> {
+    const reference = track.sourceReference;
+    const lookup = this.manager.player.plugins.execute(
+      'track.related',
+      { track },
+      {
+        pluginId: reference?.pluginId,
+        hostId: reference?.hostId ?? null,
+        signal,
+        blocked: this.manager.player.options.blockExtractors,
+      },
+    );
+    let abortLookup: (() => void) | undefined;
+
     try {
-      const reference = track.sourceReference;
-      const lookup = await this.manager.player.plugins.execute(
-        'track.related',
-        { track },
-        {
-          pluginId: reference?.pluginId,
-          hostId: reference?.hostId ?? null,
-          signal,
-          blocked: this.manager.player.options.blockExtractors,
-        },
-      );
-      // A provider that ignores cancellation must not keep an already finished qqueue
-      // in the pending-autoplay state forever
       const result = await Promise.race([
         lookup,
         new Promise<null>((_, reject) => {
-          if (signal.aborted) reject(signal.reason);
-          else
-            signal.addEventListener('abort', () => reject(signal.reason), {
-              once: true,
-            });
+          abortLookup = () => reject(signal.reason);
+
+          if (signal.aborted) abortLookup();
+          else signal.addEventListener('abort', abortLookup, { once: true });
         }),
       ]);
-      if (signal.aborted || this.#operation || this.size || revision !== this.#decisionRevision) return null;
+
+      signal.throwIfAborted();
+
       const candidates = (result?.tracks ?? []).filter(
         (item) => item.id !== track.id && (!track.url || item.url !== track.url),
       );
-      const next = await this.chooseAutoplayTrack(candidates, signal);
-      if (signal.aborted || this.#operation || this.size || revision !== this.#decisionRevision) return null;
-      this.#autoplayController = null;
-      if (next) return (await this.play(next)).playerResult;
-      this.voice.ended();
-      this.emit(GuildQueueEvents.EmptyQueue);
-      return null;
+
+      return await this.chooseAutoplayTrack(candidates, signal, crossfade);
+    } finally {
+      if (abortLookup) signal.removeEventListener('abort', abortLookup);
+    }
+  }
+
+  private async autoplay(
+    operation: ManagedOperation,
+    revision: number,
+    preparation = false,
+  ): Promise<PlayRawResult | null> {
+    let request = this.#autoplayRequest;
+
+    if (!request || request.operation !== operation || request.revision !== revision) {
+      this.cancelAutoplay();
+
+      const controller = new AbortController();
+      const signal = AbortSignal.any([
+        controller.signal,
+        this.signal,
+        AbortSignal.timeout(this.options.autoplayTimeoutMs ?? 30000),
+      ]);
+      const result = this.discoverAutoplayTrack(operation.track, signal, preparation).catch((error) => {
+        if (!controller.signal.aborted && !this.signal.aborted) this.emit(GuildQueueEvents.Error, asError(error));
+
+        return null;
+      });
+
+      request = { operation, revision, controller, result };
+      this.#autoplayRequest = request;
+    }
+
+    try {
+      const next = await request.result;
+      let work: ReturnType<GuildQueue['play']> | undefined;
+
+      {
+        using _lock = await this.tasks.acquire('queue.playback-transition');
+
+        if (
+          this.#autoplayRequest !== request ||
+          request.controller.signal.aborted ||
+          this.signal.aborted ||
+          revision !== this.#decisionRevision ||
+          this.size ||
+          operation.session !== this.node.session ||
+          (preparation
+            ? this.#operation !== operation || operation.terminal || operation.pendingTerminal
+            : this.#operation !== null)
+        )
+          return null;
+
+        // Keep an empty early result until natural completion consumes it, rather
+        // than issuing another lookup on each repeated prepareRequested event.
+        if (preparation && !next) return null;
+
+        this.#autoplayRequest = null;
+
+        // During preparation play() enqueues the candidate and the existing
+        // prepare-request path stages it. After completion it starts normally.
+        // Queue admission stays ordered before subsequent stop/skip operations.
+        if (next) work = this.play(next);
+        else {
+          this.voice.ended();
+          this.emit(GuildQueueEvents.EmptyQueue);
+        }
+      }
+
+      return work ? (await work).playerResult : null;
     } catch (error) {
-      if (!controller.signal.aborted && !this.signal.aborted) {
+      if (!request.controller.signal.aborted && !this.signal.aborted) {
         this.emit(GuildQueueEvents.Error, asError(error));
+
         if (!this.#operation && !this.size) {
           this.voice.ended();
           this.emit(GuildQueueEvents.EmptyQueue);
         }
       }
+
       return null;
     } finally {
-      if (this.#autoplayController === controller) this.#autoplayController = null;
-      // An enqueue can invalidate an in-flight related lookup after finalizeLocked
-      // has already cleared the active operation. Resume the pending queue if needed.
       if (!this.#destroyed && !this.#operation && this.size) {
         void this.playNext().catch((error) => this.emit(GuildQueueEvents.Error, asError(error)));
       }
     }
   }
 
-  private chooseAutoplayTrack(tracks: Track[], signal: AbortSignal): Promise<Track | null> {
+  private chooseAutoplayTrack(tracks: Track[], signal: AbortSignal, crossfade: boolean): Promise<Track | null> {
     signal.throwIfAborted();
     if (tracks.length && this.player.plugins.hasCapability('queue.selectRelated')) {
       const candidates = Object.freeze(
@@ -1726,7 +1802,7 @@ export class GuildQueue<Metadata = unknown> {
         guildId: this.guildId,
         candidates,
         index: 0,
-        crossfade: false,
+        crossfade,
       });
       if (!Number.isInteger(selected.index) || selected.index < 0 || selected.index >= tracks.length)
         throw new RangeError('queue.selectRelated must select an existing index.');
@@ -1835,7 +1911,10 @@ export class GuildQueue<Metadata = unknown> {
       return null;
     }
 
-    void this.cancelPreparation();
+    // A pending early lookup belongs to this operation's natural completion.
+    if (terminal !== 'natural') this.cancelAutoplay();
+
+    void this.clearPreparation();
     operation.terminal = true;
     operation.controller.abort(new Error('Playback generation ended.'));
 
@@ -1897,7 +1976,7 @@ export class GuildQueue<Metadata = unknown> {
     }
 
     if (!next && reason === 'natural' && this.#repeatMode === QueueRepeatMode.AUTOPLAY) {
-      return this.autoplay(track, this.#decisionRevision);
+      return this.autoplay(operation, this.#decisionRevision);
     }
 
     if (!next) {
@@ -2090,8 +2169,21 @@ export class GuildQueue<Metadata = unknown> {
 
   private matchOperation(
     session: PlaybackSession,
-    event: Pick<StartedEvent, 'sessionId' | 'customMetadata'>,
+    event: Pick<StartedEvent, 'sessionId' | 'generation' | 'customMetadata'>,
   ): ManagedOperation | null {
+    // Remedia metadata is optional. Once a managed start has established the
+    // generation, session and generation together identify its later events.
+    // Never use this path for supplied but foreign metadata or an unknown start.
+    if (event.customMetadata === undefined) {
+      if (session !== this.node.session || event.sessionId !== session.sessionId) return null;
+
+      return (
+        [this.#operation, ...this.#outgoing.values()].find(
+          (operation) => operation?.session === session && operation.generation === event.generation,
+        ) ?? null
+      );
+    }
+
     const markerId = (event.customMetadata as Partial<GuildQueuePlaybackMetadata> | undefined)?.__discordPlayer
       ?.operationId;
     const operation = [this.#operation, ...this.#outgoing.values()].find((item) => item?.id === markerId);
@@ -2192,11 +2284,11 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   private takeNextTrack(): Track | undefined {
+    if (!this.size) return undefined;
+
     const policy = this.selectionIndex(false, this.#shuffle && this.size ? randomInt(this.size) : 0);
     if (policy !== 0) return this.tracks.removeAt(policy);
     if (!this.#shuffle) return this.tracks.dequeue();
-
-    if (!this.tracks.size) return undefined;
 
     return this.tracks.removeAt(policy);
   }
