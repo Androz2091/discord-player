@@ -35,8 +35,8 @@
     "@clack/prompts": "^1.9.0"
   },
   "devDependencies": {
-    "@remedia/client": "0.2.2",
-    "@remedia/node": "0.2.2",
+    "@remedia/client": "0.3.0",
+    "@remedia/node": "0.3.0",
     "@types/node": "catalog:",
     "discord-player": "workspace:*",
     "discord.js": "^14.28.1",

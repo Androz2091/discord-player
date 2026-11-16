@@ -18,6 +18,8 @@ To add Discord Player to an existing project, install the `dev` tag (npm's `late
 pnpm add discord-player@dev discord.js @remedia/node
 ```
 
+> `discord.js` here is just an example. Discord Player v8 works with **any** Discord API library.
+
 Install [FFmpeg 9 shared libraries](https://discord-player.js.org/docs/v8/installation/ffmpeg) on the machine running audio. Remote-only bot processes do not need FFmpeg locally.
 
 ## Create a player

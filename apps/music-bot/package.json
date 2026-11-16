@@ -23,7 +23,7 @@
     "start": "commandkit start"
   },
   "dependencies": {
-    "@remedia/node": "0.2.2",
+    "@remedia/node": "0.3.0",
     "commandkit": "^1.2.6",
     "discord-player": "workspace:*",
     "discord.js": "^14.28.1"
