@@ -2241,6 +2241,7 @@ export class GuildQueue<Metadata = unknown> {
       ...(selfMute !== undefined ? { selfMute } : {}),
       ...(volume !== undefined ? { volume: volume / 100 } : {}),
       ...(filterGraph !== undefined ? { filterGraph } : {}),
+      ...(options.enableFallbackSeeking !== undefined ? { enableFallbackSeeking: options.enableFallbackSeeking } : {}),
     });
 
     this.emit(GuildQueueEvents.Connection);
