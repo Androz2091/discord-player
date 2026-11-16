@@ -16,7 +16,7 @@ it('observes every native session event without inventing managed playback', asy
     playbackFailed: { ...identity, state: 'failed', error: new Error('decode') },
     playbackPaused: { ...identity, previousState: 'playing', state: 'paused' },
     playbackResumed: { ...identity, previousState: 'paused', state: 'playing' },
-    playbackSeeked: { ...identity, previousPositionMs: 0, positionMs: 100 },
+    playbackSeeked: { ...identity, previousPositionMs: 0, positionMs: 100, fallback: false, requestedPositionMs: 100 },
     prepareRequested: { ...identity, remainingMs: 1000, transitionInMs: 500 },
     stageReady: stage,
     stageFailed: { ...stage, reason: 'stage' },

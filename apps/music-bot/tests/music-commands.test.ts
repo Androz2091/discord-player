@@ -232,7 +232,14 @@ test('playback announcements preserve Track arguments and report queue and playe
     () => player.events.emit('playerStop', queue, track, undefined),
     () => player.events.emit('playerPause', queue, { ...identity, previousState: 'playing', state: 'paused' }),
     () => player.events.emit('playerResume', queue, { ...identity, previousState: 'paused', state: 'playing' }),
-    () => player.events.emit('playerSeek', queue, { ...identity, previousPositionMs: 0, positionMs: 30_000 }),
+    () =>
+      player.events.emit('playerSeek', queue, {
+        ...identity,
+        previousPositionMs: 0,
+        positionMs: 30_000,
+        fallback: false,
+        requestedPositionMs: 30_000,
+      }),
     () => player.events.emit('volumeChange', queue, 80, 60),
     () => player.events.emit('emptyQueue', queue),
   ];

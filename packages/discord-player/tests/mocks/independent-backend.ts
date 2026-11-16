@@ -333,6 +333,8 @@ export class IndependentSession implements PlaybackSession {
       ...this.identity(),
       positionMs,
       previousPositionMs,
+      fallback: false,
+      requestedPositionMs: positionMs,
     });
   }
 

@@ -71,6 +71,8 @@ it('uses the native timeline with one timer, independent subscriptions, pause, s
     ...identity,
     positionMs: 0,
     previousPositionMs: 2000,
+    fallback: false,
+    requestedPositionMs: 0,
   } satisfies DiscordSessionEvents['playbackSeeked'][0]);
   expect(second.mock.lastCall).toEqual(['zero', 0]);
   session.state = 'paused';

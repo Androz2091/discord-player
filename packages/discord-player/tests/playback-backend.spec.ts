@@ -52,6 +52,8 @@ class CustomSession extends FakeSession implements PlaybackSession {
       ...this.identity(),
       positionMs,
       previousPositionMs,
+      fallback: false,
+      requestedPositionMs: positionMs,
     } satisfies PlaybackBackendEvents['playbackSeeked'][0]);
   }
 }
