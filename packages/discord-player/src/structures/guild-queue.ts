@@ -93,7 +93,7 @@ export interface GuildQueueOptions<Metadata = unknown> extends StreamHooks {
   leaveOnStopCooldown?: number;
   /** Automatically pause on confirmed empty occupancy and resume only policy-owned pauses. */
   pauseOnEmpty?: boolean;
-  /** Custom timeout for autoplay in milliseconds; defaults to 30000. */
+  /** Total related-discovery and asynchronous selection deadline in milliseconds; defaults to 30000. */
   autoplayTimeoutMs?: number;
 
   /** Arbitrary application metadata stored on the queue. */
@@ -326,6 +326,7 @@ export class GuildQueue<Metadata = unknown> {
     revision: number;
     controller: AbortController;
     result: Promise<Track | null>;
+    playbackAttempted: boolean;
   } | null = null;
 
   #currentTrack: Track | null = null;
@@ -1445,10 +1446,22 @@ export class GuildQueue<Metadata = unknown> {
     this.debugCrossfade(`preparation requested for ${reservation.entryId}`);
     this.emit(GuildQueueEvents.WillPrepareNextTrack, track, event);
 
+    const started = performance.now();
+
     void this.prepareStage(reservation).catch((error) => {
       if (this.#reservation === reservation) {
         void this.cancelPreparation();
-        this.emit(GuildQueueEvents.StageFailed, track, asError(error), undefined);
+        this.emit(
+          GuildQueueEvents.StageFailed,
+          track,
+          this.autoplayError(
+            operation,
+            operation.phase === 'preparing' ? 'source resolution' : 'crossfade staging',
+            started,
+            error,
+          ),
+          undefined,
+        );
       }
     });
   }
@@ -1668,8 +1681,35 @@ export class GuildQueue<Metadata = unknown> {
     }
   }
 
-  private async discoverAutoplayTrack(track: Track, signal: AbortSignal, crossfade: boolean): Promise<Track | null> {
+  private autoplayError(operation: ManagedOperation, phase: string, started: number, cause: unknown): Error {
+    const reference = operation.track.sourceReference;
+    const elapsedMs = Math.round(performance.now() - started);
+
+    return Object.assign(
+      new Error(
+        `Queue failed during ${phase} (operation=${operation.id}, node=${operation.session.nodeId}, host=${reference?.hostId ?? 'local'}, provider=${reference?.pluginId ?? 'unknown'}, elapsed=${elapsedMs}ms)`,
+        { cause },
+      ),
+      {
+        phase,
+        operationId: operation.id,
+        nodeId: operation.session.nodeId,
+        hostId: reference?.hostId,
+        pluginId: reference?.pluginId,
+        elapsedMs,
+      },
+    );
+  }
+
+  private async discoverAutoplayTrack(
+    operation: ManagedOperation,
+    signal: AbortSignal,
+    crossfade: boolean,
+  ): Promise<Track | null> {
+    const track = operation.track;
     const reference = track.sourceReference;
+    const started = performance.now();
+    let phase = reference?.nodeId ? 'remote related-track discovery' : 'provider execution';
     const lookup = this.manager.player.plugins.execute(
       'track.related',
       { track },
@@ -1699,7 +1739,11 @@ export class GuildQueue<Metadata = unknown> {
         (item) => item.id !== track.id && (!track.url || item.url !== track.url),
       );
 
+      phase = 'candidate selection / willAutoPlay';
+
       return await this.chooseAutoplayTrack(candidates, signal, crossfade);
+    } catch (cause) {
+      throw this.autoplayError(operation, phase, started, cause);
     } finally {
       if (abortLookup) signal.removeEventListener('abort', abortLookup);
     }
@@ -1716,20 +1760,27 @@ export class GuildQueue<Metadata = unknown> {
       this.cancelAutoplay();
 
       const controller = new AbortController();
-      const signal = AbortSignal.any([
-        controller.signal,
-        this.signal,
-        AbortSignal.timeout(this.options.autoplayTimeoutMs ?? 30000),
-      ]);
-      const result = this.discoverAutoplayTrack(operation.track, signal, preparation).catch((error) => {
-        if (!controller.signal.aborted && !this.signal.aborted) this.emit(GuildQueueEvents.Error, asError(error));
+      const timeout = new AbortController();
+      const timer = setTimeout(
+        () => timeout.abort(new DOMException('AutoPlay deadline exceeded', 'TimeoutError')),
+        this.options.autoplayTimeoutMs ?? 30000,
+      );
+      timer.unref();
 
-        return null;
-      });
+      const signal = AbortSignal.any([controller.signal, this.signal, timeout.signal]);
+      const result = this.discoverAutoplayTrack(operation, signal, preparation)
+        .catch((error) => {
+          if (!controller.signal.aborted && !this.signal.aborted) this.emit(GuildQueueEvents.Error, asError(error));
 
-      request = { operation, revision, controller, result };
+          return null;
+        })
+        .finally(() => clearTimeout(timer));
+
+      request = { operation, revision, controller, result, playbackAttempted: false };
       this.#autoplayRequest = request;
     }
+
+    const started = performance.now();
 
     try {
       const next = await request.result;
@@ -1760,8 +1811,10 @@ export class GuildQueue<Metadata = unknown> {
         // During preparation play() enqueues the candidate and the existing
         // prepare-request path stages it. After completion it starts normally.
         // Queue admission stays ordered before subsequent stop/skip operations.
-        if (next) work = this.play(next);
-        else {
+        if (next) {
+          request.playbackAttempted = true;
+          work = this.play(next);
+        } else {
           this.voice.ended();
           this.emit(GuildQueueEvents.EmptyQueue);
         }
@@ -1770,7 +1823,7 @@ export class GuildQueue<Metadata = unknown> {
       return work ? (await work).playerResult : null;
     } catch (error) {
       if (!request.controller.signal.aborted && !this.signal.aborted) {
-        this.emit(GuildQueueEvents.Error, asError(error));
+        this.emit(GuildQueueEvents.Error, this.autoplayError(operation, 'playback transition', started, error));
 
         if (!this.#operation && !this.size) {
           this.voice.ended();
@@ -1780,7 +1833,7 @@ export class GuildQueue<Metadata = unknown> {
 
       return null;
     } finally {
-      if (!this.#destroyed && !this.#operation && this.size) {
+      if (!request.playbackAttempted && !this.#destroyed && !this.#operation && this.size) {
         void this.playNext().catch((error) => this.emit(GuildQueueEvents.Error, asError(error)));
       }
     }
@@ -2066,6 +2119,8 @@ export class GuildQueue<Metadata = unknown> {
     options: GuildQueuePlayOptions<PlaybackMetadata>,
     signal: AbortSignal,
   ): Promise<PlayRawResult<GuildQueuePlaybackMetadata<PlaybackMetadata>> | null> {
+    const started = performance.now();
+
     try {
       const source = await this.manager.player.resolvePlaybackSource(
         operation.track,
@@ -2119,9 +2174,19 @@ export class GuildQueue<Metadata = unknown> {
         return null;
       }
 
-      await this.restoreFailedPreparation(operation, asError(error));
+      const failure =
+        this.#repeatMode === QueueRepeatMode.AUTOPLAY
+          ? this.autoplayError(
+              operation,
+              operation.phase === 'preparing' ? 'source resolution' : 'playback transition',
+              started,
+              error,
+            )
+          : asError(error);
 
-      throw error;
+      await this.restoreFailedPreparation(operation, failure);
+
+      throw failure;
     }
   }
 

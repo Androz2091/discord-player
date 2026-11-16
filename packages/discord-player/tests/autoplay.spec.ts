@@ -342,7 +342,10 @@ it('reports an early discovery failure once and ends only after natural completi
   expect(queue.currentTrack).toBe(first);
   expect(error).toHaveBeenCalledExactlyOnceWith(
     queue,
-    expect.objectContaining({ cause: failure, pluginId: 'fixture', operation: 'track.related' }),
+    expect.objectContaining({
+      phase: 'provider execution',
+      cause: expect.objectContaining({ cause: failure, pluginId: 'fixture', operation: 'track.related' }),
+    }),
   );
   expect(empty).not.toHaveBeenCalled();
 
@@ -353,4 +356,116 @@ it('reports an early discovery failure once and ends only after natural completi
   expect(discover).toHaveBeenCalledOnce();
   expect(error).toHaveBeenCalledOnce();
   expect(empty).toHaveBeenCalledExactlyOnceWith(queue);
+});
+
+it.each([false, true])('bounds a willAutoPlay listener that never calls done (crossfade %s)', async (crossfade) => {
+  const { player, queue, session, related, next } = await fixture(crossfade);
+  queue.options.autoplayTimeoutMs = 25;
+  const error = vi.fn();
+  const empty = vi.fn();
+  const selected = deferred<void>();
+
+  player.events.on('error', error);
+  player.events.on('emptyQueue', empty);
+  player.events.on('willAutoPlay', () => selected.resolve());
+  const ended = new Promise<void>((resolve) => player.events.once('emptyQueue', () => resolve()));
+
+  session.complete();
+  related.resolve({ tracks: [next], playlist: null });
+  await selected.promise;
+  await ended;
+
+  expect(error).toHaveBeenCalledExactlyOnceWith(
+    queue,
+    expect.objectContaining({
+      phase: 'candidate selection / willAutoPlay',
+      cause: expect.objectContaining({ name: 'TimeoutError' }),
+      nodeId: session.nodeId,
+      operationId: expect.any(String),
+      elapsedMs: expect.any(Number),
+    }),
+  );
+  expect(empty).toHaveBeenCalledOnce();
+  expect(queue.currentTrack).toBeNull();
+  expect(session.playCalls).toBe(1);
+});
+
+it('times out early discovery once, ignores late results and can play again', async () => {
+  const { player, queue, session, related, next, discover } = await fixture(true);
+  queue.options.autoplayTimeoutMs = 25;
+  const error = vi.fn();
+  player.events.on('error', error);
+  const failed = new Promise<void>((resolve) => player.events.once('error', () => resolve()));
+
+  session.requestPreparation();
+  await failed;
+  session.requestPreparation();
+  session.complete();
+  await settle();
+  related.resolve({ tracks: [next], playlist: null });
+  await settle();
+
+  expect(error).toHaveBeenCalledExactlyOnceWith(queue, expect.objectContaining({ phase: 'provider execution' }));
+  expect(discover).toHaveBeenCalledOnce();
+  expect(queue.currentTrack).toBeNull();
+  await queue.play(new TestTrack('manual'));
+  expect(session.playCalls).toBe(2);
+});
+
+it('does not retry a failed AutoPlay playback transition indefinitely', async () => {
+  const { player, queue, session, related } = await fixture(false);
+  const resolve = vi.spyOn(player, 'resolvePlaybackSource').mockRejectedValue(new Error('Source unavailable'));
+  const failed = new Promise<void>((done) => player.events.once('error', () => done()));
+
+  session.complete();
+  related.resolve({ tracks: [new TestTrack('failed')], playlist: null });
+  await failed;
+  await settle();
+
+  expect(resolve).toHaveBeenCalledOnce();
+  expect(queue.currentTrack).toBeNull();
+  expect(queue.size).toBe(1);
+  expect(queue.stats.tracksFailed).toBe(1);
+});
+
+it('ends empty discovery when the selection callback declines', async () => {
+  const { player, queue, session, related } = await fixture(false);
+  const select = vi.fn((_queue, _tracks, done) => done(null));
+  const empty = vi.fn();
+  player.events.on('willAutoPlay', select);
+  player.events.on('emptyQueue', empty);
+
+  session.complete();
+  related.resolve({ tracks: [], playlist: null });
+  await settle();
+
+  expect(select).toHaveBeenCalledExactlyOnceWith(queue, [], expect.any(Function));
+  expect(empty).toHaveBeenCalledExactlyOnceWith(queue);
+});
+
+it.each([false, true])('continues across three AutoPlay transitions (crossfade %s)', async (crossfade) => {
+  const { player, queue, session, related, discover } = await fixture(crossfade);
+  related.resolve({ tracks: [], playlist: null });
+  discover.mockImplementation(async ({ track }) => ({
+    tracks: [new TestTrack(`next:${track.title}`)],
+    playlist: null,
+  }));
+  const finish = vi.fn();
+  player.events.on('playerFinish', finish);
+
+  for (let index = 0; index < 3; index++) {
+    const previous = queue.currentTrack!;
+    if (crossfade) {
+      session.requestPreparation();
+      await settle();
+      expect(session.stage).not.toBeNull();
+      session.promote()();
+    } else session.complete();
+    await settle();
+    expect(queue.currentTrack?.title).toBe(`next:${previous.title}`);
+  }
+
+  expect(discover).toHaveBeenCalledTimes(3);
+  expect(finish).toHaveBeenCalledTimes(3);
+  expect(session.playCalls).toBe(crossfade ? 1 : 4);
 });

@@ -115,23 +115,35 @@ export async function relatedRemedia(
   if (!reference?.nodeId || !reference.hostId) throw new Error('Remote Track origin is missing');
   if (blocked.includes(reference.pluginId)) throw new Error('Track provider is blocked');
 
-  const available = await hosts(client, operation, signal);
-  if (!available.some((host) => host.nodeId === reference.nodeId && host.hostId === reference.hostId))
-    throw new Error('Remote source operation is unavailable');
+  const started = performance.now();
+  let phase = 'authorization / host discovery';
 
-  const response = await client.plugins.execute({
-    nodeId: reference.nodeId,
-    hostId: reference.hostId,
-    pluginId,
-    operation,
-    input: { track: serializeSourceTrack(track) },
-    signal,
-  });
-  signal?.throwIfAborted();
+  try {
+    const available = await hosts(client, operation, signal);
+    if (!available.some((host) => host.nodeId === reference.nodeId && host.hostId === reference.hostId))
+      throw new Error('source.related is not advertised or authorized on the originating deployment');
 
-  return response.handled && response.result !== null
-    ? sourceResult(response.result, response.nodeId, response.hostId, blocked)
-    : null;
+    phase = 'provider execution';
+
+    const response = await client.plugins.execute({
+      nodeId: reference.nodeId,
+      hostId: reference.hostId,
+      pluginId,
+      operation,
+      input: { track: serializeSourceTrack(track) },
+      signal,
+    });
+    signal?.throwIfAborted();
+
+    return response.handled && response.result !== null
+      ? sourceResult(response.result, response.nodeId, response.hostId, blocked)
+      : null;
+  } catch (cause) {
+    throw new Error(
+      `Remote related-track discovery failed during ${phase} (operation=${operation}, node=${reference.nodeId}, host=${reference.hostId}, provider=${reference.pluginId}, elapsed=${Math.round(performance.now() - started)}ms)`,
+      { cause },
+    );
+  }
 }
 
 /** Look up Track lyrics through its authorized source deployment. @internal

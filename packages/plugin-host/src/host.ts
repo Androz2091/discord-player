@@ -46,7 +46,7 @@ export interface SourcePluginHostOptions extends PluginHostOptions, Omit<SourceP
   /** Maximum retained process-local Track references; default 1000. */
   maxTrackStates?: number;
 
-  /** State lifetime in milliseconds; default ten minutes. Expired tracks are reconstructed by URL. */
+  /** State lifetime in milliseconds; default ten minutes. Expired playback engine state is reconstructed by URL; related discovery uses portable metadata. */
   trackStateTtlMs?: number;
 }
 
@@ -137,7 +137,7 @@ export class SourcePluginHost {
               : { tracks: [], playlist: null };
           }
           if (request.operation === 'track.related') {
-            const track = await this.restore(this.record(request.input).track, signal);
+            const track = await this.restore(this.record(request.input).track, signal, true);
             const result = await this.plugins.execute(
               'track.related',
               { track },
@@ -176,7 +176,7 @@ export class SourcePluginHost {
         },
 
         'source.related': async (input, { signal }) => {
-          const track = await this.restore(this.record(input).track, signal);
+          const track = await this.restore(this.record(input).track, signal, true);
           const result = await this.plugins.execute(
             'track.related',
             { track },
@@ -363,7 +363,7 @@ export class SourcePluginHost {
     return { tracks, playlist: result.playlist?.serialize() ?? null };
   }
 
-  private async restore(input: unknown, signal: AbortSignal): Promise<Track> {
+  private async restore(input: unknown, signal: AbortSignal, metadataOnly = false): Promise<Track> {
     signal.throwIfAborted();
 
     if (input instanceof Track && !this.boundary.getStore()) {
@@ -371,7 +371,7 @@ export class SourcePluginHost {
 
       // A consumer-side model has no host-local engine. Ordinary local models retain identity.
       if (input.sourceState || (this.extractors.get(input.sourceReference?.pluginId ?? '') && !input.extractor)) {
-        return this.restore(serializeSourceTrack(input), signal);
+        return this.restore(serializeSourceTrack(input), signal, metadataOnly);
       }
 
       return input;
@@ -429,11 +429,19 @@ export class SourcePluginHost {
     if (!pluginId || !this.plugins.has(pluginId))
       throw new Error('Track source is unavailable; register its provider and search again');
 
-    if (!this.extractors.get(pluginId)) return track;
-
-    // Re-run legacy metadata resolution rather than guessing the meaning of raw.engine.
+    // Related discovery needs Track metadata, not a freshly resolved playback engine.
+    // Expired or opaque engine state must not add a second network lookup here.
     const data = track.sourceReference?.data;
     const queryType = data && typeof data === 'object' && 'queryType' in data ? data.queryType : undefined;
+
+    if (metadataOnly || !this.extractors.get(pluginId)) {
+      if (typeof queryType === 'string') track.queryType = queryType;
+      track.extractor = this.extractors.get(pluginId) ?? null;
+
+      return track;
+    }
+
+    // Re-run legacy metadata resolution rather than guessing the meaning of raw.engine.
     const result = await this.plugins.execute(
       'search.query.resolve',
       {

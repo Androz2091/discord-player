@@ -689,3 +689,37 @@ it('applies provider blocking and preserves HTTP error redaction without changin
   expect(await response.text()).not.toContain('private-provider-secret');
   expect(report).toHaveBeenCalledOnce();
 });
+
+it.each(['evicted', 'opaque'])(
+  'discovers related metadata with %s state without resolving the playback engine again',
+  async (state) => {
+    const h = host({ maxTrackStates: 1 });
+
+    class Related extends LegacyFixture {
+      static override identifier = 'fixture.related';
+
+      override async handle(query: string) {
+        const result = await super.handle(query);
+        result.tracks[0]!.raw.engine = new URL('https://fixture.test/opaque');
+
+        return result;
+      }
+
+      override async getRelatedTracks(track: Track) {
+        return this.createResponse(null, [
+          new Track({ title: `related:${track.title}`, url: 'https://fixture.test/next' }),
+        ]);
+      }
+    }
+
+    const extractor = await h.extractors.register(Related);
+    const search = await http(h, 'source.search', { query: 'first' });
+    if (state === 'evicted') await http(h, 'source.search', { query: 'evict' });
+    const resolve = vi.spyOn(extractor, 'handle').mockRejectedValue(new Error('Metadata reconstruction must not run'));
+
+    const result = await http(h, 'source.related', { track: search.result.tracks[0] });
+
+    expect(result.result.tracks[0].data.title).toBe('related:first');
+    expect(resolve).not.toHaveBeenCalled();
+  },
+);

@@ -52,3 +52,5 @@ forward-only seeking, and owns native decoding. Replay re-executes the operation
 seekable durable URL. Source providers must support reconstruction/reopening for
 recovery; do not advertise arbitrary random-access or tail-moov M4A support from
 the sequential fixture test alone.
+
+Related discovery restores available cached Track data. If private engine state has expired or cannot be cloned, it uses portable metadata and the owning legacy extractor/query hint instead of resolving the playback engine over the network. Related handlers must be able to use public Track metadata in this case. Playback stream operations still reconstruct private engine state when required.
