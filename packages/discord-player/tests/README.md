@@ -34,3 +34,11 @@ context isolation, HTTP retry ordering, and legacy registration failures.
 The official raw-stream fixture has its own provenance and dependency boundaries
 in `fixtures/README.md`. Offline tests cannot establish native decoder behavior,
 real Gateway negotiation, remote-server behavior, or live playback compatibility.
+
+Real remote AutoPlay RPC coverage (requires an installed Remedia 0.3.0 executable):
+
+```sh
+REMEDIA_BINARY=/path/to/remedia pnpm --filter discord-player exec vitest run tests/remote-autoplay-rpc.spec.ts
+```
+
+This starts isolated Remedia and HTTP source-host processes with fixture credentials, evicts cached Track state, and checks normal playback and adaptive crossfade admission. RPC, authorization and provider execution are real; Discord transport and audio generations use the deterministic playback backend. It does not connect to Discord.

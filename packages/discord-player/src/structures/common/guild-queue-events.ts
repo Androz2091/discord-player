@@ -261,6 +261,6 @@ export interface GuildQueueEventsMap {
   /** A Track was selected and will be submitted to Remedia. */
   [GuildQueueEvents.WillPlayTrack]: QueueEventParams<[track: Track]>;
 
-  /** Related candidates are ready. A registered listener must call done(trackOrNull); cancellation invalidates late choices. */
+  /** Related candidates are ready. A registered listener must call done(trackOrNull) within autoplayTimeoutMs, including asynchronous selection; cancellation invalidates late choices. */
   [GuildQueueEvents.WillAutoPlay]: QueueEventParams<[tracks: Track[], done: (track: Track | null) => void]>;
 }

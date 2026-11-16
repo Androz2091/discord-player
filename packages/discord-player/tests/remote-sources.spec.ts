@@ -877,3 +877,21 @@ it.each([false, true])('forwards natural-completion AutoPlay to its source host 
   );
   expect(session.playCalls).toBe(crossfade ? 1 : 2);
 });
+
+it('executes related tracks on the owning host after its state token is lost', async () => {
+  const { player: bot, host } = await forwarded();
+  const track = (await bot.search('first')).tracks[0]!;
+  track.sourceState = undefined;
+
+  const extractor = host.host.extractors.get(RemoteExtractor.identifier)!;
+  const related = vi.spyOn(extractor, 'getRelatedTracks');
+
+  const result = await bot.plugins.execute('track.related', { track });
+
+  expect(related).toHaveBeenCalledOnce();
+  expect(result?.tracks[0]?.sourceReference).toMatchObject({
+    pluginId: RemoteExtractor.identifier,
+    hostId: 'discovered',
+    nodeId: 'fake-node',
+  });
+});
