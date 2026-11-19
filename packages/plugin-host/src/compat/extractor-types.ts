@@ -1,11 +1,20 @@
 import type { Readable } from 'node:stream';
 import type { RequestOptions } from 'node:http';
-import type { TrackRequester } from '../structures/track.js';
+import type { Track, TrackRequester } from '../structures/track.js';
 import type { SearchResultData } from '../structures/search-result.js';
 import type { SourceStream } from '../plugins/types.js';
 import type { BaseExtractor } from './base-extractor.js';
 import type { ExtractorExecutionContext } from './extractor-execution-context.js';
 import type { SearchQueryType } from './query-types.js';
+
+/** Metadata snapshot supplied to legacy related-track discovery; no queue controls are exposed. */
+export interface ExtractorRelatedHistory {
+  /** Retained tracks with array queries and the familiar collection snapshot method. */
+  tracks: readonly Track[] & {
+    /** Copy retained tracks in oldest-to-newest order. */
+    toArray(): Track[];
+  };
+}
 
 /** Legacy extractor result. */
 export type ExtractorInfo = SearchResultData;

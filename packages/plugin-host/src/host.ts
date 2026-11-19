@@ -19,6 +19,7 @@ import { DeferredSourceRequired } from './plugins/stream-resolver.js';
 import { serializeSourceTrack } from './protocol.js';
 import { cloneJSONValue } from './utils/serialization.js';
 import type { SearchOptions } from './types.js';
+import type { SourceRelatedRequest } from './plugins/types.js';
 
 /** Stable aggregate protocol registration identifier. */
 export const SOURCE_PLUGIN_ID = 'discord-player.source';
@@ -137,12 +138,11 @@ export class SourcePluginHost {
               : { tracks: [], playlist: null };
           }
           if (request.operation === 'track.related') {
-            const track = await this.restore(this.record(request.input).track, signal, true);
-            const result = await this.plugins.execute(
-              'track.related',
-              { track },
-              { pluginId: request.providerId, signal },
-            );
+            const related = await this.relatedRequest(request.input, signal);
+            const result = await this.plugins.execute('track.related', related, {
+              pluginId: request.providerId,
+              signal,
+            });
             return result
               ? this.boundary.getStore()
                 ? this.portable(result)
@@ -176,12 +176,11 @@ export class SourcePluginHost {
         },
 
         'source.related': async (input, { signal }) => {
-          const track = await this.restore(this.record(input).track, signal, true);
-          const result = await this.plugins.execute(
-            'track.related',
-            { track },
-            { pluginId: track.sourceReference?.pluginId, signal },
-          );
+          const related = await this.relatedRequest(input, signal);
+          const result = await this.plugins.execute('track.related', related, {
+            pluginId: related.track.sourceReference?.pluginId,
+            signal,
+          });
 
           return result && this.boundary.getStore() ? this.portable(result) : result;
         },
@@ -270,6 +269,30 @@ export class SourcePluginHost {
 
   private async prepareMedia(source: ClientMediaSource, signal?: AbortSignal): Promise<ClientMediaSource> {
     return openMedia(source, this.mediaPolicy, signal);
+  }
+
+  private async relatedRequest(input: unknown, signal: AbortSignal): Promise<SourceRelatedRequest> {
+    const value = this.record(input);
+    const track = await this.restore(value.track, signal, true);
+
+    if (value.history === undefined) return { track };
+
+    const history = this.record(value.history);
+    if (!Array.isArray(history.tracks)) throw new TypeError('Related history must contain a tracks array');
+
+    const tracks = history.tracks.map((item) => {
+      // History is metadata, not executable source state. It can include other deployments.
+      if (item instanceof Track) return item;
+
+      const { sourceState: _state, ...entity } = this.record(item);
+      const previous = deserialize(entity);
+
+      if (!(previous instanceof Track)) throw new TypeError('Expected related history Track metadata');
+
+      return previous;
+    });
+
+    return { track, history: { tracks } };
   }
 
   private record(input: unknown): Record<string, unknown> {

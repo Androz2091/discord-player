@@ -6,7 +6,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createSourcePluginHost, SOURCE_PLUGIN_ID, serializeSourceTrack } from '@discord-player/plugin-host';
 import { BaseExtractor, DiscordPlayer, QueueRepeatMode, Track, definePlugin, deserialize } from '../src/index.js';
 import { setup } from './mocks/queue.js';
-import { settle } from './mocks/async.js';
+import { deferred, settle } from './mocks/async.js';
 import { MatchingExtractor, PermissiveExtractor, matchingUrl } from './mocks/search-fallback.js';
 
 const nativeFetch = globalThis.fetch;
@@ -37,7 +37,7 @@ class RemoteExtractor extends BaseExtractor {
     ]);
   }
 
-  override async getRelatedTracks(track: Track) {
+  override async getRelatedTracks(track: Track, _history?: Parameters<BaseExtractor['getRelatedTracks']>[1]) {
     return this.handle(`related:${track.title}`);
   }
 
@@ -815,7 +815,9 @@ it.each([false, true])('forwards natural-completion AutoPlay to its source host 
   } = await forwarded('equalPower', async (host) => {
     const extractor = await host.extractors.register(RemoteExtractor);
 
-    vi.spyOn(extractor, 'getRelatedTracks').mockImplementation(async () => {
+    vi.spyOn(extractor, 'getRelatedTracks').mockImplementation(async (track, history) => {
+      expect(history?.tracks.toArray().map((item) => item.title)).toEqual(['first']);
+      expect(history?.tracks.some((item) => item.id === track.id)).toBe(true);
       const result = await extractor.handle('related:first');
       result.tracks[0]!.url = 'https://fixture.test/related';
       return result;
@@ -895,3 +897,70 @@ it('executes related tracks on the owning host after its state token is lost', a
     nodeId: 'fake-node',
   });
 });
+
+it('preserves history through direct HTTP related-track forwarding', async () => {
+  const seen = vi.fn<(titles: string[]) => void>();
+  const host = await deployment('history-host', undefined, async (runtime) => {
+    const extractor = await runtime.extractors.register(RemoteExtractor);
+    vi.spyOn(extractor, 'getRelatedTracks').mockImplementation(async (track, history) => {
+      seen(history?.tracks.toArray().map((item) => item.title) ?? []);
+      expect(history?.tracks.some((item) => item.id === track.id)).toBe(true);
+      const result = await extractor.handle('B');
+      result.tracks[0]!.url = 'https://fixture.test/B';
+      return result;
+    });
+  });
+  const bot = player([host]);
+  const seed = (await bot.search('A')).tracks[0]!;
+  const result = await bot.plugins.execute('track.related', { track: seed, history: { tracks: [seed] } });
+  expect(result?.tracks[0]?.title).toBe('B');
+  expect(seen).toHaveBeenCalledExactlyOnceWith(['A']);
+  expect(result?.tracks[0]?.sourceReference).toMatchObject({
+    hostId: host.hostId,
+    pluginId: RemoteExtractor.identifier,
+  });
+});
+
+it.each(['empty', 'failure'] as const)(
+  'retains the outgoing track until completion after remote related %s',
+  async (outcome) => {
+    const observed = deferred<void>();
+    const {
+      player: bot,
+      queue,
+      session,
+      execute,
+    } = await forwarded('equalPower', async (runtime) => {
+      const extractor = await runtime.extractors.register(RemoteExtractor);
+      vi.spyOn(extractor, 'getRelatedTracks').mockImplementation(async () => {
+        if (outcome === 'failure') throw new Error('Controlled provider failure');
+        return extractor.createResponse();
+      });
+    });
+    const errors = vi.fn();
+    bot.events.on('error', (...args) => {
+      errors(...args);
+      observed.resolve();
+    });
+    bot.events.on('willAutoPlay', (_, tracks, done) => {
+      expect(tracks).toEqual([]);
+      done(null);
+      observed.resolve();
+    });
+    const first = (await bot.search('A')).tracks[0]!;
+    queue.setRepeatMode(QueueRepeatMode.AUTOPLAY);
+    await queue.play(first);
+    session.requestPreparation();
+    await observed.promise;
+    await settle();
+    expect(queue.currentTrack).toBe(first);
+    expect(session.stage).toBeNull();
+    const exhausted = new Promise<void>((resolve) => bot.events.once('emptyQueue', () => resolve()));
+    session.complete();
+    await exhausted;
+    expect(queue.currentTrack).toBeNull();
+    expect(session.playCalls).toBe(1);
+    expect(execute.mock.calls.filter(([request]) => request.operation === 'source.related')).toHaveLength(1);
+    expect(errors).toHaveBeenCalledTimes(outcome === 'failure' ? 1 : 0);
+  },
+);

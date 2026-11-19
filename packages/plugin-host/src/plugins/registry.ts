@@ -677,10 +677,14 @@ export class PluginRegistry {
         throw new Error('Related-track targeting conflicts with remote Track origin');
       const client = this.player.getRemedia(false);
       if (!client) throw new Error('Remote Track requires its originating Remedia client');
-      return (await relatedRemedia(client, track, 'source.related', signal, [
-        ...this.blocked(),
-        ...(options.blocked ?? []),
-      ])) as OperationResult<K>;
+      return (await relatedRemedia(
+        client,
+        track,
+        'source.related',
+        signal,
+        [...this.blocked(), ...(options.blocked ?? [])],
+        'history' in input ? input.history : undefined,
+      )) as OperationResult<K>;
     }
 
     if (

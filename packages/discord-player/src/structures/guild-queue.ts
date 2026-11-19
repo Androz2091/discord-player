@@ -1710,9 +1710,17 @@ export class GuildQueue<Metadata = unknown> {
     const reference = track.sourceReference;
     const started = performance.now();
     let phase = reference?.nodeId ? 'remote related-track discovery' : 'provider execution';
+    const history = this.history.tracks.toArray();
+
+    // Before completion, the outgoing seed has not entered retained history yet.
+    if (history.at(-1)?.id !== track.id) history.push(track);
+
     const lookup = this.manager.player.plugins.execute(
       'track.related',
-      { track },
+      {
+        track,
+        history: { tracks: history },
+      },
       {
         pluginId: reference?.pluginId,
         hostId: reference?.hostId ?? null,

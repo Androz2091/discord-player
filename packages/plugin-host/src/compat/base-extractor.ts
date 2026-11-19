@@ -5,7 +5,13 @@ import type { Track } from '../structures/track.js';
 import type { Playlist } from '../structures/playlist.js';
 import type { ExtractorExecutionContext } from './extractor-execution-context.js';
 import type { SearchQueryType } from './query-types.js';
-import type { ExtractorInfo, ExtractorSearchContext, ExtractorStreamable, NextFunction } from './extractor-types.js';
+import type {
+  ExtractorInfo,
+  ExtractorRelatedHistory,
+  ExtractorSearchContext,
+  ExtractorStreamable,
+  NextFunction,
+} from './extractor-types.js';
 
 /** Minimal v7 lifecycle and source API, adapted to the source operation registry. */
 export class BaseExtractor<Options extends object = object> {
@@ -92,9 +98,9 @@ export class BaseExtractor<Options extends object = object> {
 
   /** Resolve related metadata.
    * @param track Seed track.
-   * @param history Optional queue history; local execution only.
+   * @param history Queue-history snapshot. Tracks support array operations and toArray(); playback controls are unavailable.
    */
-  public async getRelatedTracks(track: Track, history?: unknown): Promise<ExtractorInfo> {
+  public async getRelatedTracks(track: Track, history?: ExtractorRelatedHistory): Promise<ExtractorInfo> {
     void track;
     void history;
 

@@ -184,9 +184,16 @@ export async function registerRemote(
   if (provider.operations.includes('track.related')) {
     ctx.on(
       'track.related',
-      async ({ track }, { signal }) => {
+      async ({ track, history }, { signal }) => {
         const result = await execute(
-          { providerId, operation: 'track.related', input: { track: serializeSourceTrack(track) } },
+          {
+            providerId,
+            operation: 'track.related',
+            input: {
+              track: serializeSourceTrack(track),
+              ...(history ? { history: { tracks: history.tracks.map(serializeSourceTrack) } } : {}),
+            },
+          },
           signal,
         );
         return deserializeSourceResult(result as PortableSourceResult);

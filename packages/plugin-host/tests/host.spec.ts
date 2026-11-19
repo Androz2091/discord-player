@@ -723,3 +723,47 @@ it.each(['evicted', 'opaque'])(
     expect(resolve).not.toHaveBeenCalled();
   },
 );
+
+it.each(['source.related', 'metadata.execute'])(
+  'restores history metadata for %s without executing historical sources',
+  async (operation) => {
+    const h = host();
+    const seen = vi.fn<(tracks: readonly Track[] | undefined) => void>();
+    await h.plugins.register(
+      definePlugin({
+        id: 'fixture.history',
+        setup(ctx) {
+          ctx.on('track.related', ({ history }) => {
+            seen(history?.tracks);
+            return { tracks: [], playlist: null };
+          });
+        },
+      })(),
+    );
+    const seed = new Track({
+      title: 'A',
+      url: 'https://fixture.test/A',
+      sourceReference: { pluginId: 'fixture.history', hostId: 'test-host', data: null },
+    });
+    const previous = new Track({
+      title: 'previous',
+      url: 'https://fixture.test/previous',
+      sourceReference: { pluginId: 'another-provider', hostId: 'another-host', data: null },
+    });
+    const related = {
+      track: seed.serialize(),
+      history: { tracks: [{ ...previous.serialize(), sourceState: 'ignored-history-state' }, seed.serialize()] },
+    };
+    const input =
+      operation === 'source.related'
+        ? related
+        : { providerId: 'fixture.history', operation: 'track.related', input: related };
+    const response = await http(h, operation, input);
+    expect(response.result.tracks).toEqual([]);
+    expect(seen).toHaveBeenCalledOnce();
+    const tracks = seen.mock.calls[0]?.[0] ?? [];
+    expect(tracks.map((track) => track.title)).toEqual(['previous', 'A']);
+    expect(tracks[0]?.sourceReference?.hostId).toBe('another-host');
+    expect(tracks[0]?.sourceState).toBeUndefined();
+  },
+);

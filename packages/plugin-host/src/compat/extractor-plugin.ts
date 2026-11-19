@@ -139,7 +139,12 @@ export function createExtractorPlugin(
       if (instance.getRelatedTracks !== BaseExtractor.prototype.getRelatedTracks) {
         ctx.on(
           'track.related',
-          async ({ track, history }) => stamp(await instance.getRelatedTracks(track, history ?? { tracks: [] })),
+          async ({ track, history }) => {
+            const tracks = [...(history?.tracks ?? [track])];
+            const snapshot = Object.assign(tracks, { toArray: () => [...tracks] });
+
+            return stamp(await instance.getRelatedTracks(track, { tracks: snapshot }));
+          },
           metadata,
         );
       }

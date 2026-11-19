@@ -82,10 +82,13 @@ export interface SourceTrackRequest {
   track: Track;
 }
 
-/** Related-media request with optional local legacy history. */
+/** Related-media request with a bounded queue-history snapshot. */
 export interface SourceRelatedRequest extends SourceTrackRequest {
-  /** Local history compatibility payload; not part of a future remote request. */
-  history?: unknown;
+  /** Retained history, including the outgoing seed during speculative discovery. */
+  history?: {
+    /** Tracks ordered from oldest to newest. */
+    tracks: readonly Track[];
+  };
 }
 
 /** Fallback request excluding the original provider. */
@@ -139,7 +142,7 @@ export interface OperationMap {
   /** Resolve playable media. */
   'track.stream': Operation<SourceTrackRequest, SourceStream, 'first'>;
 
-  /** Resolve related media; history is local compatibility context only. */
+  /** Resolve related media using seed metadata and a portable history snapshot. */
   'track.related': Operation<SourceRelatedRequest, SearchResultData, 'first'>;
 
   /** Explicit fallback for sources that cannot stream their own metadata. */
