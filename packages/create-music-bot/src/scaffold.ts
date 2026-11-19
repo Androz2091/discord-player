@@ -1,11 +1,4 @@
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, posix, resolve } from 'node:path';
 
 /** Languages a project can be generated in. */
@@ -69,8 +62,7 @@ export function validateProjectName(name: string): string | undefined {
     return 'Use lowercase letters, numbers, "-", "." and "_" only, starting with a letter or number.';
   }
 
-  if (RESERVED_NAMES.includes(name))
-    return `"${name}" is the name of a dependency. Choose a different name.`;
+  if (RESERVED_NAMES.includes(name)) return `"${name}" is the name of a dependency. Choose a different name.`;
 
   return undefined;
 }
@@ -81,9 +73,7 @@ export function validateProjectName(name: string): string | undefined {
  * @param userAgent Value of `npm_config_user_agent`, which package managers set for `create` commands.
  * @returns The detected package manager, or `npm` when none can be identified.
  */
-export function detectPackageManager(
-  userAgent: string | undefined,
-): PackageManager {
+export function detectPackageManager(userAgent: string | undefined): PackageManager {
   const name = userAgent?.split(' ')[0]?.split('/')[0];
 
   return PACKAGE_MANAGERS.find((manager) => manager === name) ?? 'npm';
@@ -156,10 +146,7 @@ export function resolveDiscordPlayerVersion(version: string): string {
  * @param cwd Directory the generator was started from.
  * @returns The absolute directory and the project name, which is the directory's last path segment.
  */
-export function resolveTarget(
-  target: string,
-  cwd: string = process.cwd(),
-): { directory: string; name: string } {
+export function resolveTarget(target: string, cwd: string = process.cwd()): { directory: string; name: string } {
   const directory = resolve(cwd, target);
 
   return { directory, name: basename(directory) };
@@ -181,8 +168,7 @@ export function renderProject(options: {
   discordPlayerVersion: string;
   packageManager: PackageManager;
 }): ProjectFiles {
-  const { templatesDir, template, name, discordPlayerVersion, packageManager } =
-    options;
+  const { templatesDir, template, name, discordPlayerVersion, packageManager } = options;
   const commands = getProjectCommands(packageManager);
   const tokens: Record<string, string> = { name, ...commands };
   const files = new Map<string, string>();
@@ -190,26 +176,15 @@ export function renderProject(options: {
   for (const path of listFiles(join(templatesDir, template))) {
     const contents = readFileSync(join(templatesDir, template, path), 'utf8');
     const fileName = posix.basename(path);
-    const outputPath = posix.join(
-      posix.dirname(path),
-      RENAMED_FILES[fileName] ?? fileName,
-    );
+    const outputPath = posix.join(posix.dirname(path), RENAMED_FILES[fileName] ?? fileName);
 
     files.set(
       outputPath,
-      path === 'README.md'
-        ? contents.replace(
-            /\{\{(\w+)\}\}/g,
-            (_, token: string) => tokens[token] ?? '',
-          )
-        : contents,
+      path === 'README.md' ? contents.replace(/\{\{(\w+)\}\}/g, (_, token: string) => tokens[token] ?? '') : contents,
     );
   }
 
-  files.set(
-    'package.json',
-    renderPackageJson(template, name, discordPlayerVersion),
-  );
+  files.set('package.json', renderPackageJson(template, name, discordPlayerVersion));
 
   return { files };
 }
@@ -222,17 +197,12 @@ export function renderProject(options: {
  * @returns Relative paths that would be overwritten.
  * @throws When the directory path exists but is not a directory.
  */
-export function findConflicts(
-  directory: string,
-  project: ProjectFiles,
-): string[] {
+export function findConflicts(directory: string, project: ProjectFiles): string[] {
   if (existsSync(directory) && !statSync(directory).isDirectory()) {
     throw new Error(`${directory} already exists and is not a directory.`);
   }
 
-  return [...project.files.keys()]
-    .filter((path) => existsSync(join(directory, path)))
-    .sort();
+  return [...project.files.keys()].filter((path) => existsSync(join(directory, path))).sort();
 }
 
 /**
@@ -246,11 +216,7 @@ export function findConflicts(
  * @param overwrite Whether existing files may be replaced.
  * @returns Relative paths that were written.
  */
-export function writeProject(
-  directory: string,
-  project: ProjectFiles,
-  overwrite: boolean,
-): string[] {
+export function writeProject(directory: string, project: ProjectFiles, overwrite: boolean): string[] {
   if (existsSync(directory) && !statSync(directory).isDirectory()) {
     throw new Error(`${directory} already exists and is not a directory.`);
   }
@@ -268,11 +234,7 @@ export function writeProject(
   return written;
 }
 
-function renderPackageJson(
-  template: Template,
-  name: string,
-  discordPlayerVersion: string,
-): string {
+function renderPackageJson(template: Template, name: string, discordPlayerVersion: string): string {
   const entry = template === 'ts' ? 'src/index.ts' : 'src/index.js';
   const scripts: Record<string, string> = {
     start: `node --env-file-if-exists=.env ${entry}`,
