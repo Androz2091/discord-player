@@ -84,8 +84,20 @@ export interface PortableLyricsRequest {
   input: string | SerializedTrack;
 }
 
+/** Portable seed and history for related-track discovery on the owning host. */
+export interface PortableRelatedRequest {
+  /** Seed with provider identity and an optional source-state hint. */
+  track: PortableSourceTrack;
+
+  /** Metadata-only history; no playback engine objects are transferred. */
+  history?: {
+    /** Retained tracks ordered from oldest to newest, including the seed. */
+    tracks: PortableSourceTrack[];
+  };
+}
+
 /** Direct HTTP metadata request, also suitable for future generic forwarding. */
 export type MetadataRequest =
   | { providerId: string; operation: 'search.query.match' | 'search.query.resolve'; input: PortableSourceQuery }
   | { providerId: string; operation: 'lyrics.search'; input: PortableLyricsRequest }
-  | { providerId: string; operation: 'track.related'; input: { track: PortableSourceTrack } };
+  | { providerId: string; operation: 'track.related'; input: PortableRelatedRequest };

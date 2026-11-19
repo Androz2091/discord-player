@@ -8,6 +8,8 @@ operator configuration and in each Track's portable source reference.
 
 Automatic discovery through `RemediaClient.plugins.list()` is the default. Allow `source.search` and `source.stream` on the server; Discord Player forwards searches with `plugins.execute()`, preserving portable provider state and stamping the executing `nodeId` on Track references. Related metadata uses `source.related`, and Track-based lyrics use `metadata.execute` when allowed. Node affinity survives serialization and queue history. Conflicting queue origins, sticky assignments and existing sessions fail without migration. Remedia owns discovery caching and forwarding authorization; unsupported servers and embedded nodes keep local plugins.
 
+`source.related` accepts `{ track, history?: { tracks } }`, with the seed and history encoded as portable Track metadata. Direct HTTP `track.related` metadata requests carry the same fields. History includes the outgoing seed during speculative discovery; it never restores or executes historical playback engines. The legacy adapter exposes this snapshot through array queries and `history.tracks.toArray()`. Update the bot and source host together to preserve history during remote discovery.
+
 For optional direct HTTP access, configure a client plugin with `definePlugin({ id, remoteHost: { hostId, url, token?, timeoutMs? } })`, then pass its factory registration in `Player({ plugins: [remotePlugin()], ... })`.
 The bot performs metadata operations, reconstructing canonical Tracks with
 `deserializeSourceResult()`. It sends remote playback and staged-next sources as:

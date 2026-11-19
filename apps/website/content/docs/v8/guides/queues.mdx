@@ -75,7 +75,7 @@ queue.repeatMode = QueueRepeatMode.TRACK;
 
 ### Autoplay
 
-With `AUTOPLAY`, the queue calls the source's `track.related` operation after the last track finishes. With crossfade enabled, it starts discovery earlier when Remedia requests preparation and no upcoming track exists. The `willAutoPlay` callback can therefore run while the current track is still playing. If discovery finishes too late for crossfade, the selected track starts normally. If the source returns nothing, playback ends when the current track finishes.
+With `AUTOPLAY`, the queue calls the source's `track.related` operation after the last track finishes. With crossfade enabled, it starts discovery earlier when Remedia requests preparation and no upcoming track exists. Discovery receives a bounded metadata snapshot of retained history plus the outgoing seed track, including before that track finishes. Remote source hosts receive the same snapshot. Legacy extractors can query `history.tracks` with array methods or `toArray()`; it does not expose queue controls. The `willAutoPlay` callback can therefore run while the current track is still playing. If discovery finishes too late for crossfade, the selected track starts normally. If the source returns nothing, playback ends when the current track finishes.
 
 `autoplayTimeoutMs` (30 seconds by default) bounds discovery and asynchronous selection together. A listener must call `done(track)` or `done(null)` before that deadline. Returning `null` from selection ends AutoPlay. Errors identify discovery, selection, source resolution, staging, or playback transition, with operation and deployment identity and elapsed time. Cancellation caused by queue controls ignores late results.
 

@@ -5,6 +5,7 @@ import { lyricsResultSchema, type LyricsResult } from './lyrics.js';
 import { Track } from './structures/track.js';
 import { SearchResult } from './structures/search-result.js';
 import type { SearchOptions } from './types.js';
+import type { SourceRelatedRequest } from './plugins/types.js';
 
 const pluginId = 'discord-player.source';
 
@@ -103,6 +104,7 @@ export async function searchRemedia(
  * @param operation Authorized source operation.
  * @param signal Caller lifetime.
  * @param blocked Disabled providers.
+ * @param history Bounded queue-history metadata snapshot.
  */
 export async function relatedRemedia(
   client: RemediaClient,
@@ -110,6 +112,7 @@ export async function relatedRemedia(
   operation: 'source.related',
   signal?: AbortSignal,
   blocked: readonly string[] = [],
+  history?: SourceRelatedRequest['history'],
 ) {
   const reference = track.sourceReference;
   if (!reference?.nodeId || !reference.hostId) throw new Error('Remote Track origin is missing');
@@ -130,7 +133,10 @@ export async function relatedRemedia(
       hostId: reference.hostId,
       pluginId,
       operation,
-      input: { track: serializeSourceTrack(track) },
+      input: {
+        track: serializeSourceTrack(track),
+        ...(history ? { history: { tracks: history.tracks.map(serializeSourceTrack) } } : {}),
+      },
       signal,
     });
     signal?.throwIfAborted();
