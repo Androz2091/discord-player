@@ -52,7 +52,7 @@ export class FakeSession
   public state: 'idle' | 'playing' | 'paused' | 'stopped' | 'completed' | 'failed' = 'idle';
 
   /** Current voice connection state. */
-  public connectionState: 'connected' | 'disconnected' = 'disconnected';
+  public connectionState: DiscordSession['connectionState'] = 'disconnected';
 
   /** Current linear gain value. */
   public volume: number;

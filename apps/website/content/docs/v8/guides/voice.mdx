@@ -98,11 +98,15 @@ All policies are off by default.
 | `leaveOnEnd`   | The queue runs out of tracks. Repeat modes and crossfade continuation do not count     |
 | `leaveOnStop`  | Playback is stopped with `queue.stop()`                                                |
 | `leaveOnEmpty` | The channel is confirmed empty. Needs a [member resolver](#know-who-is-in-the-channel) |
-| `pauseOnEmpty` | The channel is confirmed empty. Resumes when someone joins                             |
+| `pauseOnEmpty` | The channel is confirmed empty and `leaveOnEmpty` is off. Resumes when someone joins   |
 
-Each `...Cooldown` option waits that many milliseconds first. The queue checks the condition again before it acts. Starting playback, moving channels, and destroying the queue cancel a pending timer.
+Each `...Cooldown` option waits that many milliseconds first. The queue checks the condition again before it acts. Starting playback cancels end and stop timers. Moving channels or destroying the queue cancels all policy timers.
 
-A pause started by `pauseOnEmpty` is resumed automatically. A pause from `queue.node.pause()` stays paused.
+When both `leaveOnEmpty` and `pauseOnEmpty` are enabled, `leaveOnEmpty` takes precedence: playback continues during the leave cooldown without an empty-channel pause RPC. Repeated voice updates and track starts do not extend that deadline. A member returning cancels it, and occupancy is checked again before departure. Unknown or failed occupancy checks never cause departure.
+
+With `leaveOnEmpty` disabled, a pause confirmed by the backend through `pauseOnEmpty` is resumed automatically when members return. A pause from `queue.node.pause()` stays paused. Failed automatic controls emit a queue `error`; they do not acquire pause ownership or hold the queue control lock while waiting for a backend RPC. Server mute and stage suppression still pause independently, once the voice transport is connected.
+
+Natural queue exhaustion starts a separate `leaveOnEndCooldown` after repeat and autoplay decisions finish. Adding or starting a track cancels that deadline; skip, stop, and failure do not start it.
 
 If the bot is server-muted or suppressed in a stage channel, playback pauses and resumes when that ends. Requesting to speak in a stage channel is up to your bot.
 
