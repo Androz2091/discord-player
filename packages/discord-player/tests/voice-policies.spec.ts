@@ -1,6 +1,8 @@
 import { afterEach, expect, it, vi } from 'vitest';
+import type { DiscordSessionEvents } from '@remedia/client';
 import { setup, TestTrack } from './mocks/queue.js';
 import { deferred } from './mocks/async.js';
+import { definePlugin, QueueRepeatMode } from '../src/index.js';
 
 const players: Awaited<ReturnType<typeof setup>>['player'][] = [];
 async function fixture(options: Parameters<typeof setup>[0] = {}) {
@@ -246,4 +248,373 @@ it('shares cooldown revalidation with Gateway reconciliation without overlapping
   await flush();
   expect(resolver).toHaveBeenCalledTimes(3);
   expect(queue.destroyed).toBe(false);
+});
+
+it.each(['embedded', 'remote'] as const)(
+  'gives leave precedence and keeps the original deadline on %s',
+  async (nodeType) => {
+    vi.useFakeTimers();
+    const { player, queue, session } = await fixture({
+      nodeType,
+      playerOptions: { resolveVoiceChannelUsers: async () => [] },
+      queueOptions: { leaveOnEmpty: true, pauseOnEmpty: true, leaveOnEmptyCooldown: 100 },
+    });
+    const pause = vi.spyOn(session, 'pause');
+    await queue.play(new TestTrack('one'));
+    await flush();
+    for (let i = 0; i < 4; i++) {
+      await vi.advanceTimersByTimeAsync(20);
+      player.receive(state('member', null));
+      await flush();
+    }
+    expect(pause).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(20);
+    expect(queue.destroyed).toBe(true);
+    expect(session.disposeCalls).toBe(1);
+  },
+);
+
+it('cancels empty departure when a member returns during cooldown', async () => {
+  vi.useFakeTimers();
+  let users: readonly string[] = [];
+  const { player, queue } = await fixture({
+    playerOptions: { resolveVoiceChannelUsers: async () => users },
+    queueOptions: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 },
+  });
+  await flush();
+  await vi.advanceTimersByTimeAsync(50);
+  users = ['member'];
+  player.receive(state('member', 'voice-one'));
+  await flush();
+  await vi.advanceTimersByTimeAsync(100);
+  expect(queue.destroyed).toBe(false);
+});
+
+it.each(['resolve', 'reject'] as const)(
+  'does not block session disposal behind a slow policy pause (%s)',
+  async (outcome) => {
+    let users: readonly string[] = ['member'];
+    const { player, queue, session } = await fixture({
+      nodeType: 'remote',
+      playerOptions: { resolveVoiceChannelUsers: async () => users },
+      queueOptions: { pauseOnEmpty: true },
+    });
+    await queue.play(new TestTrack('one'));
+    await flush();
+    const pending = deferred<void>();
+    const pause = vi.spyOn(session, 'pause').mockReturnValue(pending.promise);
+    const error = vi.fn();
+    player.events.on('error', error);
+    users = [];
+    player.receive(state('member', null));
+    await flush();
+    player.receive(state('member', null));
+    await flush();
+    expect(pause).toHaveBeenCalledOnce();
+    await queue.node.destroySession();
+    expect(session.disposeCalls).toBe(1);
+    await queue.connect({ channelId: 'voice-two' });
+    users = ['member'];
+    if (outcome === 'reject') pending.reject(new Error('request_timeout'));
+    else pending.resolve();
+    await flush();
+    expect(queue.node.session?.channelId).toBe('voice-two');
+    expect(queue.destroyed).toBe(false);
+    expect(error).toHaveBeenCalledTimes(outcome === 'reject' ? 1 : 0);
+  },
+);
+
+it('resumes after a confirmed slow pause when occupancy changed during the RPC', async () => {
+  let users: readonly string[] = ['member'];
+  const { player, queue, session } = await fixture({
+    playerOptions: { resolveVoiceChannelUsers: async () => users },
+    queueOptions: { pauseOnEmpty: true },
+  });
+  await queue.play(new TestTrack('one'));
+  await flush();
+  const pending = deferred<void>();
+  const pause = vi.spyOn(session, 'pause').mockImplementation(async () => {
+    await pending.promise;
+    session.state = 'paused';
+  });
+  const resume = vi.spyOn(session, 'resume');
+  users = [];
+  player.receive(state('member', null));
+  await flush();
+  users = ['member'];
+  player.receive(state('member', 'voice-one'));
+  await flush();
+  expect(resume).not.toHaveBeenCalled();
+  pending.resolve();
+  await flush();
+  expect(pause).toHaveBeenCalledOnce();
+  expect(resume).toHaveBeenCalledOnce();
+  expect(session.state).toBe('playing');
+});
+
+it('does not acquire ownership after a rejected pause or lose ownership after a rejected resume', async () => {
+  let users: readonly string[] = ['member'];
+  const { player, queue, session } = await fixture({
+    playerOptions: { resolveVoiceChannelUsers: async () => users },
+    queueOptions: { pauseOnEmpty: true },
+  });
+  await queue.play(new TestTrack('one'));
+  await flush();
+  const pause = vi.spyOn(session, 'pause').mockRejectedValueOnce(new Error('request_timeout'));
+  const resume = vi.spyOn(session, 'resume');
+  const errors = vi.fn();
+  player.events.on('error', errors);
+  users = [];
+  player.receive(state('member', null));
+  await flush();
+  expect(pause).toHaveBeenCalledOnce();
+  session.state = 'paused';
+  users = ['member'];
+  player.receive(state('member', 'voice-one'));
+  await flush();
+  expect(resume).not.toHaveBeenCalled();
+  session.state = 'playing';
+  users = [];
+  player.receive(state('member', null));
+  await flush();
+  resume.mockRejectedValueOnce(new Error('request_timeout'));
+  users = ['member'];
+  player.receive(state('member', 'voice-one'));
+  await flush();
+  expect(session.state).toBe('paused');
+  player.receive(state('member', 'voice-one'));
+  await flush();
+  expect(session.state).toBe('playing');
+  expect(errors).toHaveBeenCalledTimes(2);
+});
+
+it('waits for transport readiness while preserving mute policy with leave precedence', async () => {
+  const { player, queue, session } = await fixture({ queueOptions: { leaveOnEmpty: true, pauseOnEmpty: true } });
+  await queue.play(new TestTrack('one'));
+  const pause = vi.spyOn(session, 'pause');
+  session.connectionState = 'negotiating_dave';
+  player.receive(state('bot-user', 'voice-one', { mute: true }));
+  await flush();
+  expect(pause).not.toHaveBeenCalled();
+  expect(queue.destroyed).toBe(false);
+  session.connectionState = 'connected';
+  const ready: DiscordSessionEvents['voiceStateChanged'][0] = {
+    sessionId: session.sessionId,
+    guildId: queue.id,
+    nodeId: session.nodeId,
+    previousState: 'negotiating_dave',
+    state: 'connected',
+  };
+  session.emit('voiceStateChanged', ready);
+  await flush();
+  expect(pause).toHaveBeenCalledOnce();
+});
+
+it('keeps natural-end and empty deadlines independent', async () => {
+  vi.useFakeTimers();
+  let users: readonly string[] = [];
+  const { player, queue, session } = await fixture({
+    playerOptions: { resolveVoiceChannelUsers: async () => users },
+    queueOptions: { leaveOnEmpty: true, leaveOnEmptyCooldown: 500, leaveOnEnd: true, leaveOnEndCooldown: 100 },
+  });
+  await queue.play(new TestTrack('one'));
+  session.complete();
+  await flush();
+  await vi.advanceTimersByTimeAsync(50);
+  users = ['member'];
+  player.receive(state('member', 'voice-one'));
+  await flush();
+  await vi.advanceTimersByTimeAsync(50);
+  expect(queue.destroyed).toBe(true);
+  expect(session.disposeCalls).toBe(1);
+});
+
+it('does not leave between queued tracks or after stop/failure, and cancels end on insertion', async () => {
+  vi.useFakeTimers();
+  const { queue, session } = await fixture({ queueOptions: { leaveOnEnd: true, leaveOnEndCooldown: 100 } });
+  await queue.play(new TestTrack('one'));
+  queue.addTrack(new TestTrack('two'));
+  session.complete();
+  await flush();
+  await vi.advanceTimersByTimeAsync(100);
+  expect(queue.currentTrack?.title).toBe('two');
+  expect(queue.destroyed).toBe(false);
+  session.complete();
+  await flush();
+  queue.addTrack(new TestTrack('three'));
+  await vi.advanceTimersByTimeAsync(100);
+  expect(queue.destroyed).toBe(false);
+  await queue.playNext();
+  await queue.stop();
+  await vi.advanceTimersByTimeAsync(100);
+  expect(queue.destroyed).toBe(false);
+  await queue.play(new TestTrack('four'));
+  session.fail();
+  await flush();
+  await vi.advanceTimersByTimeAsync(100);
+  expect(queue.destroyed).toBe(false);
+});
+
+it('keeps concurrent guild timers and pending controls independent', async () => {
+  vi.useFakeTimers();
+  const { player, queue, session, backend } = await fixture({
+    nodeType: 'remote',
+    playerOptions: { resolveVoiceChannelUsers: async () => [] },
+    queueOptions: { pauseOnEmpty: true },
+  });
+  const pending = deferred<void>();
+  vi.spyOn(session, 'pause').mockReturnValue(pending.promise);
+  await queue.play(new TestTrack('one'));
+  await flush();
+  const others = await Promise.all(
+    Array.from({ length: 4 }, async (_, index) => {
+      const other = await player.nodes.create(`guild-${index}`, { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 });
+      const otherSession = backend.asSession(await other.connect({ channelId: 'voice-one' }));
+      await other.play(new TestTrack(`track-${index}`));
+      return { other, otherSession };
+    }),
+  );
+  await flush();
+  await vi.advanceTimersByTimeAsync(100);
+  for (const { other, otherSession } of others) {
+    expect(other.destroyed).toBe(true);
+    expect(otherSession.disposeCalls).toBe(1);
+  }
+  expect(queue.destroyed).toBe(false);
+  await queue.destroy();
+  pending.reject(new Error('cancelled'));
+  await flush();
+  expect(session.disposeCalls).toBe(1);
+});
+
+it('does not transfer pending pause ownership across a move, new generation, or manual control', async () => {
+  let users: readonly string[] = ['member'];
+  const { player, queue, session } = await fixture({
+    playerOptions: { resolveVoiceChannelUsers: async () => users },
+    queueOptions: { pauseOnEmpty: true },
+  });
+  await queue.play(new TestTrack('one'));
+  await flush();
+  const pending = deferred<void>();
+  vi.spyOn(session, 'pause').mockReturnValueOnce(pending.promise);
+  const resume = vi.spyOn(session, 'resume');
+  users = [];
+  player.receive(state('member', null));
+  await flush();
+  users = ['member'];
+  await queue.connect({ channelId: 'voice-two' });
+  await queue.play(new TestTrack('two'));
+  await queue.node.pause();
+  pending.resolve();
+  await flush();
+  player.receive(state('member', 'voice-two'));
+  await flush();
+  expect(resume).not.toHaveBeenCalled();
+  expect(session.state).toBe('paused');
+});
+
+it.each([QueueRepeatMode.TRACK, QueueRepeatMode.QUEUE])(
+  'keeps repeat mode %s connected after completion',
+  async (repeatMode) => {
+    vi.useFakeTimers();
+    const { queue, session } = await fixture({
+      queueOptions: { repeatMode, leaveOnEnd: true, leaveOnEndCooldown: 100 },
+    });
+    await queue.play(new TestTrack('one'));
+    session.complete();
+    await flush();
+    await vi.advanceTimersByTimeAsync(100);
+    expect(queue.destroyed).toBe(false);
+    expect(session.playCalls).toBe(2);
+  },
+);
+
+it('waits for pending autoplay before scheduling natural-end departure', async () => {
+  vi.useFakeTimers();
+  const { player, queue, session } = await fixture({
+    queueOptions: { repeatMode: QueueRepeatMode.AUTOPLAY, leaveOnEnd: true, leaveOnEndCooldown: 100 },
+  });
+  const related = deferred<{ tracks: TestTrack[]; playlist: null }>();
+  await player.plugins.unregister('fixture');
+  await player.plugins.register(
+    definePlugin({
+      id: 'fixture',
+      setup(ctx) {
+        ctx.on('track.stream', ({ track }) => ({ url: track.url }));
+        ctx.on('track.related', () => related.promise);
+      },
+    })(),
+  );
+  await queue.play(new TestTrack('one'));
+  session.complete();
+  await flush();
+  await vi.advanceTimersByTimeAsync(200);
+  expect(queue.destroyed).toBe(false);
+  related.resolve({ tracks: [], playlist: null });
+  await flush();
+  await vi.advanceTimersByTimeAsync(99);
+  expect(queue.destroyed).toBe(false);
+  await vi.advanceTimersByTimeAsync(1);
+  expect(queue.destroyed).toBe(true);
+});
+
+it('invalidates pending pause on a Gateway move and cancels the previous channel deadline', async () => {
+  vi.useFakeTimers();
+  let users: readonly string[] = ['member'];
+  const { player, queue, session } = await fixture({
+    playerOptions: { resolveVoiceChannelUsers: async () => users },
+    queueOptions: { pauseOnEmpty: true },
+  });
+  await queue.play(new TestTrack('one'));
+  await flush();
+  const pending = deferred<void>();
+  vi.spyOn(session, 'pause').mockReturnValueOnce(pending.promise);
+  const resume = vi.spyOn(session, 'resume');
+  users = [];
+  player.receive(state('member', null));
+  await flush();
+  queue.options.leaveOnEmpty = true;
+  queue.options.leaveOnEmptyCooldown = 100;
+  player.receive(state('member', null));
+  await flush();
+  await vi.advanceTimersByTimeAsync(50);
+  users = ['member'];
+  player.receive(state('bot-user', 'voice-two'));
+  await flush();
+  session.state = 'paused';
+  pending.resolve();
+  await flush();
+  await vi.advanceTimersByTimeAsync(100);
+  expect(session.channelId).toBe('voice-two');
+  expect(queue.destroyed).toBe(false);
+  expect(resume).not.toHaveBeenCalled();
+});
+
+it('does not extend a leave-only deadline on repeated Gateway, start, or resume events', async () => {
+  vi.useFakeTimers();
+  const { player, queue, session } = await fixture({
+    playerOptions: { resolveVoiceChannelUsers: async () => [] },
+    queueOptions: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 },
+  });
+  await queue.play(new TestTrack('one'));
+  await flush();
+  await vi.advanceTimersByTimeAsync(40);
+  player.receive(state('member', null));
+  queue.addTrack(new TestTrack('two'));
+  session.complete();
+  await flush();
+  await vi.advanceTimersByTimeAsync(40);
+  const resumed: DiscordSessionEvents['playbackResumed'][0] = {
+    sessionId: session.sessionId,
+    guildId: queue.id,
+    nodeId: session.nodeId,
+    generation: session.generation,
+    previousState: 'paused',
+    state: 'playing',
+  };
+  session.emit('playbackResumed', resumed);
+  await flush();
+  await vi.advanceTimersByTimeAsync(20);
+  expect(queue.destroyed).toBe(true);
+  expect(session.disposeCalls).toBe(1);
 });

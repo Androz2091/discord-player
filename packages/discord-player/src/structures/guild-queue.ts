@@ -79,7 +79,7 @@ export interface GuildQueueOptions<Metadata = unknown> extends StreamHooks {
   /** Automatic crossfading for this queue; overrides the Player default at session creation. */
   crossfade?: CrossfadeOptions;
 
-  /** Destroy after confirmed voice-channel emptiness; requires an authoritative resolver. */
+  /** Destroy after confirmed voice-channel emptiness; requires an authoritative resolver. Takes precedence over pauseOnEmpty. */
   leaveOnEmpty?: boolean;
   /** Empty-channel leave delay in milliseconds; defaults to zero. */
   leaveOnEmptyCooldown?: number;
@@ -91,7 +91,7 @@ export interface GuildQueueOptions<Metadata = unknown> extends StreamHooks {
   leaveOnStop?: boolean;
   /** Stop leave delay in milliseconds; defaults to zero. */
   leaveOnStopCooldown?: number;
-  /** Automatically pause on confirmed empty occupancy and resume only policy-owned pauses. */
+  /** Automatically pause on confirmed empty occupancy when leaveOnEmpty is disabled, and resume only confirmed policy-owned pauses. */
   pauseOnEmpty?: boolean;
   /** Total related-discovery and asynchronous selection deadline in milliseconds; defaults to 30000. */
   autoplayTimeoutMs?: number;

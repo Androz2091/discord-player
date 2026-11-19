@@ -23,15 +23,16 @@ export class VoiceStateTracker {
   private channel: string | null = null;
   private session: PlaybackSession | null = null;
   private revision = 0;
+  private occupancyRevision = -1;
   private requested = false;
   private work: Promise<void> | null = null;
-  private deadlineRevision: number | null = null;
-  private timer: ReturnType<typeof setTimeout> | undefined;
+  private leaves = new Map<'empty' | 'end' | 'stop', ReturnType<typeof setTimeout>>();
+  private pauseWork: object | null = null;
+  private pauseGeneration: number | null = null;
   private pauseOwned = false;
   private pauseCause: 'empty' | 'mute' | null = null;
   private blocked = false;
   private pauseRevision = 0;
-  private reason: 'empty' | 'end' | 'stop' | undefined;
 
   /** Own policy subscriptions for one queue.
    * @param queue Queue whose lifetime bounds all state and timers.
@@ -56,11 +57,13 @@ export class VoiceStateTracker {
    */
   onEvent(event: string): void {
     if (event === 'playerStart') {
-      this.cancelLeave();
+      this.cancelQueueLeave();
+      this.pauseRevision++;
+      this.pauseOwned = false;
       this.applyPause();
       this.reconcile();
     } else if (event === 'playerResume') {
-      this.cancelLeave();
+      this.cancelQueueLeave();
       this.reconcile();
     } else if (event === 'audioTrackAdd' || event === 'audioTracksAdd') this.cancelQueueLeave();
     else if (event === 'playerStop') this.schedule('stop');
@@ -78,6 +81,7 @@ export class VoiceStateTracker {
     if (this.session !== session || this.channel !== session?.channelId) {
       this.revision++;
       this.pauseRevision++;
+      this.pauseWork = null;
       this.cancelLeave();
       this.occupants = null;
       if (this.session !== session) {
@@ -136,6 +140,8 @@ export class VoiceStateTracker {
         (current.serverMute ?? previous?.serverMute ?? false) || (current.suppress ?? previous?.suppress ?? false);
 
       if (current.channelId === null && this.channel !== null) {
+        if (this.queue.signal.aborted) return;
+
         this.queue.emit('disconnect', payload);
         this.report(this.queue.destroy());
         return;
@@ -143,6 +149,8 @@ export class VoiceStateTracker {
 
       if (current.channelId && current.channelId !== this.channel) {
         this.revision++;
+        this.pauseRevision++;
+        this.pauseWork = null;
         this.cancelLeave();
         this.channel = current.channelId;
         this.occupants = null;
@@ -159,16 +167,15 @@ export class VoiceStateTracker {
   reconcile(): void {
     this.revision++;
     this.requested = true;
-    this.cancelEmptyLeave();
     this.report(this.startDrain());
   }
 
   private startDrain(): Promise<void> {
     this.work ??= Promise.resolve()
       .then(() => this.drain())
-      .finally(() => {
+      .finally(async () => {
         this.work = null;
-        if (this.requested && !this.queue.signal.aborted) this.report(this.startDrain());
+        if (this.requested && !this.queue.signal.aborted) await this.startDrain();
       });
     return this.work;
   }
@@ -192,6 +199,7 @@ export class VoiceStateTracker {
 
       if (revision !== this.revision || session !== this.queue.node.session || this.queue.signal.aborted) continue;
 
+      this.occupancyRevision = revision;
       const wasEmpty = this.occupants?.size === 0;
       this.occupants =
         users === null ? null : new Set(users.filter((id) => id !== this.queue.manager.player.getClientId()));
@@ -202,38 +210,81 @@ export class VoiceStateTracker {
 
       this.applyPause();
       if (!empty) this.cancelEmptyLeave();
-      if (empty && this.deadlineRevision !== revision) this.schedule('empty');
+      if (empty) this.schedule('empty');
     }
+  }
+
+  private shouldPause(): boolean {
+    return (
+      this.blocked ||
+      (this.queue.options.leaveOnEmpty !== true &&
+        this.queue.options.pauseOnEmpty === true &&
+        this.occupants?.size === 0)
+    );
   }
 
   private applyPause(): void {
     const session = this.session;
-    if (!session || session !== this.queue.node.session || this.queue.signal.aborted) return;
+    if (
+      !session ||
+      session !== this.queue.node.session ||
+      this.queue.signal.aborted ||
+      session.connectionState !== 'connected' ||
+      this.pauseWork
+    )
+      return;
 
-    const shouldPause = this.blocked || (this.queue.options.pauseOnEmpty === true && this.occupants?.size === 0);
+    const generation = session.snapshot.generation;
+    if (this.pauseGeneration !== generation) this.pauseOwned = false;
+    this.pauseGeneration = generation;
     const revision = this.pauseRevision;
+    const channel = this.channel;
+    const work = {};
+    this.pauseWork = work;
 
     this.report(
       (async () => {
-        using _lock = await this.queue.tasks.acquire('queue.node.operation');
-        if (session !== this.queue.node.session || this.queue.signal.aborted || revision !== this.pauseRevision) return;
-        const stillPause = this.blocked || (this.queue.options.pauseOnEmpty === true && this.occupants?.size === 0);
-        if (shouldPause !== stillPause) return;
+        let control: Promise<void>;
+        let pausing: boolean;
+        let cause: 'mute' | 'empty' | null;
+        const current = () =>
+          session === this.queue.node.session &&
+          channel === this.channel &&
+          channel === session.channelId &&
+          !this.queue.signal.aborted &&
+          revision === this.pauseRevision &&
+          generation === session.snapshot.generation;
 
-        if (shouldPause && session.state === 'playing') {
-          this.pauseOwned = true;
-          this.pauseCause = this.blocked ? 'mute' : 'empty';
-          intercept(this.queue.player.plugins, 'voice.beforeAutoPause', { guildId: this.queue.guildId });
-          await session.pause();
-        } else if (
-          !shouldPause &&
-          this.pauseOwned &&
-          (this.pauseCause === 'mute' || this.occupants !== null) &&
-          session.state === 'paused'
-        ) {
-          this.pauseOwned = false;
-          await session.resume();
+        try {
+          {
+            // Serialize submission with queue controls, never hold teardown behind a remote RPC.
+            using _lock = await this.queue.tasks.acquire('queue.node.operation');
+            if (!current() || session.connectionState !== 'connected') return;
+            pausing = this.shouldPause();
+            cause = this.blocked ? 'mute' : 'empty';
+            if (pausing && session.state === 'playing') {
+              intercept(this.queue.player.plugins, 'voice.beforeAutoPause', { guildId: this.queue.guildId });
+              control = session.pause();
+            } else if (
+              !pausing &&
+              this.pauseOwned &&
+              (this.pauseCause === 'mute' || this.occupants !== null) &&
+              session.state === 'paused'
+            ) {
+              control = session.resume();
+            } else return;
+          }
+
+          await control;
+          if (!current()) return;
+          this.pauseOwned = pausing;
+          this.pauseCause = pausing ? cause : null;
+        } finally {
+          if (this.pauseWork === work) this.pauseWork = null;
         }
+
+        // A member can return while pause is in flight. Reconcile only after confirmation.
+        if (current() && this.shouldPause() !== pausing) this.applyPause();
       })(),
     );
   }
@@ -249,9 +300,7 @@ export class VoiceStateTracker {
       (reason === 'end' && (this.queue.size || this.queue.isPlaying()))
     )
       return;
-    if (reason !== 'empty' && this.reason === 'empty') return;
-    this.cancelLeave();
-    this.reason = reason;
+    if (this.leaves.has(reason)) return;
     const delay =
       reason === 'empty'
         ? options.leaveOnEmptyCooldown
@@ -260,32 +309,25 @@ export class VoiceStateTracker {
           : options.leaveOnStopCooldown;
     const session = this.session;
     const channel = this.channel;
-    const revision = this.revision;
-    this.timer = setTimeout(
+    const timer = setTimeout(
       () => {
-        this.timer = undefined;
         if (
           this.queue.destroyed ||
           session !== this.queue.node.session ||
           channel !== this.channel ||
-          this.reason !== reason
+          this.leaves.get(reason) !== timer
         )
           return;
-        if (reason === 'empty' && (this.occupants?.size !== 0 || revision !== this.revision)) return;
+        if (reason === 'empty' && this.occupants?.size !== 0) return;
         if (reason !== 'empty' && this.queue.isPlaying()) return;
         if (reason === 'end' && this.queue.size) return;
         this.report(
           (async () => {
             if (reason === 'empty' && channel) {
-              const refreshRevision = ++this.revision;
-              this.deadlineRevision = refreshRevision;
+              this.revision++;
               this.requested = true;
-              try {
-                await this.startDrain();
-                if (this.revision !== refreshRevision || this.occupants?.size !== 0) return;
-              } finally {
-                if (this.deadlineRevision === refreshRevision) this.deadlineRevision = null;
-              }
+              await this.startDrain();
+              if (this.occupants?.size !== 0 || this.occupancyRevision !== this.revision) return;
             }
             const current = this.queue.options;
             if (
@@ -296,7 +338,7 @@ export class VoiceStateTracker {
               session !== this.queue.node.session ||
               this.channel !== channel ||
               this.queue.destroyed ||
-              this.reason !== reason
+              this.leaves.get(reason) !== timer
             )
               return;
             if (reason !== 'empty' && this.queue.isPlaying()) return;
@@ -308,20 +350,27 @@ export class VoiceStateTracker {
       },
       Math.max(0, delay ?? 0),
     );
-    this.timer.unref();
+    this.leaves.set(reason, timer);
+    timer.unref();
   }
 
-  private cancelLeave(): void {
-    if (this.timer) clearTimeout(this.timer);
-    this.timer = undefined;
-    this.reason = undefined;
+  private cancelLeave(reason?: 'empty' | 'end' | 'stop'): void {
+    for (const [key, timer] of this.leaves) {
+      if (reason && key !== reason) continue;
+      clearTimeout(timer);
+      this.leaves.delete(key);
+    }
   }
+
   private cancelQueueLeave(): void {
-    if (this.reason !== 'empty') this.cancelLeave();
+    this.cancelLeave('end');
+    this.cancelLeave('stop');
   }
+
   private cancelEmptyLeave(): void {
-    if (this.reason === 'empty') this.cancelLeave();
+    this.cancelLeave('empty');
   }
+
   private report(work: Promise<unknown>): void {
     void work.catch((error) => this.queue.emit('error', error instanceof Error ? error : new Error(String(error))));
   }
