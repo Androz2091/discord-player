@@ -2,7 +2,7 @@ import type { RemediaNodeConfig } from '@remedia/client';
 import type {
   GuildQueue,
   GuildQueueOptions,
-  GuildQueuePlayOptions,
+  GuildQueueConnectOptions,
   GuildQueuePlayResult,
 } from './structures/guild-queue.js';
 import type { SearchResult } from './structures/search-result.js';
@@ -38,19 +38,34 @@ export type { MediaResource, SearchOptions } from '@discord-player/plugin-host';
 import type { MediaResource, SearchOptions } from '@discord-player/plugin-host';
 
 /** Player-level playback orchestration options. */
-export interface PlayerPlayOptions<Metadata = unknown> extends GuildQueuePlayOptions<Metadata>, SearchOptions {
+export interface PlayerPlayOptions<Metadata = unknown, PlaybackMetadata = unknown> extends SearchOptions {
   /** Guild queue defaults used only when the queue is first created. */
   nodeOptions?: GuildQueueOptions<Metadata>;
+
+  /** Connection/session overrides for this call, including volume and filterGraph on existing sessions. */
+  connectionOptions?: Omit<GuildQueueConnectOptions, 'channelId' | 'signal'>;
+
+  /** Metadata for playback started by this call, independent of nodeOptions.metadata; not retained when only enqueuing. */
+  customMetadata?: PlaybackMetadata;
+
+  /** Cancel search, waiting, voice negotiation, preparation, or started playback; not retained when only enqueuing. */
+  signal?: AbortSignal;
 
   /** Explicit guild identifier when the channel argument is only a channel ID. */
   guildId?: string;
 }
 
 /** Compatibility name for the v7-style initializer options. */
-export type PlayerNodeInitializerOptions<Metadata = unknown> = PlayerPlayOptions<Metadata>;
+export type PlayerNodeInitializerOptions<Metadata = unknown, PlaybackMetadata = unknown> = PlayerPlayOptions<
+  Metadata,
+  PlaybackMetadata
+>;
 
 /** Result of Player-level orchestration. */
-export interface PlayerNodeInitializationResult<Metadata = unknown> extends GuildQueuePlayResult<Metadata> {
+export interface PlayerNodeInitializationResult<
+  Metadata = unknown,
+  PlaybackMetadata = unknown,
+> extends GuildQueuePlayResult<PlaybackMetadata> {
   /** The guild queue that received this playback request. */
   queue: GuildQueue<Metadata>;
 

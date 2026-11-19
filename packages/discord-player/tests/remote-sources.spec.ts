@@ -364,7 +364,7 @@ it('carries all queued host requirements into session creation and fences custom
   await queue.node.destroySession();
   backend.client.nodes[0]!.capabilities.pluginOperations = { available: true, hosts: ['a', 'b'], forwarding: false };
 
-  await queue.play([first, second], { channelId: 'voice' });
+  await queue.play([first, second], { connectionOptions: { channelId: 'voice' } });
 
   expect(backend.client.createDiscordSession.mock.lastCall?.[0].pluginHosts).toEqual(['a', 'b']);
   expect(selectNode.mock.lastCall?.[0]).toHaveLength(1);
@@ -375,7 +375,7 @@ it('carries all queued host requirements into session creation and fences custom
 
   const selections = selectNode.mock.calls.length;
 
-  await expect(queue.play([first, second], { channelId: 'voice' })).rejects.toThrow(
+  await expect(queue.play([first, second], { connectionOptions: { channelId: 'voice' } })).rejects.toThrow(
     'No healthy Remedia node can access required source hosts',
   );
 
@@ -678,8 +678,10 @@ it('rejects conflicting placements including duplicate host IDs and sticky guild
   const first = (await bot.search('first')).tracks[0]!;
   const second = deserialize(first.serialize()) as Track;
   second.sourceReference!.nodeId = 'other-deployment';
-  await expect(queue.play([first, second], { channelId: 'voice-one' })).rejects.toThrow('conflicting Remedia nodes');
-  await expect(queue.play(second, { channelId: 'voice-one' })).rejects.toThrow();
+  await expect(queue.play([first, second], { connectionOptions: { channelId: 'voice-one' } })).rejects.toThrow(
+    'conflicting Remedia nodes',
+  );
+  await expect(queue.play(second, { connectionOptions: { channelId: 'voice-one' } })).rejects.toThrow();
   await queue.node.destroySession();
   backend.client.getAssignment.mockReturnValue({
     guildId: queue.guildId,
@@ -687,7 +689,9 @@ it('rejects conflicting placements including duplicate host IDs and sticky guild
     nodeType: 'remote',
     status: 'assigned',
   });
-  await expect(queue.play(first, { channelId: 'voice-one' })).rejects.toThrow('sticky guild assignment');
+  await expect(queue.play(first, { connectionOptions: { channelId: 'voice-one' } })).rejects.toThrow(
+    'sticky guild assignment',
+  );
 });
 
 it.each(['equalPower', 'adaptive'] as const)(
@@ -759,7 +763,7 @@ it('tries multiple deployments with duplicate host IDs and pins a new session to
   const track = (await bot.search('second deployment')).tracks[0]!;
   expect(track.sourceReference?.nodeId).toBe('second-node');
   await queue.node.destroySession();
-  await queue.play(track, { channelId: 'voice-one' });
+  await queue.play(track, { connectionOptions: { channelId: 'voice-one' } });
   expect(backend.client.createDiscordSession).toHaveBeenLastCalledWith(
     expect.objectContaining({ nodeId: 'second-node' }),
   );
@@ -796,7 +800,7 @@ it('rejects an unsupported adaptive curve on a discovered source node without mo
   backend.client.nodes[0]!.capabilities.crossfade.curves = ['equalPower'];
   backend.client.createDiscordSession.mockClear();
 
-  await expect(queue.play(track, { channelId: 'voice-one' })).rejects.toThrow(
+  await expect(queue.play(track, { connectionOptions: { channelId: 'voice-one' } })).rejects.toThrow(
     'does not support the adaptive crossfade curve',
   );
 

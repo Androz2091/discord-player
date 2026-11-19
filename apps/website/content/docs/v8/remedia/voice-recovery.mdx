@@ -14,7 +14,7 @@ Every guild has its own Remedia voice connection. Joins run independently, so on
 | Server-side `voice.connect`    | At least 75 seconds             |
 | Whole initial join             | 100 seconds                     |
 
-These are separate deadlines. Raising `requestTimeoutMs` does not help a slow voice join. Set `connectTimeoutMs` on `queue.connect()` or `player.play()` instead. Channel moves use their own internal timeout.
+These are separate deadlines. Raising `requestTimeoutMs` does not help a slow voice join. Set `connectTimeoutMs` on `queue.connect()` or `connectionOptions.connectTimeoutMs` on `player.play()` instead. Channel moves use their own internal timeout.
 
 ## Test several guilds
 

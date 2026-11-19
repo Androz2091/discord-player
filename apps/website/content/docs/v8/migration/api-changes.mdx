@@ -35,6 +35,39 @@ await player.play(channelId, result, { guildId }); // Channel ID with an explici
 
 This keeps Discord Player independent from any one Discord library.
 
+## Playback option groups
+
+Search settings retain the v7 shape. Queue initialization defaults belong in `nodeOptions`, and connection/session overrides belong in `connectionOptions`:
+
+```ts
+await player.play(channel, resource, {
+  requestedBy: user,
+  searchEngine: 'auto',
+  nodeOptions: {
+    metadata: { textChannel },
+    leaveOnEmpty: true,
+    leaveOnEmptyCooldown: 60_000,
+    volume: 80,
+  },
+  connectionOptions: {
+    selfDeaf: true,
+    selfMute: false,
+    connectTimeoutMs: 30_000,
+    nodeId: 'remote',
+  },
+  customMetadata: { requestId },
+  signal,
+});
+```
+
+Earlier v8 development builds accepted flat `selfDeaf`, `selfMute`, `nodeId`, `connectTimeoutMs`, `volume`, and `filterGraph`. Move these into `connectionOptions`; those flat aliases are removed. `volume` and `filterGraph` in this group apply immediately to existing sessions as well as new ones. Their `nodeOptions` counterparts initialize new queues only. Omitting an override retains the existing session value; zero volume and `filterGraph: null` are explicit overrides. Node placement cannot change for an existing session. `enableFallbackSeeking` is a creation-only connection setting and rejects attempts to change an existing session.
+
+`queue.play(track, { connectionOptions: { channelId, volume: 80 }, signal })` uses the same grouping. Omit `connectionOptions.channelId` to configure the existing channel. `queue.connect({ channelId, volume: 80, signal })` stays flat. Raw Remedia sessions retain their native flat options and linear volume units.
+
+Queue metadata and generation metadata are independent. `player.play<QueueMetadata, GenerationMetadata>()` types them separately. `customMetadata` and `signal` apply to playback started by the call; they are not retained on a future queued occurrence when another track is already active. Cancellation propagates through search, lock waiting, voice negotiation, source preparation, and playback. Connection controls already applied before cancellation are retained.
+
+For `twlite/music-bot`, move the flat `selfDeaf: true` in `apps/music-bot/src/app/commands/play.ts` to `connectionOptions: { selfDeaf: true }` when updating its published v8 development dependency. Keep `queueDefaults(...)` and queue metadata under `nodeOptions`. Its `/join` call to `queue.connect()` and raw effect/session calls remain flat. The Discord Player test bot demonstrates the corrected call.
+
 ## Queue controls are familiar
 
 ```ts

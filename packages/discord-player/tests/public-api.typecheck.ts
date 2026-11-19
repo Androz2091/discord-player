@@ -67,3 +67,56 @@ export function consumeLifetimeSignals(player: DiscordPlayer, queue: GuildQueue)
   // @ts-expect-error consumers cannot replace the queue lifetime signal
   queue.signal = new AbortController().signal;
 }
+
+/** Reject flat session options while retaining v7-style search and queue defaults. */
+export async function groupedPlayOptions(player: DiscordPlayer, queue: GuildQueue, track: Track): Promise<void> {
+  const signal = new AbortController().signal;
+  await player.play<{ textChannel: string }, { request: number }>({ guildId: 'guild', channelId: 'voice' }, track, {
+    requestedBy: { id: 'user' },
+    searchEngine: 'auto',
+    nodeOptions: { metadata: { textChannel: 'text' }, volume: 80, leaveOnEmpty: true },
+    connectionOptions: {
+      selfDeaf: true,
+      selfMute: false,
+      nodeId: 'remote',
+      connectTimeoutMs: 30_000,
+      volume: 50,
+      filterGraph: null,
+    },
+    customMetadata: { request: 1 },
+    signal,
+  });
+  await queue.play(track, { connectionOptions: { channelId: 'voice', volume: 50 }, customMetadata: 1, signal });
+  await queue.connect({ channelId: 'voice', selfDeaf: true, signal });
+
+  // @ts-expect-error connection settings belong in connectionOptions
+  void player.play('voice', track, { selfDeaf: true });
+  // @ts-expect-error connection settings belong in connectionOptions
+  void player.play('voice', track, { selfMute: true });
+  // @ts-expect-error connection settings belong in connectionOptions
+  void player.play('voice', track, { connectTimeoutMs: 1000 });
+  // @ts-expect-error placement belongs in connectionOptions
+  void player.play('voice', track, { nodeId: 'remote' });
+  // @ts-expect-error session volume belongs in connectionOptions or creation defaults in nodeOptions
+  void player.play('voice', track, { volume: 80 });
+  // @ts-expect-error session filtering belongs in connectionOptions
+  void player.play('voice', track, { filterGraph: null });
+  // @ts-expect-error Player.play receives its channel through the first argument
+  void player.play('voice', track, { connectionOptions: { channelId: 'voice' } });
+  // @ts-expect-error placement is not a queue initialization policy
+  void player.play('voice', track, { nodeOptions: { nodeId: 'remote' } });
+  // @ts-expect-error per-play metadata is separate from queue metadata
+  void player.play<{ textChannel: string }, number>('voice', track, { customMetadata: 'wrong' });
+  // @ts-expect-error queue.play groups connection settings too
+  void queue.play(track, { channelId: 'voice' });
+  // @ts-expect-error queue.play groups session overrides too
+  void queue.play(track, { volume: 50 });
+  // @ts-expect-error queue.connect remains flat
+  void queue.connect({ connectionOptions: { channelId: 'voice' } });
+  // @ts-expect-error plugin-host requirements are derived from Tracks, not supplied publicly
+  void queue.connect({ channelId: 'voice', pluginHosts: ['host'] });
+  // @ts-expect-error crossfade is a queue initialization default
+  void player.play('voice', track, { connectionOptions: { crossfade: { enabled: true } } });
+  // @ts-expect-error playback cancellation has one top-level signal
+  void queue.play(track, { connectionOptions: { signal } });
+}

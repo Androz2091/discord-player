@@ -20,7 +20,7 @@ const queue = await player.createQueue(guildId, {
 const existing = player.getQueue(guildId); // null when there is no queue
 ```
 
-Options apply only when the queue is created. `player.play()` creates a queue for you, so you usually only call `getQueue()`.
+Initialization options apply only when the queue is created. For per-call session volume or filtering, use `connectionOptions` in `player.play()` or `queue.play()`, or pass them directly to `queue.connect()`. `player.play()` creates a queue for you, so you usually only call `getQueue()`.
 
 `maxSize` limits upcoming tracks. The current track does not count toward it.
 
@@ -35,7 +35,7 @@ const { queue, track } = await player.play({ guildId, channelId }, query);
 If you already have `Track` objects, use the queue directly:
 
 ```ts
-await queue.play(track, { channelId }); // Queue it and start if idle
+await queue.play(track, { connectionOptions: { channelId } }); // Queue it and start if idle
 queue.addTrack(track); // Upcoming only
 queue.addTracks(moreTracks);
 ```

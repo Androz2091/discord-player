@@ -197,10 +197,14 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
    * Connect the current session or create and connect one for the requested channel.
    * Moving a connected session uses the backend's `move()` method and retains this session identity.
    * @param options Channel, node, voice, gain, and filtergraph settings.
+   * @param signal Optional caller cancellation for waiting, session creation, and voice negotiation.
    * @returns The connected playback session.
    * @throws Error When an existing session is assigned to a different node than requested.
    */
-  public async connect<M = unknown>(options: GuildQueuePlayerNodeSessionCreateOptions): Promise<PlaybackSession<M>> {
+  public async connect<M = unknown>(
+    options: GuildQueuePlayerNodeSessionCreateOptions,
+    signal?: AbortSignal,
+  ): Promise<PlaybackSession<M>> {
     const request = intercept(this.player.plugins, 'voice.beforeSession', {
       guildId: this.queue.guildId,
       channelId: options.channelId,
@@ -208,9 +212,16 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     if (typeof request.channelId !== 'string' || !request.channelId)
       throw new TypeError('Voice channel ID must be nonempty.');
     options = { ...options, channelId: request.channelId };
-    using _lock = await this.queue.tasks.acquire('queue.node.operation');
+    using _lock = await this.queue.tasks.acquire('queue.node.operation', { signal });
 
     this.assertQueueAlive();
+    signal?.throwIfAborted();
+
+    const connectionSignal = signal
+      ? AbortSignal.any([this.queue.signal, this.player.playbackSignal, signal])
+      : this.player.playbackBackend
+        ? AbortSignal.any([this.queue.signal, this.player.playbackSignal])
+        : this.queue.signal;
 
     const existing = this.session;
     if (
@@ -231,31 +242,38 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
         if (options.selfDeaf !== undefined && options.selfDeaf !== existing.selfDeaf)
           await existing.setSelfDeaf(options.selfDeaf);
 
+        signal?.throwIfAborted();
+
         if (options.selfMute !== undefined && options.selfMute !== existing.selfMute)
           await existing.setSelfMute(options.selfMute);
+
+        signal?.throwIfAborted();
 
         const previousVolume = existing.volume;
 
         if (options.volume !== undefined && options.volume !== previousVolume) await existing.setVolume(options.volume);
+
+        signal?.throwIfAborted();
 
         if (options.filterGraph !== undefined && options.filterGraph !== existing.filters?.graph) {
           if (options.filterGraph === null) await this.requireFilters(existing).clear();
           else await this.requireFilters(existing).set(options.filterGraph);
         }
 
+        signal?.throwIfAborted();
+
         if (options.channelId !== existing.channelId) await existing.move(options.channelId);
+
+        signal?.throwIfAborted();
 
         if (existing.connectionState !== 'connected') {
           await existing.connect({
             ...(options.connectTimeoutMs === undefined ? {} : { timeoutMs: options.connectTimeoutMs }),
-            ...(this.player.playbackBackend
-              ? {
-                  signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]),
-                }
-              : { signal: this.queue.signal }),
+            signal: connectionSignal,
           });
         }
 
+        signal?.throwIfAborted();
         this.assertQueueAlive();
         this.rememberSessionConfiguration(existing);
         this.queue.voice.connected(existing);
@@ -277,11 +295,14 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     const { connectTimeoutMs, ...sessionOptions } = options;
     const negotiated = await this.sessionPolicy(sessionOptions);
-    const session = await this.createBackendSession({
-      ...negotiated,
-      guildId: this.queue.guildId,
-      userId: this.player.getClientId(),
-    });
+    const session = await this.createBackendSession(
+      {
+        ...negotiated,
+        guildId: this.queue.guildId,
+        userId: this.player.getClientId(),
+      },
+      signal,
+    );
 
     const previousVolume = this.#volume;
     const previousOptions = {
@@ -295,12 +316,9 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       await this.adoptSession(session);
       await session.connect({
         ...(connectTimeoutMs === undefined ? {} : { timeoutMs: connectTimeoutMs }),
-        ...(this.player.playbackBackend
-          ? {
-              signal: AbortSignal.any([this.queue.signal, this.player.playbackSignal]),
-            }
-          : { signal: this.queue.signal }),
+        signal: connectionSignal,
       });
+      signal?.throwIfAborted();
       this.assertQueueAlive();
       this.rememberSessionConfiguration(session);
       this.queue.voice.connected(session);
@@ -383,16 +401,23 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     return session.filters;
   }
 
-  private async createBackendSession(options: PlaybackSessionOptions): Promise<PlaybackSession> {
+  private async createBackendSession(
+    options: PlaybackSessionOptions,
+    callerSignal?: AbortSignal,
+  ): Promise<PlaybackSession> {
     const backend = this.player.playbackBackend;
+    callerSignal?.throwIfAborted();
     if (!backend) return this.player.getRemedia().createDiscordSession(options);
     this.player.getBackend();
-    const signal = AbortSignal.any([this.queue.signal, this.player.playbackSignal]);
+    const signal = AbortSignal.any([
+      this.queue.signal,
+      this.player.playbackSignal,
+      ...(callerSignal ? [callerSignal] : []),
+    ]);
     signal.throwIfAborted();
     const session = await backend.createSession(options, signal);
     try {
-      this.queue.signal.throwIfAborted();
-      this.player.playbackSignal.throwIfAborted();
+      signal.throwIfAborted();
       if (this.player.playbackBackend !== backend)
         throw new Error('Playback provider was removed during session creation.');
       this.assertBackendSession(session, backend);

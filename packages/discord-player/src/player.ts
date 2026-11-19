@@ -718,17 +718,19 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Resolve a structural channel, create its guild queue, and delegate playback to `queue.play()`.
    * @param channel Voice channel object, channel ID, or explicit `{guildId, channelId}` pair.
    * @param resource Resource to search or play.
-   * @param options Queue defaults and queue-managed playback options.
+   * @param options Search options, creation-only nodeOptions, connectionOptions, and per-generation metadata/cancellation.
    * @returns The queue, selected Track, immediate Remedia result, and search result.
    */
-  public async play<Metadata = unknown>(
+  public async play<Metadata = unknown, PlaybackMetadata = unknown>(
     /** Voice channel object, channel ID, or explicit `{guildId, channelId}` pair. */
     channel: PlayerChannelResolvable,
     /** Resource to search or play. */
     resource: MediaResource,
-    /** Queue defaults and queue-managed playback options. */
-    options: PlayerPlayOptions<Metadata> = {},
-  ): Promise<PlayerNodeInitializationResult<Metadata>> {
+    /** Search options, creation-only nodeOptions, connectionOptions, and per-generation metadata/cancellation. */
+    options: PlayerPlayOptions<Metadata, PlaybackMetadata> = {},
+  ): Promise<PlayerNodeInitializationResult<Metadata, PlaybackMetadata>> {
+    options.signal?.throwIfAborted();
+
     const channelId = typeof channel === 'string' ? channel : 'channelId' in channel ? channel.channelId : channel.id;
     const inferredGuildId =
       typeof channel === 'string'
@@ -742,18 +744,18 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       throw new TypeError('A guildId is required when channel does not expose a structural guild reference.');
     }
 
-    const queueDefaults = options.nodeOptions ?? {};
-    const queue = await this.nodes.create<Metadata>(guildId, queueDefaults);
-    const searchResult = await this.search(resource, options);
+    const { nodeOptions, connectionOptions, customMetadata, guildId: _guildId, ...searchOptions } = options;
+    const queue = await this.nodes.create<Metadata>(guildId, nodeOptions ?? {});
+    const searchResult = await this.search(resource, searchOptions);
 
     if (searchResult.isEmpty()) {
       return { queue, resource, searchResult, track: null, playerResult: null };
     }
 
-    const { nodeOptions: _nodeOptions, guildId: _guildId, ...playOptions } = options;
-    const result = await queue.play(searchResult, {
-      ...playOptions,
-      channelId,
+    const result = await queue.play<PlaybackMetadata>(searchResult, {
+      connectionOptions: { ...connectionOptions, channelId },
+      customMetadata,
+      signal: options.signal,
     });
 
     return { queue, resource, searchResult, ...result };
