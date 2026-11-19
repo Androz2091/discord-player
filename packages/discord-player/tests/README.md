@@ -35,7 +35,7 @@ The official raw-stream fixture has its own provenance and dependency boundaries
 in `fixtures/README.md`. Offline tests cannot establish native decoder behavior,
 real Gateway negotiation, remote-server behavior, or live playback compatibility.
 
-Real remote AutoPlay RPC coverage (requires an installed Remedia 0.3.0 executable):
+Real remote AutoPlay RPC coverage (requires an installed Remedia 0.3.1 executable):
 
 ```sh
 REMEDIA_BINARY=/path/to/remedia pnpm --filter discord-player exec vitest run tests/remote-autoplay-rpc.spec.ts
