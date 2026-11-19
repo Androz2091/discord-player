@@ -51,7 +51,7 @@ These Player options go to the Remedia client:
 | `requestTimeoutMs`   | 15000   | Timeout for ordinary requests       |
 | `maxPendingRequests` | 128     | Concurrent requests per remote node |
 
-Voice joins use a longer deadline. `connectTimeoutMs` on `queue.connect()` or `player.play()` sets the overall initial join deadline, and channel moves keep their own.
+Voice joins use a longer deadline. `connectTimeoutMs` on `queue.connect()` or `connectionOptions.connectTimeoutMs` on `player.play()` sets the overall initial join deadline, and channel moves keep their own.
 
 ## Inspect nodes
 

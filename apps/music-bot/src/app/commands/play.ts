@@ -100,6 +100,7 @@ export const chatInput = musicCommand(async (interaction) => {
 
   const result = await player.play<QueueMetadata>(channel, searchResult, {
     nodeOptions: { metadata: { textChannel } },
+    connectionOptions: { selfDeaf: true, selfMute: false, connectTimeoutMs: 30_000 },
   });
 
   if (result.playerResult) {

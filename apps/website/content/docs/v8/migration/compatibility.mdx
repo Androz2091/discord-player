@@ -7,22 +7,22 @@ This page compares v7 with v8 behavior. A matching method name does not mean ide
 
 ## What carries over
 
-| Area                         | In v8                                                                                             |
-| ---------------------------- | ------------------------------------------------------------------------------------------------- |
-| `Player` and `player.play()` | Same names. Search with `searchEngine`. Queue defaults go in `nodeOptions`                        |
-| `player.nodes`               | The guild queue manager. `create`, `get`, `resolve`, `delete`, `clear`                            |
-| Queue and history            | Add, remove, move, swap, copy, repeat, shuffle, bounded history, navigation                       |
-| `queue.node.play(track)`     | Plays through the queue. With no argument it starts the next track                                |
-| Queue helpers                | `queue.player`, `queue.deleted`, `queue.filters`, `queue.syncedLyricsProvider`                    |
-| Extractors                   | `BaseExtractor` through the adapter. Priority, protocols, `activate`, and `deactivate` carry over |
-| Lyrics                       | `player.lyrics.search()` with optional plugins. Plain and synced results                          |
-| Synced lyrics                | `load`, `at`, `subscribe`, and the v7 callbacks                                                   |
-| Stream hooks                 | Global, Player, and queue hooks. They keep v7 precedence                                          |
-| Context hooks                | `useMainPlayer`, `useQueue`, and the others. The first active Player is the fallback              |
-| Voice policies               | `leaveOnEmpty`, `leaveOnEnd`, `leaveOnStop`, cooldowns, and `pauseOnEmpty`                        |
-| Autoplay                     | Uses the source's `track.related` and the v7 `willAutoPlay` callback                              |
-| Track and Playlist           | Same constructors and helpers, with versioned storage                                             |
-| Lifetimes                    | `player.signal` and `queue.signal` abort as soon as destruction starts                            |
+| Area                         | In v8                                                                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `Player` and `player.play()` | Same names. Search with `searchEngine`. Queue defaults go in `nodeOptions`; session settings go in `connectionOptions` |
+| `player.nodes`               | The guild queue manager. `create`, `get`, `resolve`, `delete`, `clear`                                                 |
+| Queue and history            | Add, remove, move, swap, copy, repeat, shuffle, bounded history, navigation                                            |
+| `queue.node.play(track)`     | Plays through the queue. With no argument it starts the next track                                                     |
+| Queue helpers                | `queue.player`, `queue.deleted`, `queue.filters`, `queue.syncedLyricsProvider`                                         |
+| Extractors                   | `BaseExtractor` through the adapter. Priority, protocols, `activate`, and `deactivate` carry over                      |
+| Lyrics                       | `player.lyrics.search()` with optional plugins. Plain and synced results                                               |
+| Synced lyrics                | `load`, `at`, `subscribe`, and the v7 callbacks                                                                        |
+| Stream hooks                 | Global, Player, and queue hooks. They keep v7 precedence                                                               |
+| Context hooks                | `useMainPlayer`, `useQueue`, and the others. The first active Player is the fallback                                   |
+| Voice policies               | `leaveOnEmpty`, `leaveOnEnd`, `leaveOnStop`, cooldowns, and `pauseOnEmpty`                                             |
+| Autoplay                     | Uses the source's `track.related` and the v7 `willAutoPlay` callback                                                   |
+| Track and Playlist           | Same constructors and helpers, with versioned storage                                                                  |
+| Lifetimes                    | `player.signal` and `queue.signal` abort as soon as destruction starts                                                 |
 
 ## What changed
 

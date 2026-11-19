@@ -148,10 +148,12 @@ it('applies per-play policies, batches and dynamic shuffle without losing queued
   const tracks = ['one', 'two', 'three'].map((title) => new TestTrack(title));
 
   await queue.play(new Playlist({ tracks }), {
-    selfDeaf: false,
-    selfMute: true,
-    volume: 20,
-    filterGraph: 'volume=0.2',
+    connectionOptions: {
+      selfDeaf: false,
+      selfMute: true,
+      volume: 20,
+      filterGraph: 'volume=0.2',
+    },
   });
 
   expect(tracks).toContain(queue.currentTrack);

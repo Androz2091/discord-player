@@ -40,7 +40,7 @@ The example returns the first node to stay short. It is not a placement strategy
 You can also pin a node when playing:
 
 ```ts
-await player.play(channel, query, { nodeId: 'audio-1' });
+await player.play(channel, query, { connectionOptions: { nodeId: 'audio-1' } });
 ```
 
 ## Crossfade placement

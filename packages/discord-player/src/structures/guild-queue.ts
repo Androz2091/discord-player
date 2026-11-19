@@ -4,14 +4,14 @@ import { SyncedLyricsProvider } from './synced-lyrics.js';
 import type { StreamHooks } from '../hooks.js';
 import { VoiceStateTracker } from '../voice-state.js';
 import { randomInt, randomUUID } from 'node:crypto';
-import type { CrossfadeCurve, DiscordSessionEvents, NodeSelection, PlayOptions } from '@remedia/client';
+import type { CrossfadeCurve, DiscordSessionEvents, NodeSelection } from '@remedia/client';
 import { AsyncQueue } from '../utils/async-queue.js';
 import type { GuildNodeManager } from '../managers/guild-queue.manager.js';
 import { GuildQueueHistory } from '../managers/guild-queue-history.manager.js';
 import { Queue } from './common/queue.js';
 import { QueueCapacityError } from '../errors.js';
 import { GuildQueueEvents, type GuildQueueEventsMap } from './common/guild-queue-events.js';
-import type { GuildQueuePlayerNodeSessionCreateOptions, PlayRawResult } from './guild-queue-player-node.js';
+import type { PlayRawResult } from './guild-queue-player-node.js';
 import { GuildQueuePlayerNode } from './guild-queue-player-node.js';
 import { Playlist } from './playlist.js';
 import { SearchResult } from './search-result.js';
@@ -132,49 +132,46 @@ export interface GuildQueueOptions<Metadata = unknown> extends StreamHooks {
   selfMute?: boolean;
 }
 
-/** Options accepted by a queue connection, using Discord Player's familiar percentage volume. */
-export interface GuildQueueConnectOptions extends Omit<
-  GuildQueuePlayerNodeSessionCreateOptions,
-  'selfDeaf' | 'selfMute' | 'volume' | 'filterGraph'
-> {
-  /** Voice channel to connect to or move the existing session into. */
+/** Voice connection and session settings; volume uses Discord Player percentages. */
+export interface GuildQueueConnectOptions {
+  /** Voice channel to join or move the current session into. */
   channelId: string;
 
-  /** Percentage volume to initialize or apply, from zero through two hundred. */
-  volume?: number;
-
-  /** Raw Remedia filtergraph to initialize or apply; null clears filtering. */
-  filterGraph?: string | null;
-
-  /** Discord self-deaf state to initialize or apply. */
-  selfDeaf?: boolean;
-
-  /** Discord self-mute state to initialize or apply. */
-  selfMute?: boolean;
-}
-
-/** Queue-level playback options; queue playback still resolves the Track source before calling the raw node. */
-export interface GuildQueuePlayOptions<Metadata = unknown> extends PlayOptions<Metadata> {
-  /** Connect or move the queue to this voice channel before starting playback. */
-  channelId?: string;
-
-  /** Pin a new Remedia session to this node. */
+  /** Node for a new session. An existing session cannot move between nodes. */
   nodeId?: string;
 
-  /** Optional Discord self-deaf state to initialize or apply. */
+  /** Discord self-deaf state to initialize or apply. Omission retains the current session; new sessions use the queue setting, then true. */
   selfDeaf?: boolean;
 
-  /** Optional Discord self-mute state to initialize or apply. */
+  /** Discord self-mute state to initialize or apply. Omission retains the current session; new sessions use the queue setting, then false. */
   selfMute?: boolean;
 
-  /** Volume percentage, from zero through two hundred. */
+  /** Initial voice negotiation deadline in milliseconds; defaults to the backend deadline. */
+  connectTimeoutMs?: number;
+
+  /** Session volume percentage (0–200), applied to new or existing sessions. */
   volume?: number;
 
-  /** Raw Remedia filtergraph to apply before playback; null clears filtering. */
+  /** Session filtergraph, applied to new or existing sessions; null clears filtering. */
   filterGraph?: string | null;
 
-  /** Initial voice join timeout in milliseconds; defaults to Remedia's 100 seconds. */
-  connectTimeoutMs?: number;
+  /** Enable fallback seeking when creating a session; cannot reconfigure an existing session. */
+  enableFallbackSeeking?: boolean;
+
+  /** Cancel lock acquisition and voice negotiation; already-applied session controls are retained. */
+  signal?: AbortSignal;
+}
+
+/** Managed playback options. Connection settings are normalized before calling the raw backend. */
+export interface GuildQueuePlayOptions<Metadata = unknown> {
+  /** Optional connection overrides. Omit channelId to use the current session's channel. */
+  connectionOptions?: Partial<Omit<GuildQueueConnectOptions, 'signal'>>;
+
+  /** Metadata for playback started by this call; not retained on a future queued occurrence. */
+  customMetadata?: Metadata;
+
+  /** Cancel waiting, voice negotiation, preparation, or started playback; not retained when only enqueuing. */
+  signal?: AbortSignal;
 }
 
 /** Result of a queue-managed playback request. */
@@ -863,7 +860,7 @@ export class GuildQueue<Metadata = unknown> {
       guildId: this.guildId,
     });
 
-    using _lock = await this.tasks.acquire('queue.playback-transition');
+    using _lock = await this.tasks.acquire('queue.playback-transition', { signal: options.signal });
 
     this.assertAlive();
 
@@ -880,6 +877,7 @@ export class GuildQueue<Metadata = unknown> {
     resource: Track | Track[] | Playlist | SearchResult,
     options: GuildQueuePlayOptions<PlaybackMetadata> = {},
   ): Promise<GuildQueuePlayResult<PlaybackMetadata>> {
+    options.signal?.throwIfAborted();
     this.player.plugins.assertNotDispatching();
     if (this.player.plugins.hasCapability('playback.beforeStart')) {
       const requested =
@@ -901,7 +899,7 @@ export class GuildQueue<Metadata = unknown> {
     let work: Promise<PlayRawResult<GuildQueuePlaybackMetadata<PlaybackMetadata>> | null> | null = null;
 
     {
-      using _lock = await this.tasks.acquire('queue.playback-transition');
+      using _lock = await this.tasks.acquire('queue.playback-transition', { signal: options.signal });
 
       this.assertAlive();
 
@@ -916,22 +914,21 @@ export class GuildQueue<Metadata = unknown> {
 
       if (!incoming?.length) return { track: null, playerResult: null };
 
-      if (options.channelId) {
-        await this.connectLocked({ ...options, channelId: options.channelId }, incoming);
-      } else if (!this.node.getSession(false)) {
-        throw new Error('This queue has no voice session. Pass channelId or call queue.connect() first.');
-      } else if (
-        options.nodeId !== undefined ||
-        options.selfDeaf !== undefined ||
-        options.selfMute !== undefined ||
-        options.volume !== undefined ||
-        options.filterGraph !== undefined
-      ) {
-        await this.connectLocked({
-          ...options,
-          channelId: this.node.getSession().channelId,
-        });
+      const connection = options.connectionOptions;
+      const session = this.node.getSession(false);
+      const channelId = connection?.channelId ?? session?.channelId;
+
+      if (!channelId) {
+        throw new Error(
+          'This queue has no voice session. Pass connectionOptions.channelId or call queue.connect() first.',
+        );
       }
+
+      if (connection || !session) {
+        await this.connectLocked({ ...connection, channelId, signal: options.signal }, incoming);
+      }
+
+      options.signal?.throwIfAborted();
 
       this.addTrack(incoming);
       selected = incoming[0] ?? null;
@@ -2282,7 +2279,13 @@ export class GuildQueue<Metadata = unknown> {
       throw new RangeError('Queue volume must be a finite percentage between 0 and 200.');
     }
 
+    options.signal?.throwIfAborted();
     const existing = this.node.getSession(false);
+
+    if (existing && options.enableFallbackSeeking !== undefined) {
+      throw new Error('enableFallbackSeeking can only be set when creating a new session.');
+    }
+
     const volume = options.volume ?? (existing ? undefined : (this.options.volume ?? this.node.volume));
     const selfDeaf = options.selfDeaf ?? (existing ? undefined : this.options.selfDeaf);
     const selfMute = options.selfMute ?? (existing ? undefined : this.options.selfMute);
@@ -2299,23 +2302,28 @@ export class GuildQueue<Metadata = unknown> {
     if (origin && options.nodeId && origin !== options.nodeId)
       throw new Error('Selected Remedia node conflicts with remote Track origin');
 
-    const session = await this.node.connect({
-      channelId: options.channelId,
-      pluginHosts: [
-        ...new Set(
-          [...(this.currentTrack ? [this.currentTrack] : []), ...this.tracks.toArray(), ...incoming].flatMap((track) =>
-            track.sourceReference?.hostId ? [track.sourceReference.hostId] : [],
+    const session = await this.node.connect(
+      {
+        channelId: options.channelId,
+        pluginHosts: [
+          ...new Set(
+            [...(this.currentTrack ? [this.currentTrack] : []), ...this.tracks.toArray(), ...incoming].flatMap(
+              (track) => (track.sourceReference?.hostId ? [track.sourceReference.hostId] : []),
+            ),
           ),
-        ),
-      ],
-      ...((origin ?? options.nodeId) ? { nodeId: origin ?? options.nodeId } : {}),
-      ...(options.connectTimeoutMs === undefined ? {} : { connectTimeoutMs: options.connectTimeoutMs }),
-      ...(selfDeaf !== undefined ? { selfDeaf } : {}),
-      ...(selfMute !== undefined ? { selfMute } : {}),
-      ...(volume !== undefined ? { volume: volume / 100 } : {}),
-      ...(filterGraph !== undefined ? { filterGraph } : {}),
-      ...(options.enableFallbackSeeking !== undefined ? { enableFallbackSeeking: options.enableFallbackSeeking } : {}),
-    });
+        ],
+        ...((origin ?? options.nodeId) ? { nodeId: origin ?? options.nodeId } : {}),
+        ...(options.connectTimeoutMs === undefined ? {} : { connectTimeoutMs: options.connectTimeoutMs }),
+        ...(selfDeaf !== undefined ? { selfDeaf } : {}),
+        ...(selfMute !== undefined ? { selfMute } : {}),
+        ...(volume !== undefined ? { volume: volume / 100 } : {}),
+        ...(filterGraph !== undefined ? { filterGraph } : {}),
+        ...(options.enableFallbackSeeking !== undefined
+          ? { enableFallbackSeeking: options.enableFallbackSeeking }
+          : {}),
+      },
+      options.signal,
+    );
 
     this.emit(GuildQueueEvents.Connection);
 

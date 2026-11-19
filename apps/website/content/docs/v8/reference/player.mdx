@@ -68,15 +68,15 @@ The Remedia client options `botUserId` and `selectNode` are not options of the P
 
 ```ts
 const { queue, track, playerResult, searchResult } = await player.play({ guildId, channelId }, query, {
-  connectTimeoutMs: 120_000,
+  connectionOptions: { connectTimeoutMs: 120_000 },
 });
 ```
 
-| Argument   | Accepts                                                                                  |
-| ---------- | ---------------------------------------------------------------------------------------- |
-| `channel`  | A voice channel object, `{ guildId, channelId }`, or a channel ID with `options.guildId` |
-| `resource` | A string query, `Track`, `Track[]`, `Playlist`, or `SearchResult`                        |
-| `options`  | Search options, queue play options, `nodeOptions`, and `guildId`                         |
+| Argument   | Accepts                                                                                       |
+| ---------- | --------------------------------------------------------------------------------------------- |
+| `channel`  | A voice channel object, `{ guildId, channelId }`, or a channel ID with `options.guildId`      |
+| `resource` | A string query, `Track`, `Track[]`, `Playlist`, or `SearchResult`                             |
+| `options`  | Search options, `nodeOptions`, `connectionOptions`, `customMetadata`, `signal`, and `guildId` |
 
 | Result         | Description                                                         |
 | -------------- | ------------------------------------------------------------------- |
@@ -86,9 +86,9 @@ const { queue, track, playerResult, searchResult } = await player.play({ guildId
 | `searchResult` | The tracks and playlist found                                       |
 | `resource`     | The value you passed in                                             |
 
-`connectTimeoutMs` sets the initial voice join deadline. The default is 100 seconds. It does not apply to channel moves.
+`connectionOptions.connectTimeoutMs` sets the initial voice join deadline. The default is 100 seconds. It does not apply to channel moves.
 
-`nodeOptions` holds queue defaults and applies only when the queue is created.
+`nodeOptions` holds queue defaults and applies only when the queue is created. `connectionOptions` applies connection and session overrides on every call, including existing sessions. Volume is a percentage (0–200); `filterGraph: null` clears filtering. Search fields stay at the top level. `customMetadata` belongs to the started playback generation; it is independent of `nodeOptions.metadata`. The optional second type parameter describes that per-generation metadata. `signal` covers search, waiting, voice negotiation, source preparation, and started playback cancellation. Enqueuing into an active queue does not attach generation metadata or cancellation to that future queued occurrence.
 
 ## Lifetime signal
 
