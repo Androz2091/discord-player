@@ -1,3 +1,4 @@
+/** Cancellation options for an asynchronous lock acquisition. */
 export interface AsyncQueueAcquireOptions {
   /** A signal used to cancel an acquisition while it is waiting. */
   signal?: AbortSignal;

@@ -16,7 +16,7 @@ export interface GatewayVoiceState {
   suppress?: boolean;
 }
 
-/** Queue-owned Gateway tracking and authoritative occupancy policy. @internal */
+/** Queue-owned Gateway tracking and authoritative occupancy policy. Use queue.voice for the managed instance. */
 export class VoiceStateTracker {
   private states = new Map<string, GatewayVoiceState>();
   private occupants: Set<string> | null = null;

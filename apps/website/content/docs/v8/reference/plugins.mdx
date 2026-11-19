@@ -31,15 +31,67 @@ A plugin that only provides lyrics needs no source operations.
 
 ## Setup context
 
-| Member                                     | Description                                             |
-| ------------------------------------------ | ------------------------------------------------------- |
-| `ctx.options`                              | Options for this registration                           |
-| `ctx.signal`                               | Aborted when the plugin is removed                      |
-| `ctx.on(operation, handler, options?)`     | Registers a handler. Returns a function that removes it |
-| `ctx.provide('playback.backend', backend)` | Supplies the Player's custom playback backend           |
-| `ctx.onCleanup(fn)`                        | Registers cleanup that runs in reverse order            |
+| Member                                     | Description                                                      |
+| ------------------------------------------ | ---------------------------------------------------------------- |
+| `ctx.options`                              | Options for this registration                                    |
+| `ctx.signal`                               | Aborted when the plugin is removed                               |
+| `ctx.player`                               | The hosting runtime. See [runtime narrowing](#runtime-narrowing) |
+| `ctx.on(operation, handler, options?)`     | Registers a handler. Returns a function that removes it          |
+| `ctx.provide('playback.backend', backend)` | Supplies the Player's custom playback backend                    |
+| `ctx.onCleanup(fn)`                        | Registers cleanup that runs in reverse order                     |
 
-Handler `options` are `{ priority?, protocols? }`.
+## Handler options
+
+| Option      | Type                | Description                                                                                                                       |
+| ----------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`  | `number`            | Higher priorities run first. Equal priorities keep registration order. Defaults to the plugin's `priority`                        |
+| `protocols` | `readonly string[]` | Only selected when the input names one of these protocols, such as `example` for `example:query`. Inputs without a protocol match |
+| `guildIds`  | `readonly string[]` | Only selected when the invocation is routed for one of these guilds                                                               |
+
+`guildIds` uses the guild identity passed by the caller, never a `guildId` field inside the operation input. An invocation without
+a guild, such as `player.search(query)` without `guildId`, skips guild-restricted handlers. Standalone source hosts never route
+for a guild, so guild-restricted handlers registered there are never selected.
+
+## Operation context
+
+Every handler receives the operation input and an operation context:
+
+```ts
+ctx.on('track.stream', async ({ track }, { queue, guildId, signal }) => {
+  if (queue) console.log(guildId, queue.currentTrack?.title, queue.history.size);
+
+  return { url: await resolveUrl(track, { signal }) };
+});
+```
+
+| Member    | Type                 | Description                                                                        |
+| --------- | -------------------- | ---------------------------------------------------------------------------------- |
+| `signal`  | `AbortSignal`        | Aborts when the caller cancels or the plugin is removed                            |
+| `guildId` | `string \| null`     | The guild this invocation belongs to, or `null` when it has none                   |
+| `queue`   | `GuildQueue \| null` | The owning Player's queue for `guildId`, or `null` when none exists or is unscoped |
+
+Queue playback, related-track lookup for autoplay, stream resolution, lifecycle capabilities, and `player.play()` searches are
+routed for their guild. Pass `guildId` to `player.search()` or `player.plugins.execute()` to route other calls. The queue
+is looked up on the Player that owns the registry, so two Players with the same guild ID stay separate.
+
+The context is local. Remote source hosts receive only portable input and never see `guildId` or `queue`.
+
+## Runtime narrowing
+
+Plugins registered on a Player receive the actual `DiscordPlayer` as `ctx.player`. Standalone source hosts created with
+`@discord-player/plugin-host` provide a partial `SourcePluginRuntime` instead. `ctx.player.isPartial()` narrows between them:
+
+```ts
+setup(ctx) {
+  if (!ctx.player.isPartial()) {
+    ctx.player.nodes; // DiscordPlayer
+    ctx.player.events;
+  }
+}
+```
+
+Programs that only install `@discord-player/plugin-host` see `ctx.player` as `SourcePluginRuntime`. Installing
+`discord-player` adds `DiscordPlayer` to the union without a runtime dependency between the packages.
 
 ## Registry
 
@@ -53,7 +105,7 @@ Handler `options` are `{ priority?, protocols? }`.
 | `hasHost(hostId)`                     | Whether a source host is registered                                   |
 | `registerHost(options)`               | Registers every provider a source host advertises                     |
 | `ready()`                             | Waits for pending registrations                                       |
-| `execute(operation, input, options?)` | Runs an operation                                                     |
+| `execute(operation, input, options?)` | Runs an operation. `options.guildId` routes it for a guild            |
 | `resolveStream(track, options?)`      | Returns the media source for a track                                  |
 | `defineOperation(name, policy)`       | Adds an operation. See [custom operations](/docs/v8/plugins/advanced) |
 | `destroy()`                           | Releases every registration                                           |

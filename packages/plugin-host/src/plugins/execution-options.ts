@@ -2,6 +2,9 @@ import type { MediaSource } from '@remedia/client';
 
 /** Optional dispatch targeting and cancellation. */
 export interface ExecuteOptions {
+  /** Explicit local guild routing. Never inferred from payloads or forwarded as live context. */
+  guildId?: string | null;
+
   /** Restrict execution to one provider. */
   pluginId?: string;
 

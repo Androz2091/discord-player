@@ -442,11 +442,15 @@ export class GuildQueue<Metadata = unknown> {
     const emitted = emitter.emit(event as string, this, ...args);
     if (this.player.plugins.hasCapability('queue.event'))
       try {
-        this.player.plugins.executeSync('queue.event', {
-          guildId: this.guildId,
-          event,
-          args: Object.freeze([...args]),
-        } as unknown as QueueEventObservation);
+        this.player.plugins.executeSync(
+          'queue.event',
+          {
+            guildId: this.guildId,
+            event,
+            args: Object.freeze([...args]),
+          } as unknown as QueueEventObservation,
+          { guildId: this.guildId },
+        );
       } catch (error) {
         this.player.emit('error', asError(error));
       }
@@ -1109,9 +1113,13 @@ export class GuildQueue<Metadata = unknown> {
       } finally {
         this.manager.cache.delete(this.guildId);
         this.emit(GuildQueueEvents.QueueDelete);
-        this.player.plugins.executeSync('queue.destroyed', {
-          guildId: this.guildId,
-        });
+        this.player.plugins.executeSync(
+          'queue.destroyed',
+          {
+            guildId: this.guildId,
+          },
+          { guildId: this.guildId },
+        );
       }
     });
     this.#lifetimeController.abort();
@@ -1337,10 +1345,14 @@ export class GuildQueue<Metadata = unknown> {
     this.#decisionRevision++;
     if (!this.#destroyed && this.player.plugins.hasCapability('queue.changed')) {
       try {
-        this.player.plugins.executeSync('queue.changed', {
-          guildId: this.guildId,
-          size: this.size,
-        });
+        this.player.plugins.executeSync(
+          'queue.changed',
+          {
+            guildId: this.guildId,
+            size: this.size,
+          },
+          { guildId: this.guildId },
+        );
       } catch (error) {
         this.player.emit('error', asError(error));
       }
@@ -1719,6 +1731,7 @@ export class GuildQueue<Metadata = unknown> {
         history: { tracks: history },
       },
       {
+        guildId: this.guildId,
         pluginId: reference?.pluginId,
         hostId: reference?.hostId ?? null,
         signal,

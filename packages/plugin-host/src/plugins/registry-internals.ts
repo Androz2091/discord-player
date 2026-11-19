@@ -80,6 +80,9 @@ export type OperationRunner = <K extends OperationName>(
 
 /** Host state read by operation dispatch. */
 export interface DispatchState {
+  /** Resolve invocation context without process-global or async-local routing. */
+  context: (options: ExecuteOptions, signal: AbortSignal) => OperationContext;
+
   /** Subscriptions visible to the current dispatch. */
   handlers: ReadonlyMap<OperationName, readonly Handler[]>;
 

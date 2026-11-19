@@ -1,3 +1,4 @@
+import type { OperationMap, ProviderMap } from '../index.js';
 import { relatedRemedia, lyricsRemedia } from '../remedia.js';
 import { serialize, deserialize, type SerializedEntityUnion } from '../utils/serde.js';
 import { parseEntity } from '../utils/parse-serialized-entity.js';
@@ -18,10 +19,8 @@ import type {
   OperationResult,
   PluginRegistration,
   ProviderReference,
-  OperationMap,
-  ProviderMap,
 } from './types.js';
-import type { LegacyPlayerContext } from '../legacy-player.js';
+import type { PluginPlayer, PluginQueue, OperationContext } from './types.js';
 
 export { PluginError } from './plugin-error.js';
 export type { ExecuteOptions, StreamResolutionOptions } from './execution-options.js';
@@ -95,14 +94,22 @@ export class PluginRegistry {
    * @param player Structural source context.
    * @param blocked Default disabled source IDs supplied by the owning Player.
    * @param hostId Owning deployment, absent in ordinary embedded execution.
+   * @param resolveQueue Queue resolver belonging to the embedding Player.
    */
   public constructor(
-    public readonly player: LegacyPlayerContext,
+    public readonly player: PluginPlayer,
 
     private readonly blocked: () => readonly string[] = () => [],
 
     private readonly hostId?: string,
+
+    private readonly resolveQueue: (guildId: string) => PluginQueue | null = () => null,
   ) {}
+
+  private operationContext = (options: ExecuteOptions, signal: AbortSignal): OperationContext => {
+    const guildId = this.player.isPartial() ? null : (options.guildId ?? null);
+    return { signal, guildId, queue: guildId === null ? null : this.resolveQueue(guildId) };
+  };
 
   private definitions = new Map<OperationName, DispatchPolicy>([
     ['serialization.beforeRestore', 'pipe'],
@@ -164,21 +171,18 @@ export class PluginRegistry {
 
   /** List active provider/deployment references in priority and registration order.
    * @param operation Capability to inspect.
+   * @param options Explicit guild and provider routing.
    * @returns Unique eligible provider/deployment references.
    */
-  public providers(operation: OperationName): ProviderReference[] {
+  public providers(operation: OperationName, options: ExecuteOptions = {}): ProviderReference[] {
     const seen = new Set<string>();
-    return selectHandlers(
-      operation,
-      {},
-      {},
-      {
-        handlers: this.handlers,
-        definitions: this.definitions,
-        blocked: () => this.blocked(),
-        resultOwners: this.resultOwners,
-      },
-    ).flatMap((handler) => {
+    return selectHandlers(operation, {}, options, {
+      context: this.operationContext,
+      handlers: this.handlers,
+      definitions: this.definitions,
+      blocked: () => this.blocked(),
+      resultOwners: this.resultOwners,
+    }).flatMap((handler) => {
       const pluginId = handler.entry.id;
       const hostId = handler.entry.registration.definition.remoteHost?.hostId;
       const key = `${hostId ?? ''}::${pluginId}`;
@@ -298,6 +302,7 @@ export class PluginRegistry {
     const handlers = (['search.query.match', 'search.query.resolve'] as const)
       .flatMap((operation) =>
         selectHandlers(operation, { protocol }, options, {
+          context: this.operationContext,
           handlers: this.handlers,
           definitions: this.definitions,
           blocked: () => this.blocked(),
@@ -573,6 +578,7 @@ export class PluginRegistry {
     input: OperationInput<K>,
     options: ExecuteOptions = {},
   ): OperationResult<K> {
+    options = this.player.isPartial() ? { ...options, guildId: null } : options;
     options.signal?.throwIfAborted();
     if (!this.synchronous.has(operation)) throw new Error(`Operation is not synchronous: ${operation}`);
     const policy = this.definitions.get(operation);
@@ -584,6 +590,7 @@ export class PluginRegistry {
     const errors: PluginError[] = [];
     try {
       for (const handler of selectHandlers(operation, input, options, {
+        context: this.operationContext,
         handlers: this.handlers,
         definitions: this.definitions,
         blocked: this.blocked,
@@ -594,7 +601,10 @@ export class PluginRegistry {
           : handler.entry.controller.signal;
         signal.throwIfAborted();
         try {
-          const result = handler.fn(policy === 'pipe' || policy === 'intercept' ? value : input, { signal });
+          const result = handler.fn(
+            policy === 'pipe' || policy === 'intercept' ? value : input,
+            this.operationContext(options, signal),
+          );
           if (result && typeof result === 'object' && 'then' in result) {
             const pending = Promise.resolve(result);
             handler.entry.pending.add(pending);
@@ -663,6 +673,7 @@ export class PluginRegistry {
     options: ExecuteOptions,
     handled?: HandledCallback,
   ): Promise<OperationResult<K>> {
+    options = this.player.isPartial() ? { ...options, guildId: null } : options;
     const track = input && typeof input === 'object' && 'track' in input ? input.track : undefined;
 
     if (operation === 'track.related' && track?.sourceReference?.nodeId) {
@@ -711,6 +722,7 @@ export class PluginRegistry {
       input,
       options,
       {
+        context: this.operationContext,
         handlers: this.handlers,
         definitions: this.definitions,
 
@@ -758,6 +770,7 @@ export class PluginRegistry {
         {},
         { ...options, pluginId },
         {
+          context: this.operationContext,
           handlers: this.handlers,
           definitions: this.definitions,
 
@@ -803,7 +816,11 @@ export class PluginRegistry {
     if (this.hasCapability('media.beforeResolve')) {
       const originalPluginId = track.sourceReference?.pluginId;
       const originalHostId = track.sourceReference?.hostId;
-      const prepared = await this.execute('media.beforeResolve', { track }, { signal: options.signal });
+      const prepared = await this.execute(
+        'media.beforeResolve',
+        { track },
+        { signal: options.signal, guildId: options.guildId },
+      );
       if (
         !prepared ||
         prepared.track.sourceReference?.pluginId !== originalPluginId ||

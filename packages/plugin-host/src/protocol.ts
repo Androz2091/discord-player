@@ -74,7 +74,7 @@ export interface PortableSourceQuery {
   /** Serializable public search hints; never includes request credentials or cancellation. */
   options?: Omit<
     SearchOptions,
-    'signal' | 'requestOptions' | 'requestedBy' | 'searchEngine' | 'hostId' | 'resolveCustomProtocols'
+    'signal' | 'requestOptions' | 'requestedBy' | 'searchEngine' | 'hostId' | 'resolveCustomProtocols' | 'guildId'
   > & { requestedBy?: string | null };
 }
 

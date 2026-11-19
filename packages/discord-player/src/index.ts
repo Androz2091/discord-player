@@ -35,7 +35,29 @@ export type { RemotePluginHostOptions } from '@discord-player/plugin-host';
 /** Native payload contracts appended to forwarded lifecycle events. */
 export type { DiscordSessionEvents, RemediaClientEvents } from '@remedia/client';
 
-export type { GatewayVoiceState } from './voice-state.js';
+export * from './voice-state.js';
+export * from './utils/async-queue.js';
+export * from './utils/safe-event-emitter.js';
+export {
+  SourcePluginRuntime,
+  createSourcePluginHost,
+  SOURCE_PLUGIN_ID,
+  cloneJSONValue,
+  deserializeSourceResult,
+  serializeSourceTrack,
+} from '@discord-player/plugin-host';
+export type {
+  SourcePluginRuntimeOptions,
+  SourcePluginHostOptions,
+  SourceRuntimeEvents,
+  PortableSourceTrack,
+  PortableSourceResult,
+  PortableSourceQuery,
+  PortableRelatedRequest,
+  MetadataRequest,
+  PortableLyricsRequest,
+  MediaAccessPolicy,
+} from '@discord-player/plugin-host';
 
 export { onBeforeCreateStream, onAfterCreateStream, onStreamExtracted } from './hooks.js';
 export type {

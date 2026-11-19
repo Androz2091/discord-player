@@ -180,6 +180,14 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Optional lyrics lookup through registered capability providers. */
   public readonly lyrics = new Lyrics(this);
 
+  /**
+   * Distinguish a full Player from standalone source execution in plugin setup.
+   * @returns Always `false`; narrows `ctx.player` to `DiscordPlayer` when negated.
+   */
+  public isPartial(): this is never {
+    return false;
+  }
+
   /** Create a Player configured with Remedia client options.
    * @param options Remedia node configurations and the Discord gateway send callback.
    */
@@ -189,7 +197,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   ) {
     super();
 
-    this.sources = new SourcePluginRuntime({ player: this });
+    this.sources = new SourcePluginRuntime({ player: this, resolveQueue: (guildId) => this.nodes.get(guildId) });
     this.plugins = this.sources.plugins;
     installLocalCapabilities(this.plugins);
     this.plugins.defineProvider('playback.backend');
@@ -692,7 +700,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
       };
 
       if (!this.plugins.hasCapability('media.descriptor')) return source;
-      const descriptor = await this.plugins.execute('media.descriptor', { source, guildId }, { signal });
+      const descriptor = await this.plugins.execute('media.descriptor', { source, guildId }, { signal, guildId });
       if (
         !descriptor ||
         !descriptor.source ||
@@ -746,7 +754,7 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
 
     const { nodeOptions, connectionOptions, customMetadata, guildId: _guildId, ...searchOptions } = options;
     const queue = await this.nodes.create<Metadata>(guildId, nodeOptions ?? {});
-    const searchResult = await this.search(resource, searchOptions);
+    const searchResult = await this.search(resource, { ...searchOptions, guildId });
 
     if (searchResult.isEmpty()) {
       return { queue, resource, searchResult, track: null, playerResult: null };

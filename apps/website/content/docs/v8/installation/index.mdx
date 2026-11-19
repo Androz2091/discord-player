@@ -3,7 +3,7 @@ title: Installation
 description: Install Discord Player and choose where audio runs.
 ---
 
-Discord Player v8 requires Node.js 22.18 or newer and ESM.
+Discord Player v8 requires Node.js 22.18 or newer. It ships as ES modules with no top-level await, so both `import { Player } from 'discord-player'` and `const { Player } = require('discord-player')` work.
 
 <Callout type="info" title="Starting a new bot?">
   `npm create music-bot@dev my-bot` creates a project with everything on this page already installed and configured. See

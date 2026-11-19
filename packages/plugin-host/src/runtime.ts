@@ -1,5 +1,5 @@
 import { searchRemedia } from './remedia.js';
-import type { SourceQuery } from './plugins/types.js';
+import type { PluginPlayer, PluginQueue, SourceQuery } from './plugins/types.js';
 import type { RemediaClient } from '@remedia/client';
 import { PluginRegistry } from './plugins/registry.js';
 import { PluginError } from './plugins/plugin-error.js';
@@ -17,7 +17,10 @@ export interface SourcePluginRuntimeOptions {
   hostId?: string;
 
   /** Actual Player context when embedded. */
-  player?: LegacyPlayerContext;
+  player?: PluginPlayer;
+
+  /** Resolve an invocation queue through the embedding Player; standalone runtimes omit this. */
+  resolveQueue?: (guildId: string) => PluginQueue | null;
 
   /** Disabled provider IDs. */
   blockExtractors?: readonly string[];
@@ -35,7 +38,7 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
   public readonly extractors: ExtractorExecutionContext;
 
   /** Actual Player or this runtime's source facade. */
-  public readonly player: LegacyPlayerContext;
+  public readonly player: PluginPlayer;
 
   /** Source compatibility options. */
   public readonly options: LegacyPlayerContext['options'];
@@ -47,8 +50,21 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
     super();
     this.player = options.player ?? this;
     this.options = options.player?.options ?? options;
-    this.plugins = new PluginRegistry(this.player, () => this.options.blockExtractors ?? [], options.hostId);
+    this.plugins = new PluginRegistry(
+      this.player,
+      () => this.options.blockExtractors ?? [],
+      options.hostId,
+      options.resolveQueue,
+    );
     this.extractors = new ExtractorExecutionContext(this.player);
+  }
+
+  /**
+   * Narrow a plugin runtime to standalone source execution.
+   * @returns Always `true`; standalone runtimes own no guild queues.
+   */
+  public isPartial(): this is SourcePluginRuntime {
+    return true;
   }
 
   /** Required audio access is unavailable in standalone execution. */
@@ -124,7 +140,9 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
         ? /^([a-z][a-z0-9+.-]*):(?:\/\/)?(.*)$/is.exec(query)
         : null;
     const protocol =
-      prefix && this.plugins.supportsProtocol(prefix[1]!, { pluginId: target, blocked }) ? prefix[1] : undefined;
+      prefix && this.plugins.supportsProtocol(prefix[1]!, { pluginId: target, blocked, guildId: options.guildId })
+        ? prefix[1]
+        : undefined;
     const providerHint = target ? undefined : engine;
     let input: SourceQuery = {
       query: protocol ? prefix![2]! : query,
@@ -138,12 +156,21 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
       },
     };
     if (this.plugins.hasCapability('search.beforeQuery')) {
-      const transformed = await this.plugins.execute('search.beforeQuery', input, { signal: options.signal });
+      const transformed = await this.plugins.execute('search.beforeQuery', input, {
+        signal: options.signal,
+        guildId: options.guildId,
+      });
       if (!transformed || typeof transformed.query !== 'string')
         throw new TypeError('search.beforeQuery requires a string query.');
       input = { ...input, ...transformed };
     }
-    const execution = { signal: options.signal, blocked, pluginId: target, hostId: options.hostId };
+    const execution = {
+      signal: options.signal,
+      guildId: options.guildId,
+      blocked,
+      pluginId: target,
+      hostId: options.hostId,
+    };
     const matches = target
       ? [{ pluginId: target, score: 0, hostId: options.hostId }]
       : protocol
@@ -193,7 +220,10 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
         if (options.requestedBy !== undefined) track.requestedBy = options.requestedBy;
       }
       const transformed = this.plugins.hasCapability('search.afterResults')
-        ? await this.plugins.execute('search.afterResults', result, { signal: options.signal })
+        ? await this.plugins.execute('search.afterResults', result, {
+            signal: options.signal,
+            guildId: options.guildId,
+          })
         : result;
       if (
         !transformed ||
@@ -227,7 +257,10 @@ export class SourcePluginRuntime extends SafeEventEmitter<SourceRuntimeEvents> i
       },
     );
     if (result.isEmpty() || !this.plugins.hasCapability('search.afterResults')) return result;
-    const transformed = await this.plugins.execute('search.afterResults', result, { signal: options.signal });
+    const transformed = await this.plugins.execute('search.afterResults', result, {
+      signal: options.signal,
+      guildId: options.guildId,
+    });
     if (
       !transformed ||
       !Array.isArray(transformed.tracks) ||

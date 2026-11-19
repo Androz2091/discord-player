@@ -1,4 +1,10 @@
-import type { DiscordPlayer, GuildQueue, Track } from '../src/index.js';
+import {
+  definePlugin,
+  type SourcePluginRuntime,
+  type DiscordPlayer,
+  type GuildQueue,
+  type Track,
+} from '../src/index.js';
 import type { DiscordSessionEvents } from '@remedia/client';
 
 /** Compile representative v7-style listeners and playback calls against the public v8 API. */
@@ -119,4 +125,29 @@ export async function groupedPlayOptions(player: DiscordPlayer, queue: GuildQueu
   void player.play('voice', track, { connectionOptions: { crossfade: { enabled: true } } });
   // @ts-expect-error playback cancellation has one top-level signal
   void queue.play(track, { connectionOptions: { signal } });
+}
+
+/** Plugins narrow the runtime and receive a nullable, fully typed owning queue. */
+export function pluginRuntimeContexts(): void {
+  definePlugin({
+    id: 'typed.context',
+    setup(ctx) {
+      if (ctx.player.isPartial()) {
+        const runtime: SourcePluginRuntime = ctx.player;
+        void runtime;
+        // @ts-expect-error standalone source execution does not own guild nodes
+        void ctx.player.nodes;
+      } else {
+        const player: DiscordPlayer = ctx.player;
+        void [player.nodes, player.events, player.context, player.play];
+      }
+      ctx.on('track.stream', (_input, { queue, guildId, signal }) => {
+        const current: GuildQueue | null = queue;
+        const guild: string | null = guildId;
+        if (current) void [current.currentTrack, current.history, current.guildId];
+        void [guild, signal.aborted];
+        return 'https://fixture.test/audio';
+      });
+    },
+  });
 }

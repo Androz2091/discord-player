@@ -110,7 +110,7 @@ export class GuildNodeManager {
 
     this.cache.set(id, queue);
     try {
-      this.player.plugins.executeSync('queue.created', { guildId: id });
+      this.player.plugins.executeSync('queue.created', { guildId: id }, { guildId: id });
     } catch (error) {
       this.player.emit('error', error instanceof Error ? error : new Error(String(error)));
     }
