@@ -224,9 +224,9 @@ export function intercept<K extends keyof LocalCapabilityInputs>(
 ): LocalCapabilityInputs[K] {
   registry.assertNotDispatching();
   if (!registry.hasCapability(operation)) return input;
-  const result = registry.executeSync(operation, Object.freeze(input) as OperationInput<K>) as
-    | CapabilityDecision<LocalCapabilityInputs[K]>
-    | undefined;
+  const result = registry.executeSync(operation, Object.freeze(input) as OperationInput<K>, {
+    guildId: 'guildId' in input ? input.guildId : null,
+  }) as CapabilityDecision<LocalCapabilityInputs[K]> | undefined;
   if (!result) return input;
   if (result.action === 'cancel') throw new CapabilityCancelledError(operation, result.reason);
   if (

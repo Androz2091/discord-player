@@ -38,6 +38,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "module-sync": "./dist/index.js",
       "import": "./dist/index.js"
     }
   },

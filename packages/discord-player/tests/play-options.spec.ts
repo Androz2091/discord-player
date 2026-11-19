@@ -47,6 +47,7 @@ it.each(['embedded', 'remote'] as const)(
     });
     const session = backend.asSession(result.queue.node.getSession());
     expect(search).toHaveBeenCalledExactlyOnceWith(resource, {
+      guildId: 'new-guild',
       requestedBy: 'requester',
       searchEngine: 'auto',
       signal,

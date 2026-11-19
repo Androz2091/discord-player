@@ -16,12 +16,16 @@ export class Lyrics {
    * @param options Optional caller cancellation combined with the Player lifetime.
    * @returns Normalized records; operational errors propagate.
    */
-  async search(input: Track | string, options: { signal?: AbortSignal } = {}): Promise<LyricsResult[]> {
+  async search(
+    input: Track | string,
+    options: { signal?: AbortSignal; guildId?: string } = {},
+  ): Promise<LyricsResult[]> {
     await this.player.ready();
     return searchLyrics(
       this.player.plugins,
       input,
       options.signal ? AbortSignal.any([this.player.signal, options.signal]) : this.player.signal,
+      options.guildId,
     );
   }
 }

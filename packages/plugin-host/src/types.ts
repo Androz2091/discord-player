@@ -8,6 +8,9 @@ export type MediaResource = string | Track | Track[] | Playlist | SearchResult;
 
 /** Source search and compatibility options. */
 export interface SearchOptions {
+  /** Local guild routing for source handlers; standalone hosts do not receive queue context. */
+  guildId?: string;
+
   /** Explicit standalone deployment ID; interpreted by DiscordPlayer, never a local provider ID. */
   hostId?: string;
 

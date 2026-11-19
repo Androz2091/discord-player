@@ -5,7 +5,7 @@ import { Legacy } from './mocks/legacy.js';
 
 const player = () => new DiscordPlayer({ nodes: [], send() {} });
 
-declare module '../src/plugins/types.js' {
+declare module '@discord-player/plugin-host' {
   interface OperationMap {
     'fixture.null': { input: number; output: null | false; policy: 'first' };
   }

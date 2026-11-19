@@ -19,7 +19,8 @@ registrations and capabilities; `hasCapability(name)` checks active subscribers.
 
 Returning `undefined` leaves the decision unchanged. Higher priorities run first;
 equal priorities preserve subscription order. Options and setup closures belong
-to each registration. Handler options accept `priority` and local `guildIds`.
+to each registration. Handler options accept `priority` and `guildIds`; lifecycle capabilities are routed for their queue's guild
+and receive it as `context.queue`. See [handler options](/docs/v8/reference/plugins#handler-options).
 Source execution also supports provider, deployment, protocol and block filters.
 
 Local lifecycle callbacks must be synchronous. TypeScript excludes Promise

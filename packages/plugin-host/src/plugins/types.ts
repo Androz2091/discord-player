@@ -1,13 +1,10 @@
-import type { SerializedEntityUnion } from '../utils/serde.js';
 import type { RemotePluginHostOptions } from '../remote.js';
-import type { LyricsRequest, LyricsResult } from '../lyrics.js';
 import type { Readable } from 'node:stream';
 import type { MediaSource } from '@remedia/client';
 import type { Track } from '../structures/track.js';
-import type { SearchResultData } from '../structures/search-result.js';
 import type { SearchOptions } from '../types.js';
 import type { JSONValue } from '../utils/serialization.js';
-import type { LegacyPlayerContext } from '../legacy-player.js';
+import type { OperationMap, SynchronousOperationMap, ProviderMap, PluginRuntimeMap, PluginQueueMap } from '../index.js';
 
 /** Serializable provider identity; never put credentials or live objects in this payload. */
 export type ProviderReference = {
@@ -58,7 +55,7 @@ export interface SourceQuery {
   providerHint?: string;
 
   /** Portable search hints and local cancellation. */
-  options?: Omit<SearchOptions, 'searchEngine' | 'hostId' | 'signal' | 'resolveCustomProtocols'>;
+  options?: Omit<SearchOptions, 'searchEngine' | 'hostId' | 'signal' | 'resolveCustomProtocols' | 'guildId'>;
 
   /** Explicit protocol prefix when present. */
   protocol?: string;
@@ -103,61 +100,6 @@ export interface SourceStreamTransform extends SourceTrackRequest {
   stream: Readable;
 }
 
-/** Extensible source operation contracts. Augmented operations also need host definitions. */
-export interface OperationMap {
-  /** Transform a validated persistence payload before restoring an entity. */
-  'serialization.beforeRestore': Operation<SerializedEntityUnion, SerializedEntityUnion, 'pipe'>;
-
-  /** Transform serialized application metadata; the result is validated again. */
-  'serialization.afterSerialize': Operation<SerializedEntityUnion, SerializedEntityUnion, 'pipe'>;
-
-  /** Transform source preparation while preserving portable provider identity. */
-  'media.beforeResolve': Operation<SourceTrackRequest, SourceTrackRequest, 'pipe'>;
-
-  /** Transform a portable search query before provider selection. */
-  'search.beforeQuery': Operation<SourceQuery, SourceQuery, 'pipe'>;
-
-  /** Transform metadata returned by search orchestration. */
-  'search.afterResults': Operation<SearchResultData, SearchResultData, 'pipe'>;
-
-  /** Transform encoded bytes across modern plugins, independent of source ownership. */
-  'media.transform': Operation<SourceStreamTransform, SourceStreamTransform, 'pipe'>;
-
-  /** Transform a resolved descriptor. Standalone execution has no guild context. */
-  'media.descriptor': Operation<
-    { readonly source: MediaSource; readonly guildId: string | null },
-    { readonly source: MediaSource; readonly guildId: string | null },
-    'pipe'
-  >;
-
-  /** Optional lyrics lookup, independent of all source operations. */
-  'lyrics.search': Operation<LyricsRequest, LyricsResult[] | null, 'collect'>;
-
-  /** Collect scored providers. */
-  'search.query.match': Operation<SourceQuery, SourceMatch | null, 'collect'>;
-
-  /** Resolve metadata with the selected provider. */
-  'search.query.resolve': Operation<SourceQuery, SearchResultData, 'first'>;
-
-  /** Resolve playable media. */
-  'track.stream': Operation<SourceTrackRequest, SourceStream, 'first'>;
-
-  /** Resolve related media using seed metadata and a portable history snapshot. */
-  'track.related': Operation<SourceRelatedRequest, SearchResultData, 'first'>;
-
-  /** Explicit fallback for sources that cannot stream their own metadata. */
-  'track.bridge': Operation<SourceBridgeRequest, SourceStream, 'first'>;
-
-  /** Local encoded stream transformation. */
-  'stream.transform': Operation<SourceStreamTransform, SourceStreamTransform, 'pipe'>;
-
-  /** Notification after a source is resolved. */
-  'track.stream.resolved': Operation<SourceTrackRequest, void, 'broadcast'>;
-}
-
-/** Declaration merged names restricted to synchronous callbacks. */
-export interface SynchronousOperationMap {}
-
 /** Names available to source plugins. */
 export type OperationName = keyof OperationMap;
 
@@ -174,10 +116,22 @@ export type OperationResult<K extends OperationName> = OperationMap[K]['policy']
     ? void
     : OperationOutput<K> | undefined;
 
+/** Registered runtime identities available to plugin setup. */
+export type PluginPlayer = PluginRuntimeMap[keyof PluginRuntimeMap];
+
+/** Embedding queue type, or never in standalone-only programs. */
+export type PluginQueue = PluginQueueMap[keyof PluginQueueMap];
+
 /** Per-invocation cancellation supplied to all handlers. */
 export interface OperationContext {
   /** Caller cancellation combined with registration removal. */
   signal: AbortSignal;
+
+  /** Explicit local guild routing, or null for unscoped/standalone calls. */
+  guildId: string | null;
+
+  /** Queue resolved through the owning runtime, or null when unavailable. */
+  queue: PluginQueue | null;
 }
 
 /** A handler may decline only by returning undefined.
@@ -205,9 +159,6 @@ export interface HandlerOptions {
   guildIds?: readonly string[];
 }
 
-/** Declaration-merged singleton services supplied only by modern plugins. */
-export interface ProviderMap {}
-
 /** Source setup context shared by embedded and standalone execution. */
 export interface PluginContext<Options> {
   /** Options belonging to this registration. */
@@ -217,7 +168,7 @@ export interface PluginContext<Options> {
   readonly signal: AbortSignal;
 
   /** Structural source context hosting this registration. */
-  readonly player: LegacyPlayerContext;
+  readonly player: PluginPlayer;
 
   /** Register an owned operation handler.
    * @param operation Operation name.

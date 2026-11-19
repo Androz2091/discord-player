@@ -120,17 +120,19 @@ export function parseLyrics(text: string): LyricsLine[] {
  * @param plugins Shared registry.
  * @param input Track or raw query.
  * @param signal Caller lifetime.
+ * @param guildId Explicit local guild routing, omitted for unscoped metadata.
  * @returns Results in provider priority order, preferring explicit and source affinity.
  */
 export async function searchLyrics(
   plugins: PluginRegistry,
   input: Track | string,
   signal?: AbortSignal,
+  guildId?: string,
 ): Promise<LyricsResult[]> {
   signal?.throwIfAborted();
   await plugins.ready();
 
-  const providers = plugins.providers('lyrics.search');
+  const providers = plugins.providers('lyrics.search', { guildId });
   const preferred = typeof input === 'string' ? [] : [input.lyricsReference, input.sourceReference];
   const ordered = [...providers];
   for (const reference of preferred.reverse()) {
@@ -148,7 +150,7 @@ export async function searchLyrics(
     const groups = await plugins.execute(
       'lyrics.search',
       { input },
-      { pluginId: provider.pluginId, hostId: provider.hostId ?? null, signal },
+      { pluginId: provider.pluginId, hostId: provider.hostId ?? null, signal, guildId },
     );
 
     for (const result of groups.flatMap((group) => group ?? [])) {

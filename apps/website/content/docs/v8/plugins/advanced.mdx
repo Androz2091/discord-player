@@ -29,6 +29,16 @@ ctx.on('track.audit', ({ sourceId }) => ({ accepted: sourceId.length > 0 }));
 const result = await player.plugins.execute('track.audit', { sourceId: 'abc' });
 ```
 
+Pass `guildId` to route an invocation for a guild. Handlers then receive that guild's queue, and `guildIds` handler options apply:
+
+```ts
+ctx.on('track.audit', (_, { queue }) => ({ accepted: queue !== null }), { guildIds: [guildId] });
+
+await player.plugins.execute('track.audit', { sourceId: 'abc' }, { guildId });
+```
+
+A `guildId` field in the input is ordinary data and does not route the call.
+
 Define the operation before any plugin registers a handler for it.
 
 ## Choose a policy

@@ -62,7 +62,7 @@ const player = new Player({ blockExtractors: ['example.direct-audio'], send });
 
 ## Cancellation and errors
 
-Every handler receives `{ signal }`, which aborts when the caller cancels or the plugin is removed. Check it during slow work:
+Every handler receives `{ signal, guildId, queue }`. `signal` aborts when the caller cancels or the plugin is removed. Check it during slow work:
 
 ```ts
 ctx.on('track.stream', async ({ track }, { signal }) => {
@@ -73,5 +73,25 @@ ctx.on('track.stream', async ({ track }, { signal }) => {
 ```
 
 A failing handler rejects with a `PluginError` that names the plugin and operation.
+
+## Guild context
+
+When an operation runs for a guild, `guildId` and `queue` identify it. Searches without a guild, standalone source hosts, and
+remote source hosts receive `guildId: null` and `queue: null`.
+
+```ts
+ctx.on(
+  'track.stream',
+  ({ track }, { queue }) => {
+    console.log(`Resolving ${track.title} for ${queue?.guildId ?? 'no guild'}`);
+
+    return { url: track.url };
+  },
+  { guildIds: ['123456789012345678'] },
+);
+```
+
+`guildIds` limits a handler to invocations routed for those guilds. It does not inspect the operation input, and handlers
+restricted to guilds are skipped when there is no guild. See [handler options](/docs/v8/reference/plugins#handler-options).
 
 <NextStep href="/docs/v8/plugins/advanced" label="Custom operations" />

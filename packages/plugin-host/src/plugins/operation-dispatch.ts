@@ -19,15 +19,11 @@ export function selectHandlers(
   options: ExecuteOptions,
   state: DispatchState,
 ) {
-  return (state.handlers.get(operation) ?? []).filter(
-    (handler) =>
+  return (state.handlers.get(operation) ?? []).filter((handler) => {
+    const guildId = state.context(options, handler.entry.controller.signal).guildId;
+    return (
       handler.entry.active &&
-      (!handler.guildIds ||
-        (typeof input === 'object' &&
-          input !== null &&
-          'guildId' in input &&
-          typeof input.guildId === 'string' &&
-          handler.guildIds.includes(input.guildId))) &&
+      (!handler.guildIds || (guildId !== null && handler.guildIds.includes(guildId))) &&
       (!options.pluginId || handler.entry.id === options.pluginId) &&
       (options.hostId === undefined ||
         (handler.entry.registration.definition.remoteHost?.hostId ?? null) === options.hostId) &&
@@ -35,8 +31,9 @@ export function selectHandlers(
       !state.blocked().includes(handler.entry.id) &&
       (!(input as { protocol?: string }).protocol ||
         !handler.protocols?.length ||
-        handler.protocols?.includes((input as { protocol: string }).protocol)),
-  );
+        handler.protocols?.includes((input as { protocol: string }).protocol))
+    );
+  });
 }
 
 /** Dispatch a typed operation against initialized host state.
@@ -79,7 +76,7 @@ export async function dispatchOperation<K extends OperationName>(
     const pending = Promise.resolve().then(() => {
       signal.throwIfAborted();
 
-      return handler.fn(policy === 'pipe' ? value : input, { signal });
+      return handler.fn(policy === 'pipe' ? value : input, state.context(options, signal));
     });
 
     handler.entry.pending.add(pending);
