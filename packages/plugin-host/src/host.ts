@@ -1,6 +1,6 @@
 import { normalizeLyrics } from './lyrics.js';
 import type { MediaSource as ClientMediaSource } from '@remedia/client';
-import { authorizeMediaURL, openMedia, type MediaAccessPolicy } from './media.js';
+import { authorizeMediaURL, openMedia, validateMediaHeaders, type MediaAccessPolicy } from './media.js';
 import type { PortableSourceResult } from './protocol.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
@@ -225,6 +225,10 @@ export class SourcePluginHost {
                   if (!('url' in media)) throw new Error('Expected a direct media URL');
 
                   await authorizeMediaURL(new URL(media.url), this.mediaPolicy, lifetime ?? signal);
+
+                  // Direct URL descriptors preserve headers for Remedia's decoder.
+                  // Reject malformed values here, before returning them to a remote node.
+                  validateMediaHeaders('headers' in media ? media.headers : undefined);
 
                   if (
                     'expiresAtMs' in media &&
