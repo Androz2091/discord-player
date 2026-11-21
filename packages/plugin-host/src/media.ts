@@ -204,7 +204,7 @@ async function remote(
  * @returns Owned stream; close, abort, errors and deadlines release upstream resources.
  */
 export async function openMedia(
-  source: MediaSource,
+  source: MediaSource | HttpMediaSource,
   policy: MediaAccessPolicy,
   signal?: AbortSignal,
 ): Promise<MediaSource> {
