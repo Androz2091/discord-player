@@ -30,6 +30,36 @@ export interface MediaAccessPolicy {
   timeoutMs?: number;
 }
 
+/** Existing client versions may not declare headers yet; the next Remedia release does. */
+type HttpMediaSource = Extract<MediaSource, { url: string }> & {
+  headers?: Record<string, string>;
+};
+
+const HTTP_HEADER_NAME = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
+const BLOCKED_MEDIA_HEADERS = new Set(['host', 'content-length', 'transfer-encoding', 'connection', 'upgrade']);
+const REDIRECT_CREDENTIAL_HEADERS = new Set(['authorization', 'proxy-authorization', 'cookie']);
+
+/** Validate extractor-provided request headers before making any media request. */
+export function validateMediaHeaders(input: unknown): Record<string, string> | undefined {
+  if (input === undefined) return undefined;
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new TypeError('Invalid media headers');
+
+  const headers: Record<string, string> = {};
+  let size = 0;
+
+  for (const [name, value] of Object.entries(input)) {
+    if (!HTTP_HEADER_NAME.test(name) || BLOCKED_MEDIA_HEADERS.has(name.toLowerCase()))
+      throw new TypeError('Invalid media header name');
+    if (typeof value !== 'string' || /[\\r\\n\\0]/.test(value))
+      throw new TypeError('Invalid media header value');
+    size += name.length + value.length + 4;
+    if (size > 16 * 1024) throw new RangeError('Media headers exceed 16 KiB');
+    headers[name] = value;
+  }
+
+  return headers;
+}
+
 const active = new WeakMap<MediaAccessPolicy, number>();
 const denied = new BlockList();
 const deniedV6 = new BlockList();
@@ -106,7 +136,13 @@ export async function authorizeMediaURL(url: URL, policy: MediaAccessPolicy, sig
   return selected;
 }
 
-async function remote(url: URL, policy: MediaAccessPolicy, signal: AbortSignal, redirects = 0): Promise<Readable> {
+async function remote(
+  url: URL,
+  policy: MediaAccessPolicy,
+  signal: AbortSignal,
+  headers: Record<string, string> = {},
+  redirects = 0,
+): Promise<Readable> {
   const selected = await authorizeMediaURL(url, policy, signal);
   const response = await new Promise<IncomingMessage>((resolve, reject) => {
     const req = (url.protocol === 'https:' ? httpsRequest : httpRequest)(
@@ -120,7 +156,7 @@ async function remote(url: URL, policy: MediaAccessPolicy, signal: AbortSignal, 
           else callback(null, selected.address, selected.family);
         },
 
-        headers: { 'accept-encoding': 'identity' },
+        headers: { 'accept-encoding': 'identity', ...headers },
       },
       resolve,
     );
@@ -141,7 +177,14 @@ async function remote(url: URL, policy: MediaAccessPolicy, signal: AbortSignal, 
 
     if (url.protocol === 'https:' && target.protocol !== 'https:') throw new Error('Media TLS downgrade denied');
 
-    return remote(target, policy, signal, redirects + 1);
+    const nextHeaders =
+      target.origin === url.origin
+        ? headers
+        : Object.fromEntries(
+            Object.entries(headers).filter(([name]) => !REDIRECT_CREDENTIAL_HEADERS.has(name.toLowerCase())),
+          );
+
+    return remote(target, policy, signal, nextHeaders, redirects + 1);
   }
 
   if (response.statusCode !== 200) {
@@ -230,7 +273,10 @@ export async function openMedia(
 
         throw error;
       }
-    } else if ('url' in source) input = await remote(new URL(source.url), policy, lifetime);
+    } else if ('url' in source) {
+      const headers = validateMediaHeaders((source as HttpMediaSource).headers);
+      input = await remote(new URL(source.url), policy, lifetime, headers);
+    }
     else throw new Error('A source host cannot materialize another operation source');
 
     lifetime.throwIfAborted();
