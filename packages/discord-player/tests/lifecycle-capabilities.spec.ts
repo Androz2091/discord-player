@@ -280,13 +280,13 @@ it('validates audio interception before contacting Remedia', async () => {
     })(),
   );
   await expect(queue.node.setVolume(20)).rejects.toThrow(/Volume/);
-  expect(queue.options.volume).toBeUndefined();
+  expect(queue.options?.playback?.volume).toBeUndefined();
 });
 
 it('selects a real queued occurrence for playback and crossfade without changing occurrence identity', async () => {
   const { setup, TestTrack } = await import('./mocks/queue.js');
   const { settle } = await import('./mocks/async.js');
-  const { player: p, queue, session } = await setup({ queueOptions: { crossfade: { enabled: true } } });
+  const { player: p, queue, session } = await setup({ queueOptions: { playback: { crossfade: { enabled: true } } } });
   players.push(p);
   const phases: boolean[] = [];
   await p.plugins.register(
@@ -397,4 +397,34 @@ it('observes strongly typed public event argument ordering', async () => {
   const track = new Track();
   queue.addTrack(track);
   expect(observed).toEqual([['guild', track]]);
+});
+
+it('passes detached grouped creation settings through plugin interception', async () => {
+  const p = player();
+  await p.plugins.register(
+    definePlugin({
+      id: 'example.queue.defaults',
+      setup(ctx) {
+        ctx.on('queue.beforeCreate', (input) => {
+          expect(input.configuration.history).toEqual({ maxHistorySize: 3 });
+          expect(input.configuration.lifecycle).toEqual({ leaveOnEnd: true });
+          return {
+            action: 'replace',
+            value: {
+              ...input,
+              configuration: {
+                ...input.configuration,
+                playback: { ...input.configuration.playback, volume: 40 },
+              },
+            },
+          };
+        });
+      },
+    })(),
+  );
+  const defaults = { playback: { volume: 80 }, history: { maxHistorySize: 3 }, lifecycle: { leaveOnEnd: true } };
+  const queue = await p.queues.create('grouped', defaults);
+  expect(queue.node.volume).toBe(40);
+  expect(queue.history.tracks.maxSize).toBe(3);
+  expect(defaults.playback.volume).toBe(80);
 });

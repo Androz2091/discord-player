@@ -96,7 +96,7 @@ it('uses the native timeline with one timer, independent subscriptions, pause, s
 });
 
 it('clears old lyrics on crossfade promotion, stop, replay and queue destruction', async () => {
-  const { queue, session } = await fixture({ queueOptions: { crossfade: { enabled: true } } });
+  const { queue, session } = await fixture({ queueOptions: { playback: { crossfade: { enabled: true } } } });
   const track = new TestTrack('one');
   await queue.play([track, new TestTrack('two')]);
   queue.syncedLyrics.load('[00:00.00]old');

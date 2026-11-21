@@ -98,7 +98,7 @@ export class BaseExtractor<Options extends object = object> {
 
   /** Resolve related metadata.
    * @param track Seed track.
-   * @param history Queue-history snapshot. Tracks support array operations and toArray(); playback controls are unavailable.
+   * @param history Queue-history snapshot. Tracks support toArray(), some(), and find(); mutation and playback controls are unavailable.
    */
   public async getRelatedTracks(track: Track, history?: ExtractorRelatedHistory): Promise<ExtractorInfo> {
     void track;

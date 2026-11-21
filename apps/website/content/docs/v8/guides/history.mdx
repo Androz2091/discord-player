@@ -41,8 +41,10 @@ await queue.history.previous(false);
 
 ```ts
 const queue = await player.createQueue(guildId, {
-  maxHistorySize: 20, // Keep the last 20 tracks
-  disableHistory: true, // Or record nothing
+  history: {
+    maxHistorySize: 20,
+    disableHistory: true,
+  },
 });
 ```
 

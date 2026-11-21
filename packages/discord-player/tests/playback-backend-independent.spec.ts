@@ -343,7 +343,7 @@ it('stages, cancels, promotes and reconciles independent crossfade generations d
   const { player, backend } = fixture(new IndependentBackend({ sources: ['url'], crossfade: true, filters: false }));
   await player.initialize('bot-user');
   await source(player);
-  const queue = await player.nodes.create('guild', { crossfade: { enabled: true } });
+  const queue = await player.nodes.create('guild', { playback: { crossfade: { enabled: true } } });
   await queue.connect({ channelId: 'voice' });
   const first = track('first');
   const second = track('second');

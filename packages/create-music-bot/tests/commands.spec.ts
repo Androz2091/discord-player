@@ -186,7 +186,10 @@ describe.each(TEMPLATES)('generated %s commands', (template) => {
       expect(interaction.deferReply).toHaveBeenCalledOnce();
       expect(player.search).toHaveBeenCalledWith('https://media.test/a.mp3', { requestedBy: 'user-1' });
       expect(player.play).toHaveBeenCalledWith(channel, result, {
-        nodeOptions: { metadata: { channel: interaction.channel }, leaveOnEnd: true, leaveOnEndCooldown: 30_000 },
+        nodeOptions: {
+          metadata: { channel: interaction.channel },
+          lifecycle: { leaveOnEnd: true, leaveOnEndCooldown: 30_000 },
+        },
       });
       expect(interaction.editReply).toHaveBeenCalledWith({
         content: 'Added **@everyone \\*loud\\*** (2 waiting in the queue).',

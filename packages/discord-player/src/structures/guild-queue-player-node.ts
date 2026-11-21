@@ -139,7 +139,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     public readonly queue: GuildQueue<Metadata>,
   ) {
     this.player = queue.manager.player;
-    this.#volume = queue.options.volume ?? 100;
+    this.#volume = queue.options.playback?.volume ?? 100;
     this.filters = new GuildQueuePlayerAudioFilters(this);
   }
 
@@ -306,10 +306,10 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
     const previousVolume = this.#volume;
     const previousOptions = {
-      volume: this.queue.options.volume,
-      selfDeaf: this.queue.options.selfDeaf,
-      selfMute: this.queue.options.selfMute,
-      filterGraph: this.queue.options.filterGraph,
+      volume: this.queue.options.playback?.volume,
+      selfDeaf: this.queue.options.connectionOptions?.selfDeaf,
+      selfMute: this.queue.options.connectionOptions?.selfMute,
+      filterGraph: this.queue.options.playback?.filterGraph,
     };
 
     try {
@@ -330,7 +330,14 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       } finally {
         if (!this.session) {
           this.#volume = previousVolume;
-          Object.assign(this.queue.options, previousOptions);
+          Object.assign((this.queue.options.playback ??= {}), {
+            volume: previousOptions.volume,
+            filterGraph: previousOptions.filterGraph,
+          });
+          Object.assign((this.queue.options.connectionOptions ??= {}), {
+            selfDeaf: previousOptions.selfDeaf,
+            selfMute: previousOptions.selfMute,
+          });
         }
       }
       throw error;
@@ -585,12 +592,12 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   ): Promise<GuildQueuePlayerNodeSessionCreateOptions> {
     const backend = this.player.playbackBackend;
     if (backend) {
-      if (options.nodeId || this.queue.options.selectNode)
+      if (options.nodeId || this.queue.options.connectionOptions?.selectNode)
         throw new Error('Custom playback providers do not support Remedia node selection.');
       this.assertHosts(null, options.pluginHosts ?? []);
       if (options.filterGraph !== undefined && !backend.capabilities.filters)
         throw new Error('Playback backend does not support audio filters.');
-      const requested = this.queue.options.crossfade ?? this.player.options.crossfade ?? options.crossfade;
+      const requested = this.queue.options.playback?.crossfade ?? this.player.options.crossfade ?? options.crossfade;
       if (requested && !backend.capabilities.crossfade) throw new Error('Playback backend does not support crossfade.');
       return {
         ...options,
@@ -606,8 +613,8 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     }
     const client = this.player.getRemedia();
     const hosts = options.pluginHosts ?? [];
-    const requested = this.queue.options.crossfade ?? this.player.options.crossfade ?? options.crossfade;
-    const selector = this.queue.options.selectNode;
+    const requested = this.queue.options.playback?.crossfade ?? this.player.options.crossfade ?? options.crossfade;
+    const selector = this.queue.options.connectionOptions?.selectNode;
     let nodeId = options.nodeId ?? client.getAssignment(this.queue.guildId)?.nodeId;
 
     // Without a queue selector, Remedia performs its own capacity-aware placement.
@@ -775,13 +782,13 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
         if (!active()) return;
 
         this.#volume = event.volume * 100;
-        this.queue.options.volume = this.#volume;
+        (this.queue.options.playback ??= {}).volume = this.#volume;
         this.queue.emit('volumeChange', event.previousVolume * 100, this.#volume, event);
       });
       on('filterChanged', (event) => {
         if (!active()) return;
 
-        this.queue.options.filterGraph = event.graph;
+        (this.queue.options.playback ??= {}).filterGraph = event.graph;
         this.queue.emit('audioFiltersUpdate', event.previousGraph, event.graph, event);
       });
       on('voiceStateChanged', (event) => {
@@ -863,10 +870,10 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
 
   private applySessionConfiguration(configuration: SessionConfiguration): void {
     this.#volume = configuration.volume;
-    this.queue.options.volume = configuration.volume;
-    this.queue.options.selfDeaf = configuration.selfDeaf;
-    this.queue.options.selfMute = configuration.selfMute;
-    this.queue.options.filterGraph = configuration.filterGraph;
+    (this.queue.options.playback ??= {}).volume = configuration.volume;
+    (this.queue.options.connectionOptions ??= {}).selfDeaf = configuration.selfDeaf;
+    (this.queue.options.connectionOptions ??= {}).selfMute = configuration.selfMute;
+    (this.queue.options.playback ??= {}).filterGraph = configuration.filterGraph;
   }
 
   /** Play a Track through the managed queue, preserving v7 scheduling.
@@ -948,7 +955,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     if (session) await session.setVolume(volumePercentage / 100);
 
     this.#volume = volumePercentage;
-    this.queue.options.volume = volumePercentage;
+    (this.queue.options.playback ??= {}).volume = volumePercentage;
 
     if (!session && previous !== volumePercentage) this.queue.emit('volumeChange', previous, volumePercentage);
 

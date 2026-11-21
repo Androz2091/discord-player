@@ -36,7 +36,9 @@ class MockExtractor extends BaseExtractor<{ createStream?: () => Promise<Extract
   }
 
   override async getRelatedTracks(track: InstanceType<typeof Track>) {
-    return this.handle(track.url, { type: track.queryType });
+    const result = await this.handle(track.url, { type: track.queryType });
+    result.tracks[0]!.url = `${track.url}/related`;
+    return result;
   }
 
   override async stream(): Promise<ExtractorStreamable | undefined> {

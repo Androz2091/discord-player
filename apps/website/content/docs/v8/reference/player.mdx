@@ -20,7 +20,7 @@ await player.initialize(botUserId);
 | Option                                                             | Type                                                | Description                                                                           |
 | ------------------------------------------------------------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | `send`                                                             | `(guildId, payload) => void \| Promise<void>`       | Required. Sends voice requests through the shard that owns the guild                  |
-| `nodes`                                                            | `RemediaNodeConfig[]`                               | Audio nodes. Defaults to one embedded node named `local`                              |
+| `nodes`, `queues`                                                  | `RemediaNodeConfig[]`                               | Audio nodes. Defaults to one embedded node named `local`                              |
 | `plugins`                                                          | `PluginRegistration[]`                              | Source plugins registered with the Player                                             |
 | `crossfade`                                                        | `CrossfadeOptions`                                  | Default [crossfade](/docs/v8/guides/crossfade) for new queues. Off by default         |
 | `resolveVoiceChannelUsers`                                         | `(guildId, channelId) => Promise<string[] \| null>` | Member IDs for [emptiness policies](/docs/v8/guides/voice#know-who-is-in-the-channel) |
@@ -50,19 +50,19 @@ The Remedia client options `botUserId` and `selectNode` are not options of the P
 
 ## Properties
 
-| Property        | Description                                                  |
-| --------------- | ------------------------------------------------------------ |
-| `nodes`         | The guild queue manager (`GuildNodeManager`)                 |
-| `nodeSnapshots` | Status of the Remedia nodes, or `null` before initialization |
-| `remedia`       | The Remedia client, or `null` before initialization          |
-| `plugins`       | The plugin registry                                          |
-| `extractors`    | The v7 extractor registration API                            |
-| `events`        | Guild queue events. See [events](/docs/v8/reference/events)  |
-| `context`       | [Player context](/docs/v8/guides/context)                    |
-| `lyrics`        | [Lyrics lookup](/docs/v8/guides/lyrics)                      |
-| `statistics`    | Counts of queues, upcoming tracks, and active queues         |
-| `signal`        | `AbortSignal` that aborts as soon as `destroy()` starts      |
-| `id`, `version` | Instance ID and package version                              |
+| Property          | Description                                                  |
+| ----------------- | ------------------------------------------------------------ |
+| `nodes`, `queues` | The guild queue manager (`GuildNodeManager`)                 |
+| `nodeSnapshots`   | Status of the Remedia nodes, or `null` before initialization |
+| `remedia`         | The Remedia client, or `null` before initialization          |
+| `plugins`         | The plugin registry                                          |
+| `extractors`      | The v7 extractor registration API                            |
+| `events`          | Guild queue events. See [events](/docs/v8/reference/events)  |
+| `context`         | [Player context](/docs/v8/guides/context)                    |
+| `lyrics`          | [Lyrics lookup](/docs/v8/guides/lyrics)                      |
+| `statistics`      | Counts of queues, upcoming tracks, and active queues         |
+| `signal`          | `AbortSignal` that aborts as soon as `destroy()` starts      |
+| `id`, `version`   | Instance ID and package version                              |
 
 ## play()
 

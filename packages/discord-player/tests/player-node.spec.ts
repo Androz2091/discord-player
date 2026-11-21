@@ -40,7 +40,7 @@ it('creates, replaces, reconnects and destroys sessions while retaining configur
   expect(created.disposeCalls).toBe(1);
   expect(backend.activeSessions.size).toBe(0);
   expect(node.getSession(false)).toBeNull();
-  expect(node.filters.graph).toBe(queue.options.filterGraph);
+  expect(node.filters.graph).toBe(queue.options?.playback?.filterGraph);
   expect(() => node.getSession()).toThrow('initialized');
   expect(node.isIdle()).toBe(true);
   expect(node.isPlaying()).toBe(false);

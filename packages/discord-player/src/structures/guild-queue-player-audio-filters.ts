@@ -37,7 +37,7 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
   public get graph(): string | null {
     return this.node.session
       ? (this.node.session.filters?.graph ?? null)
-      : (this.node.queue.options.filterGraph ?? null);
+      : (this.node.queue.options.playback?.filterGraph ?? null);
   }
 
   /** Enabled canonical preset names, in application order. Returns a detached array. */
@@ -185,7 +185,7 @@ export class GuildQueuePlayerAudioFilters<Metadata = unknown> {
       }
     }
 
-    this.node.queue.options.filterGraph = graph;
+    (this.node.queue.options.playback ??= {}).filterGraph = graph;
     this.state =
       graph === ([next.raw, ...next.enabled.map((name) => AudioFilterPresets[name])].filter(Boolean).join(',') || null)
         ? next

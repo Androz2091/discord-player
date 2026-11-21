@@ -12,10 +12,10 @@ import { setup } from './mocks/queue.js';
 import { deferred, settle } from './mocks/async.js';
 
 // Opt in with REMEDIA_BINARY=/path/to/remedia; no Discord credentials or public media needed.
-it.skipIf(!process.env.REMEDIA_BINARY).each(['off', 'early', 'late', 'cancel'] as const)(
+it.skipIf(!process.env.REMEDIA_BINARY).each(['off', 'early', 'late', 'cancel', 'fallback'] as const)(
   'AutoPlay over real Remedia RPC and HTTP host after cache eviction (transition %s)',
   async (transition) => {
-    const crossfade = transition !== 'off';
+    const crossfade = transition !== 'off' && transition !== 'fallback';
     const entered = deferred<void>();
     const release = deferred<void>();
     vi.mocked(RemediaClient.create).mockRestore();
@@ -46,6 +46,8 @@ it.skipIf(!process.env.REMEDIA_BINARY).each(['off', 'early', 'late', 'cancel'] a
       override async getRelatedTracks(track: Track) {
         entered.resolve();
         await release.promise;
+
+        if (transition === 'fallback') return this.createResponse();
 
         return this.createResponse(null, [
           new Track({ title: `next:${track.title}`, url: `https://fixture.test/next/${track.title}` }),
@@ -86,6 +88,19 @@ it.skipIf(!process.env.REMEDIA_BINARY).each(['off', 'early', 'late', 'cancel'] a
       publicUrl: `http://127.0.0.1:${address.port}`,
     });
     const provider = await host.extractors.register(Provider);
+    class Fallback extends Provider {
+      static override identifier = 'example.source.beta';
+      override priority = 10;
+      override async validate() {
+        return false;
+      }
+      override async getRelatedTracks(track: Track) {
+        return this.createResponse(null, [
+          new Track({ title: `next:${track.title}`, url: 'https://fixture.test/fallback' }),
+        ]);
+      }
+    }
+    if (transition === 'fallback') await host.extractors.register(Fallback);
     const portProbe = createServer();
     portProbe.listen(0, '127.0.0.1');
     await once(portProbe, 'listening');
@@ -154,8 +169,10 @@ it.skipIf(!process.env.REMEDIA_BINARY).each(['off', 'early', 'late', 'cancel'] a
         nodeType: 'remote',
         crossfadeAvailable: true,
         queueOptions: {
-          repeatMode: QueueRepeatMode.AUTOPLAY,
-          crossfade: crossfade ? { enabled: true, curve: 'adaptive' } : false,
+          playback: {
+            repeatMode: QueueRepeatMode.AUTOPLAY,
+            crossfade: crossfade ? { enabled: true, curve: 'adaptive' } : false,
+          },
         },
       });
       const { player, queue, session, backend } = fixture;
@@ -200,7 +217,7 @@ it.skipIf(!process.env.REMEDIA_BINARY).each(['off', 'early', 'late', 'cancel'] a
       expect(queue.currentTrack?.sourceReference).toMatchObject({
         nodeId: 'fake-node',
         hostId: 'rpc-host',
-        pluginId: Provider.identifier,
+        pluginId: transition === 'fallback' ? Fallback.identifier : Provider.identifier,
       });
       expect(related).toHaveBeenCalledOnce();
       expect(metadata).not.toHaveBeenCalled();

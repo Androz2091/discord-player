@@ -11,21 +11,19 @@ description: Queue options, methods, state, and the playback node.
 const queue = await player.createQueue(guildId, { maxSize: 100, metadata: { textChannelId } });
 ```
 
-| Option                                                              | Description                                                                |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `metadata`                                                          | Your data, stored on the queue                                             |
-| `maxSize`, `maxHistorySize`                                         | Limits for upcoming and past tracks. Zero or less means unlimited          |
-| `disableHistory`                                                    | Do not record history                                                      |
-| `repeatMode`                                                        | Initial [repeat mode](/docs/v8/guides/queues#repeat-modes)                 |
-| `volume`                                                            | Initial volume percentage, 0 to 200                                        |
-| `filterGraph`                                                       | Raw FFmpeg graph for new sessions                                          |
-| `selfDeaf`, `selfMute`                                              | Initial voice flags                                                        |
-| `crossfade`                                                         | [Crossfade](/docs/v8/guides/crossfade) for this queue. `false` disables it |
-| `selectNode`                                                        | Chooses the Remedia node for the first session                             |
-| `leaveOnEmpty`, `leaveOnEnd`, `leaveOnStop`                         | [Leave policies](/docs/v8/guides/voice#leave-and-pause-automatically)      |
-| `leaveOnEmptyCooldown`, `leaveOnEndCooldown`, `leaveOnStopCooldown` | Delay in milliseconds                                                      |
-| `pauseOnEmpty`                                                      | Pause when the channel is confirmed empty                                  |
-| `onBeforeCreateStream`, `onStreamExtracted`, `onAfterCreateStream`  | [Resource hooks](/docs/v8/guides/hooks)                                    |
+| Option                                                                                        | Description                                                                                          |
+| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `metadata`                                                                                    | Your data, stored on the queue                                                                       |
+| `maxSize`                                                                                     | Upcoming-track capacity; zero or less means unlimited                                                |
+| `history.maxHistorySize`, `history.disableHistory`                                            | History retention limit and collection policy                                                        |
+| `playback.repeatMode`                                                                         | Initial [repeat mode](/docs/v8/guides/queues#repeat-modes)                                           |
+| `playback.volume`, `playback.filterGraph`                                                     | Initial volume percentage (0–200) and filtergraph                                                    |
+| `playback.crossfade`                                                                          | [Crossfade](/docs/v8/guides/crossfade) policy; `false` disables it                                   |
+| `playback.onBeforeCreateStream`, `playback.onStreamExtracted`, `playback.onAfterCreateStream` | [Resource hooks](/docs/v8/guides/hooks)                                                              |
+| `connectionOptions.selfDeaf`, `connectionOptions.selfMute`                                    | Default voice flags                                                                                  |
+| `connectionOptions.selectNode`                                                                | Initial Remedia node selection                                                                       |
+| `autoplay.autoplayTimeoutMs`                                                                  | Total related discovery and selection deadline, default 30000 ms                                     |
+| `lifecycle`                                                                                   | [Leave and pause policies](/docs/v8/guides/voice#leave-and-pause-automatically), including cooldowns |
 
 Options apply when the queue is created.
 
