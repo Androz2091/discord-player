@@ -98,7 +98,10 @@ export function createCommands(player, config) {
       }
 
       const { track, queue } = await player.play(channel, result, {
-        nodeOptions: { metadata: { channel: interaction.channel }, leaveOnEnd: true, leaveOnEndCooldown: 30_000 },
+        nodeOptions: {
+          metadata: { channel: interaction.channel },
+          lifecycle: { leaveOnEnd: true, leaveOnEndCooldown: 30_000 },
+        },
       });
 
       if (!track) return interaction.editReply('I could not read audio from that link.');

@@ -96,10 +96,12 @@ export class GuildNodeManager {
       const decision = intercept(this.player.plugins, 'queue.beforeCreate', {
         guildId: id,
         configuration: Object.freeze({
-          volume: options.volume,
+          playback: Object.freeze({ ...options.playback }),
+          history: Object.freeze({ ...options.history }),
           maxSize: options.maxSize,
-          maxHistorySize: options.maxHistorySize,
-          repeatMode: options.repeatMode,
+          connectionOptions: Object.freeze({ ...options.connectionOptions }),
+          autoplay: Object.freeze({ ...options.autoplay }),
+          lifecycle: Object.freeze({ ...options.lifecycle }),
         }),
       });
       if (!decision.configuration || typeof decision.configuration !== 'object')

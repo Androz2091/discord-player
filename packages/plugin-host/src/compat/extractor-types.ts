@@ -9,10 +9,34 @@ import type { SearchQueryType } from './query-types.js';
 
 /** Metadata snapshot supplied to legacy related-track discovery; no queue controls are exposed. */
 export interface ExtractorRelatedHistory {
-  /** Retained tracks with array queries and the familiar collection snapshot method. */
-  tracks: readonly Track[] & {
-    /** Copy retained tracks in oldest-to-newest order. */
+  /** Retained tracks, ordered oldest to newest. No mutation or playback controls are supplied. */
+  readonly tracks: {
+    /** Copy retained tracks. */
     toArray(): Track[];
+    /** Number of retained tracks. */
+    readonly size: number;
+    /** Read the most recent retained track. */
+    peek(): Track | undefined;
+    /** Whether no tracks are retained. */
+    isEmpty(): boolean;
+    /** Read an array-style index. @param index Track index, including negative indices. */
+    at(index: number): Track | undefined;
+    /** Filter retained tracks. @param predicate Track predicate. */
+    filter(predicate: (track: Track) => boolean): Track[];
+    /** Map retained tracks. @param callback Mapping callback. */
+    map<T>(callback: (track: Track) => T): T[];
+    /** Visit retained tracks. @param callback Visitor callback. */
+    forEach(callback: (track: Track) => void): void;
+    /** Test all retained tracks. @param predicate Track predicate. */
+    every(predicate: (track: Track) => boolean): boolean;
+    /** Locate a retained track. @param track Track to locate. */
+    indexOf(track: Track): number;
+    /** Iterate oldest to newest. */
+    [Symbol.iterator](): Iterator<Track>;
+    /** Test retained tracks. @param predicate Track predicate. */
+    some(predicate: (track: Track) => boolean): boolean;
+    /** Find a retained track. @param predicate Track predicate. */
+    find(predicate: (track: Track) => boolean): Track | undefined;
   };
 }
 

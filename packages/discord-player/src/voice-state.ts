@@ -217,8 +217,8 @@ export class VoiceStateTracker {
   private shouldPause(): boolean {
     return (
       this.blocked ||
-      (this.queue.options.leaveOnEmpty !== true &&
-        this.queue.options.pauseOnEmpty === true &&
+      (this.queue.options.lifecycle?.leaveOnEmpty !== true &&
+        this.queue.options.lifecycle?.pauseOnEmpty === true &&
         this.occupants?.size === 0)
     );
   }
@@ -292,7 +292,11 @@ export class VoiceStateTracker {
   private schedule(reason: 'empty' | 'end' | 'stop'): void {
     const options = this.queue.options;
     const enabled =
-      reason === 'empty' ? options.leaveOnEmpty : reason === 'end' ? options.leaveOnEnd : options.leaveOnStop;
+      reason === 'empty'
+        ? options.lifecycle?.leaveOnEmpty
+        : reason === 'end'
+          ? options.lifecycle?.leaveOnEnd
+          : options.lifecycle?.leaveOnStop;
     if (
       !enabled ||
       this.queue.destroyed ||
@@ -303,10 +307,10 @@ export class VoiceStateTracker {
     if (this.leaves.has(reason)) return;
     const delay =
       reason === 'empty'
-        ? options.leaveOnEmptyCooldown
+        ? options.lifecycle?.leaveOnEmptyCooldown
         : reason === 'end'
-          ? options.leaveOnEndCooldown
-          : options.leaveOnStopCooldown;
+          ? options.lifecycle?.leaveOnEndCooldown
+          : options.lifecycle?.leaveOnStopCooldown;
     const session = this.session;
     const channel = this.channel;
     const timer = setTimeout(
@@ -331,7 +335,11 @@ export class VoiceStateTracker {
             }
             const current = this.queue.options;
             if (
-              !(reason === 'empty' ? current.leaveOnEmpty : reason === 'end' ? current.leaveOnEnd : current.leaveOnStop)
+              !(reason === 'empty'
+                ? current?.lifecycle?.leaveOnEmpty
+                : reason === 'end'
+                  ? current?.lifecycle?.leaveOnEnd
+                  : current?.lifecycle?.leaveOnStop)
             )
               return;
             if (

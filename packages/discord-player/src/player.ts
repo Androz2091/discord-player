@@ -168,6 +168,11 @@ export class DiscordPlayer extends SafeEventEmitter<DiscordPlayerEvents> {
   /** Guild queue manager. */
   public readonly nodes = new GuildNodeManager(this);
 
+  /** Guild queue manager, shared with `nodes`, matching the v7 queue accessor. */
+  public get queues(): GuildNodeManager {
+    return this.nodes;
+  }
+
   /** Guild queue lifecycle events; separate from Player-level events. */
   public readonly events = new SafeEventEmitter<GuildQueueEventsMap>();
 

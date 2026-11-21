@@ -58,8 +58,8 @@ export interface LocalCapabilityInputs {
   'queue.beforeAdd': QueueAdmission;
   /** Before allocating and caching a queue. */
   'queue.beforeCreate': QueueCapabilityContext & {
-    /** Detached initial defaults; metadata retains the application's generic type. */
-    readonly configuration: Readonly<Pick<GuildQueueOptions, 'volume' | 'maxSize' | 'maxHistorySize' | 'repeatMode'>>;
+    /** Detached grouped initialization defaults. */
+    readonly configuration: Readonly<Omit<GuildQueueOptions, 'metadata'>>;
   };
   /** Before changing an audio filtergraph. */
   'audio.beforeFilters': QueueCapabilityContext & { readonly graph: string | null };

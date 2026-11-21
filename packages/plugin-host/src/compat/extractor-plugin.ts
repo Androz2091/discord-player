@@ -1,3 +1,4 @@
+import type { Track } from '../structures/track.js';
 import { Readable } from 'node:stream';
 import { definePlugin, type PluginFactory } from '../plugins/types.js';
 import { BaseExtractor } from './base-extractor.js';
@@ -141,7 +142,21 @@ export function createExtractorPlugin(
           'track.related',
           async ({ track, history }) => {
             const tracks = [...(history?.tracks ?? [track])];
-            const snapshot = Object.assign(tracks, { toArray: () => [...tracks] });
+            const snapshot = Object.freeze({
+              toArray: () => [...tracks],
+              size: tracks.length,
+              peek: () => tracks.at(-1),
+              isEmpty: () => tracks.length === 0,
+              at: (index: number) => tracks.at(index),
+              filter: (predicate: (item: Track) => boolean) => tracks.filter(predicate),
+              map: <T>(callback: (item: Track) => T) => tracks.map(callback),
+              forEach: (callback: (item: Track) => void) => tracks.forEach(callback),
+              every: (predicate: (item: Track) => boolean) => tracks.every(predicate),
+              indexOf: (item: Track) => tracks.indexOf(item),
+              [Symbol.iterator]: () => tracks[Symbol.iterator](),
+              some: (predicate: (item: Track) => boolean) => tracks.some(predicate),
+              find: (predicate: (item: Track) => boolean) => tracks.find(predicate),
+            });
 
             return stamp(await instance.getRelatedTracks(track, { tracks: snapshot }));
           },

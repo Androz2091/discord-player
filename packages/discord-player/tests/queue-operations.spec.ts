@@ -126,11 +126,11 @@ it('enforces history limits, disabled retention, navigation errors and failure r
   queue.history.clear();
   await expect(queue.history.previous()).rejects.toBeInstanceOf(NoResultError);
   await expect(queue.history.next()).rejects.toBeInstanceOf(NoResultError);
-  queue.options.disableHistory = true;
+  (queue.options.history ??= {}).disableHistory = true;
 
   expect(queue.history.push(tracks[0]!)).toBe(false);
 
-  queue.options.disableHistory = false;
+  (queue.options.history ??= {}).disableHistory = false;
   queue.addTrack(tracks[0]!);
   await queue.history.next();
 

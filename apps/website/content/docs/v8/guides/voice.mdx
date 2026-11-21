@@ -81,13 +81,15 @@ See [voice recovery](/docs/v8/remedia/voice-recovery) for timeouts and for diagn
 
 ```ts
 const queue = await player.createQueue(guildId, {
-  leaveOnEnd: true,
-  leaveOnEndCooldown: 60_000,
-  leaveOnStop: true,
-  leaveOnStopCooldown: 10_000,
-  leaveOnEmpty: true,
-  leaveOnEmptyCooldown: 30_000,
-  pauseOnEmpty: true,
+  lifecycle: {
+    leaveOnEnd: true,
+    leaveOnEndCooldown: 60_000,
+    leaveOnStop: true,
+    leaveOnStopCooldown: 10_000,
+    leaveOnEmpty: true,
+    leaveOnEmptyCooldown: 30_000,
+    pauseOnEmpty: true,
+  },
 });
 ```
 

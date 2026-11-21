@@ -15,8 +15,7 @@ async function fixture(crossfade: boolean, prepare = false, nodeType: 'embedded'
     nodeType,
     crossfadeAvailable: true,
     queueOptions: {
-      repeatMode: QueueRepeatMode.AUTOPLAY,
-      crossfade: crossfade ? { enabled: true } : false,
+      playback: { repeatMode: QueueRepeatMode.AUTOPLAY, crossfade: crossfade ? { enabled: true } : false },
     },
   });
   players.push(result.player);
@@ -302,7 +301,7 @@ describe('early crossfade AutoPlay discovery', () => {
     expect(discover).toHaveBeenCalledOnce();
   });
 
-  it.each(['skip', 'stop', 'seek', 'delete', 'enqueue', 'repeat'] as const)(
+  it.each(['stop', 'seek', 'delete', 'enqueue', 'repeat'] as const)(
     'discards pending early discovery on %s',
     async (action) => {
       const { queue, session, related, discover, next } = await fixture(true, true);
@@ -398,7 +397,7 @@ it('reports an early discovery failure once and ends only after natural completi
 
 it.each([false, true])('bounds a willAutoPlay listener that never calls done (crossfade %s)', async (crossfade) => {
   const { player, queue, session, related, next } = await fixture(crossfade);
-  queue.options.autoplayTimeoutMs = 25;
+  (queue.options.autoplay ??= {}).autoplayTimeoutMs = 25;
   const error = vi.fn();
   const empty = vi.fn();
   const selected = deferred<void>();
@@ -430,7 +429,7 @@ it.each([false, true])('bounds a willAutoPlay listener that never calls done (cr
 
 it('times out early discovery once, ignores late results and can play again', async () => {
   const { player, queue, session, related, next, discover } = await fixture(true);
-  queue.options.autoplayTimeoutMs = 25;
+  (queue.options.autoplay ??= {}).autoplayTimeoutMs = 25;
   const error = vi.fn();
   player.events.on('error', error);
   const failed = new Promise<void>((resolve) => player.events.once('error', () => resolve()));
@@ -510,7 +509,9 @@ it.each([false, true])('continues across three AutoPlay transitions (crossfade %
 
 it.each([false, true])('passes seeded history to legacy related discovery (crossfade %s)', async (crossfade) => {
   const result = await setup({
-    queueOptions: { repeatMode: QueueRepeatMode.AUTOPLAY, crossfade: crossfade ? { enabled: true } : false },
+    queueOptions: {
+      playback: { repeatMode: QueueRepeatMode.AUTOPLAY, crossfade: crossfade ? { enabled: true } : false },
+    },
   });
   players.push(result.player);
   const { player, queue, session } = result;
@@ -608,4 +609,42 @@ it('preserves queue.selectRelated selection while staging a speculative result',
   await settle();
   expect(queue.currentTrack).toBe(next);
   expect(session.playCalls).toBe(1);
+});
+
+it.each(['embedded', 'remote'] as const)(
+  'manual skip discovers AutoPlay on %s without a natural finish',
+  async (nodeType) => {
+    const { player, queue, related, discover, next, first } = await fixture(false, false, nodeType);
+    const finish = vi.fn();
+    const skip = vi.fn();
+    player.events.on('playerFinish', finish);
+    player.events.on('playerSkip', skip);
+    const pending = queue.skip();
+    await settle();
+    expect(discover).toHaveBeenCalledOnce();
+    related.resolve({ tracks: [next], playlist: null });
+    await pending;
+    expect(queue.currentTrack).toBe(next);
+    expect(skip.mock.calls[0]?.slice(0, 2)).toEqual([queue, first]);
+    expect(finish).not.toHaveBeenCalled();
+  },
+);
+
+it('skip uses a queued successor without related discovery', async () => {
+  const { queue, discover, next } = await fixture(false);
+  queue.addTrack(next);
+  await queue.skip();
+  expect(queue.currentTrack).toBe(next);
+  expect(discover).not.toHaveBeenCalled();
+});
+
+it('stop cancels AutoPlay initiated by skip', async () => {
+  const { queue, related, discover, next } = await fixture(false);
+  const pending = queue.skip();
+  await settle();
+  expect(discover).toHaveBeenCalledOnce();
+  await queue.stop();
+  related.resolve({ tracks: [next], playlist: null });
+  await pending;
+  expect(queue.currentTrack).toBeNull();
 });

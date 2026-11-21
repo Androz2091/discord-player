@@ -42,7 +42,7 @@ it('preserves v7 queue/node access and real queue mutation methods without paral
 it('autoplay awaits related metadata, continues through managed playback and does not prematurely leave', async () => {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
   const { player, queue, session } = await setup({
-    queueOptions: { repeatMode: QueueRepeatMode.AUTOPLAY, leaveOnEnd: true },
+    queueOptions: { playback: { repeatMode: QueueRepeatMode.AUTOPLAY }, lifecycle: { leaveOnEnd: true } },
   });
   players.push(player);
   const related = deferred<{ tracks: TestTrack[]; playlist: null }>();
@@ -68,7 +68,9 @@ it('autoplay awaits related metadata, continues through managed playback and doe
 });
 
 it('cancels stale autoplay when a user enqueues another Track', async () => {
-  const { player, queue, session } = await setup({ queueOptions: { repeatMode: QueueRepeatMode.AUTOPLAY } });
+  const { player, queue, session } = await setup({
+    queueOptions: { playback: { repeatMode: QueueRepeatMode.AUTOPLAY } },
+  });
   players.push(player);
   const related = deferred<{ tracks: TestTrack[]; playlist: null }>();
   await player.plugins.register(
@@ -101,7 +103,9 @@ it('cancels stale autoplay when a user enqueues another Track', async () => {
 });
 
 it('preserves asynchronous v7 willAutoPlay selection and invalidates late callbacks after stop', async () => {
-  const { player, queue, session } = await setup({ queueOptions: { repeatMode: QueueRepeatMode.AUTOPLAY } });
+  const { player, queue, session } = await setup({
+    queueOptions: { playback: { repeatMode: QueueRepeatMode.AUTOPLAY } },
+  });
   players.push(player);
   const next = new TestTrack('candidate');
   await player.plugins.unregister('fixture');

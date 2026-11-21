@@ -45,9 +45,13 @@ await player.play(channel, resource, {
   searchEngine: 'auto',
   nodeOptions: {
     metadata: { textChannel },
-    leaveOnEmpty: true,
-    leaveOnEmptyCooldown: 60_000,
-    volume: 80,
+    lifecycle: {
+      leaveOnEmpty: true,
+      leaveOnEmptyCooldown: 60_000,
+    },
+    playback: {
+      volume: 80,
+    },
   },
   connectionOptions: {
     selfDeaf: true,
@@ -96,3 +100,17 @@ See the [event reference](/docs/v8/reference/events) and the [event mapping](/do
 v8 does not bring back the stream dispatcher, audio resource internals, raw codec format overrides, or custom filter registration. Use [source plugins](/docs/v8/plugins) and [filters](/docs/v8/guides/filters) instead.
 
 <NextStep href="/docs/v8/migration/extractors" label="Migrate extractors" />
+
+## Grouped queue defaults
+
+`player.queues.create()`, `player.createQueue()`, and `player.play({ nodeOptions })` accept the same `GuildQueueOptions`:
+
+| Group               | Settings                                                                     |
+| ------------------- | ---------------------------------------------------------------------------- |
+| `connectionOptions` | `selfDeaf`, `selfMute`, `selectNode`                                         |
+| `playback`          | `volume`, `filterGraph`, `repeatMode`, `crossfade`, stream hooks             |
+| `history`           | `maxHistorySize`, `disableHistory`                                           |
+| `autoplay`          | `autoplayTimeoutMs`                                                          |
+| `lifecycle`         | `leaveOnEmpty`, `leaveOnEnd`, `leaveOnStop`, their cooldowns, `pauseOnEmpty` |
+
+`metadata` and `maxSize` remain at the queue-options root. Move obsolete flat v8 queue settings into these groups. For example, use `nodeOptions: { playback: { volume: 80 }, lifecycle: { leaveOnEnd: true } }`. Per-call `connectionOptions` and `queue.connect()` retain their existing session settings.

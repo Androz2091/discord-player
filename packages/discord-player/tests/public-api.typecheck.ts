@@ -80,7 +80,7 @@ export async function groupedPlayOptions(player: DiscordPlayer, queue: GuildQueu
   await player.play<{ textChannel: string }, { request: number }>({ guildId: 'guild', channelId: 'voice' }, track, {
     requestedBy: { id: 'user' },
     searchEngine: 'auto',
-    nodeOptions: { metadata: { textChannel: 'text' }, volume: 80, leaveOnEmpty: true },
+    nodeOptions: { metadata: { textChannel: 'text' }, playback: { volume: 80 }, lifecycle: { leaveOnEmpty: true } },
     connectionOptions: {
       selfDeaf: true,
       selfMute: false,

@@ -59,8 +59,16 @@ export async function dispatchOperation<K extends OperationName>(
   }
 
   const handlers = selectHandlers(operation, input, options, state);
+
+  if (operation === 'track.related') {
+    const seed = (input as OperationInput<'track.related'>).track;
+    const origin = seed.sourceReference?.pluginId;
+    handlers.sort((a, b) => Number(b.entry.id === origin) - Number(a.entry.id === origin));
+  }
+
   const results: unknown[] = [];
   let value: unknown = input;
+  let emptyRelated: unknown;
 
   for (const handler of handlers) {
     if (!handler.entry.active) {
@@ -112,7 +120,19 @@ export async function dispatchOperation<K extends OperationName>(
       handler.entry.pending.delete(pending);
     }
 
-    if (result === undefined) {
+    if (operation === 'track.related' && result != null) {
+      const seed = (input as OperationInput<'track.related'>).track;
+      const related = result as NonNullable<OperationResult<'track.related'>>;
+      const tracks = related.tracks.filter((track) => track.id !== seed.id && (!seed.url || track.url !== seed.url));
+      result = { ...related, tracks };
+
+      if (!tracks.length) {
+        emptyRelated = result;
+        continue;
+      }
+    }
+
+    if (result === undefined || (operation === 'track.related' && result === null)) {
       continue;
     }
 
@@ -190,5 +210,5 @@ export async function dispatchOperation<K extends OperationName>(
     );
   }
 
-  return (policy === 'collect' ? results : policy === 'pipe' ? value : undefined) as OperationResult<K>;
+  return (policy === 'collect' ? results : policy === 'pipe' ? value : emptyRelated) as OperationResult<K>;
 }

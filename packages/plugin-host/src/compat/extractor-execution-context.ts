@@ -34,8 +34,8 @@ export class ExtractorExecutionContext {
   /** Look up a legacy registration.
    * @param id Extractor identifier.
    */
-  public get(id: string): BaseExtractor<any> | undefined {
-    return this.instances.get(id);
+  public get<T extends BaseExtractor = BaseExtractor>(id: string): T | undefined {
+    return this.instances.get(id) as T | undefined;
   }
 
   /** Test legacy registration membership.

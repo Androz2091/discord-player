@@ -183,7 +183,7 @@ it('validates queue policies and disconnected playback before inserting resource
 
   expect(queue.size).toBe(0);
 
-  await expect(player.createQueue('invalid', { volume: -1 })).rejects.toThrow(RangeError);
+  await expect(player.createQueue('invalid', { playback: { volume: -1 } })).rejects.toThrow(RangeError);
   await player.destroy();
 });
 

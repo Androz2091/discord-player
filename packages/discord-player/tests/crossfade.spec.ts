@@ -5,7 +5,7 @@ import { setup, TestTrack } from './mocks/queue.js';
 import { deferred, settle } from './mocks/async.js';
 
 describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %s', (curve) => {
-  const enabled = { crossfade: { enabled: true as const, curve } };
+  const enabled = { playback: { crossfade: { enabled: true as const, curve } } };
 
   async function prepare() {
     const fixture = await setup({ queueOptions: enabled });
@@ -37,7 +37,7 @@ describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %
   });
 
   it('leaves omitted settings to the embedded node defaults', async () => {
-    const { session } = await setup({ queueOptions: { crossfade: { enabled: true } } });
+    const { session } = await setup({ queueOptions: { playback: { crossfade: { enabled: true } } } });
 
     expect(session.crossfade).toEqual({ enabled: true });
     expect(session.snapshot.crossfade).toEqual({
@@ -49,11 +49,11 @@ describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %
   });
 
   it('uses global settings and allows a queue to disable them', async () => {
-    const { session } = await setup({ playerOptions: enabled });
+    const { session } = await setup({ playerOptions: enabled.playback });
 
     expect(session.crossfade).toMatchObject({ enabled: true });
 
-    const override = await setup({ playerOptions: enabled, queueOptions: { crossfade: false } });
+    const override = await setup({ playerOptions: enabled.playback, queueOptions: { playback: { crossfade: false } } });
 
     expect(override.session.crossfade).toBe(false);
   });
@@ -225,7 +225,9 @@ describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %
   it.each([QueueRepeatMode.OFF, QueueRepeatMode.TRACK, QueueRepeatMode.QUEUE, QueueRepeatMode.AUTOPLAY])(
     'respects repeat mode %s',
     async (mode) => {
-      const { queue, session } = await setup({ queueOptions: { ...enabled, repeatMode: mode } });
+      const { queue, session } = await setup({
+        queueOptions: { ...enabled, playback: { ...enabled.playback, repeatMode: mode } },
+      });
       const a = new TestTrack('a'),
         b = new TestTrack('b');
 
@@ -243,7 +245,9 @@ describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %
   );
 
   it('does not fabricate an autoplay source at an empty boundary', async () => {
-    const { queue, session } = await setup({ queueOptions: { ...enabled, repeatMode: QueueRepeatMode.AUTOPLAY } });
+    const { queue, session } = await setup({
+      queueOptions: { ...enabled, playback: { ...enabled.playback, repeatMode: QueueRepeatMode.AUTOPLAY } },
+    });
 
     await queue.play(new TestTrack('a'));
     session.requestPreparation();
@@ -490,7 +494,7 @@ describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %
   it('does not change the native worker policy when options change on an existing session', async () => {
     const { queue, session } = await setup();
 
-    queue.options.crossfade = { enabled: true };
+    (queue.options.playback ??= {}).crossfade = { enabled: true };
     await queue.connect({ channelId: session.channelId });
     await queue.play([new TestTrack('a'), new TestTrack('b')]);
     session.requestPreparation();

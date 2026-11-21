@@ -31,7 +31,10 @@ async function fixture(custom: boolean) {
     player.remedia = remedia.asClient();
     player.getClientId = () => 'bot-user';
   }
-  const queue = await player.nodes.create('guild', { volume: 60, selfDeaf: true, selfMute: false, filterGraph: null });
+  const queue = await player.nodes.create('guild', {
+    playback: { volume: 60, filterGraph: null },
+    connectionOptions: { selfDeaf: true, selfMute: false },
+  });
   const sessions = custom ? independent.sessions : remedia.sessions;
   return { player, queue, sessions, independent, remedia };
 }
@@ -58,7 +61,10 @@ for (const custom of [false, true]) {
       .catch((value: unknown) => value);
     expect(error).toBeInstanceOf(AggregateError);
     expect((error as AggregateError).errors).toEqual([joinError, disposeError]);
-    expect(queue.options).toMatchObject({ volume: 60, selfDeaf: true, selfMute: false, filterGraph: null });
+    expect(queue.options).toMatchObject({
+      playback: { volume: 60, filterGraph: null },
+      connectionOptions: { selfDeaf: true, selfMute: false },
+    });
     expect(queue.node.volume).toBe(60);
     expect(queue.node.session).toBeNull();
     expect(sessions[0]?.listenerCount('playbackCompleted')).toBe(0);
@@ -76,7 +82,10 @@ for (const custom of [false, true]) {
     await expect(queue.connect({ channelId: 'moved', selfDeaf: false, selfMute: true, volume: 20 })).rejects.toBe(
       failure,
     );
-    expect(queue.options).toMatchObject({ selfDeaf: false, selfMute: true, volume: 60, filterGraph: null });
+    expect(queue.options).toMatchObject({
+      playback: { volume: 60, filterGraph: null },
+      connectionOptions: { selfDeaf: false, selfMute: true },
+    });
     expect(session.channelId).toBe('voice');
     expect(queue.node.session).toBe(session);
     expect(queue.node.volume).toBe(session.volume * 100);
@@ -96,7 +105,10 @@ for (const custom of [false, true]) {
     await expect(
       queue.connect({ channelId: 'moved', volume: 20, selfDeaf: false, filterGraph: 'volume=0.2' }),
     ).rejects.toThrow(/move failed/);
-    expect(queue.options).toMatchObject({ volume: 20, selfDeaf: false, filterGraph: 'volume=0.2' });
+    expect(queue.options).toMatchObject({
+      playback: { volume: 20, filterGraph: 'volume=0.2' },
+      connectionOptions: { selfDeaf: false },
+    });
     expect(queue.node.session?.channelId).toBe('moved');
     expect(queue.node.session?.connectionState).toBe('disconnected');
     expect(connection).not.toHaveBeenCalled();

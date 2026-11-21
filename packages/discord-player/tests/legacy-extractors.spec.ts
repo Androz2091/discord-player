@@ -1,6 +1,13 @@
 import { Readable } from 'node:stream';
 import { it, expect } from 'vitest';
-import { BaseExtractor, DiscordPlayer, Track, definePlugin, type NextFunction } from '../src/index.js';
+import {
+  BaseExtractor,
+  DiscordPlayer,
+  Track,
+  definePlugin,
+  type GuildQueueHistory,
+  type NextFunction,
+} from '../src/index.js';
 import { Legacy } from './mocks/legacy.js';
 
 const player = () => new DiscordPlayer({ nodes: [], send() {} });
@@ -106,3 +113,70 @@ it('routes legacy bridging, related tracks and post-stream processing through th
 
   await p.destroy();
 });
+
+it('registers a v7 history signature and exposes only snapshot reads', async () => {
+  const p = player();
+  const seed = new Track({ title: 'seed', url: 'https://example.test/seed' });
+  class Alpha extends BaseExtractor {
+    static override identifier = 'example.source.alpha';
+
+    override async getRelatedTracks(track: Track, history: GuildQueueHistory) {
+      expect(history.tracks.toArray()).toEqual([seed]);
+      expect(history.tracks.some((item) => item === seed)).toBe(true);
+      expect(history.tracks.find((item) => item === seed)).toBe(seed);
+      expect(history.tracks.map((item) => item.title)).toEqual(['seed']);
+      expect(history.tracks.filter((item) => item === seed)).toEqual([seed]);
+      expect(history.tracks.peek()).toBe(seed);
+      expect(history.tracks.size).toBe(1);
+      expect([...history.tracks]).toEqual([seed]);
+      history.tracks.toArray().pop();
+      expect(history.tracks.toArray()).toEqual([seed]);
+      expect(history).not.toHaveProperty('queue');
+      expect(history).not.toHaveProperty('next');
+      expect(history.tracks).not.toHaveProperty('push');
+      return this.createResponse(null, [new Track({ title: 'next' })]);
+    }
+  }
+  const instance = await p.extractors.register(Alpha);
+  const lookup: Alpha | undefined = p.extractors.get<Alpha>(Alpha.identifier);
+  expect(lookup).toBe(instance);
+  expect(p.extractors.get<Alpha>('missing')).toBeUndefined();
+  await p.plugins.execute('track.related', { track: seed, history: { tracks: [seed] } });
+  await p.destroy();
+});
+
+it.each(['empty', 'seed', 'usable'] as const)(
+  'tries origin before higher priority fallback for %s results',
+  async (outcome) => {
+    const p = player();
+    const calls: string[] = [];
+    const seed = new Track({
+      title: 'seed',
+      url: 'https://example.test/seed',
+      sourceReference: { pluginId: 'example.source.alpha', data: null },
+    });
+    const next = new Track({ title: 'next', url: 'https://example.test/next' });
+    class Alpha extends BaseExtractor {
+      static override identifier = 'example.source.alpha';
+      override async getRelatedTracks() {
+        calls.push(this.identifier);
+        return this.createResponse(null, outcome === 'empty' ? [] : outcome === 'seed' ? [seed] : [next]);
+      }
+    }
+    class Beta extends BaseExtractor {
+      static override identifier = 'example.source.beta';
+      override priority = 10;
+      override async getRelatedTracks() {
+        calls.push(this.identifier);
+        return this.createResponse(null, [next]);
+      }
+    }
+    await p.extractors.register(Beta);
+    await p.extractors.register(Alpha);
+    const result = await p.plugins.execute('track.related', { track: seed });
+    expect(calls).toEqual(outcome === 'usable' ? [Alpha.identifier] : [Alpha.identifier, Beta.identifier]);
+    expect(result?.tracks).toEqual([next]);
+    expect(next.sourceReference?.pluginId).toBe(outcome === 'usable' ? Alpha.identifier : Beta.identifier);
+    await p.destroy();
+  },
+);

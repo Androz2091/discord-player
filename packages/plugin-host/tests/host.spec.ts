@@ -767,3 +767,59 @@ it.each(['source.related', 'metadata.execute'])(
     expect(tracks[0]?.sourceState).toBeUndefined();
   },
 );
+
+it.each(['source.related', 'metadata.execute'] as const)(
+  'falls back from empty origin in priority order through %s',
+  async (operation) => {
+    const h = host();
+    const calls: string[] = [];
+    class Alpha extends BaseExtractor {
+      static override identifier = 'example.source.alpha';
+      override async getRelatedTracks(track: Track) {
+        calls.push(this.identifier);
+        return this.createResponse(null, [track]);
+      }
+    }
+    class Beta extends BaseExtractor {
+      static override identifier = 'example.source.beta';
+      override priority = 10;
+      override async getRelatedTracks() {
+        calls.push(this.identifier);
+        return this.createResponse(null, [new Track({ title: 'next', url: 'https://example.test/next' })]);
+      }
+    }
+    await h.extractors.register(Beta);
+    await h.extractors.register(Alpha);
+    const seed = new Track({
+      title: 'seed',
+      url: 'https://example.test/seed',
+      sourceReference: {
+        pluginId: Alpha.identifier,
+        hostId: 'test-host',
+        data: null,
+      },
+    });
+    const input = { track: seed.serialize() };
+    const result = await http(
+      h,
+      operation,
+      operation === 'source.related'
+        ? input
+        : {
+            providerId: Alpha.identifier,
+            operation: 'track.related',
+            input,
+          },
+    );
+    if (operation === 'source.related') {
+      expect(calls).toEqual([Alpha.identifier, Beta.identifier]);
+      expect(result.result.tracks[0].data.sourceReference).toMatchObject({
+        pluginId: Beta.identifier,
+        hostId: 'test-host',
+      });
+    } else {
+      expect(calls).toEqual([Alpha.identifier]);
+      expect(result.result.tracks).toEqual([]);
+    }
+  },
+);

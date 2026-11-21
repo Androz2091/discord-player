@@ -131,7 +131,7 @@ it('discards and closes a hook resource returned after cancellation', async () =
 });
 
 it('prepares crossfade hooks once during staging and reuses the prepared native resource on promotion', async () => {
-  const { queue, session } = await fixture({ queueOptions: { crossfade: { enabled: true } } });
+  const { queue, session } = await fixture({ queueOptions: { playback: { crossfade: { enabled: true } } } });
   const hook = vi.fn(async (track: { url: string }) => ({ url: track.url }));
   queue.onBeforeCreateStream = hook;
   await queue.play([new TestTrack('one'), new TestTrack('two')]);

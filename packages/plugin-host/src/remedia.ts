@@ -135,6 +135,7 @@ export async function relatedRemedia(
       operation,
       input: {
         track: serializeSourceTrack(track),
+        blocked,
         ...(history ? { history: { tracks: history.tracks.map(serializeSourceTrack) } } : {}),
       },
       signal,
