@@ -41,7 +41,7 @@ export class GuildQueueHistory<Metadata = unknown> {
 
   /** Whether history collection is disabled for this queue. */
   public get disabled(): boolean {
-    return this.queue.options.disableHistory ?? false;
+    return this.queue.options.history?.disableHistory ?? false;
   }
 
   /** Number of retained previous tracks. */

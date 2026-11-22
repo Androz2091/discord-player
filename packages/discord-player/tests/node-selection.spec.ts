@@ -49,11 +49,11 @@ describe('Remedia node placement', () => {
   });
 
   it('leaves placement to Remedia for crossfade when every eligible node supports it', async () => {
-    const fixture = await setup({ queueOptions: { crossfade: { enabled: true } } });
+    const fixture = await setup({ queueOptions: { playback: { crossfade: { enabled: true } } } });
 
     addNode(fixture, 'second');
 
-    const queue = await pending(fixture, { crossfade: { enabled: true } });
+    const queue = await pending(fixture, { playback: { crossfade: { enabled: true } } });
 
     await queue.connect({ channelId: 'voice-two' });
 
@@ -64,7 +64,11 @@ describe('Remedia node placement', () => {
   });
 
   it('plays without crossfade when automatic placement may choose an unsupported node', async () => {
-    const fixture = await setup({ nodeType: 'remote', crossfadeAvailable: true, queueOptions: { crossfade: false } });
+    const fixture = await setup({
+      nodeType: 'remote',
+      crossfadeAvailable: true,
+      queueOptions: { playback: { crossfade: false } },
+    });
     const second = addNode(fixture, 'second');
 
     second.capabilities.crossfade.available = false;
@@ -73,7 +77,7 @@ describe('Remedia node placement', () => {
 
     fixture.player.on('debug', debug);
 
-    const queue = await pending(fixture, { crossfade: { enabled: true } });
+    const queue = await pending(fixture, { playback: { crossfade: { enabled: true } } });
 
     await queue.connect({ channelId: 'voice-two' });
 
@@ -94,7 +98,7 @@ describe('Remedia node placement', () => {
 
     degraded.statistics = { transportHealth: 'degraded' } as NodeSnapshot['statistics'];
 
-    const queue = await pending(fixture, { selectNode });
+    const queue = await pending(fixture, { connectionOptions: { selectNode } });
 
     await queue.connect({ channelId: 'voice-two' });
 
@@ -111,7 +115,7 @@ describe('Remedia node placement', () => {
     addNode(fixture, 'second');
 
     const selectNode = vi.fn(() => 'fake-node');
-    const queue = await pending(fixture, { selectNode });
+    const queue = await pending(fixture, { connectionOptions: { selectNode } });
 
     await queue.node.createSession({ channelId: 'voice-two', nodeId: 'second' });
 
@@ -131,14 +135,21 @@ describe('Remedia node placement', () => {
   });
 
   it('applies a selector before ordinary playback and keeps crossfade on the chosen node', async () => {
-    const fixture = await setup({ nodeType: 'remote', crossfadeAvailable: true, queueOptions: { crossfade: false } });
+    const fixture = await setup({
+      nodeType: 'remote',
+      crossfadeAvailable: true,
+      queueOptions: { playback: { crossfade: false } },
+    });
     const second = addNode(fixture, 'second');
 
     second.capabilities.crossfade.available = false;
 
     const supported = vi.fn(() => 'fake-node');
     const unsupported = vi.fn(() => 'second');
-    const first = await pending(fixture, { selectNode: supported, crossfade: { enabled: true } });
+    const first = await pending(fixture, {
+      connectionOptions: { selectNode: supported },
+      playback: { crossfade: { enabled: true } },
+    });
 
     await first.node.createSession({ channelId: 'voice-two' });
 
@@ -150,8 +161,8 @@ describe('Remedia node placement', () => {
     await first.destroy();
 
     const second_queue = await fixture.player.createQueue('guild-three', {
-      selectNode: unsupported,
-      crossfade: { enabled: true },
+      connectionOptions: { selectNode: unsupported },
+      playback: { crossfade: { enabled: true } },
     });
 
     await second_queue.node.createSession({ channelId: 'voice-three' });
@@ -168,7 +179,7 @@ describe('Remedia node placement', () => {
     fixture.backend.client.nodes[0]!.status = 'disconnected';
 
     const selectNode = vi.fn(() => 'fake-node');
-    const queue = await pending(fixture, { selectNode });
+    const queue = await pending(fixture, { connectionOptions: { selectNode } });
 
     await queue.node.createSession({ channelId: 'voice-two' });
 
@@ -191,7 +202,7 @@ describe('crossfade curve negotiation', () => {
         expect(fixture.session.crossfade).toEqual({ enabled: true, curve });
 
         const override: CrossfadeCurve = curve === 'adaptive' ? 'equalPower' : 'adaptive';
-        const queue = await pending(fixture, { crossfade: { enabled: true, curve: override } });
+        const queue = await pending(fixture, { playback: { crossfade: { enabled: true, curve: override } } });
 
         await queue.connect({ channelId: 'voice-two' });
 
@@ -213,7 +224,7 @@ describe('crossfade curve negotiation', () => {
       capabilities: { ...node.capabilities, crossfade: { ...node.capabilities.crossfade, curve: 'equalPower' } },
     });
 
-    const queue = await pending(fixture, { crossfade: { enabled: true } });
+    const queue = await pending(fixture, { playback: { crossfade: { enabled: true } } });
 
     await queue.connect({ channelId: 'voice-two' });
 
@@ -226,7 +237,7 @@ describe('crossfade curve negotiation', () => {
 
     fixture.backend.client.nodes[0]!.capabilities.crossfade.curves = ['equalPower'];
 
-    const compatible = await pending(fixture, { crossfade: { enabled: true, curve: 'equalPower' } });
+    const compatible = await pending(fixture, { playback: { crossfade: { enabled: true, curve: 'equalPower' } } });
 
     await compatible.connect({ channelId: 'voice-two' });
 
@@ -236,7 +247,7 @@ describe('crossfade curve negotiation', () => {
     });
     await compatible.destroy();
 
-    const incompatible = await pending(fixture, { crossfade: { enabled: true, curve: 'adaptive' } });
+    const incompatible = await pending(fixture, { playback: { crossfade: { enabled: true, curve: 'adaptive' } } });
 
     await expect(incompatible.connect({ channelId: 'voice-two' })).rejects.toThrow(
       'does not support the adaptive crossfade curve',
@@ -252,12 +263,12 @@ describe('crossfade curve negotiation', () => {
 
     old.capabilities.crossfade.curves = ['equalPower'];
 
-    const queue = await pending(fixture, { crossfade: { enabled: true, curve: 'adaptive' } });
+    const queue = await pending(fixture, { playback: { crossfade: { enabled: true, curve: 'adaptive' } } });
 
     await expect(queue.connect({ channelId: 'voice-two' })).rejects.toThrow('old-server');
     expect(fixture.backend.client.createDiscordSession).not.toHaveBeenCalled();
 
-    queue.options.selectNode = () => 'fake-node';
+    (queue.options.connectionOptions ??= {}).selectNode = () => 'fake-node';
     await queue.connect({ channelId: 'voice-two' });
 
     expect(fixture.backend.client.createDiscordSession.mock.lastCall?.[0]).toMatchObject({
@@ -277,7 +288,7 @@ describe('crossfade curve negotiation', () => {
       curve: 'adaptive',
     });
     await queue.node.destroySession();
-    queue.options.crossfade = false;
+    (queue.options.playback ??= {}).crossfade = false;
     await queue.node.createSession({ channelId: 'voice-two', crossfade: { enabled: true, curve: 'adaptive' } });
 
     expect(fixture.backend.client.createDiscordSession.mock.lastCall?.[0].crossfade).toBe(false);

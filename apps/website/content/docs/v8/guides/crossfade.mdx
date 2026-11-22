@@ -22,7 +22,9 @@ Or for one queue:
 
 ```ts
 const queue = await player.createQueue(guildId, {
-  crossfade: { enabled: true, durationMs: 8000, prepareBeforeMs: 30_000 },
+  playback: {
+    crossfade: { enabled: true, durationMs: 8000, prepareBeforeMs: 30_000 },
+  },
 });
 ```
 

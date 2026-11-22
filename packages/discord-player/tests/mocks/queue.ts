@@ -67,8 +67,8 @@ export async function setup(
 
   const queue = await player.nodes.create(options.guildId ?? 'guild-one', {
     maxSize: options.maxSize,
-    maxHistorySize: options.maxHistorySize,
     ...options.queueOptions,
+    history: { maxHistorySize: options.maxHistorySize, ...options.queueOptions?.history },
   });
   const session = backend.asSession(await queue.connect({ channelId: 'voice-one' }));
 

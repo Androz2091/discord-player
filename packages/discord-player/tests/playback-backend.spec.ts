@@ -284,7 +284,7 @@ it('disposes late session creation after queue destruction and rejects unsupport
   await player.initialize('bot-user');
   const queue = await player.nodes.create('guild');
   await expect(queue.node.filters.set('nightcore')).rejects.toThrow(/does not support audio filters/);
-  const crossfadeQueue = await player.nodes.create('other', { crossfade: { enabled: true } });
+  const crossfadeQueue = await player.nodes.create('other', { playback: { crossfade: { enabled: true } } });
   await expect(crossfadeQueue.connect({ channelId: 'voice' })).rejects.toThrow(/does not support crossfade/);
   await expect(queue.connect({ channelId: 'voice', nodeId: 'node' })).rejects.toThrow(/node selection/);
   const connection = expect(queue.connect({ channelId: 'voice' })).rejects.toThrow();
@@ -303,7 +303,7 @@ it('uses explicitly declared staging and processing capabilities without a nativ
   const { player, sessions } = fixture({ capabilities: { sources: ['url'], crossfade: true, filters: true } });
   await player.initialize('bot-user');
   await source(player);
-  const queue = await player.nodes.create('guild', { crossfade: { enabled: true } });
+  const queue = await player.nodes.create('guild', { playback: { crossfade: { enabled: true } } });
   await queue.connect({ channelId: 'voice' });
   await queue.node.filters.setRaw('volume=0.5');
   expect(sessions[0]?.filters.graph).toBe('volume=0.5');
@@ -483,7 +483,7 @@ it.each(['equalPower', 'adaptive'] as const)('accepts a custom backend snapshot 
 
   await player.initialize('bot-user');
 
-  const queue = await player.nodes.create('guild', { crossfade: { enabled: true, curve } });
+  const queue = await player.nodes.create('guild', { playback: { crossfade: { enabled: true, curve } } });
 
   await queue.connect({ channelId: 'voice' });
 

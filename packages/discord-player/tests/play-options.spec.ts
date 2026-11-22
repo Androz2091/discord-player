@@ -29,10 +29,9 @@ it.each(['embedded', 'remote'] as const)(
       signal,
       nodeOptions: {
         metadata: { textChannel: 'text' },
-        volume: 80,
-        selfDeaf: false,
-        filterGraph: 'bass=gain=2',
-        leaveOnEnd: true,
+        playback: { volume: 80, filterGraph: 'bass=gain=2' },
+        connectionOptions: { selfDeaf: false },
+        lifecycle: { leaveOnEnd: true },
       },
       connectionOptions: {
         selfDeaf: true,
@@ -53,7 +52,7 @@ it.each(['embedded', 'remote'] as const)(
       signal,
     });
     expect(result.queue.metadata).toEqual({ textChannel: 'text' });
-    expect(result.queue.options.leaveOnEnd).toBe(true);
+    expect(result.queue.options?.lifecycle?.leaveOnEnd).toBe(true);
     expect(backend.client.createDiscordSession).toHaveBeenLastCalledWith(
       expect.objectContaining({
         guildId: 'new-guild',
@@ -78,13 +77,22 @@ it('uses creation defaults, retains existing configuration, then applies explici
   const { player, queue, backend } = await fixture();
   await queue.destroy();
   const first = await player.play({ guildId: 'new', channelId: 'voice' }, new TestTrack('one'), {
-    nodeOptions: { metadata: 'original', volume: 80, filterGraph: 'bass=gain=2', selfDeaf: false, selfMute: true },
+    nodeOptions: {
+      metadata: 'original',
+      playback: { volume: 80, filterGraph: 'bass=gain=2' },
+      connectionOptions: { selfDeaf: false, selfMute: true },
+    },
   });
   const session = backend.asSession(first.queue.node.getSession());
   expect(session).toMatchObject({ volume: 0.8, selfDeaf: false, selfMute: true });
   expect(session.filters.graph).toBe('bass=gain=2');
   await player.play({ guildId: 'new', channelId: 'voice' }, new TestTrack('two'), {
-    nodeOptions: { metadata: 'ignored', volume: 10, filterGraph: null, selfDeaf: true, maxSize: 1 },
+    nodeOptions: {
+      metadata: 'ignored',
+      maxSize: 1,
+      playback: { volume: 10, filterGraph: null },
+      connectionOptions: { selfDeaf: true },
+    },
   });
   expect(first.queue.metadata).toBe('original');
   expect(session.volume).toBe(0.8);
@@ -222,3 +230,34 @@ it('retains applied controls but stops further overrides after caller cancellati
   await queue.connect({ channelId: 'voice-one', volume: 80 });
   expect(session.volume).toBe(0.8);
 });
+
+it.each(['play', 'createQueue', 'queues.create'] as const)(
+  'propagates all grouped defaults through %s',
+  async (api) => {
+    const { player } = await fixture();
+    const options = {
+      maxSize: 10,
+      metadata: { label: 'grouped' },
+      playback: { volume: 75 },
+      history: { maxHistorySize: 3, disableHistory: true },
+      autoplay: { autoplayTimeoutMs: 1200 },
+      lifecycle: { pauseOnEmpty: true },
+      connectionOptions: { selfDeaf: false },
+    };
+    const queue =
+      api === 'play'
+        ? (
+            await player.play({ guildId: 'grouped', channelId: 'voice' }, new TestTrack('one'), {
+              nodeOptions: options,
+            })
+          ).queue
+        : api === 'createQueue'
+          ? await player.createQueue('grouped', options)
+          : await player.queues.create('grouped', options);
+    expect(queue.options).toMatchObject(options);
+    expect(queue.maxSize).toBe(10);
+    expect(queue.maxHistorySize).toBe(3);
+    expect(queue.history.disabled).toBe(true);
+    expect(queue.node.volume).toBe(75);
+  },
+);

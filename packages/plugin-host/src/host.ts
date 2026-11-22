@@ -177,8 +177,11 @@ export class SourcePluginHost {
 
         'source.related': async (input, { signal }) => {
           const related = await this.relatedRequest(input, signal);
+          const blocked = this.record(input).blocked;
           const result = await this.plugins.execute('track.related', related, {
-            pluginId: related.track.sourceReference?.pluginId,
+            blocked: Array.isArray(blocked)
+              ? blocked.filter((id: unknown): id is string => typeof id === 'string')
+              : [],
             signal,
           });
 

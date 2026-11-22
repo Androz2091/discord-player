@@ -38,7 +38,9 @@ class RemoteExtractor extends BaseExtractor {
   }
 
   override async getRelatedTracks(track: Track, _history?: Parameters<BaseExtractor['getRelatedTracks']>[1]) {
-    return this.handle(`related:${track.title}`);
+    const result = await this.handle(`related:${track.title}`);
+    result.tracks[0]!.url = `https://fixture.test/related/${track.id}`;
+    return result;
   }
 
   override async stream(track: Track) {
@@ -274,7 +276,7 @@ it('queues and stages operation descriptors without local extraction or a bot me
   } = await setup({
     nodeType: 'remote',
     crossfadeAvailable: true,
-    queueOptions: { crossfade: { enabled: true } },
+    queueOptions: { playback: { crossfade: { enabled: true } } },
     playerOptions: {
       plugins: [host].map((remoteHost) => definePlugin({ id: RemoteExtractor.identifier, remoteHost })()),
     },
@@ -350,7 +352,7 @@ it('carries all queued host requirements into session creation and fences custom
   } = await setup({
     nodeType: 'remote',
     crossfadeAvailable: true,
-    queueOptions: { crossfade: { enabled: true }, selectNode },
+    queueOptions: { playback: { crossfade: { enabled: true } }, connectionOptions: { selectNode } },
     playerOptions: {
       plugins: [a, b].map((remoteHost) => definePlugin({ id: RemoteExtractor.identifier, remoteHost })()),
     },
@@ -449,7 +451,7 @@ it('clears a pending native stage before waiting for its preparation lock', asyn
   } = await setup({
     nodeType: 'remote',
     crossfadeAvailable: true,
-    queueOptions: { crossfade: { enabled: true } },
+    queueOptions: { playback: { crossfade: { enabled: true } } },
     playerOptions: {
       plugins: [host].map((remoteHost) => definePlugin({ id: RemoteExtractor.identifier, remoteHost })()),
     },
@@ -516,7 +518,7 @@ async function forwarded(curve: CrossfadeCurve = 'equalPower', configure?: Confi
   const fixture = await setup({
     nodeType: 'remote',
     crossfadeAvailable: true,
-    queueOptions: { crossfade: { enabled: true, curve } },
+    queueOptions: { playback: { crossfade: { enabled: true, curve } } },
   });
   cleanup.push(() => fixture.player.destroy());
   const node = fixture.backend.client.nodes[0]!;

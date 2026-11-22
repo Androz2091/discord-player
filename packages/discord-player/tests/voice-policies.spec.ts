@@ -73,7 +73,7 @@ it('uses authoritative empty/populate snapshots, owns automatic pause and respec
   const resolveVoiceChannelUsers = vi.fn(async () => users);
   const { player, queue, session } = await fixture({
     playerOptions: { resolveVoiceChannelUsers },
-    queueOptions: { pauseOnEmpty: true },
+    queueOptions: { lifecycle: { pauseOnEmpty: true } },
   });
   const empty = vi.fn();
   const populate = vi.fn();
@@ -107,7 +107,7 @@ it.each([null, undefined] as const)('does not infer emptiness when occupancy is 
   vi.useFakeTimers();
   const { player, queue, session } = await fixture({
     playerOptions: snapshot === undefined ? {} : { resolveVoiceChannelUsers: async () => snapshot },
-    queueOptions: { leaveOnEmpty: true, leaveOnEmptyCooldown: 10, pauseOnEmpty: true },
+    queueOptions: { lifecycle: { leaveOnEmpty: true, leaveOnEmptyCooldown: 10, pauseOnEmpty: true } },
   });
   await queue.play(new TestTrack('one'));
   player.receive(state('member', 'voice-one'));
@@ -123,7 +123,7 @@ it('coalesces snapshots and discards results from obsolete channels and destroye
   const resolver = vi.fn().mockReturnValueOnce(first.promise).mockResolvedValue(['member']);
   const { player, queue } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: resolver },
-    queueOptions: { leaveOnEmpty: true },
+    queueOptions: { lifecycle: { leaveOnEmpty: true } },
   });
   await flush();
   await queue.connect({ channelId: 'voice-two' });
@@ -147,7 +147,7 @@ it('reports resolver failures while keeping occupancy unknown', async () => {
   const resolver = vi.fn(async () => ['member'] as readonly string[]);
   const { player, queue } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: resolver },
-    queueOptions: { leaveOnEmpty: true },
+    queueOptions: { lifecycle: { leaveOnEmpty: true } },
   });
   await flush();
   const failure = vi.fn();
@@ -164,7 +164,7 @@ it('rechecks empty cooldown occupancy and cancels after repopulation', async () 
   let users: readonly string[] = [];
   const { player, queue } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: async () => users },
-    queueOptions: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 },
+    queueOptions: { lifecycle: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 } },
   });
   await flush();
   users = ['member'];
@@ -182,7 +182,9 @@ it.each(['end', 'stop'] as const)(
   async (reason) => {
     vi.useFakeTimers();
     const { queue, session } = await fixture({
-      queueOptions: { leaveOnEnd: true, leaveOnEndCooldown: 100, leaveOnStop: true, leaveOnStopCooldown: 100 },
+      queueOptions: {
+        lifecycle: { leaveOnEnd: true, leaveOnEndCooldown: 100, leaveOnStop: true, leaveOnStopCooldown: 100 },
+      },
     });
     await queue.play(new TestTrack('one'));
     if (reason === 'end') session.complete();
@@ -202,12 +204,14 @@ it.each(['end', 'stop'] as const)(
 
 it('does not apply natural-end leave after skip, and rejects invalid cooldowns', async () => {
   vi.useFakeTimers();
-  const { player, queue } = await fixture({ queueOptions: { leaveOnEnd: true, leaveOnEndCooldown: 10 } });
+  const { player, queue } = await fixture({
+    queueOptions: { lifecycle: { leaveOnEnd: true, leaveOnEndCooldown: 10 } },
+  });
   await queue.play(new TestTrack('one'));
   await queue.skip();
   await vi.advanceTimersByTimeAsync(100);
   expect(queue.destroyed).toBe(false);
-  await expect(player.createQueue('invalid', { leaveOnEmptyCooldown: -1 })).rejects.toThrow(RangeError);
+  await expect(player.createQueue('invalid', { lifecycle: { leaveOnEmptyCooldown: -1 } })).rejects.toThrow(RangeError);
 });
 
 it('invalidates a pending occupancy request on session replacement and reconciles reconnect', async () => {
@@ -215,7 +219,7 @@ it('invalidates a pending occupancy request on session replacement and reconcile
   const resolver = vi.fn().mockReturnValueOnce(pending.promise).mockResolvedValue(['member']);
   const { player, queue } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: resolver },
-    queueOptions: { leaveOnEmpty: true },
+    queueOptions: { lifecycle: { leaveOnEmpty: true } },
   });
   await flush();
   const empty = vi.fn();
@@ -236,7 +240,7 @@ it('shares cooldown revalidation with Gateway reconciliation without overlapping
   const resolver = vi.fn().mockResolvedValueOnce([]).mockReturnValueOnce(expiry.promise).mockResolvedValue(['member']);
   const { player, queue } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: resolver },
-    queueOptions: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 },
+    queueOptions: { lifecycle: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 } },
   });
   await flush();
   await vi.advanceTimersByTimeAsync(100);
@@ -257,7 +261,7 @@ it.each(['embedded', 'remote'] as const)(
     const { player, queue, session } = await fixture({
       nodeType,
       playerOptions: { resolveVoiceChannelUsers: async () => [] },
-      queueOptions: { leaveOnEmpty: true, pauseOnEmpty: true, leaveOnEmptyCooldown: 100 },
+      queueOptions: { lifecycle: { leaveOnEmpty: true, pauseOnEmpty: true, leaveOnEmptyCooldown: 100 } },
     });
     const pause = vi.spyOn(session, 'pause');
     await queue.play(new TestTrack('one'));
@@ -279,7 +283,7 @@ it('cancels empty departure when a member returns during cooldown', async () => 
   let users: readonly string[] = [];
   const { player, queue } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: async () => users },
-    queueOptions: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 },
+    queueOptions: { lifecycle: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 } },
   });
   await flush();
   await vi.advanceTimersByTimeAsync(50);
@@ -297,7 +301,7 @@ it.each(['resolve', 'reject'] as const)(
     const { player, queue, session } = await fixture({
       nodeType: 'remote',
       playerOptions: { resolveVoiceChannelUsers: async () => users },
-      queueOptions: { pauseOnEmpty: true },
+      queueOptions: { lifecycle: { pauseOnEmpty: true } },
     });
     await queue.play(new TestTrack('one'));
     await flush();
@@ -328,7 +332,7 @@ it('resumes after a confirmed slow pause when occupancy changed during the RPC',
   let users: readonly string[] = ['member'];
   const { player, queue, session } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: async () => users },
-    queueOptions: { pauseOnEmpty: true },
+    queueOptions: { lifecycle: { pauseOnEmpty: true } },
   });
   await queue.play(new TestTrack('one'));
   await flush();
@@ -356,7 +360,7 @@ it('does not acquire ownership after a rejected pause or lose ownership after a 
   let users: readonly string[] = ['member'];
   const { player, queue, session } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: async () => users },
-    queueOptions: { pauseOnEmpty: true },
+    queueOptions: { lifecycle: { pauseOnEmpty: true } },
   });
   await queue.play(new TestTrack('one'));
   await flush();
@@ -389,7 +393,9 @@ it('does not acquire ownership after a rejected pause or lose ownership after a 
 });
 
 it('waits for transport readiness while preserving mute policy with leave precedence', async () => {
-  const { player, queue, session } = await fixture({ queueOptions: { leaveOnEmpty: true, pauseOnEmpty: true } });
+  const { player, queue, session } = await fixture({
+    queueOptions: { lifecycle: { leaveOnEmpty: true, pauseOnEmpty: true } },
+  });
   await queue.play(new TestTrack('one'));
   const pause = vi.spyOn(session, 'pause');
   session.connectionState = 'negotiating_dave';
@@ -415,7 +421,9 @@ it('keeps natural-end and empty deadlines independent', async () => {
   let users: readonly string[] = [];
   const { player, queue, session } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: async () => users },
-    queueOptions: { leaveOnEmpty: true, leaveOnEmptyCooldown: 500, leaveOnEnd: true, leaveOnEndCooldown: 100 },
+    queueOptions: {
+      lifecycle: { leaveOnEmpty: true, leaveOnEmptyCooldown: 500, leaveOnEnd: true, leaveOnEndCooldown: 100 },
+    },
   });
   await queue.play(new TestTrack('one'));
   session.complete();
@@ -431,7 +439,9 @@ it('keeps natural-end and empty deadlines independent', async () => {
 
 it('does not leave between queued tracks or after stop/failure, and cancels end on insertion', async () => {
   vi.useFakeTimers();
-  const { queue, session } = await fixture({ queueOptions: { leaveOnEnd: true, leaveOnEndCooldown: 100 } });
+  const { queue, session } = await fixture({
+    queueOptions: { lifecycle: { leaveOnEnd: true, leaveOnEndCooldown: 100 } },
+  });
   await queue.play(new TestTrack('one'));
   queue.addTrack(new TestTrack('two'));
   session.complete();
@@ -460,7 +470,7 @@ it('keeps concurrent guild timers and pending controls independent', async () =>
   const { player, queue, session, backend } = await fixture({
     nodeType: 'remote',
     playerOptions: { resolveVoiceChannelUsers: async () => [] },
-    queueOptions: { pauseOnEmpty: true },
+    queueOptions: { lifecycle: { pauseOnEmpty: true } },
   });
   const pending = deferred<void>();
   vi.spyOn(session, 'pause').mockReturnValue(pending.promise);
@@ -468,7 +478,9 @@ it('keeps concurrent guild timers and pending controls independent', async () =>
   await flush();
   const others = await Promise.all(
     Array.from({ length: 4 }, async (_, index) => {
-      const other = await player.nodes.create(`guild-${index}`, { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 });
+      const other = await player.nodes.create(`guild-${index}`, {
+        lifecycle: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 },
+      });
       const otherSession = backend.asSession(await other.connect({ channelId: 'voice-one' }));
       await other.play(new TestTrack(`track-${index}`));
       return { other, otherSession };
@@ -491,7 +503,7 @@ it('does not transfer pending pause ownership across a move, new generation, or 
   let users: readonly string[] = ['member'];
   const { player, queue, session } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: async () => users },
-    queueOptions: { pauseOnEmpty: true },
+    queueOptions: { lifecycle: { pauseOnEmpty: true } },
   });
   await queue.play(new TestTrack('one'));
   await flush();
@@ -518,7 +530,7 @@ it.each([QueueRepeatMode.TRACK, QueueRepeatMode.QUEUE])(
   async (repeatMode) => {
     vi.useFakeTimers();
     const { queue, session } = await fixture({
-      queueOptions: { repeatMode, leaveOnEnd: true, leaveOnEndCooldown: 100 },
+      queueOptions: { playback: { repeatMode }, lifecycle: { leaveOnEnd: true, leaveOnEndCooldown: 100 } },
     });
     await queue.play(new TestTrack('one'));
     session.complete();
@@ -532,7 +544,10 @@ it.each([QueueRepeatMode.TRACK, QueueRepeatMode.QUEUE])(
 it('waits for pending autoplay before scheduling natural-end departure', async () => {
   vi.useFakeTimers();
   const { player, queue, session } = await fixture({
-    queueOptions: { repeatMode: QueueRepeatMode.AUTOPLAY, leaveOnEnd: true, leaveOnEndCooldown: 100 },
+    queueOptions: {
+      playback: { repeatMode: QueueRepeatMode.AUTOPLAY },
+      lifecycle: { leaveOnEnd: true, leaveOnEndCooldown: 100 },
+    },
   });
   const related = deferred<{ tracks: TestTrack[]; playlist: null }>();
   await player.plugins.unregister('fixture');
@@ -563,7 +578,7 @@ it('invalidates pending pause on a Gateway move and cancels the previous channel
   let users: readonly string[] = ['member'];
   const { player, queue, session } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: async () => users },
-    queueOptions: { pauseOnEmpty: true },
+    queueOptions: { lifecycle: { pauseOnEmpty: true } },
   });
   await queue.play(new TestTrack('one'));
   await flush();
@@ -573,8 +588,8 @@ it('invalidates pending pause on a Gateway move and cancels the previous channel
   users = [];
   player.receive(state('member', null));
   await flush();
-  queue.options.leaveOnEmpty = true;
-  queue.options.leaveOnEmptyCooldown = 100;
+  (queue.options.lifecycle ??= {}).leaveOnEmpty = true;
+  (queue.options.lifecycle ??= {}).leaveOnEmptyCooldown = 100;
   player.receive(state('member', null));
   await flush();
   await vi.advanceTimersByTimeAsync(50);
@@ -594,7 +609,7 @@ it('does not extend a leave-only deadline on repeated Gateway, start, or resume 
   vi.useFakeTimers();
   const { player, queue, session } = await fixture({
     playerOptions: { resolveVoiceChannelUsers: async () => [] },
-    queueOptions: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 },
+    queueOptions: { lifecycle: { leaveOnEmpty: true, leaveOnEmptyCooldown: 100 } },
   });
   await queue.play(new TestTrack('one'));
   await flush();

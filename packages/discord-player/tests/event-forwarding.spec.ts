@@ -57,14 +57,14 @@ it('observes every native session event without inventing managed playback', asy
   expect(equalizer).not.toHaveBeenCalled();
   expect(failure).toHaveBeenCalledExactlyOnceWith(queue, events.voiceFailed.error, events.voiceFailed);
   expect(transport).toHaveBeenCalledExactlyOnceWith(queue, 'connected', 'disconnected', events.voiceStateChanged);
-  expect(queue.options.volume).toBe(40);
-  expect(queue.options.filterGraph).toBe('atempo=1.2');
+  expect(queue.options?.playback?.volume).toBe(40);
+  expect(queue.options?.playback?.filterGraph).toBe('atempo=1.2');
 
   await player.destroy();
 });
 
 it('prepares before resolving and stages without starting playback; promotion preserves Track identity', async () => {
-  const { player, queue, session } = await setup({ queueOptions: { crossfade: { enabled: true } } });
+  const { player, queue, session } = await setup({ queueOptions: { playback: { crossfade: { enabled: true } } } });
   const a = new TestTrack('a');
   const b = new TestTrack('b');
   const prepare = vi.fn();

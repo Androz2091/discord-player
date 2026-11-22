@@ -126,7 +126,7 @@ it('configures filters before connection and retains them through moves and reco
 
   await filters.set('nightcore');
 
-  expect(queue.options.filterGraph).toBe(AudioFilterPresets.nightcore);
+  expect(queue.options?.playback?.filterGraph).toBe(AudioFilterPresets.nightcore);
   expect(filters.graph).toBe(AudioFilterPresets.nightcore);
 
   const session = backend.asSession(await queue.connect({ channelId: 'new' }));
@@ -149,7 +149,7 @@ it('configures filters before connection and retains them through moves and reco
 
 it('reads configured defaults without a session and synchronizes changes made through raw Remedia controls', async () => {
   const player = new DiscordPlayer({ nodes: [], send() {} });
-  const initial = await player.createQueue('defaults', { filterGraph: AudioFilterPresets.nightcore });
+  const initial = await player.createQueue('defaults', { playback: { filterGraph: AudioFilterPresets.nightcore } });
 
   expect(initial.node.filters.graph).toBe(AudioFilterPresets.nightcore);
   expect(initial.node.filters.enabled).toEqual(['nightcore']);
@@ -194,7 +194,7 @@ it('commits state only after Remedia accepts the graph and leaves rejected updat
 
   expect(filters.graph).toBe(graph);
   expect(filters.enabled).toEqual(['nightcore']);
-  expect(queue.options.filterGraph).toBe(graph);
+  expect(queue.options?.playback?.filterGraph).toBe(graph);
 
   vi.spyOn(session.filters, 'clear').mockRejectedValueOnce(new Error('clear failed'));
   await expect(filters.clear()).rejects.toThrow('clear failed');
@@ -232,7 +232,7 @@ it('serializes concurrent toggles with session moves and retains every successfu
 
   expect(queue.node.filters.enabled).toEqual(['nightcore', '8D']);
   expect(session.channelId).toBe('moved');
-  expect(queue.options.filterGraph).toBe(`${AudioFilterPresets.nightcore},${AudioFilterPresets['8D']}`);
+  expect(queue.options?.playback?.filterGraph).toBe(`${AudioFilterPresets.nightcore},${AudioFilterPresets['8D']}`);
 
   await player.destroy();
 });

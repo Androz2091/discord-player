@@ -123,7 +123,7 @@ export function createCommands(player: Player, config: Config): Command[] {
 
       const metadata: QueueMetadata = { channel: interaction.channel };
       const { track, queue } = await player.play(channel, result, {
-        nodeOptions: { metadata, leaveOnEnd: true, leaveOnEndCooldown: 30_000 },
+        nodeOptions: { metadata, lifecycle: { leaveOnEnd: true, leaveOnEndCooldown: 30_000 } },
       });
 
       if (!track) return interaction.editReply('I could not read audio from that link.');

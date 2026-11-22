@@ -20,8 +20,10 @@ Audio node state lives on `player.remedia` and `player.nodeSnapshots`. `player.n
 
 ```ts
 const queue = await player.createQueue(guildId, {
-  selectNode(nodes) {
-    return nodes[0]!.id;
+  connectionOptions: {
+    selectNode(nodes) {
+      return nodes[0]!.id;
+    },
   },
 });
 ```

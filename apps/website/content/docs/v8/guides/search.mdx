@@ -13,7 +13,12 @@ await player.search('some query', { searchEngine: 'example.source' });
 await player.play(channel, 'some query', {
   searchEngine: 'example.source',
   requestedBy: userId,
-  nodeOptions: { leaveOnEnd: true, leaveOnEndCooldown: 30_000 },
+  nodeOptions: {
+    lifecycle: {
+      leaveOnEnd: true,
+      leaveOnEndCooldown: 30_000,
+    },
+  },
 });
 ```
 

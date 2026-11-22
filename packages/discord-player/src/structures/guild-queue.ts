@@ -75,61 +75,83 @@ export type CrossfadeOptions =
     };
 
 /** Initialization defaults and policies for one guild queue. */
-export interface GuildQueueOptions<Metadata = unknown> extends StreamHooks {
-  /** Automatic crossfading for this queue; overrides the Player default at session creation. */
-  crossfade?: CrossfadeOptions;
-
-  /** Destroy after confirmed voice-channel emptiness; requires an authoritative resolver. Takes precedence over pauseOnEmpty. */
-  leaveOnEmpty?: boolean;
-  /** Empty-channel leave delay in milliseconds; defaults to zero. */
-  leaveOnEmptyCooldown?: number;
-  /** Destroy after natural queue exhaustion. */
-  leaveOnEnd?: boolean;
-  /** Natural exhaustion leave delay in milliseconds; defaults to zero. */
-  leaveOnEndCooldown?: number;
-  /** Destroy after managed playback stops. */
-  leaveOnStop?: boolean;
-  /** Stop leave delay in milliseconds; defaults to zero. */
-  leaveOnStopCooldown?: number;
-  /** Automatically pause on confirmed empty occupancy when leaveOnEmpty is disabled, and resume only confirmed policy-owned pauses. */
-  pauseOnEmpty?: boolean;
-  /** Total related-discovery and asynchronous selection deadline in milliseconds; defaults to 30000. */
-  autoplayTimeoutMs?: number;
-
+export interface GuildQueueOptions<Metadata = unknown> {
   /** Arbitrary application metadata stored on the queue. */
   metadata?: Metadata;
-
-  /**
-   * Optional policy choosing the Remedia node for this guild's first session. It receives the healthy nodes
-   * with spare capacity that host every required plugin host, and its choice is pinned for the session.
-   * It is not called when a node is pinned with `nodeId` or the guild is already assigned. Without it,
-   * Remedia's capacity-aware placement chooses the node.
-   */
-  selectNode?: NodeSelection;
 
   /** Maximum number of upcoming tracks accepted by public insertion methods; non-positive values mean unlimited. */
   maxSize?: number;
 
-  /** Maximum number of previous tracks retained; non-positive values mean unlimited. */
-  maxHistorySize?: number;
+  /** Default voice connection and node placement settings. */
+  connectionOptions?: {
+    /** Desired self-deaf setting; Remedia defaults this to true when omitted. */
+    selfDeaf?: boolean;
 
-  /** Disable collecting previous tracks while keeping manual history navigation available. */
-  disableHistory?: boolean;
+    /** Desired self-mute setting; Remedia defaults this to false when omitted. */
+    selfMute?: boolean;
 
-  /** Repeat policy used after natural playback completion. */
-  repeatMode?: QueueRepeatMode;
+    /**
+     * Optional policy choosing the Remedia node for this guild's first session. It receives the healthy nodes
+     * with spare capacity that host every required plugin host, and its choice is pinned for the session.
+     * It is not called when a node is pinned with `nodeId` or the guild is already assigned. Without it,
+     * Remedia's capacity-aware placement chooses the node.
+     */
+    selectNode?: NodeSelection;
+  };
 
-  /** Initial volume percentage, from 0 to 200. */
-  volume?: number;
+  /** Playback defaults and source hooks. */
+  playback?: StreamHooks & {
+    /** Initial volume percentage, from 0 to 200. */
+    volume?: number;
 
-  /** Raw Remedia filtergraph applied to new sessions; null clears filtering. */
-  filterGraph?: string | null;
+    /** Raw Remedia filtergraph applied to new sessions; null clears filtering. */
+    filterGraph?: string | null;
 
-  /** Desired self-deaf setting; Remedia defaults this to true when omitted. */
-  selfDeaf?: boolean;
+    /** Repeat policy used after natural playback completion. */
+    repeatMode?: QueueRepeatMode;
 
-  /** Desired self-mute setting; Remedia defaults this to false when omitted. */
-  selfMute?: boolean;
+    /** Automatic crossfading for this queue; overrides the Player default at session creation. */
+    crossfade?: CrossfadeOptions;
+  };
+
+  /** Previous-track collection and retention. */
+  history?: {
+    /** Maximum number of previous tracks retained; non-positive values mean unlimited. */
+    maxHistorySize?: number;
+
+    /** Disable collecting previous tracks while keeping manual history navigation available. */
+    disableHistory?: boolean;
+  };
+
+  /** Related-track discovery policy. */
+  autoplay?: {
+    /** Total related-discovery and asynchronous selection deadline in milliseconds; defaults to 30000. */
+    autoplayTimeoutMs?: number;
+  };
+
+  /** Automatic pause and disconnect policies. */
+  lifecycle?: {
+    /** Destroy after confirmed voice-channel emptiness; requires an authoritative resolver. Takes precedence over pauseOnEmpty. */
+    leaveOnEmpty?: boolean;
+
+    /** Empty-channel leave delay in milliseconds; defaults to zero. */
+    leaveOnEmptyCooldown?: number;
+
+    /** Destroy after natural queue exhaustion. */
+    leaveOnEnd?: boolean;
+
+    /** Natural exhaustion leave delay in milliseconds; defaults to zero. */
+    leaveOnEndCooldown?: number;
+
+    /** Destroy after managed playback stops. */
+    leaveOnStop?: boolean;
+
+    /** Stop leave delay in milliseconds; defaults to zero. */
+    leaveOnStopCooldown?: number;
+
+    /** Automatically pause on confirmed empty occupancy when leaveOnEmpty is disabled, and resume only confirmed policy-owned pauses. */
+    pauseOnEmpty?: boolean;
+  };
 }
 
 /** Voice connection and session settings; volume uses Discord Player percentages. */
@@ -391,20 +413,24 @@ export class GuildQueue<Metadata = unknown> {
     public readonly options: GuildQueueOptions<Metadata> = {},
   ) {
     if (
-      options.volume !== undefined &&
-      (!Number.isFinite(options.volume) || options.volume < 0 || options.volume > 200)
+      options.playback?.volume !== undefined &&
+      (!Number.isFinite(options.playback?.volume) || options.playback?.volume < 0 || options.playback?.volume > 200)
     ) {
       throw new RangeError('Queue volume must be a finite percentage between 0 and 200.');
     }
 
-    for (const cooldown of [options.leaveOnEmptyCooldown, options.leaveOnEndCooldown, options.leaveOnStopCooldown]) {
+    for (const cooldown of [
+      options.lifecycle?.leaveOnEmptyCooldown,
+      options.lifecycle?.leaveOnEndCooldown,
+      options.lifecycle?.leaveOnStopCooldown,
+    ]) {
       if (cooldown !== undefined && (!Number.isFinite(cooldown) || cooldown < 0 || cooldown > 2147483647))
         throw new RangeError('Queue leave cooldowns must be finite milliseconds from 0 through 2147483647.');
     }
 
     this.#maxSize = normalizeLimit(options.maxSize, Infinity);
-    this.#maxHistorySize = normalizeLimit(options.maxHistorySize, Infinity);
-    this.#repeatMode = options.repeatMode ?? QueueRepeatMode.OFF;
+    this.#maxHistorySize = normalizeLimit(options.history?.maxHistorySize, Infinity);
+    this.#repeatMode = options.playback?.repeatMode ?? QueueRepeatMode.OFF;
     this.tracks = new Queue<Track>();
     this.tasks = new AsyncQueue();
     this.tracks.onBeforeMutation = () => this.player.plugins.assertNotDispatching();
@@ -413,9 +439,9 @@ export class GuildQueue<Metadata = unknown> {
     this.history = new GuildQueueHistory(this);
     this.voice = new VoiceStateTracker(this);
     this.syncedLyrics = new SyncedLyricsProvider(this);
-    this.onBeforeCreateStream = options.onBeforeCreateStream;
-    this.onStreamExtracted = options.onStreamExtracted;
-    this.onAfterCreateStream = options.onAfterCreateStream;
+    this.onBeforeCreateStream = options.playback?.onBeforeCreateStream;
+    this.onStreamExtracted = options.playback?.onStreamExtracted;
+    this.onAfterCreateStream = options.playback?.onAfterCreateStream;
     this.emit(GuildQueueEvents.QueueCreate);
   }
 
@@ -1732,7 +1758,6 @@ export class GuildQueue<Metadata = unknown> {
       },
       {
         guildId: this.guildId,
-        pluginId: reference?.pluginId,
         hostId: reference?.hostId ?? null,
         signal,
         blocked: this.manager.player.options.blockExtractors,
@@ -1781,7 +1806,7 @@ export class GuildQueue<Metadata = unknown> {
       const timeout = new AbortController();
       const timer = setTimeout(
         () => timeout.abort(new DOMException('AutoPlay deadline exceeded', 'TimeoutError')),
-        this.options.autoplayTimeoutMs ?? 30000,
+        this.options.autoplay?.autoplayTimeoutMs ?? 30000,
       );
       timer.unref();
 
@@ -2046,7 +2071,7 @@ export class GuildQueue<Metadata = unknown> {
       next = this.takeNextTrack();
     }
 
-    if (!next && reason === 'natural' && this.#repeatMode === QueueRepeatMode.AUTOPLAY) {
+    if (!next && (reason === 'natural' || reason === 'skip') && this.#repeatMode === QueueRepeatMode.AUTOPLAY) {
       return this.autoplay(operation, this.#decisionRevision);
     }
 
@@ -2299,11 +2324,15 @@ export class GuildQueue<Metadata = unknown> {
       throw new Error('enableFallbackSeeking can only be set when creating a new session.');
     }
 
-    const volume = options.volume ?? (existing ? undefined : (this.options.volume ?? this.node.volume));
-    const selfDeaf = options.selfDeaf ?? (existing ? undefined : this.options.selfDeaf);
-    const selfMute = options.selfMute ?? (existing ? undefined : this.options.selfMute);
+    const volume = options.volume ?? (existing ? undefined : (this.options.playback?.volume ?? this.node.volume));
+    const selfDeaf = options.selfDeaf ?? (existing ? undefined : this.options.connectionOptions?.selfDeaf);
+    const selfMute = options.selfMute ?? (existing ? undefined : this.options.connectionOptions?.selfMute);
     const filterGraph =
-      options.filterGraph !== undefined ? options.filterGraph : existing ? undefined : this.options.filterGraph;
+      options.filterGraph !== undefined
+        ? options.filterGraph
+        : existing
+          ? undefined
+          : this.options.playback?.filterGraph;
 
     const origins = new Set(
       [...(this.currentTrack ? [this.currentTrack] : []), ...this.tracks.toArray(), ...incoming].flatMap((track) =>
@@ -2349,10 +2378,10 @@ export class GuildQueue<Metadata = unknown> {
 
     if (methodName === 'setSelfDeaf') {
       await session.setSelfDeaf(enabled);
-      this.options.selfDeaf = enabled;
+      (this.options.connectionOptions ??= {}).selfDeaf = enabled;
     } else {
       await session.setSelfMute(enabled);
-      this.options.selfMute = enabled;
+      (this.options.connectionOptions ??= {}).selfMute = enabled;
     }
   }
 
