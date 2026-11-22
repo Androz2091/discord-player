@@ -22,7 +22,6 @@ import {
 const version = (createRequire(import.meta.url)('../package.json') as { version: string }).version;
 const templatesDir = fileURLToPath(new URL('./templates', import.meta.url));
 const DEFAULT_NAME = 'my-music-bot';
-const FFMPEG_DOCS = 'https://discord-player.js.org/docs/v8/installation/ffmpeg';
 
 const HELP = `create-music-bot ${version}
 
@@ -195,13 +194,11 @@ async function run(): Promise<void> {
     }
   }
 
-  const ffmpeg = `Remedia needs the FFmpeg 9 shared libraries on this machine: ${FFMPEG_DOCS}`;
-
   if (interactive) {
     prompts.note(steps.join('\n'), 'Next steps');
-    prompts.outro(ffmpeg);
+    prompts.outro('Your project is ready.');
   } else {
-    console.log(`\nNext steps:\n${steps.map((step) => `  ${step}`).join('\n')}\n\n${ffmpeg}`);
+    console.log(`\nNext steps:\n${steps.map((step) => `  ${step}`).join('\n')}`);
   }
 }
 

@@ -22,12 +22,12 @@ Discord Player manages queues, playback controls, and events for Discord music b
 
 ## What you need
 
-| Requirement   | Details                                                                                                |
-| ------------- | ------------------------------------------------------------------------------------------------------ |
-| Runtime       | Node.js 22.18 or newer, ESM                                                                            |
-| Discord bot   | Any gateway library. The tutorial uses discord.js                                                      |
-| Source plugin | Turns a query into tracks and audio. The generated bot includes one                                    |
-| FFmpeg 9      | Shared libraries on the machine that runs the audio engine. See [FFmpeg](/docs/v8/installation/ffmpeg) |
+| Requirement    | Details                                                                                              |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| Runtime        | Node.js 22.18 or newer. ESM `import` and CommonJS `require()` are supported                          |
+| Discord bot    | Any gateway library. The tutorial uses discord.js                                                    |
+| Source plugin  | Turns a query into tracks and audio. The generated bot includes one                                  |
+| Native runtime | `@remedia/node` for embedded playback, or a Remedia server. Official native releases bundle FFmpeg 9 |
 
 ## How the pieces fit
 

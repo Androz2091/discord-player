@@ -55,7 +55,7 @@ The JavaScript project has the same files with a `.js` extension. Both are ESM a
 ## Requirements
 
 - Node.js 22.18 or newer.
-- FFmpeg 9 shared libraries on the machine that runs the bot. See the [FFmpeg guide](https://discord-player.js.org/docs/v8/installation/ffmpeg).
+- A platform supported by `@remedia/node`, with optional platform packages enabled during installation. Remedia bundles FFmpeg 9.
 - A Discord bot token.
 
 ## Versions

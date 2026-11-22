@@ -47,7 +47,7 @@ Options apply when the queue is created.
 | `setRepeatMode(mode)`                                         | Set the repeat mode                                                |
 | `setMaxSize(n)`, `setMaxHistorySize(n)`                       | Change limits                                                      |
 
-`connect()` options extend the Remedia session options and add `connectTimeoutMs`. The initial join deadline defaults to 100 seconds.
+`connect()` accepts Discord Player's `GuildQueueConnectOptions`: channel and node selection, voice flags, percentage volume, a raw filtergraph, creation-only `enableFallbackSeeking`, and cancellation. `connectTimeoutMs` controls the initial join deadline, which defaults to 100 seconds. This is a queue API, not the full native session-options object; see [playback controls](/docs/v8/guides/playback-controls#fallback-seeking) for fallback-seeking constraints.
 
 ## State
 

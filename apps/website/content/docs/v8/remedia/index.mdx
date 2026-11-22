@@ -3,7 +3,7 @@ title: The Remedia runtime
 description: What Discord Player delegates to Remedia, and how embedded and remote nodes differ.
 ---
 
-Remedia is the audio engine behind Discord Player. It decodes audio, applies filters and volume, encodes Opus, and sends audio over Discord voice. Discord Player decides which track plays and where its audio comes from.
+Remedia is the audio engine behind Discord Player. It opens encoded media, selects Opus passthrough or PCM processing, applies filters and volume, and sends audio over Discord voice. Discord Player decides which track plays and where its audio comes from. Official native addons and server releases statically link FFmpeg 9.
 
 ## Who owns what
 
@@ -40,7 +40,7 @@ After `player.initialize()`, the Remedia client is `player.remedia`. Use `player
 
 ## What stays on the bot
 
-Source plugins run in your bot process. A remote Remedia server never runs your plugin's `setup()` or `track.stream` handler. It receives a resolved URL or file, or fetches audio from a [source host](/docs/v8/plugins/remote-hosts).
+Locally registered source plugins run in your bot process. A remote Remedia server does not copy or run those JavaScript handlers. It opens a resolved URL or server-local file, or executes an allowed operation on a configured [source host](/docs/v8/plugins/remote-hosts). The host runs its own plugin runtime and retains provider credentials; a portable Track stores source identity rather than an active stream or temporary grant.
 
 For protocol, security, and server settings, see the [Remedia documentation](https://github.com/twlite/remedia/tree/main/apps/docs/content/docs).
 

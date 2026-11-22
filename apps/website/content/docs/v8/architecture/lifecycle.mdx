@@ -46,7 +46,7 @@ sequenceDiagram
 
 ## Generations
 
-An event can reach the queue before the original `play()` call returns, so the queue cannot trust arrival order. Each managed operation carries a queue token, an operation ID, the exact session, and a Remedia playback generation. A stale event from a skipped, replayed, or reconnected track is therefore ignored.
+An event can reach the queue before the original `play()` call returns, so the queue cannot trust arrival order. Each managed operation carries a queue token, an operation ID, the exact session, and a Remedia playback generation. Stale events cannot mutate the active operation; raw native notifications remain observable through `sessionEvent`. A fallback seek can advance the source generation without starting another Track, so the queue adopts the generation from the correlated `playbackSeeked` event.
 
 ## How a track ends
 
@@ -61,7 +61,7 @@ An event can reach the queue before the original `play()` call returns, so the q
 
 ## Local streams
 
-A Node.js `Readable` can feed an embedded engine because both live in one process. A remote engine cannot read it. With remote nodes, a plugin must return a URL or path the remote machine can open.
+A Node.js `Readable` can feed an embedded engine because both live in one process. A remote engine cannot read it. With remote nodes, a plugin must return a URL or server-local path the remote machine can open, or use an operation source routed to a configured source host. Buffers and streams are not uploaded to remote nodes.
 
 ## Overlapping tracks with crossfade
 

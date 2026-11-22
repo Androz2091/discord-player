@@ -40,7 +40,8 @@ describe('create-music-bot CLI', () => {
     );
     expect(result.stdout).toContain('cd my-bot');
     expect(result.stdout).toContain('npm run dev');
-    expect(result.stdout).toContain('FFmpeg 9');
+    expect(result.stdout).toContain('Next steps:');
+    expect(result.stdout).not.toContain('FFmpeg');
   });
 
   it('defaults to TypeScript and does not install unless asked', async () => {

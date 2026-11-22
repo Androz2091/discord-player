@@ -54,7 +54,7 @@ Crossfade is requested only when the chosen node supports it. Without `selectNod
 | Concern           | Embedded               | Remote                  |
 | ----------------- | ---------------------- | ----------------------- |
 | Process           | In the bot             | Separate service        |
-| FFmpeg libraries  | Bot machine            | Server machine          |
+| FFmpeg 9          | Bundled with the addon | Bundled with the server |
 | Control           | Native binding         | Authenticated WebSocket |
 | Local `Readable`  | Supported              | Not supported           |
 | Failure isolation | Shares the bot process | Independent             |
@@ -69,7 +69,7 @@ remedia-server --list
 remedia-server doctor --config ./remedia.config.json --env-file .env
 ```
 
-`--list` shows local servers with their player counts, connections, memory, and health. `doctor` checks the FFmpeg 9 libraries and the configuration.
+`--list` shows local servers with their player counts, connections, memory, and health. `doctor` reports the bundled FFmpeg build, validates configuration and environment files, and probes configured plugin hosts. It does not verify a media URL or your bot's gateway routing. A plugin-host discovery warning does not by itself make `doctor` exit unsuccessfully.
 
 For metrics and debugging, see Remedia's [observability documentation](https://github.com/twlite/remedia/tree/main/apps/docs/content/docs/observability). Keep media locations and credentials out of logs.
 

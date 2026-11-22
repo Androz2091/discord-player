@@ -44,8 +44,7 @@ export function createBot(config) {
       console.log(`Ready as ${ready.user.tag}`);
     } catch (error) {
       console.error(
-        'Could not start the audio engine. Check that the FFmpeg 9 shared libraries are installed: ' +
-          'https://discord-player.js.org/docs/v8/installation/ffmpeg',
+        'Could not start the bot. See https://discord-player.js.org/docs/v8/troubleshooting for startup diagnostics.',
         error,
       );
 

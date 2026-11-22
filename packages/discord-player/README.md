@@ -6,7 +6,7 @@ Build Discord music bots with queues, playback controls, events, history, filter
 
 ## Install
 
-Requires Node.js 22.18+ and ESM.
+Requires Node.js 22.18 or newer. Supports ESM `import` and CommonJS `require()`.
 
 ```bash
 pnpm add discord-player@dev
@@ -16,7 +16,7 @@ pnpm add @remedia/node
 
 Starting a new bot? `npm create music-bot@dev my-bot` generates a working project. v8 is a preview release, so use the `dev` tag: without it your package manager installs v7.
 
-Embedded playback needs [FFmpeg 9 shared libraries](https://discord-player.js.org/docs/v8/installation/ffmpeg). For remote playback, the audio server needs them instead.
+Official Remedia native addons and server releases bundle FFmpeg 9 through static linking. No separate FFmpeg installation or library-path configuration is needed.
 
 ## Set up the player
 

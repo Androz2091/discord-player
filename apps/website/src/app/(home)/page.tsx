@@ -52,8 +52,7 @@ const runtimes = [
   {
     id: 'embedded',
     title: 'Embedded',
-    description:
-      'One process for your bot and its audio. Remedia runs natively inside Node.js, with FFmpeg installed on the bot machine.',
+    description: 'One process for your bot and its audio. Remedia runs natively inside Node.js and bundles FFmpeg 9.',
     code: `const player = new Player({
   nodes: [{ id: 'local', type: 'embedded' }],
   send,

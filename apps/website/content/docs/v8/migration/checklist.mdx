@@ -7,8 +7,8 @@ Work through this list on a small test server with a few known audio sources.
 
 ## Runtime and voice
 
-- [ ] The bot starts on Node.js 22.18 or newer with ESM.
-- [ ] The embedded host loads FFmpeg 9 and `@remedia/node`, or the remote server loads FFmpeg 9 and starts.
+- [ ] The bot starts on Node.js 22.18 or newer with ESM `import` or CommonJS `require()`.
+- [ ] The embedded host loads `@remedia/node`, or the remote server starts. Official native releases bundle FFmpeg 9; remove obsolete FFmpeg installer steps and library-path configuration.
 - [ ] `initialize(botUserId)` finishes after the bot is ready.
 - [ ] Every raw gateway packet reaches `player.receive()`.
 - [ ] The bot joins and leaves voice channels.

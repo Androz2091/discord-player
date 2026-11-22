@@ -23,15 +23,15 @@ Register them before the first `play()`. `player` and `player.events` ignore `er
 
 ## Diagnose a problem
 
-| Symptom                                  | Check                                                                       |
-| ---------------------------------------- | --------------------------------------------------------------------------- |
-| `player.search()` returns no tracks      | Is a plugin registered and does its `search.query.match` accept the query?  |
-| `No source plugin handled ...`           | Does the track have a source reference, or can another plugin bridge it?    |
-| Native library fails to load             | FFmpeg 9 shared libraries on the machine that runs the audio engine         |
-| Voice never connects                     | Bot permissions, `send` routing, and forwarding every packet to `receive()` |
-| Remote node rejects a stream             | Remote nodes cannot read a Node.js `Readable` from your bot                 |
-| A filter update rejects                  | Validate the raw FFmpeg graph                                               |
-| `playerError` right after a track starts | Is the URL reachable from the audio node, and is the format supported?      |
+| Symptom                                  | Check                                                                                   |
+| ---------------------------------------- | --------------------------------------------------------------------------------------- |
+| `player.search()` returns no tracks      | Is a plugin registered and does its `search.query.match` accept the query?              |
+| `No source plugin handled ...`           | Does the track have a source reference, or can another plugin bridge it?                |
+| Native library fails to load             | Node.js version, OS/CPU support, optional addon packages, and the original loader error |
+| Voice never connects                     | Bot permissions, `send` routing, and forwarding every packet to `receive()`             |
+| Remote node rejects a stream             | Remote nodes cannot read a Node.js `Readable` from your bot                             |
+| A filter update rejects                  | Validate the raw FFmpeg graph                                                           |
+| `playerError` right after a track starts | Is the URL reachable from the audio node, and is the format supported?                  |
 
 ## What happens to a failed track
 

@@ -6,7 +6,7 @@ Discord Player is a music framework for Discord bots. Manage queues, tracks, pla
 
 ## Install
 
-Node.js 22.18+ and ESM are required. To start a new bot, generate a project:
+Node.js 22.18 or newer is required. ESM `import` and CommonJS `require()` are supported. To start a new bot, generate a project:
 
 ```bash
 npm create music-bot@dev my-bot
@@ -20,7 +20,7 @@ pnpm add discord-player@dev discord.js @remedia/node
 
 > `discord.js` here is just an example. Discord Player v8 works with **any** Discord API library.
 
-Install [FFmpeg 9 shared libraries](https://discord-player.js.org/docs/v8/installation/ffmpeg) on the machine running audio. Remote-only bot processes do not need FFmpeg locally.
+Official Remedia native addons and server releases bundle FFmpeg 9 through static linking. No separate FFmpeg installation or library-path configuration is needed.
 
 ## Create a player
 

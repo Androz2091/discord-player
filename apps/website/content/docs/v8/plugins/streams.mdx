@@ -1,6 +1,6 @@
 ---
 title: Media sources
-description: Return URLs, files, or streams from track.stream, and know what each kind of node can open.
+description: Pass URLs, files, encoded streams, or remote operations to Remedia.
 ---
 
 `track.stream` returns the audio for a track. The Player passes it to Remedia as a media source.
@@ -25,18 +25,34 @@ ctx.on('track.stream', async ({ track }) => ({ stream: createEncodedReadable(tra
 | Source               | Embedded node           | Remote node                                                    |
 | -------------------- | ----------------------- | -------------------------------------------------------------- |
 | HTTP(S) URL          | Yes                     | Yes, if the server can reach it and its media policy allows it |
-| File path            | Yes, on the bot machine | Only if the same file exists on the server                     |
+| File path            | Yes, on the bot machine | A server-local path under the server's allowed media roots     |
 | `Readable` or buffer | Yes                     | No                                                             |
+| Plugin operation     | No                      | Playback and staging through a configured source host          |
 
 A remote node runs on another machine and cannot read your bot's memory, files, or streams. For remote nodes, return a URL the server can open, or use a [remote source host](/docs/v8/plugins/remote-hosts).
+
+Operation sources identify a host deployment, plugin, operation, and serializable input. Remedia resolves them when playback or staging starts. They cannot be probed or moved to another node, and they do not contain a temporary media grant.
 
 Do not assume a private local file is available on another server.
 
 ## Encoded audio only
 
-A `Readable` carries encoded audio such as MP3, Ogg, or M4A. Remedia decodes it. A `Readable` is not a place to push raw PCM or Opus frames.
+A `Readable` carries encoded audio such as MP3, Ogg, or M4A. Remedia selects decoding or compatible Opus passthrough. A `Readable` is not a place to push raw PCM or unframed Opus packets.
 
 To modify the encoded bytes before decoding, add a `stream.transform` handler. It runs only for local streams, must stop when the signal aborts, and should not keep unbounded chunks in memory.
+
+## HTTP request headers
+
+A URL source can include request headers for embedded and remote playback:
+
+```ts
+ctx.on('track.stream', ({ track }) => ({
+  url: track.url,
+  headers: { Referer: 'https://media.example.com/' },
+}));
+```
+
+Treat authorization and cookies as credentials. Keep them out of Track metadata and logs. Direct URL redirects are handled by FFmpeg and may forward headers to another origin; use trusted destinations when supplying sensitive headers.
 
 ## Remote-safe URLs
 

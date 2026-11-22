@@ -300,7 +300,7 @@ continues to execute local registrations and rejects remote-host Tracks.
 `pnpm build`, `pnpm typecheck`, `pnpm test`, `pnpm lint`, and `pnpm format:check`
 cover the workspace. Tests use local mock extractors and include
 real HTTP disconnect/shutdown, and real FFmpeg decoding of generated MP3, Ogg/Opus
-and faststart M4A. FFmpeg must be installed; CI installs it explicitly. No personal
+and faststart M4A. These tests invoke the standalone FFmpeg executable; CI installs it explicitly. This is independent of Remedia's bundled runtime. No personal
 media files or third-party service access are needed. CI builds the host before discord-player,
 includes its dist artifacts, and publishes it before dependent packages using the
 shared release inventory.

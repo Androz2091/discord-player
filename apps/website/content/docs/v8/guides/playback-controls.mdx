@@ -41,6 +41,8 @@ const bar = queue.node.createProgressBar({ length: 20 });
 
 `playbackTime` prefers Remedia’s live source-media clock, keeping progress aligned with the source duration under filters such as `nightcore` and `vaporwave`. If that clock is unavailable, it uses the latest source position snapshot, then output elapsed time. It starts at zero for each new track and moves to the source seek target after a seek. `streamTime` uses the same clock, and `progress` is capped at 100.
 
+These clocks estimate progress; they do not measure what a Discord listener has heard. Raw Remedia `session.position` separates source time (`mediaMs`) from submitted output time (`submittedMs`). Discord does not report an audible sample position, so `playedMs` can be `null`.
+
 ## Seek
 
 ```ts
@@ -49,9 +51,23 @@ await queue.node.seek(90_000);
 
 Whether a seek works depends on the source:
 
-- Files and URLs usually support seeking.
-- Plugin sources on a remote node can only seek forward. A backward seek is rejected.
-- A source with an unknown duration may reject a seek.
+- Files, owned buffers, and seekable HTTP resources can seek when the demuxer supports it.
+- Readables and plugin media grants are normally forward-only. Forward seeks decode and discard audio, and decoder read-ahead can make an earlier position unavailable.
+- Knowing a duration does not guarantee that a source can seek. Handle rejections for unsupported inputs and positions.
+
+### Fallback seeking
+
+Opt in when creating the queue's voice session:
+
+```ts
+await queue.connect({ channelId, enableFallbackSeeking: true });
+```
+
+This setting cannot be changed on an existing session. A remote node must advertise fallback-seeking support; requesting it on an unsupported node rejects session creation.
+
+Remedia can reopen an eligible non-seekable source in a second decoder while the current source keeps playing. An operation source is reopened by executing its operation again; a one-shot `Readable` cannot be reopened. This allows backward seeks on eligible operation sources as well as seeks on HTTP resources without usable range support. The seek can take seconds, so remote `requestTimeoutMs` must allow for preparation.
+
+The applied position includes source time that elapsed during preparation. `playerSeek` carries the native `playbackSeeked` event: `requestedPositionMs` is the target, `positionMs` is where playback continues, and `fallback` identifies a replacement. Use the applied position for progress. A fallback seek can advance the native generation without firing `playerStart` for another Track. See Remedia's [seeking behavior](https://remedia.twlite.dev/docs/client/positions) for cancellation and timing details.
 
 Handle the rejection and tell the user:
 

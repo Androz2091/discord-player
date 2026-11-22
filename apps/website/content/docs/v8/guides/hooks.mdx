@@ -58,10 +58,11 @@ A replacement can be:
 - A native media descriptor.
 - A Node.js `Readable`, `Buffer`, or `Uint8Array` of encoded audio.
 
-| Source               | Embedded node | Remote node                    |
-| -------------------- | ------------- | ------------------------------ |
-| URL or file          | Yes           | Yes, if the server can open it |
-| `Readable` or buffer | Yes           | No                             |
+| Source               | Embedded node | Remote node                      |
+| -------------------- | ------------- | -------------------------------- |
+| URL or file          | Yes           | Yes, if the server can open it   |
+| `Readable` or buffer | Yes           | No                               |
+| Operation descriptor | No            | Through a configured source host |
 
 An unsupported source fails with an error. The Player does not move the guild to another node.
 
@@ -69,7 +70,7 @@ An unsupported source fails with an error. The Player does not move the guild to
 
 The last argument is an `AbortSignal` for the preparation. Pass it to your own I/O. The queue also checks it after your hook returns and closes streams that arrive late.
 
-With crossfade, hooks run when the next track is staged. The prepared source is reused when it becomes audible.
+With crossfade, hooks run when the next track is staged. The prepared source is reused when Remedia promotes it; staging does not fire `playerStart`.
 
 ## onStreamExtracted
 

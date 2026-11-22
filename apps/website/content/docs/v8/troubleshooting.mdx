@@ -7,15 +7,23 @@ Find the layer first. A missing source plugin and a native decoder failure are d
 
 ## Installation and native runtime
 
-**Symptom:** `ERR_DLOPEN_FAILED`, a missing `.node` addon, `avcodec` or FFmpeg library errors, or missing Windows DLLs.
+**Symptom:** `ERR_DLOPEN_FAILED`, a missing `.node` addon, or an OS loader error.
 
 **Check:**
 
 - Node.js version and CPU architecture.
 - That optional platform packages were installed.
-- The five FFmpeg 9 shared libraries and their ABI versions (63, 63, 61, 12, 7).
+- The original error and its `cause` chain, including the platform addon candidates the loader tried.
 
-Run the [smoke test](/docs/v8/installation/ffmpeg#verify-your-installation). Embedded hosts need the libraries locally. A bot that only uses remote nodes does not.
+Official Remedia native addons and server releases statically link FFmpeg 9. No separate FFmpeg installation or library-path configuration is needed. Static FFmpeg linking does not eliminate OS runtime dependencies. See Remedia's [platform support](https://remedia.twlite.dev/docs/node/distribution) and [native loader diagnostics](https://remedia.twlite.dev/docs/node/troubleshooting).
+
+To inspect an installed embedded runtime without joining voice:
+
+```bash
+node --input-type=module -e "import { getFFmpegRuntime } from '@remedia/node'; console.log(getFFmpegRuntime())"
+```
+
+This reports the bundled build; it does not test audio playback. For remote deployments, run `remedia-server doctor` on the server and inspect its runtime, environment, and configuration results separately.
 
 ## The generated bot will not start
 
@@ -23,12 +31,12 @@ Run the [smoke test](/docs/v8/installation/ffmpeg#verify-your-installation). Emb
 
 **Check:** the message it prints.
 
-| Message                                        | Cause                                                                                         |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `DISCORD_TOKEN is not set`                     | `.env` is missing. Copy `.env.example` to `.env`                                              |
-| `ALLOWED_MEDIA_HOSTS must list bare hostnames` | An entry is a URL, has a port or a wildcard. List hostnames only                              |
-| `Could not log in to Discord`                  | The token is wrong or was reset                                                               |
-| `Could not start the audio engine`             | The FFmpeg 9 shared libraries are missing. See [Install FFmpeg](/docs/v8/installation/ffmpeg) |
+| Message                                        | Cause                                                                                               |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `DISCORD_TOKEN is not set`                     | `.env` is missing. Copy `.env.example` to `.env`                                                    |
+| `ALLOWED_MEDIA_HOSTS must list bare hostnames` | An entry is a URL, has a port or a wildcard. List hostnames only                                    |
+| `Could not log in to Discord`                  | The token is wrong or was reset                                                                     |
+| `Could not start the bot`                      | Read the attached error. Check native runtime loading, bot initialization, and command registration |
 
 `/play` replies that playback is disabled until `ALLOWED_MEDIA_HOSTS` contains the host of the link. See [the generated project](/docs/v8/getting-started/create-music-bot).
 
@@ -79,9 +87,9 @@ See the [playback lifecycle](/docs/v8/architecture/lifecycle).
 
 <Cards>
   <Card
-    title="FFmpeg installation"
-    href="/docs/v8/installation/ffmpeg"
-    description="Libraries, platforms, and the smoke test."
+    title="Runtime installation"
+    href="/docs/v8/installation"
+    description="Install the native addon or connect a remote server."
   />
   <Card title="Operations" href="/docs/v8/plugins/operations" description="Matching, priority, and plugin errors." />
   <Card title="Voice" href="/docs/v8/guides/voice" description="Gateway packets, identity, and moves." />

@@ -14,32 +14,10 @@ You need:
 - Node.js 22.18 or newer.
 - A Discord application with a bot token. Create one in the [Discord Developer Portal](https://discord.com/developers/applications).
 - A server where the bot can join and speak in a voice channel.
-- FFmpeg 9 shared libraries on the machine that runs the bot. See the next section.
 
-## 1. Install FFmpeg 9
+Remedia bundles FFmpeg 9 in its native addon. No separate FFmpeg installation or library-path configuration is needed. Allow optional platform packages when installing dependencies.
 
-Remedia decodes audio with FFmpeg's shared libraries. An `ffmpeg` executable is not enough, and most Linux distributions ship an older version. Remedia's installer sets up the right libraries in `~/.remedia/ffmpeg9`, and `@remedia/node` finds them without any configuration.
-
-<Tabs items={['Linux and macOS', 'Windows PowerShell']}>
-  <Tab value="Linux and macOS">
-
-```bash
-curl -fsSL https://remedia.twlite.dev/install.sh | sh -s -- --ffmpeg-only
-```
-
-  </Tab>
-  <Tab value="Windows PowerShell">
-
-```powershell
-& ([scriptblock]::Create((irm https://remedia.twlite.dev/install.ps1))) -FFmpegOnly
-```
-
-  </Tab>
-</Tabs>
-
-[Install FFmpeg](/docs/v8/installation/ffmpeg) lists other methods and how to check the result.
-
-## 2. Create the project
+## 1. Create the project
 
 <Tabs items={['npm', 'pnpm', 'yarn', 'bun']}>
   <Tab value="npm">
@@ -84,7 +62,7 @@ The generator asks three questions:
 
 To skip the questions, pass flags. For example, `npm create music-bot@dev my-bot -- --template js --install` creates a JavaScript project and installs it. See [the generator](/docs/v8/getting-started/create-music-bot) for every option.
 
-## 3. Add your token and a media host
+## 2. Add your token and a media host
 
 ```bash
 cd my-bot
@@ -100,7 +78,7 @@ ALLOWED_MEDIA_HOSTS=media.example.com
 
 `ALLOWED_MEDIA_HOSTS` lists the hostnames `/play` may load audio from, separated by commas. It is empty by default and `/play` refuses every link until you set it. Use hosts you trust: Remedia follows redirects, so a listed host can send the bot elsewhere.
 
-## 4. Invite the bot
+## 3. Invite the bot
 
 In the Developer Portal, open **OAuth2** and create an invite URL with:
 
@@ -109,7 +87,7 @@ In the Developer Portal, open **OAuth2** and create an invite URL with:
 
 Open the URL and add the bot to your server. The bot does not need any privileged intent.
 
-## 5. Install and run
+## 4. Install and run
 
 If you did not let the generator install dependencies, run `npm install` first.
 
@@ -125,7 +103,7 @@ Ready as My Bot#1234
 
 The first start registers the slash commands. Global commands can take a few minutes to appear.
 
-## 6. Play a track
+## 5. Play a track
 
 Join a voice channel and run `/play` with a direct link to an audio file on an allowed host, for example `https://media.example.com/song.mp3`. The bot joins, announces the track in the channel where you ran the command, and plays it.
 
@@ -133,15 +111,15 @@ Use `/queue` to see what is next and `/skip`, `/pause`, `/resume`, or `/stop` to
 
 ## If something goes wrong
 
-| Message or symptom                      | Fix                                                                                                                                  |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `DISCORD_TOKEN is not set`              | Create `.env` from `.env.example` and set the token                                                                                  |
-| `Could not log in to Discord`           | The token is wrong or was reset. Copy a new one from the Developer Portal                                                            |
-| `Could not start the audio engine`      | FFmpeg 9 shared libraries are missing. Follow step 1 and [verify the install](/docs/v8/installation/ffmpeg#verify-your-installation) |
-| `/play` says playback is disabled       | Set `ALLOWED_MEDIA_HOSTS` in `.env` and restart                                                                                      |
-| `"host" is not in ALLOWED_MEDIA_HOSTS`  | Add the exact hostname to the list                                                                                                   |
-| `I could not read audio from that link` | The link must point straight at an audio file that Remedia can open, not at a web page                                               |
-| Slash commands do not appear            | Wait a few minutes after the first start, and check the invite included `applications.commands`                                      |
+| Message or symptom                      | Fix                                                                                                                       |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `DISCORD_TOKEN is not set`              | Create `.env` from `.env.example` and set the token                                                                       |
+| `Could not log in to Discord`           | The token is wrong or was reset. Copy a new one from the Developer Portal                                                 |
+| `Could not start the bot`               | Read the attached error and check [runtime loading and startup](/docs/v8/troubleshooting#installation-and-native-runtime) |
+| `/play` says playback is disabled       | Set `ALLOWED_MEDIA_HOSTS` in `.env` and restart                                                                           |
+| `"host" is not in ALLOWED_MEDIA_HOSTS`  | Add the exact hostname to the list                                                                                        |
+| `I could not read audio from that link` | The link must point straight at an audio file that Remedia can open, not at a web page                                    |
+| Slash commands do not appear            | Wait a few minutes after the first start, and check the invite included `applications.commands`                           |
 
 More causes are in [Troubleshooting](/docs/v8/troubleshooting).
 

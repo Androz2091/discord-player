@@ -4,12 +4,13 @@ A Discord music bot built with [Discord Player v8](https://discord-player.js.org
 
 ## Set up
 
-1. **Install FFmpeg 9 shared libraries.** Remedia needs them on the machine that runs the bot. An `ffmpeg` executable alone is not enough. Follow the [FFmpeg guide](https://discord-player.js.org/docs/v8/installation/ffmpeg).
-2. **Create a bot** in the [Discord Developer Portal](https://discord.com/developers/applications) and copy its token. Invite it with the `bot` and `applications.commands` scopes and the View Channel, Send Messages, Connect, and Speak permissions.
-3. **Configure the bot.** Copy `.env.example` to `.env`, then set:
+Remedia bundles FFmpeg 9 in its native addon, so no separate FFmpeg installation is needed. Allow optional platform packages when installing dependencies.
+
+1. **Create a bot** in the [Discord Developer Portal](https://discord.com/developers/applications) and copy its token. Invite it with the `bot` and `applications.commands` scopes and the View Channel, Send Messages, Connect, and Speak permissions.
+2. **Configure the bot.** Copy `.env.example` to `.env`, then set:
    - `DISCORD_TOKEN`: the bot token.
    - `ALLOWED_MEDIA_HOSTS`: comma-separated hostnames that `/play` may load audio from.
-4. **Install and run.**
+3. **Install and run.**
 
 ```bash
 {{install}}

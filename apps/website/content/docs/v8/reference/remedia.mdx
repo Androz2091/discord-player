@@ -17,7 +17,7 @@ nodes: [{ id: 'local', type: 'embedded', capacity: 8 }];
 | `type`     | `'embedded'`                                    |
 | `capacity` | Maximum simultaneous guild sessions. Default 64 |
 
-It uses `@remedia/node` in your process and needs the [FFmpeg 9 shared libraries](/docs/v8/installation/ffmpeg) on that machine.
+It uses `@remedia/node` in your process. Official native addons statically link FFmpeg 9, so no separate FFmpeg installation or library-path configuration is needed.
 
 ## Remote node
 
@@ -40,7 +40,7 @@ nodes: [
 | `auth`     | `{ username, password }` for HTTP Basic authentication. Do not log it            |
 | `capacity` | Overrides the server's reported player maximum for selection                     |
 
-The bot machine does not need FFmpeg when it only uses remote nodes. Use TLS and server-side access limits. See [remote playback](/docs/v8/remedia/remote).
+A remote-only bot does not need `@remedia/node`; official server releases bundle FFmpeg 9. Use TLS and server-side access limits. See [remote playback](/docs/v8/remedia/remote).
 
 ## Client options
 

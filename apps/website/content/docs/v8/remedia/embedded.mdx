@@ -20,11 +20,11 @@ await player.initialize(botUserId);
 
 ## Set up
 
-1. Use Node.js 22.18 or newer with ESM.
+1. Use Node.js 22.18 or newer. Both ESM `import` and CommonJS `require()` are supported.
 2. Install `discord-player` and `@remedia/node`.
-3. Install the [FFmpeg 9 shared libraries](/docs/v8/installation/ffmpeg) on the bot machine. The `ffmpeg` executable alone is not enough.
-4. Allow optional platform packages during installation, so the native binary for your platform is installed.
-5. Run the [smoke test](/docs/v8/installation/ffmpeg#verify-your-installation).
+3. Allow optional platform packages during installation, so the native binary for your OS and CPU architecture is installed.
+
+The official native addon statically links FFmpeg 9. No separate FFmpeg installation or library-path configuration is needed. For addon loading failures, check the original error and [native runtime troubleshooting](/docs/v8/troubleshooting#installation-and-native-runtime).
 
 ## What embedded nodes allow
 

@@ -24,7 +24,6 @@ You also need a Discord gateway library such as discord.js. Discord Player does 
 | -------------------------- | -------------------------------------- | ------------------------------------- |
 | Audio engine               | Inside your bot process                | A separate `remedia-server`           |
 | Extra package on the bot   | `@remedia/node`                        | None                                  |
-| FFmpeg 9 libraries         | On the bot machine                     | On the server machine                 |
 | Local streams from plugins | Supported                              | Not supported                         |
 | Best for                   | First bots, single-machine deployments | Scaling, isolating audio from the bot |
 
@@ -45,7 +44,7 @@ const player = new Player({
 
 `nodes` can be omitted. A Player without `nodes` uses one embedded node named `local`.
 
-Install the [FFmpeg 9 shared libraries](/docs/v8/installation/ffmpeg) on the bot machine. An `ffmpeg` executable alone is not enough.
+The official `@remedia/node` addon bundles FFmpeg 9 through static linking. No separate FFmpeg installation or library-path configuration is needed. Allow optional dependencies so the native addon for your OS and CPU architecture is installed.
 
 ### Remote playback
 
@@ -65,6 +64,6 @@ const player = new Player({
 });
 ```
 
-`send` is the gateway callback from the [manual setup tutorial](/docs/v8/getting-started/create-player). The audio server needs FFmpeg and the bot does not. See [remote playback](/docs/v8/remedia/remote) for server setup.
+`send` is the gateway callback from the [manual setup tutorial](/docs/v8/getting-started/create-player). Official server releases also bundle FFmpeg 9. A remote-only bot does not need `@remedia/node`. See [remote playback](/docs/v8/remedia/remote) for server setup.
 
 <NextStep href="/docs/v8/getting-started" label="Create a music bot" />

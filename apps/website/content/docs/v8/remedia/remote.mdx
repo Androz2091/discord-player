@@ -3,7 +3,7 @@ title: Remote playback
 description: Run Remedia on another machine and connect your bot to it.
 ---
 
-A remote node is the same engine running in `remedia-server`. Your bot still owns the Discord gateway connection and source plugins. The server decodes audio and sends it to Discord voice, so the bot machine does not need FFmpeg.
+A remote node is the same engine running in `remedia-server`. Your bot still owns the Discord gateway connection and source plugins. The server processes audio and sends it to Discord voice using bundled FFmpeg 9. A remote-only bot does not need `@remedia/node`.
 
 ## Connect the bot
 
@@ -46,13 +46,13 @@ remedia-server serve --config ./remedia.config.json --env-file .env
 | Command                  | Purpose                                                                     |
 | ------------------------ | --------------------------------------------------------------------------- |
 | `--generate-config-file` | Writes a starter `remedia.config.json` without overwriting an existing file |
-| `doctor`                 | Checks the FFmpeg 9 libraries and the configuration                         |
+| `doctor`                 | Reports bundled runtime diagnostics and checks configuration                |
 | `serve`                  | Starts the server                                                           |
 | `--list`                 | Shows Remedia servers running on this machine for the current user          |
 
 The generated configuration denies all media URLs and files until you allow them. Put the password in `.env` and reference it from the configuration. `--env-file` requires the file to exist, and `--optional-env-file` does not.
 
-`serve` and `doctor` need the FFmpeg 9 libraries on the server. The `--list` command does not.
+Official server releases statically link FFmpeg 9. No separate FFmpeg installation or library-path configuration is needed. Install the complete release, including its CLI and runtime executables, and keep them together when deploying or upgrading.
 
 For configuration and deployment details, see the Remedia [configuration reference](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/configuration.mdx) and [deployment guide](https://github.com/twlite/remedia/blob/main/apps/docs/content/docs/server/deployment.mdx).
 
@@ -86,7 +86,7 @@ Do not serialize guild joins to avoid timeouts. Each guild has an independent se
 
 A guild stays on the node it was assigned to. When the connection drops, the client reconnects and tries to resume its sessions. A lost session is not a finished track, so watch the `sessionLost` and `sessionResumed` events and recover on purpose.
 
-The Remedia client can move a session to another node, but the move may need to reconnect and reopen the audio. Do not expect gapless transfers or automatic load shedding from Discord Player.
+The Remedia client has explicit session migration, but Discord Player does not automatically move guilds for load shedding. A move can reconnect voice and reopen supported sources; it is not gapless. Operation sources retain host and node affinity and cannot be migrated to another node. Do not use raw client migration to bypass the queue's placement rules.
 
 ## Crossfade
 

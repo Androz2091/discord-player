@@ -81,7 +81,7 @@ The queue never decodes audio or sends UDP packets. `queue.node.play()` is raw R
 
 `PluginRegistry` dispatches named operations such as `search.query.match`, `search.query.resolve`, `track.stream`, `track.related`, `track.bridge`, and `stream.transform`.
 
-The `BaseExtractor` adapter turns legacy methods into the same operations, so there is one dispatcher. Source resolution runs in your bot process. Plugins are not copied to remote audio nodes.
+The `BaseExtractor` adapter turns legacy methods into the same operations, so there is one dispatcher. Local source resolution runs in your bot process. A standalone source host uses that dispatcher in a separate process; a remote node can execute its configured operations when opening or staging audio. Plugins are not copied from the bot to remote audio nodes.
 
 ### 4. Remedia client
 
@@ -89,7 +89,7 @@ The `BaseExtractor` adapter turns legacy methods into the same operations, so th
 
 ### 5. Engine and voice
 
-`remedia-core` opens the source with FFmpeg, decodes and resamples it, applies filters and volume, and tracks the source position. `remedia-discord` encodes Opus and delivers it over Discord's encrypted voice transport. Playback events return through the client to the owning queue.
+`remedia-core` opens the source with bundled FFmpeg. Compatible Opus inputs can use passthrough; sources that need decoding, filters, gain changes, or crossfade use PCM processing and Opus encoding. Remedia selects and switches the processing path. `remedia-discord` delivers packets over Discord's encrypted voice transport. Playback events return through the client to the owning queue.
 
 ## Read next
 

@@ -222,10 +222,11 @@ describe.each(TEMPLATES)('generated %s bot', (template) => {
       await bot.stop();
     });
 
-    it('stops with a failure and an FFmpeg hint when the audio engine cannot start', async () => {
+    it('preserves the startup error and stops with runtime troubleshooting guidance', async () => {
       const { createBot } = await load<typeof BotModule>(template, 'bot');
 
-      vi.spyOn(RemediaClient, 'create').mockRejectedValue(new Error('libavcodec.so.63 not found'));
+      const startupError = new Error('Native addon could not be loaded');
+      vi.spyOn(RemediaClient, 'create').mockRejectedValue(startupError);
 
       const bot = createBot({ token: 'token', allowedMediaHosts: hosts });
       const set = vi.fn();
@@ -240,7 +241,10 @@ describe.each(TEMPLATES)('generated %s bot', (template) => {
       await vi.waitFor(() => expect(destroy).toHaveBeenCalledOnce());
 
       expect(set).not.toHaveBeenCalled();
-      expect(error.mock.calls[0]?.[0]).toContain('FFmpeg 9 shared libraries');
+      expect(error).toHaveBeenCalledExactlyOnceWith(
+        'Could not start the bot. See https://discord-player.js.org/docs/v8/troubleshooting for startup diagnostics.',
+        startupError,
+      );
       expect(process.exitCode).toBe(1);
     });
 

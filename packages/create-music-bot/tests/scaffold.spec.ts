@@ -166,6 +166,15 @@ describe('rendered files', () => {
     expect(files.has('_gitignore')).toBe(false);
   });
 
+  it.each(TEMPLATES)('%s documents the bundled runtime without a separate FFmpeg installation', (template) => {
+    const readme = render(template).files.get('README.md') ?? '';
+
+    expect(readme).toContain('Remedia bundles FFmpeg 9 in its native addon');
+    expect(readme).toContain('Allow optional platform packages');
+    expect(readme).not.toContain('installation/ffmpeg');
+    expect(readme).not.toContain('shared libraries');
+  });
+
   it('fills the README with the project name and package manager commands', () => {
     const readme = render('ts', 'pnpm').files.get('README.md') ?? '';
 
