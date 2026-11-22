@@ -72,6 +72,9 @@ jobs:
       - name: Build packages and applications
         run: pnpm build
 
+      - name: Verify package build outputs
+        run: node .github/scripts/release.mjs verify-build
+
       - name: Typecheck all workspaces
         run: pnpm typecheck
 
