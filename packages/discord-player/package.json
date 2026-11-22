@@ -50,7 +50,7 @@
   "dependencies": {
     "@discord-player/plugin-host": "workspace:*",
     "@discordjs/collection": "^2.1.1",
-    "@remedia/client": "0.3.1",
+    "@remedia/client": "0.4.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
