@@ -8,7 +8,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { expect, it } from 'vitest';
 import { createNodeMiddleware } from '@remedia/plugin-host/node';
-import { openMedia } from '../src/media.js';
+import { openMedia, validateMediaHeaders } from '../src/media.js';
 import {
   createSourcePluginHost,
   definePlugin,
@@ -335,4 +335,69 @@ it('returns accessible direct URLs with expiration without proxying bytes when e
     await h.close();
     await close(server);
   }
+});
+
+it('forwards media headers through same-origin redirects', async () => {
+  const received: Array<{ cookie?: string; referer?: string }> = [];
+  const server = createServer((req, res) => {
+    received.push({ cookie: req.headers.cookie, referer: req.headers.referer });
+    if (req.url === '/redirect') {
+      res.writeHead(302, { location: '/audio' });
+      res.end();
+    } else res.end('encoded');
+  });
+  const origin = await listen(server);
+  try {
+    const result = await openMedia(
+      { url: origin + '/redirect', headers: { Cookie: 'session=private', Referer: 'https://source.example/' } },
+      { allowPrivateNetworks: true },
+    );
+    if (!('stream' in result)) throw new Error('Expected stream');
+    expect((await collect(result.stream)).join('')).toBe('encoded');
+    expect(received).toEqual([
+      { cookie: 'session=private', referer: 'https://source.example/' },
+      { cookie: 'session=private', referer: 'https://source.example/' },
+    ]);
+  } finally {
+    await close(server);
+  }
+});
+
+it('does not forward cookie or authorization to another origin on redirects', async () => {
+  let headers: import('node:http').IncomingHttpHeaders | undefined;
+  const destination = createServer((req, res) => {
+    headers = req.headers;
+    res.end('encoded');
+  });
+  const destinationUrl = await listen(destination);
+  const originServer = createServer((_req, res) => {
+    res.writeHead(302, { location: destinationUrl });
+    res.end();
+  });
+  const origin = await listen(originServer);
+  try {
+    const result = await openMedia(
+      {
+        url: origin + '/redirect',
+        headers: { Cookie: 'session=private', Authorization: 'Bearer private', Referer: 'https://source.example/' },
+      },
+      { allowPrivateNetworks: true },
+    );
+    if (!('stream' in result)) throw new Error('Expected stream');
+    expect((await collect(result.stream)).join('')).toBe('encoded');
+    expect(headers?.cookie).toBeUndefined();
+    expect(headers?.authorization).toBeUndefined();
+    expect(headers?.referer).toBe('https://source.example/');
+  } finally {
+    await close(originServer);
+    await close(destination);
+  }
+});
+
+it('validates extractor-provided media headers', () => {
+  expect(validateMediaHeaders({ Cookie: 'session=one' })).toEqual({ Cookie: 'session=one' });
+  expect(() => validateMediaHeaders({ Host: 'private.test' })).toThrow('Invalid media header name');
+  expect(() => validateMediaHeaders({ Cookie: 'secret\r\nX-Injected: yes' })).toThrow('Invalid media header value');
+  expect(() => validateMediaHeaders({ Referer: 23 })).toThrow('Invalid media header value');
+  expect(() => validateMediaHeaders({ 'X-Test': 'x'.repeat(17000) })).toThrow('16 KiB');
 });
