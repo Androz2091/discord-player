@@ -24,5 +24,5 @@
     }
   },
   "include": ["src", "commandkit.config.ts", "commandkit-env.d.ts"],
-  "exclude": ["dist", "node_modules", ".commandkit"]
+  "exclude": ["dist", "node_modules", ".commandkit", "src/lib/_legacy-extractor-test"]
 }

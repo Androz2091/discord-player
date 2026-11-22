@@ -22,7 +22,12 @@ it('loads built and packed public packages through ESM and require without nativ
       const root = join(repository, 'packages', folder);
       const destination = join(directory, folder);
       await mkdir(destination);
-      await exec('pnpm', ['pack', '--pack-destination', destination], { cwd: root });
+      if (!process.env.npm_execpath) throw new Error('Run package tests through pnpm');
+      const pnpm = process.env.npm_execpath;
+      const args = ['pack', '--pack-destination', destination];
+      await exec(pnpm.endsWith('.exe') ? pnpm : process.execPath, pnpm.endsWith('.exe') ? args : [pnpm, ...args], {
+        cwd: root,
+      });
       const archive = (await readdir(destination)).find((file) => file.endsWith('.tgz'));
       if (!archive) throw new Error(`Missing packed ${name}`);
       await exec('tar', ['-xzf', join(destination, archive), '-C', destination]);

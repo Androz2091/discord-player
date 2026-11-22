@@ -56,7 +56,13 @@ export function runCli(
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [cli, ...args], {
       cwd: options.cwd,
-      env: { ...process.env, npm_config_user_agent: 'npm/11.0.0 node/v22.18.0', ...options.env },
+      env: {
+        ...Object.fromEntries(
+          Object.entries(process.env).filter(([key]) => key.toLowerCase() !== 'npm_config_user_agent'),
+        ),
+        npm_config_user_agent: 'npm/11.0.0 node/v22.18.0',
+        ...options.env,
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let stdout = '';

@@ -231,7 +231,7 @@ test('removing the source plugin aborts pending filesystem work and drains its h
 });
 
 test('normalizes punctuation, symbols, spacing and accents while retaining original file metadata', async () => {
-  const name = 'Artist: Café___Night—Drive! (Live) 🎵.mp3';
+  const name = 'Artist; Café___Night—Drive! (Live) 🎵.mp3';
 
   await writeFile(join(directory, name), 'audio');
 

@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { basename, dirname, join, posix, resolve } from 'node:path';
 
 /** Languages a project can be generated in. */
@@ -14,7 +15,9 @@ export const PACKAGE_MANAGERS = ['npm', 'pnpm', 'yarn', 'bun'] as const;
 export type PackageManager = (typeof PACKAGE_MANAGERS)[number];
 
 /** Embedded audio runtime installed in generated projects. */
-export const REMEDIA_NODE_VERSION = '0.3.1';
+export const REMEDIA_NODE_VERSION: string = (
+  createRequire(import.meta.url)('../package.json') as { devDependencies: { '@remedia/node': string } }
+).devDependencies['@remedia/node'];
 
 const DISCORD_JS_VERSION = '^14.28.1';
 const NODE_TYPES_VERSION = '^22.20.5';

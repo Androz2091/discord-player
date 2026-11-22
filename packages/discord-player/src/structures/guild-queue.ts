@@ -1237,6 +1237,14 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   private applyPlaybackStarted(session: PlaybackSession, event: StartedEvent, rawEvent?: StartedEvent): void {
+    if (
+      this.#destroyed ||
+      session !== this.node.session ||
+      event.sessionId !== session.sessionId ||
+      event.generation !== session.snapshot.generation
+    )
+      return;
+
     if (event.transition) this.promote(session, event);
     else if (session === this.node.session && !this.matchOperation(session, event)) {
       this.#prepareRequest = null;
@@ -1259,19 +1267,47 @@ export class GuildQueue<Metadata = unknown> {
   }
 
   /**
+   * Retain the source generation established by a native seek, including fallback seeking.
+   * @internal
+   * @param session Exact session emitting the seek.
+   * @param event Native seek identity and position.
+   */
+  public handlePlaybackSeeked(session: PlaybackSession, event: DiscordSessionEvents['playbackSeeked'][0]): void {
+    if (this.#destroyed || event.generation !== session.snapshot.generation) return;
+
+    const operation = this.matchOperation(session, event);
+
+    if (
+      operation &&
+      operation === this.#operation &&
+      !operation.terminal &&
+      !operation.pendingTerminal &&
+      operation.generation !== null &&
+      event.generation >= operation.generation
+    )
+      operation.generation = event.generation;
+  }
+
+  /**
    * Consume a generation-aware Remedia terminal event once.
    * @param session Exact session that emitted the lifecycle event.
    * @param kind Application-level terminal classification.
    * @param event Generation-aware Remedia completion, stop, or failure event.
    */
   public handlePlaybackTerminal(session: PlaybackSession, kind: PlaybackTerminalKind, event: TerminalEvent): void {
-    if (this.#destroyed) return;
+    if (this.#destroyed || session !== this.node.session || event.sessionId !== session.sessionId) return;
 
     if ('continuation' in event && event.continuation && this.#reservation) {
       const reservation = this.#reservation;
       const info = session.snapshot.source;
 
-      if (info && event.continuation.entryId === reservation.entryId)
+      if (
+        info &&
+        this.matchOperation(session, event) === reservation.outgoing &&
+        event.generation === reservation.outgoing.generation &&
+        event.continuation.generation === session.snapshot.generation &&
+        event.continuation.entryId === reservation.entryId
+      )
         this.applyPlaybackStarted(session, {
           sessionId: session.sessionId,
           nodeId: session.nodeId,
@@ -1675,14 +1711,14 @@ export class GuildQueue<Metadata = unknown> {
     if (!session.stagedSource) return;
     const stage = await session.stagedSource();
 
-    if (this.#reservation !== reservation) return;
+    if (this.#destroyed || session !== this.node.session || this.#reservation !== reservation) return;
 
     const snapshot = session.snapshot;
 
     if (
       !stage &&
       ['playing', 'paused'].includes(snapshot.state) &&
-      snapshot.generation > (reservation.outgoing.generation ?? Infinity) &&
+      snapshot.generation === (reservation.outgoing.generation ?? Infinity) + 1 &&
       snapshot.source
     ) {
       this.applyPlaybackStarted(session, {
@@ -2279,12 +2315,12 @@ export class GuildQueue<Metadata = unknown> {
     session: PlaybackSession,
     event: Pick<StartedEvent, 'sessionId' | 'generation' | 'customMetadata'>,
   ): ManagedOperation | null {
+    if (session !== this.node.session || event.sessionId !== session.sessionId) return null;
+
     // Remedia metadata is optional. Once a managed start has established the
     // generation, session and generation together identify its later events.
     // Never use this path for supplied but foreign metadata or an unknown start.
     if (event.customMetadata === undefined) {
-      if (session !== this.node.session || event.sessionId !== session.sessionId) return null;
-
       return (
         [this.#operation, ...this.#outgoing.values()].find(
           (operation) => operation?.session === session && operation.generation === event.generation,

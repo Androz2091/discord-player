@@ -1,4 +1,4 @@
-import { createServer, type Server } from 'node:http';
+import { createServer, type Server, type IncomingHttpHeaders } from 'node:http';
 import { once } from 'node:events';
 import { Readable } from 'node:stream';
 import { mkdtemp, rm } from 'node:fs/promises';
@@ -364,7 +364,7 @@ it('forwards media headers through same-origin redirects', async () => {
 });
 
 it('does not forward cookie or authorization to another origin on redirects', async () => {
-  let headers: import('node:http').IncomingHttpHeaders | undefined;
+  let headers: IncomingHttpHeaders | undefined;
   const destination = createServer((req, res) => {
     headers = req.headers;
     res.end('encoded');

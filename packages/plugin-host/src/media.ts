@@ -50,8 +50,7 @@ export function validateMediaHeaders(input: unknown): Record<string, string> | u
   for (const [name, value] of Object.entries(input)) {
     if (!HTTP_HEADER_NAME.test(name) || BLOCKED_MEDIA_HEADERS.has(name.toLowerCase()))
       throw new TypeError('Invalid media header name');
-    if (typeof value !== 'string' || /[\r\n\0]/.test(value))
-      throw new TypeError('Invalid media header value');
+    if (typeof value !== 'string' || /[\r\n\0]/.test(value)) throw new TypeError('Invalid media header value');
     size += name.length + value.length + 4;
     if (size > 16 * 1024) throw new RangeError('Media headers exceed 16 KiB');
     headers[name] = value;
@@ -276,8 +275,7 @@ export async function openMedia(
     } else if ('url' in source) {
       const headers = validateMediaHeaders((source as HttpMediaSource).headers);
       input = await remote(new URL(source.url), policy, lifetime, headers);
-    }
-    else throw new Error('A source host cannot materialize another operation source');
+    } else throw new Error('A source host cannot materialize another operation source');
 
     lifetime.throwIfAborted();
 

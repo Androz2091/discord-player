@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   REMEDIA_NODE_VERSION,
@@ -78,8 +78,8 @@ describe('detectPackageManager', () => {
 
 describe('resolveTarget', () => {
   it('names the project after the last path segment', () => {
-    expect(resolveTarget('apps/my-bot', '/work')).toEqual({ directory: '/work/apps/my-bot', name: 'my-bot' });
-    expect(resolveTarget('.', '/work/my-bot')).toEqual({ directory: '/work/my-bot', name: 'my-bot' });
+    expect(resolveTarget('apps/my-bot', '/work')).toEqual({ directory: resolve('/work/apps/my-bot'), name: 'my-bot' });
+    expect(resolveTarget('.', '/work/my-bot')).toEqual({ directory: resolve('/work/my-bot'), name: 'my-bot' });
   });
 });
 

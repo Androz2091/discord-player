@@ -50,7 +50,7 @@ export async function runTypeDoc(
   const app = await Application.bootstrapWithPlugins(
     {
       name: pkg.name,
-      entryPoints: pkg.entries.map((entry) => resolve(root, pkg.directory, entry.file)),
+      entryPoints: pkg.entries.map((entry) => resolve(root, pkg.directory, entry.file).replaceAll('\\', '/')),
       entryPointStrategy: 'resolve',
       tsconfig: options.tsconfig ?? TSCONFIG,
       basePath: root,
@@ -83,7 +83,7 @@ export async function runTypeDoc(
 
   if (!project) throw new Error(`TypeDoc could not convert ${pkg.name}.`);
 
-  const json = app.serializer.projectToObject(project, root as NormalizedPath);
+  const json = app.serializer.projectToObject(project, root.replaceAll('\\', '/') as NormalizedPath);
 
   assertSchema(json);
 

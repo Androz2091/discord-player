@@ -7,8 +7,8 @@ import { deferred, settle } from './mocks/async.js';
 describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %s', (curve) => {
   const enabled = { playback: { crossfade: { enabled: true as const, curve } } };
 
-  async function prepare() {
-    const fixture = await setup({ queueOptions: enabled });
+  async function prepare(nodeType: 'embedded' | 'remote' = 'embedded') {
+    const fixture = await setup({ queueOptions: enabled, nodeType, crossfadeAvailable: true });
     const a = new TestTrack('a');
     const b = new TestTrack('b');
     const c = new TestTrack('c');
@@ -138,6 +138,61 @@ describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %
 
     expect(queue.currentTrack).toBeNull();
     expect(queue.stats.tracksFinished).toBe(3);
+  });
+
+  it.each(['embedded', 'remote'] as const)(
+    'keeps the current reservation when an obsolete start arrives on %s',
+    async (nodeType) => {
+      const { queue, session, player, b } = await prepare(nodeType);
+      const oldMetadata = session.customMetadata;
+      const oldGeneration = session.generation;
+      const finish = session.promote();
+
+      finish();
+      await settle();
+      session.requestPreparation();
+      await settle();
+
+      const stage = session.stage;
+      const start = vi.fn();
+      player.events.on('playerStart', start);
+      session.emit('playbackStarted', {
+        sessionId: session.sessionId,
+        generation: oldGeneration,
+        customMetadata: oldMetadata,
+        state: 'playing',
+        info: session.info,
+      });
+      await settle();
+
+      expect(queue.currentTrack).toBe(b);
+      expect(session.stage).toBe(stage);
+      expect(stage).not.toBeNull();
+      expect(start).not.toHaveBeenCalled();
+      await player.destroy();
+    },
+  );
+
+  it('does not promote a reservation from a foreign session continuation', async () => {
+    const { queue, session, player, a } = await prepare();
+    const metadata = session.customMetadata;
+    const generation = session.generation;
+    session.generation++;
+    session.stage = null;
+
+    session.emit('playbackCompleted', {
+      sessionId: 'obsolete-session',
+      generation,
+      customMetadata: metadata,
+      state: 'completed',
+      continuation: { type: 'promoted', generation: session.generation, entryId: session.stageOptions[0]!.entryId },
+    });
+    await settle();
+
+    expect(queue.currentTrack).toBe(a);
+    expect(queue.size).toBe(2);
+    expect(queue.stats.tracksStarted).toBe(1);
+    await player.destroy();
   });
 
   it('starts playback time from zero for the promoted generation', async () => {
@@ -355,49 +410,89 @@ describe.each(['equalPower', 'adaptive'] as const)('automatic crossfading with %
     expect(queue.size).toBe(1);
   });
 
-  it('recovers a lost incoming start from continuation without replaying the source', async () => {
-    const { player, queue, session, b } = await prepare();
-    const start = vi.fn();
+  it.each(['embedded', 'remote'] as const)(
+    'recovers a lost incoming start from continuation without replaying the source on %s',
+    async (nodeType) => {
+      const { player, queue, session, b } = await prepare(nodeType);
+      const start = vi.fn();
 
-    player.events.on('playerStart', start);
+      player.events.on('playerStart', start);
 
-    const emit = session.emit.bind(session);
-    const spy = vi
-      .spyOn(session, 'emit')
-      .mockImplementation((name, ...args) => (name === 'playbackStarted' ? false : emit(name, ...args)));
-    const finish = session.promote();
+      const emit = session.emit.bind(session);
+      const spy = vi
+        .spyOn(session, 'emit')
+        .mockImplementation((name, ...args) => (name === 'playbackStarted' ? false : emit(name, ...args)));
+      const finish = session.promote();
 
-    spy.mockRestore();
-    finish();
-    await settle();
+      spy.mockRestore();
+      finish();
+      await settle();
 
-    expect(queue.currentTrack).toBe(b);
-    expect(start).toHaveBeenCalledExactlyOnceWith(queue, b, undefined);
-    expect(queue.stats.tracksStarted).toBe(2);
-    expect(queue.stats.tracksFinished).toBe(1);
-    expect(session.playCalls).toBe(1);
-  });
+      expect(queue.currentTrack).toBe(b);
+      expect(start).toHaveBeenCalledExactlyOnceWith(queue, b, undefined);
+      expect(queue.stats.tracksStarted).toBe(2);
+      expect(queue.stats.tracksFinished).toBe(1);
+      expect(session.playCalls).toBe(1);
+    },
+  );
 
-  it('recovers an already promoted source after reconnect', async () => {
-    const { player, queue, session, b } = await prepare();
-    const start = vi.fn();
+  it.each(['embedded', 'remote'] as const)(
+    'recovers an already promoted source after reconnect on %s',
+    async (nodeType) => {
+      const { player, queue, session, b } = await prepare(nodeType);
+      const start = vi.fn();
 
-    player.events.on('playerStart', start);
+      player.events.on('playerStart', start);
 
-    const emit = session.emit.bind(session);
-    const spy = vi
-      .spyOn(session, 'emit')
-      .mockImplementation((name, ...args) => (name === 'playbackStarted' ? false : emit(name, ...args)));
-    const finish = session.promote();
+      const emit = session.emit.bind(session);
+      const spy = vi
+        .spyOn(session, 'emit')
+        .mockImplementation((name, ...args) => (name === 'playbackStarted' ? false : emit(name, ...args)));
+      const finish = session.promote();
 
-    spy.mockRestore();
-    await queue.reconcileCrossfade(queue.node.getSession());
-    finish();
-    await settle();
+      spy.mockRestore();
+      await queue.reconcileCrossfade(queue.node.getSession());
+      finish();
+      await settle();
 
-    expect(queue.currentTrack).toBe(b);
-    expect(start).toHaveBeenCalledExactlyOnceWith(queue, b, undefined);
-    expect(session.playCalls).toBe(1);
+      expect(queue.currentTrack).toBe(b);
+      expect(start).toHaveBeenCalledExactlyOnceWith(queue, b, undefined);
+      expect(session.playCalls).toBe(1);
+    },
+  );
+
+  it.each(['embedded', 'remote'] as const)(
+    'rejects a snapshot that advanced beyond the reserved promotion on %s',
+    async (nodeType) => {
+      const { queue, session, player, a } = await prepare(nodeType);
+      session.stage = null;
+      session.generation += 2;
+      const start = vi.fn();
+      player.events.on('playerStart', start);
+
+      await queue.reconcileCrossfade(queue.node.getSession());
+
+      expect(queue.currentTrack).toBe(a);
+      expect(queue.size).toBe(2);
+      expect(start).not.toHaveBeenCalled();
+      await player.destroy();
+    },
+  );
+
+  it.each(['embedded', 'remote'] as const)('ignores reconciliation resolved after stop on %s', async (nodeType) => {
+    const { queue, session, player } = await prepare(nodeType);
+    const stage = deferred<Awaited<ReturnType<typeof session.stagedSource>>>();
+    vi.spyOn(session, 'stagedSource').mockReturnValueOnce(stage.promise);
+    const reconciling = queue.reconcileCrossfade(queue.node.getSession());
+    await queue.stop();
+    session.generation++;
+    session.state = 'playing';
+    stage.resolve(null);
+    await reconciling;
+
+    expect(queue.currentTrack).toBeNull();
+    expect(queue.stats.tracksStarted).toBe(1);
+    await player.destroy();
   });
 
   it('restores the outgoing source on native transition cancellation', async () => {

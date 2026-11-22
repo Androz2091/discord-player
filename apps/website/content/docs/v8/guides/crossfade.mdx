@@ -57,7 +57,7 @@ During the overlap:
 - `queue.currentTrack` is the incoming track as soon as it is audible.
 - The incoming track stays in `queue.tracks` until it becomes audible.
 
-Staging a track for a fade does not fire `playerStart`.
+Staging a track for a fade does not fire `playerStart`. If the incoming start notification is lost, the queue can recover promotion from the outgoing completion continuation or a reconnect snapshot of the next generation. Recovered starts have no raw Remedia event argument. Snapshots that have advanced beyond that generation cannot identify the reserved track and are not used to promote it.
 
 ## How repeat modes behave
 

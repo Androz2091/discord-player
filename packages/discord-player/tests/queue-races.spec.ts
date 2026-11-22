@@ -3,7 +3,7 @@ import { Playlist, QueueRepeatMode, Track } from '../src/index.js';
 import { setup, TestTrack } from './mocks/queue.js';
 import { settle } from './mocks/async.js';
 import { deferred } from './mocks/async.js';
-import type { MediaSource } from '@remedia/client';
+import type { MediaSource, DiscordSessionEvents } from '@remedia/client';
 
 it('selects explicit skip targets both while idle and during active playback', async () => {
   const { queue, player } = await setup();
@@ -204,3 +204,74 @@ it('keeps upcoming tracks when disconnected navigation cannot start playback', a
 
   await player.destroy();
 });
+
+it.each(['embedded', 'remote'] as const)('advances after a generation-changing seek on %s', async (nodeType) => {
+  const { queue, player, session } = await setup({ nodeType });
+  const a = new TestTrack('a');
+  const b = new TestTrack('b');
+  await queue.play([a, b]);
+  const generation = session.generation;
+  session.generation++;
+  const event: DiscordSessionEvents['playbackSeeked'][0] = {
+    sessionId: session.sessionId,
+    guildId: queue.id,
+    nodeId: session.nodeId,
+    generation: session.generation,
+    customMetadata: session.customMetadata,
+    positionMs: 1000,
+    requestedPositionMs: 1000,
+    fallback: true,
+    previousPositionMs: 0,
+  };
+  const seek = vi.fn();
+  const finish = vi.fn();
+  player.events.on('playerSeek', seek);
+  player.events.on('playerFinish', finish);
+  session.emit('playbackSeeked', event);
+  session.emit('playbackCompleted', { ...event, generation, state: 'completed', position: session.position });
+  await settle();
+  expect(queue.currentTrack).toBe(a);
+  session.complete();
+  await settle();
+  expect(queue.currentTrack).toBe(b);
+  expect(seek).toHaveBeenCalledExactlyOnceWith(queue, event);
+  expect(finish).toHaveBeenCalledExactlyOnceWith(queue, a, expect.objectContaining({ generation: generation + 1 }));
+  await player.destroy();
+});
+
+it.each(['embedded', 'remote'] as const)(
+  'ignores old lifecycle events after rapid replacement on %s',
+  async (nodeType) => {
+    const { queue, player, session } = await setup({ nodeType });
+    await queue.play(new TestTrack('first'));
+    const stale = {
+      sessionId: session.sessionId,
+      generation: session.generation,
+      customMetadata: session.customMetadata,
+    };
+    await queue.playHistoryTrack(new TestTrack('second'), false);
+    const current = new TestTrack('third');
+    await queue.playHistoryTrack(current, false);
+    const start = vi.fn();
+    const finish = vi.fn();
+    player.events.on('playerStart', start);
+    player.events.on('playerFinish', finish);
+    session.emit('playbackStarted', { ...stale, state: 'playing', info: session.info });
+    session.emit('playbackCompleted', { ...stale, state: 'completed', position: session.position });
+    session.emit('playbackStopped', { ...stale, state: 'stopped' });
+    session.emit('playbackFailed', { ...stale, state: 'failed', error: new Error('late failure') });
+    await settle();
+    expect(queue.currentTrack).toBe(current);
+    expect(start).not.toHaveBeenCalled();
+    expect(finish).not.toHaveBeenCalled();
+    expect(queue.stats.tracksFailed).toBe(0);
+    session.complete();
+    await settle();
+    expect(finish).toHaveBeenCalledExactlyOnceWith(
+      queue,
+      current,
+      expect.objectContaining({ generation: session.generation }),
+    );
+    await player.destroy();
+  },
+);

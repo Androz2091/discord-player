@@ -776,6 +776,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
         if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerResume', event);
       });
       on('playbackSeeked', (event) => {
+        this.queue.handlePlaybackSeeked(session, event);
         if (active() && event.generation === session.snapshot.generation) this.queue.emit('playerSeek', event);
       });
       on('volumeChanged', (event) => {
