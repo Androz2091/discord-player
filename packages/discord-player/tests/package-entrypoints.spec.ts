@@ -25,7 +25,8 @@ it('loads built and packed public packages through ESM and require without nativ
       if (!process.env.npm_execpath) throw new Error('Run package tests through pnpm');
       const pnpm = process.env.npm_execpath;
       const args = ['pack', '--pack-destination', destination];
-      await exec(pnpm.endsWith('.exe') ? pnpm : process.execPath, pnpm.endsWith('.exe') ? args : [pnpm, ...args], {
+      const javascript = /\.[cm]?js$/i.test(pnpm);
+      await exec(javascript ? process.execPath : pnpm, javascript ? [pnpm, ...args] : args, {
         cwd: root,
       });
       const archive = (await readdir(destination)).find((file) => file.endsWith('.tgz'));
