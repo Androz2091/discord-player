@@ -84,7 +84,7 @@ for (const custom of [false, true]) {
     );
     expect(queue.options).toMatchObject({
       playback: { volume: 60, filterGraph: null },
-      connectionOptions: { selfDeaf: false, selfMute: true },
+      connectionOptions: { selfDeaf: true, selfMute: false },
     });
     expect(session.channelId).toBe('voice');
     expect(queue.node.session).toBe(session);
@@ -107,7 +107,7 @@ for (const custom of [false, true]) {
     ).rejects.toThrow(/move failed/);
     expect(queue.options).toMatchObject({
       playback: { volume: 20, filterGraph: 'volume=0.2' },
-      connectionOptions: { selfDeaf: false },
+      connectionOptions: { selfDeaf: true },
     });
     expect(queue.node.session?.channelId).toBe('moved');
     expect(queue.node.session?.connectionState).toBe('disconnected');
@@ -195,5 +195,26 @@ for (const custom of [false, true]) {
     await playback;
     expect(session.disposeCalls).toBe(1);
     expect(queue.node.session).toBeNull();
+  });
+}
+
+for (const custom of [false, true]) {
+  it(`${custom ? 'custom' : 'default'}: immutable controls remain idempotent across reconnects and recreation`, async () => {
+    const { queue, sessions } = await fixture(custom);
+    await queue.connect({ channelId: 'voice', enableFallbackSeeking: true });
+    const session = sessions[0]!;
+    session.connectionState = 'disconnected';
+    await queue.connect({ channelId: 'voice', enableFallbackSeeking: true });
+    await queue.connect({ channelId: 'voice', selfDeaf: false });
+    expect(session.selfDeaf).toBe(false);
+    expect(queue.options.connectionOptions).toEqual({ selfDeaf: true, selfMute: false });
+    await expect(queue.connect({ channelId: 'voice', enableFallbackSeeking: false, selfDeaf: true })).rejects.toThrow(
+      'cannot be changed',
+    );
+    expect(session.selfDeaf).toBe(false);
+    await queue.node.destroySession();
+    await queue.connect({ channelId: 'voice', enableFallbackSeeking: false });
+    expect(queue.node.session?.selfDeaf).toBe(true);
+    await queue.connect({ channelId: 'voice', enableFallbackSeeking: false });
   });
 }

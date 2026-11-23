@@ -2,7 +2,7 @@ import type { RemediaNodeConfig } from '@remedia/client';
 import type {
   GuildQueue,
   GuildQueueOptions,
-  GuildQueueConnectOptions,
+  GuildQueueConnectionOptions,
   GuildQueuePlayResult,
 } from './structures/guild-queue.js';
 import type { SearchResult } from './structures/search-result.js';
@@ -43,7 +43,7 @@ export interface PlayerPlayOptions<Metadata = unknown, PlaybackMetadata = unknow
   nodeOptions?: GuildQueueOptions<Metadata>;
 
   /** Connection/session overrides for this call, including volume and filterGraph on existing sessions. */
-  connectionOptions?: Omit<GuildQueueConnectOptions, 'channelId' | 'signal'>;
+  connectionOptions?: GuildQueueConnectionOptions;
 
   /** Metadata for playback started by this call, independent of nodeOptions.metadata; not retained when only enqueuing. */
   customMetadata?: PlaybackMetadata;

@@ -1,4 +1,3 @@
-import type { Track } from '../structures/track.js';
 import { Readable } from 'node:stream';
 import { definePlugin, type PluginFactory } from '../plugins/types.js';
 import { BaseExtractor } from './base-extractor.js';
@@ -141,40 +140,42 @@ export function createExtractorPlugin(
         ctx.on(
           'track.related',
           async ({ track, history }) => {
-            const tracks = [...(history?.tracks ?? [track])];
+            const tracks = Object.freeze([...(history?.tracks ?? [track])].reverse());
             const snapshot = Object.freeze({
               toArray: () => [...tracks],
               size: tracks.length,
-              peek: () => tracks.at(-1),
+              peek: () => tracks.at(0),
+              data: tracks,
+              store: tracks,
+              strategy: 'LIFO' as const,
+              isLIFO: () => true,
+              isFIFO: () => false,
+              toJSON: () => [...tracks],
               isEmpty: () => tracks.length === 0,
-              at: (index: number) => tracks.at(index),
-              filter: (predicate: (item: Track) => boolean) => tracks.filter(predicate),
-              map: <T>(callback: (item: Track) => T) => tracks.map(callback),
-              flatMap: <T>(callback: (item: Track) => T[]) => tracks.flatMap(callback),
-              reduce: <T>(callback: (accumulator: T, item: Track) => T, initialValue: T) =>
-                tracks.reduce(callback, initialValue),
-              reduceRight: <T>(callback: (accumulator: T, item: Track) => T, initialValue: T) =>
-                tracks.reduceRight(callback, initialValue),
-              forEach: (callback: (item: Track) => void) => tracks.forEach(callback),
-              every: (predicate: (item: Track) => boolean) => tracks.every(predicate),
-              indexOf: (item: Track) => tracks.indexOf(item),
+              at: tracks.at.bind(tracks),
+              filter: tracks.filter.bind(tracks),
+              map: tracks.map.bind(tracks),
+              flatMap: tracks.flatMap.bind(tracks),
+              reduce: tracks.reduce.bind(tracks),
+              reduceRight: tracks.reduceRight.bind(tracks),
+              forEach: tracks.forEach.bind(tracks),
+              every: tracks.every.bind(tracks),
+              indexOf: tracks.indexOf.bind(tracks),
               [Symbol.iterator]: () => tracks[Symbol.iterator](),
-              some: (predicate: (item: Track) => boolean) => tracks.some(predicate),
-              find: (predicate: (item: Track) => boolean) => tracks.find(predicate),
+              some: tracks.some.bind(tracks),
+              find: tracks.find.bind(tracks),
             });
 
-            // For compatibility reasons, the history snapshot is proxied to allow legacy extractors to access the original array methods, while still preventing mutation of the snapshot itself.
-            const historyProxy = new Proxy({} as ExtractorRelatedHistory, {
-              get: (target, prop, receiver) => {
-                if (prop === 'tracks') {
-                  return snapshot;
-                }
-
-                return Reflect.get(snapshot, prop, receiver);
-              },
+            const relatedHistory: ExtractorRelatedHistory = Object.freeze({
+              tracks: snapshot,
+              currentTrack: track,
+              previousTrack: tracks.at(0) ?? null,
+              size: tracks.length,
+              getSize: () => tracks.length,
+              isEmpty: () => tracks.length === 0,
             });
 
-            return stamp(await instance.getRelatedTracks(track, historyProxy));
+            return stamp(await instance.getRelatedTracks(track, relatedHistory));
           },
           metadata,
         );

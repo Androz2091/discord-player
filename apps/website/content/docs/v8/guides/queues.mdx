@@ -127,3 +127,39 @@ await queue.destroy(); // or player.deleteQueue(guildId)
 This stops playback, leaves voice, and clears the queue. A later `player.play()` creates a new queue.
 
 <NextStep href="/docs/v8/guides/playback-controls" label="Control playback" />
+
+### Connection defaults and per-call overrides
+
+`nodeOptions.connectionOptions` in `player.play()`, and `connectionOptions` in
+`player.createQueue()` or `player.queues.create()`, store defaults when the queue
+is first created. Later calls do not replace those defaults.
+
+Root `connectionOptions` in `player.play()` and `queue.play()` uses the same
+`GuildQueueConnectionOptions` type. `queue.connect()` adds a required `channelId`
+and optional cancellation signal. The shared configuration supports `selfDeaf`,
+`selfMute`, `nodeId`, `selectNode`, `connectTimeoutMs`, `volume` (0–200),
+`filterGraph` (including `null` to clear), and `enableFallbackSeeking`.
+
+For a new session, explicit call options override queue connection defaults,
+then playback volume/filter defaults and Remedia defaults apply. On an existing
+session, omitted options retain its current settings. Explicit voice flags,
+volume, filters, and channel moves apply to that session. Connection deadlines
+apply when voice negotiation is needed. Node selection applies at creation;
+an existing session cannot switch nodes.
+
+`enableFallbackSeeking` defaults to `false` in Remedia and is fixed for the
+session lifetime. Repeating the same effective value succeeds. Changing it
+throws before applying other controls or adding the track. Destroying the
+session allows the next connection to use the queue defaults and any new call
+overrides.
+
+```ts
+const connectionOptions = { selfDeaf: true, enableFallbackSeeking: false };
+
+await player.play(channel, trackA, {
+  nodeOptions: { connectionOptions },
+  connectionOptions,
+});
+
+await player.play(channel, trackB, { connectionOptions });
+```

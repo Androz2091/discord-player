@@ -200,7 +200,7 @@ it('forwards reconnect deadlines and rejects creation-only settings before admis
   expect(session.selfMute).toBe(true);
   await expect(
     queue.play(new TestTrack('two'), { connectionOptions: { enableFallbackSeeking: true } }),
-  ).rejects.toThrow('only be set when creating');
+  ).rejects.toThrow('cannot be changed');
   expect(queue.size).toBe(0);
   expect(session.playCalls).toBe(1);
 });
@@ -259,5 +259,77 @@ it.each(['play', 'createQueue', 'queues.create'] as const)(
     expect(queue.maxHistorySize).toBe(3);
     expect(queue.history.disabled).toBe(true);
     expect(queue.node.volume).toBe(75);
+  },
+);
+
+it.each(['embedded', 'remote'] as const)(
+  'reuses identical connection settings and restores defaults on %s',
+  async (nodeType) => {
+    const { player, queue, backend } = await fixture(nodeType);
+    await queue.destroy();
+    const defaults = {
+      selfDeaf: false,
+      selfMute: true,
+      enableFallbackSeeking: true,
+      nodeId: 'fake-node',
+      connectTimeoutMs: 3210,
+      volume: 75,
+      filterGraph: 'volume=0.75',
+      selectNode: vi.fn(() => 'fake-node'),
+    };
+    const options = {
+      nodeOptions: { connectionOptions: defaults },
+      connectionOptions: { selfDeaf: true, enableFallbackSeeking: false, volume: 20, filterGraph: null },
+    };
+    const channel = { guildId: 'repeat', channelId: 'voice' };
+    const { queue: active } = await player.play(channel, new TestTrack('A'), options);
+    const session = backend.asSession(active.node.getSession());
+    for (const title of ['B', 'C']) await player.play(channel, new TestTrack(title), options);
+    expect(session).toMatchObject({ selfDeaf: true, selfMute: true, volume: 0.2 });
+    expect(session.filters.graph).toBeNull();
+    expect(session.connectOptions[0]).toMatchObject({ timeoutMs: 3210 });
+    expect(active.size).toBe(2);
+    expect(active.options.connectionOptions).toEqual(defaults);
+    expect(defaults.selectNode).not.toHaveBeenCalled();
+    await player.play(channel, new TestTrack('D'), {
+      nodeOptions: { connectionOptions: { enableFallbackSeeking: true, volume: 99 } },
+    });
+    await active.connect({ channelId: 'voice', enableFallbackSeeking: false });
+    await active.play(new TestTrack('E'), { connectionOptions: { enableFallbackSeeking: false } });
+    expect(session.volume).toBe(0.2);
+    await expect(active.connect({ channelId: 'voice', enableFallbackSeeking: true })).rejects.toThrow(
+      'cannot be changed',
+    );
+    expect(active.options.connectionOptions).toEqual(defaults);
+    await active.node.destroySession();
+    await active.connect({ channelId: 'voice' });
+    expect(backend.client.createDiscordSession).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        enableFallbackSeeking: true,
+        selfDeaf: false,
+        selfMute: true,
+        volume: 0.75,
+        filterGraph: 'volume=0.75',
+        nodeId: 'fake-node',
+      }),
+    );
+    await active.connect({ channelId: 'voice', enableFallbackSeeking: true });
+    await expect(active.connect({ channelId: 'voice', enableFallbackSeeking: false })).rejects.toThrow(
+      'cannot be changed',
+    );
+  },
+);
+
+it.each(['embedded', 'remote'] as const)(
+  'tracks Remedia immutable defaults on %s, including raw sessions',
+  async (nodeType) => {
+    const { queue } = await fixture(nodeType);
+    await queue.connect({ channelId: 'voice', enableFallbackSeeking: false });
+    await queue.node.destroySession();
+    await queue.node.createSession({ channelId: 'voice', enableFallbackSeeking: true });
+    await queue.connect({ channelId: 'voice', enableFallbackSeeking: true });
+    await expect(queue.connect({ channelId: 'voice', enableFallbackSeeking: false })).rejects.toThrow(
+      'cannot be changed',
+    );
   },
 );

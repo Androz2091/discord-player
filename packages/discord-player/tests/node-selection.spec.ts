@@ -294,3 +294,19 @@ describe('crossfade curve negotiation', () => {
     expect(fixture.backend.client.createDiscordSession.mock.lastCall?.[0].crossfade).toBe(false);
   });
 });
+
+it.each(['embedded', 'remote'] as const)('uses a call selector ahead of stored defaults on %s', async (nodeType) => {
+  const fixture = await setup({ nodeType });
+  const defaults = vi.fn(() => 'fake-node');
+  const override = vi.fn(() => 'second');
+  addNode(fixture, 'second');
+  const queue = await pending(fixture, { connectionOptions: { selectNode: defaults } });
+  await queue.connect({ channelId: 'voice', selectNode: override });
+  expect(override).toHaveBeenCalledOnce();
+  expect(defaults).not.toHaveBeenCalled();
+  expect(fixture.backend.client.createDiscordSession).toHaveBeenLastCalledWith(
+    expect.objectContaining({ nodeId: 'second' }),
+  );
+  expect(queue.options.connectionOptions?.selectNode).toBe(defaults);
+  await fixture.player.destroy();
+});

@@ -5,7 +5,7 @@ import {
   DiscordPlayer,
   Track,
   definePlugin,
-  type GuildQueueHistory,
+  type ExtractorRelatedHistory,
   type NextFunction,
 } from '../src/index.js';
 import { Legacy } from './mocks/legacy.js';
@@ -114,13 +114,13 @@ it('routes legacy bridging, related tracks and post-stream processing through th
   await p.destroy();
 });
 
-it('registers a v7 history signature and exposes only snapshot reads', async () => {
+it('registers the supported legacy history signature and exposes only snapshot reads', async () => {
   const p = player();
   const seed = new Track({ title: 'seed', url: 'https://example.test/seed' });
   class Alpha extends BaseExtractor {
     static override identifier = 'example.source.alpha';
 
-    override async getRelatedTracks(track: Track, history: GuildQueueHistory) {
+    override async getRelatedTracks(track: Track, history: ExtractorRelatedHistory) {
       expect(history.tracks.toArray()).toEqual([seed]);
       expect(history.tracks.some((item) => item === seed)).toBe(true);
       expect(history.tracks.find((item) => item === seed)).toBe(seed);
@@ -128,6 +128,21 @@ it('registers a v7 history signature and exposes only snapshot reads', async () 
       expect(history.tracks.filter((item) => item === seed)).toEqual([seed]);
       expect(history.tracks.peek()).toBe(seed);
       expect(history.tracks.size).toBe(1);
+      expect(history.size).toBe(1);
+      expect(history.getSize()).toBe(1);
+      expect(history.isEmpty()).toBe(false);
+      expect(history.currentTrack).toBe(seed);
+      expect(history.previousTrack).toBe(seed);
+      expect(history.tracks.isLIFO()).toBe(true);
+      expect(history.tracks.isFIFO()).toBe(false);
+      expect(history.tracks.data).toEqual([seed]);
+      expect(history.tracks.toJSON()).toEqual([seed]);
+      expect(history.tracks.reduce((count) => count + 1, 0)).toBe(1);
+      expect(history.tracks.reduceRight((count) => count + 1, 0)).toBe(1);
+      expect(Object.keys(history)).toContain('tracks');
+      expect(Object.isFrozen(history)).toBe(true);
+      expect(Object.isFrozen(history.tracks)).toBe(true);
+      expect(Object.isFrozen(history.tracks.store)).toBe(true);
       expect([...history.tracks]).toEqual([seed]);
       history.tracks.toArray().pop();
       expect(history.tracks.toArray()).toEqual([seed]);

@@ -545,7 +545,7 @@ it.each([false, true])('passes seeded history to legacy related discovery (cross
   else session.complete();
   await settle();
 
-  expect(histories).toEqual([[previous, first]]);
+  expect(histories).toEqual([[first, previous]]);
   if (crossfade) {
     expect(session.stage).not.toBeNull();
     expect(queue.currentTrack).toBe(first);

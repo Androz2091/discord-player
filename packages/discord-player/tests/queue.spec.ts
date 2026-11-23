@@ -418,8 +418,8 @@ describe('managed queue playback', () => {
       expect(configured.volume).toBe(0.8);
       expect(configured.filters.graph).toBe('bass=gain=8');
       expect(queue.options?.playback?.volume).toBe(80);
-      expect(queue.options?.connectionOptions?.selfDeaf).toBe(false);
-      expect(queue.options?.connectionOptions?.selfMute).toBe(true);
+      expect(queue.options?.connectionOptions?.selfDeaf).toBeUndefined();
+      expect(queue.options?.connectionOptions?.selfMute).toBeUndefined();
       expect(queue.options?.playback?.filterGraph).toBe('bass=gain=8');
     },
   );
@@ -584,8 +584,8 @@ describe('managed queue playback', () => {
 
     expect(session.selfDeaf).toBe(false);
     expect(session.selfMute).toBe(true);
-    expect(queue.options?.connectionOptions?.selfDeaf).toBe(false);
-    expect(queue.options?.connectionOptions?.selfMute).toBe(true);
+    expect(queue.options?.connectionOptions?.selfDeaf).toBeUndefined();
+    expect(queue.options?.connectionOptions?.selfMute).toBeUndefined();
   });
 });
 
