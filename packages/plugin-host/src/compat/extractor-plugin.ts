@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 import { definePlugin, type PluginFactory } from '../plugins/types.js';
 import { BaseExtractor } from './base-extractor.js';
 import type { ExtractorExecutionContext } from './extractor-execution-context.js';
-import type { ExtractorInfo, ExtractorStreamable, NextFunction } from './extractor-types.js';
+import type { ExtractorInfo, ExtractorRelatedHistory, ExtractorStreamable, NextFunction } from './extractor-types.js';
 
 function checkLegacyStream(result: ExtractorStreamable | undefined): ExtractorStreamable | undefined {
   if (result && typeof result === 'object' && '$fmt' in result && /^(?:pcm|opus)$/i.test(result.$fmt)) {
@@ -150,6 +150,11 @@ export function createExtractorPlugin(
               at: (index: number) => tracks.at(index),
               filter: (predicate: (item: Track) => boolean) => tracks.filter(predicate),
               map: <T>(callback: (item: Track) => T) => tracks.map(callback),
+              flatMap: <T>(callback: (item: Track) => T[]) => tracks.flatMap(callback),
+              reduce: <T>(callback: (accumulator: T, item: Track) => T, initialValue: T) =>
+                tracks.reduce(callback, initialValue),
+              reduceRight: <T>(callback: (accumulator: T, item: Track) => T, initialValue: T) =>
+                tracks.reduceRight(callback, initialValue),
               forEach: (callback: (item: Track) => void) => tracks.forEach(callback),
               every: (predicate: (item: Track) => boolean) => tracks.every(predicate),
               indexOf: (item: Track) => tracks.indexOf(item),
@@ -158,7 +163,18 @@ export function createExtractorPlugin(
               find: (predicate: (item: Track) => boolean) => tracks.find(predicate),
             });
 
-            return stamp(await instance.getRelatedTracks(track, { tracks: snapshot }));
+            // For compatibility reasons, the history snapshot is proxied to allow legacy extractors to access the original array methods, while still preventing mutation of the snapshot itself.
+            const historyProxy = new Proxy({} as ExtractorRelatedHistory, {
+              get: (target, prop, receiver) => {
+                if (prop === 'tracks') {
+                  return snapshot;
+                }
+
+                return Reflect.get(snapshot, prop, receiver);
+              },
+            });
+
+            return stamp(await instance.getRelatedTracks(track, historyProxy));
           },
           metadata,
         );

@@ -3,9 +3,23 @@ import { Collection } from '@discordjs/collection';
 import type { LegacyPlayerContext } from '../legacy-player.js';
 import type { Track } from '../structures/track.js';
 import type { SourceStream } from '../plugins/types.js';
-import { BaseExtractor } from './base-extractor.js';
+import type { BaseExtractor } from './base-extractor.js';
 import { createExtractorPlugin } from './extractor-plugin.js';
 import type { ExtractorConstructor, ExtractorExecutionResult } from './extractor-types.js';
+import { z } from 'zod';
+
+const ExtractorShapeSchema = z.object({
+  identifier: z.string().min(1),
+  prototype: z.object({
+    activate: z.function(),
+    deactivate: z.function(),
+    handle: z.function(),
+    stream: z.function(),
+    getRelatedTracks: z.function(),
+    bridge: z.function(),
+    handlePostStream: z.function(),
+  }),
+});
 
 /** Small legacy ownership adapter; all execution goes through player.plugins. */
 export class ExtractorExecutionContext {
@@ -72,10 +86,12 @@ export class ExtractorExecutionContext {
   ): Promise<InstanceType<C>> {
     if (
       typeof Extractor !== 'function' ||
-      !(Extractor.prototype instanceof BaseExtractor) ||
-      typeof Extractor.identifier !== 'string'
+      !ExtractorShapeSchema.safeParse({
+        identifier: Extractor.identifier,
+        prototype: Extractor.prototype,
+      }).success
     ) {
-      throw new TypeError('extractors.register expects a BaseExtractor subclass constructor.');
+      throw new TypeError('extractors.register expects a BaseExtractor-compatible constructor.');
     }
 
     const instance = new Extractor(this, args[0] ?? {});
