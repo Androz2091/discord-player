@@ -83,3 +83,23 @@ Saved tracks must not depend on `raw.engine`. Restored tracks need a public `url
 A remote node can open allowed URLs and server-local files, or execute an operation on a configured source host. A `Readable` from an extractor works with embedded nodes only and is never uploaded. Use a [source host](/docs/v8/plugins/remote-hosts) to run an extractor away from the bot while preserving its provider and deployment identity.
 
 <NextStep href="/docs/v8/migration/data" label="Migrate saved data" />
+
+### Related-track history snapshots
+
+The legacy adapter supplies `ExtractorRelatedHistory` to `getRelatedTracks()`.
+Use that exported type (or infer the parameter type from `BaseExtractor`) when
+migrating an explicit v7 `GuildQueueHistory` annotation. It describes the actual
+snapshot available in both local and remote hosts, rather than a live queue.
+
+`history.tracks` is ordered most recent first, matching v7's LIFO collection.
+It supports `toArray()`, `at()`, `some()`, `find()`, `filter()`, `map()`,
+`flatMap()`, reductions, iteration, and the other declared read operations.
+`size`, `getSize()`, `isEmpty()`, `currentTrack`, and `previousTrack` are available
+on the history snapshot. The outgoing seed is included during speculative
+crossfade discovery. Collection membership is frozen; `toArray()` returns a copy.
+Track objects retain their normal identity.
+
+The snapshot does not expose `queue`, `nextTrack`, `disabled`, history mutation,
+or playback navigation (`next()`, `previous()`, `back()`). These require live
+queue state and controls that are unavailable in a standalone remote host.
+Move queue control into the application instead of relying on extractor access.

@@ -2,6 +2,7 @@ export { QueryType, BaseExtractor, ExtractorExecutionContext } from '@discord-pl
 export type {
   SearchQueryType,
   ExtractorInfo,
+  ExtractorRelatedHistory,
   ExtractorStreamable,
   NextFunction,
   ExtractorSearchContext,

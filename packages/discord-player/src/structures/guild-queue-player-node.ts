@@ -9,7 +9,13 @@ import type {
   PlayOptions,
 } from '@remedia/client';
 import type { DiscordPlayer } from '../player.js';
-import type { TrackResolvable, GuildQueue, GuildQueuePlayOptions, GuildQueuePlayResult } from './guild-queue.js';
+import type {
+  TrackResolvable,
+  GuildQueue,
+  GuildQueuePlayOptions,
+  GuildQueuePlayResult,
+  GuildQueueConnectionOptions,
+} from './guild-queue.js';
 import { Track } from './track.js';
 import type { NativeSessionObservation } from './common/guild-queue-events.js';
 
@@ -18,6 +24,9 @@ import type { NativeSessionObservation } from './common/guild-queue-events.js';
  * `volume` uses linear gain, from 0 through 2; queue APIs accept percentages instead.
  */
 export interface GuildQueuePlayerNodeSessionCreateOptions extends Omit<DiscordSessionOptions, 'guildId' | 'userId'> {
+  /** Node selection policy for a newly created session. */
+  selectNode?: GuildQueueConnectionOptions['selectNode'];
+
   /** Deadline for the initial Discord voice join, in milliseconds; defaults to the backend timeout. */
   connectTimeoutMs?: number;
 }
@@ -90,10 +99,6 @@ const CONNECTION_STATES = [
 interface SessionConfiguration {
   volume: number;
 
-  selfDeaf: boolean;
-
-  selfMute: boolean;
-
   filterGraph: string | null;
 }
 
@@ -112,6 +117,8 @@ function timecode(milliseconds: number): string {
 export class GuildQueuePlayerNode<Metadata = unknown> {
   /** Current playback session, or `null` before connecting. */
   #currentSession: PlaybackSession | null = null;
+
+  private readonly fallbackSeeking = new WeakMap<PlaybackSession, boolean>();
 
   /** Framework-owned current session; use createSession() to replace it safely. */
   public get session(): PlaybackSession | null {
@@ -232,6 +239,13 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       throw new Error('Playback backend does not support audio filters.');
 
     if (existing) {
+      if (
+        options.enableFallbackSeeking !== undefined &&
+        options.enableFallbackSeeking !== this.fallbackSeeking.get(existing)
+      ) {
+        throw new Error('enableFallbackSeeking cannot be changed on an existing session; destroy the session first.');
+      }
+
       this.assertHosts(existing.nodeId, options.pluginHosts ?? []);
 
       if (options.nodeId && options.nodeId !== existing.nodeId) {
@@ -307,8 +321,6 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     const previousVolume = this.#volume;
     const previousOptions = {
       volume: this.queue.options.playback?.volume,
-      selfDeaf: this.queue.options.connectionOptions?.selfDeaf,
-      selfMute: this.queue.options.connectionOptions?.selfMute,
       filterGraph: this.queue.options.playback?.filterGraph,
     };
 
@@ -333,10 +345,6 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
           Object.assign((this.queue.options.playback ??= {}), {
             volume: previousOptions.volume,
             filterGraph: previousOptions.filterGraph,
-          });
-          Object.assign((this.queue.options.connectionOptions ??= {}), {
-            selfDeaf: previousOptions.selfDeaf,
-            selfMute: previousOptions.selfMute,
           });
         }
       }
@@ -414,7 +422,11 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   ): Promise<PlaybackSession> {
     const backend = this.player.playbackBackend;
     callerSignal?.throwIfAborted();
-    if (!backend) return this.player.getRemedia().createDiscordSession(options);
+    if (!backend) {
+      const session = this.player.getRemedia().createDiscordSession(options);
+      this.fallbackSeeking.set(session, options.enableFallbackSeeking ?? false);
+      return session;
+    }
     this.player.getBackend();
     const signal = AbortSignal.any([
       this.queue.signal,
@@ -428,6 +440,7 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
       if (this.player.playbackBackend !== backend)
         throw new Error('Playback provider was removed during session creation.');
       this.assertBackendSession(session, backend);
+      this.fallbackSeeking.set(session, options.enableFallbackSeeking ?? false);
       return session;
     } catch (error) {
       if (session && typeof session.dispose === 'function') {
@@ -590,9 +603,11 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   private async sessionPolicy(
     options: GuildQueuePlayerNodeSessionCreateOptions,
   ): Promise<GuildQueuePlayerNodeSessionCreateOptions> {
+    const { selectNode: selector = this.queue.options.connectionOptions?.selectNode, ...sessionOptions } = options;
+    options = sessionOptions;
     const backend = this.player.playbackBackend;
     if (backend) {
-      if (options.nodeId || this.queue.options.connectionOptions?.selectNode)
+      if (options.nodeId || selector)
         throw new Error('Custom playback providers do not support Remedia node selection.');
       this.assertHosts(null, options.pluginHosts ?? []);
       if (options.filterGraph !== undefined && !backend.capabilities.filters)
@@ -614,7 +629,6 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
     const client = this.player.getRemedia();
     const hosts = options.pluginHosts ?? [];
     const requested = this.queue.options.playback?.crossfade ?? this.player.options.crossfade ?? options.crossfade;
-    const selector = this.queue.options.connectionOptions?.selectNode;
     let nodeId = options.nodeId ?? client.getAssignment(this.queue.guildId)?.nodeId;
 
     // Without a queue selector, Remedia performs its own capacity-aware placement.
@@ -863,8 +877,6 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   private readSessionConfiguration(session: PlaybackSession): SessionConfiguration {
     return {
       volume: session.volume * 100,
-      selfDeaf: session.selfDeaf,
-      selfMute: session.selfMute,
       filterGraph: session.snapshot.filterGraph,
     };
   }
@@ -872,8 +884,6 @@ export class GuildQueuePlayerNode<Metadata = unknown> {
   private applySessionConfiguration(configuration: SessionConfiguration): void {
     this.#volume = configuration.volume;
     (this.queue.options.playback ??= {}).volume = configuration.volume;
-    (this.queue.options.connectionOptions ??= {}).selfDeaf = configuration.selfDeaf;
-    (this.queue.options.connectionOptions ??= {}).selfMute = configuration.selfMute;
     (this.queue.options.playback ??= {}).filterGraph = configuration.filterGraph;
   }
 

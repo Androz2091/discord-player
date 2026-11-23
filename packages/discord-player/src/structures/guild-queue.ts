@@ -83,21 +83,7 @@ export interface GuildQueueOptions<Metadata = unknown> {
   maxSize?: number;
 
   /** Default voice connection and node placement settings. */
-  connectionOptions?: {
-    /** Desired self-deaf setting; Remedia defaults this to true when omitted. */
-    selfDeaf?: boolean;
-
-    /** Desired self-mute setting; Remedia defaults this to false when omitted. */
-    selfMute?: boolean;
-
-    /**
-     * Optional policy choosing the Remedia node for this guild's first session. It receives the healthy nodes
-     * with spare capacity that host every required plugin host, and its choice is pinned for the session.
-     * It is not called when a node is pinned with `nodeId` or the guild is already assigned. Without it,
-     * Remedia's capacity-aware placement chooses the node.
-     */
-    selectNode?: NodeSelection;
-  };
+  connectionOptions?: GuildQueueConnectionOptions;
 
   /** Playback defaults and source hooks. */
   playback?: StreamHooks & {
@@ -155,9 +141,9 @@ export interface GuildQueueOptions<Metadata = unknown> {
 }
 
 /** Voice connection and session settings; volume uses Discord Player percentages. */
-export interface GuildQueueConnectOptions {
-  /** Voice channel to join or move the current session into. */
-  channelId: string;
+export interface GuildQueueConnectionOptions {
+  /** Select a healthy eligible node for a new session unless nodeId or a guild assignment pins it. */
+  selectNode?: NodeSelection;
 
   /** Node for a new session. An existing session cannot move between nodes. */
   nodeId?: string;
@@ -177,8 +163,14 @@ export interface GuildQueueConnectOptions {
   /** Session filtergraph, applied to new or existing sessions; null clears filtering. */
   filterGraph?: string | null;
 
-  /** Enable fallback seeking when creating a session; cannot reconfigure an existing session. */
+  /** Enable fallback seeking at creation (default false). Reapplying the effective value is allowed; changing it requires destroying the session. */
   enableFallbackSeeking?: boolean;
+}
+
+/** Direct connection settings with a required destination and optional cancellation. */
+export interface GuildQueueConnectOptions extends GuildQueueConnectionOptions {
+  /** Voice channel to join or move the current session into. */
+  channelId: string;
 
   /** Cancel lock acquisition and voice negotiation; already-applied session controls are retained. */
   signal?: AbortSignal;
@@ -187,7 +179,7 @@ export interface GuildQueueConnectOptions {
 /** Managed playback options. Connection settings are normalized before calling the raw backend. */
 export interface GuildQueuePlayOptions<Metadata = unknown> {
   /** Optional connection overrides. Omit channelId to use the current session's channel. */
-  connectionOptions?: Partial<Omit<GuildQueueConnectOptions, 'signal'>>;
+  connectionOptions?: GuildQueueConnectionOptions & Partial<Pick<GuildQueueConnectOptions, 'channelId'>>;
 
   /** Metadata for playback started by this call; not retained on a future queued occurrence. */
   customMetadata?: Metadata;
@@ -2346,18 +2338,22 @@ export class GuildQueue<Metadata = unknown> {
     options: GuildQueueConnectOptions,
     incoming: readonly Track[] = [],
   ): Promise<PlaybackSession> {
+    options.signal?.throwIfAborted();
+    const existing = this.node.getSession(false);
+
+    if (!existing) {
+      options = {
+        ...this.options.connectionOptions,
+        ...Object.fromEntries(Object.entries(options).filter(([, value]) => value !== undefined)),
+        channelId: options.channelId,
+      };
+    }
+
     if (
       options.volume !== undefined &&
       (!Number.isFinite(options.volume) || options.volume < 0 || options.volume > 200)
     ) {
       throw new RangeError('Queue volume must be a finite percentage between 0 and 200.');
-    }
-
-    options.signal?.throwIfAborted();
-    const existing = this.node.getSession(false);
-
-    if (existing && options.enableFallbackSeeking !== undefined) {
-      throw new Error('enableFallbackSeeking can only be set when creating a new session.');
     }
 
     const volume = options.volume ?? (existing ? undefined : (this.options.playback?.volume ?? this.node.volume));
@@ -2383,6 +2379,7 @@ export class GuildQueue<Metadata = unknown> {
     const session = await this.node.connect(
       {
         channelId: options.channelId,
+        selectNode: options.selectNode,
         pluginHosts: [
           ...new Set(
             [...(this.currentTrack ? [this.currentTrack] : []), ...this.tracks.toArray(), ...incoming].flatMap(
@@ -2414,10 +2411,8 @@ export class GuildQueue<Metadata = unknown> {
 
     if (methodName === 'setSelfDeaf') {
       await session.setSelfDeaf(enabled);
-      (this.options.connectionOptions ??= {}).selfDeaf = enabled;
     } else {
       await session.setSelfMute(enabled);
-      (this.options.connectionOptions ??= {}).selfMute = enabled;
     }
   }
 

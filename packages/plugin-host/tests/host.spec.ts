@@ -823,3 +823,50 @@ it.each(['source.related', 'metadata.execute'] as const)(
     }
   },
 );
+
+it.each(['source.related', 'metadata.execute'] as const)(
+  'supplies legacy LIFO history reads through %s',
+  async (operation) => {
+    const h = host();
+    class HistoryExtractor extends BaseExtractor {
+      static override identifier = 'fixture.history-snapshot';
+
+      override async getRelatedTracks(
+        track: Track,
+        history: NonNullable<Parameters<BaseExtractor['getRelatedTracks']>[1]>,
+      ) {
+        expect(history.tracks.toArray().map((item) => item.title)).toEqual(['seed', 'previous']);
+        expect(history.tracks.at(0)?.title).toBe('seed');
+        expect(history.tracks.at(-1)?.title).toBe('previous');
+        expect(history.previousTrack?.title).toBe('seed');
+        expect(history.currentTrack).toBe(track);
+        expect(history.getSize()).toBe(2);
+        expect(history.tracks.reduce((titles, item) => [...titles, item.title], [] as string[])).toEqual([
+          'seed',
+          'previous',
+        ]);
+        expect('tracks' in history).toBe(true);
+        expect(Object.keys(history)).toContain('tracks');
+        expect(Object.isFrozen(history.tracks.store)).toBe(true);
+        history.tracks.toArray().pop();
+        expect(history.size).toBe(2);
+        expect(history).not.toHaveProperty('queue');
+        expect(history).not.toHaveProperty('next');
+        return this.createResponse(null, []);
+      }
+    }
+    await h.extractors.register(HistoryExtractor);
+    const seed = new Track({
+      title: 'seed',
+      sourceReference: { pluginId: HistoryExtractor.identifier, hostId: 'test-host', data: null },
+    });
+    const previous = new Track({ title: 'previous' });
+    const related = { track: seed.serialize(), history: { tracks: [previous.serialize(), seed.serialize()] } };
+    const input =
+      operation === 'source.related'
+        ? related
+        : { providerId: HistoryExtractor.identifier, operation: 'track.related', input: related };
+    const response = await http(h, operation, input);
+    expect(response.result.tracks).toEqual([]);
+  },
+);

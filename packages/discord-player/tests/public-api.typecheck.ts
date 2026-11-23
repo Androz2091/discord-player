@@ -4,6 +4,11 @@ import {
   type DiscordPlayer,
   type GuildQueue,
   type Track,
+  type GuildQueueConnectionOptions,
+  type GuildQueueOptions,
+  type PlayerPlayOptions,
+  type GuildQueuePlayOptions,
+  type GuildQueueConnectOptions,
 } from '../src/index.js';
 import type { DiscordSessionEvents } from '@remedia/client';
 
@@ -150,4 +155,18 @@ export function pluginRuntimeContexts(): void {
       });
     },
   });
+}
+
+/** The location of connection configuration never changes its type. */
+export function sharedConnectionConfiguration(configuration: GuildQueueConnectionOptions): void {
+  type QueueConnection = NonNullable<GuildQueueOptions['connectionOptions']>;
+  type CallConnection = NonNullable<PlayerPlayOptions['connectionOptions']>;
+  type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+  const same: Equal<QueueConnection, CallConnection> = true;
+  const queue: QueueConnection = configuration;
+  const call: CallConnection = queue;
+  const playback: GuildQueuePlayOptions = { connectionOptions: call };
+  const direct: GuildQueueConnectOptions = { ...call, channelId: 'voice' };
+
+  void [same, playback, direct];
 }
