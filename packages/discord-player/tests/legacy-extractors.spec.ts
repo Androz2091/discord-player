@@ -195,3 +195,48 @@ it.each(['empty', 'seed', 'usable'] as const)(
     await p.destroy();
   },
 );
+
+it('honors live legacy bridge priorities and stable ties with modern handlers', async () => {
+  const p = player();
+  const track = new Track({ sourceReference: { pluginId: 'metadata', data: null } });
+
+  class First extends BaseExtractor {
+    static override identifier = 'example.bridge.first';
+
+    override async bridge() {
+      return 'https://example.test/first';
+    }
+  }
+
+  class Second extends BaseExtractor {
+    static override identifier = 'example.bridge.second';
+
+    override async bridge() {
+      return 'https://example.test/second';
+    }
+  }
+
+  try {
+    const first = await p.extractors.register(First);
+    const second = await p.extractors.register(Second);
+    await p.plugins.register(
+      definePlugin({
+        id: 'example.bridge.modern',
+
+        setup(ctx) {
+          ctx.on('track.bridge', () => ({ url: 'https://example.test/modern' }), { priority: 5 });
+        },
+      })(),
+    );
+
+    expect(await p.plugins.resolveStream(track)).toEqual({ url: 'https://example.test/modern' });
+    second.priority = 10;
+    expect(await p.plugins.resolveStream(track)).toEqual({ url: 'https://example.test/second' });
+    first.priority = 10;
+    expect(await p.plugins.resolveStream(track)).toEqual({ url: 'https://example.test/first' });
+    first.priority = 0;
+    expect(await p.plugins.resolveStream(track)).toEqual({ url: 'https://example.test/second' });
+  } finally {
+    await p.destroy();
+  }
+});

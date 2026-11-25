@@ -238,3 +238,89 @@ it('cancels callback-style legacy transforms when their registration is removed'
 
   await p.destroy();
 });
+
+it('skips origin and blocked providers and falls through failed bridges in priority order', async () => {
+  const host = new DiscordPlayer({ nodes: [], send() {} }).plugins;
+  const calls: string[] = [];
+  const track = new Track({ sourceReference: { pluginId: 'origin', data: null } });
+
+  try {
+    for (const [id, priority] of [
+      ['winner', 1],
+      ['decline', 5],
+      ['failure', 10],
+      ['blocked', 20],
+      ['origin', 30],
+    ] as const) {
+      await host.register(
+        definePlugin({
+          id,
+
+          setup(ctx) {
+            ctx.on(
+              'track.bridge',
+              () => {
+                calls.push(id);
+                if (id === 'failure') throw new Error('bridge failed');
+                if (id === 'decline') return undefined;
+                return { url: 'https://example.test/' + id };
+              },
+              { priority },
+            );
+          },
+        })(),
+      );
+    }
+
+    expect(await host.resolveStream(track, { blocked: ['blocked'] })).toEqual({
+      url: 'https://example.test/winner',
+    });
+    expect(calls).toEqual(['failure', 'decline', 'winner']);
+
+    await host.unregister('winner');
+    await expect(host.resolveStream(track, { blocked: ['blocked'] })).rejects.toMatchObject({
+      pluginId: 'failure',
+      operation: 'track.bridge',
+    });
+  } finally {
+    await host.destroy();
+  }
+});
+
+it('does not try another bridge when the caller cancels', async () => {
+  const host = new DiscordPlayer({ nodes: [], send() {} }).plugins;
+  const controller = new AbortController();
+  const later = vi.fn(() => ({ url: 'https://example.test/later' }));
+
+  try {
+    await host.register(
+      definePlugin({
+        id: 'cancelled',
+
+        setup(ctx) {
+          ctx.on(
+            'track.bridge',
+            () => {
+              controller.abort('cancel');
+              throw new Error('bridge interrupted');
+            },
+            { priority: 10 },
+          );
+        },
+      })(),
+    );
+    await host.register(
+      definePlugin({
+        id: 'later',
+
+        setup(ctx) {
+          ctx.on('track.bridge', later);
+        },
+      })(),
+    );
+    await expect(host.resolveStream(new Track(), { signal: controller.signal })).rejects.toBe('cancel');
+    expect(later).not.toHaveBeenCalled();
+  } finally {
+    await host.destroy();
+  }
+});

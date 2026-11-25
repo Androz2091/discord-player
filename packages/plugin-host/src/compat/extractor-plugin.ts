@@ -46,6 +46,10 @@ export function createExtractorPlugin(
   return definePlugin({
     id: instance.identifier,
 
+    get priority() {
+      return instance.priority;
+    },
+
     setup: async (ctx) => {
       await instance.activate();
       onActivate();
@@ -58,11 +62,10 @@ export function createExtractorPlugin(
 
             return result == null ? null : Array.isArray(result) ? result : [result];
           },
-          { priority: instance.priority },
         );
       }
 
-      const metadata = { priority: instance.priority, protocols: instance.protocols };
+      const metadata = { protocols: instance.protocols };
 
       if (
         instance.handle !== BaseExtractor.prototype.handle &&

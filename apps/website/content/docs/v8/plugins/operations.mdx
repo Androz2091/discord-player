@@ -35,7 +35,7 @@ ctx.on('search.query.match', ({ query }) => (query.startsWith('https://') ? { sc
 });
 ```
 
-Handlers with higher `priority` run first. For equal priority, a higher match `score` wins, then registration order. The Player resolves candidates in that order until one returns tracks.
+Handlers with higher `priority` run first. For equal priority, a higher match `score` wins for search matching, then registration order. Other operations use registration order to break priority ties. Legacy extractor priority changes take effect on the next dispatch. The Player resolves search candidates in order until one returns tracks.
 
 ## Declining
 
@@ -43,7 +43,7 @@ Handlers with higher `priority` run first. For equal priority, a higher match `s
 | ----------- | -------------------------------------------------------- |
 | `undefined` | This handler declines. The next one runs                 |
 | `null`      | A real result of "no match" for operations that allow it |
-| A throw     | A failure. The Player does not try another plugin        |
+| A throw     | A failure. Bridge handlers fall through; other operations fail |
 
 ## Target or block plugins
 
@@ -72,7 +72,7 @@ ctx.on('track.stream', async ({ track }, { signal }) => {
 });
 ```
 
-A failing handler rejects with a `PluginError` that names the plugin and operation.
+A failing handler rejects with a `PluginError` that names the plugin and operation. For `track.bridge`, the original provider is excluded and a failing handler falls through to the next eligible provider. If none succeeds, the last bridge error is reported. Cancellation always stops dispatch. A direct `track.stream` failure still rejects rather than triggering bridging.
 
 ## Guild context
 

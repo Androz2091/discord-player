@@ -19,21 +19,23 @@ export function selectHandlers(
   options: ExecuteOptions,
   state: DispatchState,
 ) {
-  return (state.handlers.get(operation) ?? []).filter((handler) => {
-    const guildId = state.context(options, handler.entry.controller.signal).guildId;
-    return (
-      handler.entry.active &&
-      (!handler.guildIds || (guildId !== null && handler.guildIds.includes(guildId))) &&
-      (!options.pluginId || handler.entry.id === options.pluginId) &&
-      (options.hostId === undefined ||
-        (handler.entry.registration.definition.remoteHost?.hostId ?? null) === options.hostId) &&
-      !options.blocked?.includes(handler.entry.id) &&
-      !state.blocked().includes(handler.entry.id) &&
-      (!(input as { protocol?: string }).protocol ||
-        !handler.protocols?.length ||
-        handler.protocols?.includes((input as { protocol: string }).protocol))
-    );
-  });
+  return (state.handlers.get(operation) ?? [])
+    .filter((handler) => {
+      const guildId = state.context(options, handler.entry.controller.signal).guildId;
+      return (
+        handler.entry.active &&
+        (!handler.guildIds || (guildId !== null && handler.guildIds.includes(guildId))) &&
+        (!options.pluginId || handler.entry.id === options.pluginId) &&
+        (options.hostId === undefined ||
+          (handler.entry.registration.definition.remoteHost?.hostId ?? null) === options.hostId) &&
+        !options.blocked?.includes(handler.entry.id) &&
+        !state.blocked().includes(handler.entry.id) &&
+        (!(input as { protocol?: string }).protocol ||
+          !handler.protocols?.length ||
+          handler.protocols?.includes((input as { protocol: string }).protocol))
+      );
+    })
+    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0) || a.order - b.order);
 }
 
 /** Dispatch a typed operation against initialized host state.
@@ -58,7 +60,13 @@ export async function dispatchOperation<K extends OperationName>(
     throw new Error(`Undefined operation: ${operation}`);
   }
 
-  const handlers = selectHandlers(operation, input, options, state);
+  let handlers = selectHandlers(operation, input, options, state);
+
+  if (operation === 'track.bridge') {
+    const request = input as OperationInput<'track.bridge'>;
+    const origin = request.sourcePluginId ?? request.track.sourceReference?.pluginId;
+    handlers = handlers.filter((handler) => handler.entry.id !== origin);
+  }
 
   if (operation === 'track.related') {
     const seed = (input as OperationInput<'track.related'>).track;
@@ -69,6 +77,7 @@ export async function dispatchOperation<K extends OperationName>(
   const results: unknown[] = [];
   let value: unknown = input;
   let emptyRelated: unknown;
+  let bridgeError: PluginError | undefined;
 
   for (const handler of handlers) {
     if (!handler.entry.active) {
@@ -115,7 +124,12 @@ export async function dispatchOperation<K extends OperationName>(
       if (signal.aborted) {
         throw signal.reason;
       }
-      throw new PluginError(handler.entry.id, operation, error);
+      const failure = new PluginError(handler.entry.id, operation, error);
+      if (operation === 'track.bridge') {
+        bridgeError = failure;
+        continue;
+      }
+      throw failure;
     } finally {
       handler.entry.pending.delete(pending);
     }
@@ -199,6 +213,8 @@ export async function dispatchOperation<K extends OperationName>(
       results.push(result);
     }
   }
+
+  if (operation === 'track.bridge' && bridgeError) throw bridgeError;
 
   if (operation === 'search.query.match') {
     // Priority tiers precede confidence, preserving legacy precedence.

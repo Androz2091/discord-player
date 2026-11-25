@@ -70,6 +70,17 @@ describe('versioned serialization', () => {
     expect(encode(serialized)).toMatch(/^[A-Za-z0-9+/]+=*$/);
   });
 
+  it('preserves optional ISRC in JSON and versioned persistence', () => {
+    const track = makeTrack({ isrc: 'USRC17607839' });
+    expect(track.isrc).toBe('USRC17607839');
+    expect(track.toJSON().isrc).toBe(track.isrc);
+    const restored = deserialize(JSON.parse(JSON.stringify(track.serialize())));
+    expect(restored).toBeInstanceOf(Track);
+    if (!(restored instanceof Track)) throw new Error('Expected a Track instance.');
+    expect(restored.isrc).toBe(track.isrc);
+    expect(makeTrack().serialize().data).not.toHaveProperty('isrc');
+  });
+
   it('round-trips Playlist ordering, Track instances, and parent relationships', () => {
     const first = makeTrack({ id: 'first', title: 'First' });
     const second = makeTrack({ id: 'second', title: 'Second' });

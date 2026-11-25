@@ -386,13 +386,15 @@ export class PluginRegistry {
         if (!Number.isFinite(options.priority ?? definition.priority ?? 0))
           throw new TypeError('Handler priority must be finite.');
 
+        const priority = options.priority;
         const handler: Handler = {
           entry,
           operation,
           fn,
-          priority: definition.priority,
           ...options,
-          ...(definition.remoteHost && definition.priority !== undefined ? { priority: definition.priority } : {}),
+          get priority() {
+            return (definition.remoteHost ? definition.priority : undefined) ?? priority ?? definition.priority;
+          },
           ...(options.guildIds ? { guildIds: Object.freeze([...options.guildIds]) } : {}),
           order: this.order++,
         };
