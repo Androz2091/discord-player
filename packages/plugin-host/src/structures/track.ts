@@ -69,6 +69,9 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
   /** Track author or artist. */
   public author: string;
 
+  /** International Standard Recording Code, when available. */
+  public isrc?: string;
+
   /** Track description. */
   public description: string;
 
@@ -191,6 +194,7 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
     this.id = data.id ?? randomUUID();
     this.title = data.title ?? '';
     this.author = data.author ?? '';
+    this.isrc = data.isrc;
     this.description = data.description ?? (this.author ? `${this.title} by ${this.author}` : this.title);
     this.url = data.url ?? '';
     this.thumbnail = data.thumbnail ?? '';
@@ -270,6 +274,7 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
       id: this.id,
       title: this.title,
       author: this.author,
+      ...(this.isrc !== undefined ? { isrc: this.isrc } : {}),
       description: this.description,
       url: this.url,
       thumbnail: this.thumbnail,
@@ -300,6 +305,7 @@ export class Track<Metadata = unknown> implements Serializable<SerializedTrack> 
         id: this.id,
         title: this.title,
         author: this.author,
+        ...(this.isrc !== undefined ? { isrc: this.isrc } : {}),
         description: this.description,
         url: this.url,
         thumbnail: this.thumbnail,

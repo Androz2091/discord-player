@@ -17,6 +17,7 @@ const trackDataSchema = z.strictObject({
   id: z.string(),
   title: z.string(),
   author: z.string(),
+  isrc: z.string().optional(),
   description: z.string(),
   url: z.string(),
   thumbnail: z.string(),

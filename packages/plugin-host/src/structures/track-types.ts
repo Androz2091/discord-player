@@ -41,6 +41,9 @@ export interface TrackData<Metadata = unknown> {
   /** Track author or artist. */
   author?: string;
 
+  /** International Standard Recording Code, when available. */
+  isrc?: string;
+
   /** Track description. */
   description?: string;
 
@@ -142,6 +145,9 @@ export type SerializedTrackData = {
 
   /** Track author or artist. */
   author: string;
+
+  /** International Standard Recording Code, when available. */
+  isrc?: string;
 
   /** Track description. */
   description: string;

@@ -46,23 +46,23 @@ export function createExtractorPlugin(
   return definePlugin({
     id: instance.identifier,
 
+    get priority() {
+      return instance.priority;
+    },
+
     setup: async (ctx) => {
       await instance.activate();
       onActivate();
 
       if (instance.resolveLyrics) {
-        ctx.on(
-          'lyrics.search',
-          async ({ input }) => {
-            const result = await instance.resolveLyrics?.(input);
+        ctx.on('lyrics.search', async ({ input }) => {
+          const result = await instance.resolveLyrics?.(input);
 
-            return result == null ? null : Array.isArray(result) ? result : [result];
-          },
-          { priority: instance.priority },
-        );
+          return result == null ? null : Array.isArray(result) ? result : [result];
+        });
       }
 
-      const metadata = { priority: instance.priority, protocols: instance.protocols };
+      const metadata = { protocols: instance.protocols };
 
       if (
         instance.handle !== BaseExtractor.prototype.handle &&
