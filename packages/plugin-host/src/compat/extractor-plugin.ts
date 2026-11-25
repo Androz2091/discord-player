@@ -55,14 +55,11 @@ export function createExtractorPlugin(
       onActivate();
 
       if (instance.resolveLyrics) {
-        ctx.on(
-          'lyrics.search',
-          async ({ input }) => {
-            const result = await instance.resolveLyrics?.(input);
+        ctx.on('lyrics.search', async ({ input }) => {
+          const result = await instance.resolveLyrics?.(input);
 
-            return result == null ? null : Array.isArray(result) ? result : [result];
-          },
-        );
+          return result == null ? null : Array.isArray(result) ? result : [result];
+        });
       }
 
       const metadata = { protocols: instance.protocols };
